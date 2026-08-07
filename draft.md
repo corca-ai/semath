@@ -541,9 +541,10 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 
 ### Iteration 6 — Formula recognition과 completion
 
-* linear algebra와 probability formula를 typed pattern으로 인식한다.
+* 먼저 linear algebra formula를 typed pattern으로 인식하고 probability는 검증 corpus를 갖춘 후 별도 pack으로 추가한다.
 * 현재 symbol table에 맞춘 semantic completion을 제공한다.
 * equivalent-form rewrite는 preview-only로 유지한다.
+* **v0.4 완료:** versioned linear-algebra pack의 matrix/vector product, transpose, inner product와 quadratic form을 recognition과 completion이 함께 사용한다. Section scope와 scalar/vector/matrix/tensor constraint를 반영하며, completion은 자동 적용하지 않고 CorTeX의 revision-checked review로 전달한다. Rewrite와 probability pack은 후속 iteration으로 남긴다.
 
 ### Iteration 7 — Explainable prose와 domain inference
 
@@ -574,7 +575,7 @@ Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cro
 Release용 Rust/WASM artifact는 Apple Silicon 개발 머신에서 빌드하지 않고, 별도의 원격 빌드 호스트에서 생성한다. 다만 특정 머신의 수동 전역 상태에 의존하지 않도록 다음을 repository에 고정한다.
 
 * `rust-toolchain.toml`, `Cargo.lock`
-* wasm-bindgen, wasm-opt와 target version
+* 사용하는 wasm-bindgen과 target version
 * source sync → test → WASM build → artifact 회수를 수행하는 한 명령
 * clean build와 reproducible artifact check
 * native test와 browser WASM parity test
