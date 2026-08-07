@@ -1,0 +1,11 @@
+[package]
+name = "semath-native"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+semath-core = { path = "../semath-core" }
+serde_json.workspace = true
+

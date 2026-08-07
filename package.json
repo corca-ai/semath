@@ -1,0 +1,22 @@
+{
+  "name": "semath",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "packageManager": "bun@1.3.14",
+  "exports": {
+    "./protocol": "./packages/protocol/src/index.ts",
+    "./wasmtex-adapter": "./packages/wasmtex-adapter/src/index.ts",
+    "./worker": "./packages/worker/src/index.ts",
+    "./worker-runtime": "./packages/worker/src/runtime.ts",
+    "./wasm": "./lib/wasm/semath_wasm.js"
+  },
+  "files": [
+    "lib",
+    "packages"
+  ],
+  "scripts": {
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun test",
+    "test": "cargo test --workspace && bun test"
+  }
+}
