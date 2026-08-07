@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "packId": "probability",
+  "packVersion": "1.0.0",
+  "title": "Probability",
+  "activationRules": [
+    {
+      "id": "vocabulary",
+      "patterns": [
+        "probability",
+        "probability distribution",
+        "random variable",
+        "expectation",
+        "variance"
+      ]
+    },
+    {
+      "id": "probability-notation",
+      "patterns": ["\\mathbb{P}", "\\mathbb{E}", "\\operatorname{Var}"]
+    }
+  ],
+  "patterns": []
+}

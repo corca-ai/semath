@@ -22,7 +22,10 @@ claims, recognized formulas, diagnostics, and source evidence associated with on
 recognizes conservative English definition forms such as `respectively`, apposition,
 parenthetical definitions, typed quantifiers, and direct relational statements. Explicit scalar,
 vector, matrix, and tensor nouns can supply scoped shape claims with refinements such as
-`symmetric`, `diagonal`, or `normalized`.
+`symmetric`, `diagonal`, or `normalized`. A separate bounded `domainEvidence` query reports the
+linear-algebra and probability packs active at the current section or equation. Vocabulary and
+notation priors stay weak and cannot create definitions or diagnostics; a typed formula match is
+strong evidence only for that equation.
 
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
