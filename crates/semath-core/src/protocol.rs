@@ -198,9 +198,20 @@ pub struct SymbolInfo {
     pub location: Location,
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ShapeInfo>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub roles: Vec<RoleInfo>,
     pub formulas: Vec<FormulaRecognition>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub truncated: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct RoleInfo {
+    pub symbol: String,
+    pub role: String,
+    pub description: String,
+    pub evidence: Evidence,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -364,6 +375,8 @@ pub enum QueryValue {
         shape: Option<ShapeInfo>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         formulas: Vec<FormulaRecognition>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        roles: Vec<RoleInfo>,
     },
     SymbolInfo {
         info: Option<SymbolInfo>,

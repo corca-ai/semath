@@ -115,9 +115,23 @@ export interface SymbolInfo {
   diagnostics: readonly SemanticDiagnostic[];
   formulas: readonly FormulaRecognition[];
   location: Location;
+  roles: readonly RoleInfo[];
   shapes: readonly ShapeInfo[];
   symbol: string;
   truncated: boolean;
+}
+
+export interface RoleInfo {
+  description: string;
+  evidence: Evidence;
+  role:
+    | "distribution"
+    | "function"
+    | "index"
+    | "operator"
+    | "random-variable"
+    | "set";
+  symbol: string;
 }
 
 export interface DomainActivation {
@@ -224,6 +238,7 @@ export type QueryValue =
       equationKind?: string;
       kind: "hover";
       formulas?: readonly FormulaRecognition[];
+      roles?: readonly RoleInfo[];
       shape?: ShapeInfo;
       symbol?: string;
     }

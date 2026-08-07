@@ -538,6 +538,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * 같은 scope의 충돌하는 type/role과 중복 definition을 찾는다.
 * used-before-defined와 unused definition은 검증된 경우에만 hint로 제공한다.
 * **v0.3 일부 완료:** 같은 문서에서 한 symbol을 양립할 수 없는 shape로 재선언한 경우를 진단한다. use-before-definition과 unused-definition은 false-positive corpus가 준비될 때까지 보류한다.
+* **v0.5 role consistency:** 명시적 영어 definition에서 set, function/operator, probability distribution, random variable, index role을 추출한다. 같은 effective scope의 상호 배타적 role 또는 role–shape 선언만 모든 충돌 source와 함께 warning으로 반환한다. Domain prior와 관습 표기는 진단에 사용하지 않고 sibling section의 shadowing은 허용한다.
 
 ### Iteration 6 — Formula recognition과 completion
 
