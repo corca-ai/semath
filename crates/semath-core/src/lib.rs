@@ -1,7 +1,9 @@
 mod binder;
 mod engine;
 mod parser;
+mod pattern;
 mod protocol;
+mod scope;
 mod shape;
 mod source_index;
 

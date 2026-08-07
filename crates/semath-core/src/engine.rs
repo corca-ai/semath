@@ -5,6 +5,7 @@ use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
+use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
 use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
@@ -35,6 +36,7 @@ struct AnalyzedDocument {
     parsed: Vec<ParsedMath>,
     definitions: Vec<DefinitionInfo>,
     shapes: ShapeAnalysis,
+    formulas: FormulaAnalysis,
 }
 
 impl AnalyzedDocument {
@@ -45,11 +47,13 @@ impl AnalyzedDocument {
         let parsed = parse_regions(&document.content, &document.math_regions);
         let definitions = extract_definitions(&document, &parsed);
         let shapes = analyze_shapes(&document, &parsed);
+        let formulas = analyze_formulas(&document, &parsed, &shapes);
         Self {
             document,
             parsed,
             definitions,
             shapes,
+            formulas,
         }
     }
 }
@@ -151,7 +155,9 @@ impl SemathEngine {
             }
             | Query::ExplainDiagnostic {
                 file_id, offset, ..
-            } => (file_id, Some(*offset)),
+            }
+            | Query::FormulaRecognition { file_id, offset }
+            | Query::FormulaCompletion { file_id, offset } => (file_id, Some(*offset)),
             Query::Diagnostics { file_id } => (file_id, None),
         };
         let document = self
@@ -203,6 +209,7 @@ impl SemathEngine {
                         .and_then(|math| deepest_node(&math.root, offset))
                         .map(|node| node.kind.clone()),
                     definitions,
+                    formulas: document.formulas.at(offset),
                 }
             }
             Query::Definition { .. } => QueryValue::Locations {
@@ -230,6 +237,17 @@ impl SemathEngine {
             },
             Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
                 diagnostic: document.shapes.diagnostic(&code, offset),
+            },
+            Query::FormulaRecognition { .. } => QueryValue::FormulaRecognitions {
+                recognitions: document.formulas.at(offset),
+            },
+            Query::FormulaCompletion { .. } => QueryValue::FormulaCompletions {
+                completions: formula_completions(
+                    &document.document,
+                    &document.parsed,
+                    &document.shapes,
+                    offset,
+                ),
             },
         };
 
