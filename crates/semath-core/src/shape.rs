@@ -137,6 +137,15 @@ pub(crate) struct KnownShape {
     pub refinements: Vec<String>,
 }
 
+#[derive(Clone, Debug)]
+pub(crate) struct ExplicitShapeClaim {
+    pub symbol: String,
+    pub kind: String,
+    pub display: String,
+    pub symbol_range: SourceRange,
+    pub evidence: Evidence,
+}
+
 impl KnownShape {
     pub fn constraint(&self) -> FormulaConstraint {
         let mut constraint = self.shape.constraint();
@@ -146,6 +155,20 @@ impl KnownShape {
 }
 
 impl ShapeAnalysis {
+    pub fn explicit_claims(&self) -> Vec<ExplicitShapeClaim> {
+        self.facts
+            .iter()
+            .filter(|fact| fact.explicit)
+            .map(|fact| ExplicitShapeClaim {
+                symbol: fact.symbol.clone(),
+                kind: fact.shape.constraint().kind,
+                display: fact.shape.display(),
+                symbol_range: fact.symbol_range.clone(),
+                evidence: fact.evidence.clone(),
+            })
+            .collect()
+    }
+
     pub fn shape_at(&self, symbol: &str, offset: u32) -> Option<ShapeInfo> {
         self.facts
             .iter()

@@ -38,6 +38,11 @@ const fixtureSets = [
     goldenUrl: new URL("../fixtures/v0.5/scoped-domain-evidence.golden.json", import.meta.url),
     version: "v0.5-domains",
   },
+  {
+    fixtureUrl: new URL("../fixtures/v0.5/notation-consistency.json", import.meta.url),
+    goldenUrl: new URL("../fixtures/v0.5/notation-consistency.golden.json", import.meta.url),
+    version: "v0.5-consistency",
+  },
 ];
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {

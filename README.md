@@ -25,7 +25,10 @@ vector, matrix, and tensor nouns can supply scoped shape claims with refinements
 `symmetric`, `diagonal`, or `normalized`. A separate bounded `domainEvidence` query reports the
 linear-algebra and probability packs active at the current section or equation. Vocabulary and
 notation priors stay weak and cannot create definitions or diagnostics; a typed formula match is
-strong evidence only for that equation.
+strong evidence only for that equation. Explicit definitions can also contribute scoped semantic
+roles such as set, function/operator, probability distribution, random variable, and index.
+Warnings require incompatible explicit role or shape claims in the same scope and retain every
+conflicting source; compatible roles and section-level shadowing are left alone.
 
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.

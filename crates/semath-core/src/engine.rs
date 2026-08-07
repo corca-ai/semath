@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
+use crate::consistency::{ConsistencyAnalysis, analyze_consistency};
 use crate::domain::{DomainAnalysis, analyze_domains};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
@@ -11,11 +12,12 @@ use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceRange, SymbolInfo,
-    UpdateResult,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, ShapeInfo,
+    SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
+const MAX_SYMBOL_DIAGNOSTICS: usize = 8;
 
 #[derive(Debug, Error)]
 pub enum EngineError {
@@ -39,6 +41,7 @@ struct AnalyzedDocument {
     parsed: Vec<ParsedMath>,
     definitions: Vec<DefinitionInfo>,
     shapes: ShapeAnalysis,
+    consistency: ConsistencyAnalysis,
     formulas: FormulaAnalysis,
     domains: DomainAnalysis,
 }
@@ -51,6 +54,7 @@ impl AnalyzedDocument {
         let parsed = parse_regions(&document.content, &document.math_regions);
         let prose = analyze_prose(&document, &parsed);
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
+        let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
         let formulas = analyze_formulas(&document, &parsed, &shapes);
         let domains = analyze_domains(&document, &formulas);
         Self {
@@ -58,6 +62,7 @@ impl AnalyzedDocument {
             parsed,
             definitions: prose.definitions,
             shapes,
+            consistency,
             formulas,
             domains,
         }
@@ -204,6 +209,10 @@ impl SemathEngine {
                 tree: parsed.map(|math| math.root.clone()),
             },
             Query::Hover { .. } => {
+                let roles = symbol
+                    .as_ref()
+                    .map(|(name, _)| document.consistency.roles_at(name, offset).0)
+                    .unwrap_or_default();
                 let definitions = symbol
                     .as_ref()
                     .map(|(name, _)| self.definitions_for(name))
@@ -218,6 +227,7 @@ impl SemathEngine {
                         .map(|node| node.kind.clone()),
                     definitions,
                     formulas: document.formulas.at(offset),
+                    roles,
                 }
             }
             Query::SymbolInfo { .. } => QueryValue::SymbolInfo {
@@ -226,8 +236,9 @@ impl SemathEngine {
                     let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
                     definitions.truncate(MAX_SYMBOL_DEFINITIONS);
                     let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
+                    let (roles, roles_truncated) = document.consistency.roles_at(name, offset);
                     let (diagnostics, diagnostics_truncated) =
-                        document.shapes.diagnostics_for(offset, &shapes);
+                        symbol_diagnostics(document, name, offset, &shapes);
                     SymbolInfo {
                         symbol: name.clone(),
                         location: Location {
@@ -237,10 +248,12 @@ impl SemathEngine {
                         },
                         definitions,
                         shapes,
+                        roles,
                         formulas: document.formulas.at(offset),
                         diagnostics,
                         truncated: definitions_truncated
                             || shapes_truncated
+                            || roles_truncated
                             || diagnostics_truncated,
                     }
                 }),
@@ -266,10 +279,13 @@ impl SemathEngine {
             Query::PrepareRename { .. } => prepare_rename(parsed, offset),
             Query::Rename { new_name, .. } => rename_proposal(document, parsed, offset, &new_name),
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
-                diagnostics: document.shapes.diagnostics.clone(),
+                diagnostics: document_diagnostics(document),
             },
             Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
-                diagnostic: document.shapes.diagnostic(&code, offset),
+                diagnostic: document
+                    .shapes
+                    .diagnostic(&code, offset)
+                    .or_else(|| document.consistency.diagnostic(&code, offset)),
             },
             Query::FormulaRecognition { .. } => QueryValue::FormulaRecognitions {
                 recognitions: document.formulas.at(offset),
@@ -392,6 +408,29 @@ impl SemathEngine {
         });
         locations
     }
+}
+
+fn document_diagnostics(document: &AnalyzedDocument) -> Vec<SemanticDiagnostic> {
+    let mut diagnostics = document.shapes.diagnostics.clone();
+    diagnostics.extend(document.consistency.diagnostics.iter().cloned());
+    diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
+    diagnostics
+}
+
+fn symbol_diagnostics(
+    document: &AnalyzedDocument,
+    symbol: &str,
+    offset: u32,
+    shapes: &[ShapeInfo],
+) -> (Vec<SemanticDiagnostic>, bool) {
+    let (mut diagnostics, shape_truncated) = document.shapes.diagnostics_for(offset, shapes);
+    let (role_diagnostics, role_truncated) = document.consistency.diagnostics_for(symbol, offset);
+    diagnostics.extend(role_diagnostics);
+    diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
+    diagnostics.dedup();
+    let truncated = shape_truncated || role_truncated || diagnostics.len() > MAX_SYMBOL_DIAGNOSTICS;
+    diagnostics.truncate(MAX_SYMBOL_DIAGNOSTICS);
+    (diagnostics, truncated)
 }
 
 fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
@@ -755,6 +794,59 @@ mod tests {
             panic!("expected diagnostics")
         };
         assert!(diagnostics.is_empty());
+    }
+
+    #[test]
+    fn explains_scoped_role_and_type_conflicts() {
+        let content = "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p$\nLet $S$ denote a set.\n$S \\in \\mathbb{R}^{n}$\n$S$";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let final_p = content.find("\n$p$\n").unwrap() as u32 + 2;
+        let result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: final_p,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo { info: Some(info) } = result.value else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(info.roles.len(), 2);
+        assert_eq!(info.roles[0].role, "random-variable");
+        assert_eq!(info.roles[1].role, "distribution");
+        assert_eq!(info.diagnostics[0].code, "notation-role-conflict");
+        assert_eq!(info.diagnostics[0].evidence.len(), 2);
+
+        let final_s = content.rfind("$S$").unwrap() as u32 + 1;
+        let result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: final_s,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo { info: Some(info) } = result.value else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(info.roles[0].role, "set");
+        assert_eq!(info.shapes[0].display, "Vector[n]");
+        assert_eq!(info.diagnostics[0].code, "notation-role-type-conflict");
+        assert_eq!(info.diagnostics[0].evidence.len(), 2);
+
+        let result = engine
+            .query(query(Query::ExplainDiagnostic {
+                file_id: "main".into(),
+                code: "notation-role-type-conflict".into(),
+                offset: content.find("S \\in").unwrap() as u32,
+            }))
+            .unwrap();
+        let QueryValue::DiagnosticExplanation {
+            diagnostic: Some(diagnostic),
+        } = result.value
+        else {
+            panic!("expected diagnostic explanation")
+        };
+        assert_eq!(diagnostic.evidence.len(), 2);
     }
 
     #[test]
