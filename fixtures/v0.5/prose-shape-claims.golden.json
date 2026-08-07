@@ -1,0 +1,495 @@
+{
+  "results": [
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-prose",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "symbolInfo",
+        "info": {
+          "symbol": "A",
+          "location": {
+            "fileId": "main",
+            "path": "main.tex",
+            "range": {
+              "startOffset": 132,
+              "endOffset": 133
+            }
+          },
+          "definitions": [
+            {
+              "symbol": "A",
+              "description": "m by n symmetric matrix",
+              "location": {
+                "fileId": "main",
+                "path": "main.tex",
+                "range": {
+                  "startOffset": 13,
+                  "endOffset": 14
+                }
+              },
+              "evidence": {
+                "ruleId": "english-respectively-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 0,
+                    "endOffset": 103
+                  }
+                ]
+              }
+            }
+          ],
+          "shapes": [
+            {
+              "symbol": "A",
+              "kind": "matrix",
+              "dimensions": [
+                "m",
+                "n"
+              ],
+              "refinements": [
+                "symmetric"
+              ],
+              "display": "Matrix[m × n]",
+              "evidence": {
+                "ruleId": "english-respectively-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 0,
+                    "endOffset": 103
+                  }
+                ]
+              }
+            }
+          ],
+          "formulas": [
+            {
+              "patternId": "matrix-vector-product",
+              "title": "Matrix-vector product",
+              "packId": "linear-algebra",
+              "packVersion": "1.0.0",
+              "range": {
+                "startOffset": 132,
+                "endOffset": 134
+              },
+              "bindings": [
+                {
+                  "parameter": "matrix",
+                  "symbol": "A",
+                  "constraint": {
+                    "kind": "matrix",
+                    "dimensions": [
+                      "m",
+                      "n"
+                    ],
+                    "refinements": [
+                      "symmetric"
+                    ]
+                  },
+                  "evidence": {
+                    "ruleId": "english-respectively-definition",
+                    "kind": "explicit-prose",
+                    "strength": "strong",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 0,
+                        "endOffset": 103
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parameter": "vector",
+                  "symbol": "x",
+                  "constraint": {
+                    "kind": "vector",
+                    "dimensions": [
+                      "n"
+                    ],
+                    "refinements": [
+                      "normalized"
+                    ]
+                  },
+                  "evidence": {
+                    "ruleId": "english-respectively-definition",
+                    "kind": "explicit-prose",
+                    "strength": "strong",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 0,
+                        "endOffset": 103
+                      }
+                    ]
+                  }
+                }
+              ],
+              "result": {
+                "kind": "vector",
+                "dimensions": [
+                  "m"
+                ]
+              },
+              "evidence": [
+                {
+                  "ruleId": "english-respectively-definition",
+                  "kind": "explicit-prose",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "english-respectively-definition",
+                  "kind": "explicit-prose",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "linear-algebra/matrix-vector-product",
+                  "kind": "domain-pattern",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    },
+                    {
+                      "startOffset": 132,
+                      "endOffset": 134
+                    }
+                  ]
+                }
+              ],
+              "rank": 100
+            }
+          ],
+          "diagnostics": [],
+          "truncated": false
+        }
+      }
+    },
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-prose",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "symbolInfo",
+        "info": {
+          "symbol": "x",
+          "location": {
+            "fileId": "main",
+            "path": "main.tex",
+            "range": {
+              "startOffset": 133,
+              "endOffset": 134
+            }
+          },
+          "definitions": [
+            {
+              "symbol": "x",
+              "description": "n-dimensional normalized vector",
+              "location": {
+                "fileId": "main",
+                "path": "main.tex",
+                "range": {
+                  "startOffset": 5,
+                  "endOffset": 6
+                }
+              },
+              "evidence": {
+                "ruleId": "english-respectively-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 0,
+                    "endOffset": 103
+                  }
+                ]
+              }
+            }
+          ],
+          "shapes": [
+            {
+              "symbol": "x",
+              "kind": "vector",
+              "dimensions": [
+                "n"
+              ],
+              "refinements": [
+                "normalized"
+              ],
+              "display": "Vector[n]",
+              "evidence": {
+                "ruleId": "english-respectively-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 0,
+                    "endOffset": 103
+                  }
+                ]
+              }
+            }
+          ],
+          "formulas": [
+            {
+              "patternId": "matrix-vector-product",
+              "title": "Matrix-vector product",
+              "packId": "linear-algebra",
+              "packVersion": "1.0.0",
+              "range": {
+                "startOffset": 132,
+                "endOffset": 134
+              },
+              "bindings": [
+                {
+                  "parameter": "matrix",
+                  "symbol": "A",
+                  "constraint": {
+                    "kind": "matrix",
+                    "dimensions": [
+                      "m",
+                      "n"
+                    ],
+                    "refinements": [
+                      "symmetric"
+                    ]
+                  },
+                  "evidence": {
+                    "ruleId": "english-respectively-definition",
+                    "kind": "explicit-prose",
+                    "strength": "strong",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 0,
+                        "endOffset": 103
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parameter": "vector",
+                  "symbol": "x",
+                  "constraint": {
+                    "kind": "vector",
+                    "dimensions": [
+                      "n"
+                    ],
+                    "refinements": [
+                      "normalized"
+                    ]
+                  },
+                  "evidence": {
+                    "ruleId": "english-respectively-definition",
+                    "kind": "explicit-prose",
+                    "strength": "strong",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 0,
+                        "endOffset": 103
+                      }
+                    ]
+                  }
+                }
+              ],
+              "result": {
+                "kind": "vector",
+                "dimensions": [
+                  "m"
+                ]
+              },
+              "evidence": [
+                {
+                  "ruleId": "english-respectively-definition",
+                  "kind": "explicit-prose",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "english-respectively-definition",
+                  "kind": "explicit-prose",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "linear-algebra/matrix-vector-product",
+                  "kind": "domain-pattern",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    },
+                    {
+                      "startOffset": 132,
+                      "endOffset": 134
+                    }
+                  ]
+                }
+              ],
+              "rank": 100
+            }
+          ],
+          "diagnostics": [],
+          "truncated": false
+        }
+      }
+    },
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-prose",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "symbolInfo",
+        "info": {
+          "symbol": "A",
+          "location": {
+            "fileId": "main",
+            "path": "main.tex",
+            "range": {
+              "startOffset": 160,
+              "endOffset": 161
+            }
+          },
+          "definitions": [
+            {
+              "symbol": "A",
+              "description": "m by n symmetric matrix",
+              "location": {
+                "fileId": "main",
+                "path": "main.tex",
+                "range": {
+                  "startOffset": 13,
+                  "endOffset": 14
+                }
+              },
+              "evidence": {
+                "ruleId": "english-respectively-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 0,
+                    "endOffset": 103
+                  }
+                ]
+              }
+            }
+          ],
+          "shapes": [
+            {
+              "symbol": "A",
+              "kind": "vector",
+              "dimensions": [
+                "n"
+              ],
+              "display": "Vector[n]",
+              "evidence": {
+                "ruleId": "explicit-real-shape-declaration",
+                "kind": "explicit-math",
+                "strength": "hard",
+                "sourceRanges": [
+                  {
+                    "startOffset": 137,
+                    "endOffset": 157
+                  }
+                ]
+              }
+            },
+            {
+              "symbol": "A",
+              "kind": "matrix",
+              "dimensions": [
+                "m",
+                "n"
+              ],
+              "refinements": [
+                "symmetric"
+              ],
+              "display": "Matrix[m × n]",
+              "evidence": {
+                "ruleId": "english-respectively-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 0,
+                    "endOffset": 103
+                  }
+                ]
+              }
+            }
+          ],
+          "formulas": [],
+          "diagnostics": [
+            {
+              "code": "notation-shape-conflict",
+              "severity": "warning",
+              "message": "Notation `A` is redeclared as Vector[n] after Matrix[m × n].",
+              "explanation": "Both declarations are explicit and assign incompatible shapes to `A` in the same document scope.",
+              "range": {
+                "startOffset": 137,
+                "endOffset": 138
+              },
+              "evidence": [
+                {
+                  "ruleId": "english-respectively-definition",
+                  "kind": "explicit-prose",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 0,
+                      "endOffset": 103
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "explicit-real-shape-declaration",
+                  "kind": "explicit-math",
+                  "strength": "hard",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 137,
+                      "endOffset": 157
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "truncated": false
+        }
+      }
+    }
+  ]
+}

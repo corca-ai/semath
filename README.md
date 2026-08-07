@@ -18,7 +18,11 @@ Version 0.4 provides:
 - an adapter for the public `wasmtex/syntax` snapshot contract.
 
 The v0.5 work in progress adds a bounded `symbolInfo` query that returns the definitions, shape
-claims, recognized formulas, diagnostics, and source evidence associated with one symbol.
+claims, recognized formulas, diagnostics, and source evidence associated with one symbol. It also
+recognizes conservative English definition forms such as `respectively`, apposition,
+parenthetical definitions, typed quantifiers, and direct relational statements. Explicit scalar,
+vector, matrix, and tensor nouns can supply scoped shape claims with refinements such as
+`symmetric`, `diagonal`, or `normalized`.
 
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.

@@ -1,0 +1,23 @@
+{
+  "snapshot": {
+    "protocolVersion": 1,
+    "epoch": "parity:5-prose",
+    "inventoryVersion": 1,
+    "projectId": "parity",
+    "mainFileId": "main",
+    "documents": [
+      {
+        "fileId": "main",
+        "path": "main.tex",
+        "language": "latex",
+        "content": "Let $x$ and $A$ denote an n-dimensional normalized vector and an m by n symmetric matrix, respectively.\n$y \\in \\mathbb{R}^{m}$\n$y = Ax$\n$A \\in \\mathbb{R}^{n}$\n$A$",
+        "documentVersion": 1
+      }
+    ]
+  },
+  "queries": [
+    { "protocolVersion": 1, "epoch": "parity:5-prose", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 132 } },
+    { "protocolVersion": 1, "epoch": "parity:5-prose", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 133 } },
+    { "protocolVersion": 1, "epoch": "parity:5-prose", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 160 } }
+  ]
+}

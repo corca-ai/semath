@@ -2,6 +2,7 @@ mod binder;
 mod engine;
 mod parser;
 mod pattern;
+mod prose;
 mod protocol;
 mod scope;
 mod shape;

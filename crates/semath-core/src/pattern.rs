@@ -428,7 +428,7 @@ fn recognition(
         .map(|(parameter, fact)| FormulaBinding {
             parameter: (*parameter).into(),
             symbol: fact.symbol.clone(),
-            constraint: fact.shape.constraint(),
+            constraint: fact.constraint(),
             evidence: fact.evidence.clone(),
         })
         .collect::<Vec<_>>();
@@ -555,7 +555,7 @@ mod tests {
             math_regions: regions.clone(),
         };
         let parsed = parse_regions(source, &regions);
-        let shapes = analyze_shapes(&document, &parsed);
+        let shapes = analyze_shapes(&document, &parsed, &[]);
         (document, parsed, shapes)
     }
 
