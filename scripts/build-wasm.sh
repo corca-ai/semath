@@ -13,6 +13,8 @@ mkdir -p lib/wasm
 wasm-bindgen \
   --target web \
   --typescript \
+  --remove-name-section \
+  --remove-producers-section \
   --out-dir lib/wasm \
   target/wasm32-unknown-unknown/release/semath_wasm.wasm
 
