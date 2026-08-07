@@ -62,6 +62,14 @@ impl ScopeGraph {
             })
     }
 
+    pub fn range_at(&self, offset: u32) -> SourceRange {
+        self.scope_at(offset).range.clone()
+    }
+
+    pub fn is_document_scope_at(&self, offset: u32) -> bool {
+        self.scope_at(offset).id == 0
+    }
+
     fn scope_at(&self, offset: u32) -> &Scope {
         self.scopes
             .iter()

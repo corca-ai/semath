@@ -62,7 +62,8 @@ export type SemathQuery =
       offset: number;
     }
   | { fileId: string; kind: "formulaRecognition"; offset: number }
-  | { fileId: string; kind: "formulaCompletion"; offset: number };
+  | { fileId: string; kind: "formulaCompletion"; offset: number }
+  | { fileId: string; kind: "domainEvidence"; offset: number };
 
 export interface QueryEnvelope {
   analysisGeneration: number;
@@ -117,6 +118,16 @@ export interface SymbolInfo {
   shapes: readonly ShapeInfo[];
   symbol: string;
   truncated: boolean;
+}
+
+export interface DomainActivation {
+  evidence: readonly Evidence[];
+  packId: string;
+  packVersion: string;
+  scopeKind: "document" | "equation" | "section";
+  scopeRange: SourceRange;
+  strength: "strong" | "weak";
+  title: string;
 }
 
 export interface SemanticDiagnostic {
@@ -241,6 +252,11 @@ export type QueryValue =
   | {
       completions: readonly FormulaCompletion[];
       kind: "formulaCompletions";
+    }
+  | {
+      activations: readonly DomainActivation[];
+      kind: "domainActivations";
+      truncated: boolean;
     };
 
 export interface QueryResult {

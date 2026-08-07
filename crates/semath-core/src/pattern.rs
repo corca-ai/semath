@@ -83,6 +83,10 @@ pub(crate) struct FormulaAnalysis {
 }
 
 impl FormulaAnalysis {
+    pub fn all(&self) -> &[FormulaRecognition] {
+        &self.recognitions
+    }
+
     pub fn at(&self, offset: u32) -> Vec<FormulaRecognition> {
         self.recognitions
             .iter()

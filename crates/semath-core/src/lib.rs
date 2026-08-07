@@ -1,4 +1,5 @@
 mod binder;
+mod domain;
 mod engine;
 mod parser;
 mod pattern;

@@ -1,0 +1,138 @@
+{
+  "results": [
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-domains",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "domainActivations",
+        "activations": [
+          {
+            "packId": "linear-algebra",
+            "packVersion": "1.0.0",
+            "title": "Linear algebra",
+            "strength": "strong",
+            "scopeKind": "equation",
+            "scopeRange": { "startOffset": 159, "endOffset": 161 },
+            "evidence": [
+              {
+                "ruleId": "linear-algebra/matrix-vector-product",
+                "kind": "domain-pattern",
+                "strength": "strong",
+                "sourceRanges": [
+                  { "startOffset": 101, "endOffset": 130 },
+                  { "startOffset": 132, "endOffset": 152 },
+                  { "startOffset": 159, "endOffset": 161 }
+                ]
+              },
+              {
+                "ruleId": "linear-algebra/activation/real-coordinate-notation",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [
+                  { "startOffset": 107, "endOffset": 117 },
+                  { "startOffset": 138, "endOffset": 148 }
+                ]
+              },
+              {
+                "ruleId": "linear-algebra/activation/vocabulary",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [{ "startOffset": 70, "endOffset": 76 }]
+              }
+            ]
+          },
+          {
+            "packId": "probability",
+            "packVersion": "1.0.0",
+            "title": "Probability",
+            "strength": "weak",
+            "scopeKind": "section",
+            "scopeRange": { "startOffset": 0, "endOffset": 163 },
+            "evidence": [
+              {
+                "ruleId": "probability/activation/vocabulary",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [{ "startOffset": 38, "endOffset": 62 }]
+              }
+            ]
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-domains",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "domainActivations",
+        "activations": [
+          {
+            "packId": "linear-algebra",
+            "packVersion": "1.0.0",
+            "title": "Linear algebra",
+            "strength": "weak",
+            "scopeKind": "section",
+            "scopeRange": { "startOffset": 0, "endOffset": 163 },
+            "evidence": [
+              {
+                "ruleId": "linear-algebra/activation/real-coordinate-notation",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [
+                  { "startOffset": 107, "endOffset": 117 },
+                  { "startOffset": 138, "endOffset": 148 }
+                ]
+              },
+              {
+                "ruleId": "linear-algebra/activation/vocabulary",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [{ "startOffset": 70, "endOffset": 76 }]
+              }
+            ]
+          },
+          {
+            "packId": "probability",
+            "packVersion": "1.0.0",
+            "title": "Probability",
+            "strength": "weak",
+            "scopeKind": "section",
+            "scopeRange": { "startOffset": 0, "endOffset": 163 },
+            "evidence": [
+              {
+                "ruleId": "probability/activation/vocabulary",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [{ "startOffset": 38, "endOffset": 62 }]
+              }
+            ]
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-domains",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": { "kind": "domainActivations", "activations": [], "truncated": false }
+    },
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5-domains",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": { "kind": "diagnostics", "diagnostics": [] }
+    }
+  ]
+}

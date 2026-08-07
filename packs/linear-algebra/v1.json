@@ -2,6 +2,17 @@
   "schemaVersion": 1,
   "packId": "linear-algebra",
   "packVersion": "1.0.0",
+  "title": "Linear algebra",
+  "activationRules": [
+    {
+      "id": "vocabulary",
+      "patterns": ["linear algebra", "matrix", "vector", "eigenvalue", "eigenvector"]
+    },
+    {
+      "id": "real-coordinate-notation",
+      "patterns": ["\\mathbb{R}"]
+    }
+  ],
   "patterns": [
     {
       "id": "matrix-vector-product",

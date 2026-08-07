@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
+use crate::domain::{DomainAnalysis, analyze_domains};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
 use crate::prose::analyze_prose;
@@ -39,6 +40,7 @@ struct AnalyzedDocument {
     definitions: Vec<DefinitionInfo>,
     shapes: ShapeAnalysis,
     formulas: FormulaAnalysis,
+    domains: DomainAnalysis,
 }
 
 impl AnalyzedDocument {
@@ -50,12 +52,14 @@ impl AnalyzedDocument {
         let prose = analyze_prose(&document, &parsed);
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
         let formulas = analyze_formulas(&document, &parsed, &shapes);
+        let domains = analyze_domains(&document, &formulas);
         Self {
             document,
             parsed,
             definitions: prose.definitions,
             shapes,
             formulas,
+            domains,
         }
     }
 }
@@ -160,7 +164,8 @@ impl SemathEngine {
                 file_id, offset, ..
             }
             | Query::FormulaRecognition { file_id, offset }
-            | Query::FormulaCompletion { file_id, offset } => (file_id, Some(*offset)),
+            | Query::FormulaCompletion { file_id, offset }
+            | Query::DomainEvidence { file_id, offset } => (file_id, Some(*offset)),
             Query::Diagnostics { file_id } => (file_id, None),
         };
         let document = self
@@ -277,6 +282,13 @@ impl SemathEngine {
                     offset,
                 ),
             },
+            Query::DomainEvidence { .. } => {
+                let (activations, truncated) = document.domains.at(offset);
+                QueryValue::DomainActivations {
+                    activations,
+                    truncated,
+                }
+            }
         };
 
         Ok(QueryResult {
@@ -690,6 +702,59 @@ mod tests {
             conflict_info.diagnostics[0].evidence[1].kind,
             "explicit-math"
         );
+    }
+
+    #[test]
+    fn exposes_domain_priors_without_creating_definitions_or_warnings() {
+        let content =
+            "\\section{Mixed model}\nA probability distribution and matrix terminology.\n$p$";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let offset = content.rfind('p').unwrap() as u32;
+
+        let hover = engine
+            .query(query(Query::Hover {
+                file_id: "main".into(),
+                offset,
+            }))
+            .unwrap();
+        let QueryValue::Hover { definitions, .. } = hover.value else {
+            panic!("expected hover")
+        };
+        assert!(definitions.is_empty());
+
+        let domains = engine
+            .query(query(Query::DomainEvidence {
+                file_id: "main".into(),
+                offset,
+            }))
+            .unwrap();
+        let QueryValue::DomainActivations {
+            activations,
+            truncated,
+        } = domains.value
+        else {
+            panic!("expected domain activations")
+        };
+        assert!(!truncated);
+        assert_eq!(
+            activations
+                .iter()
+                .map(|domain| domain.pack_id.as_str())
+                .collect::<Vec<_>>(),
+            ["linear-algebra", "probability"]
+        );
+        assert!(activations.iter().all(|domain| domain.strength == "weak"));
+
+        let diagnostics = engine
+            .query(query(Query::Diagnostics {
+                file_id: "main".into(),
+            }))
+            .unwrap();
+        let QueryValue::Diagnostics { diagnostics } = diagnostics.value else {
+            panic!("expected diagnostics")
+        };
+        assert!(diagnostics.is_empty());
     }
 
     #[test]

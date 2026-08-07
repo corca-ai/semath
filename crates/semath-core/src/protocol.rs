@@ -147,6 +147,11 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
+    DomainEvidence {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -196,6 +201,18 @@ pub struct SymbolInfo {
     pub formulas: Vec<FormulaRecognition>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub truncated: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DomainActivation {
+    pub pack_id: String,
+    pub pack_version: String,
+    pub title: String,
+    pub strength: String,
+    pub scope_kind: String,
+    pub scope_range: SourceRange,
+    pub evidence: Vec<Evidence>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -374,6 +391,10 @@ pub enum QueryValue {
     },
     FormulaCompletions {
         completions: Vec<FormulaCompletion>,
+    },
+    DomainActivations {
+        activations: Vec<DomainActivation>,
+        truncated: bool,
     },
 }
 
