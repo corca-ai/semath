@@ -9,7 +9,8 @@
     "./wasmtex-adapter": "./packages/wasmtex-adapter/src/index.ts",
     "./worker": "./packages/worker/src/index.ts",
     "./worker-runtime": "./packages/worker/src/runtime.ts",
-    "./wasm": "./lib/wasm/semath_wasm.js"
+    "./wasm": "./lib/wasm/semath_wasm.js",
+    "./wasm-binary": "./lib/wasm/semath_wasm_bg.wasm"
   },
   "files": [
     "lib",
