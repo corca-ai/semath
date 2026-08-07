@@ -204,6 +204,8 @@ pub struct ShapeInfo {
     pub symbol: String,
     pub kind: String,
     pub dimensions: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub refinements: Vec<String>,
     pub display: String,
     pub evidence: Evidence,
 }

@@ -105,6 +105,7 @@ export interface ShapeInfo {
   display: string;
   evidence: Evidence;
   kind: "matrix" | "scalar" | "tensor" | "vector";
+  refinements?: readonly string[];
   symbol: string;
 }
 

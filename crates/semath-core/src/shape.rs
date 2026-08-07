@@ -4,6 +4,7 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use crate::parser::ParsedMath;
+use crate::prose::{ProseShape, ProseShapeClaim};
 use crate::scope::ScopeGraph;
 use crate::{
     Evidence, FormulaConstraint, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceIndex,
@@ -55,7 +56,7 @@ impl Shape {
         }
     }
 
-    fn info(&self, symbol: &str, evidence: Evidence) -> ShapeInfo {
+    fn info(&self, symbol: &str, evidence: Evidence, refinements: Vec<String>) -> ShapeInfo {
         let (kind, dimensions) = match self {
             Self::Scalar => ("scalar", Vec::new()),
             Self::Vector(dimension) => ("vector", vec![dimension.clone()]),
@@ -66,6 +67,7 @@ impl Shape {
             symbol: symbol.into(),
             kind: kind.into(),
             dimensions,
+            refinements,
             display: self.display(),
             evidence,
         }
@@ -100,6 +102,7 @@ struct ShapeFact {
     symbol_range: SourceRange,
     available_from: u32,
     evidence: Evidence,
+    refinements: Vec<String>,
     explicit: bool,
     scope_id: usize,
 }
@@ -131,6 +134,15 @@ pub(crate) struct KnownShape {
     pub symbol: String,
     pub shape: Shape,
     pub evidence: Evidence,
+    pub refinements: Vec<String>,
+}
+
+impl KnownShape {
+    pub fn constraint(&self) -> FormulaConstraint {
+        let mut constraint = self.shape.constraint();
+        constraint.refinements = self.refinements.clone();
+        constraint
+    }
 }
 
 impl ShapeAnalysis {
@@ -143,7 +155,10 @@ impl ShapeAnalysis {
                     && self.scopes.visible(fact.scope_id, offset)
             })
             .max_by_key(|fact| (self.scopes.depth(fact.scope_id), fact.available_from))
-            .map(|fact| fact.shape.info(symbol, fact.evidence.clone()))
+            .map(|fact| {
+                fact.shape
+                    .info(symbol, fact.evidence.clone(), fact.refinements.clone())
+            })
     }
 
     pub fn diagnostic(&self, code: &str, offset: u32) -> Option<SemanticDiagnostic> {
@@ -172,6 +187,7 @@ impl ShapeAnalysis {
                 symbol: fact.symbol.clone(),
                 shape: fact.shape.clone(),
                 evidence: fact.evidence.clone(),
+                refinements: fact.refinements.clone(),
             })
             .collect()
     }
@@ -196,7 +212,10 @@ impl ShapeAnalysis {
         let claims = facts
             .into_iter()
             .take(MAX_SYMBOL_CLAIMS)
-            .map(|fact| fact.shape.info(symbol, fact.evidence.clone()))
+            .map(|fact| {
+                fact.shape
+                    .info(symbol, fact.evidence.clone(), fact.refinements.clone())
+            })
             .collect();
         (claims, truncated)
     }
@@ -236,7 +255,11 @@ impl ShapeAnalysis {
     }
 }
 
-pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) -> ShapeAnalysis {
+pub(crate) fn analyze_shapes(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    prose_claims: &[ProseShapeClaim],
+) -> ShapeAnalysis {
     let index = SourceIndex::new(&document.content);
     let scopes = ScopeGraph::new(document);
     let inequalities = collect_inequalities(document, parsed, &index, &scopes);
@@ -245,6 +268,19 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
         diagnostics: Vec::new(),
         scopes,
     };
+
+    for claim in prose_claims {
+        analysis.facts.push(ShapeFact {
+            symbol: claim.symbol.clone(),
+            shape: prose_shape(&claim.shape),
+            symbol_range: claim.symbol_range.clone(),
+            available_from: claim.available_from,
+            evidence: claim.evidence.clone(),
+            refinements: claim.refinements.clone(),
+            explicit: true,
+            scope_id: analysis.scopes.id_at(claim.symbol_range.start_offset),
+        });
+    }
 
     for math in parsed {
         let Some((content, content_start)) = math_content(document, math, &index) else {
@@ -271,36 +307,6 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
                 content_start + symbol_match.end(),
             );
             let symbol = symbol_match.as_str();
-            if let Some(previous) =
-                latest_explicit_fact(&analysis, symbol, symbol_range.start_offset)
-                && shapes_conflict(
-                    &previous.shape,
-                    &shape,
-                    &inequalities,
-                    &analysis.scopes,
-                    symbol_range.start_offset,
-                )
-            {
-                analysis.diagnostics.push(SemanticDiagnostic {
-                    code: "notation-shape-conflict".into(),
-                    severity: "warning".into(),
-                    message: format!(
-                        "Notation `{symbol}` is redeclared as {} after {}.",
-                        shape.display(),
-                        previous.shape.display()
-                    ),
-                    explanation: format!(
-                        "Both declarations are explicit and assign incompatible shapes to `{symbol}` in the same document scope."
-                    ),
-                    range: symbol_range.clone(),
-                    evidence: vec![previous.evidence.clone(), Evidence {
-                        rule_id: "explicit-real-shape-declaration".into(),
-                        kind: "explicit-math".into(),
-                        strength: "hard".into(),
-                        source_ranges: vec![declaration_range.clone()],
-                    }],
-                });
-            }
             let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
             analysis.facts.push(ShapeFact {
                 symbol: symbol.into(),
@@ -313,11 +319,14 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
                     strength: "hard".into(),
                     source_ranges: vec![declaration_range],
                 },
+                refinements: Vec::new(),
                 explicit: true,
                 scope_id,
             });
         }
     }
+
+    add_explicit_conflict_diagnostics(&mut analysis, &inequalities);
 
     for math in parsed {
         let Some((content, content_start)) = math_content(document, math, &index) else {
@@ -359,6 +368,58 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
         .diagnostics
         .sort_by_key(|diagnostic| diagnostic.range.start_offset);
     analysis
+}
+
+fn prose_shape(shape: &ProseShape) -> Shape {
+    match shape {
+        ProseShape::Scalar => Shape::Scalar,
+        ProseShape::Vector(dimension) => Shape::Vector(dimension.clone()),
+        ProseShape::Matrix(rows, columns) => Shape::Matrix(rows.clone(), columns.clone()),
+        ProseShape::Tensor(dimensions) => Shape::Tensor(dimensions.clone()),
+    }
+}
+
+fn add_explicit_conflict_diagnostics(analysis: &mut ShapeAnalysis, inequalities: &[Inequality]) {
+    let mut facts = analysis
+        .facts
+        .iter()
+        .filter(|fact| fact.explicit)
+        .cloned()
+        .collect::<Vec<_>>();
+    facts.sort_by_key(|fact| fact.symbol_range.start_offset);
+    let mut earlier = Vec::<ShapeFact>::new();
+    for fact in facts {
+        if let Some(previous) = earlier
+            .iter()
+            .filter(|previous| previous.symbol == fact.symbol && previous.scope_id == fact.scope_id)
+            .max_by_key(|previous| previous.available_from)
+            && shapes_conflict(
+                &previous.shape,
+                &fact.shape,
+                inequalities,
+                &analysis.scopes,
+                fact.symbol_range.start_offset,
+            )
+        {
+            analysis.diagnostics.push(SemanticDiagnostic {
+                code: "notation-shape-conflict".into(),
+                severity: "warning".into(),
+                message: format!(
+                    "Notation `{}` is redeclared as {} after {}.",
+                    fact.symbol,
+                    fact.shape.display(),
+                    previous.shape.display()
+                ),
+                explanation: format!(
+                    "Both declarations are explicit and assign incompatible shapes to `{}` in the same document scope.",
+                    fact.symbol
+                ),
+                range: fact.symbol_range.clone(),
+                evidence: vec![previous.evidence.clone(), fact.evidence.clone()],
+            });
+        }
+        earlier.push(fact);
+    }
 }
 
 fn analyze_assignment(
@@ -577,6 +638,7 @@ fn push_derived_fact(
             strength: "strong".into(),
             source_ranges,
         },
+        refinements: Vec::new(),
         explicit: false,
         scope_id,
     });
@@ -649,24 +711,6 @@ fn latest_fact<'a>(analysis: &'a ShapeAnalysis, symbol: &str, at: u32) -> Option
                 && analysis.scopes.visible(fact.scope_id, at)
         })
         .max_by_key(|fact| (analysis.scopes.depth(fact.scope_id), fact.available_from))
-}
-
-fn latest_explicit_fact<'a>(
-    analysis: &'a ShapeAnalysis,
-    symbol: &str,
-    at: u32,
-) -> Option<&'a ShapeFact> {
-    let scope_id = analysis.scopes.id_at(at);
-    analysis
-        .facts
-        .iter()
-        .filter(|fact| {
-            fact.explicit
-                && fact.symbol == symbol
-                && fact.available_from <= at
-                && fact.scope_id == scope_id
-        })
-        .max_by_key(|fact| fact.available_from)
 }
 
 fn shapes_conflict(
@@ -775,7 +819,7 @@ mod tests {
             document_version: 1,
             math_regions: regions.clone(),
         };
-        analyze_shapes(&document, &parse_regions(source, &regions))
+        analyze_shapes(&document, &parse_regions(source, &regions), &[])
     }
 
     #[test]
@@ -822,7 +866,7 @@ mod tests {
             document_version: 1,
             math_regions: regions.clone(),
         };
-        let analysis = analyze_shapes(&document, &parse_regions(source, &regions));
+        let analysis = analyze_shapes(&document, &parse_regions(source, &regions), &[]);
         assert!(analysis.diagnostics.is_empty());
         let first_use = source.find("$x$\n#").unwrap() as u32 + 1;
         let second_use = source.rfind("$x$").unwrap() as u32 + 1;

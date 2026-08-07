@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
-use regex::Regex;
 use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
+use crate::prose::analyze_prose;
 use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange, SymbolInfo,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceRange, SymbolInfo,
     UpdateResult,
 };
 
@@ -47,13 +47,13 @@ impl AnalyzedDocument {
             document.math_regions = math_regions(&document.content, document.language);
         }
         let parsed = parse_regions(&document.content, &document.math_regions);
-        let definitions = extract_definitions(&document, &parsed);
-        let shapes = analyze_shapes(&document, &parsed);
+        let prose = analyze_prose(&document, &parsed);
+        let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
         let formulas = analyze_formulas(&document, &parsed, &shapes);
         Self {
             document,
             parsed,
-            definitions,
+            definitions: prose.definitions,
             shapes,
             formulas,
         }
@@ -484,107 +484,6 @@ fn check_protocol(version: u32) -> Result<(), EngineError> {
     }
 }
 
-fn extract_definitions(document: &ProjectDocument, parsed: &[ParsedMath]) -> Vec<DefinitionInfo> {
-    let prefix = Regex::new(r"(?i)(?:let|where)\s*$").unwrap();
-    let suffix =
-        Regex::new(r"(?i)^\s*(?:denote(?:s)?|be|is|represent(?:s)?)\s+([^.;\n]+)").unwrap();
-    let source_index = SourceIndex::new(&document.content);
-    let mut definitions = Vec::new();
-
-    for math in parsed {
-        let Some((symbol, symbol_range)) = math.symbols.first() else {
-            continue;
-        };
-        let start_byte = source_index.byte_for_utf16(math.region.full_range.start_offset);
-        let end_byte = source_index.byte_for_utf16(math.region.full_range.end_offset);
-        let before_start = document.content[..start_byte]
-            .char_indices()
-            .rev()
-            .nth(80)
-            .map_or(0, |(offset, _)| offset);
-        let before = &document.content[before_start..start_byte];
-        let after_end = document.content[end_byte..]
-            .char_indices()
-            .nth(180)
-            .map_or(document.content.len(), |(offset, _)| end_byte + offset);
-        let after = &document.content[end_byte..after_end];
-        if prefix.is_match(before) {
-            if let Some(captures) = suffix.captures(after) {
-                definitions.push(definition(
-                    document,
-                    symbol,
-                    symbol_range,
-                    captures.get(1).unwrap().as_str().trim(),
-                    "english-let-definition",
-                ));
-                continue;
-            }
-            if math.symbols.len() > 1 {
-                definitions.push(definition(
-                    document,
-                    symbol,
-                    symbol_range,
-                    "explicit mathematical declaration",
-                    "english-let-math-declaration",
-                ));
-            }
-        }
-
-        let line_start = document.content[..start_byte]
-            .rfind('\n')
-            .map_or(0, |offset| offset + 1);
-        let line_end = document.content[end_byte..]
-            .find('\n')
-            .map_or(document.content.len(), |offset| end_byte + offset);
-        let line = &document.content[line_start..line_end];
-        if line.contains('|') {
-            let math_end_in_line = end_byte - line_start;
-            let tail = &line[math_end_in_line..];
-            if let Some(cell_start) = tail.find('|').map(|offset| offset + 1)
-                && let Some(cell_end) = tail[cell_start..].find('|')
-            {
-                let description = tail[cell_start..cell_start + cell_end].trim();
-                if !description.is_empty() && !description.chars().all(|ch| ch == '-' || ch == ':')
-                {
-                    definitions.push(definition(
-                        document,
-                        symbol,
-                        symbol_range,
-                        description,
-                        "notation-table-definition",
-                    ));
-                }
-            }
-        }
-    }
-
-    definitions
-}
-
-fn definition(
-    document: &ProjectDocument,
-    symbol: &str,
-    range: &SourceRange,
-    description: &str,
-    rule_id: &str,
-) -> DefinitionInfo {
-    DefinitionInfo {
-        symbol: symbol.to_string(),
-        description: description.to_string(),
-        location: Location {
-            file_id: document.file_id.clone(),
-            path: document.path.clone(),
-            range: range.clone(),
-        },
-        evidence: Evidence {
-            rule_id: rule_id.to_string(),
-            kind: "explicit-prose".into(),
-            strength: "strong".into(),
-            source_ranges: vec![range.clone()],
-        },
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::SemathEngine;
@@ -734,6 +633,63 @@ mod tests {
         assert_eq!(conflict_info.shapes[1].display, "Matrix[m × n]");
         assert_eq!(conflict_info.diagnostics[0].code, "notation-shape-conflict");
         assert!(!conflict_info.truncated);
+    }
+
+    #[test]
+    fn uses_scoped_prose_shapes_for_formulas_and_conflicts() {
+        let content = "Let $x$ and $A$ denote an n-dimensional normalized vector and an m by n symmetric matrix, respectively.\n$y \\in \\mathbb{R}^{m}$\n$y = Ax$\n$A \\in \\mathbb{R}^{n}$\n$A$";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let formula_result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: content.find("Ax").unwrap() as u32,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo {
+            info: Some(formula_info),
+        } = formula_result.value
+        else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(formula_info.shapes[0].display, "Matrix[m × n]");
+        assert_eq!(formula_info.shapes[0].refinements, ["symmetric"]);
+        assert_eq!(
+            formula_info.shapes[0].evidence.rule_id,
+            "english-respectively-definition"
+        );
+        assert_eq!(formula_info.formulas[0].pattern_id, "matrix-vector-product");
+        assert_eq!(
+            formula_info.formulas[0].bindings[0].constraint.refinements,
+            ["symmetric"]
+        );
+
+        let final_a = content.rfind("$A$").unwrap() as u32 + 1;
+        let conflict_result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: final_a,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo {
+            info: Some(conflict_info),
+        } = conflict_result.value
+        else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(conflict_info.shapes.len(), 2);
+        assert_eq!(conflict_info.shapes[0].display, "Vector[n]");
+        assert_eq!(conflict_info.shapes[1].display, "Matrix[m × n]");
+        assert_eq!(conflict_info.diagnostics[0].code, "notation-shape-conflict");
+        assert_eq!(
+            conflict_info.diagnostics[0].evidence[0].kind,
+            "explicit-prose"
+        );
+        assert_eq!(
+            conflict_info.diagnostics[0].evidence[1].kind,
+            "explicit-math"
+        );
     }
 
     #[test]

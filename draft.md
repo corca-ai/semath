@@ -552,6 +552,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * 적용된 prior와 diagnostic evidence chain을 inspection할 수 있다.
 * NLP는 corpus와 browser budget을 만족할 때만 포함한다.
 * **v0.5 진행 중:** `symbolInfo`는 한 기호의 정의, 가시적인 shape claim, 인식된 formula, 관련 diagnostic과 source evidence를 각각 최대 8개로 묶어 반환한다. 미래 scope의 진단은 노출하지 않으며 응답이 잘리면 이를 명시한다.
+* **v0.5 prose slice:** `respectively`, apposition, parenthetical definition, typed `For each/every`, 문장 단위 `is/represents`만 stable rule로 인식한다. 명시된 scalar/vector/matrix/tensor와 dimension, symmetric·diagonal·positive-definite·normalized refinement는 scoped strong evidence가 되며 기존 수학 선언과 충돌해도 양쪽 claim을 보존한다. 주변 단어만으로는 추론하지 않는다.
 
 Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.
 
