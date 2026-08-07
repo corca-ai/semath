@@ -1,0 +1,25 @@
+{
+  "snapshot": {
+    "protocolVersion": 1,
+    "epoch": "parity:1",
+    "inventoryVersion": 1,
+    "projectId": "parity",
+    "mainFileId": "main",
+    "documents": [
+      {
+        "fileId": "main",
+        "path": "main.tex",
+        "language": "latex",
+        "content": "Let $x$ denote input. Then $y = x$.",
+        "documentVersion": 1
+      }
+    ]
+  },
+  "queries": [
+    { "protocolVersion": 1, "epoch": "parity:1", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "selection", "fileId": "main", "offset": 32 } },
+    { "protocolVersion": 1, "epoch": "parity:1", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "equationTree", "fileId": "main", "offset": 28 } },
+    { "protocolVersion": 1, "epoch": "parity:1", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "hover", "fileId": "main", "offset": 32 } },
+    { "protocolVersion": 1, "epoch": "parity:1", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "definition", "fileId": "main", "offset": 32 } },
+    { "protocolVersion": 1, "epoch": "parity:1", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "references", "fileId": "main", "offset": 32 } }
+  ]
+}

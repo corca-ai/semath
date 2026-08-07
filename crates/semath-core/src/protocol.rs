@@ -169,6 +169,7 @@ pub enum QueryValue {
     },
     Hover {
         symbol: Option<String>,
+        #[serde(rename = "equationKind")]
         equation_kind: Option<String>,
         definitions: Vec<DefinitionInfo>,
     },

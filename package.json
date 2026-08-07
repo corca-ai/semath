@@ -16,7 +16,8 @@
     "packages"
   ],
   "scripts": {
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun test",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun test && bun run parity",
+    "parity": "node scripts/check-parity.mjs",
     "test": "cargo test --workspace && bun test"
   }
 }

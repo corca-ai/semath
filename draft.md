@@ -1,5 +1,7 @@
 # Semantic Math Analysis Library Proposal
 
+> **구현 상태 — v0.1.0 완료 (2026-08-07):** Iteration 1과 2의 첫 vertical slice가 구현됐다. Rust/WASM core, `wasmtex/syntax`, CorTeX Worker 통합, structural selection/equation tree, 그리고 명시적 `Let`/`where`/notation-table 정의의 hover·definition·references를 제공한다. Binder, shape, notation diagnostics와 edit 기능은 후속 버전 범위다.
+
 ## 1. 개요
 
 Semath는 Markdown/LaTeX 문서에서 수학적 구조와 의미를 복원하는 독립 분석 라이브러리다. 파일 형식이나 수학 DSL을 새로 만들지 않으며, 첫 번째 호스트인 CorTeX에 다음 결과를 제공한다.
