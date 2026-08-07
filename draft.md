@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.2.0 완료 (2026-08-07):** v0.1의 구조 탐색과 명시적 정의 navigation에 더해, 합·극한·한정자의 bound variable을 구분하고 capture를 방지하는 rename proposal을 제공한다. CorTeX는 이를 기존의 revision-checked review 흐름으로 검토·적용한다. 적분 differential, prose binder, shape와 notation diagnostics는 후속 범위다.
+> **구현 상태 — v0.3.0 (2026-08-07):** 구조 탐색, 명시적 정의 navigation, binder-aware rename에 이어 명시적 vector/matrix shape와 보수적 propagation을 제공한다. 증명 가능한 shape·notation 충돌만 설명 가능한 warning으로 노출하며 자동 수정은 하지 않는다. 적분 differential, prose binder와 휴리스틱 notation hint는 후속 범위다.
 
 ## 1. 개요
 
@@ -531,11 +531,13 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * 명시적인 vector/matrix 선언과 propagation을 hover에 표시한다.
 * linear-algebra pack으로 확실한 shape contradiction을 설명한다.
 * 수정 action 없이 evidence chain만 제공한다.
+* **v0.3 완료:** `\mathbb{R}`의 vector/matrix 선언, alias·덧셈·행렬 곱의 shape를 보수적으로 전파한다. 서로 다른 symbolic dimension만으로는 경고하지 않고, 숫자 불일치 또는 명시적 부등식으로 모순이 증명된 경우만 진단한다.
 
 ### Iteration 5 — Notation consistency
 
 * 같은 scope의 충돌하는 type/role과 중복 definition을 찾는다.
 * used-before-defined와 unused definition은 검증된 경우에만 hint로 제공한다.
+* **v0.3 일부 완료:** 같은 문서에서 한 symbol을 양립할 수 없는 shape로 재선언한 경우를 진단한다. use-before-definition과 unused-definition은 false-positive corpus가 준비될 때까지 보류한다.
 
 ### Iteration 6 — Formula recognition과 completion
 
