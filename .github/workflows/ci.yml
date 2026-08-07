@@ -23,3 +23,4 @@ jobs:
       - run: bun test
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: scripts/build-wasm.sh
+      - run: git diff --exit-code -- lib/wasm

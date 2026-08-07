@@ -15,3 +15,12 @@ wasm-bindgen \
   --typescript \
   --out-dir lib/wasm \
   target/wasm32-unknown-unknown/release/semath_wasm.wasm
+
+(
+  cd lib/wasm
+  sha256sum \
+    semath_wasm.js \
+    semath_wasm.d.ts \
+    semath_wasm_bg.wasm \
+    semath_wasm_bg.wasm.d.ts > SHA256SUMS
+)
