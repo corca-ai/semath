@@ -35,6 +35,7 @@ static QUADRATIC_FORM: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*([A-Za-z])\s*([A-Za-z])\s*$")
         .unwrap()
 });
+const MAX_SYMBOL_CLAIMS: usize = 8;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Shape {
@@ -173,6 +174,65 @@ impl ShapeAnalysis {
                 evidence: fact.evidence.clone(),
             })
             .collect()
+    }
+
+    pub fn claims_at(&self, symbol: &str, offset: u32) -> (Vec<ShapeInfo>, bool) {
+        let mut facts = self
+            .facts
+            .iter()
+            .filter(|fact| {
+                fact.symbol == symbol
+                    && (fact.available_from <= offset || fact.symbol_range.contains(offset))
+                    && self.scopes.visible(fact.scope_id, offset)
+            })
+            .collect::<Vec<_>>();
+        facts.sort_by_key(|fact| {
+            (
+                std::cmp::Reverse(self.scopes.depth(fact.scope_id)),
+                std::cmp::Reverse(fact.available_from),
+            )
+        });
+        let truncated = facts.len() > MAX_SYMBOL_CLAIMS;
+        let claims = facts
+            .into_iter()
+            .take(MAX_SYMBOL_CLAIMS)
+            .map(|fact| fact.shape.info(symbol, fact.evidence.clone()))
+            .collect();
+        (claims, truncated)
+    }
+
+    pub fn diagnostics_for(
+        &self,
+        offset: u32,
+        claims: &[ShapeInfo],
+    ) -> (Vec<SemanticDiagnostic>, bool) {
+        let claim_ranges = claims
+            .iter()
+            .flat_map(|claim| claim.evidence.source_ranges.iter())
+            .collect::<Vec<_>>();
+        let related = self
+            .diagnostics
+            .iter()
+            .filter(|diagnostic| {
+                diagnostic.range.start_offset <= offset
+                    && (diagnostic.range.contains(offset)
+                        || diagnostic.evidence.iter().any(|evidence| {
+                            evidence
+                                .source_ranges
+                                .iter()
+                                .any(|source| claim_ranges.contains(&source))
+                        }))
+            })
+            .collect::<Vec<_>>();
+        let truncated = related.len() > MAX_SYMBOL_CLAIMS;
+        (
+            related
+                .into_iter()
+                .take(MAX_SYMBOL_CLAIMS)
+                .cloned()
+                .collect(),
+            truncated,
+        )
     }
 }
 

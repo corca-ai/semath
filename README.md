@@ -17,6 +17,9 @@ Version 0.4 provides:
 - a versioned project/update/query protocol and browser Worker runtime;
 - an adapter for the public `wasmtex/syntax` snapshot contract.
 
+The v0.5 work in progress adds a bounded `symbolInfo` query that returns the definitions, shape
+claims, recognized formulas, diagnostics, and source evidence associated with one symbol.
+
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
 See [draft.md](./draft.md) for the architecture and roadmap.

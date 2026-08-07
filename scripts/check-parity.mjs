@@ -23,6 +23,11 @@ const fixtureSets = [
     goldenUrl: new URL("../fixtures/v0.4/formula-intelligence.golden.json", import.meta.url),
     version: "v0.4",
   },
+  {
+    fixtureUrl: new URL("../fixtures/v0.5/symbol-inspection.json", import.meta.url),
+    goldenUrl: new URL("../fixtures/v0.5/symbol-inspection.golden.json", import.meta.url),
+    version: "v0.5",
+  },
 ];
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {

@@ -100,6 +100,11 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
+    SymbolInfo {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
     Definition {
         #[serde(rename = "fileId")]
         file_id: String,
@@ -179,6 +184,18 @@ pub struct DefinitionInfo {
     pub description: String,
     pub location: Location,
     pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolInfo {
+    pub symbol: String,
+    pub location: Location,
+    pub definitions: Vec<DefinitionInfo>,
+    pub shapes: Vec<ShapeInfo>,
+    pub formulas: Vec<FormulaRecognition>,
+    pub diagnostics: Vec<SemanticDiagnostic>,
+    pub truncated: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -328,6 +345,9 @@ pub enum QueryValue {
         shape: Option<ShapeInfo>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         formulas: Vec<FormulaRecognition>,
+    },
+    SymbolInfo {
+        info: Option<SymbolInfo>,
     },
     Locations {
         locations: Vec<Location>,

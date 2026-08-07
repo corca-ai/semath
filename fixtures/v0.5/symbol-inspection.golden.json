@@ -1,0 +1,306 @@
+{
+  "results": [
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "symbolInfo",
+        "info": {
+          "symbol": "A",
+          "location": {
+            "fileId": "main",
+            "path": "main.tex",
+            "range": {
+              "startOffset": 116,
+              "endOffset": 117
+            }
+          },
+          "definitions": [
+            {
+              "symbol": "A",
+              "description": "the transformation",
+              "location": {
+                "fileId": "main",
+                "path": "main.tex",
+                "range": {
+                  "startOffset": 5,
+                  "endOffset": 6
+                }
+              },
+              "evidence": {
+                "ruleId": "english-let-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 5,
+                    "endOffset": 6
+                  }
+                ]
+              }
+            }
+          ],
+          "shapes": [
+            {
+              "symbol": "A",
+              "kind": "matrix",
+              "dimensions": [
+                "m",
+                "n"
+              ],
+              "display": "Matrix[m × n]",
+              "evidence": {
+                "ruleId": "explicit-real-shape-declaration",
+                "kind": "explicit-math",
+                "strength": "hard",
+                "sourceRanges": [
+                  {
+                    "startOffset": 36,
+                    "endOffset": 65
+                  }
+                ]
+              }
+            }
+          ],
+          "formulas": [
+            {
+              "patternId": "matrix-vector-product",
+              "title": "Matrix-vector product",
+              "packId": "linear-algebra",
+              "packVersion": "1.0.0",
+              "range": {
+                "startOffset": 116,
+                "endOffset": 118
+              },
+              "bindings": [
+                {
+                  "parameter": "matrix",
+                  "symbol": "A",
+                  "constraint": {
+                    "kind": "matrix",
+                    "dimensions": [
+                      "m",
+                      "n"
+                    ]
+                  },
+                  "evidence": {
+                    "ruleId": "explicit-real-shape-declaration",
+                    "kind": "explicit-math",
+                    "strength": "hard",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 36,
+                        "endOffset": 65
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parameter": "vector",
+                  "symbol": "x",
+                  "constraint": {
+                    "kind": "vector",
+                    "dimensions": [
+                      "n"
+                    ]
+                  },
+                  "evidence": {
+                    "ruleId": "explicit-real-shape-declaration",
+                    "kind": "explicit-math",
+                    "strength": "hard",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 67,
+                        "endOffset": 87
+                      }
+                    ]
+                  }
+                }
+              ],
+              "result": {
+                "kind": "vector",
+                "dimensions": [
+                  "m"
+                ]
+              },
+              "evidence": [
+                {
+                  "ruleId": "explicit-real-shape-declaration",
+                  "kind": "explicit-math",
+                  "strength": "hard",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 36,
+                      "endOffset": 65
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "explicit-real-shape-declaration",
+                  "kind": "explicit-math",
+                  "strength": "hard",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 67,
+                      "endOffset": 87
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "linear-algebra/matrix-vector-product",
+                  "kind": "domain-pattern",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 36,
+                      "endOffset": 65
+                    },
+                    {
+                      "startOffset": 67,
+                      "endOffset": 87
+                    },
+                    {
+                      "startOffset": 116,
+                      "endOffset": 118
+                    }
+                  ]
+                }
+              ],
+              "rank": 100
+            }
+          ],
+          "diagnostics": [],
+          "truncated": false
+        }
+      }
+    },
+    {
+      "protocolVersion": 1,
+      "epoch": "parity:5",
+      "inventoryVersion": 1,
+      "documentVersion": 1,
+      "analysisGeneration": 1,
+      "value": {
+        "kind": "symbolInfo",
+        "info": {
+          "symbol": "A",
+          "location": {
+            "fileId": "main",
+            "path": "main.tex",
+            "range": {
+              "startOffset": 121,
+              "endOffset": 122
+            }
+          },
+          "definitions": [
+            {
+              "symbol": "A",
+              "description": "the transformation",
+              "location": {
+                "fileId": "main",
+                "path": "main.tex",
+                "range": {
+                  "startOffset": 5,
+                  "endOffset": 6
+                }
+              },
+              "evidence": {
+                "ruleId": "english-let-definition",
+                "kind": "explicit-prose",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 5,
+                    "endOffset": 6
+                  }
+                ]
+              }
+            }
+          ],
+          "shapes": [
+            {
+              "symbol": "A",
+              "kind": "vector",
+              "dimensions": [
+                "k"
+              ],
+              "display": "Vector[k]",
+              "evidence": {
+                "ruleId": "explicit-real-shape-declaration",
+                "kind": "explicit-math",
+                "strength": "hard",
+                "sourceRanges": [
+                  {
+                    "startOffset": 121,
+                    "endOffset": 141
+                  }
+                ]
+              }
+            },
+            {
+              "symbol": "A",
+              "kind": "matrix",
+              "dimensions": [
+                "m",
+                "n"
+              ],
+              "display": "Matrix[m × n]",
+              "evidence": {
+                "ruleId": "explicit-real-shape-declaration",
+                "kind": "explicit-math",
+                "strength": "hard",
+                "sourceRanges": [
+                  {
+                    "startOffset": 36,
+                    "endOffset": 65
+                  }
+                ]
+              }
+            }
+          ],
+          "formulas": [],
+          "diagnostics": [
+            {
+              "code": "notation-shape-conflict",
+              "severity": "warning",
+              "message": "Notation `A` is redeclared as Vector[k] after Matrix[m × n].",
+              "explanation": "Both declarations are explicit and assign incompatible shapes to `A` in the same document scope.",
+              "range": {
+                "startOffset": 121,
+                "endOffset": 122
+              },
+              "evidence": [
+                {
+                  "ruleId": "explicit-real-shape-declaration",
+                  "kind": "explicit-math",
+                  "strength": "hard",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 36,
+                      "endOffset": 65
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "explicit-real-shape-declaration",
+                  "kind": "explicit-math",
+                  "strength": "hard",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 121,
+                      "endOffset": 141
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "truncated": false
+        }
+      }
+    }
+  ]
+}
