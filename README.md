@@ -30,4 +30,5 @@ bun test
 ```
 
 On a supported build host, `scripts/build-wasm.sh` regenerates the checked-in WASM package and
-its checksums. CI rejects artifacts that are not reproducible from the committed source.
+its checksums. CI verifies those committed checksums, then independently rebuilds the package and
+checks native/WASM behavior parity plus the generated JavaScript and TypeScript ABI.

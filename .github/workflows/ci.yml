@@ -21,6 +21,9 @@ jobs:
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
       - run: bun test
+      - run: sha256sum -c SHA256SUMS
+        working-directory: lib/wasm
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: scripts/build-wasm.sh
-      - run: git diff --exit-code -- lib/wasm
+      - run: node scripts/check-parity.mjs
+      - run: git diff --exit-code -- lib/wasm/semath_wasm.js lib/wasm/semath_wasm.d.ts lib/wasm/semath_wasm_bg.wasm.d.ts

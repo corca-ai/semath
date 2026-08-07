@@ -577,10 +577,10 @@ Release용 Rust/WASM artifact는 Apple Silicon 개발 머신에서 빌드하지 
 * `rust-toolchain.toml`, `Cargo.lock`
 * 사용하는 wasm-bindgen과 target version
 * source sync → test → WASM build → artifact 회수를 수행하는 한 명령
-* clean build와 reproducible artifact check
-* native test와 browser WASM parity test
+* release host의 clean build, checksum과 artifact provenance
+* CI의 독립 build, generated ABI와 native/browser WASM parity test
 
-원격 호스트는 빠른 cache를 가진 build runner이지 유일한 재현 환경이 아니다. 같은 build contract를 CI에서도 실행할 수 있어야 한다.
+원격 호스트는 빠른 cache를 가진 release build runner다. Host별 LLVM codegen bytes가 같다고 가정하지 않고, CI는 별도 clean build의 동작 parity와 generated ABI를 검증한다.
 
 ---
 
