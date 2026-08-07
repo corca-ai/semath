@@ -5,7 +5,7 @@ resolver = "2"
 [workspace.package]
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/akcorca/semath"
+repository = "https://github.com/corca-ai/semath"
 version = "0.1.0"
 
 [workspace.dependencies]
