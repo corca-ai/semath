@@ -50,7 +50,9 @@ export type SemathQuery =
   | { fileId: string; kind: "equationTree"; offset: number }
   | { fileId: string; kind: "hover"; offset: number }
   | { fileId: string; kind: "definition"; offset: number }
-  | { fileId: string; kind: "references"; offset: number };
+  | { fileId: string; kind: "references"; offset: number }
+  | { fileId: string; kind: "prepareRename"; offset: number }
+  | { fileId: string; kind: "rename"; newName: string; offset: number };
 
 export interface QueryEnvelope {
   analysisGeneration: number;
@@ -88,6 +90,26 @@ export interface DefinitionInfo {
   symbol: string;
 }
 
+export interface SemanticTextEdit {
+  expectedText: string;
+  range: SourceRange;
+  replacementText: string;
+}
+
+export interface SemanticEditFile {
+  documentVersion: number;
+  edits: readonly SemanticTextEdit[];
+  fileId: string;
+  path: string;
+}
+
+export interface SemanticEditProposal {
+  evidence: readonly Evidence[];
+  files: readonly SemanticEditFile[];
+  safety: "deterministic" | "review-required";
+  title: string;
+}
+
 export type QueryValue =
   | { kind: "selection"; ranges: readonly SourceRange[] }
   | { kind: "equationTree"; tree?: EquationNode }
@@ -97,7 +119,18 @@ export type QueryValue =
       kind: "hover";
       symbol?: string;
     }
-  | { kind: "locations"; locations: readonly Location[] };
+  | { kind: "locations"; locations: readonly Location[] }
+  | {
+      kind: "renamePreparation";
+      placeholder?: string;
+      range?: SourceRange;
+      rejection?: string;
+    }
+  | {
+      kind: "editProposal";
+      proposal?: SemanticEditProposal;
+      rejection?: string;
+    };
 
 export interface QueryResult {
   analysisGeneration: number;

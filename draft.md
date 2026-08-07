@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.1.0 완료 (2026-08-07):** Iteration 1과 2의 첫 vertical slice가 구현됐다. Rust/WASM core, `wasmtex/syntax`, CorTeX Worker 통합, structural selection/equation tree, 그리고 명시적 `Let`/`where`/notation-table 정의의 hover·definition·references를 제공한다. Binder, shape, notation diagnostics와 edit 기능은 후속 버전 범위다.
+> **구현 상태 — v0.2.0 완료 (2026-08-07):** v0.1의 구조 탐색과 명시적 정의 navigation에 더해, 합·극한·한정자의 bound variable을 구분하고 capture를 방지하는 rename proposal을 제공한다. CorTeX는 이를 기존의 revision-checked review 흐름으로 검토·적용한다. 적분 differential, prose binder, shape와 notation diagnostics는 후속 범위다.
 
 ## 1. 개요
 
@@ -524,6 +524,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * sum, limit, quantifier의 free/bound variable을 구분한다.
 * capture-avoiding rename proposal을 CorTeX review 흐름으로 적용한다.
 * 적분 differential과 prose binder는 아직 rename하지 않는다.
+* **v0.2 완료:** 합과 극한의 scope는 바로 다음 구조 단위로 보수적으로 제한하고, 한정자는 해당 sequence의 나머지를 scope로 삼는다. 불완전한 수식, shadowing 또는 capture 가능성이 있는 변경은 proposal을 만들지 않는다.
 
 ### Iteration 4 — 기본 shape insight
 

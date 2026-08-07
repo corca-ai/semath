@@ -3,11 +3,13 @@ use std::collections::HashMap;
 use regex::Regex;
 use thiserror::Error;
 
+use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
-    SourceIndex, SourceRange, UpdateResult,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
+    UpdateResult,
 };
 
 #[derive(Debug, Error)]
@@ -138,7 +140,11 @@ impl SemathEngine {
             | Query::EquationTree { file_id, offset }
             | Query::Hover { file_id, offset }
             | Query::Definition { file_id, offset }
-            | Query::References { file_id, offset } => (file_id, *offset),
+            | Query::References { file_id, offset }
+            | Query::PrepareRename { file_id, offset }
+            | Query::Rename {
+                file_id, offset, ..
+            } => (file_id, *offset),
         };
         let document = self
             .documents
@@ -203,6 +209,8 @@ impl SemathEngine {
                     .map(|definition| self.references_for(&definition))
                     .unwrap_or_default(),
             },
+            Query::PrepareRename { .. } => prepare_rename(parsed, offset),
+            Query::Rename { new_name, .. } => rename_proposal(document, parsed, offset, &new_name),
         };
 
         Ok(QueryResult {
@@ -305,6 +313,100 @@ impl SemathEngine {
                 .then(left.range.start_offset.cmp(&right.range.start_offset))
         });
         locations
+    }
+}
+
+fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
+    let Some(parsed) = parsed else {
+        return rename_preparation_rejection("The cursor is not inside a math expression.");
+    };
+    if !parsed.region.closed {
+        return rename_preparation_rejection(
+            "Finish the math expression before renaming a bound variable.",
+        );
+    }
+    let found = binders(parsed);
+    let Some(target) = binder_at(parsed, &found, offset) else {
+        return rename_preparation_rejection(
+            "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
+        );
+    };
+    QueryValue::RenamePreparation {
+        range: parsed
+            .symbols
+            .iter()
+            .find(|(_, range)| range.contains(offset))
+            .map(|(_, range)| range.clone()),
+        placeholder: Some(target.symbol.clone()),
+        rejection: None,
+    }
+}
+
+fn rename_preparation_rejection(message: &str) -> QueryValue {
+    QueryValue::RenamePreparation {
+        range: None,
+        placeholder: None,
+        rejection: Some(message.into()),
+    }
+}
+
+fn rename_proposal(
+    document: &AnalyzedDocument,
+    parsed: Option<&ParsedMath>,
+    offset: u32,
+    new_name: &str,
+) -> QueryValue {
+    let Some(parsed) = parsed else {
+        return edit_proposal_rejection("The cursor is not inside a math expression.");
+    };
+    if !parsed.region.closed {
+        return edit_proposal_rejection(
+            "Finish the math expression before renaming a bound variable.",
+        );
+    }
+    let found = binders(parsed);
+    let Some(target) = binder_at(parsed, &found, offset) else {
+        return edit_proposal_rejection(
+            "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
+        );
+    };
+    if let Some(rejection) = rename_rejection(parsed, &found, target, new_name) {
+        return edit_proposal_rejection(&rejection);
+    }
+    let occurrences = bound_occurrences(parsed, &found, target);
+    let evidence = Evidence {
+        rule_id: "capture-avoiding-bound-variable-rename".into(),
+        kind: "syntax".into(),
+        strength: "hard".into(),
+        source_ranges: occurrences.clone(),
+    };
+    QueryValue::EditProposal {
+        proposal: Some(SemanticEditProposal {
+            title: format!("Rename bound `{}` to `{new_name}`", target.symbol),
+            safety: "deterministic".into(),
+            evidence: vec![evidence],
+            files: vec![SemanticEditFile {
+                file_id: document.document.file_id.clone(),
+                path: document.document.path.clone(),
+                document_version: document.document.document_version,
+                edits: occurrences
+                    .into_iter()
+                    .map(|range| SemanticTextEdit {
+                        range,
+                        expected_text: target.symbol.clone(),
+                        replacement_text: new_name.into(),
+                    })
+                    .collect(),
+            }],
+        }),
+        rejection: None,
+    }
+}
+
+fn edit_proposal_rejection(message: &str) -> QueryValue {
+    QueryValue::EditProposal {
+        proposal: None,
+        rejection: Some(message.into()),
     }
 }
 
@@ -523,5 +625,58 @@ mod tests {
             panic!("expected hover")
         };
         assert_eq!(definitions[0].description, "weight matrix");
+    }
+
+    #[test]
+    fn proposes_a_capture_avoiding_bound_variable_rename() {
+        let content = "$i$ is external. $\\sum_{i=1}^n x_i$.";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let use_offset = content.rfind("x_i").unwrap() as u32 + 2;
+        let result = engine
+            .query(query(Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "j".into(),
+            }))
+            .unwrap();
+        let QueryValue::EditProposal {
+            proposal: Some(proposal),
+            rejection: None,
+        } = result.value
+        else {
+            panic!("expected edit proposal")
+        };
+        assert_eq!(proposal.safety, "deterministic");
+        assert_eq!(proposal.files[0].edits.len(), 2);
+        assert!(
+            proposal.files[0]
+                .edits
+                .iter()
+                .all(|edit| edit.expected_text == "i" && edit.replacement_text == "j")
+        );
+    }
+
+    #[test]
+    fn refuses_an_unfinished_or_capturing_rename() {
+        for content in ["$\\sum_{i=1}^n (x_i + j)$", "$\\sum_{i=1}^n x_i"] {
+            let mut engine = SemathEngine::default();
+            engine.reset(snapshot(content)).unwrap();
+            let offset = content.find("i=1").unwrap() as u32;
+            let result = engine
+                .query(query(Query::Rename {
+                    file_id: "main".into(),
+                    offset,
+                    new_name: "j".into(),
+                }))
+                .unwrap();
+            let QueryValue::EditProposal {
+                proposal: None,
+                rejection: Some(_),
+            } = result.value
+            else {
+                panic!("expected rename rejection")
+            };
+        }
     }
 }

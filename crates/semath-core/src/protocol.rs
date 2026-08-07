@@ -110,6 +110,18 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
+    PrepareRename {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
+    Rename {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+        #[serde(rename = "newName")]
+        new_name: String,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -159,6 +171,32 @@ pub struct EquationNode {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticTextEdit {
+    pub range: SourceRange,
+    pub expected_text: String,
+    pub replacement_text: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticEditFile {
+    pub file_id: String,
+    pub path: String,
+    pub document_version: u64,
+    pub edits: Vec<SemanticTextEdit>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticEditProposal {
+    pub title: String,
+    pub safety: String,
+    pub evidence: Vec<Evidence>,
+    pub files: Vec<SemanticEditFile>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum QueryValue {
     Selection {
@@ -175,6 +213,15 @@ pub enum QueryValue {
     },
     Locations {
         locations: Vec<Location>,
+    },
+    RenamePreparation {
+        range: Option<SourceRange>,
+        placeholder: Option<String>,
+        rejection: Option<String>,
+    },
+    EditProposal {
+        proposal: Option<SemanticEditProposal>,
+        rejection: Option<String>,
     },
 }
 
