@@ -1,3 +1,4 @@
+mod binder;
 mod engine;
 mod parser;
 mod protocol;
