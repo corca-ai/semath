@@ -241,6 +241,7 @@ pub enum QueryValue {
         #[serde(rename = "equationKind")]
         equation_kind: Option<String>,
         definitions: Vec<DefinitionInfo>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         shape: Option<ShapeInfo>,
     },
     Locations {
