@@ -3,11 +3,13 @@
 Semath is a Rust/WASM library for semantic navigation in scientific Markdown and LaTeX. It is
 designed to be embedded by editors such as CorTeX, not to be a standalone web application.
 
-Version 0.2 provides:
+Version 0.3 provides:
 
 - structural selection and a queryable equation tree;
 - explicit English definition extraction (`Let x denote …`) with hover, definition, and references;
 - capture-avoiding rename proposals for variables bound by sums, limits, and quantifiers;
+- explicit vector/matrix shapes, conservative propagation, and evidence-backed contradiction diagnostics;
+- diagnostic explanation queries without speculative quick fixes;
 - UTF-16 source ranges compatible with Monaco;
 - a versioned project/update/query protocol and browser Worker runtime;
 - an adapter for the public `wasmtex/syntax` snapshot contract.

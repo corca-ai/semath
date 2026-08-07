@@ -13,6 +13,11 @@ const fixtureSets = [
     goldenUrl: new URL("../fixtures/v0.2/bound-variable-rename.golden.json", import.meta.url),
     version: "v0.2",
   },
+  {
+    fixtureUrl: new URL("../fixtures/v0.3/shape-diagnostics.json", import.meta.url),
+    goldenUrl: new URL("../fixtures/v0.3/shape-diagnostics.golden.json", import.meta.url),
+    version: "v0.3",
+  },
 ];
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {

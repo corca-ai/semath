@@ -5,6 +5,7 @@ use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
+use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
@@ -33,6 +34,7 @@ struct AnalyzedDocument {
     document: ProjectDocument,
     parsed: Vec<ParsedMath>,
     definitions: Vec<DefinitionInfo>,
+    shapes: ShapeAnalysis,
 }
 
 impl AnalyzedDocument {
@@ -42,10 +44,12 @@ impl AnalyzedDocument {
         }
         let parsed = parse_regions(&document.content, &document.math_regions);
         let definitions = extract_definitions(&document, &parsed);
+        let shapes = analyze_shapes(&document, &parsed);
         Self {
             document,
             parsed,
             definitions,
+            shapes,
         }
     }
 }
@@ -135,7 +139,7 @@ impl SemathEngine {
         if envelope.inventory_version != self.inventory_version {
             return Err(EngineError::StaleInventory);
         }
-        let (file_id, offset) = match &envelope.query {
+        let (file_id, query_offset) = match &envelope.query {
             Query::Selection { file_id, offset }
             | Query::EquationTree { file_id, offset }
             | Query::Hover { file_id, offset }
@@ -144,7 +148,11 @@ impl SemathEngine {
             | Query::PrepareRename { file_id, offset }
             | Query::Rename {
                 file_id, offset, ..
-            } => (file_id, *offset),
+            }
+            | Query::ExplainDiagnostic {
+                file_id, offset, ..
+            } => (file_id, Some(*offset)),
+            Query::Diagnostics { file_id } => (file_id, None),
         };
         let document = self
             .documents
@@ -153,10 +161,13 @@ impl SemathEngine {
         if document.document.document_version != envelope.document_version {
             return Err(EngineError::DocumentVersionMismatch);
         }
-        let parsed = document
-            .parsed
-            .iter()
-            .find(|math| math.region.full_range.contains(offset));
+        let offset = query_offset.unwrap_or(0);
+        let parsed = query_offset.and_then(|offset| {
+            document
+                .parsed
+                .iter()
+                .find(|math| math.region.full_range.contains(offset))
+        });
         let symbol = parsed.and_then(|math| {
             math.symbols
                 .iter()
@@ -184,6 +195,9 @@ impl SemathEngine {
                     .map(|(name, _)| self.definitions_for(name))
                     .unwrap_or_default();
                 QueryValue::Hover {
+                    shape: symbol
+                        .as_ref()
+                        .and_then(|(name, _)| document.shapes.shape_at(name, offset)),
                     symbol: symbol.map(|(name, _)| name),
                     equation_kind: parsed
                         .and_then(|math| deepest_node(&math.root, offset))
@@ -211,6 +225,12 @@ impl SemathEngine {
             },
             Query::PrepareRename { .. } => prepare_rename(parsed, offset),
             Query::Rename { new_name, .. } => rename_proposal(document, parsed, offset, &new_name),
+            Query::Diagnostics { .. } => QueryValue::Diagnostics {
+                diagnostics: document.shapes.diagnostics.clone(),
+            },
+            Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
+                diagnostic: document.shapes.diagnostic(&code, offset),
+            },
         };
 
         Ok(QueryResult {

@@ -2,6 +2,7 @@ mod binder;
 mod engine;
 mod parser;
 mod protocol;
+mod shape;
 mod source_index;
 
 pub use engine::SemathEngine;

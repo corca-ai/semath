@@ -52,7 +52,14 @@ export type SemathQuery =
   | { fileId: string; kind: "definition"; offset: number }
   | { fileId: string; kind: "references"; offset: number }
   | { fileId: string; kind: "prepareRename"; offset: number }
-  | { fileId: string; kind: "rename"; newName: string; offset: number };
+  | { fileId: string; kind: "rename"; newName: string; offset: number }
+  | { fileId: string; kind: "diagnostics" }
+  | {
+      code: string;
+      fileId: string;
+      kind: "explainDiagnostic";
+      offset: number;
+    };
 
 export interface QueryEnvelope {
   analysisGeneration: number;
@@ -90,6 +97,23 @@ export interface DefinitionInfo {
   symbol: string;
 }
 
+export interface ShapeInfo {
+  dimensions: readonly string[];
+  display: string;
+  evidence: Evidence;
+  kind: "matrix" | "vector";
+  symbol: string;
+}
+
+export interface SemanticDiagnostic {
+  code: string;
+  evidence: readonly Evidence[];
+  explanation: string;
+  message: string;
+  range: SourceRange;
+  severity: "error" | "warning";
+}
+
 export interface SemanticTextEdit {
   expectedText: string;
   range: SourceRange;
@@ -117,6 +141,7 @@ export type QueryValue =
       definitions: readonly DefinitionInfo[];
       equationKind?: string;
       kind: "hover";
+      shape?: ShapeInfo;
       symbol?: string;
     }
   | { kind: "locations"; locations: readonly Location[] }
@@ -130,6 +155,11 @@ export type QueryValue =
       kind: "editProposal";
       proposal?: SemanticEditProposal;
       rejection?: string;
+    }
+  | { diagnostics: readonly SemanticDiagnostic[]; kind: "diagnostics" }
+  | {
+      diagnostic?: SemanticDiagnostic;
+      kind: "diagnosticExplanation";
     };
 
 export interface QueryResult {

@@ -122,6 +122,16 @@ pub enum Query {
         #[serde(rename = "newName")]
         new_name: String,
     },
+    Diagnostics {
+        #[serde(rename = "fileId")]
+        file_id: String,
+    },
+    ExplainDiagnostic {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        code: String,
+        offset: u32,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -159,6 +169,27 @@ pub struct DefinitionInfo {
     pub description: String,
     pub location: Location,
     pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ShapeInfo {
+    pub symbol: String,
+    pub kind: String,
+    pub dimensions: Vec<String>,
+    pub display: String,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticDiagnostic {
+    pub code: String,
+    pub severity: String,
+    pub message: String,
+    pub explanation: String,
+    pub range: SourceRange,
+    pub evidence: Vec<Evidence>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -210,6 +241,8 @@ pub enum QueryValue {
         #[serde(rename = "equationKind")]
         equation_kind: Option<String>,
         definitions: Vec<DefinitionInfo>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        shape: Option<ShapeInfo>,
     },
     Locations {
         locations: Vec<Location>,
@@ -222,6 +255,12 @@ pub enum QueryValue {
     EditProposal {
         proposal: Option<SemanticEditProposal>,
         rejection: Option<String>,
+    },
+    Diagnostics {
+        diagnostics: Vec<SemanticDiagnostic>,
+    },
+    DiagnosticExplanation {
+        diagnostic: Option<SemanticDiagnostic>,
     },
 }
 
