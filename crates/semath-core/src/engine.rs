@@ -361,6 +361,33 @@ fn extract_definitions(document: &ProjectDocument, parsed: &[ParsedMath]) -> Vec
                 ));
             }
         }
+
+        let line_start = document.content[..start_byte]
+            .rfind('\n')
+            .map_or(0, |offset| offset + 1);
+        let line_end = document.content[end_byte..]
+            .find('\n')
+            .map_or(document.content.len(), |offset| end_byte + offset);
+        let line = &document.content[line_start..line_end];
+        if line.contains('|') {
+            let math_end_in_line = end_byte - line_start;
+            let tail = &line[math_end_in_line..];
+            if let Some(cell_start) = tail.find('|').map(|offset| offset + 1)
+                && let Some(cell_end) = tail[cell_start..].find('|')
+            {
+                let description = tail[cell_start..cell_start + cell_end].trim();
+                if !description.is_empty() && !description.chars().all(|ch| ch == '-' || ch == ':')
+                {
+                    definitions.push(definition(
+                        document,
+                        symbol,
+                        symbol_range,
+                        description,
+                        "notation-table-definition",
+                    ));
+                }
+            }
+        }
     }
 
     definitions
@@ -478,5 +505,23 @@ mod tests {
             .unwrap();
         let result: serde_json::Value = serde_json::from_slice(&result).unwrap();
         assert_eq!(result["value"]["symbol"], "x");
+    }
+
+    #[test]
+    fn extracts_notation_table_definitions() {
+        let content = "| Symbol | Meaning |\n| --- | --- |\n| $W$ | weight matrix |\n\nUse $W$.";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let offset = content.rfind('W').unwrap() as u32;
+        let result = engine
+            .query(query(Query::Hover {
+                file_id: "main".into(),
+                offset,
+            }))
+            .unwrap();
+        let QueryValue::Hover { definitions, .. } = result.value else {
+            panic!("expected hover")
+        };
+        assert_eq!(definitions[0].description, "weight matrix");
     }
 }
