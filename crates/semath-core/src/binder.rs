@@ -134,7 +134,26 @@ fn collect_binders(
         parent_scope
     };
 
+    if node.kind == "sequence" {
+        for (index, child) in node.children.iter().enumerate() {
+            let child_scope = if scripted_binder_operator(child) {
+                SourceRange {
+                    start_offset: node.range.start_offset,
+                    end_offset: node
+                        .children
+                        .get(index + 1)
+                        .map_or(child.range.end_offset, |body| body.range.end_offset),
+                }
+            } else {
+                node.range.clone()
+            };
+            collect_binders(parsed, child, &child_scope, output);
+        }
+        return;
+    }
+
     if node.kind == "scripted"
+        && parent_scope.end_offset > node.range.end_offset
         && let Some(operator) = node.children.first()
         && matches!(operator.kind.as_str(), "sum" | "limit")
         && let Some(subscript) = node.children.iter().find(|child| child.kind == "subscript")
@@ -170,6 +189,14 @@ fn collect_binders(
     for child in &node.children {
         collect_binders(parsed, child, scope, output);
     }
+}
+
+fn scripted_binder_operator(node: &EquationNode) -> bool {
+    node.kind == "scripted"
+        && node
+            .children
+            .first()
+            .is_some_and(|operator| matches!(operator.kind.as_str(), "sum" | "limit"))
 }
 
 fn first_symbol_in<'a>(
@@ -214,7 +241,7 @@ mod tests {
         let parsed = parsed(source);
         let found = binders(&parsed);
         assert_eq!(found.len(), 2);
-        assert_eq!(bound_occurrences(&parsed, &found, &found[0]).len(), 3);
+        assert_eq!(bound_occurrences(&parsed, &found, &found[0]).len(), 2);
         assert_eq!(bound_occurrences(&parsed, &found, &found[1]).len(), 2);
         let inner_use = source.find("y_i").unwrap() as u32 + 2;
         assert_eq!(
@@ -232,5 +259,22 @@ mod tests {
         let nested = parsed("$\\sum_{i=1}^n (x_i + \\sum_{j=1}^m a_i)$");
         let found = binders(&nested);
         assert!(rename_rejection(&nested, &found, &found[0], "j").is_some());
+    }
+
+    #[test]
+    fn bounds_a_sum_to_its_next_structural_atom() {
+        let source = "$\\sum_{i=1}^n x_i + z_i$";
+        let expression = parsed(source);
+        let found = binders(&expression);
+        let occurrences = bound_occurrences(&expression, &found, &found[0]);
+        assert_eq!(occurrences.len(), 2);
+        assert!(
+            occurrences
+                .iter()
+                .all(|range| { range.start_offset < source.find("z_i").unwrap() as u32 })
+        );
+
+        let no_body = parsed("$\\sum_{i=1}^n$");
+        assert!(binders(&no_body).is_empty());
     }
 }
