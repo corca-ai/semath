@@ -1,0 +1,22 @@
+{
+  "snapshot": {
+    "protocolVersion": 1,
+    "epoch": "parity:5",
+    "inventoryVersion": 1,
+    "projectId": "parity",
+    "mainFileId": "main",
+    "documents": [
+      {
+        "fileId": "main",
+        "path": "main.tex",
+        "language": "latex",
+        "content": "Let $A$ denote the transformation.\n$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}, y \\in \\mathbb{R}^{m}$\n$y = Ax$\n$A \\in \\mathbb{R}^{k}$",
+        "documentVersion": 1
+      }
+    ]
+  },
+  "queries": [
+    { "protocolVersion": 1, "epoch": "parity:5", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 116 } },
+    { "protocolVersion": 1, "epoch": "parity:5", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 121 } }
+  ]
+}

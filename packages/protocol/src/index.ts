@@ -49,6 +49,7 @@ export type SemathQuery =
   | { fileId: string; kind: "selection"; offset: number }
   | { fileId: string; kind: "equationTree"; offset: number }
   | { fileId: string; kind: "hover"; offset: number }
+  | { fileId: string; kind: "symbolInfo"; offset: number }
   | { fileId: string; kind: "definition"; offset: number }
   | { fileId: string; kind: "references"; offset: number }
   | { fileId: string; kind: "prepareRename"; offset: number }
@@ -105,6 +106,16 @@ export interface ShapeInfo {
   evidence: Evidence;
   kind: "matrix" | "scalar" | "tensor" | "vector";
   symbol: string;
+}
+
+export interface SymbolInfo {
+  definitions: readonly DefinitionInfo[];
+  diagnostics: readonly SemanticDiagnostic[];
+  formulas: readonly FormulaRecognition[];
+  location: Location;
+  shapes: readonly ShapeInfo[];
+  symbol: string;
+  truncated: boolean;
 }
 
 export interface SemanticDiagnostic {
@@ -204,6 +215,7 @@ export type QueryValue =
       shape?: ShapeInfo;
       symbol?: string;
     }
+  | { info?: SymbolInfo; kind: "symbolInfo" }
   | { kind: "locations"; locations: readonly Location[] }
   | {
       kind: "renamePreparation";

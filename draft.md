@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.3.0 (2026-08-07):** 구조 탐색, 명시적 정의 navigation, binder-aware rename에 이어 명시적 vector/matrix shape와 보수적 propagation을 제공한다. 증명 가능한 shape·notation 충돌만 설명 가능한 warning으로 노출하며 자동 수정은 하지 않는다. 적분 differential, prose binder와 휴리스틱 notation hint는 후속 범위다.
+> **구현 상태 — v0.4.0 (2026-08-07):** 구조 탐색, 명시적 정의 navigation, binder-aware rename과 보수적인 shape 분석에 이어 typed linear-algebra pattern 기반 formula recognition·completion을 제공한다. 모든 변경은 호스트의 review 흐름을 거치며, v0.5에서는 근거를 한곳에서 검사하는 bounded symbol query를 확장하고 있다.
 
 ## 1. 개요
 
@@ -551,6 +551,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * 더 넓은 영어 definition pattern과 domain evidence를 연결한다.
 * 적용된 prior와 diagnostic evidence chain을 inspection할 수 있다.
 * NLP는 corpus와 browser budget을 만족할 때만 포함한다.
+* **v0.5 진행 중:** `symbolInfo`는 한 기호의 정의, 가시적인 shape claim, 인식된 formula, 관련 diagnostic과 source evidence를 각각 최대 8개로 묶어 반환한다. 미래 scope의 진단은 노출하지 않으며 응답이 잘리면 이를 명시한다.
 
 Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.
 

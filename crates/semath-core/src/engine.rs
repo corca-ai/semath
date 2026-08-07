@@ -10,9 +10,11 @@ use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange, SymbolInfo,
     UpdateResult,
 };
+
+const MAX_SYMBOL_DEFINITIONS: usize = 8;
 
 #[derive(Debug, Error)]
 pub enum EngineError {
@@ -147,6 +149,7 @@ impl SemathEngine {
             Query::Selection { file_id, offset }
             | Query::EquationTree { file_id, offset }
             | Query::Hover { file_id, offset }
+            | Query::SymbolInfo { file_id, offset }
             | Query::Definition { file_id, offset }
             | Query::References { file_id, offset }
             | Query::PrepareRename { file_id, offset }
@@ -212,6 +215,31 @@ impl SemathEngine {
                     formulas: document.formulas.at(offset),
                 }
             }
+            Query::SymbolInfo { .. } => QueryValue::SymbolInfo {
+                info: symbol.as_ref().map(|(name, occurrence)| {
+                    let mut definitions = self.definitions_for(name);
+                    let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
+                    definitions.truncate(MAX_SYMBOL_DEFINITIONS);
+                    let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
+                    let (diagnostics, diagnostics_truncated) =
+                        document.shapes.diagnostics_for(offset, &shapes);
+                    SymbolInfo {
+                        symbol: name.clone(),
+                        location: Location {
+                            file_id: document.document.file_id.clone(),
+                            path: document.document.path.clone(),
+                            range: occurrence.clone(),
+                        },
+                        definitions,
+                        shapes,
+                        formulas: document.formulas.at(offset),
+                        diagnostics,
+                        truncated: definitions_truncated
+                            || shapes_truncated
+                            || diagnostics_truncated,
+                    }
+                }),
+            },
             Query::Definition { .. } => QueryValue::Locations {
                 locations: symbol
                     .as_ref()
@@ -663,6 +691,49 @@ mod tests {
             panic!("expected hover")
         };
         assert_eq!(definitions[0].description, "weight matrix");
+    }
+
+    #[test]
+    fn explains_a_symbol_with_bounded_evidence_backed_claims() {
+        let content = "Let $A$ denote the transformation.\n$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}, y \\in \\mathbb{R}^{m}$\n$y = Ax$\n$A \\in \\mathbb{R}^{k}$";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let formula_result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: content.find("Ax").unwrap() as u32,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo {
+            info: Some(formula_info),
+        } = formula_result.value
+        else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(formula_info.symbol, "A");
+        assert_eq!(formula_info.definitions.len(), 1);
+        assert_eq!(formula_info.shapes[0].display, "Matrix[m × n]");
+        assert_eq!(formula_info.formulas[0].pattern_id, "matrix-vector-product");
+
+        let redeclaration = content.rfind("$A").unwrap() as u32 + 1;
+        let conflict_result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: redeclaration,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo {
+            info: Some(conflict_info),
+        } = conflict_result.value
+        else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(conflict_info.shapes.len(), 2);
+        assert_eq!(conflict_info.shapes[0].display, "Vector[k]");
+        assert_eq!(conflict_info.shapes[1].display, "Matrix[m × n]");
+        assert_eq!(conflict_info.diagnostics[0].code, "notation-shape-conflict");
+        assert!(!conflict_info.truncated);
     }
 
     #[test]
