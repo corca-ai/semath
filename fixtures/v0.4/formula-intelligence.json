@@ -1,0 +1,23 @@
+{
+  "snapshot": {
+    "protocolVersion": 1,
+    "epoch": "parity:4",
+    "inventoryVersion": 1,
+    "projectId": "parity",
+    "mainFileId": "main",
+    "documents": [
+      {
+        "fileId": "main",
+        "path": "main.tex",
+        "language": "latex",
+        "content": "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}, y \\in \\mathbb{R}^{m}, s \\in \\mathbb{R}$\n$y = Ax$\n$s = x^{\\top}x$\n$y = $",
+        "documentVersion": 1
+      }
+    ]
+  },
+  "queries": [
+    { "protocolVersion": 1, "epoch": "parity:4", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaRecognition", "fileId": "main", "offset": 99 } },
+    { "protocolVersion": 1, "epoch": "parity:4", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaRecognition", "fileId": "main", "offset": 108 } },
+    { "protocolVersion": 1, "epoch": "parity:4", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaCompletion", "fileId": "main", "offset": 124 } }
+  ]
+}

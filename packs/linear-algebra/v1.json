@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "packId": "linear-algebra",
+  "packVersion": "1.0.0",
+  "patterns": [
+    {
+      "id": "matrix-vector-product",
+      "title": "Matrix-vector product",
+      "matcher": "binary-product",
+      "parameters": [
+        { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } },
+        { "id": "vector", "constraint": { "kind": "vector", "dimensions": ["n"] } }
+      ],
+      "result": { "kind": "vector", "dimensions": ["m"] },
+      "sideConditions": [
+        { "kind": "dimension-equality", "left": "matrix.columns", "right": "vector.length" }
+      ],
+      "generationTemplate": "{{matrix}}{{vector}}"
+    },
+    {
+      "id": "matrix-matrix-product",
+      "title": "Matrix-matrix product",
+      "matcher": "binary-product",
+      "parameters": [
+        { "id": "left", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } },
+        { "id": "right", "constraint": { "kind": "matrix", "dimensions": ["n", "p"] } }
+      ],
+      "result": { "kind": "matrix", "dimensions": ["m", "p"] },
+      "sideConditions": [
+        { "kind": "dimension-equality", "left": "left.columns", "right": "right.rows" }
+      ],
+      "generationTemplate": "{{left}}{{right}}"
+    },
+    {
+      "id": "matrix-transpose",
+      "title": "Matrix transpose",
+      "matcher": "transpose",
+      "parameters": [
+        { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } }
+      ],
+      "result": { "kind": "matrix", "dimensions": ["n", "m"] },
+      "sideConditions": [
+        { "kind": "presentation-safe", "left": "matrix", "right": "transpose" }
+      ],
+      "generationTemplate": "{{matrix}}^{\\top}"
+    },
+    {
+      "id": "vector-inner-product",
+      "title": "Vector inner product",
+      "matcher": "transposed-binary-product",
+      "parameters": [
+        { "id": "left", "constraint": { "kind": "vector", "dimensions": ["n"] } },
+        { "id": "right", "constraint": { "kind": "vector", "dimensions": ["n"] } }
+      ],
+      "result": { "kind": "scalar" },
+      "sideConditions": [
+        { "kind": "dimension-equality", "left": "left.length", "right": "right.length" }
+      ],
+      "generationTemplate": "{{left}}^{\\top}{{right}}"
+    },
+    {
+      "id": "quadratic-form",
+      "title": "Quadratic form",
+      "matcher": "quadratic-form",
+      "parameters": [
+        { "id": "vector", "constraint": { "kind": "vector", "dimensions": ["n"] } },
+        { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["n", "n"] } }
+      ],
+      "result": { "kind": "scalar" },
+      "sideConditions": [
+        { "kind": "dimension-equality", "left": "matrix.rows", "right": "vector.length" },
+        { "kind": "dimension-equality", "left": "matrix.columns", "right": "vector.length" }
+      ],
+      "generationTemplate": "{{vector}}^{\\top}{{matrix}}{{vector}}"
+    }
+  ]
+}

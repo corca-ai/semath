@@ -102,7 +102,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "semath-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "regex",
  "serde",
@@ -112,7 +112,7 @@ dependencies = [
 
 [[package]]
 name = "semath-native"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "semath-core",
  "serde_json",
@@ -120,7 +120,7 @@ dependencies = [
 
 [[package]]
 name = "semath-wasm"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "semath-core",
  "wasm-bindgen",

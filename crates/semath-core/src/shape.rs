@@ -1,13 +1,18 @@
+use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
 
 use crate::parser::ParsedMath;
-use crate::{Evidence, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceIndex, SourceRange};
+use crate::scope::ScopeGraph;
+use crate::{
+    Evidence, FormulaConstraint, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceIndex,
+    SourceRange,
+};
 
 static DECLARATION: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r"(?x)([A-Za-z])\s*\\in\s*\\mathbb\s*\{\s*R\s*\}\s*\^\s*(?:\{([^}]*)\}|([A-Za-z0-9]+))",
+        r"(?x)([A-Za-z])\s*\\in\s*\\mathbb\s*\{\s*R\s*\}(?:\s*\^\s*(?:\{([^}]*)\}|([A-Za-z0-9]+)))?",
     )
     .unwrap()
 });
@@ -24,25 +29,37 @@ static PRODUCT: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\s*([A-Za-z])\s*(\^\s*(?:\{\s*\\top\s*\}|\\top))?\s*(?:\\cdot\s*)?([A-Za-z])\s*$")
         .unwrap()
 });
+static TRANSPOSE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*$").unwrap());
+static QUADRATIC_FORM: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*([A-Za-z])\s*([A-Za-z])\s*$")
+        .unwrap()
+});
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-enum Shape {
+pub(crate) enum Shape {
+    Scalar,
     Vector(String),
     Matrix(String, String),
+    Tensor(Vec<String>),
 }
 
 impl Shape {
     fn display(&self) -> String {
         match self {
+            Self::Scalar => "Scalar".into(),
             Self::Vector(dimension) => format!("Vector[{dimension}]"),
             Self::Matrix(rows, columns) => format!("Matrix[{rows} × {columns}]"),
+            Self::Tensor(dimensions) => format!("Tensor[{}]", dimensions.join(" × ")),
         }
     }
 
     fn info(&self, symbol: &str, evidence: Evidence) -> ShapeInfo {
         let (kind, dimensions) = match self {
+            Self::Scalar => ("scalar", Vec::new()),
             Self::Vector(dimension) => ("vector", vec![dimension.clone()]),
             Self::Matrix(rows, columns) => ("matrix", vec![rows.clone(), columns.clone()]),
+            Self::Tensor(dimensions) => ("tensor", dimensions.clone()),
         };
         ShapeInfo {
             symbol: symbol.into(),
@@ -59,6 +76,20 @@ impl Shape {
             other => other.clone(),
         }
     }
+
+    pub(crate) fn constraint(&self) -> FormulaConstraint {
+        let (kind, dimensions) = match self {
+            Self::Scalar => ("scalar", Vec::new()),
+            Self::Vector(dimension) => ("vector", vec![dimension.clone()]),
+            Self::Matrix(rows, columns) => ("matrix", vec![rows.clone(), columns.clone()]),
+            Self::Tensor(dimensions) => ("tensor", dimensions.clone()),
+        };
+        FormulaConstraint {
+            kind: kind.into(),
+            dimensions,
+            refinements: Vec::new(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -69,6 +100,7 @@ struct ShapeFact {
     available_from: u32,
     evidence: Evidence,
     explicit: bool,
+    scope_id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -76,6 +108,7 @@ struct Inequality {
     left: String,
     right: String,
     range: SourceRange,
+    scope_id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -85,10 +118,18 @@ struct DimensionMismatch {
     evidence_range: Option<SourceRange>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub(crate) struct ShapeAnalysis {
     facts: Vec<ShapeFact>,
     pub diagnostics: Vec<SemanticDiagnostic>,
+    scopes: ScopeGraph,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct KnownShape {
+    pub symbol: String,
+    pub shape: Shape,
+    pub evidence: Evidence,
 }
 
 impl ShapeAnalysis {
@@ -98,8 +139,9 @@ impl ShapeAnalysis {
             .filter(|fact| {
                 fact.symbol == symbol
                     && (fact.available_from <= offset || fact.symbol_range.contains(offset))
+                    && self.scopes.visible(fact.scope_id, offset)
             })
-            .max_by_key(|fact| fact.available_from)
+            .max_by_key(|fact| (self.scopes.depth(fact.scope_id), fact.available_from))
             .map(|fact| fact.shape.info(symbol, fact.evidence.clone()))
     }
 
@@ -109,12 +151,40 @@ impl ShapeAnalysis {
             .find(|diagnostic| diagnostic.code == code && diagnostic.range.contains(offset))
             .cloned()
     }
+
+    pub fn known_shapes_at(&self, offset: u32) -> Vec<KnownShape> {
+        let mut latest = BTreeMap::<&str, &ShapeFact>::new();
+        for fact in &self.facts {
+            if fact.available_from <= offset
+                && self.scopes.visible(fact.scope_id, offset)
+                && latest.get(fact.symbol.as_str()).is_none_or(|current| {
+                    (self.scopes.depth(current.scope_id), current.available_from)
+                        < (self.scopes.depth(fact.scope_id), fact.available_from)
+                })
+            {
+                latest.insert(fact.symbol.as_str(), fact);
+            }
+        }
+        latest
+            .into_values()
+            .map(|fact| KnownShape {
+                symbol: fact.symbol.clone(),
+                shape: fact.shape.clone(),
+                evidence: fact.evidence.clone(),
+            })
+            .collect()
+    }
 }
 
 pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) -> ShapeAnalysis {
     let index = SourceIndex::new(&document.content);
-    let inequalities = collect_inequalities(document, parsed, &index);
-    let mut analysis = ShapeAnalysis::default();
+    let scopes = ScopeGraph::new(document);
+    let inequalities = collect_inequalities(document, parsed, &index, &scopes);
+    let mut analysis = ShapeAnalysis {
+        facts: Vec::new(),
+        diagnostics: Vec::new(),
+        scopes,
+    };
 
     for math in parsed {
         let Some((content, content_start)) = math_content(document, math, &index) else {
@@ -126,8 +196,7 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
             let dimensions = captures
                 .get(2)
                 .or_else(|| captures.get(3))
-                .unwrap()
-                .as_str();
+                .map(|found| found.as_str());
             let Some(shape) = declared_shape(dimensions) else {
                 continue;
             };
@@ -143,11 +212,12 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
             );
             let symbol = symbol_match.as_str();
             if let Some(previous) =
-                latest_explicit_fact(&analysis.facts, symbol, symbol_range.start_offset)
+                latest_explicit_fact(&analysis, symbol, symbol_range.start_offset)
                 && shapes_conflict(
                     &previous.shape,
                     &shape,
                     &inequalities,
+                    &analysis.scopes,
                     symbol_range.start_offset,
                 )
             {
@@ -171,6 +241,7 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
                     }],
                 });
             }
+            let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
             analysis.facts.push(ShapeFact {
                 symbol: symbol.into(),
                 shape,
@@ -183,6 +254,7 @@ pub(crate) fn analyze_shapes(document: &ProjectDocument, parsed: &[ParsedMath]) 
                     source_ranges: vec![declaration_range],
                 },
                 explicit: true,
+                scope_id,
             });
         }
     }
@@ -239,16 +311,71 @@ fn analyze_assignment(
     available_from: u32,
 ) {
     let at = expression_range.start_offset;
+    if let Some(captures) = QUADRATIC_FORM.captures(expression) {
+        let vector_symbol = captures.get(1).unwrap().as_str();
+        let matrix_symbol = captures.get(2).unwrap().as_str();
+        let trailing_symbol = captures.get(3).unwrap().as_str();
+        if vector_symbol != trailing_symbol {
+            return;
+        }
+        let Some(vector) = latest_fact(analysis, vector_symbol, at).cloned() else {
+            return;
+        };
+        let Some(matrix) = latest_fact(analysis, matrix_symbol, at).cloned() else {
+            return;
+        };
+        let (Shape::Vector(length), Shape::Matrix(rows, columns)) = (&vector.shape, &matrix.shape)
+        else {
+            return;
+        };
+        if dimension_mismatch(length, rows, inequalities, &analysis.scopes, at).is_some()
+            || dimension_mismatch(length, columns, inequalities, &analysis.scopes, at).is_some()
+        {
+            return;
+        }
+        push_derived_fact(
+            analysis,
+            target,
+            target_range,
+            available_from,
+            Shape::Scalar,
+            "linear-algebra/quadratic-form",
+            evidence_ranges(&[&vector, &matrix]),
+        );
+        return;
+    }
+
+    if let Some(captures) = TRANSPOSE.captures(expression) {
+        let source_symbol = captures.get(1).unwrap().as_str();
+        if let Some(source) = latest_fact(analysis, source_symbol, at).cloned() {
+            push_derived_fact(
+                analysis,
+                target,
+                target_range,
+                available_from,
+                source.shape.transpose(),
+                "linear-algebra/matrix-transpose",
+                evidence_ranges(&[&source]),
+            );
+        }
+        return;
+    }
     if let Some(captures) = ADDITION.captures(expression) {
         let left_symbol = captures.get(1).unwrap().as_str();
         let right_symbol = captures.get(2).unwrap().as_str();
-        let Some(left) = latest_fact(&analysis.facts, left_symbol, at).cloned() else {
+        let Some(left) = latest_fact(analysis, left_symbol, at).cloned() else {
             return;
         };
-        let Some(right) = latest_fact(&analysis.facts, right_symbol, at).cloned() else {
+        let Some(right) = latest_fact(analysis, right_symbol, at).cloned() else {
             return;
         };
-        if shapes_conflict(&left.shape, &right.shape, inequalities, at) {
+        if shapes_conflict(
+            &left.shape,
+            &right.shape,
+            inequalities,
+            &analysis.scopes,
+            at,
+        ) {
             analysis.diagnostics.push(SemanticDiagnostic {
                 code: "shape-incompatible-addition".into(),
                 severity: "warning".into(),
@@ -268,9 +395,9 @@ fn analyze_assignment(
             target,
             target_range,
             available_from,
-            left.shape,
+            left.shape.clone(),
             "derived-shape-addition",
-            vec![left.symbol_range, right.symbol_range],
+            evidence_ranges(&[&left, &right]),
         );
         return;
     }
@@ -278,10 +405,10 @@ fn analyze_assignment(
     if let Some(captures) = PRODUCT.captures(expression) {
         let left_symbol = captures.get(1).unwrap().as_str();
         let right_symbol = captures.get(3).unwrap().as_str();
-        let Some(mut left) = latest_fact(&analysis.facts, left_symbol, at).cloned() else {
+        let Some(mut left) = latest_fact(analysis, left_symbol, at).cloned() else {
             return;
         };
-        let Some(right) = latest_fact(&analysis.facts, right_symbol, at).cloned() else {
+        let Some(right) = latest_fact(analysis, right_symbol, at).cloned() else {
             return;
         };
         if captures.get(2).is_some() {
@@ -290,12 +417,26 @@ fn analyze_assignment(
         let (result, mismatch) = match (&left.shape, &right.shape) {
             (Shape::Matrix(rows, inner), Shape::Vector(dimension)) => (
                 Some(Shape::Vector(rows.clone())),
-                dimension_mismatch(inner, dimension, inequalities, at),
+                dimension_mismatch(inner, dimension, inequalities, &analysis.scopes, at),
             ),
             (Shape::Matrix(rows, inner), Shape::Matrix(right_rows, columns)) => (
                 Some(Shape::Matrix(rows.clone(), columns.clone())),
-                dimension_mismatch(inner, right_rows, inequalities, at),
+                dimension_mismatch(inner, right_rows, inequalities, &analysis.scopes, at),
             ),
+            (Shape::Vector(left_dimension), Shape::Vector(right_dimension))
+                if captures.get(2).is_some() =>
+            {
+                (
+                    Some(Shape::Scalar),
+                    dimension_mismatch(
+                        left_dimension,
+                        right_dimension,
+                        inequalities,
+                        &analysis.scopes,
+                        at,
+                    ),
+                )
+            }
             _ => (None, None),
         };
         let Some(result) = result else {
@@ -334,22 +475,22 @@ fn analyze_assignment(
             available_from,
             result,
             "derived-shape-product",
-            vec![left.symbol_range, right.symbol_range],
+            evidence_ranges(&[&left, &right]),
         );
         return;
     }
 
     if let Some(captures) = ALIAS.captures(expression) {
         let source_symbol = captures.get(1).unwrap().as_str();
-        if let Some(source) = latest_fact(&analysis.facts, source_symbol, at).cloned() {
+        if let Some(source) = latest_fact(analysis, source_symbol, at).cloned() {
             push_derived_fact(
                 analysis,
                 target,
                 target_range,
                 available_from,
-                source.shape,
+                source.shape.clone(),
                 "derived-shape-alias",
-                vec![source.symbol_range],
+                evidence_ranges(&[&source]),
             );
         }
     }
@@ -364,6 +505,7 @@ fn push_derived_fact(
     rule_id: &str,
     source_ranges: Vec<SourceRange>,
 ) {
+    let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
     analysis.facts.push(ShapeFact {
         symbol: symbol.into(),
         shape,
@@ -376,6 +518,7 @@ fn push_derived_fact(
             source_ranges,
         },
         explicit: false,
+        scope_id,
     });
 }
 
@@ -383,6 +526,7 @@ fn collect_inequalities(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     index: &SourceIndex,
+    scopes: &ScopeGraph,
 ) -> Vec<Inequality> {
     parsed
         .iter()
@@ -402,6 +546,7 @@ fn collect_inequalities(
                             content_start + whole.start(),
                             content_start + whole.end(),
                         ),
+                        scope_id: scopes.id_at(index.utf16_for_byte(content_start + whole.start())),
                     }
                 })
                 .collect::<Vec<_>>()
@@ -409,7 +554,10 @@ fn collect_inequalities(
         .collect()
 }
 
-fn declared_shape(dimensions: &str) -> Option<Shape> {
+fn declared_shape(dimensions: Option<&str>) -> Option<Shape> {
+    let Some(dimensions) = dimensions else {
+        return Some(Shape::Scalar);
+    };
     let dimensions = dimensions.trim();
     let parts: Vec<_> = DIMENSION_PRODUCT
         .split(dimensions)
@@ -419,6 +567,7 @@ fn declared_shape(dimensions: &str) -> Option<Shape> {
     match parts.as_slice() {
         [dimension] => Some(Shape::Vector(dimension.clone())),
         [rows, columns] => Some(Shape::Matrix(rows.clone(), columns.clone())),
+        dimensions if dimensions.len() >= 3 => Some(Shape::Tensor(dimensions.to_vec())),
         _ => None,
     }
 }
@@ -430,41 +579,78 @@ fn normalize_dimension(value: &str) -> String {
         .collect()
 }
 
-fn latest_fact<'a>(facts: &'a [ShapeFact], symbol: &str, at: u32) -> Option<&'a ShapeFact> {
-    facts
+fn latest_fact<'a>(analysis: &'a ShapeAnalysis, symbol: &str, at: u32) -> Option<&'a ShapeFact> {
+    analysis
+        .facts
         .iter()
-        .filter(|fact| fact.symbol == symbol && fact.available_from <= at)
-        .max_by_key(|fact| fact.available_from)
+        .filter(|fact| {
+            fact.symbol == symbol
+                && fact.available_from <= at
+                && analysis.scopes.visible(fact.scope_id, at)
+        })
+        .max_by_key(|fact| (analysis.scopes.depth(fact.scope_id), fact.available_from))
 }
 
 fn latest_explicit_fact<'a>(
-    facts: &'a [ShapeFact],
+    analysis: &'a ShapeAnalysis,
     symbol: &str,
     at: u32,
 ) -> Option<&'a ShapeFact> {
-    facts
+    let scope_id = analysis.scopes.id_at(at);
+    analysis
+        .facts
         .iter()
-        .filter(|fact| fact.explicit && fact.symbol == symbol && fact.available_from <= at)
+        .filter(|fact| {
+            fact.explicit
+                && fact.symbol == symbol
+                && fact.available_from <= at
+                && fact.scope_id == scope_id
+        })
         .max_by_key(|fact| fact.available_from)
 }
 
-fn shapes_conflict(left: &Shape, right: &Shape, inequalities: &[Inequality], at: u32) -> bool {
+fn shapes_conflict(
+    left: &Shape,
+    right: &Shape,
+    inequalities: &[Inequality],
+    scopes: &ScopeGraph,
+    at: u32,
+) -> bool {
     match (left, right) {
         (Shape::Vector(left), Shape::Vector(right)) => {
-            dimension_mismatch(left, right, inequalities, at).is_some()
+            dimension_mismatch(left, right, inequalities, scopes, at).is_some()
         }
         (Shape::Matrix(left_rows, left_columns), Shape::Matrix(right_rows, right_columns)) => {
-            dimension_mismatch(left_rows, right_rows, inequalities, at).is_some()
-                || dimension_mismatch(left_columns, right_columns, inequalities, at).is_some()
+            dimension_mismatch(left_rows, right_rows, inequalities, scopes, at).is_some()
+                || dimension_mismatch(left_columns, right_columns, inequalities, scopes, at)
+                    .is_some()
+        }
+        (Shape::Scalar, Shape::Scalar) => false,
+        (Shape::Tensor(left), Shape::Tensor(right)) if left.len() == right.len() => {
+            left.iter().zip(right).any(|(left, right)| {
+                dimension_mismatch(left, right, inequalities, scopes, at).is_some()
+            })
         }
         _ => true,
     }
+}
+
+fn evidence_ranges(facts: &[&ShapeFact]) -> Vec<SourceRange> {
+    let mut ranges = Vec::new();
+    for fact in facts {
+        ranges.extend(fact.evidence.source_ranges.iter().cloned());
+        ranges.push(fact.symbol_range.clone());
+    }
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
+    ranges
 }
 
 fn dimension_mismatch(
     left: &str,
     right: &str,
     inequalities: &[Inequality],
+    scopes: &ScopeGraph,
     at: u32,
 ) -> Option<DimensionMismatch> {
     if left == right {
@@ -479,7 +665,9 @@ fn dimension_mismatch(
     }
     inequalities
         .iter()
-        .filter(|inequality| inequality.range.end_offset <= at)
+        .filter(|inequality| {
+            inequality.range.end_offset <= at && scopes.visible(inequality.scope_id, at)
+        })
         .find(|inequality| {
             (inequality.left == left && inequality.right == right)
                 || (inequality.left == right && inequality.right == left)
@@ -560,5 +748,45 @@ mod tests {
         let analysis = analyze(source);
         assert_eq!(analysis.diagnostics.len(), 1);
         assert_eq!(analysis.diagnostics[0].code, "notation-shape-conflict");
+    }
+
+    #[test]
+    fn keeps_explicit_shadowing_in_separate_sections() {
+        let source = "# First\n$x \\in \\mathbb{R}^{n}$\n$x$\n# Second\n$x \\in \\mathbb{R}^{m \\times n}$\n$x$";
+        let regions = math_regions(source, DocumentLanguage::Markdown);
+        let document = ProjectDocument {
+            file_id: "main".into(),
+            path: "main.md".into(),
+            language: DocumentLanguage::Markdown,
+            content: source.into(),
+            document_version: 1,
+            math_regions: regions.clone(),
+        };
+        let analysis = analyze_shapes(&document, &parse_regions(source, &regions));
+        assert!(analysis.diagnostics.is_empty());
+        let first_use = source.find("$x$\n#").unwrap() as u32 + 1;
+        let second_use = source.rfind("$x$").unwrap() as u32 + 1;
+        assert_eq!(
+            analysis.shape_at("x", first_use).unwrap().display,
+            "Vector[n]"
+        );
+        assert_eq!(
+            analysis.shape_at("x", second_use).unwrap().display,
+            "Matrix[m × n]"
+        );
+    }
+
+    #[test]
+    fn represents_scalar_and_tensor_declarations() {
+        let source = "$s \\in \\mathbb{R}, T \\in \\mathbb{R}^{a \\times b \\times c}$\n$s$ $T$";
+        let analysis = analyze(source);
+        let scalar = analysis
+            .shape_at("s", source.rfind("$s$").unwrap() as u32 + 1)
+            .unwrap();
+        let tensor = analysis
+            .shape_at("T", source.rfind("$T$").unwrap() as u32 + 1)
+            .unwrap();
+        assert_eq!(scalar.display, "Scalar");
+        assert_eq!(tensor.display, "Tensor[a × b × c]");
     }
 }

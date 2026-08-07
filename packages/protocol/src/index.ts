@@ -59,7 +59,9 @@ export type SemathQuery =
       fileId: string;
       kind: "explainDiagnostic";
       offset: number;
-    };
+    }
+  | { fileId: string; kind: "formulaRecognition"; offset: number }
+  | { fileId: string; kind: "formulaCompletion"; offset: number };
 
 export interface QueryEnvelope {
   analysisGeneration: number;
@@ -101,7 +103,7 @@ export interface ShapeInfo {
   dimensions: readonly string[];
   display: string;
   evidence: Evidence;
-  kind: "matrix" | "vector";
+  kind: "matrix" | "scalar" | "tensor" | "vector";
   symbol: string;
 }
 
@@ -112,6 +114,63 @@ export interface SemanticDiagnostic {
   message: string;
   range: SourceRange;
   severity: "error" | "warning";
+}
+
+export interface FormulaConstraint {
+  dimensions?: readonly string[];
+  kind: "matrix" | "scalar" | "tensor" | "vector";
+  refinements?: readonly string[];
+}
+
+export interface FormulaParameter {
+  constraint: FormulaConstraint;
+  id: string;
+}
+
+export interface FormulaSideCondition {
+  kind: string;
+  left: string;
+  right: string;
+}
+
+export interface FormulaPattern {
+  generationTemplate: string;
+  id: string;
+  matcher: string;
+  packId: string;
+  packVersion: string;
+  parameters: readonly FormulaParameter[];
+  result: FormulaConstraint;
+  schemaVersion: number;
+  sideConditions: readonly FormulaSideCondition[];
+  title: string;
+}
+
+export interface FormulaBinding {
+  constraint: FormulaConstraint;
+  evidence: Evidence;
+  parameter: string;
+  symbol: string;
+}
+
+export interface FormulaRecognition {
+  bindings: readonly FormulaBinding[];
+  evidence: readonly Evidence[];
+  packId: string;
+  packVersion: string;
+  patternId: string;
+  range: SourceRange;
+  rank: number;
+  result: FormulaConstraint;
+  title: string;
+}
+
+export interface FormulaCompletion {
+  detail: string;
+  patternId: string;
+  proposal: SemanticEditProposal;
+  rank: number;
+  title: string;
 }
 
 export interface SemanticTextEdit {
@@ -141,6 +200,7 @@ export type QueryValue =
       definitions: readonly DefinitionInfo[];
       equationKind?: string;
       kind: "hover";
+      formulas?: readonly FormulaRecognition[];
       shape?: ShapeInfo;
       symbol?: string;
     }
@@ -160,6 +220,14 @@ export type QueryValue =
   | {
       diagnostic?: SemanticDiagnostic;
       kind: "diagnosticExplanation";
+    }
+  | {
+      kind: "formulaRecognitions";
+      recognitions: readonly FormulaRecognition[];
+    }
+  | {
+      completions: readonly FormulaCompletion[];
+      kind: "formulaCompletions";
     };
 
 export interface QueryResult {

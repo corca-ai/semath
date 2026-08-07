@@ -132,6 +132,16 @@ pub enum Query {
         code: String,
         offset: u32,
     },
+    FormulaRecognition {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
+    FormulaCompletion {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -194,6 +204,79 @@ pub struct SemanticDiagnostic {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct FormulaConstraint {
+    pub kind: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub dimensions: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub refinements: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaParameter {
+    pub id: String,
+    pub constraint: FormulaConstraint,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaSideCondition {
+    pub kind: String,
+    pub left: String,
+    pub right: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaPattern {
+    pub schema_version: u32,
+    pub pack_id: String,
+    pub pack_version: String,
+    pub id: String,
+    pub title: String,
+    pub matcher: String,
+    pub parameters: Vec<FormulaParameter>,
+    pub result: FormulaConstraint,
+    pub side_conditions: Vec<FormulaSideCondition>,
+    pub generation_template: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaBinding {
+    pub parameter: String,
+    pub symbol: String,
+    pub constraint: FormulaConstraint,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaRecognition {
+    pub pattern_id: String,
+    pub title: String,
+    pub pack_id: String,
+    pub pack_version: String,
+    pub range: SourceRange,
+    pub bindings: Vec<FormulaBinding>,
+    pub result: FormulaConstraint,
+    pub evidence: Vec<Evidence>,
+    pub rank: u32,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaCompletion {
+    pub pattern_id: String,
+    pub title: String,
+    pub detail: String,
+    pub rank: u32,
+    pub proposal: SemanticEditProposal,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct EquationNode {
     pub kind: String,
     pub label: Option<String>,
@@ -243,6 +326,8 @@ pub enum QueryValue {
         definitions: Vec<DefinitionInfo>,
         #[serde(skip_serializing_if = "Option::is_none")]
         shape: Option<ShapeInfo>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        formulas: Vec<FormulaRecognition>,
     },
     Locations {
         locations: Vec<Location>,
@@ -261,6 +346,12 @@ pub enum QueryValue {
     },
     DiagnosticExplanation {
         diagnostic: Option<SemanticDiagnostic>,
+    },
+    FormulaRecognitions {
+        recognitions: Vec<FormulaRecognition>,
+    },
+    FormulaCompletions {
+        completions: Vec<FormulaCompletion>,
     },
 }
 
