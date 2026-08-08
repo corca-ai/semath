@@ -202,25 +202,19 @@ impl SemathEngine {
             return Err(EngineError::DocumentVersionMismatch);
         }
         let offset = query_offset.unwrap_or(0);
-        let parsed = query_offset.and_then(|offset| {
-            document
-                .parsed
-                .iter()
-                .find(|math| math.region.full_range.contains(offset))
-        });
-        let symbol = parsed.and_then(|math| {
-            math.symbols
-                .iter()
-                .find(|(_, range)| range.contains(offset))
-                .map(|(symbol, range)| (symbol.clone(), range.clone()))
-        });
+        let parsed =
+            query_offset.and_then(|offset| parsed_math_at_cursor(&document.parsed, offset));
+        let symbol = parsed.and_then(|math| symbol_at_cursor(math, offset));
+        let cursor_offset = symbol
+            .as_ref()
+            .map_or(offset, |(_, range)| offset.min(range.end_offset - 1));
 
         let hygiene_enabled = self.documents.len() == 1;
         let value = match envelope.query {
             Query::Selection { .. } => {
                 let mut ranges = Vec::new();
                 if let Some(math) = parsed {
-                    selection_path(&math.root, offset, &mut ranges);
+                    selection_path(&math.root, cursor_offset, &mut ranges);
                     if ranges.last() != Some(&math.region.full_range) {
                         ranges.push(math.region.full_range.clone());
                     }
@@ -233,7 +227,7 @@ impl SemathEngine {
             Query::Hover { .. } => {
                 let roles = symbol
                     .as_ref()
-                    .map(|(name, _)| document.consistency.roles_at(name, offset).0)
+                    .map(|(name, _)| document.consistency.roles_at(name, cursor_offset).0)
                     .unwrap_or_default();
                 let definitions = symbol
                     .as_ref()
@@ -242,19 +236,19 @@ impl SemathEngine {
                 QueryValue::Hover {
                     shape: symbol
                         .as_ref()
-                        .and_then(|(name, _)| document.shapes.shape_at(name, offset)),
+                        .and_then(|(name, _)| document.shapes.shape_at(name, cursor_offset)),
                     symbol: symbol.map(|(name, _)| name),
                     equation_kind: parsed
-                        .and_then(|math| deepest_node(&math.root, offset))
+                        .and_then(|math| deepest_node(&math.root, cursor_offset))
                         .map(|node| node.kind.clone()),
                     definitions,
-                    formulas: document.formulas.at(offset),
+                    formulas: document.formulas.at(cursor_offset),
                     roles,
                 }
             }
             Query::SymbolInfo { .. } => QueryValue::SymbolInfo {
                 info: symbol.as_ref().map(|(name, occurrence)| {
-                    self.symbol_info(document, name, occurrence, offset, hygiene_enabled)
+                    self.symbol_info(document, name, occurrence, cursor_offset, hygiene_enabled)
                 }),
             },
             Query::Definition { .. } => QueryValue::Locations {
@@ -275,24 +269,26 @@ impl SemathEngine {
                     .map(|definition| self.references_for(&definition))
                     .unwrap_or_default(),
             },
-            Query::PrepareRename { .. } => prepare_rename(parsed, offset),
-            Query::Rename { new_name, .. } => rename_proposal(document, parsed, offset, &new_name),
+            Query::PrepareRename { .. } => prepare_rename(parsed, cursor_offset),
+            Query::Rename { new_name, .. } => {
+                rename_proposal(document, parsed, cursor_offset, &new_name)
+            }
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
                 diagnostics: document_diagnostics(document, hygiene_enabled),
             },
             Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
                 diagnostic: document
                     .shapes
-                    .diagnostic(&code, offset)
-                    .or_else(|| document.consistency.diagnostic(&code, offset))
+                    .diagnostic(&code, cursor_offset)
+                    .or_else(|| document.consistency.diagnostic(&code, cursor_offset))
                     .or_else(|| {
                         hygiene_enabled
-                            .then(|| document.hygiene.diagnostic(&code, offset))
+                            .then(|| document.hygiene.diagnostic(&code, cursor_offset))
                             .flatten()
                     }),
             },
             Query::FormulaRecognition { .. } => QueryValue::FormulaRecognitions {
-                recognitions: document.formulas.at(offset),
+                recognitions: document.formulas.at(cursor_offset),
             },
             Query::FormulaCompletion { .. } => QueryValue::FormulaCompletions {
                 completions: formula_completions(
@@ -304,10 +300,10 @@ impl SemathEngine {
                 ),
             },
             Query::FormulaRewrite { .. } => QueryValue::FormulaRewrites {
-                rewrites: formula_rewrites(&document.document, &document.formulas, offset),
+                rewrites: formula_rewrites(&document.document, &document.formulas, cursor_offset),
             },
             Query::DomainEvidence { .. } => {
-                let (activations, truncated) = document.domains.at(offset);
+                let (activations, truncated) = document.domains.at(cursor_offset);
                 QueryValue::DomainActivations {
                     activations,
                     truncated,
@@ -321,13 +317,13 @@ impl SemathEngine {
                 });
                 let mut selection_path = Vec::new();
                 if let Some(math) = parsed {
-                    equation_selection_path(&math.root, offset, &mut selection_path);
+                    equation_selection_path(&math.root, cursor_offset, &mut selection_path);
                 }
                 let selection_truncated = selection_path.len() > MAX_INSPECTION_SELECTION_DEPTH;
                 selection_path.truncate(MAX_INSPECTION_SELECTION_DEPTH);
 
                 let symbol_info = symbol.as_ref().map(|(name, occurrence)| {
-                    self.symbol_info(document, name, occurrence, offset, hygiene_enabled)
+                    self.symbol_info(document, name, occurrence, cursor_offset, hygiene_enabled)
                 });
                 let mut references = symbol
                     .as_ref()
@@ -344,14 +340,14 @@ impl SemathEngine {
                     .filter(|diagnostic| {
                         parsed.is_some_and(|math| {
                             ranges_overlap(&diagnostic.range, &math.region.content_range)
-                        }) || diagnostic.range.contains(offset)
+                        }) || diagnostic.range.contains(cursor_offset)
                     })
                     .collect::<Vec<_>>();
                 let diagnostics_truncated = diagnostics.len() > MAX_INSPECTION_DIAGNOSTICS;
                 diagnostics.truncate(MAX_INSPECTION_DIAGNOSTICS);
 
-                let (domains, domains_truncated) = document.domains.at(offset);
-                let recognitions = document.formulas.at(offset);
+                let (domains, domains_truncated) = document.domains.at(cursor_offset);
+                let recognitions = document.formulas.at(cursor_offset);
                 let completions = formula_completions(
                     &document.document,
                     &document.parsed,
@@ -359,8 +355,9 @@ impl SemathEngine {
                     &document.consistency,
                     offset,
                 );
-                let rewrites = formula_rewrites(&document.document, &document.formulas, offset);
-                let rename = prepare_rename_info(parsed, offset);
+                let rewrites =
+                    formula_rewrites(&document.document, &document.formulas, cursor_offset);
+                let rename = prepare_rename_info(parsed, cursor_offset);
                 let truncated = tree_truncated
                     || selection_truncated
                     || references_truncated
@@ -701,6 +698,42 @@ fn normalize_project_path(path: &str) -> String {
     parts.join("/")
 }
 
+fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMath> {
+    parsed
+        .iter()
+        .find(|math| math.region.full_range.contains(offset))
+        .or_else(|| {
+            parsed.iter().find(|math| {
+                math.symbols.iter().any(|(_, range)| {
+                    range.start_offset < range.end_offset && range.end_offset == offset
+                })
+            })
+        })
+}
+
+fn symbol_at_cursor(math: &ParsedMath, offset: u32) -> Option<(String, SourceRange)> {
+    symbol_range_at_cursor(&math.symbols, offset)
+        .map(|(symbol, range)| (symbol.clone(), range.clone()))
+}
+
+fn symbol_range_at_cursor(
+    symbols: &[(String, SourceRange)],
+    offset: u32,
+) -> Option<(&String, &SourceRange)> {
+    symbols
+        .iter()
+        .find(|(_, range)| range.contains(offset))
+        .or_else(|| {
+            symbols
+                .iter()
+                .filter(|(_, range)| {
+                    range.start_offset < range.end_offset && range.end_offset == offset
+                })
+                .max_by_key(|(_, range)| range.start_offset)
+        })
+        .map(|(symbol, range)| (symbol, range))
+}
+
 fn bounded_equation_tree(
     node: &EquationNode,
     depth: usize,
@@ -909,7 +942,7 @@ fn check_protocol(version: u32) -> Result<(), EngineError> {
 
 #[cfg(test)]
 mod tests {
-    use super::SemathEngine;
+    use super::{SemathEngine, symbol_range_at_cursor};
     use crate::{
         DocumentLanguage, PROTOCOL_VERSION, ProjectDocument, ProjectInclude, ProjectSnapshot,
         Query, QueryEnvelope, QueryValue, SourceRange,
@@ -962,6 +995,181 @@ mod tests {
         };
         assert_eq!(locations.len(), 1);
         assert_eq!(locations[0].path, "main.tex");
+    }
+
+    #[test]
+    fn resolves_a_definition_from_the_end_boundary_of_a_symbol() {
+        let content = concat!(
+            "Let $A$ denote an event of positive probability.\n",
+            "Let $B$ denote an event of positive probability.\n",
+            "$p = \\frac{\\mathbb{P}(A \\cap B)}{\\mathbb{P}(B)}$.",
+        );
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let after_numerator_a = content.rfind("A \\cap").unwrap() as u32 + 1;
+
+        let result = engine
+            .query(query(Query::Definition {
+                file_id: "main".into(),
+                offset: after_numerator_a,
+            }))
+            .unwrap();
+
+        let QueryValue::Locations { locations } = result.value else {
+            panic!("expected locations")
+        };
+        assert_eq!(locations.len(), 1);
+        assert_eq!(locations[0].range.start_offset, 5);
+    }
+
+    #[test]
+    fn keeps_cursor_queries_stable_at_a_symbol_end_boundary() {
+        let content = concat!(
+            "Let $A$ denote an event of positive probability.\n",
+            "Let $B$ denote an event of positive probability.\n",
+            "$p = \\frac{\\mathbb{P}(A \\cap B)}{\\mathbb{P}(B)}$.",
+        );
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let numerator_a = content.rfind("A \\cap").unwrap() as u32;
+        let queries_at = |offset| {
+            vec![
+                Query::Selection {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::EquationTree {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::Hover {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::SymbolInfo {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::Definition {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::References {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::PrepareRename {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::FormulaRecognition {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::FormulaRewrite {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::DomainEvidence {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::Inspection {
+                    file_id: "main".into(),
+                    offset,
+                },
+            ]
+            .into_iter()
+            .map(|kind| engine.query(query(kind)).unwrap().value)
+            .collect::<Vec<_>>()
+        };
+
+        assert_eq!(queries_at(numerator_a), queries_at(numerator_a + 1));
+    }
+
+    #[test]
+    fn resolves_a_symbol_at_the_end_of_an_unfinished_math_region() {
+        let content = "Let $A$ denote an event.\nUse $A";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let result = engine
+            .query(query(Query::Definition {
+                file_id: "main".into(),
+                offset: content.len() as u32,
+            }))
+            .unwrap();
+
+        let QueryValue::Locations { locations } = result.value else {
+            panic!("expected locations")
+        };
+        assert_eq!(locations.len(), 1);
+    }
+
+    #[test]
+    fn an_exact_symbol_start_wins_over_the_previous_symbol_end() {
+        let symbols = vec![
+            (
+                "A".into(),
+                SourceRange {
+                    start_offset: 2,
+                    end_offset: 3,
+                },
+            ),
+            (
+                "B".into(),
+                SourceRange {
+                    start_offset: 3,
+                    end_offset: 4,
+                },
+            ),
+        ];
+
+        let (symbol, range) = symbol_range_at_cursor(&symbols, 3).unwrap();
+
+        assert_eq!(symbol, "B");
+        assert_eq!(range.start_offset, 3);
+    }
+
+    #[test]
+    fn keeps_bound_variable_rename_available_after_the_symbol() {
+        let content = "$\\sum_{i=1}^n i$";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let use_i = content.rfind(" i$").unwrap() as u32 + 1;
+
+        let prepare_at = |offset| {
+            engine
+                .query(query(Query::PrepareRename {
+                    file_id: "main".into(),
+                    offset,
+                }))
+                .unwrap()
+                .value
+        };
+        let rename_at = |offset| {
+            engine
+                .query(query(Query::Rename {
+                    file_id: "main".into(),
+                    new_name: "j".into(),
+                    offset,
+                }))
+                .unwrap()
+                .value
+        };
+
+        let preparation = prepare_at(use_i);
+        assert_eq!(preparation, prepare_at(use_i + 1));
+        let QueryValue::RenamePreparation {
+            placeholder: Some(placeholder),
+            rejection: None,
+            ..
+        } = preparation
+        else {
+            panic!("expected a renameable bound variable")
+        };
+        assert_eq!(placeholder, "i");
+        assert_eq!(rename_at(use_i), rename_at(use_i + 1));
     }
 
     #[test]

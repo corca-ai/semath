@@ -19,6 +19,10 @@ Current `main` provides:
 - a transport-neutral language server that combines wasmtex LaTeX intelligence
   with Semath selection, navigation, diagnostics, completion, and reviewable rewrites.
 
+Cursor-addressed symbol queries accept both positions inside a symbol and the
+caret immediately after it. If another symbol starts at that same UTF-16
+offset, the symbol on the right wins.
+
 Version 0.11 unifies the built-in domain-pack schema and expands the calibrated
 catalog to linear algebra, probability/statistics, calculus/analysis,
 optimization/ML, and discrete mathematics. Broad entries are recognition-only;
