@@ -51,7 +51,9 @@ Version 0.7 adds bounded equivalent-form rewrite proposals. The first slice expa
 probability into its definition when the conditioning event is explicitly known to have positive
 probability, and also offers Bayes' theorem when both events have that evidence. Rewrites preserve
 the exact source range and expected text and are always previewed through the host's
-revision-checked review flow; they are never automatic edits or diagnostic quick fixes.
+revision-checked review flow; they are never automatic edits or diagnostic quick fixes. When a
+closed math region has exactly one recognized rewrite target, its action remains available from
+the left-hand side, delimiters, and the position immediately after the formula.
 
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.

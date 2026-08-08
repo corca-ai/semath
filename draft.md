@@ -549,7 +549,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * equivalent-form rewrite는 preview-only로 유지한다.
 * **v0.4 완료:** versioned linear-algebra pack의 matrix/vector product, transpose, inner product와 quadratic form을 recognition과 completion이 함께 사용한다. Section scope와 scalar/vector/matrix/tensor constraint를 반영하며, completion은 자동 적용하지 않고 CorTeX의 revision-checked review로 전달한다. Rewrite와 probability pack은 후속 iteration으로 남긴다.
 * **v0.6 probability slice:** 명시적으로 event와 random variable로 정의된 단일 기호에 대해 event probability, expectation과 variance를 typed pattern으로 인식한다. Conditional probability는 conditioning event에 positive-probability 근거가 있을 때만 허용한다. 명시적 scalar target의 completion만 review-required proposal로 제공하며 rewrite는 포함하지 않는다.
-* **v0.7 rewrite slice:** conditional probability의 conditioning event에 positive-probability 근거가 있을 때 정의식 전개를 제안한다. Bayes 전개는 두 event 모두에 같은 근거가 있을 때만 제안한다. 결과는 cursor 중심 bounded query이며 exact expected text를 포함한 review-required proposal로만 반환하고 Quick Fix나 자동 적용은 하지 않는다.
+* **v0.7 rewrite slice:** conditional probability의 conditioning event에 positive-probability 근거가 있을 때 정의식 전개를 제안한다. Bayes 전개는 두 event 모두에 같은 근거가 있을 때만 제안한다. 닫힌 math region에 rewrite target이 하나뿐이면 좌변·delimiter·수식 직후의 cursor에서도 발견할 수 있다. 결과는 bounded query이며 exact expected text를 포함한 review-required proposal로만 반환하고 Quick Fix나 자동 적용은 하지 않는다.
 
 ### Iteration 7 — Explainable prose와 domain inference
 
