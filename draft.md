@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.8 완료 (2026-08-08):** bounded semantic inspection 계약을 제공하며 CorTeX Math Inspector가 수식 구조, 정의·참조·근거·진단과 검토형 액션을 같은 분석 snapshot에서 연결한다.
+> **구현 상태 — v0.9 완료 (2026-08-08):** wasmtex와 Semath가 문서 revision당 하나의 syntax snapshot을 공유하고, CorTeX의 주요 cursor query와 completion은 우선순위·취소·stale-result gate를 갖춘 authoring Worker에서 실행된다. 같은 WASM artifact를 사용하는 standalone LSP도 제공한다.
 
 ## 1. 개요
 
@@ -564,6 +564,13 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * 하나의 bounded `inspection` query가 equation tree와 선택 경로, symbol 정보, 정의·참조, 진단, domain/formula evidence와 사용 가능한 edit proposal을 같은 snapshot에서 반환한다.
 * CorTeX Math 사이드바는 cursor와 양방향으로 연결하고, source 이동은 즉시 수행하되 completion·rewrite·rename은 기존 revision-checked review와 권한 정책을 그대로 사용한다.
 * 큰 수식과 많은 참조는 node/depth/result budget을 적용하고 truncation을 명시한다.
+
+### Iteration 9 — Shared authoring runtime과 standalone LSP
+
+* wasmtex language service와 Semath가 stable file identity를 가진 동일한 syntax snapshot을 소비한다.
+* CorTeX의 LaTeX completion, hover, definition, references와 Semath query를 하나의 cancellable Worker queue로 통합하고 cursor query를 background 분석보다 우선한다.
+* `semath/lsp`와 `semath-lsp`가 selection, hover, navigation, rename, completion, diagnostics와 review-required code action을 같은 WASM core로 제공한다.
+* parse count, cold start, cursor p95와 응답 크기를 release gate로 고정한다.
 
 Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.
 
