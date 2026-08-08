@@ -123,7 +123,7 @@ export interface SymbolInfo {
   diagnostics: readonly SemanticDiagnostic[];
   formulas: readonly FormulaRecognition[];
   location: Location;
-  roles: readonly RoleInfo[];
+  roles?: readonly RoleInfo[];
   shapes: readonly ShapeInfo[];
   symbol: string;
   truncated: boolean;

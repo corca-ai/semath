@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { SEMATH_PROTOCOL_VERSION, type ProjectSnapshot } from "./index";
+import {
+  SEMATH_PROTOCOL_VERSION,
+  type ProjectSnapshot,
+  type SymbolInfo,
+} from "./index";
 
 describe("protocol", () => {
   test("keeps the public version explicit", () => {
@@ -12,5 +16,21 @@ describe("protocol", () => {
     };
     expect(snapshot.protocolVersion).toBe(1);
   });
-});
 
+  test("allows omitted empty role collections from the wire format", () => {
+    const info: SymbolInfo = {
+      definitions: [],
+      diagnostics: [],
+      formulas: [],
+      location: {
+        fileId: "main",
+        path: "main.md",
+        range: { endOffset: 2, startOffset: 1 },
+      },
+      shapes: [],
+      symbol: "x",
+      truncated: false,
+    };
+    expect(info.roles).toBeUndefined();
+  });
+});
