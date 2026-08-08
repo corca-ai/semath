@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "wasmtex": "github:corca-ai/wasmtex#b58fbe5"
+    "wasmtex": "github:corca-ai/wasmtex#c27a447"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",
