@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.8 진행 (2026-08-08):** bounded semantic inspection 계약과 CorTeX Math Inspector를 하나의 vertical slice로 제공한다. 수식 구조, 정의·참조·근거·진단과 검토형 액션을 같은 분석 snapshot에서 연결한다.
+> **구현 상태 — v0.8 완료 (2026-08-08):** bounded semantic inspection 계약을 제공하며 CorTeX Math Inspector가 수식 구조, 정의·참조·근거·진단과 검토형 액션을 같은 분석 snapshot에서 연결한다.
 
 ## 1. 개요
 

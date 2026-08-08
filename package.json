@@ -1,6 +1,6 @@
 {
   "name": "semath",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -17,7 +17,8 @@
     "packages"
   ],
   "scripts": {
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun test && bun run parity",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun test && bun run parity && bun run budget:v0.8",
+    "budget:v0.8": "node scripts/check-v0.8-budget.mjs",
     "parity": "node scripts/check-parity.mjs",
     "test": "cargo test --workspace && bun test"
   }
