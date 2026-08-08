@@ -7,6 +7,7 @@ mod parser;
 mod pattern;
 mod prose;
 mod protocol;
+mod rewrite;
 mod scope;
 mod shape;
 mod source_index;

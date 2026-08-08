@@ -47,6 +47,12 @@ does not perform equivalent-form rewrites. The labeled probability corpus has a 
 positive budget and includes scope, role mismatch, side-condition, and unfinished-input
 suppression cases.
 
+Version 0.7 adds bounded equivalent-form rewrite proposals. The first slice expands a conditional
+probability into its definition when the conditioning event is explicitly known to have positive
+probability, and also offers Bayes' theorem when both events have that evidence. Rewrites preserve
+the exact source range and expected text and are always previewed through the host's
+revision-checked review flow; they are never automatic edits or diagnostic quick fixes.
+
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
 See [draft.md](./draft.md) for the architecture and roadmap.

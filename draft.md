@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.6 진행 중 (2026-08-08):** v0.5의 bounded symbol/domain inspection과 설명 가능한 notation consistency를 완료했다. 현재는 명시적 event·random-variable 근거에 한정한 probability formula recognition·completion을 추가하고 있으며, 모든 변경은 호스트의 revision-checked review 흐름을 거친다.
+> **구현 상태 — v0.7 진행 중 (2026-08-08):** typed probability recognition·completion까지 완료했다. 현재는 side condition을 명시적 근거로 증명할 수 있는 조건부확률 동치식만 bounded rewrite proposal로 제공하며, 모든 변경은 호스트의 revision-checked review 흐름을 거친다.
 
 ## 1. 개요
 
@@ -440,6 +440,7 @@ Canonicalization, semantic fingerprint와 e-graph saturation은 모든 keystroke
 | Rename | validated edit proposal | `prepareRename` / `rename` |
 | Diagnostics | evidence-bearing problems | push 또는 pull diagnostics |
 | Formula completion | typed text edit proposal | `textDocument/completion` |
+| Formula rewrite | side-condition-aware preview proposal | `textDocument/codeAction` |
 
 Diagnostic은 다음 범주를 지원할 수 있다.
 
@@ -548,6 +549,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * equivalent-form rewrite는 preview-only로 유지한다.
 * **v0.4 완료:** versioned linear-algebra pack의 matrix/vector product, transpose, inner product와 quadratic form을 recognition과 completion이 함께 사용한다. Section scope와 scalar/vector/matrix/tensor constraint를 반영하며, completion은 자동 적용하지 않고 CorTeX의 revision-checked review로 전달한다. Rewrite와 probability pack은 후속 iteration으로 남긴다.
 * **v0.6 probability slice:** 명시적으로 event와 random variable로 정의된 단일 기호에 대해 event probability, expectation과 variance를 typed pattern으로 인식한다. Conditional probability는 conditioning event에 positive-probability 근거가 있을 때만 허용한다. 명시적 scalar target의 completion만 review-required proposal로 제공하며 rewrite는 포함하지 않는다.
+* **v0.7 rewrite slice:** conditional probability의 conditioning event에 positive-probability 근거가 있을 때 정의식 전개를 제안한다. Bayes 전개는 두 event 모두에 같은 근거가 있을 때만 제안한다. 결과는 cursor 중심 bounded query이며 exact expected text를 포함한 review-required proposal로만 반환하고 Quick Fix나 자동 적용은 하지 않는다.
 
 ### Iteration 7 — Explainable prose와 domain inference
 
