@@ -16,6 +16,8 @@ Current `main` provides:
 - UTF-16 source ranges compatible with Monaco;
 - a versioned project/update/query protocol and browser Worker runtime;
 - an adapter for the public `wasmtex/syntax` snapshot contract.
+- a transport-neutral language server that combines wasmtex LaTeX intelligence
+  with Semath selection, navigation, diagnostics, completion, and reviewable rewrites.
 
 Version 0.5 adds a bounded `symbolInfo` query that returns the definitions, shape
 claims, recognized formulas, diagnostics, and source evidence associated with one symbol. It also
@@ -65,6 +67,22 @@ timed queries or accept an unbounded sidebar response.
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
 See [draft.md](./draft.md) for the architecture and roadmap.
+
+## Language server
+
+`semath/lsp` is an embeddable JSON-RPC server core. It owns one shared wasmtex
+syntax runtime, so LaTeX providers and Semath consume a single parse per document
+revision. The package also includes a Bun-based stdio host for native editors:
+
+```sh
+bun node_modules/semath/packages/lsp/stdio.mjs
+```
+
+Configure the command as a full-sync language server for `latex`, `markdown`, and
+`bibtex` documents. It exposes selection ranges, hover, definition, references,
+prepare-rename/rename, completion, code actions, diagnostics, and the bounded
+`semath/inspection` request. Formula edits remain review-required LSP workspace
+edits; the server never changes source on its own.
 
 ## Verification
 
