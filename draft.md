@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.9 완료 (2026-08-08):** wasmtex와 Semath가 문서 revision당 하나의 syntax snapshot을 공유하고, CorTeX의 주요 cursor query와 completion은 우선순위·취소·stale-result gate를 갖춘 authoring Worker에서 실행된다. 같은 WASM artifact를 사용하는 standalone LSP도 제공한다.
+> **구현 상태 — v0.10 (2026-08-08):** recoverable matrix/cases/application IR, include·scope 기반 semantic identity, bounded macro provenance와 재사용 가능한 Worker lifecycle을 추가했다. CorTeX의 LaTeX provider는 wasmtex와 Semath 결과를 한 곳에서 합성하고 interactive parsing은 authoring Worker가 담당한다.
 
 ## 1. 개요
 
@@ -128,7 +128,7 @@ interface LatexSyntaxService {
 }
 
 interface LatexFileSyntax {
-  schemaVersion: 1;
+  schemaVersion: 2;
   fileId: string;
   path: string;
   documentVersion: number;
@@ -143,7 +143,7 @@ interface LatexFileSyntax {
 
 * range는 원문 기준 UTF-16 half-open offset이다.
 * unfinished LaTeX에서도 부분 결과를 반환한다.
-* macro expansion은 definition과 call-site provenance를 보존한다.
+* macro event는 definition/call range, bounded expansion 상태, cycle/truncation과 synthetic occurrence의 editability를 보존한다.
 * stable `fileId`와 mutable path를 구분한다.
 * schema version으로 wasmtex와 Semath의 독립 release를 허용한다.
 
@@ -207,6 +207,7 @@ interface ProjectDocument {
   language: "latex" | "markdown" | "bibtex";
   content: string;
   documentVersion: number;
+  includes?: readonly { path: string; sourceRange: SourceRange }[];
 }
 ```
 
@@ -571,6 +572,13 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * CorTeX의 LaTeX completion, hover, definition, references와 Semath query를 하나의 cancellable Worker queue로 통합하고 cursor query를 background 분석보다 우선한다.
 * `semath/lsp`와 `semath-lsp`가 selection, hover, navigation, rename, completion, diagnostics와 review-required code action을 같은 WASM core로 제공한다.
 * parse count, cold start, cursor p95와 응답 크기를 release gate로 고정한다.
+
+### Iteration 10 — Reliable project-wide semantics
+
+* matrix/cases row·cell, function application과 paired delimiter를 unfinished source에서도 bounded partial IR로 반환한다.
+* include component, stable file identity, section scope와 declaration anchor를 semantic symbol ID로 사용해 같은 glyph의 false link를 막는다.
+* wasmtex macro provenance와 CorTeX composite provider를 통해 synthetic occurrence는 탐색만 허용하고 모든 edit는 source-backed review plan으로 제한한다.
+* 다중 파일 false-link corpus, native/WASM/LSP parity, Worker failure/cancellation과 cursor latency를 하나의 release gate로 묶는다.
 
 Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.
 

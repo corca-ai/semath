@@ -19,6 +19,12 @@ Current `main` provides:
 - a transport-neutral language server that combines wasmtex LaTeX intelligence
   with Semath selection, navigation, diagnostics, completion, and reviewable rewrites.
 
+Version 0.10 adds recoverable application, matrix, cases, and paired-delimiter
+IR; project/include/scope-aware semantic symbol identities; bounded macro
+provenance through wasmtex syntax schema 2; and a reusable prioritized Worker
+host with typed cancellation and failure results. Its multi-file corpus rejects
+cross-scope false links and shares native/WASM parity and latency gates.
+
 Version 0.5 adds a bounded `symbolInfo` query that returns the definitions, shape
 claims, recognized formulas, diagnostics, and source evidence associated with one symbol. It also
 recognizes conservative English definition forms such as `respectively`, apposition,

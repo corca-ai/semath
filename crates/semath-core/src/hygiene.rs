@@ -229,6 +229,7 @@ mod tests {
                 content: case.content.clone(),
                 document_version: 1,
                 math_regions: regions.clone(),
+                includes: Vec::new(),
             };
             let parsed = parse_regions(&case.content, &regions);
             let prose = analyze_prose(&document, &parsed);

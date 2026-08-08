@@ -55,4 +55,19 @@ mod tests {
         assert_eq!(index.byte_for_utf16(2), 4);
         assert_eq!(index.byte_for_utf16(4), 8);
     }
+
+    #[test]
+    fn maps_combining_marks_crlf_and_multiline_text_without_normalizing_source() {
+        let source = "e\u{301}\r\n한😀\n";
+        let index = SourceIndex::new(source);
+        for (byte, _) in source.char_indices() {
+            let utf16 = source[..byte].encode_utf16().count() as u32;
+            assert_eq!(index.utf16_for_byte(byte), utf16);
+            assert_eq!(index.byte_for_utf16(utf16), byte);
+        }
+        assert_eq!(
+            index.utf16_for_byte(source.len()),
+            source.encode_utf16().count() as u32
+        );
+    }
 }

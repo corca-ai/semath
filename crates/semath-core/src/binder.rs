@@ -192,6 +192,9 @@ fn collect_binders(
 }
 
 fn scripted_binder_operator(node: &EquationNode) -> bool {
+    if node.kind == "application" {
+        return node.children.first().is_some_and(scripted_binder_operator);
+    }
     node.kind == "scripted"
         && node
             .children

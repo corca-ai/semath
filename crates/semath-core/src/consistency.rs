@@ -453,6 +453,7 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
         let prose = analyze_prose(&document, &parsed);

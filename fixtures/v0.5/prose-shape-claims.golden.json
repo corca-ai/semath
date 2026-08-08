@@ -10,6 +10,13 @@
         "kind": "symbolInfo",
         "info": {
           "symbol": "A",
+          "semanticId": {
+            "componentId": "main",
+            "fileId": "main",
+            "scopePath": [],
+            "kind": "definition",
+            "anchor": 13
+          },
           "location": {
             "fileId": "main",
             "path": "main.tex",
@@ -40,6 +47,13 @@
                     "endOffset": 103
                   }
                 ]
+              },
+              "semanticId": {
+                "componentId": "main",
+                "fileId": "main",
+                "scopePath": [],
+                "kind": "definition",
+                "anchor": 13
               }
             }
           ],
@@ -192,6 +206,13 @@
         "kind": "symbolInfo",
         "info": {
           "symbol": "x",
+          "semanticId": {
+            "componentId": "main",
+            "fileId": "main",
+            "scopePath": [],
+            "kind": "definition",
+            "anchor": 5
+          },
           "location": {
             "fileId": "main",
             "path": "main.tex",
@@ -222,6 +243,13 @@
                     "endOffset": 103
                   }
                 ]
+              },
+              "semanticId": {
+                "componentId": "main",
+                "fileId": "main",
+                "scopePath": [],
+                "kind": "definition",
+                "anchor": 5
               }
             }
           ],
@@ -373,6 +401,13 @@
         "kind": "symbolInfo",
         "info": {
           "symbol": "A",
+          "semanticId": {
+            "componentId": "main",
+            "fileId": "main",
+            "scopePath": [],
+            "kind": "definition",
+            "anchor": 13
+          },
           "location": {
             "fileId": "main",
             "path": "main.tex",
@@ -403,6 +438,13 @@
                     "endOffset": 103
                   }
                 ]
+              },
+              "semanticId": {
+                "componentId": "main",
+                "fileId": "main",
+                "scopePath": [],
+                "kind": "definition",
+                "anchor": 13
               }
             }
           ],

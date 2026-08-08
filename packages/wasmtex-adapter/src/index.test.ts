@@ -17,9 +17,15 @@ describe("wasmtex adapter", () => {
           syntax: {
             documentVersion: 2,
             fileId: "f1",
+            includes: [
+              {
+                path: "chapter",
+                source: { range: { endOffset: 4, startOffset: 1 } },
+              },
+            ],
             mathRegions: [region],
             path: "main.md",
-            schemaVersion: 1,
+            schemaVersion: 2,
           },
         },
       ],
@@ -28,5 +34,8 @@ describe("wasmtex adapter", () => {
       projectId: "p",
     });
     expect(snapshot.documents[0]?.mathRegions?.[0]).toEqual(region);
+    expect(snapshot.documents[0]?.includes).toEqual([
+      { path: "chapter", sourceRange: { endOffset: 4, startOffset: 1 } },
+    ]);
   });
 });
