@@ -336,8 +336,10 @@ fn validate_packs(packs: &[DomainPack]) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::analyze_domains;
+    use crate::consistency::analyze_consistency;
     use crate::parser::{math_regions, parse_regions};
     use crate::pattern::analyze_formulas;
+    use crate::prose::analyze_prose;
     use crate::shape::analyze_shapes;
     use crate::{DocumentLanguage, ProjectDocument};
 
@@ -352,8 +354,10 @@ mod tests {
             math_regions: regions.clone(),
         };
         let parsed = parse_regions(source, &regions);
-        let shapes = analyze_shapes(&document, &parsed, &[]);
-        let formulas = analyze_formulas(&document, &parsed, &shapes);
+        let prose = analyze_prose(&document, &parsed);
+        let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
+        let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
+        let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
         analyze_domains(&document, &formulas)
     }
 

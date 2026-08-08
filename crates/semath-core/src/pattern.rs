@@ -4,12 +4,13 @@ use std::sync::LazyLock;
 use regex::Regex;
 use serde::Deserialize;
 
+use crate::consistency::ConsistencyAnalysis;
 use crate::parser::ParsedMath;
 use crate::shape::{KnownShape, Shape, ShapeAnalysis};
 use crate::{
     Evidence, FormulaBinding, FormulaCompletion, FormulaConstraint, FormulaParameter,
-    FormulaPattern, FormulaRecognition, FormulaSideCondition, ProjectDocument, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
+    FormulaPattern, FormulaRecognition, FormulaSideCondition, ProjectDocument, RoleInfo,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
 };
 
 const PATTERN_SCHEMA_VERSION: u32 = 1;
@@ -31,6 +32,30 @@ static INNER_PRODUCT: LazyLock<Regex> = LazyLock::new(|| {
 static QUADRATIC_FORM: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*([A-Za-z])\s*([A-Za-z])\s*$")
         .unwrap()
+});
+static CONDITIONAL_PROBABILITY: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^\s*\\mathbb\s*\{\s*P\s*\}\s*(?:\\left\s*)?\(\s*([A-Za-z])\s*(?:\\mid|\\vert|\|)\s*([A-Za-z])\s*(?:\\right\s*)?\)\s*$",
+    )
+    .unwrap()
+});
+static EVENT_PROBABILITY: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^\s*\\mathbb\s*\{\s*P\s*\}\s*(?:\\left\s*)?\(\s*([A-Za-z])\s*(?:\\right\s*)?\)\s*$",
+    )
+    .unwrap()
+});
+static EXPECTATION: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^\s*\\mathbb\s*\{\s*E\s*\}\s*(?:\\left\s*)?\[\s*([A-Za-z])\s*(?:\\right\s*)?\]\s*$",
+    )
+    .unwrap()
+});
+static VARIANCE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^\s*\\(?:operatorname|mathrm)\s*\{\s*Var\s*\}\s*(?:\\left\s*)?\(\s*([A-Za-z])\s*(?:\\right\s*)?\)\s*$",
+    )
+    .unwrap()
 });
 
 #[derive(Deserialize)]
@@ -54,9 +79,9 @@ struct RawPattern {
     generation_template: String,
 }
 
-static LINEAR_ALGEBRA_PATTERNS: LazyLock<Vec<FormulaPattern>> = LazyLock::new(|| {
-    let pack: RawPack = serde_json::from_str(include_str!("../../../packs/linear-algebra/v1.json"))
-        .expect("linear-algebra pack must be valid JSON");
+fn load_patterns(source: &str, name: &str) -> Vec<FormulaPattern> {
+    let pack: RawPack =
+        serde_json::from_str(source).unwrap_or_else(|_| panic!("{name} pack must be valid JSON"));
     let patterns = pack
         .patterns
         .into_iter()
@@ -73,8 +98,23 @@ static LINEAR_ALGEBRA_PATTERNS: LazyLock<Vec<FormulaPattern>> = LazyLock::new(||
             generation_template: pattern.generation_template,
         })
         .collect::<Vec<_>>();
-    validate_patterns(&patterns).expect("linear-algebra pack must satisfy the pattern schema");
+    validate_patterns(&patterns)
+        .unwrap_or_else(|_| panic!("{name} pack must satisfy the pattern schema"));
     patterns
+}
+
+static LINEAR_ALGEBRA_PATTERNS: LazyLock<Vec<FormulaPattern>> = LazyLock::new(|| {
+    load_patterns(
+        include_str!("../../../packs/linear-algebra/v1.json"),
+        "linear-algebra",
+    )
+});
+
+static PROBABILITY_PATTERNS: LazyLock<Vec<FormulaPattern>> = LazyLock::new(|| {
+    load_patterns(
+        include_str!("../../../packs/probability/v1.json"),
+        "probability",
+    )
 });
 
 #[derive(Clone, Debug, Default)]
@@ -101,12 +141,16 @@ pub(crate) fn analyze_formulas(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     shapes: &ShapeAnalysis,
+    consistency: &ConsistencyAnalysis,
 ) -> FormulaAnalysis {
     let index = SourceIndex::new(&document.content);
     let mut recognitions = Vec::new();
     for math in parsed.iter().take(MAX_REGIONS) {
         if recognitions.len() >= MAX_RECOGNITIONS {
             break;
+        }
+        if !math.region.closed {
+            continue;
         }
         let Some((content, content_start)) = math_content(document, math, &index) else {
             continue;
@@ -121,8 +165,9 @@ pub(crate) fn analyze_formulas(
             content_start + expression.end(),
         );
         let known = known_by_symbol(shapes.known_shapes_at(expression_range.start_offset));
+        let roles = roles_by_symbol(consistency.effective_roles_at(expression_range.start_offset));
         if let Some(recognition) =
-            recognize_expression(expression.as_str(), expression_range, &known)
+            recognize_expression(expression.as_str(), expression_range, &known, &roles)
         {
             recognitions.push(recognition);
         }
@@ -134,6 +179,7 @@ pub(crate) fn formula_completions(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     shapes: &ShapeAnalysis,
+    consistency: &ConsistencyAnalysis,
     offset: u32,
 ) -> Vec<FormulaCompletion> {
     let Some(math) = parsed.iter().find(|math| {
@@ -159,7 +205,16 @@ pub(crate) fn formula_completions(
     let Some(target_shape) = known.iter().find(|fact| fact.symbol == target) else {
         return Vec::new();
     };
-    let candidates = completion_candidates(target, &target_shape.shape, &known);
+    let roles = if matches!(target_shape.shape, Shape::Scalar)
+        && matches!(
+            target_shape.evidence.kind.as_str(),
+            "explicit-math" | "explicit-prose"
+        ) {
+        consistency.effective_roles_at(offset)
+    } else {
+        Vec::new()
+    };
+    let candidates = completion_candidates(target, &target_shape.shape, &known, &roles);
     candidates
         .into_iter()
         .take(MAX_COMPLETIONS)
@@ -168,17 +223,18 @@ pub(crate) fn formula_completions(
         .collect()
 }
 
-struct CompletionCandidate<'a> {
+struct CompletionCandidate {
     pattern: &'static FormulaPattern,
     latex: String,
-    facts: Vec<&'a KnownShape>,
+    evidence: Vec<Evidence>,
 }
 
-fn completion_candidates<'a>(
+fn completion_candidates(
     target: &str,
     target_shape: &Shape,
-    known: &'a [KnownShape],
-) -> Vec<CompletionCandidate<'a>> {
+    known: &[KnownShape],
+    roles: &[RoleInfo],
+) -> Vec<CompletionCandidate> {
     let inputs = known
         .iter()
         .filter(|fact| fact.symbol != target)
@@ -198,7 +254,7 @@ fn completion_candidates<'a>(
                         &mut candidates,
                         "matrix-vector-product",
                         &[(&left.symbol, "matrix"), (&right.symbol, "vector")],
-                        vec![*left, *right],
+                        vec![left.evidence.clone(), right.evidence.clone()],
                     );
                 }
                 (
@@ -210,7 +266,7 @@ fn completion_candidates<'a>(
                         &mut candidates,
                         "matrix-matrix-product",
                         &[(&left.symbol, "left"), (&right.symbol, "right")],
-                        vec![*left, *right],
+                        vec![left.evidence.clone(), right.evidence.clone()],
                     );
                 }
                 (Shape::Vector(left_length), Shape::Vector(right_length), Shape::Scalar)
@@ -220,7 +276,7 @@ fn completion_candidates<'a>(
                         &mut candidates,
                         "vector-inner-product",
                         &[(&left.symbol, "left"), (&right.symbol, "right")],
-                        vec![*left, *right],
+                        vec![left.evidence.clone(), right.evidence.clone()],
                     );
                 }
                 _ => {}
@@ -238,7 +294,7 @@ fn completion_candidates<'a>(
                 &mut candidates,
                 "matrix-transpose",
                 &[(&matrix.symbol, "matrix")],
-                vec![*matrix],
+                vec![matrix.evidence.clone()],
             );
         }
     }
@@ -257,11 +313,13 @@ fn completion_candidates<'a>(
                         &mut candidates,
                         "quadratic-form",
                         &[(&vector.symbol, "vector"), (&matrix.symbol, "matrix")],
-                        vec![*vector, *matrix],
+                        vec![vector.evidence.clone(), matrix.evidence.clone()],
                     );
                 }
             }
         }
+
+        probability_completion_candidates(&mut candidates, roles);
     }
 
     let mut seen = HashSet::new();
@@ -274,11 +332,70 @@ fn completion_candidates<'a>(
     candidates
 }
 
-fn push_candidate<'a>(
-    candidates: &mut Vec<CompletionCandidate<'a>>,
+fn probability_completion_candidates(
+    candidates: &mut Vec<CompletionCandidate>,
+    roles: &[RoleInfo],
+) {
+    let events = effective_roles(roles, "event");
+    let variables = effective_roles(roles, "random-variable");
+
+    for event in &events {
+        push_candidate(
+            candidates,
+            "event-probability",
+            &[(&event.symbol, "event")],
+            vec![event.evidence.clone()],
+        );
+    }
+
+    for event in &events {
+        for condition in &events {
+            if event.symbol == condition.symbol || !has_positive_probability_evidence(condition) {
+                continue;
+            }
+            push_candidate(
+                candidates,
+                "conditional-probability",
+                &[(&event.symbol, "event"), (&condition.symbol, "condition")],
+                vec![event.evidence.clone(), condition.evidence.clone()],
+            );
+        }
+    }
+
+    for variable in variables {
+        let binding = &[(&variable.symbol[..], "variable")];
+        let evidence = vec![variable.evidence.clone()];
+        push_candidate(candidates, "expectation", binding, evidence.clone());
+        push_candidate(candidates, "variance", binding, evidence);
+    }
+}
+
+fn effective_roles<'a>(roles: &'a [RoleInfo], role: &str) -> Vec<&'a RoleInfo> {
+    let mut symbols = HashSet::new();
+    roles
+        .iter()
+        .filter(|claim| claim.role == role && symbols.insert(claim.symbol.as_str()))
+        .collect()
+}
+
+fn has_positive_probability_evidence(role: &RoleInfo) -> bool {
+    let description = role
+        .description
+        .to_ascii_lowercase()
+        .replace(['-', '_'], " ")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    description.contains("positive probability")
+        || description.contains("nonzero probability")
+        || description.contains("probability greater than zero")
+}
+
+fn push_candidate(
+    candidates: &mut Vec<CompletionCandidate>,
     pattern_id: &str,
     bindings: &[(&str, &str)],
-    facts: Vec<&'a KnownShape>,
+    evidence: Vec<Evidence>,
 ) {
     let Some(pattern) = pattern(pattern_id) else {
         return;
@@ -290,7 +407,7 @@ fn push_candidate<'a>(
     candidates.push(CompletionCandidate {
         pattern,
         latex,
-        facts,
+        evidence,
     });
 }
 
@@ -298,13 +415,8 @@ fn completion(
     document: &ProjectDocument,
     offset: u32,
     rank: usize,
-    candidate: CompletionCandidate<'_>,
+    candidate: CompletionCandidate,
 ) -> FormulaCompletion {
-    let evidence = candidate
-        .facts
-        .iter()
-        .map(|fact| fact.evidence.clone())
-        .collect::<Vec<_>>();
     FormulaCompletion {
         pattern_id: candidate.pattern.id.clone(),
         title: candidate.latex.clone(),
@@ -316,7 +428,7 @@ fn completion(
         proposal: SemanticEditProposal {
             title: format!("Insert {}: {}", candidate.pattern.title, candidate.latex),
             safety: "review-required".into(),
-            evidence,
+            evidence: candidate.evidence,
             files: vec![SemanticEditFile {
                 file_id: document.file_id.clone(),
                 path: document.path.clone(),
@@ -338,7 +450,68 @@ fn recognize_expression(
     expression: &str,
     range: SourceRange,
     known: &BTreeMap<String, KnownShape>,
+    roles: &BTreeMap<String, Vec<RoleInfo>>,
 ) -> Option<FormulaRecognition> {
+    if let Some(captures) = CONDITIONAL_PROBABILITY.captures(expression) {
+        let event = role(roles, captures.get(1).unwrap().as_str(), "event")?;
+        let condition = role(roles, captures.get(2).unwrap().as_str(), "event")?;
+        if event.symbol == condition.symbol || !has_positive_probability_evidence(condition) {
+            return None;
+        }
+        return role_recognition(
+            "conditional-probability",
+            range,
+            vec![("event", event), ("condition", condition)],
+            FormulaConstraint {
+                kind: "scalar".into(),
+                dimensions: Vec::new(),
+                refinements: vec!["probability".into()],
+            },
+        );
+    }
+
+    if let Some(captures) = EVENT_PROBABILITY.captures(expression) {
+        let event = role(roles, captures.get(1).unwrap().as_str(), "event")?;
+        return role_recognition(
+            "event-probability",
+            range,
+            vec![("event", event)],
+            FormulaConstraint {
+                kind: "scalar".into(),
+                dimensions: Vec::new(),
+                refinements: vec!["probability".into()],
+            },
+        );
+    }
+
+    if let Some(captures) = EXPECTATION.captures(expression) {
+        let variable = role(roles, captures.get(1).unwrap().as_str(), "random-variable")?;
+        return role_recognition(
+            "expectation",
+            range,
+            vec![("variable", variable)],
+            FormulaConstraint {
+                kind: "scalar".into(),
+                dimensions: Vec::new(),
+                refinements: Vec::new(),
+            },
+        );
+    }
+
+    if let Some(captures) = VARIANCE.captures(expression) {
+        let variable = role(roles, captures.get(1).unwrap().as_str(), "random-variable")?;
+        return role_recognition(
+            "variance",
+            range,
+            vec![("variable", variable)],
+            FormulaConstraint {
+                kind: "scalar".into(),
+                dimensions: Vec::new(),
+                refinements: vec!["nonnegative".into()],
+            },
+        );
+    }
+
     if let Some(captures) = QUADRATIC_FORM.captures(expression) {
         let vector = captures.get(1).unwrap().as_str();
         let matrix = captures.get(2).unwrap().as_str();
@@ -467,6 +640,65 @@ fn recognition(
     })
 }
 
+fn role_recognition(
+    pattern_id: &str,
+    range: SourceRange,
+    facts: Vec<(&str, &RoleInfo)>,
+    result: FormulaConstraint,
+) -> Option<FormulaRecognition> {
+    let pattern = pattern(pattern_id)?;
+    let bindings = facts
+        .iter()
+        .map(|(parameter, role)| FormulaBinding {
+            parameter: (*parameter).into(),
+            symbol: role.symbol.clone(),
+            constraint: role_constraint(role),
+            evidence: role.evidence.clone(),
+        })
+        .collect::<Vec<_>>();
+    let mut source_ranges = facts
+        .iter()
+        .flat_map(|(_, role)| role.evidence.source_ranges.iter().cloned())
+        .collect::<Vec<_>>();
+    source_ranges.push(range.clone());
+    source_ranges.sort_by_key(|source| (source.start_offset, source.end_offset));
+    source_ranges.dedup();
+    let pattern_evidence = Evidence {
+        rule_id: format!("{}/{}", pattern.pack_id, pattern.id),
+        kind: "domain-pattern".into(),
+        strength: "strong".into(),
+        source_ranges,
+    };
+    let mut evidence = bindings
+        .iter()
+        .map(|binding| binding.evidence.clone())
+        .collect::<Vec<_>>();
+    evidence.push(pattern_evidence);
+    Some(FormulaRecognition {
+        pattern_id: pattern.id.clone(),
+        title: pattern.title.clone(),
+        pack_id: pattern.pack_id.clone(),
+        pack_version: pattern.pack_version.clone(),
+        range,
+        bindings,
+        result,
+        evidence,
+        rank: 100,
+    })
+}
+
+fn role_constraint(role: &RoleInfo) -> FormulaConstraint {
+    FormulaConstraint {
+        kind: role.role.clone(),
+        dimensions: Vec::new(),
+        refinements: if role.role == "event" && has_positive_probability_evidence(role) {
+            vec!["positive-probability".into()]
+        } else {
+            Vec::new()
+        },
+    }
+}
+
 fn known_by_symbol(known: Vec<KnownShape>) -> BTreeMap<String, KnownShape> {
     known
         .into_iter()
@@ -474,15 +706,33 @@ fn known_by_symbol(known: Vec<KnownShape>) -> BTreeMap<String, KnownShape> {
         .collect()
 }
 
+fn roles_by_symbol(roles: Vec<RoleInfo>) -> BTreeMap<String, Vec<RoleInfo>> {
+    let mut by_symbol = BTreeMap::<String, Vec<RoleInfo>>::new();
+    for role in roles {
+        by_symbol.entry(role.symbol.clone()).or_default().push(role);
+    }
+    by_symbol
+}
+
+fn role<'a>(
+    roles: &'a BTreeMap<String, Vec<RoleInfo>>,
+    symbol: &str,
+    expected: &str,
+) -> Option<&'a RoleInfo> {
+    roles.get(symbol)?.iter().find(|role| role.role == expected)
+}
+
 fn pattern(id: &str) -> Option<&'static FormulaPattern> {
     LINEAR_ALGEBRA_PATTERNS
         .iter()
+        .chain(PROBABILITY_PATTERNS.iter())
         .find(|pattern| pattern.id == id)
 }
 
 fn pattern_order(id: &str) -> usize {
     LINEAR_ALGEBRA_PATTERNS
         .iter()
+        .chain(PROBABILITY_PATTERNS.iter())
         .position(|pattern| pattern.id == id)
         .unwrap_or(usize::MAX)
 }
@@ -538,9 +788,12 @@ fn absolute_range(index: &SourceIndex, start: usize, end: usize) -> SourceRange 
 #[cfg(test)]
 mod tests {
     use super::{analyze_formulas, formula_completions};
+    use crate::consistency::{ConsistencyAnalysis, analyze_consistency};
     use crate::parser::{math_regions, parse_regions};
+    use crate::prose::analyze_prose;
     use crate::shape::analyze_shapes;
     use crate::{DocumentLanguage, ProjectDocument};
+    use serde::Deserialize;
 
     fn analyze(
         source: &str,
@@ -548,26 +801,45 @@ mod tests {
         ProjectDocument,
         Vec<crate::parser::ParsedMath>,
         crate::shape::ShapeAnalysis,
+        ConsistencyAnalysis,
     ) {
-        let regions = math_regions(source, DocumentLanguage::Latex);
+        analyze_language(source, DocumentLanguage::Latex)
+    }
+
+    fn analyze_language(
+        source: &str,
+        language: DocumentLanguage,
+    ) -> (
+        ProjectDocument,
+        Vec<crate::parser::ParsedMath>,
+        crate::shape::ShapeAnalysis,
+        ConsistencyAnalysis,
+    ) {
+        let regions = math_regions(source, language);
         let document = ProjectDocument {
             file_id: "main".into(),
-            path: "main.tex".into(),
-            language: DocumentLanguage::Latex,
+            path: if language == DocumentLanguage::Markdown {
+                "main.md".into()
+            } else {
+                "main.tex".into()
+            },
+            language,
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
         };
         let parsed = parse_regions(source, &regions);
-        let shapes = analyze_shapes(&document, &parsed, &[]);
-        (document, parsed, shapes)
+        let prose = analyze_prose(&document, &parsed);
+        let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
+        let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
+        (document, parsed, shapes, consistency)
     }
 
     #[test]
     fn recognizes_typed_linear_algebra_formulas() {
         let source = "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}$\n$y = Ax$";
-        let (document, parsed, shapes) = analyze(source);
-        let formulas = analyze_formulas(&document, &parsed, &shapes);
+        let (document, parsed, shapes, consistency) = analyze(source);
+        let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
         let offset = source.rfind("Ax").unwrap() as u32;
         let recognized = formulas.at(offset);
         assert_eq!(recognized[0].pattern_id, "matrix-vector-product");
@@ -577,9 +849,9 @@ mod tests {
     #[test]
     fn completes_a_typed_formula_slot_from_known_symbols() {
         let source = "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}, y \\in \\mathbb{R}^{m}$\n$y = $";
-        let (document, parsed, shapes) = analyze(source);
+        let (document, parsed, shapes, consistency) = analyze(source);
         let offset = source.rfind(" = ").unwrap() as u32 + 3;
-        let completions = formula_completions(&document, &parsed, &shapes, offset);
+        let completions = formula_completions(&document, &parsed, &shapes, &consistency, offset);
         assert!(
             completions
                 .iter()
@@ -597,8 +869,8 @@ mod tests {
     #[test]
     fn recognizes_inner_products_and_quadratic_forms() {
         let source = "$A \\in \\mathbb{R}^{n \\times n}, x \\in \\mathbb{R}^{n}, y \\in \\mathbb{R}^{n}$\n$s = x^{\\top}y$\n$q = x^{\\top}Ax$";
-        let (document, parsed, shapes) = analyze(source);
-        let formulas = analyze_formulas(&document, &parsed, &shapes);
+        let (document, parsed, shapes, consistency) = analyze(source);
+        let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
         assert_eq!(
             formulas.at(source.find("x^{\\top}y").unwrap() as u32)[0].pattern_id,
             "vector-inner-product"
@@ -607,5 +879,81 @@ mod tests {
             formulas.at(source.rfind("x^{\\top}Ax").unwrap() as u32)[0].pattern_id,
             "quadratic-form"
         );
+    }
+
+    #[test]
+    fn completes_probability_formulas_from_explicit_visible_roles() {
+        let source = "Let $A$ denote an event.\nLet $B$ denote an event of positive probability.\nLet $X$ denote a random variable.\n$p \\in \\mathbb{R}$\n$p = $";
+        let (document, parsed, shapes, consistency) =
+            analyze_language(source, DocumentLanguage::Markdown);
+        let offset = source.rfind(" = ").unwrap() as u32 + 3;
+        let completions = formula_completions(&document, &parsed, &shapes, &consistency, offset);
+        let titles = completions
+            .iter()
+            .map(|completion| completion.title.as_str())
+            .collect::<Vec<_>>();
+
+        assert!(titles.contains(&"\\mathbb{P}(A)"));
+        assert!(titles.contains(&"\\mathbb{P}(A \\mid B)"));
+        assert!(titles.contains(&"\\mathbb{E}[X]"));
+        assert!(titles.contains(&"\\operatorname{Var}(X)"));
+        assert!(!titles.contains(&"\\mathbb{P}(B \\mid A)"));
+        assert!(
+            completions
+                .iter()
+                .all(|completion| completion.proposal.safety == "review-required")
+        );
+    }
+
+    #[test]
+    fn does_not_offer_probability_formulas_for_a_derived_scalar_target() {
+        let source = "Let $X$ denote a random variable.\n$x \\in \\mathbb{R}^{n}, y \\in \\mathbb{R}^{n}$\n$s = x^{\\top}y$\n$s = $";
+        let (document, parsed, shapes, consistency) =
+            analyze_language(source, DocumentLanguage::Markdown);
+        let offset = source.rfind(" = ").unwrap() as u32 + 3;
+        let completions = formula_completions(&document, &parsed, &shapes, &consistency, offset);
+
+        assert!(completions.iter().all(|completion| {
+            !matches!(
+                completion.pattern_id.as_str(),
+                "event-probability" | "conditional-probability" | "expectation" | "variance"
+            )
+        }));
+    }
+
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Corpus {
+        false_positive_budget: usize,
+        cases: Vec<Case>,
+    }
+
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Case {
+        id: String,
+        content: String,
+        expected_patterns: Vec<String>,
+    }
+
+    #[test]
+    fn matches_the_labeled_probability_formula_corpus() {
+        let corpus: Corpus = serde_json::from_str(include_str!(
+            "../../../fixtures/v0.6/probability-formula-corpus.json"
+        ))
+        .unwrap();
+        assert_eq!(corpus.false_positive_budget, 0);
+
+        for case in corpus.cases {
+            let (document, parsed, shapes, consistency) =
+                analyze_language(&case.content, DocumentLanguage::Markdown);
+            let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
+            let actual = formulas
+                .all()
+                .iter()
+                .map(|formula| formula.pattern_id.clone())
+                .collect::<Vec<_>>();
+            assert_eq!(actual, case.expected_patterns, "corpus case {}", case.id);
+        }
     }
 }

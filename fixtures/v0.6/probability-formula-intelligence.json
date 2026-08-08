@@ -1,0 +1,27 @@
+{
+  "snapshot": {
+    "protocolVersion": 1,
+    "epoch": "parity:6",
+    "inventoryVersion": 1,
+    "projectId": "parity",
+    "mainFileId": "main",
+    "documents": [
+      {
+        "fileId": "main",
+        "path": "main.md",
+        "language": "markdown",
+        "content": "Let $A$ denote an event.\nLet $B$ denote an event of positive probability.\nLet $X$ denote a random variable.\n$p \\in \\mathbb{R}, c \\in \\mathbb{R}, e \\in \\mathbb{R}, v \\in \\mathbb{R}$\n$p = \\mathbb{P}(A)$\n$c = \\mathbb{P}(A \\mid B)$\n$e = \\mathbb{E}[X]$\n$v = \\operatorname{Var}(X)$\n$p = $",
+        "documentVersion": 1
+      }
+    ]
+  },
+  "queries": [
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaRecognition", "fileId": "main", "offset": 186 } },
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaRecognition", "fileId": "main", "offset": 206 } },
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaRecognition", "fileId": "main", "offset": 233 } },
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaRecognition", "fileId": "main", "offset": 253 } },
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "formulaCompletion", "fileId": "main", "offset": 281 } },
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 244 } },
+    { "protocolVersion": 1, "epoch": "parity:6", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "domainEvidence", "fileId": "main", "offset": 186 } }
+  ]
+}

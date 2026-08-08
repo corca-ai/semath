@@ -19,5 +19,62 @@
       "patterns": ["\\mathbb{P}", "\\mathbb{E}", "\\operatorname{Var}"]
     }
   ],
-  "patterns": []
+  "patterns": [
+    {
+      "id": "event-probability",
+      "title": "Event probability",
+      "matcher": "event-probability",
+      "parameters": [
+        { "id": "event", "constraint": { "kind": "event" } }
+      ],
+      "result": { "kind": "scalar", "refinements": ["probability"] },
+      "sideConditions": [
+        { "kind": "explicit-role", "left": "event", "right": "event" }
+      ],
+      "generationTemplate": "\\mathbb{P}({{event}})"
+    },
+    {
+      "id": "conditional-probability",
+      "title": "Conditional probability",
+      "matcher": "conditional-probability",
+      "parameters": [
+        { "id": "event", "constraint": { "kind": "event" } },
+        {
+          "id": "condition",
+          "constraint": { "kind": "event", "refinements": ["positive-probability"] }
+        }
+      ],
+      "result": { "kind": "scalar", "refinements": ["probability"] },
+      "sideConditions": [
+        { "kind": "positive-probability", "left": "condition", "right": "0" }
+      ],
+      "generationTemplate": "\\mathbb{P}({{event}} \\mid {{condition}})"
+    },
+    {
+      "id": "expectation",
+      "title": "Expectation",
+      "matcher": "expectation",
+      "parameters": [
+        { "id": "variable", "constraint": { "kind": "random-variable" } }
+      ],
+      "result": { "kind": "scalar" },
+      "sideConditions": [
+        { "kind": "explicit-role", "left": "variable", "right": "random-variable" }
+      ],
+      "generationTemplate": "\\mathbb{E}[{{variable}}]"
+    },
+    {
+      "id": "variance",
+      "title": "Variance",
+      "matcher": "variance",
+      "parameters": [
+        { "id": "variable", "constraint": { "kind": "random-variable" } }
+      ],
+      "result": { "kind": "scalar", "refinements": ["nonnegative"] },
+      "sideConditions": [
+        { "kind": "explicit-role", "left": "variable", "right": "random-variable" }
+      ],
+      "generationTemplate": "\\operatorname{Var}({{variable}})"
+    }
+  ]
 }
