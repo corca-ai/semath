@@ -157,6 +157,11 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
+    Inspection {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -348,6 +353,38 @@ pub struct EquationNode {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct EquationNodeSummary {
+    pub kind: String,
+    pub label: Option<String>,
+    pub range: SourceRange,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct RenamePreparation {
+    pub range: Option<SourceRange>,
+    pub placeholder: Option<String>,
+    pub rejection: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct InspectionInfo {
+    pub equation: Option<EquationNode>,
+    pub selection_path: Vec<EquationNodeSummary>,
+    pub symbol: Option<SymbolInfo>,
+    pub references: Vec<Location>,
+    pub diagnostics: Vec<SemanticDiagnostic>,
+    pub recognitions: Vec<FormulaRecognition>,
+    pub domains: Vec<DomainActivation>,
+    pub completions: Vec<FormulaCompletion>,
+    pub rewrites: Vec<FormulaRewrite>,
+    pub rename: RenamePreparation,
+    pub truncated: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct SemanticTextEdit {
     pub range: SourceRange,
     pub expected_text: String,
@@ -426,6 +463,9 @@ pub enum QueryValue {
     DomainActivations {
         activations: Vec<DomainActivation>,
         truncated: bool,
+    },
+    Inspection {
+        inspection: InspectionInfo,
     },
 }
 

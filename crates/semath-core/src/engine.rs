@@ -12,14 +12,20 @@ use crate::prose::analyze_prose;
 use crate::rewrite::formula_rewrites;
 use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
-    ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
-    ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
-    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, ShapeInfo,
-    SourceRange, SymbolInfo, UpdateResult,
+    ChangeEnvelope, DefinitionInfo, DocumentLanguage, EquationNode, EquationNodeSummary, Evidence,
+    InspectionInfo, Location, PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectSnapshot,
+    Query, QueryEnvelope, QueryResult, QueryValue, RenamePreparation, SemanticDiagnostic,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, ShapeInfo, SourceRange, SymbolInfo,
+    UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
 const MAX_SYMBOL_DIAGNOSTICS: usize = 8;
+const MAX_INSPECTION_DIAGNOSTICS: usize = 8;
+const MAX_INSPECTION_REFERENCES: usize = 32;
+const MAX_INSPECTION_SELECTION_DEPTH: usize = 16;
+const MAX_INSPECTION_TREE_DEPTH: usize = 12;
+const MAX_INSPECTION_TREE_NODES: usize = 128;
 
 #[derive(Debug, Error)]
 pub enum EngineError {
@@ -176,7 +182,8 @@ impl SemathEngine {
             | Query::FormulaRecognition { file_id, offset }
             | Query::FormulaCompletion { file_id, offset }
             | Query::FormulaRewrite { file_id, offset }
-            | Query::DomainEvidence { file_id, offset } => (file_id, Some(*offset)),
+            | Query::DomainEvidence { file_id, offset }
+            | Query::Inspection { file_id, offset } => (file_id, Some(*offset)),
             Query::Diagnostics { file_id } => (file_id, None),
         };
         let document = self
@@ -239,30 +246,7 @@ impl SemathEngine {
             }
             Query::SymbolInfo { .. } => QueryValue::SymbolInfo {
                 info: symbol.as_ref().map(|(name, occurrence)| {
-                    let mut definitions = self.definitions_for(name);
-                    let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
-                    definitions.truncate(MAX_SYMBOL_DEFINITIONS);
-                    let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
-                    let (roles, roles_truncated) = document.consistency.roles_at(name, offset);
-                    let (diagnostics, diagnostics_truncated) =
-                        symbol_diagnostics(document, name, offset, &shapes, hygiene_enabled);
-                    SymbolInfo {
-                        symbol: name.clone(),
-                        location: Location {
-                            file_id: document.document.file_id.clone(),
-                            path: document.document.path.clone(),
-                            range: occurrence.clone(),
-                        },
-                        definitions,
-                        shapes,
-                        roles,
-                        formulas: document.formulas.at(offset),
-                        diagnostics,
-                        truncated: definitions_truncated
-                            || shapes_truncated
-                            || roles_truncated
-                            || diagnostics_truncated,
-                    }
+                    self.symbol_info(document, name, occurrence, offset, hygiene_enabled)
                 }),
             },
             Query::Definition { .. } => QueryValue::Locations {
@@ -319,6 +303,77 @@ impl SemathEngine {
                 QueryValue::DomainActivations {
                     activations,
                     truncated,
+                }
+            }
+            Query::Inspection { .. } => {
+                let mut tree_budget = MAX_INSPECTION_TREE_NODES;
+                let mut tree_truncated = false;
+                let equation = parsed.and_then(|math| {
+                    bounded_equation_tree(&math.root, 0, &mut tree_budget, &mut tree_truncated)
+                });
+                let mut selection_path = Vec::new();
+                if let Some(math) = parsed {
+                    equation_selection_path(&math.root, offset, &mut selection_path);
+                }
+                let selection_truncated = selection_path.len() > MAX_INSPECTION_SELECTION_DEPTH;
+                selection_path.truncate(MAX_INSPECTION_SELECTION_DEPTH);
+
+                let symbol_info = symbol.as_ref().map(|(name, occurrence)| {
+                    self.symbol_info(document, name, occurrence, offset, hygiene_enabled)
+                });
+                let mut references = symbol
+                    .as_ref()
+                    .and_then(|(name, occurrence)| {
+                        self.resolve_definition(file_id, occurrence, name)
+                    })
+                    .map(|definition| self.references_for(&definition))
+                    .unwrap_or_default();
+                let references_truncated = references.len() > MAX_INSPECTION_REFERENCES;
+                references.truncate(MAX_INSPECTION_REFERENCES);
+
+                let mut diagnostics = document_diagnostics(document, hygiene_enabled)
+                    .into_iter()
+                    .filter(|diagnostic| {
+                        parsed.is_some_and(|math| {
+                            ranges_overlap(&diagnostic.range, &math.region.content_range)
+                        }) || diagnostic.range.contains(offset)
+                    })
+                    .collect::<Vec<_>>();
+                let diagnostics_truncated = diagnostics.len() > MAX_INSPECTION_DIAGNOSTICS;
+                diagnostics.truncate(MAX_INSPECTION_DIAGNOSTICS);
+
+                let (domains, domains_truncated) = document.domains.at(offset);
+                let recognitions = document.formulas.at(offset);
+                let completions = formula_completions(
+                    &document.document,
+                    &document.parsed,
+                    &document.shapes,
+                    &document.consistency,
+                    offset,
+                );
+                let rewrites = formula_rewrites(&document.document, &document.formulas, offset);
+                let rename = prepare_rename_info(parsed, offset);
+                let truncated = tree_truncated
+                    || selection_truncated
+                    || references_truncated
+                    || diagnostics_truncated
+                    || domains_truncated
+                    || symbol_info.as_ref().is_some_and(|info| info.truncated);
+
+                QueryValue::Inspection {
+                    inspection: InspectionInfo {
+                        equation,
+                        selection_path,
+                        symbol: symbol_info,
+                        references,
+                        diagnostics,
+                        recognitions,
+                        domains,
+                        completions,
+                        rewrites,
+                        rename,
+                        truncated,
+                    },
                 }
             }
         };
@@ -424,6 +479,96 @@ impl SemathEngine {
         });
         locations
     }
+
+    fn symbol_info(
+        &self,
+        document: &AnalyzedDocument,
+        name: &str,
+        occurrence: &SourceRange,
+        offset: u32,
+        hygiene_enabled: bool,
+    ) -> SymbolInfo {
+        let mut definitions = self.definitions_for(name);
+        let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
+        definitions.truncate(MAX_SYMBOL_DEFINITIONS);
+        let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
+        let (roles, roles_truncated) = document.consistency.roles_at(name, offset);
+        let (diagnostics, diagnostics_truncated) =
+            symbol_diagnostics(document, name, offset, &shapes, hygiene_enabled);
+        SymbolInfo {
+            symbol: name.into(),
+            location: Location {
+                file_id: document.document.file_id.clone(),
+                path: document.document.path.clone(),
+                range: occurrence.clone(),
+            },
+            definitions,
+            shapes,
+            roles,
+            formulas: document.formulas.at(offset),
+            diagnostics,
+            truncated: definitions_truncated
+                || shapes_truncated
+                || roles_truncated
+                || diagnostics_truncated,
+        }
+    }
+}
+
+fn bounded_equation_tree(
+    node: &EquationNode,
+    depth: usize,
+    budget: &mut usize,
+    truncated: &mut bool,
+) -> Option<EquationNode> {
+    if *budget == 0 {
+        *truncated = true;
+        return None;
+    }
+    *budget -= 1;
+    let mut children = Vec::new();
+    if depth >= MAX_INSPECTION_TREE_DEPTH {
+        *truncated |= !node.children.is_empty();
+    } else {
+        for child in &node.children {
+            let Some(child) = bounded_equation_tree(child, depth + 1, budget, truncated) else {
+                break;
+            };
+            children.push(child);
+        }
+    }
+    Some(EquationNode {
+        kind: node.kind.clone(),
+        label: node.label.clone(),
+        range: node.range.clone(),
+        children,
+    })
+}
+
+fn equation_selection_path(
+    node: &EquationNode,
+    offset: u32,
+    output: &mut Vec<EquationNodeSummary>,
+) {
+    if !node.range.contains(offset) {
+        return;
+    }
+    output.push(EquationNodeSummary {
+        kind: node.kind.clone(),
+        label: node.label.clone(),
+        range: node.range.clone(),
+    });
+    if let Some(child) = node
+        .children
+        .iter()
+        .find(|child| child.range.contains(offset))
+    {
+        equation_selection_path(child, offset, output);
+    }
+}
+
+fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
+    left.start_offset < right.end_offset && right.start_offset < left.end_offset
 }
 
 fn document_diagnostics(
@@ -466,6 +611,15 @@ fn symbol_diagnostics(
 }
 
 fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
+    let preparation = prepare_rename_info(parsed, offset);
+    QueryValue::RenamePreparation {
+        range: preparation.range,
+        placeholder: preparation.placeholder,
+        rejection: preparation.rejection,
+    }
+}
+
+fn prepare_rename_info(parsed: Option<&ParsedMath>, offset: u32) -> RenamePreparation {
     let Some(parsed) = parsed else {
         return rename_preparation_rejection("The cursor is not inside a math expression.");
     };
@@ -480,7 +634,7 @@ fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
             "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
         );
     };
-    QueryValue::RenamePreparation {
+    RenamePreparation {
         range: parsed
             .symbols
             .iter()
@@ -491,8 +645,8 @@ fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
     }
 }
 
-fn rename_preparation_rejection(message: &str) -> QueryValue {
-    QueryValue::RenamePreparation {
+fn rename_preparation_rejection(message: &str) -> RenamePreparation {
+    RenamePreparation {
         range: None,
         placeholder: None,
         rejection: Some(message.into()),
@@ -655,6 +809,77 @@ mod tests {
             .unwrap();
         let result: serde_json::Value = serde_json::from_slice(&result).unwrap();
         assert_eq!(result["value"]["symbol"], "x");
+    }
+
+    #[test]
+    fn inspects_a_formula_from_one_coherent_snapshot() {
+        let content = "Let $A$ denote an event of positive probability.\nLet $B$ denote an event of positive probability.\n$p = \\mathbb{P}(A \\mid B)$";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let offset = content.rfind("A \\mid").unwrap() as u32;
+        let result = engine
+            .query(query(Query::Inspection {
+                file_id: "main".into(),
+                offset,
+            }))
+            .unwrap();
+        let QueryValue::Inspection { inspection } = result.value else {
+            panic!("expected inspection")
+        };
+
+        assert!(inspection.equation.is_some());
+        assert!(inspection.selection_path.len() >= 2);
+        assert_eq!(
+            inspection.symbol.as_ref().map(|info| info.symbol.as_str()),
+            Some("A")
+        );
+        assert!(!inspection.references.is_empty());
+        assert!(
+            inspection
+                .domains
+                .iter()
+                .any(|domain| domain.pack_id == "probability")
+        );
+        assert_eq!(
+            inspection.recognitions[0].pattern_id,
+            "conditional-probability"
+        );
+        assert_eq!(inspection.rewrites.len(), 2);
+        assert!(inspection.rename.range.is_none());
+        assert!(!inspection.truncated);
+    }
+
+    #[test]
+    fn bounds_large_inspection_trees_and_exposes_rename_availability() {
+        let large_formula = format!("$x={}$", "a+".repeat(140));
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(&large_formula)).unwrap();
+        let result = engine
+            .query(query(Query::Inspection {
+                file_id: "main".into(),
+                offset: 1,
+            }))
+            .unwrap();
+        let QueryValue::Inspection { inspection } = result.value else {
+            panic!("expected inspection")
+        };
+        assert!(inspection.truncated);
+
+        let content = "$\\sum_{i=1}^{n} x_i$";
+        engine.reset(snapshot(content)).unwrap();
+        let offset = content.find('i').unwrap() as u32;
+        let result = engine
+            .query(query(Query::Inspection {
+                file_id: "main".into(),
+                offset,
+            }))
+            .unwrap();
+        let QueryValue::Inspection { inspection } = result.value else {
+            panic!("expected inspection")
+        };
+        assert_eq!(inspection.rename.placeholder.as_deref(), Some("i"));
+        assert!(inspection.rename.range.is_some());
+        assert!(inspection.rename.rejection.is_none());
     }
 
     #[test]

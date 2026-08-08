@@ -64,7 +64,8 @@ export type SemathQuery =
   | { fileId: string; kind: "formulaRecognition"; offset: number }
   | { fileId: string; kind: "formulaCompletion"; offset: number }
   | { fileId: string; kind: "formulaRewrite"; offset: number }
-  | { fileId: string; kind: "domainEvidence"; offset: number };
+  | { fileId: string; kind: "domainEvidence"; offset: number }
+  | { fileId: string; kind: "inspection"; offset: number };
 
 export interface QueryEnvelope {
   analysisGeneration: number;
@@ -77,6 +78,12 @@ export interface QueryEnvelope {
 
 export interface EquationNode {
   children: readonly EquationNode[];
+  kind: string;
+  label?: string;
+  range: SourceRange;
+}
+
+export interface EquationNodeSummary {
   kind: string;
   label?: string;
   range: SourceRange;
@@ -226,6 +233,26 @@ export interface FormulaRewrite {
   title: string;
 }
 
+export interface RenamePreparation {
+  placeholder?: string;
+  range?: SourceRange;
+  rejection?: string;
+}
+
+export interface InspectionInfo {
+  completions: readonly FormulaCompletion[];
+  diagnostics: readonly SemanticDiagnostic[];
+  domains: readonly DomainActivation[];
+  equation?: EquationNode;
+  recognitions: readonly FormulaRecognition[];
+  references: readonly Location[];
+  rename: RenamePreparation;
+  rewrites: readonly FormulaRewrite[];
+  selectionPath: readonly EquationNodeSummary[];
+  symbol?: SymbolInfo;
+  truncated: boolean;
+}
+
 export interface SemanticTextEdit {
   expectedText: string;
   range: SourceRange;
@@ -292,7 +319,8 @@ export type QueryValue =
       activations: readonly DomainActivation[];
       kind: "domainActivations";
       truncated: boolean;
-    };
+    }
+  | { inspection: InspectionInfo; kind: "inspection" };
 
 export interface QueryResult {
   analysisGeneration: number;

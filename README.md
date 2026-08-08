@@ -55,6 +55,13 @@ revision-checked review flow; they are never automatic edits or diagnostic quick
 closed math region has exactly one recognized rewrite target, its action remains available from
 the left-hand side, delimiters, and the position immediately after the formula.
 
+Version 0.8 adds one bounded `inspection` query for editor-facing semantic inspection. A single
+snapshot now returns the equation tree and selected node path together with symbol definitions,
+references, diagnostics, formula/domain evidence, completion and rewrite proposals, and bound-
+variable rename availability. Tree depth, node count, references, diagnostics, and existing claim
+collections are capped and report truncation, so hosts do not need to coordinate many independently
+timed queries or accept an unbounded sidebar response.
+
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
 See [draft.md](./draft.md) for the architecture and roadmap.
@@ -68,5 +75,7 @@ bun test
 ```
 
 On a supported build host, `scripts/build-wasm.sh` regenerates the checked-in WASM package and
-its checksums. CI verifies those committed checksums, then independently rebuilds the package and
-checks native/WASM behavior parity plus the generated JavaScript and TypeScript ABI.
+its checksums. From an Apple Silicon development machine, set `SEMATH_BUILD_HOST` to a separate
+x86_64 Linux host and run `scripts/build-wasm-remote.sh`; it syncs an isolated source tree, builds,
+and retrieves only the artifacts. CI verifies the committed checksums, then independently rebuilds
+the package and checks native/WASM behavior parity plus the generated JavaScript and TypeScript ABI.
