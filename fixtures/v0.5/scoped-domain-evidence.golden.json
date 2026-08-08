@@ -39,7 +39,7 @@
           },
           {
             "packId": "linear-algebra",
-            "packVersion": "1.1.0",
+            "packVersion": "1.2.0",
             "title": "Linear algebra",
             "strength": "strong",
             "scopeKind": "equation",
@@ -97,7 +97,7 @@
           },
           {
             "packId": "probability",
-            "packVersion": "1.1.0",
+            "packVersion": "1.2.0",
             "title": "Probability and statistics",
             "strength": "weak",
             "scopeKind": "section",
@@ -150,7 +150,7 @@
                 "sourceRanges": [
                   {
                     "startOffset": 101,
-                    "endOffset": 134
+                    "endOffset": 133
                   },
                   {
                     "startOffset": 101,
@@ -181,7 +181,7 @@
           },
           {
             "packId": "linear-algebra",
-            "packVersion": "1.1.0",
+            "packVersion": "1.2.0",
             "title": "Linear algebra",
             "strength": "weak",
             "scopeKind": "section",
@@ -220,7 +220,7 @@
           },
           {
             "packId": "probability",
-            "packVersion": "1.1.0",
+            "packVersion": "1.2.0",
             "title": "Probability and statistics",
             "strength": "weak",
             "scopeKind": "section",

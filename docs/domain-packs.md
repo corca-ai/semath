@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath v0.11 ships one schema-2 catalog consumed by domain activation, formula
+Semath v0.12 ships one schema-2 catalog consumed by domain activation, formula
 recognition, completion, and rewrite orchestration. `semath/packs` exposes the
 same metadata to TypeScript consumers; `semath-pack` validates the built-ins or
 one or more JSON paths without CorTeX.
@@ -40,11 +40,14 @@ action-capable typed forms.
 | Optimization and ML | min/max, constraints, Lagrangians, updates, least squares, regularization, sigmoid/softmax, empirical risk, cross-entropy | 12 | recognition only |
 | Discrete mathematics | sets, quantifiers, implication, combinatorics, recurrences, graph degree/Laplacian | 14 | recognition only |
 
-The recognition corpus has one positive case for every recognition-only entry
-and derives an unfinished-input adversarial case from each. Existing typed
-linear-algebra and probability corpora retain zero-known-false-edit gates.
+Every entry is exercised through at least five supported surfaces and five
+structural refusals. Thirteen focused collision documents cover every pair of
+packs plus within-pack binder and estimator ambiguities. The nine action-capable
+patterns have a separate exact-result corpus; recognition-only entries must
+produce no edits. Native and release WASM must agree on results, ranges,
+bindings, conditions, ranks, and refusals.
 
-Deliberately unsupported in v0.11 are equivalence execution, theorem-assumption
+Deliberately unsupported in v0.12 are equivalence execution, theorem-assumption
 proof, convergence/convexity inference, arbitrary user regex loading, physical
 units, and automatic logical rewrites. Those forms remain recognition-only or
 unknown until stronger semantics and calibration exist.

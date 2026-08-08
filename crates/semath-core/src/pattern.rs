@@ -2,13 +2,14 @@ use std::collections::{BTreeMap, HashSet};
 use std::sync::LazyLock;
 
 use crate::consistency::ConsistencyAnalysis;
+use crate::matcher::primitive_matcher;
 use crate::pack::{PackPattern, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::shape::{KnownShape, Shape, ShapeAnalysis};
 use crate::{
-    Evidence, FormulaBinding, FormulaCompletion, FormulaConditionInfo, FormulaConstraint,
-    FormulaRecognition, ProjectDocument, RoleInfo, SemanticEditFile, SemanticEditProposal,
-    SemanticTextEdit, SourceIndex, SourceRange,
+    EquationNode, Evidence, FormulaBinding, FormulaCompletion, FormulaConditionInfo,
+    FormulaConstraint, FormulaRecognition, ProjectDocument, RoleInfo, SemanticEditFile,
+    SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
 };
 use regex::Regex;
 
@@ -22,65 +23,54 @@ static TRIMMED_EXPRESSION: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)^\s*(\S(?:.*\S)?)\s*$").unwrap());
 static COMPLETION_TARGET: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"([A-Za-z])\s*=\s*$").unwrap());
-static BINARY_PRODUCT: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*(?:\\cdot\s*)?([A-Za-z])\s*$").unwrap());
-static TRANSPOSE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*$").unwrap());
-static INNER_PRODUCT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*([A-Za-z])\s*$").unwrap()
-});
-static QUADRATIC_FORM: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*([A-Za-z])\s*([A-Za-z])\s*$")
-        .unwrap()
-});
-static CONDITIONAL_PROBABILITY: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"^\s*\\mathbb\s*\{\s*P\s*\}\s*(?:\\left\s*)?\(\s*([A-Za-z])\s*(?:\\mid|\\vert|\|)\s*([A-Za-z])\s*(?:\\right\s*)?\)\s*$",
-    )
-    .unwrap()
-});
-static EVENT_PROBABILITY: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"^\s*\\mathbb\s*\{\s*P\s*\}\s*(?:\\left\s*)?\(\s*([A-Za-z])\s*(?:\\right\s*)?\)\s*$",
-    )
-    .unwrap()
-});
-static EXPECTATION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"^\s*\\mathbb\s*\{\s*E\s*\}\s*(?:\\left\s*)?\[\s*([A-Za-z])\s*(?:\\right\s*)?\]\s*$",
-    )
-    .unwrap()
-});
-static VARIANCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"^\s*\\(?:operatorname|mathrm)\s*\{\s*Var\s*\}\s*(?:\\left\s*)?\(\s*([A-Za-z])\s*(?:\\right\s*)?\)\s*$",
-    )
-    .unwrap()
-});
 
-struct CompiledRegexPattern {
+struct CompiledPackPattern {
     pattern: &'static PackPattern,
     regex: Regex,
+    parameter_captures: Vec<Vec<usize>>,
 }
 
-static REGEX_PATTERNS: LazyLock<Vec<CompiledRegexPattern>> = LazyLock::new(|| {
+static COMPILED_PATTERNS: LazyLock<Vec<CompiledPackPattern>> = LazyLock::new(|| {
     built_in_packs()
         .iter()
         .flat_map(|pack| &pack.patterns)
-        .filter(|pattern| pattern.matcher.primitive == "regex-captures")
-        .map(|pattern| CompiledRegexPattern {
-            pattern,
-            regex: Regex::new(
-                pattern
-                    .matcher
-                    .expression
-                    .as_deref()
-                    .expect("validated regex matcher has an expression"),
-            )
-            .expect("validated pack regex compiles"),
+        .map(|pattern| {
+            let (expression, parameter_captures) = if pattern.matcher.primitive == "regex-captures"
+            {
+                (
+                    pattern
+                        .matcher
+                        .expression
+                        .as_deref()
+                        .expect("validated regex matcher has an expression"),
+                    (1..=pattern.parameters.len())
+                        .map(|capture| vec![capture])
+                        .collect(),
+                )
+            } else {
+                let spec = primitive_matcher(&pattern.matcher.primitive)
+                    .expect("validated primitive matcher exists");
+                (
+                    spec.expression,
+                    spec.parameter_captures
+                        .iter()
+                        .map(|captures| captures.to_vec())
+                        .collect(),
+                )
+            };
+            CompiledPackPattern {
+                pattern,
+                regex: Regex::new(expression).expect("validated pack matcher compiles"),
+                parameter_captures,
+            }
         })
         .collect()
 });
+
+struct MatchedRecognition {
+    recognition: FormulaRecognition,
+    specificity: usize,
+}
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct FormulaAnalysis {
@@ -135,42 +125,66 @@ pub(crate) fn analyze_formulas(
         );
         let known = known_by_symbol(shapes.known_shapes_at(expression_range.start_offset));
         let roles = roles_by_symbol(consistency.effective_roles_at(expression_range.start_offset));
-        let mut found = recognize_legacy_expression(
-            expression.as_str(),
-            expression_range.clone(),
-            &known,
-            &roles,
-        )
-        .into_iter()
-        .collect::<Vec<_>>();
+        let mut found = Vec::new();
         if let Some(full_expression) = full_expression {
-            found.extend(recognize_regex_patterns(
+            let full_range = absolute_range(
+                &index,
+                content_start + full_expression.start(),
+                content_start + full_expression.end(),
+            );
+            found.extend(recognize_pack_patterns(
                 full_expression.as_str(),
-                absolute_range(
-                    &index,
-                    content_start + full_expression.start(),
-                    content_start + full_expression.end(),
-                ),
+                full_range.clone(),
                 content_start + full_expression.start(),
                 &index,
+                &math.root,
                 &known,
                 &roles,
             ));
+            if let Some((transparent, transparent_start)) =
+                transparent_math_body(document, math, &index)
+            {
+                found.extend(recognize_pack_patterns(
+                    transparent,
+                    full_range.clone(),
+                    transparent_start,
+                    &index,
+                    &math.root,
+                    &known,
+                    &roles,
+                ));
+                if let Some(assignment) = ASSIGNMENT
+                    .captures(transparent)
+                    .and_then(|captures| captures.get(1))
+                {
+                    found.extend(recognize_pack_patterns(
+                        assignment.as_str(),
+                        full_range,
+                        transparent_start + assignment.start(),
+                        &index,
+                        &math.root,
+                        &known,
+                        &roles,
+                    ));
+                }
+            }
         }
         if full_expression.is_some_and(|full| {
             full.start() != expression.start() || full.end() != expression.end()
         }) {
-            found.extend(recognize_regex_patterns(
+            found.extend(recognize_pack_patterns(
                 expression.as_str(),
                 expression_range,
                 content_start + expression.start(),
                 &index,
+                &math.root,
                 &known,
                 &roles,
             ));
         }
         let mut seen = HashSet::new();
-        found.retain(|recognition| {
+        found.retain(|matched| {
+            let recognition = &matched.recognition;
             seen.insert((
                 recognition.pack_id.clone(),
                 recognition.pattern_id.clone(),
@@ -178,9 +192,39 @@ pub(crate) fn analyze_formulas(
                 recognition.range.end_offset,
             ))
         });
+        let recognized_ranges = found
+            .iter()
+            .map(|matched| matched.recognition.range.clone())
+            .collect::<Vec<_>>();
+        found.retain(|matched| {
+            let range = &matched.recognition.range;
+            !recognized_ranges.iter().any(|nested| {
+                nested.start_offset >= range.start_offset
+                    && nested.end_offset <= range.end_offset
+                    && (nested.start_offset > range.start_offset
+                        || nested.end_offset < range.end_offset)
+            })
+        });
+        let mut best_by_range = BTreeMap::<(u32, u32), usize>::new();
+        for matched in &found {
+            let range = &matched.recognition.range;
+            best_by_range
+                .entry((range.start_offset, range.end_offset))
+                .and_modify(|best| *best = (*best).max(matched.specificity))
+                .or_insert(matched.specificity);
+        }
+        found.retain(|matched| {
+            let range = &matched.recognition.range;
+            best_by_range.get(&(range.start_offset, range.end_offset)) == Some(&matched.specificity)
+        });
+        found.sort_by(|left, right| {
+            pattern_order(&left.recognition.pattern_id)
+                .cmp(&pattern_order(&right.recognition.pattern_id))
+        });
         recognitions.extend(
             found
                 .into_iter()
+                .map(|matched| matched.recognition)
                 .take(MAX_RECOGNITIONS.saturating_sub(recognitions.len())),
         );
     }
@@ -460,165 +504,19 @@ fn completion(
     }
 }
 
-fn recognize_legacy_expression(
-    expression: &str,
-    range: SourceRange,
-    known: &BTreeMap<String, KnownShape>,
-    roles: &BTreeMap<String, Vec<RoleInfo>>,
-) -> Option<FormulaRecognition> {
-    if let Some(captures) = CONDITIONAL_PROBABILITY.captures(expression) {
-        let event = role(roles, captures.get(1).unwrap().as_str(), "event")?;
-        let condition = role(roles, captures.get(2).unwrap().as_str(), "event")?;
-        if event.symbol == condition.symbol || !has_positive_probability_evidence(condition) {
-            return None;
-        }
-        return role_recognition(
-            "conditional-probability",
-            range,
-            vec![("event", event), ("condition", condition)],
-            FormulaConstraint {
-                kind: "scalar".into(),
-                dimensions: Vec::new(),
-                refinements: vec!["probability".into()],
-            },
-        );
-    }
-
-    if let Some(captures) = EVENT_PROBABILITY.captures(expression) {
-        let event = role(roles, captures.get(1).unwrap().as_str(), "event")?;
-        return role_recognition(
-            "event-probability",
-            range,
-            vec![("event", event)],
-            FormulaConstraint {
-                kind: "scalar".into(),
-                dimensions: Vec::new(),
-                refinements: vec!["probability".into()],
-            },
-        );
-    }
-
-    if let Some(captures) = EXPECTATION.captures(expression) {
-        let variable = role(roles, captures.get(1).unwrap().as_str(), "random-variable")?;
-        return role_recognition(
-            "expectation",
-            range,
-            vec![("variable", variable)],
-            FormulaConstraint {
-                kind: "scalar".into(),
-                dimensions: Vec::new(),
-                refinements: Vec::new(),
-            },
-        );
-    }
-
-    if let Some(captures) = VARIANCE.captures(expression) {
-        let variable = role(roles, captures.get(1).unwrap().as_str(), "random-variable")?;
-        return role_recognition(
-            "variance",
-            range,
-            vec![("variable", variable)],
-            FormulaConstraint {
-                kind: "scalar".into(),
-                dimensions: Vec::new(),
-                refinements: vec!["nonnegative".into()],
-            },
-        );
-    }
-
-    if let Some(captures) = QUADRATIC_FORM.captures(expression) {
-        let vector = captures.get(1).unwrap().as_str();
-        let matrix = captures.get(2).unwrap().as_str();
-        let trailing = captures.get(3).unwrap().as_str();
-        if vector != trailing {
-            return None;
-        }
-        let vector_fact = known.get(vector)?;
-        let matrix_fact = known.get(matrix)?;
-        if let (Shape::Vector(length), Shape::Matrix(rows, columns)) =
-            (&vector_fact.shape, &matrix_fact.shape)
-            && length == rows
-            && length == columns
-        {
-            return recognition(
-                "quadratic-form",
-                range,
-                vec![("vector", vector_fact), ("matrix", matrix_fact)],
-                Shape::Scalar,
-            );
-        }
-        return None;
-    }
-
-    if let Some(captures) = INNER_PRODUCT.captures(expression) {
-        let left = known.get(captures.get(1).unwrap().as_str())?;
-        let right = known.get(captures.get(2).unwrap().as_str())?;
-        if let (Shape::Vector(left_length), Shape::Vector(right_length)) =
-            (&left.shape, &right.shape)
-            && left_length == right_length
-        {
-            return recognition(
-                "vector-inner-product",
-                range,
-                vec![("left", left), ("right", right)],
-                Shape::Scalar,
-            );
-        }
-        return None;
-    }
-
-    if let Some(captures) = TRANSPOSE.captures(expression) {
-        let matrix = known.get(captures.get(1).unwrap().as_str())?;
-        if let Shape::Matrix(rows, columns) = &matrix.shape {
-            return recognition(
-                "matrix-transpose",
-                range,
-                vec![("matrix", matrix)],
-                Shape::Matrix(columns.clone(), rows.clone()),
-            );
-        }
-        return None;
-    }
-
-    if let Some(captures) = BINARY_PRODUCT.captures(expression) {
-        let left = known.get(captures.get(1).unwrap().as_str())?;
-        let right = known.get(captures.get(2).unwrap().as_str())?;
-        match (&left.shape, &right.shape) {
-            (Shape::Matrix(rows, inner), Shape::Vector(length)) if inner == length => recognition(
-                "matrix-vector-product",
-                range,
-                vec![("matrix", left), ("vector", right)],
-                Shape::Vector(rows.clone()),
-            ),
-            (Shape::Matrix(rows, inner), Shape::Matrix(right_rows, columns))
-                if inner == right_rows =>
-            {
-                recognition(
-                    "matrix-matrix-product",
-                    range,
-                    vec![("left", left), ("right", right)],
-                    Shape::Matrix(rows.clone(), columns.clone()),
-                )
-            }
-            _ => None,
-        }
-    } else {
-        None
-    }
-}
-
-fn recognize_regex_patterns(
+fn recognize_pack_patterns(
     expression: &str,
     range: SourceRange,
     expression_byte_start: usize,
     index: &SourceIndex,
+    root: &EquationNode,
     known: &BTreeMap<String, KnownShape>,
     roles: &BTreeMap<String, Vec<RoleInfo>>,
-) -> Vec<FormulaRecognition> {
-    if !complete_expression_surface(expression) {
+) -> Vec<MatchedRecognition> {
+    if !complete_expression_surface(expression) || !structurally_complete_span(root, &range) {
         return Vec::new();
     }
-    REGEX_PATTERNS
+    COMPILED_PATTERNS
         .iter()
         .filter_map(|compiled| {
             let captures = compiled.regex.captures(expression)?;
@@ -626,6 +524,7 @@ fn recognize_regex_patterns(
             if whole.start() != 0 || whole.end() != expression.len() {
                 return None;
             }
+            let specificity = match_specificity(expression.len(), &captures, compiled);
             let mut dimensions = BTreeMap::<String, String>::new();
             let bindings = compiled
                 .pattern
@@ -633,22 +532,43 @@ fn recognize_regex_patterns(
                 .iter()
                 .enumerate()
                 .map(|(index_in_pattern, parameter)| {
-                    let capture = captures.get(index_in_pattern + 1)?;
+                    let mut symbol = None;
+                    let mut ranges = Vec::new();
+                    for capture_index in &compiled.parameter_captures[index_in_pattern] {
+                        let Some(capture) = captures.get(*capture_index) else {
+                            return parameter.optional.then_some(None);
+                        };
+                        let (captured, relative_start, relative_end) =
+                            trimmed_capture(capture.as_str())?;
+                        if symbol.is_some_and(|existing| existing != captured) {
+                            return None;
+                        }
+                        symbol = Some(captured);
+                        let capture_range = absolute_range(
+                            index,
+                            expression_byte_start + capture.start() + relative_start,
+                            expression_byte_start + capture.start() + relative_end,
+                        );
+                        if !structurally_complete_span(root, &capture_range) {
+                            return None;
+                        }
+                        ranges.push(capture_range);
+                    }
                     regex_binding(
                         compiled.pattern,
                         parameter,
-                        capture.as_str(),
-                        absolute_range(
-                            index,
-                            expression_byte_start + capture.start(),
-                            expression_byte_start + capture.end(),
-                        ),
+                        symbol?,
+                        ranges,
                         known,
                         roles,
                         &mut dimensions,
                     )
+                    .map(Some)
                 })
-                .collect::<Option<Vec<_>>>()?;
+                .collect::<Option<Vec<_>>>()?
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
             if !generic_side_conditions_hold(compiled.pattern, &bindings) {
                 return None;
             }
@@ -670,29 +590,115 @@ fn recognize_regex_patterns(
                 .map(|binding| binding.evidence.clone())
                 .collect::<Vec<_>>();
             evidence.push(pattern_evidence);
-            Some(FormulaRecognition {
-                pattern_id: compiled.pattern.id.clone(),
-                title: compiled.pattern.title.clone(),
-                description: compiled.pattern.description.clone(),
-                description_key: compiled.pattern.description_key.clone(),
-                maturity: compiled.pattern.maturity.as_str().into(),
-                status: if compiled.pattern.side_conditions.is_empty() {
-                    "recognized"
-                } else {
-                    "verified"
-                }
-                .into(),
-                pack_id: compiled.pattern.pack_id.clone(),
-                pack_version: compiled.pattern.pack_version.clone(),
-                range: range.clone(),
-                bindings,
-                result: substitute_dimensions(&compiled.pattern.result, &dimensions),
-                conditions: verified_conditions(compiled.pattern),
-                evidence,
-                rank: 50,
+            Some(MatchedRecognition {
+                recognition: FormulaRecognition {
+                    pattern_id: compiled.pattern.id.clone(),
+                    title: compiled.pattern.title.clone(),
+                    description: compiled.pattern.description.clone(),
+                    description_key: compiled.pattern.description_key.clone(),
+                    maturity: compiled.pattern.maturity.as_str().into(),
+                    status: if compiled.pattern.side_conditions.is_empty() {
+                        "recognized"
+                    } else {
+                        "verified"
+                    }
+                    .into(),
+                    pack_id: compiled.pattern.pack_id.clone(),
+                    pack_version: compiled.pattern.pack_version.clone(),
+                    range: range.clone(),
+                    bindings,
+                    result: substitute_dimensions(&compiled.pattern.result, &dimensions),
+                    conditions: verified_conditions(compiled.pattern),
+                    evidence,
+                    rank: if compiled.pattern.maturity.as_str() == "recognition" {
+                        50
+                    } else {
+                        100
+                    },
+                },
+                specificity,
             })
         })
         .collect()
+}
+
+fn trimmed_capture(captured: &str) -> Option<(&str, usize, usize)> {
+    let trimmed_start = captured.len() - captured.trim_start().len();
+    let trimmed = captured.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    Some((trimmed, trimmed_start, trimmed_start + trimmed.len()))
+}
+
+fn match_specificity(
+    expression_len: usize,
+    captures: &regex::Captures<'_>,
+    compiled: &CompiledPackPattern,
+) -> usize {
+    let mut ranges = compiled
+        .parameter_captures
+        .iter()
+        .flatten()
+        .filter_map(|index| captures.get(*index))
+        .map(|capture| (capture.start(), capture.end()))
+        .collect::<Vec<_>>();
+    ranges.sort_unstable();
+    let mut captured_bytes = 0;
+    let mut current: Option<(usize, usize)> = None;
+    for (start, end) in ranges {
+        match current {
+            Some((current_start, current_end)) if start <= current_end => {
+                current = Some((current_start, current_end.max(end)));
+            }
+            Some((current_start, current_end)) => {
+                captured_bytes += current_end - current_start;
+                current = Some((start, end));
+            }
+            None => current = Some((start, end)),
+        }
+    }
+    if let Some((start, end)) = current {
+        captured_bytes += end - start;
+    }
+    expression_len.saturating_sub(captured_bytes)
+}
+
+fn structurally_complete_span(node: &EquationNode, range: &SourceRange) -> bool {
+    if node.range == *range {
+        return true;
+    }
+    if range.start_offset < node.range.start_offset || range.end_offset > node.range.end_offset {
+        return false;
+    }
+    if node
+        .children
+        .iter()
+        .any(|child| structurally_complete_span(child, range))
+    {
+        return true;
+    }
+    if node.kind != "sequence" {
+        return false;
+    }
+    let selected = node
+        .children
+        .iter()
+        .filter(|child| {
+            child.range.start_offset < range.end_offset
+                && range.start_offset < child.range.end_offset
+        })
+        .collect::<Vec<_>>();
+    selected.first().is_some_and(|first| {
+        first.range.start_offset == range.start_offset
+            && selected
+                .last()
+                .is_some_and(|last| last.range.end_offset == range.end_offset)
+            && selected.iter().all(|child| {
+                child.range.start_offset >= range.start_offset
+                    && child.range.end_offset <= range.end_offset
+            })
+    })
 }
 
 fn complete_expression_surface(expression: &str) -> bool {
@@ -719,35 +725,20 @@ fn balanced_pair(expression: &str, open: char, close: char) -> bool {
     depth == 0
 }
 
-fn balanced_capture_surface(expression: &str) -> bool {
-    !expression.trim().is_empty()
-        && balanced_pair(expression, '{', '}')
-        && balanced_pair(expression, '(', ')')
-        && balanced_pair(expression, '[', ']')
-}
-
 #[allow(clippy::too_many_arguments)]
 fn regex_binding(
     pattern: &PackPattern,
     parameter: &crate::FormulaParameter,
-    captured: &str,
-    capture_range: SourceRange,
+    symbol: &str,
+    capture_ranges: Vec<SourceRange>,
     known: &BTreeMap<String, KnownShape>,
     roles: &BTreeMap<String, Vec<RoleInfo>>,
     dimensions: &mut BTreeMap<String, String>,
 ) -> Option<FormulaBinding> {
-    let symbol = captured.trim();
     if symbol.is_empty() {
         return None;
     }
     if parameter.constraint.kind == "expression" {
-        // A capture is an operand, not an arbitrary slice through nested syntax.
-        // Requiring each operand to be independently balanced prevents a broad
-        // binary matcher such as `A \\cap B` from claiming the inner operator in
-        // `\\Pr(A \\cap B)` or a conditional-probability identity.
-        if !balanced_capture_surface(symbol) {
-            return None;
-        }
         return Some(FormulaBinding {
             parameter: parameter.id.clone(),
             symbol: symbol.into(),
@@ -759,7 +750,7 @@ fn regex_binding(
                 ),
                 kind: "syntax".into(),
                 strength: "strong".into(),
-                source_ranges: vec![capture_range],
+                source_ranges: capture_ranges,
             },
         });
     }
@@ -848,6 +839,14 @@ fn generic_side_conditions_hold(pattern: &PackPattern, bindings: &[FormulaBindin
             .iter()
             .find(|binding| binding.parameter == condition.left);
         match condition.kind.as_str() {
+            "distinct-binding" => {
+                let right = bindings
+                    .iter()
+                    .find(|binding| binding.parameter == condition.right);
+                binding
+                    .zip(right)
+                    .is_some_and(|(left, right)| left.symbol != right.symbol)
+            }
             "explicit-role" => binding.is_some_and(|binding| {
                 binding.constraint.kind == condition.right
                     && matches!(
@@ -865,110 +864,6 @@ fn generic_side_conditions_hold(pattern: &PackPattern, bindings: &[FormulaBindin
             "dimension-equality" | "presentation-safe" => true,
             _ => false,
         }
-    })
-}
-
-fn recognition(
-    pattern_id: &str,
-    range: SourceRange,
-    facts: Vec<(&str, &KnownShape)>,
-    result: Shape,
-) -> Option<FormulaRecognition> {
-    let pattern = pattern(pattern_id)?;
-    let bindings = facts
-        .iter()
-        .map(|(parameter, fact)| FormulaBinding {
-            parameter: (*parameter).into(),
-            symbol: fact.symbol.clone(),
-            constraint: fact.constraint(),
-            evidence: fact.evidence.clone(),
-        })
-        .collect::<Vec<_>>();
-    let mut source_ranges = facts
-        .iter()
-        .flat_map(|(_, fact)| fact.evidence.source_ranges.iter().cloned())
-        .collect::<Vec<_>>();
-    source_ranges.push(range.clone());
-    source_ranges.sort_by_key(|source| (source.start_offset, source.end_offset));
-    source_ranges.dedup();
-    let pattern_evidence = Evidence {
-        rule_id: format!("{}/{}", pattern.pack_id, pattern.id),
-        kind: "domain-pattern".into(),
-        strength: "strong".into(),
-        source_ranges,
-    };
-    let mut evidence = bindings
-        .iter()
-        .map(|binding| binding.evidence.clone())
-        .collect::<Vec<_>>();
-    evidence.push(pattern_evidence);
-    Some(FormulaRecognition {
-        pattern_id: pattern.id.clone(),
-        title: pattern.title.clone(),
-        description: pattern.description.clone(),
-        description_key: pattern.description_key.clone(),
-        maturity: pattern.maturity.as_str().into(),
-        status: "verified".into(),
-        pack_id: pattern.pack_id.clone(),
-        pack_version: pattern.pack_version.clone(),
-        range,
-        bindings,
-        result: result.constraint(),
-        conditions: verified_conditions(pattern),
-        evidence,
-        rank: 100,
-    })
-}
-
-fn role_recognition(
-    pattern_id: &str,
-    range: SourceRange,
-    facts: Vec<(&str, &RoleInfo)>,
-    result: FormulaConstraint,
-) -> Option<FormulaRecognition> {
-    let pattern = pattern(pattern_id)?;
-    let bindings = facts
-        .iter()
-        .map(|(parameter, role)| FormulaBinding {
-            parameter: (*parameter).into(),
-            symbol: role.symbol.clone(),
-            constraint: role_constraint(role),
-            evidence: role.evidence.clone(),
-        })
-        .collect::<Vec<_>>();
-    let mut source_ranges = facts
-        .iter()
-        .flat_map(|(_, role)| role.evidence.source_ranges.iter().cloned())
-        .collect::<Vec<_>>();
-    source_ranges.push(range.clone());
-    source_ranges.sort_by_key(|source| (source.start_offset, source.end_offset));
-    source_ranges.dedup();
-    let pattern_evidence = Evidence {
-        rule_id: format!("{}/{}", pattern.pack_id, pattern.id),
-        kind: "domain-pattern".into(),
-        strength: "strong".into(),
-        source_ranges,
-    };
-    let mut evidence = bindings
-        .iter()
-        .map(|binding| binding.evidence.clone())
-        .collect::<Vec<_>>();
-    evidence.push(pattern_evidence);
-    Some(FormulaRecognition {
-        pattern_id: pattern.id.clone(),
-        title: pattern.title.clone(),
-        description: pattern.description.clone(),
-        description_key: pattern.description_key.clone(),
-        maturity: pattern.maturity.as_str().into(),
-        status: "verified".into(),
-        pack_id: pattern.pack_id.clone(),
-        pack_version: pattern.pack_version.clone(),
-        range,
-        bindings,
-        result,
-        conditions: verified_conditions(pattern),
-        evidence,
-        rank: 100,
     })
 }
 
@@ -1046,6 +941,24 @@ fn math_content<'a>(
         .content
         .get(start..end)
         .map(|content| (content, start))
+}
+
+fn transparent_math_body<'a>(
+    document: &'a ProjectDocument,
+    math: &ParsedMath,
+    index: &SourceIndex,
+) -> Option<(&'a str, usize)> {
+    let wrapper = (math.root.kind == "sequence" && math.root.children.len() == 1)
+        .then(|| &math.root.children[0])?;
+    if !matches!(wrapper.kind.as_str(), "delimited" | "group") {
+        return None;
+    }
+    let body = wrapper.children.first()?;
+    let body_start = index.byte_for_utf16(body.range.start_offset);
+    let body_end = index.byte_for_utf16(body.range.end_offset);
+    let content = document.content.get(body_start..body_end)?;
+    let trimmed = trimmed_match(content)?;
+    Some((trimmed.as_str(), body_start + trimmed.start()))
 }
 
 fn trimmed_match(content: &str) -> Option<regex::Match<'_>> {

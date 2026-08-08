@@ -5,6 +5,14 @@ import {
   assertDomainPackResults,
   buildDomainPackFixture,
 } from "./v0.11-domain-fixture.mjs";
+import {
+  assertActionPatternResults,
+  buildActionPatternFixture,
+} from "./v0.12-action-fixture.mjs";
+import {
+  assertRealisticProjectResults,
+  buildRealisticProjectFixture,
+} from "./v0.12-realistic-project-fixture.mjs";
 
 const fixtureSets = [
   {
@@ -174,4 +182,86 @@ if (JSON.stringify(nativeResults) !== JSON.stringify(wasmResults)) {
 const summary = assertDomainPackResults(nativeResults, expectations);
 console.log(
   `parity OK: ${summary.recognized} v0.11 patterns, ${summary.results} safety queries`,
+);
+
+const actionCorpus = JSON.parse(
+  await readFile(
+    new URL(
+      "../fixtures/v0.12/action-pattern-calibration.json",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
+const actionFixture = buildActionPatternFixture(actionCorpus);
+const actionFixtureText = JSON.stringify(actionFixture.fixture);
+const nativeAction = spawnSync("./target/debug/semath-native", [], {
+  encoding: "utf8",
+  input: actionFixtureText,
+});
+if (nativeAction.status !== 0) {
+  throw new Error(nativeAction.stderr || "v0.12 native action fixture failed");
+}
+const nativeActionResults = JSON.parse(nativeAction.stdout);
+const actionEngine = new SemathEngine();
+actionEngine.resetProject(
+  encoder.encode(JSON.stringify(actionFixture.fixture.snapshot)),
+);
+const wasmActionResults = actionFixture.fixture.queries.map((query) =>
+  JSON.parse(
+    decoder.decode(actionEngine.query(encoder.encode(JSON.stringify(query)))),
+  ),
+);
+actionEngine.free();
+if (JSON.stringify(nativeActionResults) !== JSON.stringify(wasmActionResults)) {
+  throw new Error("native/WASM semantic result mismatch for v0.12 action patterns");
+}
+const actionSummary = assertActionPatternResults(
+  nativeActionResults,
+  actionFixture.expectations,
+);
+console.log(
+  `parity OK: ${actionSummary.recognized} action patterns, ${actionSummary.results} v0.12 surface/adversarial queries`,
+);
+
+const realisticCorpus = JSON.parse(
+  await readFile(
+    new URL("../fixtures/v0.12/realistic-mixed-project.json", import.meta.url),
+    "utf8",
+  ),
+);
+const realistic = buildRealisticProjectFixture(realisticCorpus);
+const realisticText = JSON.stringify(realistic.fixture);
+const nativeRealistic = spawnSync("./target/debug/semath-native", [], {
+  encoding: "utf8",
+  input: realisticText,
+});
+if (nativeRealistic.status !== 0) {
+  throw new Error(
+    nativeRealistic.stderr || "v0.12 native realistic project fixture failed",
+  );
+}
+const nativeRealisticResults = JSON.parse(nativeRealistic.stdout);
+const realisticEngine = new SemathEngine();
+realisticEngine.resetProject(
+  encoder.encode(JSON.stringify(realistic.fixture.snapshot)),
+);
+const wasmRealisticResults = realistic.fixture.queries.map((query) =>
+  JSON.parse(
+    decoder.decode(realisticEngine.query(encoder.encode(JSON.stringify(query)))),
+  ),
+);
+realisticEngine.free();
+if (
+  JSON.stringify(nativeRealisticResults) !==
+  JSON.stringify(wasmRealisticResults)
+) {
+  throw new Error("native/WASM semantic result mismatch for v0.12 realistic project");
+}
+const realisticSummary = assertRealisticProjectResults(
+  nativeRealisticResults,
+  realistic.expectations,
+);
+console.log(
+  `parity OK: ${realisticSummary.results} v0.12 realistic mixed-project queries`,
 );

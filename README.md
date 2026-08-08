@@ -27,6 +27,14 @@ linear-algebra and probability cases. See
 [the pack contract](./docs/domain-packs.md) and
 [capability/test-layer matrix](./docs/capability-test-matrix.md).
 
+Version 0.12 hardens that same five-pack, 68-pattern scope without adding new
+mathematical concepts or edit authority. One structure-anchored matcher now
+owns every pattern; the calibration gate exercises multiple grouped,
+assignment, and delimiter surfaces, structural refusals, and cross-pack
+collisions. A realistic seven-file mixed-domain project additionally gates
+native/release-WASM parity, lifecycle ordering, parse reuse, latency, response
+size, and retained memory.
+
 Version 0.10 adds recoverable application, matrix, cases, and paired-delimiter
 IR; project/include/scope-aware semantic symbol identities; bounded macro
 provenance through wasmtex syntax schema 2; and a reusable prioritized Worker

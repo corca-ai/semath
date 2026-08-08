@@ -150,4 +150,31 @@ describe("SemathWorkerHost", () => {
       ["runtime-failed", false],
     ]);
   });
+
+  test("contains queued work from an old project during a rapid switch", async () => {
+    const responses: SemathWorkerResponse[] = [];
+    const log: string[] = [];
+    const host = new SemathWorkerHost(async () => fakeEngine(log), (value) => responses.push(value));
+    const nextSnapshot = {
+      ...snapshot,
+      epoch: "next:1",
+      projectId: "next",
+    };
+    host.accept({ id: 1, kind: "reset", snapshot });
+    host.accept({ envelope: query(0), id: 2, kind: "query" });
+    host.accept({ id: 3, kind: "reset", snapshot: nextSnapshot });
+    const nextQuery = query(0);
+    nextQuery.epoch = nextSnapshot.epoch;
+    nextQuery.inventoryVersion = nextSnapshot.inventoryVersion;
+    host.accept({ envelope: nextQuery, id: 4, kind: "query" });
+    await turn();
+
+    expect(log).toEqual(["reset", "query:0"]);
+    expect(responses.map((response) => [response.id, response.kind])).toEqual([
+      [1, "error"],
+      [3, "result"],
+      [2, "error"],
+      [4, "result"],
+    ]);
+  });
 });

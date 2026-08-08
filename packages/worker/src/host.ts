@@ -1,11 +1,13 @@
 import type { SemathWorkerRequest, SemathWorkerResponse } from "../../protocol/src/index";
 import type { SemathWorkerEngine } from "./index";
 import {
+  advanceProjectFreshness,
   enqueueWork,
   INITIAL_WORKER_LIFECYCLE,
-  staleGenerationMessage,
+  staleProjectMessage,
   transitionWorkerLifecycle,
   type PendingWork,
+  type ProjectFreshness,
   type WorkerLifecycleState,
   type WorkRequest,
 } from "./host-state";
@@ -17,13 +19,13 @@ export interface SemathWorkerOperations {
   reset: SemathWorkerEngine["reset"];
 }
 
-/** Serial, reusable Worker host with cancellation and stale-generation suppression. */
+/** Serial, reusable Worker host with cancellation and stale-project suppression. */
 export class SemathWorkerHost {
   private cancelled = new Set<number>();
   private disposed = false;
   private draining = false;
   private enginePromise: Promise<SemathWorkerOperations> | undefined;
-  private latestGeneration = 0;
+  private latestProject: ProjectFreshness | undefined;
   private lifecycle: WorkerLifecycleState = INITIAL_WORKER_LIFECYCLE;
   private order = 0;
   private queue: PendingWork[] = [];
@@ -56,12 +58,7 @@ export class SemathWorkerHost {
       this.error(request.id, "disposed", "Worker runtime has been disposed.", false);
       return;
     }
-    if (request.kind === "change") {
-      this.latestGeneration = Math.max(
-        this.latestGeneration,
-        request.changes.analysisGeneration,
-      );
-    }
+    this.latestProject = advanceProjectFreshness(this.latestProject, request);
     this.queue = enqueueWork(this.queue, request, this.order++);
     this.scheduleDrain();
   }
@@ -86,7 +83,7 @@ export class SemathWorkerHost {
           this.respond({ id: request.id, kind: "cancelled" });
           continue;
         }
-        const stale = staleGenerationMessage(request, this.latestGeneration);
+        const stale = staleProjectMessage(request, this.latestProject);
         if (stale) {
           this.error(
             request.id,

@@ -3,6 +3,7 @@ mod consistency;
 mod domain;
 mod engine;
 mod hygiene;
+mod matcher;
 mod pack;
 mod parser;
 mod pattern;

@@ -5,6 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::matcher::primitive_matcher;
 use crate::{FormulaConstraint, FormulaParameter, FormulaSideCondition};
 
 pub const PACK_SCHEMA_VERSION: u32 = 2;
@@ -428,23 +429,6 @@ fn validate_matcher(
     matcher: &PackMatcher,
     parameter_count: usize,
 ) -> Result<(), PackValidationError> {
-    const PRIMITIVES: &[&str] = &[
-        "binary-product",
-        "conditional-probability",
-        "event-probability",
-        "expectation",
-        "quadratic-form",
-        "regex-captures",
-        "transpose",
-        "transposed-binary-product",
-        "variance",
-    ];
-    if !PRIMITIVES.contains(&matcher.primitive.as_str()) {
-        return Err(error(
-            format!("{path}.matcher.primitive"),
-            format!("unknown matcher primitive {}", matcher.primitive),
-        ));
-    }
     match (matcher.primitive.as_str(), matcher.expression.as_deref()) {
         ("regex-captures", Some(expression)) => {
             if expression.len() > MAX_REGEX_BYTES {
@@ -478,13 +462,35 @@ fn validate_matcher(
                 "regex-captures requires an expression",
             ));
         }
-        (_, Some(_)) => {
+        (primitive, Some(_)) => {
+            if primitive_matcher(primitive).is_none() {
+                return Err(error(
+                    format!("{path}.matcher.primitive"),
+                    format!("unknown matcher primitive {primitive}"),
+                ));
+            }
             return Err(error(
                 format!("{path}.matcher.expression"),
                 "only regex-captures accepts an expression",
             ));
         }
-        (_, None) => {}
+        (primitive, None) => {
+            let Some(spec) = primitive_matcher(primitive) else {
+                return Err(error(
+                    format!("{path}.matcher.primitive"),
+                    format!("unknown matcher primitive {primitive}"),
+                ));
+            };
+            if spec.parameter_captures.len() != parameter_count {
+                return Err(error(
+                    format!("{path}.parameters"),
+                    format!(
+                        "matcher primitive {primitive} requires {} parameters",
+                        spec.parameter_captures.len()
+                    ),
+                ));
+            }
+        }
     }
     Ok(())
 }
@@ -553,6 +559,7 @@ fn validate_constraint(
 fn validate_side_conditions(path: &str, pattern: &PackPattern) -> Result<(), PackValidationError> {
     const CONDITIONS: &[&str] = &[
         "dimension-equality",
+        "distinct-binding",
         "explicit-role",
         "positive-probability",
         "presentation-safe",
