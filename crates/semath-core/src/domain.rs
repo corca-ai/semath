@@ -1,48 +1,15 @@
-use std::collections::{BTreeMap, HashSet};
-use std::sync::LazyLock;
+use std::collections::BTreeMap;
 
 use regex::Regex;
-use serde::Deserialize;
 
+use crate::pack::built_in_packs;
 use crate::pattern::FormulaAnalysis;
 use crate::scope::ScopeGraph;
 use crate::{DomainActivation, Evidence, ProjectDocument, SourceIndex, SourceRange};
 
-const PACK_SCHEMA_VERSION: u32 = 1;
 const MAX_PRIOR_MATCHES: usize = 64;
 const MAX_ACTIVATIONS: usize = 8;
 const MAX_EVIDENCE_PER_ACTIVATION: usize = 8;
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct DomainPack {
-    schema_version: u32,
-    pack_id: String,
-    pack_version: String,
-    title: String,
-    activation_rules: Vec<ActivationRule>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ActivationRule {
-    id: String,
-    patterns: Vec<String>,
-}
-
-static DOMAIN_PACKS: LazyLock<Vec<DomainPack>> = LazyLock::new(|| {
-    let packs = [
-        include_str!("../../../packs/linear-algebra/v1.json"),
-        include_str!("../../../packs/probability/v1.json"),
-    ]
-    .into_iter()
-    .map(|source| {
-        serde_json::from_str::<DomainPack>(source).expect("domain pack must be valid JSON")
-    })
-    .collect::<Vec<_>>();
-    validate_packs(&packs).expect("domain packs must satisfy the activation schema");
-    packs
-});
 
 #[derive(Clone, Debug)]
 struct ScopedPrior {
@@ -174,7 +141,7 @@ pub(crate) fn analyze_domains(
 ) -> DomainAnalysis {
     let scopes = ScopeGraph::new(document);
     let priors = collect_priors(document, &scopes);
-    let titles = DOMAIN_PACKS
+    let titles = built_in_packs()
         .iter()
         .map(|pack| (pack.pack_id.as_str(), pack.title.as_str()))
         .collect::<BTreeMap<_, _>>();
@@ -210,7 +177,7 @@ pub(crate) fn analyze_domains(
 fn collect_priors(document: &ProjectDocument, scopes: &ScopeGraph) -> Vec<ScopedPrior> {
     let index = SourceIndex::new(&document.content);
     let mut priors = Vec::new();
-    for pack in DOMAIN_PACKS.iter() {
+    for pack in built_in_packs() {
         for rule in &pack.activation_rules {
             let matcher = literal_matcher(&rule.patterns);
             let mut ranges_by_scope = BTreeMap::<usize, Vec<SourceRange>>::new();
@@ -306,31 +273,6 @@ fn in_markdown_code(source: &str, byte_offset: usize) -> bool {
         || before
             .rfind("<!--")
             .is_some_and(|open| before.rfind("-->").is_none_or(|closed| closed < open))
-}
-
-fn validate_packs(packs: &[DomainPack]) -> Result<(), String> {
-    let mut pack_ids = HashSet::new();
-    for pack in packs {
-        if pack.schema_version != PACK_SCHEMA_VERSION {
-            return Err(format!("unsupported schema for {}", pack.pack_id));
-        }
-        if !pack_ids.insert(&pack.pack_id) {
-            return Err(format!("duplicate domain pack {}", pack.pack_id));
-        }
-        if pack.title.is_empty() || pack.activation_rules.is_empty() {
-            return Err(format!("incomplete domain pack {}", pack.pack_id));
-        }
-        let mut rule_ids = HashSet::new();
-        for rule in &pack.activation_rules {
-            if !rule_ids.insert(&rule.id) || rule.patterns.is_empty() {
-                return Err(format!(
-                    "invalid activation rule {}/{}",
-                    pack.pack_id, rule.id
-                ));
-            }
-        }
-    }
-    Ok(())
 }
 
 #[cfg(test)]

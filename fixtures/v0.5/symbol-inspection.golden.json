@@ -83,8 +83,12 @@
             {
               "patternId": "matrix-vector-product",
               "title": "Matrix-vector product",
+              "description": "Applies a matrix to a dimension-compatible vector.",
+              "descriptionKey": "matrix-vector-product",
+              "maturity": "completion",
+              "status": "verified",
               "packId": "linear-algebra",
-              "packVersion": "1.0.0",
+              "packVersion": "1.1.0",
               "range": {
                 "startOffset": 116,
                 "endOffset": 118
@@ -140,6 +144,13 @@
                   "m"
                 ]
               },
+              "conditions": [
+                {
+                  "kind": "dimension-equality",
+                  "label": "The matrix column count equals the vector length.",
+                  "status": "verified"
+                }
+              ],
               "evidence": [
                 {
                   "ruleId": "explicit-real-shape-declaration",
@@ -289,7 +300,108 @@
               }
             }
           ],
-          "formulas": [],
+          "formulas": [
+            {
+              "patternId": "set-membership",
+              "title": "Set membership",
+              "description": "Membership proposition between an element and a set expression.",
+              "descriptionKey": "set-membership",
+              "maturity": "recognition",
+              "status": "recognized",
+              "packId": "discrete-math",
+              "packVersion": "1.0.0",
+              "range": {
+                "startOffset": 121,
+                "endOffset": 141
+              },
+              "bindings": [
+                {
+                  "parameter": "element",
+                  "symbol": "A",
+                  "constraint": {
+                    "kind": "expression"
+                  },
+                  "evidence": {
+                    "ruleId": "discrete-math/set-membership/capture/element",
+                    "kind": "syntax",
+                    "strength": "strong",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 121,
+                        "endOffset": 123
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parameter": "set-expression",
+                  "symbol": "\\mathbb{R}^{k}",
+                  "constraint": {
+                    "kind": "expression"
+                  },
+                  "evidence": {
+                    "ruleId": "discrete-math/set-membership/capture/set-expression",
+                    "kind": "syntax",
+                    "strength": "strong",
+                    "sourceRanges": [
+                      {
+                        "startOffset": 127,
+                        "endOffset": 141
+                      }
+                    ]
+                  }
+                }
+              ],
+              "result": {
+                "kind": "proposition"
+              },
+              "conditions": [],
+              "evidence": [
+                {
+                  "ruleId": "discrete-math/set-membership/capture/element",
+                  "kind": "syntax",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 121,
+                      "endOffset": 123
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "discrete-math/set-membership/capture/set-expression",
+                  "kind": "syntax",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 127,
+                      "endOffset": 141
+                    }
+                  ]
+                },
+                {
+                  "ruleId": "discrete-math/set-membership",
+                  "kind": "domain-pattern",
+                  "strength": "strong",
+                  "sourceRanges": [
+                    {
+                      "startOffset": 121,
+                      "endOffset": 123
+                    },
+                    {
+                      "startOffset": 121,
+                      "endOffset": 141
+                    },
+                    {
+                      "startOffset": 127,
+                      "endOffset": 141
+                    }
+                  ]
+                }
+              ],
+              "rank": 50
+            }
+          ],
           "diagnostics": [
             {
               "code": "notation-shape-conflict",

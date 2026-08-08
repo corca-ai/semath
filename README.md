@@ -19,6 +19,14 @@ Current `main` provides:
 - a transport-neutral language server that combines wasmtex LaTeX intelligence
   with Semath selection, navigation, diagnostics, completion, and reviewable rewrites.
 
+Version 0.11 unifies the built-in domain-pack schema and expands the calibrated
+catalog to linear algebra, probability/statistics, calculus/analysis,
+optimization/ML, and discrete mathematics. Broad entries are recognition-only;
+typed completion and guarded rewrites remain limited to explicitly proven
+linear-algebra and probability cases. See
+[the pack contract](./docs/domain-packs.md) and
+[capability/test-layer matrix](./docs/capability-test-matrix.md).
+
 Version 0.10 adds recoverable application, matrix, cases, and paired-delimiter
 IR; project/include/scope-aware semantic symbol identities; bounded macro
 provenance through wasmtex syntax schema 2; and a reusable prioritized Worker
@@ -70,7 +78,9 @@ variable rename availability. Tree depth, node count, references, diagnostics, a
 collections are capped and report truncation, so hosts do not need to coordinate many independently
 timed queries or accept an unbounded sidebar response.
 
-The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
+The Rust core is host-independent. The standalone [public API](docs/public-api.md),
+[domain-pack contract](docs/domain-packs.md), and [compatibility policy](docs/compatibility.md)
+are documented separately from the CorTeX host. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
 See [draft.md](./draft.md) for the architecture and roadmap.
 
@@ -96,6 +106,7 @@ edits; the server never changes source on its own.
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 bun test
+bun packages/packs/conformance.mjs
 ```
 
 On a supported build host, `scripts/build-wasm.sh` regenerates the checked-in WASM package and

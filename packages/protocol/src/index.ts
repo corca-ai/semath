@@ -182,10 +182,17 @@ export interface SemanticDiagnostic {
 export interface FormulaConstraint {
   dimensions?: readonly string[];
   kind:
+    | "distribution"
     | "event"
+    | "expression"
+    | "function"
+    | "graph"
+    | "index"
     | "matrix"
+    | "proposition"
     | "random-variable"
     | "scalar"
+    | "set"
     | "tensor"
     | "vector";
   refinements?: readonly string[];
@@ -222,15 +229,27 @@ export interface FormulaBinding {
   symbol: string;
 }
 
+export interface FormulaConditionInfo {
+  kind: string;
+  label: string;
+  status: "missing" | "verified";
+}
+
 export interface FormulaRecognition {
   bindings: readonly FormulaBinding[];
   evidence: readonly Evidence[];
+  /** Additive v0.11 metadata; absent in protocol-v1 results from older engines. */
+  conditions?: readonly FormulaConditionInfo[];
+  description?: string;
+  descriptionKey?: string;
+  maturity?: "completion" | "diagnostic" | "recognition" | "rewrite";
   packId: string;
   packVersion: string;
   patternId: string;
   range: SourceRange;
   rank: number;
   result: FormulaConstraint;
+  status?: "condition-missing" | "recognized" | "verified";
   title: string;
 }
 
@@ -376,6 +395,7 @@ export type SemathWorkerErrorCode =
   | "disposed"
   | "engine-failed"
   | "initialization-failed"
+  | "runtime-failed"
   | "stale-generation";
 
 export type SemathWorkerResponse =

@@ -1,16 +1,14 @@
-import type {
-  SemathWorkerPriority,
-  SemathWorkerRequest,
-  SemathWorkerResponse,
-} from "../../protocol/src/index";
+import type { SemathWorkerRequest, SemathWorkerResponse } from "../../protocol/src/index";
 import type { SemathWorkerEngine } from "./index";
-
-type WorkRequest = Exclude<SemathWorkerRequest, { kind: "cancel" | "dispose" }>;
-
-interface PendingWork {
-  order: number;
-  request: WorkRequest;
-}
+import {
+  enqueueWork,
+  INITIAL_WORKER_LIFECYCLE,
+  staleGenerationMessage,
+  transitionWorkerLifecycle,
+  type PendingWork,
+  type WorkerLifecycleState,
+  type WorkRequest,
+} from "./host-state";
 
 export interface SemathWorkerOperations {
   apply: SemathWorkerEngine["apply"];
@@ -19,12 +17,6 @@ export interface SemathWorkerOperations {
   reset: SemathWorkerEngine["reset"];
 }
 
-const PRIORITY: Record<SemathWorkerPriority, number> = {
-  mutation: 0,
-  cursor: 1,
-  background: 2,
-};
-
 /** Serial, reusable Worker host with cancellation and stale-generation suppression. */
 export class SemathWorkerHost {
   private cancelled = new Set<number>();
@@ -32,6 +24,7 @@ export class SemathWorkerHost {
   private draining = false;
   private enginePromise: Promise<SemathWorkerOperations> | undefined;
   private latestGeneration = 0;
+  private lifecycle: WorkerLifecycleState = INITIAL_WORKER_LIFECYCLE;
   private order = 0;
   private queue: PendingWork[] = [];
   private scheduled = false;
@@ -50,6 +43,15 @@ export class SemathWorkerHost {
       this.dispose(request.id);
       return;
     }
+    if (this.lifecycle.status === "terminal") {
+      this.error(
+        request.id,
+        "runtime-failed",
+        "Worker runtime stopped after three consecutive failures.",
+        false,
+      );
+      return;
+    }
     if (this.disposed) {
       this.error(request.id, "disposed", "Worker runtime has been disposed.", false);
       return;
@@ -60,11 +62,7 @@ export class SemathWorkerHost {
         request.changes.analysisGeneration,
       );
     }
-    this.queue.push({ order: this.order++, request });
-    this.queue.sort(
-      (left, right) =>
-        priority(left.request) - priority(right.request) || left.order - right.order,
-    );
+    this.queue = enqueueWork(this.queue, request, this.order++);
     this.scheduleDrain();
   }
 
@@ -88,14 +86,12 @@ export class SemathWorkerHost {
           this.respond({ id: request.id, kind: "cancelled" });
           continue;
         }
-        if (
-          request.kind === "query" &&
-          request.envelope.analysisGeneration < this.latestGeneration
-        ) {
+        const stale = staleGenerationMessage(request, this.latestGeneration);
+        if (stale) {
           this.error(
             request.id,
             "stale-generation",
-            `Skipped generation ${request.envelope.analysisGeneration}; current generation is ${this.latestGeneration}.`,
+            stale,
             true,
           );
           continue;
@@ -106,7 +102,8 @@ export class SemathWorkerHost {
           engine = await this.getEngine();
         } catch (error) {
           this.enginePromise = undefined;
-          this.error(request.id, "initialization-failed", message(error), true);
+          this.lifecycle = transitionWorkerLifecycle(this.lifecycle, "failure");
+          this.failure(request.id, "initialization-failed", error);
           continue;
         }
 
@@ -115,12 +112,14 @@ export class SemathWorkerHost {
           if (this.cancelled.delete(request.id)) {
             this.respond({ id: request.id, kind: "cancelled" });
           } else {
+            this.lifecycle = transitionWorkerLifecycle(this.lifecycle, "success");
             this.respond({ id: request.id, kind: "result", result });
           }
         } catch (error) {
           engine.dispose();
           this.enginePromise = undefined;
-          this.error(request.id, "engine-failed", message(error), true);
+          this.lifecycle = transitionWorkerLifecycle(this.lifecycle, "failure");
+          this.failure(request.id, "engine-failed", error);
         }
       }
     } finally {
@@ -139,6 +138,7 @@ export class SemathWorkerHost {
       return;
     }
     this.disposed = true;
+    this.lifecycle = transitionWorkerLifecycle(this.lifecycle, "dispose");
     for (const pending of this.queue) {
       this.respond({ id: pending.request.id, kind: "cancelled" });
     }
@@ -149,7 +149,12 @@ export class SemathWorkerHost {
 
   private error(
     id: number,
-    code: "disposed" | "engine-failed" | "initialization-failed" | "stale-generation",
+    code:
+      | "disposed"
+      | "engine-failed"
+      | "initialization-failed"
+      | "runtime-failed"
+      | "stale-generation",
     errorMessage: string,
     recoverable: boolean,
   ): void {
@@ -159,10 +164,22 @@ export class SemathWorkerHost {
       kind: "error",
     });
   }
-}
 
-function priority(request: WorkRequest): number {
-  return PRIORITY[request.priority ?? (request.kind === "query" ? "cursor" : "mutation")];
+  private failure(
+    id: number,
+    recoverableCode: "engine-failed" | "initialization-failed",
+    cause: unknown,
+  ): void {
+    const terminal = this.lifecycle.status === "terminal";
+    this.error(
+      id,
+      terminal ? "runtime-failed" : recoverableCode,
+      terminal
+        ? `Worker runtime stopped after three consecutive failures: ${message(cause)}`
+        : message(cause),
+      !terminal,
+    );
+  }
 }
 
 function execute(engine: SemathWorkerOperations, request: WorkRequest): unknown {

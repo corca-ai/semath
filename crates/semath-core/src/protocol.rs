@@ -333,14 +333,27 @@ pub struct FormulaBinding {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct FormulaConditionInfo {
+    pub kind: String,
+    pub label: String,
+    pub status: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct FormulaRecognition {
     pub pattern_id: String,
     pub title: String,
+    pub description: String,
+    pub description_key: String,
+    pub maturity: String,
+    pub status: String,
     pub pack_id: String,
     pub pack_version: String,
     pub range: SourceRange,
     pub bindings: Vec<FormulaBinding>,
     pub result: FormulaConstraint,
+    pub conditions: Vec<FormulaConditionInfo>,
     pub evidence: Vec<Evidence>,
     pub rank: u32,
 }

@@ -1,14 +1,16 @@
 {
   "name": "semath",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",
   "bin": {
-    "semath-lsp": "./packages/lsp/stdio.mjs"
+    "semath-lsp": "./packages/lsp/stdio.mjs",
+    "semath-pack": "./packages/packs/conformance.mjs"
   },
   "exports": {
     "./lsp": "./packages/lsp/src/index.ts",
+    "./packs": "./packages/packs/src/index.ts",
     "./protocol": "./packages/protocol/src/index.ts",
     "./wasmtex-adapter": "./packages/wasmtex-adapter/src/index.ts",
     "./worker": "./packages/worker/src/index.ts",
@@ -18,14 +20,20 @@
     "./wasm-binary": "./lib/wasm/semath_wasm_bg.wasm"
   },
   "files": [
+    "examples",
     "lib",
-    "packages"
+    "packages",
+    "packs"
   ],
   "scripts": {
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run parity && bun run budget:v0.8 && bun run budget:v0.9 && bun run budget:v0.10",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run pack:conformance && bun run calibration:v0.11 && bun run parity && bun run budget:v0.8 && bun run budget:v0.9 && bun run budget:v0.10 && bun run budget:v0.11 && bun run package:smoke",
     "budget:v0.8": "node scripts/check-v0.8-budget.mjs",
     "budget:v0.9": "bun scripts/check-v0.9-budget.ts",
     "budget:v0.10": "bun scripts/check-v0.10-budget.ts",
+    "budget:v0.11": "bun scripts/check-v0.11-budget.ts",
+    "calibration:v0.11": "bun scripts/check-v0.11-calibration.ts",
+    "pack:conformance": "bun packages/packs/conformance.mjs",
+    "package:smoke": "node scripts/check-package-smoke.mjs",
     "parity": "node scripts/check-parity.mjs",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit",

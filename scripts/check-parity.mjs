@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import init, { SemathEngine } from "../lib/wasm/semath_wasm.js";
+import {
+  assertDomainPackResults,
+  buildDomainPackFixture,
+} from "./v0.11-domain-fixture.mjs";
 
 const fixtureSets = [
   {
@@ -92,6 +96,17 @@ const fixtureSets = [
     ),
     version: "v0.10-reliable-project-semantics",
   },
+  {
+    fixtureUrl: new URL(
+      "../fixtures/v0.11/action-capable-patterns.json",
+      import.meta.url,
+    ),
+    goldenUrl: new URL(
+      "../fixtures/v0.11/action-capable-patterns.golden.json",
+      import.meta.url,
+    ),
+    version: "v0.11-action-capable-patterns",
+  },
 ];
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {
@@ -132,3 +147,31 @@ for (const { fixtureUrl, goldenUrl, version } of fixtureSets) {
   }
   console.log(`parity OK: ${fixture.queries.length} ${version} queries`);
 }
+
+const corpus = JSON.parse(
+  await readFile(
+    new URL("../fixtures/v0.11/domain-pack-recognition-corpus.json", import.meta.url),
+    "utf8",
+  ),
+);
+const { fixture, expectations } = buildDomainPackFixture(corpus);
+const fixtureText = JSON.stringify(fixture);
+const native = spawnSync("./target/debug/semath-native", [], {
+  encoding: "utf8",
+  input: fixtureText,
+});
+if (native.status !== 0) throw new Error(native.stderr || "v0.11 native fixture failed");
+const nativeResults = JSON.parse(native.stdout);
+const engine = new SemathEngine();
+engine.resetProject(encoder.encode(JSON.stringify(fixture.snapshot)));
+const wasmResults = fixture.queries.map((query) =>
+  JSON.parse(decoder.decode(engine.query(encoder.encode(JSON.stringify(query))))),
+);
+engine.free();
+if (JSON.stringify(nativeResults) !== JSON.stringify(wasmResults)) {
+  throw new Error("native/WASM semantic result mismatch for v0.11 domain packs");
+}
+const summary = assertDomainPackResults(nativeResults, expectations);
+console.log(
+  `parity OK: ${summary.recognized} v0.11 patterns, ${summary.results} safety queries`,
+);

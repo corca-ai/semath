@@ -10,8 +10,36 @@
         "kind": "domainActivations",
         "activations": [
           {
-            "packId": "linear-algebra",
+            "packId": "discrete-math",
             "packVersion": "1.0.0",
+            "title": "Discrete mathematics, logic, and sets",
+            "strength": "weak",
+            "scopeKind": "section",
+            "scopeRange": {
+              "startOffset": 0,
+              "endOffset": 163
+            },
+            "evidence": [
+              {
+                "ruleId": "discrete-math/activation/discrete-notation",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [
+                  {
+                    "startOffset": 103,
+                    "endOffset": 106
+                  },
+                  {
+                    "startOffset": 134,
+                    "endOffset": 137
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "packId": "linear-algebra",
+            "packVersion": "1.1.0",
             "title": "Linear algebra",
             "strength": "strong",
             "scopeKind": "equation",
@@ -69,8 +97,8 @@
           },
           {
             "packId": "probability",
-            "packVersion": "1.0.0",
-            "title": "Probability",
+            "packVersion": "1.1.0",
+            "title": "Probability and statistics",
             "strength": "weak",
             "scopeKind": "section",
             "scopeRange": {
@@ -105,8 +133,55 @@
         "kind": "domainActivations",
         "activations": [
           {
-            "packId": "linear-algebra",
+            "packId": "discrete-math",
             "packVersion": "1.0.0",
+            "title": "Discrete mathematics, logic, and sets",
+            "strength": "strong",
+            "scopeKind": "equation",
+            "scopeRange": {
+              "startOffset": 101,
+              "endOffset": 152
+            },
+            "evidence": [
+              {
+                "ruleId": "discrete-math/set-membership",
+                "kind": "domain-pattern",
+                "strength": "strong",
+                "sourceRanges": [
+                  {
+                    "startOffset": 101,
+                    "endOffset": 134
+                  },
+                  {
+                    "startOffset": 101,
+                    "endOffset": 152
+                  },
+                  {
+                    "startOffset": 138,
+                    "endOffset": 152
+                  }
+                ]
+              },
+              {
+                "ruleId": "discrete-math/activation/discrete-notation",
+                "kind": "domain-prior",
+                "strength": "weak",
+                "sourceRanges": [
+                  {
+                    "startOffset": 103,
+                    "endOffset": 106
+                  },
+                  {
+                    "startOffset": 134,
+                    "endOffset": 137
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "packId": "linear-algebra",
+            "packVersion": "1.1.0",
             "title": "Linear algebra",
             "strength": "weak",
             "scopeKind": "section",
@@ -145,8 +220,8 @@
           },
           {
             "packId": "probability",
-            "packVersion": "1.0.0",
-            "title": "Probability",
+            "packVersion": "1.1.0",
+            "title": "Probability and statistics",
             "strength": "weak",
             "scopeKind": "section",
             "scopeRange": {
