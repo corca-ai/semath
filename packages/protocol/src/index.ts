@@ -150,7 +150,7 @@ export interface SemanticDiagnostic {
   explanation: string;
   message: string;
   range: SourceRange;
-  severity: "error" | "warning";
+  severity: "error" | "hint" | "warning";
 }
 
 export interface FormulaConstraint {

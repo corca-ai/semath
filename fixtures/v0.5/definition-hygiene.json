@@ -1,0 +1,25 @@
+{
+  "snapshot": {
+    "protocolVersion": 1,
+    "epoch": "parity:5-hygiene",
+    "inventoryVersion": 1,
+    "projectId": "parity",
+    "mainFileId": "main",
+    "documents": [
+      {
+        "fileId": "main",
+        "path": "main.tex",
+        "language": "latex",
+        "content": "$x+1$ appears first.\nLet $x$ denote a scalar.\nLater $x$ is used.\nLet $z$ denote a scalar.",
+        "documentVersion": 1
+      }
+    ]
+  },
+  "queries": [
+    { "protocolVersion": 1, "epoch": "parity:5-hygiene", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 1 } },
+    { "protocolVersion": 1, "epoch": "parity:5-hygiene", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "symbolInfo", "fileId": "main", "offset": 70 } },
+    { "protocolVersion": 1, "epoch": "parity:5-hygiene", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "diagnostics", "fileId": "main" } },
+    { "protocolVersion": 1, "epoch": "parity:5-hygiene", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "explainDiagnostic", "fileId": "main", "code": "used-before-explicit-definition", "offset": 1 } },
+    { "protocolVersion": 1, "epoch": "parity:5-hygiene", "inventoryVersion": 1, "documentVersion": 1, "analysisGeneration": 1, "query": { "kind": "explainDiagnostic", "fileId": "main", "code": "defined-but-unused", "offset": 70 } }
+  ]
+}

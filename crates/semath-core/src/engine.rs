@@ -5,6 +5,7 @@ use thiserror::Error;
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::consistency::{ConsistencyAnalysis, analyze_consistency};
 use crate::domain::{DomainAnalysis, analyze_domains};
+use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
 use crate::prose::analyze_prose;
@@ -42,6 +43,7 @@ struct AnalyzedDocument {
     definitions: Vec<DefinitionInfo>,
     shapes: ShapeAnalysis,
     consistency: ConsistencyAnalysis,
+    hygiene: HygieneAnalysis,
     formulas: FormulaAnalysis,
     domains: DomainAnalysis,
 }
@@ -55,6 +57,7 @@ impl AnalyzedDocument {
         let prose = analyze_prose(&document, &parsed);
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
         let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
+        let hygiene = analyze_hygiene(&document, &parsed, &prose.definitions);
         let formulas = analyze_formulas(&document, &parsed, &shapes);
         let domains = analyze_domains(&document, &formulas);
         Self {
@@ -63,6 +66,7 @@ impl AnalyzedDocument {
             definitions: prose.definitions,
             shapes,
             consistency,
+            hygiene,
             formulas,
             domains,
         }
@@ -194,6 +198,7 @@ impl SemathEngine {
                 .map(|(symbol, range)| (symbol.clone(), range.clone()))
         });
 
+        let hygiene_enabled = self.documents.len() == 1;
         let value = match envelope.query {
             Query::Selection { .. } => {
                 let mut ranges = Vec::new();
@@ -238,7 +243,7 @@ impl SemathEngine {
                     let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
                     let (roles, roles_truncated) = document.consistency.roles_at(name, offset);
                     let (diagnostics, diagnostics_truncated) =
-                        symbol_diagnostics(document, name, offset, &shapes);
+                        symbol_diagnostics(document, name, offset, &shapes, hygiene_enabled);
                     SymbolInfo {
                         symbol: name.clone(),
                         location: Location {
@@ -279,13 +284,18 @@ impl SemathEngine {
             Query::PrepareRename { .. } => prepare_rename(parsed, offset),
             Query::Rename { new_name, .. } => rename_proposal(document, parsed, offset, &new_name),
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
-                diagnostics: document_diagnostics(document),
+                diagnostics: document_diagnostics(document, hygiene_enabled),
             },
             Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
                 diagnostic: document
                     .shapes
                     .diagnostic(&code, offset)
-                    .or_else(|| document.consistency.diagnostic(&code, offset)),
+                    .or_else(|| document.consistency.diagnostic(&code, offset))
+                    .or_else(|| {
+                        hygiene_enabled
+                            .then(|| document.hygiene.diagnostic(&code, offset))
+                            .flatten()
+                    }),
             },
             Query::FormulaRecognition { .. } => QueryValue::FormulaRecognitions {
                 recognitions: document.formulas.at(offset),
@@ -410,9 +420,15 @@ impl SemathEngine {
     }
 }
 
-fn document_diagnostics(document: &AnalyzedDocument) -> Vec<SemanticDiagnostic> {
+fn document_diagnostics(
+    document: &AnalyzedDocument,
+    hygiene_enabled: bool,
+) -> Vec<SemanticDiagnostic> {
     let mut diagnostics = document.shapes.diagnostics.clone();
     diagnostics.extend(document.consistency.diagnostics.iter().cloned());
+    if hygiene_enabled {
+        diagnostics.extend(document.hygiene.diagnostics.iter().cloned());
+    }
     diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
     diagnostics
 }
@@ -422,13 +438,23 @@ fn symbol_diagnostics(
     symbol: &str,
     offset: u32,
     shapes: &[ShapeInfo],
+    hygiene_enabled: bool,
 ) -> (Vec<SemanticDiagnostic>, bool) {
     let (mut diagnostics, shape_truncated) = document.shapes.diagnostics_for(offset, shapes);
     let (role_diagnostics, role_truncated) = document.consistency.diagnostics_for(symbol, offset);
     diagnostics.extend(role_diagnostics);
+    let (hygiene_diagnostics, hygiene_truncated) = if hygiene_enabled {
+        document.hygiene.diagnostics_for(symbol, offset)
+    } else {
+        (Vec::new(), false)
+    };
+    diagnostics.extend(hygiene_diagnostics);
     diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
     diagnostics.dedup();
-    let truncated = shape_truncated || role_truncated || diagnostics.len() > MAX_SYMBOL_DIAGNOSTICS;
+    let truncated = shape_truncated
+        || role_truncated
+        || hygiene_truncated
+        || diagnostics.len() > MAX_SYMBOL_DIAGNOSTICS;
     diagnostics.truncate(MAX_SYMBOL_DIAGNOSTICS);
     (diagnostics, truncated)
 }
@@ -847,6 +873,78 @@ mod tests {
             panic!("expected diagnostic explanation")
         };
         assert_eq!(diagnostic.evidence.len(), 2);
+    }
+
+    #[test]
+    fn exposes_definition_hygiene_only_as_targeted_hints() {
+        let content = "$x+1$ appears first.\nLet $x$ denote a scalar.\nLater $x$ is used.";
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let diagnostics = engine
+            .query(query(Query::Diagnostics {
+                file_id: "main".into(),
+            }))
+            .unwrap();
+        let QueryValue::Diagnostics { diagnostics } = diagnostics.value else {
+            panic!("expected diagnostics")
+        };
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(diagnostics[0].code, "used-before-explicit-definition");
+        assert_eq!(diagnostics[0].severity, "hint");
+        assert_eq!(diagnostics[0].evidence.len(), 2);
+
+        let early_x = content.find('x').unwrap() as u32;
+        let result = engine
+            .query(query(Query::SymbolInfo {
+                file_id: "main".into(),
+                offset: early_x,
+            }))
+            .unwrap();
+        let QueryValue::SymbolInfo { info: Some(info) } = result.value else {
+            panic!("expected symbol info")
+        };
+        assert_eq!(info.diagnostics[0].code, "used-before-explicit-definition");
+
+        let explanation = engine
+            .query(query(Query::ExplainDiagnostic {
+                file_id: "main".into(),
+                code: "used-before-explicit-definition".into(),
+                offset: early_x,
+            }))
+            .unwrap();
+        let QueryValue::DiagnosticExplanation {
+            diagnostic: Some(diagnostic),
+        } = explanation.value
+        else {
+            panic!("expected diagnostic explanation")
+        };
+        assert_eq!(diagnostic.severity, "hint");
+    }
+
+    #[test]
+    fn disables_hygiene_hints_when_project_scope_is_uncertain() {
+        let mut project = snapshot("Let $z$ denote a scalar.");
+        project.documents.push(ProjectDocument {
+            file_id: "appendix".into(),
+            path: "appendix.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: "$z$ may be used here.".into(),
+            document_version: 1,
+            math_regions: Vec::new(),
+        });
+        let mut engine = SemathEngine::default();
+        engine.reset(project).unwrap();
+
+        let result = engine
+            .query(query(Query::Diagnostics {
+                file_id: "main".into(),
+            }))
+            .unwrap();
+        let QueryValue::Diagnostics { diagnostics } = result.value else {
+            panic!("expected diagnostics")
+        };
+        assert!(diagnostics.is_empty());
     }
 
     #[test]
