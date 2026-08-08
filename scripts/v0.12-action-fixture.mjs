@@ -6,21 +6,7 @@ export function buildActionPatternFixture(corpus) {
 
   for (const [caseIndex, entry] of corpus.cases.entries()) {
     let content = entry.preamble;
-    const formula = mathBody(entry.surfaces[0]);
-    const positiveSurfaces = [
-      ...entry.surfaces,
-      `$\\left(${formula}\\right)$`,
-      `$ {${formula}} $`,
-    ];
-    if (!formula.includes("=")) positiveSurfaces.push(`$q=${formula}$`);
-    const variants = [
-      ...positiveSurfaces.map((surface, index) => ({
-        expected: true,
-        id: `positive-${index + 1}`,
-        surface,
-      })),
-      ...negativeVariants(entry.surfaces[0]),
-    ];
+    const variants = actionPatternVariants(entry);
     for (const variant of variants) {
       const start = content.length;
       content += `${variant.surface}\n`;
@@ -56,6 +42,39 @@ export function buildActionPatternFixture(corpus) {
       queries,
     },
   };
+}
+
+export function actionPatternVariants(entry) {
+  const formula = mathBody(entry.surfaces[0]);
+  const positives = [
+    ...entry.surfaces.map((surface, index) => ({
+      expected: true,
+      id: `positive-${index + 1}`,
+      surface,
+    })),
+    {
+      expected: true,
+      id: "positive-grouped",
+      surface: `$\\left(${formula}\\right)$`,
+    },
+    { expected: true, id: "positive-braced", surface: `$ {${formula}} $` },
+    {
+      expected: true,
+      id: "positive-unicode-crlf-context",
+      surface: `한글 😀 é\r\n$${formula}$`,
+    },
+  ];
+  if (!formula.includes("=")) {
+    positives.push({
+      expected: true,
+      id: "positive-assignment",
+      surface: `$q=${formula}$`,
+    });
+  }
+  return [
+    ...positives,
+    ...negativeVariants(entry.surfaces[0]),
+  ];
 }
 
 export function assertActionPatternResults(results, expectations) {
@@ -113,6 +132,11 @@ function negativeVariants(surface) {
       id: "negative-adjacent-expression",
       surface: `$z+\\left(${formula}\\right)$`,
     },
+    {
+      expected: false,
+      id: "negative-command-wrapper-mutation",
+      surface: `$\\semathUnknown{${formula}}$`,
+    },
   ];
 }
 
@@ -138,10 +162,19 @@ function mathBody(content) {
 }
 
 function cursorInsideSegment(content, segmentStart) {
-  const openLength = content.startsWith("\\[") ? 2 : 1;
-  const closeLength = content.endsWith("\\]") ? 2 : 1;
-  const end = content.length - closeLength;
-  return segmentStart + openLength + Math.floor((end - openLength) / 2);
+  const displayStart = content.indexOf("\\[");
+  const inlineStart = content.indexOf("$");
+  const start =
+    displayStart >= 0 && (inlineStart < 0 || displayStart < inlineStart)
+      ? displayStart
+      : inlineStart;
+  if (start < 0) throw new Error(`missing math segment: ${content}`);
+  const display = start === displayStart;
+  const openLength = display ? 2 : 1;
+  const closeStart = content.lastIndexOf(display ? "\\]" : "$");
+  const bodyStart = start + openLength;
+  const bodyEnd = closeStart >= bodyStart ? closeStart : content.length;
+  return segmentStart + bodyStart + Math.floor((Math.max(bodyEnd, bodyStart + 1) - bodyStart) / 2);
 }
 
 function sameValues(actual, expected) {

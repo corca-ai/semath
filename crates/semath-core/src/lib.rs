@@ -1,5 +1,6 @@
 mod binder;
 mod consistency;
+mod cursor;
 mod domain;
 mod engine;
 mod hygiene;
@@ -7,6 +8,7 @@ mod matcher;
 mod pack;
 mod parser;
 mod pattern;
+mod project_order;
 mod prose;
 mod protocol;
 mod rewrite;

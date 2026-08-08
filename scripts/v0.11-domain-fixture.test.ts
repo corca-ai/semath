@@ -7,13 +7,16 @@ import {
 } from "./v0.11-domain-fixture.mjs";
 
 describe("v0.11 domain fixture", () => {
-  test("builds five positive surfaces and five structural negatives for every entry", () => {
+  test("builds contextual positives and mutation refusals for every entry", () => {
     const { expectations, fixture } = buildDomainPackFixture(corpus);
     expect(fixture.snapshot.documents).toHaveLength(
       corpus.cases.length * 2 + corpus.collisions.length,
     );
     expect(
       recognitionVariants(corpus.cases[0]).filter((variant) => variant.expected),
+    ).toHaveLength(7);
+    expect(
+      recognitionVariants(corpus.cases[0]).filter((variant) => !variant.expected),
     ).toHaveLength(6);
     const caseQueries = corpus.cases.reduce(
       (total, entry) =>

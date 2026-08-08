@@ -146,6 +146,11 @@ export function recognitionVariants(entry) {
       content: `$ {${formula}} $`,
       expected: true,
     },
+    {
+      id: "positive-unicode-crlf-context",
+      content: `한글 😀 é\r\n$${formula}$`,
+      expected: true,
+    },
   ];
   if (!formula.includes("=")) {
     positives.push({
@@ -175,6 +180,11 @@ export function recognitionVariants(entry) {
     {
       id: "negative-adjacent-expression",
       content: `$z+\\left(${formula}\\right)$`,
+      expected: false,
+    },
+    {
+      id: "negative-command-wrapper-mutation",
+      content: `$\\semathUnknown{${formula}}$`,
       expected: false,
     },
   ];
@@ -219,12 +229,18 @@ function envelope(epoch, fileId, offset, kind) {
 }
 
 function cursorInsideSegment(content, segmentStart) {
-  const openLength = content.startsWith("\\[") ? 2 : 1;
-  const closeLength = content.endsWith("\\]") ? 2 : 1;
-  const end = content.length - closeLength;
-  return (
-    segmentStart +
-    openLength +
-    Math.floor((Math.max(end, openLength + 1) - openLength) / 2)
-  );
+  const displayStart = content.indexOf("\\[");
+  const inlineStart = content.indexOf("$");
+  const start =
+    displayStart >= 0 && (inlineStart < 0 || displayStart < inlineStart)
+      ? displayStart
+      : inlineStart;
+  if (start < 0) throw new Error(`missing math segment: ${content}`);
+  const display = start === displayStart;
+  const openLength = display ? 2 : 1;
+  const close = display ? "\\]" : "$";
+  const closeStart = content.lastIndexOf(close);
+  const end = closeStart >= start + openLength ? closeStart : content.length;
+  const bodyStart = start + openLength;
+  return segmentStart + bodyStart + Math.floor((Math.max(end, bodyStart + 1) - bodyStart) / 2);
 }

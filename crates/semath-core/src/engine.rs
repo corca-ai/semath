@@ -4,10 +4,12 @@ use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::consistency::{ConsistencyAnalysis, analyze_consistency};
+use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
 use crate::domain::{DomainAnalysis, analyze_domains};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
+use crate::project_order::{ProjectOrder, ProjectOrderDocument};
 use crate::prose::analyze_prose;
 use crate::rewrite::formula_rewrites;
 use crate::scope::ScopeGraph;
@@ -94,6 +96,7 @@ pub struct SemathEngine {
     main_file_id: Option<String>,
     analysis_generation: u64,
     documents: HashMap<String, AnalyzedDocument>,
+    project_order: ProjectOrder,
 }
 
 impl SemathEngine {
@@ -131,6 +134,7 @@ impl SemathEngine {
         if envelope.inventory_version <= self.inventory_version {
             return Err(EngineError::StaleInventory);
         }
+        self.validate_changes(&envelope.changes)?;
         let mut changed = Vec::new();
         for change in envelope.changes {
             match change {
@@ -146,10 +150,7 @@ impl SemathEngine {
                     }
                 }
                 ProjectChange::PathChange { file_id, path } => {
-                    let document = self
-                        .documents
-                        .get_mut(&file_id)
-                        .ok_or_else(|| EngineError::MissingDocument(file_id.clone()))?;
+                    let document = self.documents.get_mut(&file_id).unwrap();
                     document.document.path = path;
                     changed.push(file_id);
                 }
@@ -207,7 +208,7 @@ impl SemathEngine {
         let symbol = parsed.and_then(|math| symbol_at_cursor(math, offset));
         let cursor_offset = symbol
             .as_ref()
-            .map_or(offset, |(_, range)| offset.min(range.end_offset - 1));
+            .map_or(offset, |(_, range)| interior_offset(range, offset));
 
         let hygiene_enabled = self.documents.len() == 1;
         let value = match envelope.query {
@@ -418,6 +419,26 @@ impl SemathEngine {
         }
     }
 
+    fn validate_changes(&self, changes: &[ProjectChange]) -> Result<(), EngineError> {
+        let mut file_ids = self.documents.keys().cloned().collect::<HashSet<_>>();
+        for change in changes {
+            match change {
+                ProjectChange::Upsert { document } => {
+                    file_ids.insert(document.file_id.clone());
+                }
+                ProjectChange::PathChange { file_id, .. } => {
+                    if !file_ids.contains(file_id) {
+                        return Err(EngineError::MissingDocument(file_id.clone()));
+                    }
+                }
+                ProjectChange::Remove { file_id } => {
+                    file_ids.remove(file_id);
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn definitions_for(&self, symbol: &str) -> Vec<DefinitionInfo> {
         let mut definitions: Vec<_> = self
             .documents
@@ -455,6 +476,21 @@ impl SemathEngine {
                     .semantic_id
                     .as_ref()
                     .is_some_and(|identity| identity.component_id == document.component_id)
+            })
+            .filter(|definition| {
+                if definition.location.file_id == file_id {
+                    definition.location.range.start_offset <= occurrence.start_offset
+                        && definition.semantic_id.as_ref().is_some_and(|identity| {
+                            scope_visible(&identity.scope_path, &occurrence_scope)
+                        })
+                } else {
+                    self.project_order.precedes(
+                        &definition.location.file_id,
+                        definition.location.range.start_offset,
+                        file_id,
+                        occurrence.start_offset,
+                    )
+                }
             })
             .collect::<Vec<_>>();
         let mut local = candidates
@@ -582,69 +618,32 @@ impl SemathEngine {
     }
 
     fn refresh_semantic_identities(&mut self) {
-        let path_to_id = self
-            .documents
-            .values()
-            .map(|document| {
-                (
-                    normalize_project_path(&document.document.path),
-                    document.document.file_id.clone(),
-                )
-            })
-            .collect::<HashMap<_, _>>();
-        let mut adjacency = self
-            .documents
-            .keys()
-            .map(|file_id| (file_id.clone(), HashSet::new()))
-            .collect::<HashMap<_, _>>();
-        for document in self.documents.values() {
-            for include in &document.document.includes {
-                let Some(target) =
-                    resolve_include(&document.document.path, &include.path, &path_to_id)
-                else {
-                    continue;
-                };
-                adjacency
-                    .entry(document.document.file_id.clone())
-                    .or_default()
-                    .insert(target.clone());
-                adjacency
-                    .entry(target)
-                    .or_default()
-                    .insert(document.document.file_id.clone());
-            }
-        }
-
-        let mut component_by_file = HashMap::new();
-        let mut remaining = self.documents.keys().cloned().collect::<HashSet<_>>();
-        while let Some(seed) = remaining.iter().next().cloned() {
-            let mut pending = vec![seed.clone()];
-            let mut members = Vec::new();
-            remaining.remove(&seed);
-            while let Some(file_id) = pending.pop() {
-                members.push(file_id.clone());
-                for neighbor in adjacency.get(&file_id).into_iter().flatten() {
-                    if remaining.remove(neighbor) {
-                        pending.push(neighbor.clone());
-                    }
-                }
-            }
-            members.sort();
-            let component_id = self
-                .main_file_id
-                .as_ref()
-                .filter(|main| members.contains(main))
-                .cloned()
-                .unwrap_or_else(|| members[0].clone());
-            for file_id in members {
-                component_by_file.insert(file_id, component_id.clone());
-            }
-        }
-
+        let project_order = ProjectOrder::new(
+            self.documents
+                .values()
+                .map(|document| ProjectOrderDocument {
+                    file_id: document.document.file_id.clone(),
+                    includes: document.document.includes.clone(),
+                    occurrence_offsets: document
+                        .parsed
+                        .iter()
+                        .flat_map(|math| math.symbols.iter().map(|(_, range)| range.start_offset))
+                        .chain(
+                            document
+                                .definitions
+                                .iter()
+                                .map(|definition| definition.location.range.start_offset),
+                        )
+                        .collect(),
+                    path: document.document.path.clone(),
+                })
+                .collect(),
+            self.main_file_id.as_deref(),
+        );
         for (file_id, document) in &mut self.documents {
-            document.component_id = component_by_file
-                .get(file_id)
-                .cloned()
+            document.component_id = project_order
+                .component_for(file_id)
+                .map(str::to_owned)
                 .unwrap_or_else(|| file_id.clone());
             for definition in &mut document.definitions {
                 if let Some(identity) = &mut definition.semantic_id {
@@ -652,6 +651,7 @@ impl SemathEngine {
                 }
             }
         }
+        self.project_order = project_order;
     }
 }
 
@@ -661,41 +661,6 @@ fn scope_visible(definition: &[u32], occurrence: &[u32]) -> bool {
             .iter()
             .zip(occurrence)
             .all(|(left, right)| left == right)
-}
-
-fn resolve_include(
-    source_path: &str,
-    include_path: &str,
-    path_to_id: &HashMap<String, String>,
-) -> Option<String> {
-    let parent = source_path
-        .rsplit_once('/')
-        .map_or("", |(parent, _)| parent);
-    let joined = if include_path.starts_with('/') || parent.is_empty() {
-        include_path.trim_start_matches('/').to_string()
-    } else {
-        format!("{parent}/{include_path}")
-    };
-    let normalized = normalize_project_path(&joined);
-    path_to_id.get(&normalized).cloned().or_else(|| {
-        (!normalized.contains('.'))
-            .then(|| path_to_id.get(&format!("{normalized}.tex")).cloned())
-            .flatten()
-    })
-}
-
-fn normalize_project_path(path: &str) -> String {
-    let mut parts = Vec::new();
-    for part in path.split('/') {
-        match part {
-            "" | "." => {}
-            ".." => {
-                parts.pop();
-            }
-            value => parts.push(value),
-        }
-    }
-    parts.join("/")
 }
 
 fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMath> {
@@ -720,18 +685,7 @@ fn symbol_range_at_cursor(
     symbols: &[(String, SourceRange)],
     offset: u32,
 ) -> Option<(&String, &SourceRange)> {
-    symbols
-        .iter()
-        .find(|(_, range)| range.contains(offset))
-        .or_else(|| {
-            symbols
-                .iter()
-                .filter(|(_, range)| {
-                    range.start_offset < range.end_offset && range.end_offset == offset
-                })
-                .max_by_key(|(_, range)| range.start_offset)
-        })
-        .map(|(symbol, range)| (symbol, range))
+    item_at_cursor_with_trailing_edge(symbols, offset)
 }
 
 fn bounded_equation_tree(
@@ -944,8 +898,8 @@ fn check_protocol(version: u32) -> Result<(), EngineError> {
 mod tests {
     use super::{SemathEngine, symbol_range_at_cursor};
     use crate::{
-        DocumentLanguage, PROTOCOL_VERSION, ProjectDocument, ProjectInclude, ProjectSnapshot,
-        Query, QueryEnvelope, QueryValue, SourceRange,
+        ChangeEnvelope, DocumentLanguage, PROTOCOL_VERSION, ProjectChange, ProjectDocument,
+        ProjectInclude, ProjectSnapshot, Query, QueryEnvelope, QueryValue, SourceRange,
     };
 
     fn snapshot(content: &str) -> ProjectSnapshot {
@@ -976,6 +930,10 @@ mod tests {
             analysis_generation: 1,
             query: kind,
         }
+    }
+
+    fn utf16_offset(content: &str, byte_offset: usize) -> u32 {
+        content[..byte_offset].encode_utf16().count() as u32
     }
 
     #[test]
@@ -1085,6 +1043,67 @@ mod tests {
         };
 
         assert_eq!(queries_at(numerator_a), queries_at(numerator_a + 1));
+    }
+
+    #[test]
+    fn keeps_unicode_crlf_cursor_queries_stable_at_every_symbol_position() {
+        let content = concat!(
+            "한글 😀 é\r\n",
+            "Let $A$ denote an event of positive probability.\r\n",
+            "$p = \\mathbb{P}(A)$",
+        );
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let symbol_start = utf16_offset(content, content.rfind("A)").unwrap());
+        let queries_at = |offset| {
+            [
+                Query::Selection {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::Hover {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::SymbolInfo {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::Definition {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::References {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::PrepareRename {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::FormulaRecognition {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::FormulaRewrite {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::DomainEvidence {
+                    file_id: "main".into(),
+                    offset,
+                },
+                Query::Inspection {
+                    file_id: "main".into(),
+                    offset,
+                },
+            ]
+            .into_iter()
+            .map(|kind| engine.query(query(kind)).unwrap().value)
+            .collect::<Vec<_>>()
+        };
+
+        assert_eq!(queries_at(symbol_start), queries_at(symbol_start + 1));
     }
 
     #[test]
@@ -1229,6 +1248,145 @@ mod tests {
         assert_eq!(second.definitions[0].description, "the second value");
         assert_ne!(first.semantic_id, second.semantic_id);
         assert_eq!(first.semantic_id.as_ref().unwrap().component_id, "main");
+    }
+
+    #[test]
+    fn refuses_forward_and_sibling_scope_definitions() {
+        let same_file = concat!(
+            "\\section{First}\nLet $x$ denote the first value.\n",
+            "\\section{Second}\nUse $x$.",
+        );
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(same_file)).unwrap();
+        let sibling_use = same_file.rfind("$x$").unwrap() as u32 + 1;
+        let result = engine
+            .query(query(Query::Definition {
+                file_id: "main".into(),
+                offset: sibling_use,
+            }))
+            .unwrap();
+        let QueryValue::Locations { locations } = result.value else {
+            panic!("expected locations")
+        };
+        assert!(locations.is_empty());
+
+        let forward = "Use $y$.\nLet $y$ denote a later value.";
+        engine.reset(snapshot(forward)).unwrap();
+        let forward_use = forward.find("$y$").unwrap() as u32 + 1;
+        let result = engine
+            .query(query(Query::Definition {
+                file_id: "main".into(),
+                offset: forward_use,
+            }))
+            .unwrap();
+        let QueryValue::Locations { locations } = result.value else {
+            panic!("expected locations")
+        };
+        assert!(locations.is_empty());
+    }
+
+    #[test]
+    fn follows_include_expansion_order_and_keeps_references_consistent() {
+        let main = "Before $x$.\n\\input{definitions}\nAfter $x$.";
+        let definitions = "Let $x$ denote the included value.";
+        let mut project = snapshot(main);
+        let include_start = main.find("definitions").unwrap() as u32;
+        project.documents[0].includes = vec![ProjectInclude {
+            path: "definitions".into(),
+            source_range: SourceRange {
+                start_offset: include_start,
+                end_offset: include_start + "definitions".len() as u32,
+            },
+        }];
+        project.documents.push(ProjectDocument {
+            file_id: "definitions".into(),
+            path: "definitions.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: definitions.into(),
+            document_version: 1,
+            math_regions: Vec::new(),
+            includes: Vec::new(),
+        });
+        let mut engine = SemathEngine::default();
+        engine.reset(project).unwrap();
+        let before = main.find("$x$").unwrap() as u32 + 1;
+        let after = main.rfind("$x$").unwrap() as u32 + 1;
+
+        let definition_at = |offset| {
+            let result = engine
+                .query(query(Query::Definition {
+                    file_id: "main".into(),
+                    offset,
+                }))
+                .unwrap();
+            let QueryValue::Locations { locations } = result.value else {
+                panic!("expected locations")
+            };
+            locations
+        };
+        assert!(definition_at(before).is_empty());
+        assert_eq!(definition_at(after)[0].file_id, "definitions");
+
+        let definition_offset = definitions.find("$x$").unwrap() as u32 + 1;
+        let references = engine
+            .query(query(Query::References {
+                file_id: "definitions".into(),
+                offset: definition_offset,
+            }))
+            .unwrap();
+        let QueryValue::Locations { locations } = references.value else {
+            panic!("expected references")
+        };
+        assert_eq!(
+            locations
+                .iter()
+                .map(|location| location.file_id.as_str())
+                .collect::<Vec<_>>(),
+            ["definitions", "main"],
+        );
+        assert_eq!(locations[1].range.start_offset, after);
+    }
+
+    #[test]
+    fn rejects_an_invalid_change_batch_without_partial_mutation() {
+        let mut engine = SemathEngine::default();
+        engine
+            .reset(snapshot("Let $x$ denote the original value."))
+            .unwrap();
+        let result = engine.apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![
+                ProjectChange::Upsert {
+                    document: ProjectDocument {
+                        file_id: "main".into(),
+                        path: "main.tex".into(),
+                        language: DocumentLanguage::Latex,
+                        content: "Let $x$ denote the mutated value.".into(),
+                        document_version: 2,
+                        math_regions: Vec::new(),
+                        includes: Vec::new(),
+                    },
+                },
+                ProjectChange::PathChange {
+                    file_id: "missing".into(),
+                    path: "missing.tex".into(),
+                },
+            ],
+        });
+
+        assert!(matches!(
+            result,
+            Err(super::EngineError::MissingDocument(_))
+        ));
+        assert_eq!(engine.inventory_version, 1);
+        assert_eq!(
+            engine.documents["main"].document.content,
+            "Let $x$ denote the original value.",
+        );
+        assert_eq!(engine.documents["main"].document.document_version, 1);
     }
 
     #[test]

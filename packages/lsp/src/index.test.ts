@@ -152,6 +152,86 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("keeps semantic navigation stable on both UTF-16 symbol edges", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///unicode.tex";
+    const content = [
+      "한글 😀 é",
+      "Let $A$ denote an event of positive probability.",
+      "$p = \\mathbb{P}(A)$",
+    ].join("\r\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "latex", text: content, uri, version: 1 },
+      },
+    });
+    const start = content.lastIndexOf("A)");
+    for (const [id, offset] of [
+      [520, start],
+      [521, start + 1],
+    ] as const) {
+      await server.handle({
+        id,
+        method: "textDocument/definition",
+        params: { position: positionAt(content, offset), textDocument: { uri } },
+      });
+    }
+
+    expect(response(messages, 520)).toEqual(response(messages, 521));
+    expect(response(messages, 520)).toMatchObject({ uri });
+    server.dispose();
+  });
+
+  test("refuses definitions that occur later in include expansion order", async () => {
+    const { messages, server } = await setup();
+    const mainUri = "file:///main.tex";
+    const definitionsUri = "file:///definitions.tex";
+    const main = "Before $x$.\n\\input{definitions}\nAfter $x$.";
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          languageId: "latex",
+          text: main,
+          uri: mainUri,
+          version: 1,
+        },
+      },
+    });
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          languageId: "latex",
+          text: "Let $x$ denote the included value.",
+          uri: definitionsUri,
+          version: 1,
+        },
+      },
+    });
+    await server.handle({
+      id: 530,
+      method: "textDocument/definition",
+      params: {
+        position: positionAt(main, main.indexOf("$x$") + 1),
+        textDocument: { uri: mainUri },
+      },
+    });
+    await server.handle({
+      id: 531,
+      method: "textDocument/definition",
+      params: {
+        position: positionAt(main, main.lastIndexOf("$x$") + 1),
+        textDocument: { uri: mainUri },
+      },
+    });
+
+    expect(response(messages, 530)).toBeNull();
+    expect(response(messages, 531)).toMatchObject({ uri: definitionsUri });
+    server.dispose();
+  });
+
   test("returns semantic rewrites as reviewable code actions", async () => {
     const { messages, server } = await setup();
     const uri = "file:///probability.md";
