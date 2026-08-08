@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.7 진행 중 (2026-08-08):** typed probability recognition·completion까지 완료했다. 현재는 side condition을 명시적 근거로 증명할 수 있는 조건부확률 동치식만 bounded rewrite proposal로 제공하며, 모든 변경은 호스트의 revision-checked review 흐름을 거친다.
+> **구현 상태 — v0.7 완료 (2026-08-08):** typed probability recognition·completion과 side-condition-aware rewrite를 구현했다. CorTeX는 검증된 조건부확률 동치식만 Refactor 메뉴에 노출하고, 모든 변경을 revision-checked review 흐름으로 적용한다.
 
 ## 1. 개요
 
