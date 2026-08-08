@@ -9,6 +9,12 @@ import {
 export interface WasmtexFileSyntax {
   documentVersion: number;
   fileId: string;
+  includes: readonly {
+    path: string;
+    source: {
+      range: { endOffset: number; startOffset: number };
+    };
+  }[];
   mathRegions: readonly {
     closed: boolean;
     contentRange: { endOffset: number; startOffset: number };
@@ -16,7 +22,7 @@ export interface WasmtexFileSyntax {
     fullRange: { endOffset: number; startOffset: number };
   }[];
   path: string;
-  schemaVersion: 1;
+  schemaVersion: 2;
 }
 
 export interface SourceDocument {
@@ -30,6 +36,10 @@ export function adaptWasmtexDocument(source: SourceDocument): ProjectDocument {
     content: source.content,
     documentVersion: source.syntax.documentVersion,
     fileId: source.syntax.fileId,
+    includes: source.syntax.includes.map((include) => ({
+      path: include.path,
+      sourceRange: include.source.range,
+    })),
     language: source.language,
     mathRegions: source.syntax.mathRegions,
     path: source.syntax.path,

@@ -34,6 +34,15 @@ pub struct ProjectDocument {
     pub document_version: u64,
     #[serde(default)]
     pub math_regions: Vec<MathRegion>,
+    #[serde(default)]
+    pub includes: Vec<ProjectInclude>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectInclude {
+    pub path: String,
+    pub source_range: SourceRange,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -199,12 +208,26 @@ pub struct DefinitionInfo {
     pub description: String,
     pub location: Location,
     pub evidence: Evidence,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semantic_id: Option<SemanticSymbolId>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticSymbolId {
+    pub component_id: String,
+    pub file_id: String,
+    pub scope_path: Vec<u32>,
+    pub kind: String,
+    pub anchor: u32,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SymbolInfo {
     pub symbol: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semantic_id: Option<SemanticSymbolId>,
     pub location: Location,
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ShapeInfo>,
@@ -465,7 +488,7 @@ pub enum QueryValue {
         truncated: bool,
     },
     Inspection {
-        inspection: InspectionInfo,
+        inspection: Box<InspectionInfo>,
     },
 }
 

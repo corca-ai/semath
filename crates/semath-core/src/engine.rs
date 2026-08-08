@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use thiserror::Error;
 
@@ -10,6 +10,7 @@ use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selec
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
 use crate::prose::analyze_prose;
 use crate::rewrite::formula_rewrites;
+use crate::scope::ScopeGraph;
 use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, EquationNode, EquationNodeSummary, Evidence,
@@ -53,6 +54,8 @@ struct AnalyzedDocument {
     hygiene: HygieneAnalysis,
     formulas: FormulaAnalysis,
     domains: DomainAnalysis,
+    scopes: ScopeGraph,
+    component_id: String,
 }
 
 impl AnalyzedDocument {
@@ -61,6 +64,7 @@ impl AnalyzedDocument {
             document.math_regions = math_regions(&document.content, document.language);
         }
         let parsed = parse_regions(&document.content, &document.math_regions);
+        let scopes = ScopeGraph::new(&document);
         let prose = analyze_prose(&document, &parsed);
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
         let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
@@ -68,6 +72,7 @@ impl AnalyzedDocument {
         let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
         let domains = analyze_domains(&document, &formulas);
         Self {
+            component_id: document.file_id.clone(),
             document,
             parsed,
             definitions: prose.definitions,
@@ -76,6 +81,7 @@ impl AnalyzedDocument {
             hygiene,
             formulas,
             domains,
+            scopes,
         }
     }
 }
@@ -113,6 +119,7 @@ impl SemathEngine {
                 )
             })
             .collect();
+        self.refresh_semantic_identities();
         Ok(self.update_result(changed_file_ids))
     }
 
@@ -154,6 +161,7 @@ impl SemathEngine {
         }
         self.inventory_version = envelope.inventory_version;
         self.analysis_generation = envelope.analysis_generation;
+        self.refresh_semantic_identities();
         Ok(self.update_result(changed))
     }
 
@@ -229,7 +237,7 @@ impl SemathEngine {
                     .unwrap_or_default();
                 let definitions = symbol
                     .as_ref()
-                    .map(|(name, _)| self.definitions_for(name))
+                    .map(|(name, occurrence)| self.visible_definitions(file_id, occurrence, name))
                     .unwrap_or_default();
                 QueryValue::Hover {
                     shape: symbol
@@ -361,7 +369,7 @@ impl SemathEngine {
                     || symbol_info.as_ref().is_some_and(|info| info.truncated);
 
                 QueryValue::Inspection {
-                    inspection: InspectionInfo {
+                    inspection: Box::new(InspectionInfo {
                         equation,
                         selection_path,
                         symbol: symbol_info,
@@ -373,7 +381,7 @@ impl SemathEngine {
                         rewrites,
                         rename,
                         truncated,
-                    },
+                    }),
                 }
             }
         };
@@ -432,22 +440,80 @@ impl SemathEngine {
         definitions
     }
 
+    fn visible_definitions(
+        &self,
+        file_id: &str,
+        occurrence: &SourceRange,
+        symbol: &str,
+    ) -> Vec<DefinitionInfo> {
+        let Some(document) = self.documents.get(file_id) else {
+            return Vec::new();
+        };
+        let occurrence_scope = document.scopes.path_at(occurrence.start_offset);
+        let candidates = self
+            .definitions_for(symbol)
+            .into_iter()
+            .filter(|definition| {
+                definition
+                    .semantic_id
+                    .as_ref()
+                    .is_some_and(|identity| identity.component_id == document.component_id)
+            })
+            .collect::<Vec<_>>();
+        let mut local = candidates
+            .iter()
+            .filter(|definition| {
+                definition.location.file_id == file_id
+                    && definition.location.range.start_offset <= occurrence.start_offset
+                    && definition.semantic_id.as_ref().is_some_and(|identity| {
+                        scope_visible(&identity.scope_path, &occurrence_scope)
+                    })
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        local.sort_by_key(|definition| {
+            let identity = definition.semantic_id.as_ref().unwrap();
+            (
+                identity.scope_path.len(),
+                definition.location.range.start_offset,
+            )
+        });
+        if !local.is_empty() {
+            return local;
+        }
+        if candidates.len() == 1 {
+            return candidates;
+        }
+        let document_scoped = candidates
+            .into_iter()
+            .filter(|definition| {
+                definition
+                    .semantic_id
+                    .as_ref()
+                    .is_some_and(|identity| identity.scope_path.is_empty())
+            })
+            .collect::<Vec<_>>();
+        (document_scoped.len() == 1)
+            .then(|| document_scoped[0].clone())
+            .into_iter()
+            .collect()
+    }
+
     fn resolve_definition(
         &self,
         file_id: &str,
         occurrence: &SourceRange,
         symbol: &str,
     ) -> Option<DefinitionInfo> {
-        let definitions = self.definitions_for(symbol);
-        definitions
-            .iter()
-            .filter(|definition| {
-                definition.location.file_id == file_id
-                    && definition.location.range.start_offset <= occurrence.start_offset
+        self.visible_definitions(file_id, occurrence, symbol)
+            .into_iter()
+            .max_by_key(|definition| {
+                let identity = definition.semantic_id.as_ref().unwrap();
+                (
+                    identity.scope_path.len(),
+                    definition.location.range.start_offset,
+                )
             })
-            .max_by_key(|definition| definition.location.range.start_offset)
-            .cloned()
-            .or_else(|| (definitions.len() == 1).then(|| definitions[0].clone()))
     }
 
     fn references_for(&self, definition: &DefinitionInfo) -> Vec<Location> {
@@ -461,7 +527,7 @@ impl SemathEngine {
                     if self
                         .resolve_definition(&document.document.file_id, range, symbol)
                         .as_ref()
-                        .is_some_and(|resolved| resolved.location == definition.location)
+                        .is_some_and(|resolved| resolved.semantic_id == definition.semantic_id)
                     {
                         locations.push(Location {
                             file_id: document.document.file_id.clone(),
@@ -488,7 +554,8 @@ impl SemathEngine {
         offset: u32,
         hygiene_enabled: bool,
     ) -> SymbolInfo {
-        let mut definitions = self.definitions_for(name);
+        let mut definitions =
+            self.visible_definitions(&document.document.file_id, occurrence, name);
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
         definitions.truncate(MAX_SYMBOL_DEFINITIONS);
         let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
@@ -497,6 +564,9 @@ impl SemathEngine {
             symbol_diagnostics(document, name, offset, &shapes, hygiene_enabled);
         SymbolInfo {
             symbol: name.into(),
+            semantic_id: self
+                .resolve_definition(&document.document.file_id, occurrence, name)
+                .and_then(|definition| definition.semantic_id),
             location: Location {
                 file_id: document.document.file_id.clone(),
                 path: document.document.path.clone(),
@@ -513,6 +583,122 @@ impl SemathEngine {
                 || diagnostics_truncated,
         }
     }
+
+    fn refresh_semantic_identities(&mut self) {
+        let path_to_id = self
+            .documents
+            .values()
+            .map(|document| {
+                (
+                    normalize_project_path(&document.document.path),
+                    document.document.file_id.clone(),
+                )
+            })
+            .collect::<HashMap<_, _>>();
+        let mut adjacency = self
+            .documents
+            .keys()
+            .map(|file_id| (file_id.clone(), HashSet::new()))
+            .collect::<HashMap<_, _>>();
+        for document in self.documents.values() {
+            for include in &document.document.includes {
+                let Some(target) =
+                    resolve_include(&document.document.path, &include.path, &path_to_id)
+                else {
+                    continue;
+                };
+                adjacency
+                    .entry(document.document.file_id.clone())
+                    .or_default()
+                    .insert(target.clone());
+                adjacency
+                    .entry(target)
+                    .or_default()
+                    .insert(document.document.file_id.clone());
+            }
+        }
+
+        let mut component_by_file = HashMap::new();
+        let mut remaining = self.documents.keys().cloned().collect::<HashSet<_>>();
+        while let Some(seed) = remaining.iter().next().cloned() {
+            let mut pending = vec![seed.clone()];
+            let mut members = Vec::new();
+            remaining.remove(&seed);
+            while let Some(file_id) = pending.pop() {
+                members.push(file_id.clone());
+                for neighbor in adjacency.get(&file_id).into_iter().flatten() {
+                    if remaining.remove(neighbor) {
+                        pending.push(neighbor.clone());
+                    }
+                }
+            }
+            members.sort();
+            let component_id = self
+                .main_file_id
+                .as_ref()
+                .filter(|main| members.contains(main))
+                .cloned()
+                .unwrap_or_else(|| members[0].clone());
+            for file_id in members {
+                component_by_file.insert(file_id, component_id.clone());
+            }
+        }
+
+        for (file_id, document) in &mut self.documents {
+            document.component_id = component_by_file
+                .get(file_id)
+                .cloned()
+                .unwrap_or_else(|| file_id.clone());
+            for definition in &mut document.definitions {
+                if let Some(identity) = &mut definition.semantic_id {
+                    identity.component_id.clone_from(&document.component_id);
+                }
+            }
+        }
+    }
+}
+
+fn scope_visible(definition: &[u32], occurrence: &[u32]) -> bool {
+    definition.len() <= occurrence.len()
+        && definition
+            .iter()
+            .zip(occurrence)
+            .all(|(left, right)| left == right)
+}
+
+fn resolve_include(
+    source_path: &str,
+    include_path: &str,
+    path_to_id: &HashMap<String, String>,
+) -> Option<String> {
+    let parent = source_path
+        .rsplit_once('/')
+        .map_or("", |(parent, _)| parent);
+    let joined = if include_path.starts_with('/') || parent.is_empty() {
+        include_path.trim_start_matches('/').to_string()
+    } else {
+        format!("{parent}/{include_path}")
+    };
+    let normalized = normalize_project_path(&joined);
+    path_to_id.get(&normalized).cloned().or_else(|| {
+        (!normalized.contains('.'))
+            .then(|| path_to_id.get(&format!("{normalized}.tex")).cloned())
+            .flatten()
+    })
+}
+
+fn normalize_project_path(path: &str) -> String {
+    let mut parts = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => {}
+            ".." => {
+                parts.pop();
+            }
+            value => parts.push(value),
+        }
+    }
+    parts.join("/")
 }
 
 fn bounded_equation_tree(
@@ -725,8 +911,8 @@ fn check_protocol(version: u32) -> Result<(), EngineError> {
 mod tests {
     use super::SemathEngine;
     use crate::{
-        DocumentLanguage, PROTOCOL_VERSION, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope,
-        QueryValue,
+        DocumentLanguage, PROTOCOL_VERSION, ProjectDocument, ProjectInclude, ProjectSnapshot,
+        Query, QueryEnvelope, QueryValue, SourceRange,
     };
 
     fn snapshot(content: &str) -> ProjectSnapshot {
@@ -743,6 +929,7 @@ mod tests {
                 content: content.into(),
                 document_version: 1,
                 math_regions: Vec::new(),
+                includes: Vec::new(),
             }],
         }
     }
@@ -775,6 +962,65 @@ mod tests {
         };
         assert_eq!(locations.len(), 1);
         assert_eq!(locations[0].path, "main.tex");
+    }
+
+    #[test]
+    fn separates_same_glyph_definitions_by_scope_and_include_component() {
+        let chapter = concat!(
+            "\\section{First}\nLet $x$ denote the first value.\nUse $x$.\n",
+            "\\section{Second}\nLet $x$ denote the second value.\nUse $x$.",
+        );
+        let mut project = snapshot("\\input{chapter}");
+        project.documents[0].includes = vec![ProjectInclude {
+            path: "chapter".into(),
+            source_range: SourceRange {
+                start_offset: 0,
+                end_offset: 15,
+            },
+        }];
+        project.documents.push(ProjectDocument {
+            file_id: "chapter".into(),
+            path: "chapter.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: chapter.into(),
+            document_version: 1,
+            math_regions: Vec::new(),
+            includes: Vec::new(),
+        });
+        project.documents.push(ProjectDocument {
+            file_id: "orphan".into(),
+            path: "orphan.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: "Let $x$ denote an unrelated value.".into(),
+            document_version: 1,
+            math_regions: Vec::new(),
+            includes: Vec::new(),
+        });
+        let mut engine = SemathEngine::default();
+        engine.reset(project).unwrap();
+
+        let first_use = chapter.find("Use $x$").unwrap() as u32 + 5;
+        let second_use = chapter.rfind("Use $x$").unwrap() as u32 + 5;
+        let definition_at = |offset| {
+            let result = engine
+                .query(query(Query::SymbolInfo {
+                    file_id: "chapter".into(),
+                    offset,
+                }))
+                .unwrap();
+            let QueryValue::SymbolInfo { info: Some(info) } = result.value else {
+                panic!("expected symbol info")
+            };
+            info
+        };
+        let first = definition_at(first_use);
+        let second = definition_at(second_use);
+        assert_eq!(first.definitions.len(), 1);
+        assert_eq!(first.definitions[0].description, "the first value");
+        assert_eq!(second.definitions.len(), 1);
+        assert_eq!(second.definitions[0].description, "the second value");
+        assert_ne!(first.semantic_id, second.semantic_id);
+        assert_eq!(first.semantic_id.as_ref().unwrap().component_id, "main");
     }
 
     #[test]
@@ -1163,6 +1409,7 @@ mod tests {
             content: "$z$ may be used here.".into(),
             document_version: 1,
             math_regions: Vec::new(),
+            includes: Vec::new(),
         });
         let mut engine = SemathEngine::default();
         engine.reset(project).unwrap();

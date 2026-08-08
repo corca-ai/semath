@@ -841,6 +841,7 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            includes: Vec::new(),
         };
         analyze_shapes(&document, &parse_regions(source, &regions), &[])
     }
@@ -888,6 +889,7 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            includes: Vec::new(),
         };
         let analysis = analyze_shapes(&document, &parse_regions(source, &regions), &[]);
         assert!(analysis.diagnostics.is_empty());

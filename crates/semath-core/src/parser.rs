@@ -161,6 +161,10 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_atom(&mut self) -> EquationNode {
+        self.parse_atom_with_application(true)
+    }
+
+    fn parse_atom_with_application(&mut self, allow_application: bool) -> EquationNode {
         let start = self.cursor;
         let Some(character) = self.peek() else {
             return self.node("unknown", None, start, start, Vec::new());
@@ -218,7 +222,10 @@ impl<'a> Parser<'a> {
             let child = if self.peek() == Some('{') {
                 self.parse_group()
             } else {
-                self.parse_atom()
+                // An unbraced script consumes exactly one atom. In particular,
+                // `\sum^n (x)` must not reinterpret `(x)` as an application of
+                // the superscript `n`.
+                self.parse_atom_with_application(false)
             };
             scripts.push(self.node(
                 if marker == '^' {
@@ -236,6 +243,20 @@ impl<'a> Parser<'a> {
             let mut children = vec![node];
             children.extend(scripts);
             node = self.node("scripted", None, start, self.cursor, children);
+        }
+        while allow_application && application_head(&node) {
+            self.skip_whitespace();
+            let Some(open @ ('(' | '[')) = self.peek() else {
+                break;
+            };
+            let arguments = self.parse_delimited(open);
+            node = self.node(
+                "application",
+                None,
+                start,
+                self.cursor,
+                vec![node, arguments],
+            );
         }
         node
     }
@@ -295,6 +316,12 @@ impl<'a> Parser<'a> {
             self.bump();
         }
         let name = self.source[name_start..self.cursor].to_string();
+        if name == "left" {
+            return self.parse_left_right(start);
+        }
+        if name == "begin" {
+            return self.parse_environment(start);
+        }
         let mut children = Vec::new();
         let kind = match name.as_str() {
             "frac" => {
@@ -344,6 +371,176 @@ impl<'a> Parser<'a> {
         )
     }
 
+    fn parse_left_right(&mut self, start: usize) -> EquationNode {
+        self.skip_whitespace();
+        let open = self.consume_delimiter();
+        let body_start = self.cursor;
+        let right = self.source[body_start..]
+            .find("\\right")
+            .map(|offset| body_start + offset);
+        let body_end = right.unwrap_or(self.source.len());
+        let body = self.parse_slice(body_start, body_end);
+        self.cursor = body_end;
+        let close = if right.is_some() {
+            self.cursor += "\\right".len();
+            self.skip_whitespace();
+            self.consume_delimiter()
+        } else {
+            String::new()
+        };
+        self.node(
+            "delimited",
+            Some(format!("{open}{close}")),
+            start,
+            self.cursor,
+            vec![body],
+        )
+    }
+
+    fn parse_environment(&mut self, start: usize) -> EquationNode {
+        self.skip_whitespace();
+        let Some((environment, _name_node)) = self.consume_literal_group() else {
+            return self.node(
+                "command",
+                Some("\\begin".into()),
+                start,
+                self.cursor,
+                Vec::new(),
+            );
+        };
+        if !matches!(
+            environment.as_str(),
+            "matrix"
+                | "pmatrix"
+                | "bmatrix"
+                | "Bmatrix"
+                | "vmatrix"
+                | "Vmatrix"
+                | "smallmatrix"
+                | "cases"
+        ) {
+            return self.node(
+                "environment",
+                Some(environment),
+                start,
+                self.cursor,
+                Vec::new(),
+            );
+        }
+
+        let body_start = self.cursor;
+        let end_marker = format!("\\end{{{environment}}}");
+        let end_start = self.source[body_start..]
+            .find(&end_marker)
+            .map_or(self.source.len(), |offset| body_start + offset);
+        let rows = self.environment_rows(body_start, end_start);
+        self.cursor = if end_start < self.source.len() {
+            end_start + end_marker.len()
+        } else {
+            end_start
+        };
+        self.node(
+            if environment == "cases" {
+                "cases"
+            } else {
+                "matrix"
+            },
+            Some(environment),
+            start,
+            self.cursor,
+            rows,
+        )
+    }
+
+    fn environment_rows(&mut self, start: usize, end: usize) -> Vec<EquationNode> {
+        let mut rows = Vec::new();
+        let mut cells = Vec::new();
+        let mut cell_start = start;
+        let mut row_start = start;
+        let mut cursor = start;
+        let mut depth = 0usize;
+
+        while cursor < end {
+            let rest = &self.source[cursor..end];
+            if depth == 0 && rest.starts_with("\\\\") {
+                cells.push(self.environment_cell(cell_start, cursor));
+                rows.push(self.environment_row(row_start, cursor, cells));
+                cells = Vec::new();
+                cursor += 2;
+                cell_start = cursor;
+                row_start = cursor;
+                continue;
+            }
+            let character = rest.chars().next().unwrap();
+            if depth == 0 && character == '&' {
+                cells.push(self.environment_cell(cell_start, cursor));
+                cursor += 1;
+                cell_start = cursor;
+                continue;
+            }
+            match character {
+                '{' => depth += 1,
+                '}' => depth = depth.saturating_sub(1),
+                _ => {}
+            }
+            cursor += character.len_utf8();
+        }
+        if cell_start < end || !cells.is_empty() {
+            cells.push(self.environment_cell(cell_start, end));
+            rows.push(self.environment_row(row_start, end, cells));
+        }
+        rows
+    }
+
+    fn environment_cell(&mut self, start: usize, end: usize) -> EquationNode {
+        let body = self.parse_slice(start, end);
+        self.node("cell", None, start, end, vec![body])
+    }
+
+    fn environment_row(&self, start: usize, end: usize, cells: Vec<EquationNode>) -> EquationNode {
+        self.node("row", None, start, end, cells)
+    }
+
+    fn parse_slice(&mut self, start: usize, end: usize) -> EquationNode {
+        let mut parser = Parser::new(&self.source[start..end], self.base_byte + start, self.index);
+        let root = parser.parse_sequence(None);
+        self.symbols.extend(parser.symbols);
+        root
+    }
+
+    fn consume_literal_group(&mut self) -> Option<(String, EquationNode)> {
+        if self.peek() != Some('{') {
+            return None;
+        }
+        let start = self.cursor;
+        self.bump();
+        let content_start = self.cursor;
+        while self.peek().is_some_and(|character| character != '}') {
+            self.bump();
+        }
+        let content_end = self.cursor;
+        if self.peek() == Some('}') {
+            self.bump();
+        }
+        Some((
+            self.source[content_start..content_end].to_string(),
+            self.node("group", None, start, self.cursor, Vec::new()),
+        ))
+    }
+
+    fn consume_delimiter(&mut self) -> String {
+        let start = self.cursor;
+        if self.peek() == Some('\\') {
+            self.bump();
+            while self.peek().is_some_and(char::is_alphabetic) {
+                self.bump();
+            }
+        } else {
+            self.bump();
+        }
+        self.source[start..self.cursor].to_string()
+    }
+
     fn skip_whitespace(&mut self) {
         while self.peek().is_some_and(char::is_whitespace) {
             self.bump();
@@ -379,6 +576,13 @@ impl<'a> Parser<'a> {
     fn absolute_range(&self, start: usize, end: usize) -> SourceRange {
         range(self.index, self.base_byte + start, self.base_byte + end)
     }
+}
+
+fn application_head(node: &EquationNode) -> bool {
+    matches!(
+        node.kind.as_str(),
+        "symbol" | "command" | "styled" | "scripted" | "application"
+    )
 }
 
 pub(crate) fn selection_path(node: &EquationNode, offset: u32, output: &mut Vec<SourceRange>) {
@@ -432,5 +636,41 @@ mod tests {
         assert!(ranges.windows(2).all(|pair| {
             pair[0].start_offset >= pair[1].start_offset && pair[0].end_offset <= pair[1].end_offset
         }));
+    }
+
+    #[test]
+    fn represents_applications_matrices_cases_and_paired_delimiters() {
+        let source = concat!(
+            "$f(x_i) + ",
+            "\\begin{bmatrix}a & b \\\\ c & d\\end{bmatrix} + ",
+            "\\begin{cases}x & x > 0 \\\\ -x & x \\le 0\\end{cases} + ",
+            "\\left( y + 1 \\right)$",
+        );
+        let parsed = parse_regions(source, &math_regions(source, DocumentLanguage::Latex));
+        let root = &parsed[0].root;
+        let kinds = root
+            .children
+            .iter()
+            .map(|node| node.kind.as_str())
+            .collect::<Vec<_>>();
+        assert!(kinds.contains(&"application"));
+        let matrix = root
+            .children
+            .iter()
+            .find(|node| node.kind == "matrix")
+            .unwrap();
+        assert_eq!(matrix.children.len(), 2);
+        assert!(matrix.children.iter().all(|row| row.children.len() == 2));
+        let cases = root
+            .children
+            .iter()
+            .find(|node| node.kind == "cases")
+            .unwrap();
+        assert_eq!(cases.children.len(), 2);
+        assert!(
+            root.children
+                .iter()
+                .any(|node| { node.kind == "delimited" && node.label.as_deref() == Some("()") })
+        );
     }
 }

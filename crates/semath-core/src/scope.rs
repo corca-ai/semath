@@ -5,6 +5,7 @@ struct Scope {
     id: usize,
     depth: usize,
     range: SourceRange,
+    path: Vec<u32>,
 }
 
 #[derive(Clone, Debug)]
@@ -24,8 +25,21 @@ impl ScopeGraph {
                 start_offset: 0,
                 end_offset: document_end,
             },
+            path: Vec::new(),
         }];
+        let mut parents: Vec<(usize, u32)> = Vec::new();
         for (position, (depth, start_offset)) in headings.iter().enumerate() {
+            while parents
+                .last()
+                .is_some_and(|(parent_depth, _)| parent_depth >= depth)
+            {
+                parents.pop();
+            }
+            let mut path = parents
+                .iter()
+                .map(|(_, offset)| *offset)
+                .collect::<Vec<_>>();
+            path.push(*start_offset);
             let end_offset = headings[position + 1..]
                 .iter()
                 .find(|(next_depth, _)| next_depth <= depth)
@@ -37,7 +51,9 @@ impl ScopeGraph {
                     start_offset: *start_offset,
                     end_offset,
                 },
+                path,
             });
+            parents.push((*depth, *start_offset));
         }
         Self { scopes }
     }
@@ -68,6 +84,10 @@ impl ScopeGraph {
 
     pub fn is_document_scope_at(&self, offset: u32) -> bool {
         self.scope_at(offset).id == 0
+    }
+
+    pub fn path_at(&self, offset: u32) -> Vec<u32> {
+        self.scope_at(offset).path.clone()
     }
 
     fn scope_at(&self, offset: u32) -> &Scope {
@@ -145,6 +165,7 @@ mod tests {
             content: content.into(),
             document_version: 1,
             math_regions: Vec::new(),
+            includes: Vec::new(),
         }
     }
 

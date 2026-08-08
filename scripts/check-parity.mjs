@@ -81,6 +81,17 @@ const fixtureSets = [
     ),
     version: "v0.8-inspection",
   },
+  {
+    fixtureUrl: new URL(
+      "../fixtures/v0.10/reliable-project-semantics.json",
+      import.meta.url,
+    ),
+    goldenUrl: new URL(
+      "../fixtures/v0.10/reliable-project-semantics.golden.json",
+      import.meta.url,
+    ),
+    version: "v0.10-reliable-project-semantics",
+  },
 ];
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {

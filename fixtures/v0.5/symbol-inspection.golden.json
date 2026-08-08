@@ -10,6 +10,13 @@
         "kind": "symbolInfo",
         "info": {
           "symbol": "A",
+          "semanticId": {
+            "componentId": "main",
+            "fileId": "main",
+            "scopePath": [],
+            "kind": "definition",
+            "anchor": 5
+          },
           "location": {
             "fileId": "main",
             "path": "main.tex",
@@ -40,6 +47,13 @@
                     "endOffset": 6
                   }
                 ]
+              },
+              "semanticId": {
+                "componentId": "main",
+                "fileId": "main",
+                "scopePath": [],
+                "kind": "definition",
+                "anchor": 5
               }
             }
           ],
@@ -187,6 +201,13 @@
         "kind": "symbolInfo",
         "info": {
           "symbol": "A",
+          "semanticId": {
+            "componentId": "main",
+            "fileId": "main",
+            "scopePath": [],
+            "kind": "definition",
+            "anchor": 5
+          },
           "location": {
             "fileId": "main",
             "path": "main.tex",
@@ -217,6 +238,13 @@
                     "endOffset": 6
                   }
                 ]
+              },
+              "semanticId": {
+                "componentId": "main",
+                "fileId": "main",
+                "scopePath": [],
+                "kind": "definition",
+                "anchor": 5
               }
             }
           ],

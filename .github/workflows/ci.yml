@@ -28,4 +28,5 @@ jobs:
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: scripts/build-wasm.sh
       - run: node scripts/check-parity.mjs
+      - run: bun run budget:v0.10
       - run: git diff --exit-code -- lib/wasm/semath_wasm.js lib/wasm/semath_wasm.d.ts lib/wasm/semath_wasm_bg.wasm.d.ts

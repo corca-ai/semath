@@ -3,7 +3,10 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use crate::parser::ParsedMath;
-use crate::{DefinitionInfo, Evidence, Location, ProjectDocument, SourceIndex, SourceRange};
+use crate::scope::ScopeGraph;
+use crate::{
+    DefinitionInfo, Evidence, Location, ProjectDocument, SemanticSymbolId, SourceIndex, SourceRange,
+};
 
 static LET_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?:let|where)\s*$").unwrap());
@@ -184,6 +187,16 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
         );
     }
     deduplicate(&mut analysis);
+    let scopes = ScopeGraph::new(document);
+    for definition in &mut analysis.definitions {
+        definition.semantic_id = Some(SemanticSymbolId {
+            component_id: document.file_id.clone(),
+            file_id: document.file_id.clone(),
+            scope_path: scopes.path_at(definition.location.range.start_offset),
+            kind: "definition".into(),
+            anchor: definition.location.range.start_offset,
+        });
+    }
     analysis
 }
 
@@ -322,6 +335,7 @@ fn push_claim(
             range: symbol_range.clone(),
         },
         evidence: definition_evidence.clone(),
+        semantic_id: None,
     });
     if let Some((shape, refinements)) = shape_claim(description) {
         analysis.shapes.push(ProseShapeClaim {
@@ -430,6 +444,7 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            includes: Vec::new(),
         };
         analyze_prose(&document, &parse_regions(source, &regions))
     }

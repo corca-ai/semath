@@ -14,11 +14,17 @@ export interface MathRegion {
   fullRange: SourceRange;
 }
 
+export interface ProjectInclude {
+  path: string;
+  sourceRange: SourceRange;
+}
+
 export interface ProjectDocument {
   content: string;
   documentVersion: number;
   fileId: string;
   language: DocumentLanguage;
+  includes?: readonly ProjectInclude[];
   mathRegions?: readonly MathRegion[];
   path: string;
 }
@@ -106,7 +112,17 @@ export interface DefinitionInfo {
   description: string;
   evidence: Evidence;
   location: Location;
+  semanticId?: SemanticSymbolId;
   symbol: string;
+}
+
+/** Stable within one project snapshot; stable file identity survives path moves. */
+export interface SemanticSymbolId {
+  anchor: number;
+  componentId: string;
+  fileId: string;
+  kind: string;
+  scopePath: readonly number[];
 }
 
 export interface ShapeInfo {
@@ -124,6 +140,7 @@ export interface SymbolInfo {
   formulas: readonly FormulaRecognition[];
   location: Location;
   roles?: readonly RoleInfo[];
+  semanticId?: SemanticSymbolId;
   shapes: readonly ShapeInfo[];
   symbol: string;
   truncated: boolean;
@@ -330,3 +347,47 @@ export interface QueryResult {
   protocolVersion: typeof SEMATH_PROTOCOL_VERSION;
   value: QueryValue;
 }
+
+export type SemathWorkerPriority = "background" | "cursor" | "mutation";
+
+export type SemathWorkerRequest =
+  | {
+      id: number;
+      kind: "reset";
+      priority?: SemathWorkerPriority;
+      snapshot: ProjectSnapshot;
+    }
+  | {
+      changes: ChangeEnvelope;
+      id: number;
+      kind: "change";
+      priority?: SemathWorkerPriority;
+    }
+  | {
+      envelope: QueryEnvelope;
+      id: number;
+      kind: "query";
+      priority?: SemathWorkerPriority;
+    }
+  | { kind: "cancel"; requestId: number }
+  | { id: number; kind: "dispose" };
+
+export type SemathWorkerErrorCode =
+  | "disposed"
+  | "engine-failed"
+  | "initialization-failed"
+  | "stale-generation";
+
+export type SemathWorkerResponse =
+  | { id: number; kind: "result"; result: unknown }
+  | { id: number; kind: "cancelled" }
+  | {
+      error: {
+        code: SemathWorkerErrorCode;
+        message: string;
+        recoverable: boolean;
+      };
+      id: number;
+      kind: "error";
+    }
+  | { id: number; kind: "disposed" };
