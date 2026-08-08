@@ -2,6 +2,7 @@ mod binder;
 mod consistency;
 mod domain;
 mod engine;
+mod hygiene;
 mod parser;
 mod pattern;
 mod prose;

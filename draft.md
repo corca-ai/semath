@@ -539,6 +539,7 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * used-before-defined와 unused definition은 검증된 경우에만 hint로 제공한다.
 * **v0.3 일부 완료:** 같은 문서에서 한 symbol을 양립할 수 없는 shape로 재선언한 경우를 진단한다. use-before-definition과 unused-definition은 false-positive corpus가 준비될 때까지 보류한다.
 * **v0.5 role consistency:** 명시적 영어 definition에서 set, function/operator, probability distribution, random variable, index role을 추출한다. 같은 effective scope의 상호 배타적 role 또는 role–shape 선언만 모든 충돌 source와 함께 warning으로 반환한다. Domain prior와 관습 표기는 진단에 사용하지 않고 sibling section의 shadowing은 허용한다.
+* **v0.5 definition hygiene:** 단일 문서에서 유일하고 강한 명시적 definition과 완결된 free occurrence가 확인될 때만 used-before-definition과 defined-but-unused를 hint로 제공한다. 다중 문서·중복 definition·notation table·binder·미완성 수식은 보류하며, warning 승격은 별도 라벨 corpus와 측정된 precision 기준을 통과해야 한다.
 
 ### Iteration 6 — Formula recognition과 completion
 

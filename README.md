@@ -30,6 +30,15 @@ roles such as set, function/operator, probability distribution, random variable,
 Warnings require incompatible explicit role or shape claims in the same scope and retain every
 conflicting source; compatible roles and section-level shadowing are left alone.
 
+Definition hygiene is deliberately quieter. `used-before-explicit-definition` and
+`defined-but-unused` are hints only when one complete document has a unique strong definition and
+resolved free occurrences in its effective scope. Multiple files or definitions, notation tables,
+binders, unfinished math, and convention-only notation disable the hint. The checked-in calibration
+corpus has a zero-known-false-positive budget: a counterexample disables the affected rule until it
+is represented there. Promotion to warning requires a separate change backed by at least 500
+human-labeled candidate sites, at least 99% measured precision, and no scope or binder false
+positives.
+
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
 See [draft.md](./draft.md) for the architecture and roadmap.

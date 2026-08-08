@@ -1,0 +1,244 @@
+use std::collections::BTreeMap;
+
+use crate::binder::{binder_at, binders};
+use crate::parser::ParsedMath;
+use crate::scope::ScopeGraph;
+use crate::{DefinitionInfo, Evidence, ProjectDocument, SemanticDiagnostic, SourceRange};
+
+const MAX_HYGIENE_DIAGNOSTICS: usize = 8;
+
+#[derive(Clone, Debug)]
+struct HygieneEntry {
+    symbol: String,
+    scope_id: usize,
+    diagnostic: SemanticDiagnostic,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct HygieneAnalysis {
+    entries: Vec<HygieneEntry>,
+    pub diagnostics: Vec<SemanticDiagnostic>,
+    scopes: ScopeGraph,
+}
+
+impl HygieneAnalysis {
+    pub fn diagnostics_for(&self, symbol: &str, offset: u32) -> (Vec<SemanticDiagnostic>, bool) {
+        let diagnostics = self
+            .entries
+            .iter()
+            .filter(|entry| {
+                entry.symbol == symbol
+                    && entry.diagnostic.range.contains(offset)
+                    && self.scopes.visible(entry.scope_id, offset)
+            })
+            .collect::<Vec<_>>();
+        let truncated = diagnostics.len() > MAX_HYGIENE_DIAGNOSTICS;
+        (
+            diagnostics
+                .into_iter()
+                .take(MAX_HYGIENE_DIAGNOSTICS)
+                .map(|entry| entry.diagnostic.clone())
+                .collect(),
+            truncated,
+        )
+    }
+
+    pub fn diagnostic(&self, code: &str, offset: u32) -> Option<SemanticDiagnostic> {
+        self.diagnostics
+            .iter()
+            .find(|diagnostic| diagnostic.code == code && diagnostic.range.contains(offset))
+            .cloned()
+    }
+}
+
+pub(crate) fn analyze_hygiene(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    definitions: &[DefinitionInfo],
+) -> HygieneAnalysis {
+    let scopes = ScopeGraph::new(document);
+    let mut definitions_by_symbol = BTreeMap::<&str, Vec<&DefinitionInfo>>::new();
+    for definition in definitions {
+        definitions_by_symbol
+            .entry(&definition.symbol)
+            .or_default()
+            .push(definition);
+    }
+
+    let mut entries = Vec::new();
+    for (symbol, candidates) in definitions_by_symbol {
+        let [definition] = candidates.as_slice() else {
+            continue;
+        };
+        if !eligible_definition(definition, parsed) || has_unclosed_occurrence(symbol, parsed) {
+            continue;
+        }
+        let scope_id = scopes.id_at(definition.location.range.start_offset);
+        let mut occurrences = free_occurrences(symbol, parsed)
+            .into_iter()
+            .filter(|range| {
+                *range != definition.location.range && scopes.visible(scope_id, range.start_offset)
+            })
+            .collect::<Vec<_>>();
+        occurrences.sort_by_key(|range| range.start_offset);
+
+        let before = occurrences
+            .iter()
+            .filter(|range| range.start_offset < definition.location.range.start_offset)
+            .cloned()
+            .collect::<Vec<_>>();
+        if !before.is_empty() {
+            entries.push(HygieneEntry {
+                symbol: symbol.into(),
+                scope_id,
+                diagnostic: used_before_definition(symbol, definition, before),
+            });
+        } else if occurrences.is_empty() {
+            entries.push(HygieneEntry {
+                symbol: symbol.into(),
+                scope_id,
+                diagnostic: defined_but_unused(symbol, definition),
+            });
+        }
+    }
+
+    entries.sort_by_key(|entry| entry.diagnostic.range.start_offset);
+    let diagnostics = entries
+        .iter()
+        .map(|entry| entry.diagnostic.clone())
+        .collect();
+    HygieneAnalysis {
+        entries,
+        diagnostics,
+        scopes,
+    }
+}
+
+fn eligible_definition(definition: &DefinitionInfo, parsed: &[ParsedMath]) -> bool {
+    definition.evidence.kind == "explicit-prose"
+        && definition.evidence.strength == "strong"
+        && definition.evidence.rule_id != "notation-table-definition"
+        && parsed.iter().any(|math| {
+            math.region.closed
+                && math
+                    .region
+                    .content_range
+                    .contains(definition.location.range.start_offset)
+        })
+}
+
+fn has_unclosed_occurrence(symbol: &str, parsed: &[ParsedMath]) -> bool {
+    parsed.iter().any(|math| {
+        !math.region.closed
+            && math
+                .symbols
+                .iter()
+                .any(|(candidate, _)| candidate == symbol)
+    })
+}
+
+fn free_occurrences(symbol: &str, parsed: &[ParsedMath]) -> Vec<SourceRange> {
+    parsed
+        .iter()
+        .filter(|math| math.region.closed)
+        .flat_map(|math| {
+            let found = binders(math);
+            math.symbols
+                .iter()
+                .filter(move |(candidate, range)| {
+                    candidate == symbol && binder_at(math, &found, range.start_offset).is_none()
+                })
+                .map(|(_, range)| range.clone())
+        })
+        .collect()
+}
+
+fn used_before_definition(
+    symbol: &str,
+    definition: &DefinitionInfo,
+    occurrences: Vec<SourceRange>,
+) -> SemanticDiagnostic {
+    let range = occurrences[0].clone();
+    SemanticDiagnostic {
+        code: "used-before-explicit-definition".into(),
+        severity: "hint".into(),
+        message: format!("Notation `{symbol}` is used before its explicit definition."),
+        explanation: "A free occurrence appears earlier than the symbol's only strong explicit definition in this scope. This is a review hint, not a correctness warning.".into(),
+        range,
+        evidence: vec![
+            Evidence {
+                rule_id: "definition-hygiene/free-occurrence-before-definition".into(),
+                kind: "structural-order".into(),
+                strength: "calibrated-hint".into(),
+                source_ranges: occurrences,
+            },
+            definition.evidence.clone(),
+        ],
+    }
+}
+
+fn defined_but_unused(symbol: &str, definition: &DefinitionInfo) -> SemanticDiagnostic {
+    SemanticDiagnostic {
+        code: "defined-but-unused".into(),
+        severity: "hint".into(),
+        message: format!("Notation `{symbol}` is explicitly defined but not used."),
+        explanation: "No other free occurrence resolves inside the definition's analyzable scope. This is a review hint, not a correctness warning.".into(),
+        range: definition.location.range.clone(),
+        evidence: vec![definition.evidence.clone()],
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde::Deserialize;
+
+    use super::analyze_hygiene;
+    use crate::parser::{math_regions, parse_regions};
+    use crate::prose::analyze_prose;
+    use crate::{DocumentLanguage, ProjectDocument};
+
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Corpus {
+        false_positive_budget: usize,
+        cases: Vec<Case>,
+    }
+
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Case {
+        id: String,
+        content: String,
+        expected: Vec<String>,
+    }
+
+    #[test]
+    fn matches_the_labeled_definition_hygiene_corpus() {
+        let corpus: Corpus = serde_json::from_str(include_str!(
+            "../../../fixtures/v0.5/definition-hygiene-corpus.json"
+        ))
+        .unwrap();
+        assert_eq!(corpus.false_positive_budget, 0);
+
+        for case in corpus.cases {
+            let regions = math_regions(&case.content, DocumentLanguage::Markdown);
+            let document = ProjectDocument {
+                file_id: "main".into(),
+                path: "main.md".into(),
+                language: DocumentLanguage::Markdown,
+                content: case.content.clone(),
+                document_version: 1,
+                math_regions: regions.clone(),
+            };
+            let parsed = parse_regions(&case.content, &regions);
+            let prose = analyze_prose(&document, &parsed);
+            let analysis = analyze_hygiene(&document, &parsed, &prose.definitions);
+            let actual = analysis
+                .entries
+                .iter()
+                .map(|entry| format!("{}:{}", entry.diagnostic.code, entry.symbol))
+                .collect::<Vec<_>>();
+            assert_eq!(actual, case.expected, "corpus case {}", case.id);
+        }
+    }
+}

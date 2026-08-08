@@ -1,0 +1,51 @@
+{
+  "policyVersion": 1,
+  "falsePositiveBudget": 0,
+  "cases": [
+    {
+      "id": "free-use-before-unique-definition",
+      "content": "$x+1$ appears first.\nLet $x$ denote a scalar.\nLater $x$ is used.",
+      "expected": ["used-before-explicit-definition:x"]
+    },
+    {
+      "id": "unique-definition-without-another-use",
+      "content": "Let $z$ denote a scalar.",
+      "expected": ["defined-but-unused:z"]
+    },
+    {
+      "id": "ordinary-use-after-definition",
+      "content": "Let $y$ denote a scalar.\nThen $y+1$ is positive.",
+      "expected": []
+    },
+    {
+      "id": "bound-index-before-explicit-definition",
+      "content": "Consider $\\sum_{i=1}^{n} a_i$.\nLet $i$ denote an index.\nLater $i$ is discussed.",
+      "expected": []
+    },
+    {
+      "id": "notation-table-is-a-glossary",
+      "content": "| Symbol | Meaning |\n|---|---|\n| $N$ | sample size |",
+      "expected": []
+    },
+    {
+      "id": "sibling-section-shadowing-is-ambiguous",
+      "content": "# One\nLet $q$ denote a scalar.\n# Two\n$q+1$ appears first.\nLet $q$ denote an index.",
+      "expected": []
+    },
+    {
+      "id": "unfinished-math-disables-unused-hint",
+      "content": "Let $u$ denote a scalar.\nLater $u+1",
+      "expected": []
+    },
+    {
+      "id": "convention-only-notation-has-no-definition-hint",
+      "content": "The probability is $p(x)$ and the matrix is $A$.",
+      "expected": []
+    },
+    {
+      "id": "subscript-use-is-a-real-free-use",
+      "content": "Let $i$ denote an index.\nThe coefficient is $a_i$.",
+      "expected": []
+    }
+  ]
+}
