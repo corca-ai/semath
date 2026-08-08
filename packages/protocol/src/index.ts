@@ -126,6 +126,7 @@ export interface RoleInfo {
   evidence: Evidence;
   role:
     | "distribution"
+    | "event"
     | "function"
     | "index"
     | "operator"
@@ -155,7 +156,13 @@ export interface SemanticDiagnostic {
 
 export interface FormulaConstraint {
   dimensions?: readonly string[];
-  kind: "matrix" | "scalar" | "tensor" | "vector";
+  kind:
+    | "event"
+    | "matrix"
+    | "random-variable"
+    | "scalar"
+    | "tensor"
+    | "vector";
   refinements?: readonly string[];
 }
 

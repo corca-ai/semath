@@ -48,6 +48,17 @@ const fixtureSets = [
     goldenUrl: new URL("../fixtures/v0.5/definition-hygiene.golden.json", import.meta.url),
     version: "v0.5-hygiene",
   },
+  {
+    fixtureUrl: new URL(
+      "../fixtures/v0.6/probability-formula-intelligence.json",
+      import.meta.url,
+    ),
+    goldenUrl: new URL(
+      "../fixtures/v0.6/probability-formula-intelligence.golden.json",
+      import.meta.url,
+    ),
+    version: "v0.6-probability",
+  },
 ];
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {

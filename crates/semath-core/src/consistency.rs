@@ -5,6 +5,7 @@ use crate::shape::{ExplicitShapeClaim, ShapeAnalysis};
 use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnostic, SourceRange};
 
 const MAX_ROLE_CLAIMS: usize = 8;
+const MAX_VISIBLE_ROLE_CLAIMS: usize = 64;
 const MAX_ROLE_DIAGNOSTICS: usize = 8;
 
 #[derive(Clone, Debug)]
@@ -62,6 +63,36 @@ impl ConsistencyAnalysis {
                 .collect(),
             truncated,
         )
+    }
+
+    pub fn effective_roles_at(&self, offset: u32) -> Vec<RoleInfo> {
+        let mut roles = self
+            .roles
+            .iter()
+            .filter(|claim| {
+                claim.available_from <= offset && self.scopes.visible(claim.scope_id, offset)
+            })
+            .collect::<Vec<_>>();
+        roles.sort_by_key(|claim| {
+            (
+                std::cmp::Reverse(self.scopes.depth(claim.scope_id)),
+                std::cmp::Reverse(claim.available_from),
+                claim.info.symbol.clone(),
+                claim.info.role.clone(),
+            )
+        });
+        let mut selected_scopes = BTreeMap::<String, usize>::new();
+        roles
+            .into_iter()
+            .filter(|claim| {
+                *selected_scopes
+                    .entry(claim.info.symbol.clone())
+                    .or_insert(claim.scope_id)
+                    == claim.scope_id
+            })
+            .take(MAX_VISIBLE_ROLE_CLAIMS)
+            .map(|claim| claim.info.clone())
+            .collect()
     }
 
     pub fn diagnostics_for(&self, symbol: &str, offset: u32) -> (Vec<SemanticDiagnostic>, bool) {
@@ -211,6 +242,8 @@ fn classify_role(description: &str) -> Option<&'static str> {
 
     if normalized.contains("random variable") {
         Some("random-variable")
+    } else if words.contains(&"event") {
+        Some("event")
     } else if normalized.contains("probability distribution") || last == Some("distribution") {
         Some("distribution")
     } else if matches!(first, Some("set" | "space" | "domain" | "codomain"))
@@ -357,12 +390,14 @@ fn roles_conflict(left: &str, right: &str) -> bool {
             | ("random-variable", "function")
             | ("function", "distribution")
             | ("distribution", "function")
+            | ("event", "set")
+            | ("set", "event")
     )
 }
 
 fn role_shape_conflict(role: &str, shape: &str) -> bool {
     match role {
-        "set" => true,
+        "event" | "set" => true,
         "distribution" => false,
         "function" | "operator" => shape != "matrix",
         "index" => shape != "scalar",

@@ -3,7 +3,7 @@
 Semath is a Rust/WASM library for semantic navigation in scientific Markdown and LaTeX. It is
 designed to be embedded by editors such as CorTeX, not to be a standalone web application.
 
-Version 0.4 provides:
+Current `main` provides:
 
 - structural selection and a queryable equation tree;
 - explicit English definition extraction (`Let x denote …`) with hover, definition, and references;
@@ -17,7 +17,7 @@ Version 0.4 provides:
 - a versioned project/update/query protocol and browser Worker runtime;
 - an adapter for the public `wasmtex/syntax` snapshot contract.
 
-The v0.5 work in progress adds a bounded `symbolInfo` query that returns the definitions, shape
+Version 0.5 adds a bounded `symbolInfo` query that returns the definitions, shape
 claims, recognized formulas, diagnostics, and source evidence associated with one symbol. It also
 recognizes conservative English definition forms such as `respectively`, apposition,
 parenthetical definitions, typed quantifiers, and direct relational statements. Explicit scalar,
@@ -26,7 +26,7 @@ vector, matrix, and tensor nouns can supply scoped shape claims with refinements
 linear-algebra and probability packs active at the current section or equation. Vocabulary and
 notation priors stay weak and cannot create definitions or diagnostics; a typed formula match is
 strong evidence only for that equation. Explicit definitions can also contribute scoped semantic
-roles such as set, function/operator, probability distribution, random variable, and index.
+roles such as set/event, function/operator, probability distribution, random variable, and index.
 Warnings require incompatible explicit role or shape claims in the same scope and retain every
 conflicting source; compatible roles and section-level shadowing are left alone.
 
@@ -38,6 +38,14 @@ corpus has a zero-known-false-positive budget: a counterexample disables the aff
 is represented there. Promotion to warning requires a separate change backed by at least 500
 human-labeled candidate sites, at least 99% measured precision, and no scope or binder false
 positives.
+
+Version 0.6 adds a typed probability pack for event probability, conditional probability,
+expectation, and variance. Recognition requires compatible explicit roles; conditional probability
+also requires explicit positive-probability evidence for the conditioning event. Completion is
+offered only for an explicitly scalar target, remains revision-checked and review-required, and
+does not perform equivalent-form rewrites. The labeled probability corpus has a zero-known-false-
+positive budget and includes scope, role mismatch, side-condition, and unfinished-input
+suppression cases.
 
 The Rust core is host-independent. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.

@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.4.0 (2026-08-07):** 구조 탐색, 명시적 정의 navigation, binder-aware rename과 보수적인 shape 분석에 이어 typed linear-algebra pattern 기반 formula recognition·completion을 제공한다. 모든 변경은 호스트의 review 흐름을 거치며, v0.5에서는 근거를 한곳에서 검사하는 bounded symbol query를 확장하고 있다.
+> **구현 상태 — v0.6 진행 중 (2026-08-08):** v0.5의 bounded symbol/domain inspection과 설명 가능한 notation consistency를 완료했다. 현재는 명시적 event·random-variable 근거에 한정한 probability formula recognition·completion을 추가하고 있으며, 모든 변경은 호스트의 revision-checked review 흐름을 거친다.
 
 ## 1. 개요
 
@@ -547,13 +547,14 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * 현재 symbol table에 맞춘 semantic completion을 제공한다.
 * equivalent-form rewrite는 preview-only로 유지한다.
 * **v0.4 완료:** versioned linear-algebra pack의 matrix/vector product, transpose, inner product와 quadratic form을 recognition과 completion이 함께 사용한다. Section scope와 scalar/vector/matrix/tensor constraint를 반영하며, completion은 자동 적용하지 않고 CorTeX의 revision-checked review로 전달한다. Rewrite와 probability pack은 후속 iteration으로 남긴다.
+* **v0.6 probability slice:** 명시적으로 event와 random variable로 정의된 단일 기호에 대해 event probability, expectation과 variance를 typed pattern으로 인식한다. Conditional probability는 conditioning event에 positive-probability 근거가 있을 때만 허용한다. 명시적 scalar target의 completion만 review-required proposal로 제공하며 rewrite는 포함하지 않는다.
 
 ### Iteration 7 — Explainable prose와 domain inference
 
 * 더 넓은 영어 definition pattern과 domain evidence를 연결한다.
 * 적용된 prior와 diagnostic evidence chain을 inspection할 수 있다.
 * NLP는 corpus와 browser budget을 만족할 때만 포함한다.
-* **v0.5 진행 중:** `symbolInfo`는 한 기호의 정의, 가시적인 shape claim, 인식된 formula, 관련 diagnostic과 source evidence를 각각 최대 8개로 묶어 반환한다. `domainEvidence`는 section/equation 범위의 linear-algebra와 probability pack 활성화 근거를 별도로 반환한다. 어휘·표기 prior는 weak inspection evidence로만 쓰고 definition이나 warning을 만들지 않으며, typed formula match만 해당 equation에서 strong evidence가 된다.
+* **v0.5 완료:** `symbolInfo`는 한 기호의 정의, 가시적인 shape claim, 인식된 formula, 관련 diagnostic과 source evidence를 각각 최대 8개로 묶어 반환한다. `domainEvidence`는 section/equation 범위의 linear-algebra와 probability pack 활성화 근거를 별도로 반환한다. 어휘·표기 prior는 weak inspection evidence로만 쓰고 definition이나 warning을 만들지 않으며, typed formula match만 해당 equation에서 strong evidence가 된다.
 * **v0.5 prose slice:** `respectively`, apposition, parenthetical definition, typed `For each/every`, 문장 단위 `is/represents`만 stable rule로 인식한다. 명시된 scalar/vector/matrix/tensor와 dimension, symmetric·diagonal·positive-definite·normalized refinement는 scoped strong evidence가 되며 기존 수학 선언과 충돌해도 양쪽 claim을 보존한다. 주변 단어만으로는 추론하지 않는다.
 
 Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.

@@ -58,7 +58,7 @@ impl AnalyzedDocument {
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
         let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
         let hygiene = analyze_hygiene(&document, &parsed, &prose.definitions);
-        let formulas = analyze_formulas(&document, &parsed, &shapes);
+        let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
         let domains = analyze_domains(&document, &formulas);
         Self {
             document,
@@ -305,6 +305,7 @@ impl SemathEngine {
                     &document.document,
                     &document.parsed,
                     &document.shapes,
+                    &document.consistency,
                     offset,
                 ),
             },
