@@ -24,7 +24,7 @@ jobs:
       - run: bun run typecheck
       - run: bun test
       - run: bun run pack:conformance
-      - run: bun run calibration:v0.12
+      - run: bun run calibration:v0.13
       - run: sha256sum -c SHA256SUMS
         working-directory: lib/wasm
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked

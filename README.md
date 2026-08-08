@@ -39,6 +39,14 @@ collisions. A realistic seven-file mixed-domain project additionally gates
 native/release-WASM parity, lifecycle ordering, parse reuse, latency, response
 size, and retained memory.
 
+Version 0.13 closes interaction correctness gaps without adding patterns or UI
+authority. One pure cursor policy now owns token starts, interiors, trailing
+edges, shared boundaries, gaps, and ambiguity. Definition/reference resolution
+respects section visibility and include expansion order, refuses future or
+multiply-expanded candidates, and validates change batches before mutation.
+The five existing packs retain 68 patterns while adding generated Unicode/CRLF
+contexts, mutation refusals, and executable per-pack scorecards.
+
 Version 0.10 adds recoverable application, matrix, cases, and paired-delimiter
 IR; project/include/scope-aware semantic symbol identities; bounded macro
 provenance through wasmtex syntax schema 2; and a reusable prioritized Worker

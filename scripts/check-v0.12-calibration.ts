@@ -64,7 +64,7 @@ for (const entry of domainCorpus.collisions) {
 }
 
 console.log(
-  `v0.12 calibration OK: 68 patterns, 5 supported surfaces each, 5 generated structural negatives each, ${domainCorpus.collisions.length} reviewed collisions`,
+  `v0.12 calibration OK: 68 patterns, at least 5 supported surfaces and 5 structural negatives each, ${domainCorpus.collisions.length} reviewed collisions`,
 );
 
 function pairKey(left: string, right: string) {

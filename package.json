@@ -1,6 +1,6 @@
 {
   "name": "semath",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -26,7 +26,7 @@
     "packs"
   ],
   "scripts": {
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run pack:conformance && bun run calibration:v0.12 && bun run parity && bun run budget:v0.8 && bun run budget:v0.9 && bun run budget:v0.10 && bun run budget:v0.11 && bun run budget:v0.12 && bun run package:smoke",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run pack:conformance && bun run calibration:v0.13 && bun run parity && bun run budget:v0.8 && bun run budget:v0.9 && bun run budget:v0.10 && bun run budget:v0.11 && bun run budget:v0.12 && bun run package:smoke",
     "budget:v0.8": "node scripts/check-v0.8-budget.mjs",
     "budget:v0.9": "bun scripts/check-v0.9-budget.ts",
     "budget:v0.10": "bun scripts/check-v0.10-budget.ts",
@@ -34,6 +34,7 @@
     "budget:v0.12": "bun scripts/check-v0.12-budget.ts",
     "calibration:v0.11": "bun scripts/check-v0.11-calibration.ts",
     "calibration:v0.12": "bun scripts/check-v0.12-calibration.ts",
+    "calibration:v0.13": "bun scripts/check-v0.13-calibration.ts",
     "pack:conformance": "bun packages/packs/conformance.mjs",
     "package:smoke": "node scripts/check-package-smoke.mjs",
     "parity": "node scripts/check-parity.mjs",
