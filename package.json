@@ -21,8 +21,9 @@
     "packages"
   ],
   "scripts": {
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run parity && bun run budget:v0.8",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run parity && bun run budget:v0.8 && bun run budget:v0.9",
     "budget:v0.8": "node scripts/check-v0.8-budget.mjs",
+    "budget:v0.9": "bun scripts/check-v0.9-budget.ts",
     "parity": "node scripts/check-parity.mjs",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit"

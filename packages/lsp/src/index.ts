@@ -48,6 +48,15 @@ export interface SemathLspServerOptions {
 
 export type SendMessage = (message: JsonRpcMessage) => void;
 
+export interface SemathLspRuntimeStats {
+  documents: number;
+  inventoryVersion: number;
+  syntax: {
+    documents: number;
+    parseCount: number;
+  };
+}
+
 interface LspPosition {
   character: number;
   line: number;
@@ -182,6 +191,9 @@ export class SemathLspServer {
         case "semath/inspection":
           this.respond(id, this.queryAt(params, "inspection").value);
           return;
+        case "semath/runtimeStats":
+          this.respond(id, this.getRuntimeStats());
+          return;
         default:
           if (id != null)
             this.respondError(id, -32601, `Unknown method: ${method}`);
@@ -195,6 +207,15 @@ export class SemathLspServer {
 
   dispose(): void {
     this.semath.dispose?.();
+  }
+
+  /** Observable invariants for calibration and host diagnostics. */
+  getRuntimeStats(): SemathLspRuntimeStats {
+    return {
+      documents: this.documents.size,
+      inventoryVersion: this.inventoryVersion,
+      syntax: this.syntax.getStats(),
+    };
   }
 
   private didOpen(params: Record<string, unknown> | undefined): void {

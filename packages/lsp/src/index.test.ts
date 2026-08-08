@@ -134,6 +134,21 @@ describe("SemathLspServer", () => {
     expect(response(messages, 51).items).toEqual(
       expect.arrayContaining([expect.objectContaining({ label: "\\section" })]),
     );
+    expect(server.getRuntimeStats()).toEqual({
+      documents: 2,
+      inventoryVersion: 2,
+      syntax: { documents: 2, parseCount: 2 },
+    });
+
+    await server.handle({
+      id: 511,
+      method: "textDocument/hover",
+      params: {
+        position: { character: 10, line: 0 },
+        textDocument: { uri: "file:///main.tex" },
+      },
+    });
+    expect(server.getRuntimeStats().syntax.parseCount).toBe(2);
     server.dispose();
   });
 
