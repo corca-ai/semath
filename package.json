@@ -1,6 +1,6 @@
 {
   "name": "semath",
-  "version": "0.4.0",
+  "version": "0.8.0",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",

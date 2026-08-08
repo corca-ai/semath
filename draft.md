@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.7 완료 (2026-08-08):** typed probability recognition·completion과 side-condition-aware rewrite를 구현했다. CorTeX는 검증된 조건부확률 동치식만 Refactor 메뉴에 노출하고, 모든 변경을 revision-checked review 흐름으로 적용한다.
+> **구현 상태 — v0.8 진행 (2026-08-08):** bounded semantic inspection 계약과 CorTeX Math Inspector를 하나의 vertical slice로 제공한다. 수식 구조, 정의·참조·근거·진단과 검토형 액션을 같은 분석 snapshot에서 연결한다.
 
 ## 1. 개요
 
@@ -558,6 +558,12 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * NLP는 corpus와 browser budget을 만족할 때만 포함한다.
 * **v0.5 완료:** `symbolInfo`는 한 기호의 정의, 가시적인 shape claim, 인식된 formula, 관련 diagnostic과 source evidence를 각각 최대 8개로 묶어 반환한다. `domainEvidence`는 section/equation 범위의 linear-algebra와 probability pack 활성화 근거를 별도로 반환한다. 어휘·표기 prior는 weak inspection evidence로만 쓰고 definition이나 warning을 만들지 않으며, typed formula match만 해당 equation에서 strong evidence가 된다.
 * **v0.5 prose slice:** `respectively`, apposition, parenthetical definition, typed `For each/every`, 문장 단위 `is/represents`만 stable rule로 인식한다. 명시된 scalar/vector/matrix/tensor와 dimension, symmetric·diagonal·positive-definite·normalized refinement는 scoped strong evidence가 되며 기존 수학 선언과 충돌해도 양쪽 claim을 보존한다. 주변 단어만으로는 추론하지 않는다.
+
+### Iteration 8 — Semantic Math Inspector
+
+* 하나의 bounded `inspection` query가 equation tree와 선택 경로, symbol 정보, 정의·참조, 진단, domain/formula evidence와 사용 가능한 edit proposal을 같은 snapshot에서 반환한다.
+* CorTeX Math 사이드바는 cursor와 양방향으로 연결하고, source 이동은 즉시 수행하되 completion·rewrite·rename은 기존 revision-checked review와 권한 정책을 그대로 사용한다.
+* 큰 수식과 많은 참조는 node/depth/result budget을 적용하고 truncation을 명시한다.
 
 Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.
 
