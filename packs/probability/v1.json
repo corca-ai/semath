@@ -76,5 +76,26 @@
       ],
       "generationTemplate": "\\operatorname{Var}({{variable}})"
     }
+  ],
+  "rewrites": [
+    {
+      "id": "conditional-probability-definition",
+      "title": "Expand the conditional-probability definition",
+      "sourcePattern": "conditional-probability",
+      "requiredRefinements": [
+        { "parameter": "condition", "refinement": "positive-probability" }
+      ],
+      "replacementTemplate": "\\frac{\\mathbb{P}({{event}} \\cap {{condition}})}{\\mathbb{P}({{condition}})}"
+    },
+    {
+      "id": "bayes-theorem",
+      "title": "Rewrite with Bayes' theorem",
+      "sourcePattern": "conditional-probability",
+      "requiredRefinements": [
+        { "parameter": "event", "refinement": "positive-probability" },
+        { "parameter": "condition", "refinement": "positive-probability" }
+      ],
+      "replacementTemplate": "\\frac{\\mathbb{P}({{condition}} \\mid {{event}})\\mathbb{P}({{event}})}{\\mathbb{P}({{condition}})}"
+    }
   ]
 }

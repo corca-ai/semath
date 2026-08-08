@@ -1,0 +1,36 @@
+{
+  "policyVersion": 1,
+  "falsePositiveBudget": 0,
+  "cases": [
+    {
+      "id": "definition-with-positive-condition",
+      "content": "Let $A$ denote an event.\nLet $B$ denote an event of positive probability.\n$p = \\mathbb{P}(A \\mid B)$",
+      "expectedRules": ["conditional-probability-definition"]
+    },
+    {
+      "id": "bayes-with-two-positive-events",
+      "content": "Let $A$ denote an event of positive probability.\nLet $B$ denote an event of positive probability.\n$p = \\mathbb{P}(A \\mid B)$",
+      "expectedRules": ["conditional-probability-definition", "bayes-theorem"]
+    },
+    {
+      "id": "condition-not-proven-positive",
+      "content": "Let $A$ denote an event.\nLet $B$ denote an event.\n$p = \\mathbb{P}(A \\mid B)$",
+      "expectedRules": []
+    },
+    {
+      "id": "notation-only",
+      "content": "$p = \\mathbb{P}(A \\mid B)$",
+      "expectedRules": []
+    },
+    {
+      "id": "sibling-scope-evidence-is-not-visible",
+      "content": "# One\nLet $A$ denote an event.\nLet $B$ denote an event of positive probability.\n# Two\n$p = \\mathbb{P}(A \\mid B)$",
+      "expectedRules": []
+    },
+    {
+      "id": "unfinished-formula",
+      "content": "Let $A$ denote an event.\nLet $B$ denote an event of positive probability.\n$p = \\mathbb{P}(A \\mid B$",
+      "expectedRules": []
+    }
+  ]
+}

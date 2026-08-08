@@ -9,6 +9,7 @@ use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
 use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
 use crate::prose::analyze_prose;
+use crate::rewrite::formula_rewrites;
 use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, Evidence, Location, PROTOCOL_VERSION,
@@ -174,6 +175,7 @@ impl SemathEngine {
             }
             | Query::FormulaRecognition { file_id, offset }
             | Query::FormulaCompletion { file_id, offset }
+            | Query::FormulaRewrite { file_id, offset }
             | Query::DomainEvidence { file_id, offset } => (file_id, Some(*offset)),
             Query::Diagnostics { file_id } => (file_id, None),
         };
@@ -308,6 +310,9 @@ impl SemathEngine {
                     &document.consistency,
                     offset,
                 ),
+            },
+            Query::FormulaRewrite { .. } => QueryValue::FormulaRewrites {
+                rewrites: formula_rewrites(&document.document, &document.formulas, offset),
             },
             Query::DomainEvidence { .. } => {
                 let (activations, truncated) = document.domains.at(offset);

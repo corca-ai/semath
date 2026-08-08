@@ -63,6 +63,7 @@ export type SemathQuery =
     }
   | { fileId: string; kind: "formulaRecognition"; offset: number }
   | { fileId: string; kind: "formulaCompletion"; offset: number }
+  | { fileId: string; kind: "formulaRewrite"; offset: number }
   | { fileId: string; kind: "domainEvidence"; offset: number };
 
 export interface QueryEnvelope {
@@ -217,6 +218,14 @@ export interface FormulaCompletion {
   title: string;
 }
 
+export interface FormulaRewrite {
+  detail: string;
+  proposal: SemanticEditProposal;
+  rank: number;
+  ruleId: string;
+  title: string;
+}
+
 export interface SemanticTextEdit {
   expectedText: string;
   range: SourceRange;
@@ -274,6 +283,10 @@ export type QueryValue =
   | {
       completions: readonly FormulaCompletion[];
       kind: "formulaCompletions";
+    }
+  | {
+      kind: "formulaRewrites";
+      rewrites: readonly FormulaRewrite[];
     }
   | {
       activations: readonly DomainActivation[];

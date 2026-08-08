@@ -147,6 +147,11 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
+    FormulaRewrite {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
     DomainEvidence {
         #[serde(rename = "fileId")]
         file_id: String,
@@ -324,6 +329,16 @@ pub struct FormulaCompletion {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct FormulaRewrite {
+    pub rule_id: String,
+    pub title: String,
+    pub detail: String,
+    pub rank: u32,
+    pub proposal: SemanticEditProposal,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct EquationNode {
     pub kind: String,
     pub label: Option<String>,
@@ -404,6 +419,9 @@ pub enum QueryValue {
     },
     FormulaCompletions {
         completions: Vec<FormulaCompletion>,
+    },
+    FormulaRewrites {
+        rewrites: Vec<FormulaRewrite>,
     },
     DomainActivations {
         activations: Vec<DomainActivation>,
