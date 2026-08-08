@@ -51,7 +51,7 @@ pub(crate) fn formula_rewrites(
     formulas: &FormulaAnalysis,
     offset: u32,
 ) -> Vec<FormulaRewrite> {
-    let Some(recognition) = formulas.at(offset).into_iter().next() else {
+    let Some(recognition) = rewrite_recognition_at(document, formulas, offset) else {
         return Vec::new();
     };
     let index = SourceIndex::new(&document.content);
@@ -73,6 +73,33 @@ pub(crate) fn formula_rewrites(
         .enumerate()
         .map(|(rank, rule)| rewrite(document, &recognition, expected_text, rule, rank))
         .collect()
+}
+
+fn rewrite_recognition_at(
+    document: &ProjectDocument,
+    formulas: &FormulaAnalysis,
+    offset: u32,
+) -> Option<FormulaRecognition> {
+    if let Some(recognition) = formulas.at(offset).into_iter().next() {
+        return Some(recognition);
+    }
+
+    let region = document
+        .math_regions
+        .iter()
+        .find(|region| region.closed && region.full_range.contains(offset))
+        .or_else(|| {
+            document
+                .math_regions
+                .iter()
+                .find(|region| region.closed && region.full_range.end_offset == offset)
+        })?;
+    let mut candidates = formulas.all().iter().filter(|recognition| {
+        region.content_range.start_offset <= recognition.range.start_offset
+            && recognition.range.end_offset <= region.content_range.end_offset
+    });
+    let recognition = candidates.next()?.clone();
+    candidates.next().is_none().then_some(recognition)
 }
 
 fn satisfies_side_conditions(rule: &RewriteRule, recognition: &FormulaRecognition) -> bool {
@@ -187,6 +214,13 @@ mod tests {
     use serde::Deserialize;
 
     fn rewrites(source: &str, needle: &str) -> Vec<crate::FormulaRewrite> {
+        rewrites_at(
+            source,
+            source.find(needle).expect("needle must exist") as u32,
+        )
+    }
+
+    fn rewrites_at(source: &str, offset: u32) -> Vec<crate::FormulaRewrite> {
         let regions = math_regions(source, DocumentLanguage::Markdown);
         let document = ProjectDocument {
             file_id: "main".into(),
@@ -201,11 +235,7 @@ mod tests {
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
         let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
         let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
-        formula_rewrites(
-            &document,
-            &formulas,
-            source.find(needle).expect("needle must exist") as u32,
-        )
+        formula_rewrites(&document, &formulas, offset)
     }
 
     #[test]
@@ -243,6 +273,26 @@ mod tests {
             rewrites[1].proposal.files[0].edits[0].replacement_text,
             "\\frac{\\mathbb{P}(B \\mid A)\\mathbb{P}(A)}{\\mathbb{P}(B)}"
         );
+    }
+
+    #[test]
+    fn offers_the_unique_rewrite_from_any_cursor_position_in_its_math_region() {
+        let source = "Let $A$ denote an event of positive probability.\nLet $B$ denote an event of positive probability.\n$p = \\mathbb{P}(A \\mid B)$";
+        let expected = ["conditional-probability-definition", "bayes-theorem"];
+        let offsets = [
+            source.find("$p").unwrap(),
+            source.find(" = ").unwrap() + 1,
+            source.len() - 1,
+            source.len(),
+        ];
+
+        for offset in offsets {
+            let actual = rewrites_at(source, offset as u32)
+                .into_iter()
+                .map(|rewrite| rewrite.rule_id)
+                .collect::<Vec<_>>();
+            assert_eq!(actual, expected, "cursor offset {offset}");
+        }
     }
 
     #[test]
