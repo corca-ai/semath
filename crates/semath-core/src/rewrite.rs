@@ -1,50 +1,11 @@
-use std::collections::HashSet;
-use std::sync::LazyLock;
-
-use serde::Deserialize;
-
+use crate::pack::{DomainPack, PackRewrite, built_in_packs};
 use crate::pattern::FormulaAnalysis;
 use crate::{
     Evidence, FormulaRecognition, FormulaRewrite, ProjectDocument, SemanticEditFile,
     SemanticEditProposal, SemanticTextEdit, SourceIndex,
 };
 
-const REWRITE_SCHEMA_VERSION: u32 = 1;
 const MAX_REWRITES: usize = 4;
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RawRewritePack {
-    schema_version: u32,
-    pack_id: String,
-    pack_version: String,
-    rewrites: Vec<RewriteRule>,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RewriteRule {
-    id: String,
-    title: String,
-    source_pattern: String,
-    required_refinements: Vec<RequiredRefinement>,
-    replacement_template: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RequiredRefinement {
-    parameter: String,
-    refinement: String,
-}
-
-static PROBABILITY_REWRITES: LazyLock<RawRewritePack> = LazyLock::new(|| {
-    let pack: RawRewritePack =
-        serde_json::from_str(include_str!("../../../packs/probability/v1.json"))
-            .expect("probability rewrite pack must be valid JSON");
-    validate_pack(&pack).expect("probability rewrite pack must satisfy the rewrite schema");
-    pack
-});
 
 pub(crate) fn formula_rewrites(
     document: &ProjectDocument,
@@ -64,14 +25,16 @@ pub(crate) fn formula_rewrites(
         return Vec::new();
     }
 
-    PROBABILITY_REWRITES
-        .rewrites
+    built_in_packs()
         .iter()
-        .filter(|rule| rule.source_pattern == recognition.pattern_id)
-        .filter(|rule| satisfies_side_conditions(rule, &recognition))
+        .flat_map(|pack| pack.rewrites.iter().map(move |rule| (pack, rule)))
+        .filter(|(_, rule)| rule.source_pattern == recognition.pattern_id)
+        .filter(|(_, rule)| satisfies_side_conditions(rule, &recognition))
         .take(MAX_REWRITES)
         .enumerate()
-        .map(|(rank, rule)| rewrite(document, &recognition, expected_text, rule, rank))
+        .map(|(rank, (pack, rule))| {
+            rewrite(document, &recognition, expected_text, pack, rule, rank)
+        })
         .collect()
 }
 
@@ -102,7 +65,7 @@ fn rewrite_recognition_at(
     candidates.next().is_none().then_some(recognition)
 }
 
-fn satisfies_side_conditions(rule: &RewriteRule, recognition: &FormulaRecognition) -> bool {
+fn satisfies_side_conditions(rule: &PackRewrite, recognition: &FormulaRecognition) -> bool {
     rule.required_refinements.iter().all(|required| {
         recognition.bindings.iter().any(|binding| {
             binding.parameter == required.parameter
@@ -118,7 +81,8 @@ fn rewrite(
     document: &ProjectDocument,
     recognition: &FormulaRecognition,
     expected_text: &str,
-    rule: &RewriteRule,
+    pack: &DomainPack,
+    rule: &PackRewrite,
     rank: usize,
 ) -> FormulaRewrite {
     let mut replacement_text = rule.replacement_template.clone();
@@ -141,7 +105,7 @@ fn rewrite(
     source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
     source_ranges.dedup();
     evidence.push(Evidence {
-        rule_id: format!("{}/rewrite/{}", PROBABILITY_REWRITES.pack_id, rule.id),
+        rule_id: format!("{}/rewrite/{}", pack.pack_id, rule.id),
         kind: "derived-constraint".into(),
         strength: "strong".into(),
         source_ranges,
@@ -152,7 +116,7 @@ fn rewrite(
         title: rule.title.clone(),
         detail: format!(
             "{} · {} {} · review required",
-            rule.title, PROBABILITY_REWRITES.pack_id, PROBABILITY_REWRITES.pack_version
+            rule.title, pack.pack_id, pack.pack_version
         ),
         rank: rank as u32,
         proposal: SemanticEditProposal {
@@ -171,35 +135,6 @@ fn rewrite(
             }],
         },
     }
-}
-
-fn validate_pack(pack: &RawRewritePack) -> Result<(), String> {
-    if pack.schema_version != REWRITE_SCHEMA_VERSION {
-        return Err("unsupported rewrite schema".into());
-    }
-    let mut ids = HashSet::new();
-    for rule in &pack.rewrites {
-        if !ids.insert(rule.id.as_str())
-            || rule.id.is_empty()
-            || rule.title.is_empty()
-            || rule.source_pattern.is_empty()
-            || rule.required_refinements.is_empty()
-            || rule.replacement_template.is_empty()
-        {
-            return Err(format!("incomplete or duplicate rewrite {}", rule.id));
-        }
-        for required in &rule.required_refinements {
-            if required.parameter.is_empty()
-                || required.refinement.is_empty()
-                || !rule
-                    .replacement_template
-                    .contains(&format!("{{{{{}}}}}", required.parameter))
-            {
-                return Err(format!("invalid side condition in rewrite {}", rule.id));
-            }
-        }
-    }
-    Ok(())
 }
 
 #[cfg(test)]

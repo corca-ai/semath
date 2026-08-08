@@ -86,8 +86,12 @@
             {
               "patternId": "matrix-vector-product",
               "title": "Matrix-vector product",
+              "description": "Applies a matrix to a dimension-compatible vector.",
+              "descriptionKey": "matrix-vector-product",
+              "maturity": "completion",
+              "status": "verified",
               "packId": "linear-algebra",
-              "packVersion": "1.0.0",
+              "packVersion": "1.1.0",
               "range": {
                 "startOffset": 132,
                 "endOffset": 134
@@ -149,6 +153,13 @@
                   "m"
                 ]
               },
+              "conditions": [
+                {
+                  "kind": "dimension-equality",
+                  "label": "The matrix column count equals the vector length.",
+                  "status": "verified"
+                }
+              ],
               "evidence": [
                 {
                   "ruleId": "english-respectively-definition",
@@ -281,8 +292,12 @@
             {
               "patternId": "matrix-vector-product",
               "title": "Matrix-vector product",
+              "description": "Applies a matrix to a dimension-compatible vector.",
+              "descriptionKey": "matrix-vector-product",
+              "maturity": "completion",
+              "status": "verified",
               "packId": "linear-algebra",
-              "packVersion": "1.0.0",
+              "packVersion": "1.1.0",
               "range": {
                 "startOffset": 132,
                 "endOffset": 134
@@ -344,6 +359,13 @@
                   "m"
                 ]
               },
+              "conditions": [
+                {
+                  "kind": "dimension-equality",
+                  "label": "The matrix column count equals the vector length.",
+                  "status": "verified"
+                }
+              ],
               "evidence": [
                 {
                   "ruleId": "english-respectively-definition",

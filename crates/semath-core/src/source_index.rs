@@ -70,4 +70,23 @@ mod tests {
             source.encode_utf16().count() as u32
         );
     }
+
+    #[test]
+    fn round_trips_every_character_boundary_in_generated_unicode_sources() {
+        let alphabet = ["a", "한", "😀", "e\u{301}", "\r\n", "\\forall", "_"];
+        let mut state = 0x5EED_u64;
+        for length in 0..128 {
+            let mut source = String::new();
+            for _ in 0..length {
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                source.push_str(alphabet[(state as usize) % alphabet.len()]);
+            }
+            let index = SourceIndex::new(&source);
+            for (byte, _) in source.char_indices() {
+                let utf16 = source[..byte].encode_utf16().count() as u32;
+                assert_eq!(index.utf16_for_byte(byte), utf16);
+                assert_eq!(index.byte_for_utf16(utf16), byte);
+            }
+        }
+    }
 }

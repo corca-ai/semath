@@ -1,29 +1,63 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "packId": "probability",
-  "packVersion": "1.0.0",
-  "title": "Probability",
+  "packVersion": "1.1.0",
+  "title": "Probability and statistics",
+  "description": "Probability formulas gated by explicit event and random-variable roles.",
   "activationRules": [
     {
       "id": "vocabulary",
+      "topic": "foundations",
       "patterns": [
         "probability",
         "probability distribution",
         "random variable",
         "expectation",
         "variance"
-      ]
+      ],
+      "references": ["probability-theory"]
     },
     {
       "id": "probability-notation",
-      "patterns": ["\\mathbb{P}", "\\mathbb{E}", "\\operatorname{Var}"]
+      "topic": "notation",
+      "patterns": ["\\mathbb{P}", "\\mathbb{E}", "\\operatorname{Var}"],
+      "references": ["probability-theory"]
+    }
+  ],
+  "roles": [
+    {
+      "id": "event",
+      "topic": "events",
+      "description": "A measurable event whose probability may be evaluated.",
+      "notation": ["A", "B"],
+      "references": ["probability-theory"]
+    },
+    {
+      "id": "random-variable",
+      "topic": "random-variables",
+      "description": "A random variable with explicitly declared document meaning.",
+      "notation": ["X", "Y"],
+      "references": ["probability-theory"]
+    }
+  ],
+  "operators": [
+    {
+      "id": "expectation",
+      "topic": "moments",
+      "description": "Expected value of a declared random variable.",
+      "notation": ["\\mathbb{E}"],
+      "references": ["probability-theory"]
     }
   ],
   "patterns": [
     {
       "id": "event-probability",
+      "topic": "events",
       "title": "Event probability",
-      "matcher": "event-probability",
+      "description": "The probability assigned to an explicitly declared event.",
+      "descriptionKey": "event-probability",
+      "maturity": "completion",
+      "matcher": { "primitive": "event-probability" },
       "parameters": [
         { "id": "event", "constraint": { "kind": "event" } }
       ],
@@ -31,12 +65,18 @@
       "sideConditions": [
         { "kind": "explicit-role", "left": "event", "right": "event" }
       ],
-      "generationTemplate": "\\mathbb{P}({{event}})"
+      "conditionDescriptions": ["The symbol is explicitly declared as an event."],
+      "generationTemplate": "\\mathbb{P}({{event}})",
+      "references": ["probability-theory"]
     },
     {
       "id": "conditional-probability",
+      "topic": "conditional-probability",
       "title": "Conditional probability",
-      "matcher": "conditional-probability",
+      "description": "The probability of one event given another event of positive probability.",
+      "descriptionKey": "conditional-probability",
+      "maturity": "rewrite",
+      "matcher": { "primitive": "conditional-probability" },
       "parameters": [
         { "id": "event", "constraint": { "kind": "event" } },
         {
@@ -48,12 +88,18 @@
       "sideConditions": [
         { "kind": "positive-probability", "left": "condition", "right": "0" }
       ],
-      "generationTemplate": "\\mathbb{P}({{event}} \\mid {{condition}})"
+      "conditionDescriptions": ["The conditioning event has explicitly positive probability."],
+      "generationTemplate": "\\mathbb{P}({{event}} \\mid {{condition}})",
+      "references": ["probability-theory"]
     },
     {
       "id": "expectation",
+      "topic": "moments",
       "title": "Expectation",
-      "matcher": "expectation",
+      "description": "The expected value of an explicitly declared random variable.",
+      "descriptionKey": "expectation",
+      "maturity": "completion",
+      "matcher": { "primitive": "expectation" },
       "parameters": [
         { "id": "variable", "constraint": { "kind": "random-variable" } }
       ],
@@ -61,12 +107,18 @@
       "sideConditions": [
         { "kind": "explicit-role", "left": "variable", "right": "random-variable" }
       ],
-      "generationTemplate": "\\mathbb{E}[{{variable}}]"
+      "conditionDescriptions": ["The symbol is explicitly declared as a random variable."],
+      "generationTemplate": "\\mathbb{E}[{{variable}}]",
+      "references": ["probability-theory"]
     },
     {
       "id": "variance",
+      "topic": "moments",
       "title": "Variance",
-      "matcher": "variance",
+      "description": "The nonnegative variance of an explicitly declared random variable.",
+      "descriptionKey": "variance",
+      "maturity": "completion",
+      "matcher": { "primitive": "variance" },
       "parameters": [
         { "id": "variable", "constraint": { "kind": "random-variable" } }
       ],
@@ -74,28 +126,59 @@
       "sideConditions": [
         { "kind": "explicit-role", "left": "variable", "right": "random-variable" }
       ],
-      "generationTemplate": "\\operatorname{Var}({{variable}})"
-    }
+      "conditionDescriptions": ["The symbol is explicitly declared as a random variable."],
+      "generationTemplate": "\\operatorname{Var}({{variable}})",
+      "references": ["probability-theory"]
+    },
+    { "id": "joint-event-probability", "topic": "events", "title": "Joint event probability", "description": "Probability of the intersection of two explicit event expressions.", "descriptionKey": "joint-event-probability", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\mathbb\\s*\\{P\\}\\s*\\(\\s*(.+)\\s*\\\\cap\\s*(.+)\\s*\\)$" }, "parameters": [{ "id": "left-event", "constraint": { "kind": "expression" } }, { "id": "right-event", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["probability"] }, "references": ["probability-theory"] },
+    { "id": "complement-probability", "topic": "events", "title": "Complement probability", "description": "Probability of an explicitly complemented event expression.", "descriptionKey": "complement-probability", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\mathbb\\s*\\{P\\}\\s*\\(\\s*(.+)\\s*\\^\\s*\\{?c\\}?\\s*\\)$" }, "parameters": [{ "id": "event", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["probability"] }, "references": ["probability-theory"] },
+    { "id": "conditional-expectation", "topic": "conditional-moments", "title": "Conditional expectation", "description": "Expectation conditioned on an explicit sigma-field or event expression.", "descriptionKey": "conditional-expectation", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\mathbb\\s*\\{E\\}\\s*\\[\\s*(.+)\\s*(?:\\\\mid|\\|)\\s*(.+)\\s*\\]$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "condition", "constraint": { "kind": "expression" } }], "result": { "kind": "expression", "refinements": ["conditional-expectation"] }, "references": ["probability-theory"] },
+    { "id": "covariance", "topic": "moments", "title": "Covariance", "description": "Covariance between two explicitly written random-variable expressions.", "descriptionKey": "covariance", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\operatorname\\s*\\{Cov\\}\\s*\\(\\s*(.+)\\s*,\\s*(.+)\\s*\\)$" }, "parameters": [{ "id": "left-variable", "constraint": { "kind": "expression" } }, { "id": "right-variable", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["covariance"] }, "references": ["probability-theory"] },
+    { "id": "correlation", "topic": "moments", "title": "Correlation", "description": "Correlation between two explicitly written random-variable expressions.", "descriptionKey": "correlation", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\operatorname\\s*\\{Corr\\}\\s*\\(\\s*(.+)\\s*,\\s*(.+)\\s*\\)$" }, "parameters": [{ "id": "left-variable", "constraint": { "kind": "expression" } }, { "id": "right-variable", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["correlation", "unit-bounded"] }, "references": ["probability-theory"] },
+    { "id": "cumulative-distribution-function", "topic": "distributions", "title": "Cumulative distribution function", "description": "A subscripted distribution function evaluated at an explicit argument.", "descriptionKey": "cumulative-distribution-function", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^F\\s*_\\s*\\{?([^{}]+)\\}?\\s*\\((.+)\\)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "argument", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["cumulative-probability"] }, "references": ["probability-theory"] },
+    { "id": "probability-density", "topic": "distributions", "title": "Probability density or mass function", "description": "A subscripted density or mass function evaluated at an explicit argument.", "descriptionKey": "probability-density", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^[fp]\\s*_\\s*\\{?([^{}]+)\\}?\\s*\\((.+)\\)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "argument", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["density-or-mass"] }, "references": ["probability-theory"] },
+    { "id": "normal-distribution", "topic": "distributions", "title": "Normal distribution", "description": "A random-variable expression declared with normal-distribution parameters.", "descriptionKey": "normal-distribution", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^(.+)\\s*\\\\sim\\s*\\\\mathcal\\s*\\{N\\}\\s*\\(\\s*([^,]+)\\s*,\\s*([^)]*)\\)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "mean", "constraint": { "kind": "expression" } }, { "id": "variance", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["distribution-statement"] }, "references": ["probability-theory"] },
+    { "id": "entropy", "topic": "information-theory", "title": "Entropy", "description": "Entropy of an explicit random-variable or distribution expression.", "descriptionKey": "entropy", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^H\\s*\\((.+)\\)$" }, "parameters": [{ "id": "distribution", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["entropy"] }, "references": ["information-theory"] },
+    { "id": "kl-divergence", "topic": "information-theory", "title": "Kullback–Leibler divergence", "description": "KL divergence between two explicit distribution expressions.", "descriptionKey": "kl-divergence", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^D\\s*_\\s*\\{?\\\\mathrm\\s*\\{KL\\}\\}?\\s*\\(\\s*(.+)\\s*\\|\\|\\s*(.+)\\s*\\)$" }, "parameters": [{ "id": "left-distribution", "constraint": { "kind": "expression" } }, { "id": "right-distribution", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["nonnegative", "divergence"] }, "references": ["information-theory"] },
+    { "id": "sample-mean", "topic": "estimators", "title": "Sample mean", "description": "Average of an explicitly indexed finite sample.", "descriptionKey": "sample-mean", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\frac\\s*\\{1\\}\\s*\\{([^{}]+)\\}\\s*\\\\sum\\s*_\\s*\\{\\s*([A-Za-z])\\s*=\\s*1\\s*\\}\\s*\\^\\s*\\{([^{}]+)\\}\\s*(.+)$" }, "parameters": [{ "id": "normalizer", "constraint": { "kind": "expression" } }, { "id": "index", "constraint": { "kind": "expression" } }, { "id": "sample-count", "constraint": { "kind": "expression" } }, { "id": "sample-term", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["sample-mean"] }, "references": ["probability-theory"] }
   ],
   "rewrites": [
     {
       "id": "conditional-probability-definition",
+      "topic": "conditional-probability",
       "title": "Expand the conditional-probability definition",
+      "description": "Expands a conditional probability using an explicitly nonzero denominator.",
       "sourcePattern": "conditional-probability",
       "requiredRefinements": [
         { "parameter": "condition", "refinement": "positive-probability" }
       ],
-      "replacementTemplate": "\\frac{\\mathbb{P}({{event}} \\cap {{condition}})}{\\mathbb{P}({{condition}})}"
+      "replacementTemplate": "\\frac{\\mathbb{P}({{event}} \\cap {{condition}})}{\\mathbb{P}({{condition}})}",
+      "references": ["probability-theory"]
     },
     {
       "id": "bayes-theorem",
+      "topic": "conditional-probability",
       "title": "Rewrite with Bayes' theorem",
+      "description": "Applies Bayes' theorem when both denominators are explicitly nonzero.",
       "sourcePattern": "conditional-probability",
       "requiredRefinements": [
         { "parameter": "event", "refinement": "positive-probability" },
         { "parameter": "condition", "refinement": "positive-probability" }
       ],
-      "replacementTemplate": "\\frac{\\mathbb{P}({{condition}} \\mid {{event}})\\mathbb{P}({{event}})}{\\mathbb{P}({{condition}})}"
+      "replacementTemplate": "\\frac{\\mathbb{P}({{condition}} \\mid {{event}})\\mathbb{P}({{event}})}{\\mathbb{P}({{condition}})}",
+      "references": ["probability-theory"]
+    }
+  ],
+  "references": [
+    {
+      "id": "probability-theory",
+      "title": "Probability Theory: The Logic of Science",
+      "citation": "E. T. Jaynes, Probability Theory: The Logic of Science, Cambridge University Press, 2003."
+    },
+    {
+      "id": "information-theory",
+      "title": "Elements of Information Theory",
+      "citation": "Thomas M. Cover and Joy A. Thomas, Elements of Information Theory, 2nd edition, Wiley, 2006."
     }
   ]
 }

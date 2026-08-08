@@ -3,6 +3,7 @@ mod consistency;
 mod domain;
 mod engine;
 mod hygiene;
+mod pack;
 mod parser;
 mod pattern;
 mod prose;
@@ -13,5 +14,6 @@ mod shape;
 mod source_index;
 
 pub use engine::SemathEngine;
+pub use pack::*;
 pub use protocol::*;
 pub use source_index::SourceIndex;

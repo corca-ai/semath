@@ -122,4 +122,32 @@ describe("SemathWorkerHost", () => {
     ]);
     expect(log).toEqual([]);
   });
+
+  test("reports a terminal failure instead of recreating engines forever", async () => {
+    const responses: SemathWorkerResponse[] = [];
+    let attempts = 0;
+    const host = new SemathWorkerHost(async () => {
+      attempts++;
+      throw new Error("WASM unavailable");
+    }, (value) => responses.push(value));
+
+    for (const id of [1, 2, 3, 4]) {
+      host.accept({ id, kind: "reset", snapshot });
+      await turn();
+    }
+
+    expect(attempts).toBe(3);
+    expect(
+      responses.map((response) =>
+        response.kind === "error"
+          ? [response.error.code, response.error.recoverable]
+          : [response.kind],
+      ),
+    ).toEqual([
+      ["initialization-failed", true],
+      ["initialization-failed", true],
+      ["runtime-failed", false],
+      ["runtime-failed", false],
+    ]);
+  });
 });
