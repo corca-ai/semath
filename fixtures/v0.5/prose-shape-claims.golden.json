@@ -91,7 +91,7 @@
               "maturity": "completion",
               "status": "verified",
               "packId": "linear-algebra",
-              "packVersion": "1.1.0",
+              "packVersion": "1.2.0",
               "range": {
                 "startOffset": 132,
                 "endOffset": 134
@@ -297,7 +297,7 @@
               "maturity": "completion",
               "status": "verified",
               "packId": "linear-algebra",
-              "packVersion": "1.1.0",
+              "packVersion": "1.2.0",
               "range": {
                 "startOffset": 132,
                 "endOffset": 134

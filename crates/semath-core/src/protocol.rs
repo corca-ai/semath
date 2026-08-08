@@ -297,6 +297,8 @@ pub struct FormulaConstraint {
 pub struct FormulaParameter {
     pub id: String,
     pub constraint: FormulaConstraint,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub optional: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

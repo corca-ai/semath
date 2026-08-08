@@ -3,15 +3,30 @@ import corpus from "../fixtures/v0.11/domain-pack-recognition-corpus.json";
 import {
   assertDomainPackResults,
   buildDomainPackFixture,
+  recognitionVariants,
 } from "./v0.11-domain-fixture.mjs";
 
 describe("v0.11 domain fixture", () => {
-  test("builds positive, authority, and unfinished checks for every entry", () => {
+  test("builds five positive surfaces and five structural negatives for every entry", () => {
     const { expectations, fixture } = buildDomainPackFixture(corpus);
     expect(fixture.snapshot.documents).toHaveLength(
-      Math.ceil(corpus.cases.length / 4),
+      corpus.cases.length * 2 + corpus.collisions.length,
     );
-    expect(fixture.queries).toHaveLength(corpus.cases.length * 4);
+    expect(
+      recognitionVariants(corpus.cases[0]).filter((variant) => variant.expected),
+    ).toHaveLength(6);
+    const caseQueries = corpus.cases.reduce(
+      (total, entry) =>
+        total +
+        recognitionVariants(entry).reduce(
+          (count, variant) => count + (variant.expected ? 3 : 1),
+          0,
+        ),
+      0,
+    );
+    expect(fixture.queries).toHaveLength(
+      caseQueries + corpus.collisions.length,
+    );
     expect(expectations).toHaveLength(fixture.queries.length);
   });
 
@@ -29,8 +44,10 @@ describe("v0.11 domain fixture", () => {
       { value: { kind: "formulaRewrites", rewrites: [] } },
       { value: { kind: "formulaRecognitions", recognitions: [] } },
     ];
-    expect(() => assertDomainPackResults(results, expectations)).toThrow(
-      `${entry.id}: recognition-only entry exposed formulaCompletion`,
+    expect(() =>
+      assertDomainPackResults(results, expectations.slice(0, 4)),
+    ).toThrow(
+      `${entry.id}/positive-inline: recognition-only entry exposed formulaCompletion`,
     );
   });
 });

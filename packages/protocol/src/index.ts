@@ -201,6 +201,7 @@ export interface FormulaConstraint {
 export interface FormulaParameter {
   constraint: FormulaConstraint;
   id: string;
+  optional?: boolean;
 }
 
 export interface FormulaSideCondition {

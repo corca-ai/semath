@@ -1,14 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import type { QueryEnvelope } from "../../protocol/src/index";
 import {
+  advanceProjectFreshness,
   enqueueWork,
   INITIAL_WORKER_LIFECYCLE,
   staleGenerationMessage,
+  staleProjectMessage,
   transitionWorkerLifecycle,
   type WorkRequest,
 } from "./host-state";
 
-function query(generation: number, priority?: WorkRequest["priority"]): WorkRequest {
+function query(
+  generation: number,
+  priority?: WorkRequest["priority"],
+): Extract<WorkRequest, { kind: "query" }> {
   return {
     envelope: {
       analysisGeneration: generation,
@@ -54,6 +59,45 @@ describe("pure Worker host policy", () => {
     expect(staleGenerationMessage(query(3), 4)).toBe(
       "Skipped generation 3; current generation is 4.",
     );
+  });
+
+  test("rejects stale inventories and cross-project work before it reaches WASM", () => {
+    const firstReset: WorkRequest = {
+      id: 1,
+      kind: "reset",
+      snapshot: {
+        documents: [],
+        epoch: "first:1",
+        inventoryVersion: 4,
+        projectId: "first",
+        protocolVersion: 1,
+      },
+    };
+    const secondReset: WorkRequest = {
+      ...firstReset,
+      id: 2,
+      snapshot: {
+        ...firstReset.snapshot,
+        epoch: "second:1",
+        inventoryVersion: 1,
+        projectId: "second",
+      },
+    };
+    const current = advanceProjectFreshness(
+      advanceProjectFreshness(undefined, firstReset),
+      secondReset,
+    );
+
+    expect(staleProjectMessage(firstReset, current)).toContain("Skipped epoch");
+    expect(staleProjectMessage(secondReset, current)).toBeUndefined();
+    expect(staleProjectMessage(query(0), current)).toContain("Skipped epoch");
+
+    const currentQuery = query(0);
+    currentQuery.envelope.epoch = "second:1";
+    currentQuery.envelope.inventoryVersion = 1;
+    expect(staleProjectMessage(currentQuery, current)).toBeUndefined();
+    currentQuery.envelope.inventoryVersion = 2;
+    expect(staleProjectMessage(currentQuery, current)).toContain("Skipped inventory");
   });
 
   test("contains repeated crashes and resets the counter after success", () => {

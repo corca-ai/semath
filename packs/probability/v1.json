@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "packId": "probability",
-  "packVersion": "1.1.0",
+  "packVersion": "1.2.0",
   "title": "Probability and statistics",
   "description": "Probability formulas gated by explicit event and random-variable roles.",
   "activationRules": [
@@ -86,9 +86,13 @@
       ],
       "result": { "kind": "scalar", "refinements": ["probability"] },
       "sideConditions": [
+        { "kind": "distinct-binding", "left": "event", "right": "condition" },
         { "kind": "positive-probability", "left": "condition", "right": "0" }
       ],
-      "conditionDescriptions": ["The conditioning event has explicitly positive probability."],
+      "conditionDescriptions": [
+        "The event and conditioning event are distinct.",
+        "The conditioning event has explicitly positive probability."
+      ],
       "generationTemplate": "\\mathbb{P}({{event}} \\mid {{condition}})",
       "references": ["probability-theory"]
     },
@@ -140,7 +144,7 @@
     { "id": "normal-distribution", "topic": "distributions", "title": "Normal distribution", "description": "A random-variable expression declared with normal-distribution parameters.", "descriptionKey": "normal-distribution", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^(.+)\\s*\\\\sim\\s*\\\\mathcal\\s*\\{N\\}\\s*\\(\\s*([^,]+)\\s*,\\s*([^)]*)\\)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "mean", "constraint": { "kind": "expression" } }, { "id": "variance", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["distribution-statement"] }, "references": ["probability-theory"] },
     { "id": "entropy", "topic": "information-theory", "title": "Entropy", "description": "Entropy of an explicit random-variable or distribution expression.", "descriptionKey": "entropy", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^H\\s*\\((.+)\\)$" }, "parameters": [{ "id": "distribution", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["entropy"] }, "references": ["information-theory"] },
     { "id": "kl-divergence", "topic": "information-theory", "title": "Kullback–Leibler divergence", "description": "KL divergence between two explicit distribution expressions.", "descriptionKey": "kl-divergence", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^D\\s*_\\s*\\{?\\\\mathrm\\s*\\{KL\\}\\}?\\s*\\(\\s*(.+)\\s*\\|\\|\\s*(.+)\\s*\\)$" }, "parameters": [{ "id": "left-distribution", "constraint": { "kind": "expression" } }, { "id": "right-distribution", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["nonnegative", "divergence"] }, "references": ["information-theory"] },
-    { "id": "sample-mean", "topic": "estimators", "title": "Sample mean", "description": "Average of an explicitly indexed finite sample.", "descriptionKey": "sample-mean", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\frac\\s*\\{1\\}\\s*\\{([^{}]+)\\}\\s*\\\\sum\\s*_\\s*\\{\\s*([A-Za-z])\\s*=\\s*1\\s*\\}\\s*\\^\\s*\\{([^{}]+)\\}\\s*(.+)$" }, "parameters": [{ "id": "normalizer", "constraint": { "kind": "expression" } }, { "id": "index", "constraint": { "kind": "expression" } }, { "id": "sample-count", "constraint": { "kind": "expression" } }, { "id": "sample-term", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["sample-mean"] }, "references": ["probability-theory"] }
+    { "id": "sample-mean", "topic": "estimators", "title": "Sample mean", "description": "Average of an explicitly indexed finite sample.", "descriptionKey": "sample-mean", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\frac\\s*\\{1\\}\\s*\\{([^{}]+)\\}\\s*\\\\sum\\s*_\\s*\\{\\s*([A-Za-z])\\s*=\\s*1\\s*\\}\\s*\\^\\s*\\{([^{}]+)\\}\\s*([A-Z]\\s*_\\s*(?:\\{[^{}]+\\}|[A-Za-z0-9]+))$" }, "parameters": [{ "id": "normalizer", "constraint": { "kind": "expression" } }, { "id": "index", "constraint": { "kind": "expression" } }, { "id": "sample-count", "constraint": { "kind": "expression" } }, { "id": "sample-term", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["sample-mean"] }, "references": ["probability-theory"] }
   ],
   "rewrites": [
     {

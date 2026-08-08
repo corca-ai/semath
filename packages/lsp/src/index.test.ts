@@ -258,6 +258,72 @@ describe("SemathLspServer", () => {
     ).toEqual([]);
     server.dispose();
   });
+
+  test("reuses syntax trees across realistic query, edit, move, and close cycles", async () => {
+    const { server } = await setup();
+    const uris = ["file:///main.tex", "file:///chapter.tex", "file:///appendix.tex"];
+    const contents = [
+      "\\input{chapter}\nLet $x$ denote a vector. $\\lVert x \\rVert_2$",
+      "\\input{appendix}\nLet $A$ and $B$ denote events. $\\Pr(A \\mid B)$",
+      "한글 😀 é\n$\\forall x \\in S$",
+    ];
+    for (const [index, uri] of uris.entries()) {
+      await server.handle({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            languageId: "latex",
+            text: contents[index],
+            uri,
+            version: 1,
+          },
+        },
+      });
+    }
+    expect(server.getRuntimeStats().syntax).toEqual({ documents: 3, parseCount: 3 });
+
+    for (let id = 700; id < 720; id += 2) {
+      await server.handle({
+        id,
+        method: "textDocument/hover",
+        params: { position: { character: 40, line: 0 }, textDocument: { uri: uris[0] } },
+      });
+      await server.handle({
+        id: id + 1,
+        method: "semath/inspection",
+        params: { position: { character: 40, line: 0 }, textDocument: { uri: uris[0] } },
+      });
+    }
+    expect(server.getRuntimeStats().syntax.parseCount).toBe(3);
+
+    await server.handle({
+      method: "textDocument/didChange",
+      params: {
+        contentChanges: [{ text: `${contents[1]}\n% one edit` }],
+        textDocument: { uri: uris[1], version: 2 },
+      },
+    });
+    expect(server.getRuntimeStats().syntax.parseCount).toBe(4);
+
+    const movedUri = "file:///chapters/probability.tex";
+    await server.handle({
+      method: "workspace/didRenameFiles",
+      params: { files: [{ newUri: movedUri, oldUri: uris[1] }] },
+    });
+    // A move reparses only the moved document because relative includes depend
+    // on its path; the other syntax trees remain reusable.
+    expect(server.getRuntimeStats().syntax.parseCount).toBe(5);
+
+    await server.handle({
+      method: "textDocument/didClose",
+      params: { textDocument: { uri: movedUri } },
+    });
+    expect(server.getRuntimeStats()).toMatchObject({
+      documents: 2,
+      syntax: { documents: 2, parseCount: 5 },
+    });
+    server.dispose();
+  });
 });
 
 test("offset/position conversion is UTF-16 and clamps malformed positions", () => {

@@ -88,7 +88,7 @@
               "maturity": "completion",
               "status": "verified",
               "packId": "linear-algebra",
-              "packVersion": "1.1.0",
+              "packVersion": "1.2.0",
               "range": {
                 "startOffset": 116,
                 "endOffset": 118
@@ -328,7 +328,7 @@
                     "sourceRanges": [
                       {
                         "startOffset": 121,
-                        "endOffset": 123
+                        "endOffset": 122
                       }
                     ]
                   }
@@ -364,7 +364,7 @@
                   "sourceRanges": [
                     {
                       "startOffset": 121,
-                      "endOffset": 123
+                      "endOffset": 122
                     }
                   ]
                 },
@@ -386,7 +386,7 @@
                   "sourceRanges": [
                     {
                       "startOffset": 121,
-                      "endOffset": 123
+                      "endOffset": 122
                     },
                     {
                       "startOffset": 121,

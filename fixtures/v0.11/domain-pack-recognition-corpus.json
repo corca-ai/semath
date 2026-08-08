@@ -27,7 +27,7 @@
     { "id": "calculus-ordinary-derivative", "content": "$\\frac{d f}{d x}$", "expectedPattern": "ordinary-derivative" },
     { "id": "calculus-partial-derivative", "content": "$\\frac{\\partial f}{\\partial x}$", "expectedPattern": "partial-derivative" },
     { "id": "calculus-gradient", "content": "$\\nabla f$", "expectedPattern": "gradient" },
-    { "id": "calculus-hessian", "content": "$\\nabla^2 f$", "expectedPattern": "hessian" },
+    { "id": "calculus-hessian", "content": "$\\nabla^2 f$", "expectedPattern": "hessian", "expectedPatterns": ["hessian", "laplacian"] },
     { "id": "calculus-laplacian", "content": "$\\Delta f$", "expectedPattern": "laplacian" },
     { "id": "calculus-definite-integral", "content": "$\\int_{0}^{1} f(x)\\, dx$", "expectedPattern": "definite-integral" },
     { "id": "calculus-indefinite-integral", "content": "$\\int f(x)\\, dx$", "expectedPattern": "indefinite-integral" },
@@ -64,5 +64,20 @@
     { "id": "discrete-recurrence", "content": "$a_n=a_{n-1}+a_{n-2}$", "expectedPattern": "linear-recurrence" },
     { "id": "discrete-degree", "content": "$\\deg(v)$", "expectedPattern": "graph-degree" },
     { "id": "discrete-graph-laplacian", "content": "$L=D-A$", "expectedPattern": "graph-laplacian" }
+  ],
+  "collisions": [
+    { "id": "linear-probability", "packs": ["linear-algebra", "probability"], "content": "$\\det(\\mathbb{P}(A \\cap B))$", "expectedPatterns": ["determinant"] },
+    { "id": "linear-calculus", "packs": ["linear-algebra", "calculus-analysis"], "content": "$\\lVert \\nabla f \\rVert_2$", "expectedPatterns": ["vector-norm"] },
+    { "id": "linear-optimization", "packs": ["linear-algebra", "optimization-ml"], "content": "$\\min_{x} \\lVert Ax-b \\rVert^2$", "expectedPatterns": ["least-squares-objective"] },
+    { "id": "linear-discrete", "packs": ["linear-algebra", "discrete-math"], "content": "$\\lVert A \\cup B \\rVert_2$", "expectedPatterns": ["vector-norm"] },
+    { "id": "probability-calculus", "packs": ["probability", "calculus-analysis"], "content": "$\\mathbb{E}[\\nabla f \\mid Y]$", "expectedPatterns": ["conditional-expectation"] },
+    { "id": "probability-optimization", "packs": ["probability", "optimization-ml"], "content": "$-\\sum_{k} y_k \\log p_k$", "expectedPatterns": ["cross-entropy-loss"] },
+    { "id": "probability-discrete", "packs": ["probability", "discrete-math"], "content": "$\\mathbb{P}(A \\cap B)$", "expectedPatterns": ["joint-event-probability"] },
+    { "id": "calculus-optimization", "packs": ["calculus-analysis", "optimization-ml"], "content": "$x_{t+1}=x_t-\\eta \\nabla f(x_t)$", "expectedPatterns": ["gradient-descent-update"] },
+    { "id": "calculus-discrete", "packs": ["calculus-analysis", "discrete-math"], "content": "$\\lim_{x \\to 0} (A \\cap B)$", "expectedPatterns": ["limit"] },
+    { "id": "optimization-discrete", "packs": ["optimization-ml", "discrete-math"], "content": "$\\argmin_{x \\in S} f(x)$", "expectedPatterns": ["argmin-objective"] },
+    { "id": "within-discrete-quantifier-membership", "packs": ["discrete-math", "discrete-math"], "content": "$\\forall x \\in S, P(x)$", "expectedPatterns": ["universal-quantifier"] },
+    { "id": "within-calculus-ambiguous-second-derivative", "packs": ["calculus-analysis", "calculus-analysis"], "content": "$\\nabla^2 f$", "expectedPatterns": ["hessian", "laplacian"] },
+    { "id": "probability-optimization-estimator", "packs": ["probability", "optimization-ml"], "content": "$\\frac{1}{n}\\sum_{i=1}^{n}X_i$", "expectedPatterns": ["sample-mean"] }
   ]
 }
