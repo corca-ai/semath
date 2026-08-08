@@ -719,6 +719,13 @@ fn balanced_pair(expression: &str, open: char, close: char) -> bool {
     depth == 0
 }
 
+fn balanced_capture_surface(expression: &str) -> bool {
+    !expression.trim().is_empty()
+        && balanced_pair(expression, '{', '}')
+        && balanced_pair(expression, '(', ')')
+        && balanced_pair(expression, '[', ']')
+}
+
 #[allow(clippy::too_many_arguments)]
 fn regex_binding(
     pattern: &PackPattern,
@@ -734,6 +741,13 @@ fn regex_binding(
         return None;
     }
     if parameter.constraint.kind == "expression" {
+        // A capture is an operand, not an arbitrary slice through nested syntax.
+        // Requiring each operand to be independently balanced prevents a broad
+        // binary matcher such as `A \\cap B` from claiming the inner operator in
+        // `\\Pr(A \\cap B)` or a conditional-probability identity.
+        if !balanced_capture_surface(symbol) {
+            return None;
+        }
         return Some(FormulaBinding {
             parameter: parameter.id.clone(),
             symbol: symbol.into(),
@@ -1164,6 +1178,29 @@ mod tests {
             assert_eq!(recognition.pack_id, expected_pack);
             assert_eq!(recognition.pattern_id, expected_pattern);
             assert_eq!(recognition.rank, 50);
+        }
+    }
+
+    #[test]
+    fn does_not_promote_nested_set_operators_to_whole_formula_meanings() {
+        for (source, forbidden_pattern) in [
+            ("$\\Pr(A \\cap B)$", "set-intersection"),
+            (
+                "$\\Pr(A \\mid B)=\\frac{\\Pr(A \\cap B)}{\\Pr(B)}$",
+                "set-intersection",
+            ),
+            ("$f(A \\cup B)$", "set-union"),
+        ] {
+            let (document, parsed, shapes, consistency) =
+                analyze_language(source, DocumentLanguage::Markdown);
+            let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
+            assert!(
+                formulas
+                    .all()
+                    .iter()
+                    .all(|recognition| recognition.pattern_id != forbidden_pattern),
+                "{source} must not be recognized as {forbidden_pattern}"
+            );
         }
     }
 
