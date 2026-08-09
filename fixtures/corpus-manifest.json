@@ -221,36 +221,36 @@
       "packId": "circuits",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
-        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
-        "law-recognition": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
-        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
-        "project-macro": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
-        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity", "circuits-engineering-depth"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity", "circuits-engineering-depth"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity", "circuits-engineering-depth"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity", "circuits-engineering-depth"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity", "circuits-engineering-depth"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity", "circuits-engineering-depth"] }
       }
     },
     {
       "packId": "classical-mechanics",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
-        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
-        "law-recognition": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
-        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
-        "project-macro": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
-        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity", "mechanics-engineering-depth"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity", "mechanics-engineering-depth"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity", "mechanics-engineering-depth"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity", "mechanics-engineering-depth"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity", "mechanics-engineering-depth"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity", "mechanics-engineering-depth"] }
       }
     },
     {
       "packId": "control-systems",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
-        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
-        "law-recognition": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
-        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
-        "project-macro": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
-        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity", "control-engineering-depth"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity", "control-engineering-depth"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity", "control-engineering-depth"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity", "control-engineering-depth"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity", "control-engineering-depth"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity", "control-engineering-depth"] }
       }
     },
     {
@@ -302,6 +302,54 @@
       }
     },
     {
+      "packId": "signals-systems",
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["signals-systems"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["signals-systems"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["signals-systems"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["signals-systems"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["signals-systems"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["signals-systems"] }
+      }
+    },
+    {
+      "packId": "electromagnetism",
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
+        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
+        "law-recognition": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
+        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
+        "project-macro": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
+        "navigation-explanation": { "maturity": "probe", "suiteIds": ["electromagnetism"] }
+      }
+    },
+    {
+      "packId": "thermodynamics-heat-transfer",
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "law-recognition": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "project-macro": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "navigation-explanation": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] }
+      }
+    },
+    {
+      "packId": "fluid-mechanics",
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
+        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
+        "law-recognition": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
+        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
+        "project-macro": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
+        "navigation-explanation": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] }
+      }
+    },
+    {
       "packId": "quantities-units",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
@@ -339,11 +387,109 @@
       "capability": "shape-quantity-unit",
       "path": "foundation/quantities-units.json",
       "tier": "evaluated",
-      "minimumCases": 46,
+      "minimumCases": 52,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "semantic-mutation"]
     }
   ],
   "suites": [
+    {
+      "id": "mechanics-engineering-depth",
+      "kind": "law",
+      "packId": "classical-mechanics",
+      "path": "corpus/mechanics-engineering-depth.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "circuits-engineering-depth",
+      "kind": "law",
+      "packId": "circuits",
+      "path": "corpus/circuits-engineering-depth.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "control-engineering-depth",
+      "kind": "law",
+      "packId": "control-systems",
+      "path": "corpus/control-engineering-depth.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "signals-systems",
+      "kind": "law",
+      "packId": "signals-systems",
+      "path": "corpus/signals-systems.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "electromagnetism",
+      "kind": "law",
+      "packId": "electromagnetism",
+      "path": "corpus/electromagnetism.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 4, "proseFamily": 8, "projectTopology": 3, "mutationFamily": 5 },
+        "maximumProfileShare": 0.1
+      }
+    },
+    {
+      "id": "thermodynamics-heat-transfer",
+      "kind": "law",
+      "packId": "thermodynamics-heat-transfer",
+      "path": "corpus/thermodynamics-heat-transfer.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 4, "proseFamily": 8, "projectTopology": 3, "mutationFamily": 5 },
+        "maximumProfileShare": 0.1
+      }
+    },
+    {
+      "id": "fluid-mechanics",
+      "kind": "law",
+      "packId": "fluid-mechanics",
+      "path": "corpus/fluid-mechanics.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 4, "proseFamily": 8, "projectTopology": 3, "mutationFamily": 5 },
+        "maximumProfileShare": 0.1
+      }
+    },
     {
       "id": "circuits",
       "kind": "law",
@@ -517,6 +663,17 @@
       "requiredDiversity": {
         "minimumDistinct": { "semanticSkeleton": 10, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
         "maximumProfileShare": 0.1
+      }
+    },
+    {
+      "id": "engineering-cross-field",
+      "kind": "global-refusal",
+      "path": "corpus/engineering-cross-field.json",
+      "minimumCases": 16,
+      "requiredDimensions": ["notation", "roles", "constraints", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 16, "syntaxStructure": 4, "proseFamily": 4, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.07
       }
     },
     {

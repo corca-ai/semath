@@ -128,7 +128,7 @@ for (const [id, content, needle, symbol, dimension] of [
   });
 }
 
-if (cases.length !== 46) throw new Error(`expected 46 foundation cases, got ${cases.length}`);
+if (cases.length !== 52) throw new Error(`expected 52 foundation cases, got ${cases.length}`);
 const corpus: FoundationCorpus = {
   cases,
   domain: "quantities-foundation",

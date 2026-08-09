@@ -8,7 +8,7 @@
       },
       "documents": [
         {
-          "content": "Let $Q$ be length in meter.",
+          "content": "Let $Q$ be wavelength in meter.",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -526,7 +526,7 @@
       },
       "documents": [
         {
-          "content": "Let $Q$ be frequency in hertz.",
+          "content": "Let $Q$ be cyclic frequency in hertz.",
           "fileId": "main",
           "path": "main.md"
         }
@@ -553,7 +553,7 @@
       },
       "documents": [
         {
-          "content": "Let $Q$ be thermodynamic temperature in kelvin.",
+          "content": "Let $Q$ be temperature change in kelvin.",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -570,6 +570,156 @@
         "english-declarations",
         "role-prose",
         "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be density.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^-3 · mass",
+        "quantityKindId": "quantities-units:density"
+      },
+      "id": "quantity-kind-density",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be specific heat.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^2 · thermodynamic-temperature^-1 · time^-2",
+        "quantityKindId": "quantities-units:specific-heat-capacity"
+      },
+      "id": "quantity-kind-specific-heat-capacity",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be thermal conductivity.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · mass · thermodynamic-temperature^-1 · time^-3",
+        "quantityKindId": "quantities-units:thermal-conductivity"
+      },
+      "id": "quantity-kind-thermal-conductivity",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be control volume.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^3",
+        "quantityKindId": "quantities-units:volume"
+      },
+      "id": "quantity-kind-volume",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be mass flow.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "mass · time^-1",
+        "quantityKindId": "quantities-units:mass-flow-rate"
+      },
+      "id": "quantity-kind-mass-flow-rate",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be volume flow.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^3 · time^-1",
+        "quantityKindId": "quantities-units:volumetric-flow-rate"
+      },
+      "id": "quantity-kind-volumetric-flow-rate",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
       ]
     },
     {

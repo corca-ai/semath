@@ -1034,7 +1034,7 @@ fn shape_claim(description: &str) -> Option<(ProseShape, Vec<String>)> {
     } else if matches!(last_word(&normalized), Some("vector" | "vectors")) {
         ProseShape::Vector("?".into())
     } else if normalized
-        .split_whitespace()
+        .split(|character: char| !character.is_ascii_alphanumeric())
         .any(|word| matches!(word, "scalar" | "scalars"))
     {
         ProseShape::Scalar

@@ -521,6 +521,12 @@ fn expression_shape(expression: &SemanticExpr, shapes: &ShapeObservations) -> Sh
             expression_shape(right, shapes),
         ) {
             (ShapeInference::Known(left), ShapeInference::Known(right))
+                if left.first().is_some_and(|kind| kind == "scalar")
+                    || right.first().is_some_and(|kind| kind == "scalar") =>
+            {
+                multiply_shapes(left, right).map_or(ShapeInference::Invalid, ShapeInference::Known)
+            }
+            (ShapeInference::Known(left), ShapeInference::Known(right))
                 if left.first().is_some_and(|kind| kind == "vector")
                     && merge_shapes(&left, &right).is_some() =>
             {
@@ -1309,9 +1315,27 @@ fn role_symbol_is_supported(
     notation_enabled: bool,
 ) -> bool {
     let notation_symbol = symbol.split('_').next().unwrap_or(symbol);
+    if let Some(quantity) = role.quantity.as_deref()
+        && !quantity_is_supported(
+            quantity,
+            role,
+            symbol,
+            notation_symbol,
+            offset,
+            quantities,
+            external,
+            notation_enabled,
+        )
+    {
+        return false;
+    }
     let declared_roles = consistency.roles_at(symbol, offset).0;
-    if !declared_roles.is_empty()
-        && declared_roles
+    let comparable_roles = declared_roles
+        .iter()
+        .filter(|claim| concepts_are_comparable(&role.concept, &claim.concept_id))
+        .collect::<Vec<_>>();
+    if !comparable_roles.is_empty()
+        && comparable_roles
             .iter()
             .all(|claim| roles_conflict(&role.concept, &claim.concept_id))
     {
@@ -1322,7 +1346,15 @@ fn role_symbol_is_supported(
         if notation_symbol != symbol {
             explicit.extend(shapes.claims_at(notation_symbol, offset).0);
         }
-        if explicit.iter().any(|shape| shape.kind != expected_shape) {
+        let mut imported = external.shapes_at(offset, symbol);
+        if notation_symbol != symbol {
+            imported.extend(external.shapes_at(offset, notation_symbol));
+        }
+        if explicit
+            .iter()
+            .chain(&imported)
+            .any(|shape| shape.kind != expected_shape)
+        {
             return false;
         }
         match shapes
@@ -1344,23 +1376,16 @@ fn role_symbol_is_supported(
         }
     }
     if role.concept.starts_with("quantities-units:") {
-        let mut local = quantities.at(symbol, offset).0;
-        if notation_symbol != symbol {
-            local.extend(quantities.at(notation_symbol, offset).0);
-        }
-        if !local.is_empty() {
-            let declared = local
-                .iter()
-                .filter_map(|quantity| quantity.quantity_kind_id.as_deref())
-                .collect::<Vec<_>>();
-            return if declared.is_empty() {
-                notation_enabled && notation_matches(&role.notation, notation_symbol)
-            } else {
-                declared.iter().all(|kind| *kind == role.concept)
-            };
-        }
-        return external.has_quantity(offset, symbol, &role.concept)
-            || (notation_enabled && notation_matches(&role.notation, notation_symbol));
+        return quantity_is_supported(
+            &role.concept,
+            role,
+            symbol,
+            notation_symbol,
+            offset,
+            quantities,
+            external,
+            notation_enabled,
+        );
     }
     if role.concept == "linear-algebra:linear-operator" {
         return shapes
@@ -1375,6 +1400,45 @@ fn role_symbol_is_supported(
         .iter()
         .any(|claim| claim.concept_id == role.concept)
         || external.has_role(offset, symbol, &role.concept)
+        || (notation_enabled && notation_matches(&role.notation, notation_symbol))
+}
+
+fn concepts_are_comparable(left: &str, right: &str) -> bool {
+    let one_is_quantity =
+        left.starts_with("quantities-units:") != right.starts_with("quantities-units:");
+    !(one_is_quantity
+        && [left, right]
+            .iter()
+            .any(|concept| concept.split(':').next_back() == Some("variable")))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn quantity_is_supported(
+    expected: &str,
+    role: &PackLawRole,
+    symbol: &str,
+    notation_symbol: &str,
+    offset: u32,
+    quantities: &QuantityObservations,
+    external: &ExternalTypeEnvironment,
+    notation_enabled: bool,
+) -> bool {
+    let mut local = quantities.at(symbol, offset).0;
+    if notation_symbol != symbol {
+        local.extend(quantities.at(notation_symbol, offset).0);
+    }
+    if !local.is_empty() {
+        let declared = local
+            .iter()
+            .filter_map(|quantity| quantity.quantity_kind_id.as_deref())
+            .collect::<Vec<_>>();
+        return if declared.is_empty() {
+            notation_enabled && notation_matches(&role.notation, notation_symbol)
+        } else {
+            declared.iter().all(|kind| *kind == expected)
+        };
+    }
+    external.has_quantity(offset, symbol, expected)
         || (notation_enabled && notation_matches(&role.notation, notation_symbol))
 }
 
@@ -1836,6 +1900,74 @@ mod tests {
             (
                 "This example states a gradient descent update. In a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
                 "gradient-descent-update",
+            ),
+        ] {
+            assert_eq!(recognized_laws(source), [expected], "{source}");
+        }
+    }
+
+    #[test]
+    fn engineering_verticals_use_composed_role_and_quantity_constraints() {
+        for (source, expected) in [
+            (
+                "For Linear momentum, let $p$ denote momentum vector, $m$ denote mass scalar, and $v$ denote velocity vector. $p=mv$",
+                "linear-momentum-definition",
+            ),
+            (
+                "For Inductor voltage law, let $v$ denote voltage scalar, $L$ denote inductance scalar, $i$ denote current scalar, and $t$ denote time scalar. $v=L\\frac{di}{dt}$",
+                "inductor-voltage-law",
+            ),
+            (
+                "For Inductor voltage law, suppose $r$ is inductor terminal voltage, $a$ is inductance scalar, $b$ is inductor current, and $n$ is time variable. $r=a\\frac{db}{dn}$",
+                "inductor-voltage-law",
+            ),
+            (
+                "For Linear output equation, let $y$ denote output vector, $C$ denote output matrix, $x$ denote state vector, $D$ denote feedthrough matrix, and $u$ denote control input vector. $y=Cx+Du$",
+                "linear-output-equation",
+            ),
+            (
+                "Let $C$, $P_c$, and $Q_c$ be $n\\times n$ matrices. $\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c$",
+                "continuous-lyapunov-equation",
+            ),
+            (
+                "For Angular frequency, let $w$ denote angular frequency scalar, $p$ denote pi scalar, and $f$ denote frequency scalar. $w=2pf$",
+                "angular-frequency-definition",
+            ),
+            (
+                "Wave propagation uses $v=f\\lambda$.",
+                "wave-speed-relation",
+            ),
+            (
+                "For Wave speed relation, let $y$ denote wave propagation speed, $c$ denote cyclic frequency scalar, and $x$ denote wavelength scalar. $y=cx$",
+                "wave-speed-relation",
+            ),
+            (
+                "For Wave speed relation, let $y$ denote wave propagation speed scalar, $c$ denote cyclic frequency scalar, and $x$ denote wavelength scalar. $y=c\\cdot x$",
+                "wave-speed-relation",
+            ),
+            (
+                "For Electric force, let $F$ denote force vector, $q$ denote charge scalar, and $E$ denote electric field vector. $F=qE$",
+                "electric-force-law",
+            ),
+            (
+                "For Electric potential energy, let $y$ denote electric potential energy scalar, $c$ denote electric charge scalar, and $x$ denote electric potential relative to the stated reference scalar. $y=cx$",
+                "electric-potential-energy",
+            ),
+            (
+                "For Sensible heat, let $Q$ denote heat transfer scalar, $m$ denote mass scalar, $c$ denote specific heat scalar, and $T$ denote temperature change scalar. $Q=mcT$",
+                "sensible-heat-relation",
+            ),
+            (
+                "For Plane-wall conduction rate, let $y$ denote heat-transfer rate scalar, $c$ denote thermal conductivity scalar, $x$ denote area normal to heat flow scalar, $t$ denote temperature difference scalar, and $z$ denote wall thickness scalar. $y=c x t/z$",
+                "plane-wall-conduction-rate",
+            ),
+            (
+                "For Closed-system first law, let $y$ denote change in internal energy scalar, $c$ denote heat added to the system scalar, and $x$ denote work done by the system scalar. $y=c-x$",
+                "closed-system-first-law",
+            ),
+            (
+                "For Mass flow rate, let $M$ denote mass flow rate scalar, $r$ denote density scalar, $A$ denote area scalar, and $v$ denote velocity scalar. $M=rAv$",
+                "mass-flow-rate",
             ),
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");

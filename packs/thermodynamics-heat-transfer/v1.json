@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 5,
+  "packId": "thermodynamics-heat-transfer",
+  "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "thermodynamics-heat-transfer",
+  "title": "Thermodynamics and heat transfer",
+  "description": "Evidence-gated energy balances and elementary heat-transfer relations.",
+  "dependencies": [{
+    "packId": "quantities-units",
+    "versionMajor": 1,
+    "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"]
+  }],
+  "capabilities": {
+    "provides": ["semath:formula-recognition", "thermodynamics-heat-transfer:law-relations"],
+    "requires": ["semath:dimensional-analysis", "semath:quantities"]
+  },
+  "concepts": [
+    { "id": "closed-system", "conceptKind": "system", "title": "Closed thermodynamic system", "description": "A system with no mass transfer across its boundary.", "parents": [], "references": ["thermodynamics"] },
+    { "id": "sensible-heating", "conceptKind": "relation", "title": "Sensible heating", "description": "Heating represented by mass, specific heat, and temperature change.", "parents": [], "references": ["heat-transfer"] },
+    { "id": "plane-wall-conduction", "conceptKind": "system", "title": "Plane-wall conduction", "description": "One-dimensional steady conduction through a plane wall.", "parents": [], "references": ["heat-transfer"] },
+    { "id": "heat-transfer", "conceptKind": "quantity", "title": "Heat transfer", "description": "Energy transferred because of a temperature difference.", "aliases": ["transferred heat", "transferred sensible heat", "heat added", "heat added to the system"], "parents": [], "references": ["thermodynamics"] },
+    { "id": "boundary-work", "conceptKind": "quantity", "title": "Boundary work", "description": "Energy transferred as work across the system boundary.", "aliases": ["work done by the system", "system boundary work"], "parents": [], "references": ["thermodynamics"] },
+    { "id": "internal-energy-change", "conceptKind": "quantity", "title": "Internal-energy change", "description": "Change of the system internal energy.", "aliases": ["change in internal energy", "change of internal energy"], "parents": [], "references": ["thermodynamics"] },
+    { "id": "heat-transfer-rate", "conceptKind": "quantity", "title": "Heat-transfer rate", "description": "Thermal energy transferred per unit time.", "aliases": ["heat rate", "rate of heat transfer"], "parents": [], "references": ["heat-transfer"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [
+    {
+      "id": "sensible-heat-relation",
+      "title": "Sensible heat",
+      "description": "Sensible heat equals mass times specific heat capacity times temperature change.",
+      "roles": [
+        { "id": "heat-transfer", "concept": "thermodynamics-heat-transfer:heat-transfer", "quantity": "quantities-units:energy", "description": "Transferred sensible heat.", "shape": "scalar", "notation": ["Q"] },
+        { "id": "mass", "concept": "quantities-units:mass", "description": "Heated mass.", "shape": "scalar", "notation": ["m"] },
+        { "id": "specific-heat", "concept": "quantities-units:specific-heat-capacity", "description": "Specific heat capacity.", "shape": "scalar", "notation": ["c", "C"] },
+        { "id": "temperature-change", "concept": "quantities-units:temperature", "description": "Temperature change.", "shape": "scalar", "notation": ["DeltaT", "theta"] }
+      ],
+      "semanticForms": ["heat-transfer = mass specific-heat temperature-change"],
+      "conditions": ["Specific heat is treated as constant over the stated temperature interval and no phase change occurs."],
+      "references": ["heat-transfer"]
+    },
+    {
+      "id": "plane-wall-conduction-rate",
+      "title": "Plane-wall conduction rate",
+      "description": "Steady one-dimensional heat-transfer rate through a plane wall.",
+      "roles": [
+        { "id": "heat-transfer-rate", "concept": "thermodynamics-heat-transfer:heat-transfer-rate", "quantity": "quantities-units:power", "description": "Heat-transfer rate.", "shape": "scalar", "notation": ["Q", "q"] },
+        { "id": "conductivity", "concept": "quantities-units:thermal-conductivity", "description": "Thermal conductivity.", "shape": "scalar", "notation": ["k"] },
+        { "id": "area", "concept": "quantities-units:area", "description": "Area normal to heat flow.", "shape": "scalar", "notation": ["A"] },
+        { "id": "temperature-change", "concept": "quantities-units:temperature", "description": "Temperature difference across the wall.", "shape": "scalar", "notation": ["DeltaT", "theta"] },
+        { "id": "length", "concept": "quantities-units:length", "description": "Wall thickness.", "shape": "scalar", "notation": ["L", "ell"] }
+      ],
+      "semanticForms": ["heat-transfer-rate = conductivity area temperature-change / length"],
+      "conditions": ["Conduction is steady and one-dimensional with constant conductivity and no internal generation."],
+      "references": ["heat-transfer"]
+    },
+    {
+      "id": "closed-system-first-law",
+      "title": "Closed-system first law",
+      "description": "Internal-energy change equals heat added minus work done by the system.",
+      "roles": [
+        { "id": "internal-energy-change", "concept": "thermodynamics-heat-transfer:internal-energy-change", "quantity": "quantities-units:energy", "description": "Change in internal energy.", "shape": "scalar", "notation": ["DeltaU", "U"] },
+        { "id": "heat-transfer", "concept": "thermodynamics-heat-transfer:heat-transfer", "quantity": "quantities-units:energy", "description": "Heat added to the system.", "shape": "scalar", "notation": ["Q"] },
+        { "id": "work", "concept": "thermodynamics-heat-transfer:boundary-work", "quantity": "quantities-units:energy", "description": "Work done by the system.", "shape": "scalar", "notation": ["W"] }
+      ],
+      "semanticForms": ["internal-energy-change = heat-transfer - work"],
+      "conditions": ["The document states a closed system and the sign convention heat-in/work-out."],
+      "references": ["thermodynamics"]
+    }
+  ],
+  "activationRules": [{
+    "id": "thermal-vocabulary",
+    "topic": "foundations",
+    "patterns": ["thermodynamics", "heat transfer", "sensible heat", "specific heat", "temperature change", "thermal conductivity", "plane wall", "closed system", "internal energy"],
+    "references": ["thermodynamics", "heat-transfer"]
+  }],
+  "roles": [],
+  "operators": [],
+  "references": [
+    { "id": "thermodynamics", "title": "Fundamentals of Engineering Thermodynamics", "citation": "Michael J. Moran et al., Fundamentals of Engineering Thermodynamics, 9th edition, Wiley, 2018." },
+    { "id": "heat-transfer", "title": "Fundamentals of Heat and Mass Transfer", "citation": "Theodore L. Bergman et al., Fundamentals of Heat and Mass Transfer, 8th edition, Wiley, 2017." }
+  ]
+}

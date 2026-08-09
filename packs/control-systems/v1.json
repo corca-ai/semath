@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "packId": "control-systems",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -84,6 +84,30 @@
       "conceptKind": "entity",
       "title": "Lyapunov forcing matrix",
       "description": "The forcing matrix in a continuous Lyapunov equation.",
+      "parents": [],
+      "references": ["linear-system-theory"]
+    },
+    {
+      "id": "output",
+      "conceptKind": "entity",
+      "title": "System output",
+      "description": "The measured or reported output vector.",
+      "parents": [],
+      "references": ["linear-system-theory"]
+    },
+    {
+      "id": "output-matrix",
+      "conceptKind": "entity",
+      "title": "Output matrix",
+      "description": "The linear operator mapping state to output.",
+      "parents": [],
+      "references": ["linear-system-theory"]
+    },
+    {
+      "id": "feedthrough-matrix",
+      "conceptKind": "entity",
+      "title": "Feedthrough matrix",
+      "description": "The linear operator mapping input directly to output.",
       "parents": [],
       "references": ["linear-system-theory"]
     }
@@ -174,6 +198,23 @@
       "references": [
         "linear-system-theory"
       ]
+    },
+    {
+      "id": "linear-output-equation",
+      "title": "Linear output equation",
+      "description": "Output equals the state contribution plus direct input feedthrough.",
+      "roles": [
+        { "id": "output", "concept": "control-systems:output", "description": "System output.", "shape": "vector", "notation": ["y", "z"] },
+        { "id": "output-matrix", "concept": "control-systems:output-matrix", "description": "Output matrix.", "shape": "matrix", "notation": ["C", "H"] },
+        { "id": "state", "concept": "control-systems:state", "description": "State vector.", "shape": "vector", "notation": ["x", "z"] },
+        { "id": "feedthrough-matrix", "concept": "control-systems:feedthrough-matrix", "description": "Feedthrough matrix.", "shape": "matrix", "notation": ["D", "J"] },
+        { "id": "control-input", "concept": "control-systems:control-input", "description": "Control input.", "shape": "vector", "notation": ["u", "v"] }
+      ],
+      "semanticForms": [
+        "output = output-matrix state + feedthrough-matrix control-input"
+      ],
+      "conditions": ["State, input, output, and matrix dimensions are explicitly compatible."],
+      "references": ["linear-system-theory"]
     }
   ],
   "activationRules": [
@@ -187,7 +228,9 @@
         "control input",
         "state vector",
         "system matrix",
-        "system matrices"
+        "system matrices",
+        "output equation",
+        "feedthrough matrix"
       ],
       "references": [
         "linear-system-theory"

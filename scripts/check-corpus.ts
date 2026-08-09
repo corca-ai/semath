@@ -11,7 +11,28 @@ import {
 import type { QueryResult } from "../packages/protocol/src/index";
 import { loadQualityFixtures } from "./evaluation-fixtures";
 
-const { corpora, manifest } = await loadQualityFixtures();
+const loaded = await loadQualityFixtures();
+const selectedSuites = new Set(
+  (process.env.SEMATH_CORPUS_SUITES ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean),
+);
+const manifest = selectedSuites.size
+  ? {
+      ...loaded.manifest,
+      suites: loaded.manifest.suites.filter((suite) => selectedSuites.has(suite.id)),
+    }
+  : loaded.manifest;
+const corpora = selectedSuites.size
+  ? new Map([...loaded.corpora].filter(([suiteId]) => selectedSuites.has(suiteId)))
+  : loaded.corpora;
+if (selectedSuites.size && manifest.suites.length !== selectedSuites.size) {
+  const found = new Set(manifest.suites.map((suite) => suite.id));
+  throw new Error(
+    `unknown corpus suites: ${[...selectedSuites].filter((id) => !found.has(id)).sort().join(", ")}`,
+  );
+}
 const corpusIntegrityFailures = findCorpusDuplicates([...corpora.values()]);
 if (corpusIntegrityFailures.length) {
   throw new Error(`corpus integrity gate failed:\n${corpusIntegrityFailures.join("\n")}`);

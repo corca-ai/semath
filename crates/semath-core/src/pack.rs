@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 4;
+pub const PACK_SCHEMA_VERSION: u32 = 5;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -92,6 +92,8 @@ pub struct PackConcept {
     pub title: String,
     pub description: String,
     #[serde(default)]
+    pub aliases: Vec<String>,
+    #[serde(default)]
     pub parents: Vec<String>,
     pub references: Vec<String>,
 }
@@ -159,6 +161,8 @@ pub struct PackLaw {
 pub struct PackLawRole {
     pub id: String,
     pub concept: String,
+    #[serde(default)]
+    pub quantity: Option<String>,
     pub description: String,
     #[serde(default)]
     pub shape: Option<String>,
@@ -347,6 +351,16 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                         format!("unknown concept {}", role.concept),
                     ));
                 }
+                if let Some(quantity) = &role.quantity
+                    && !concepts.contains(quantity)
+                {
+                    return Err(error(
+                        format!(
+                            "packs[{pack_index}].laws[{law_index}].roles[{role_index}].quantity"
+                        ),
+                        format!("unknown quantity {quantity}"),
+                    ));
+                }
             }
         }
         for (quantity_index, quantity) in pack.quantity_kinds.iter().enumerate() {
@@ -464,6 +478,9 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
         }
         require_text(&format!("{path}.title"), &concept.title)?;
         require_text(&format!("{path}.description"), &concept.description)?;
+        for (alias_index, alias) in concept.aliases.iter().enumerate() {
+            require_text(&format!("{path}.aliases[{alias_index}]"), alias)?;
+        }
     }
     for capability in pack
         .capabilities
@@ -678,8 +695,8 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 4);
-        assert_eq!(built_in_packs().len(), 9);
+        assert_eq!(PACK_SCHEMA_VERSION, 5);
+        assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }
 

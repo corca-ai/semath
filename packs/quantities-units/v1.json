@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "packId": "quantities-units",
   "packVersion": "1.0.0",
   "packKind": "capability",
@@ -41,6 +41,7 @@
       "id": "length",
       "title": "Length",
       "description": "Spatial extent or displacement magnitude.",
+      "aliases": ["wavelength", "wave length", "height", "depth", "height difference", "depth difference", "wall thickness"],
       "dimension": [
         {
           "base": "length",
@@ -67,7 +68,7 @@
       "id": "duration",
       "title": "Duration",
       "description": "Elapsed time.",
-      "aliases": ["time", "time variable"],
+      "aliases": ["time", "time variable", "period", "sampling period", "signal period"],
       "dimension": [
         {
           "base": "time",
@@ -101,7 +102,7 @@
       "id": "velocity",
       "title": "Velocity",
       "description": "Rate of change of position with time.",
-      "aliases": ["speed", "point velocity", "velocity vector"],
+      "aliases": ["speed", "point velocity", "velocity vector", "wave speed", "propagation speed", "mean normal velocity"],
       "dimension": [
         {
           "base": "length",
@@ -209,7 +210,7 @@
       "id": "energy",
       "title": "Energy",
       "description": "Mechanical work or stored energy.",
-      "aliases": ["kinetic energy", "mechanical energy"],
+      "aliases": ["kinetic energy", "mechanical energy", "electric potential energy", "heat", "sensible heat", "work", "system work", "internal energy change", "boundary work"],
       "dimension": [
         {
           "base": "length",
@@ -235,7 +236,7 @@
       "id": "power",
       "title": "Power",
       "description": "Rate of energy transfer.",
-      "aliases": ["mechanical power", "instantaneous power"],
+      "aliases": ["mechanical power", "instantaneous power", "electric power", "heat transfer rate"],
       "dimension": [
         {
           "base": "length",
@@ -399,7 +400,7 @@
       "id": "voltage",
       "title": "Voltage",
       "description": "Electric potential difference.",
-      "aliases": ["voltage drop", "terminal voltage", "potential difference"],
+      "aliases": ["voltage drop", "terminal voltage", "potential difference", "electric potential"],
       "dimension": [
         {
           "base": "electric-current",
@@ -476,6 +477,7 @@
       "id": "frequency",
       "title": "Frequency",
       "description": "Cycles per unit time.",
+      "aliases": ["cyclic frequency", "angular frequency", "sampling frequency", "wave frequency"],
       "dimension": [
         {
           "base": "time",
@@ -488,10 +490,11 @@
         "si-brochure"
       ]
     },
-    {
-      "id": "temperature",
+  {
+    "id": "temperature",
       "title": "Thermodynamic temperature",
       "description": "Thermodynamic temperature.",
+      "aliases": ["temperature change", "temperature difference"],
       "dimension": [
         {
           "base": "thermodynamic-temperature",
@@ -500,15 +503,83 @@
         }
       ],
       "defaultUnit": "quantities-units:kelvin",
-      "references": [
-        "si-brochure"
-      ]
-    },
-    {
-      "id": "dimensionless",
+    "references": [
+      "si-brochure"
+    ]
+  },
+  {
+    "id": "density",
+    "title": "Mass density",
+    "description": "Mass per unit volume.",
+    "aliases": ["density", "fluid density", "mass density"],
+    "dimension": [
+      { "base": "length", "numerator": -3, "denominator": 1 },
+      { "base": "mass", "numerator": 1, "denominator": 1 }
+    ],
+    "references": ["si-brochure"]
+  },
+  {
+    "id": "specific-heat-capacity",
+    "title": "Specific heat capacity",
+    "description": "Heat capacity per unit mass.",
+    "aliases": ["specific heat", "specific heat capacity"],
+    "dimension": [
+      { "base": "length", "numerator": 2, "denominator": 1 },
+      { "base": "time", "numerator": -2, "denominator": 1 },
+      { "base": "thermodynamic-temperature", "numerator": -1, "denominator": 1 }
+    ],
+    "references": ["si-brochure"]
+  },
+  {
+    "id": "thermal-conductivity",
+    "title": "Thermal conductivity",
+    "description": "Heat-transfer rate per length and temperature difference.",
+    "aliases": ["thermal conductivity"],
+    "dimension": [
+      { "base": "length", "numerator": 1, "denominator": 1 },
+      { "base": "mass", "numerator": 1, "denominator": 1 },
+      { "base": "time", "numerator": -3, "denominator": 1 },
+      { "base": "thermodynamic-temperature", "numerator": -1, "denominator": 1 }
+    ],
+    "references": ["si-brochure"]
+  },
+  {
+    "id": "volume",
+    "title": "Volume",
+    "description": "Three-dimensional spatial extent.",
+    "aliases": ["control volume", "fluid volume"],
+    "dimension": [
+      { "base": "length", "numerator": 3, "denominator": 1 }
+    ],
+    "references": ["si-brochure"]
+  },
+  {
+    "id": "mass-flow-rate",
+    "title": "Mass flow rate",
+    "description": "Mass transported per unit time.",
+    "aliases": ["mass flow", "mass flow rate"],
+    "dimension": [
+      { "base": "mass", "numerator": 1, "denominator": 1 },
+      { "base": "time", "numerator": -1, "denominator": 1 }
+    ],
+    "references": ["si-brochure"]
+  },
+  {
+    "id": "volumetric-flow-rate",
+    "title": "Volumetric flow rate",
+    "description": "Volume transported per unit time.",
+    "aliases": ["volume flow", "volumetric flow", "volumetric flow rate"],
+    "dimension": [
+      { "base": "length", "numerator": 3, "denominator": 1 },
+      { "base": "time", "numerator": -1, "denominator": 1 }
+    ],
+    "references": ["si-brochure"]
+  },
+  {
+    "id": "dimensionless",
       "title": "Dimensionless quantity",
       "description": "A quantity with no physical dimension.",
-      "aliases": ["probability", "scalar probability"],
+      "aliases": ["probability", "scalar probability", "pi", "circle constant"],
       "dimension": [],
       "references": [
         "si-brochure"
