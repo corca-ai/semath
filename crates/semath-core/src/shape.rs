@@ -89,6 +89,7 @@ impl Shape {
         };
         FormulaConstraint {
             kind: kind.into(),
+            concepts: Vec::new(),
             dimensions,
             refinements: Vec::new(),
         }

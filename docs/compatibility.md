@@ -2,7 +2,7 @@
 
 | Semath | Protocol | Pack schema | wasmtex syntax | Host requirement |
 | --- | ---: | ---: | --- | --- |
-| 0.13.x | 1 | 2 | pinned in `package.json` | ES modules, WebAssembly, Worker where the host API is used |
+| 0.14.x | 1 | 3 | pinned in `package.json` | ES modules, WebAssembly, Worker where the host API is used |
 
 The package pins the reviewed wasmtex revision used to derive syntax ranges. Consumers should treat that revision, the generated WASM declarations, and `SEMATH_PROTOCOL_VERSION` as one tested compatibility set.
 

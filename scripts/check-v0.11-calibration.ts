@@ -5,7 +5,19 @@ import formulaGolden from "../fixtures/v0.4/formula-intelligence.golden.json";
 import actionGolden from "../fixtures/v0.11/action-capable-patterns.golden.json";
 import { builtInPacks } from "../packages/packs/src/index";
 
-const packs = builtInPacks();
+const LEGACY_PACK_IDS = new Set([
+  "linear-algebra",
+  "probability",
+  "calculus-analysis",
+  "optimization-ml",
+  "discrete-math",
+]);
+
+export function legacyPacks() {
+  return builtInPacks().filter((pack) => LEGACY_PACK_IDS.has(pack.packId));
+}
+
+const packs = legacyPacks();
 const patterns = packs.flatMap((pack) =>
   pack.patterns.map((pattern) => ({ pack, pattern })),
 );

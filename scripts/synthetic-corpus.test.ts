@@ -65,6 +65,27 @@ describe("synthetic corpus", () => {
         "bad.json",
       ),
     ).toThrow("cursorNeedle must occur exactly once");
+
+    expect(() =>
+      parseSyntheticDomainCorpus(
+        {
+          schemaVersion: 1,
+          domain: "overlap",
+          cases: [
+            {
+              id: "domain-refusal-with-generic-fallback",
+              topic: "overlapping domains",
+              purpose: "refusal",
+              language: "latex",
+              source: "$x_{k+1}=x_k$",
+              cursorNeedle: "x_{k+1}",
+              expectedPatterns: ["linear-recurrence"],
+            },
+          ],
+        },
+        "overlap.json",
+      ),
+    ).not.toThrow();
   });
 
   test("builds one deterministic query per independent case", () => {

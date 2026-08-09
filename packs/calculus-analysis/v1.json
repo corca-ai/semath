@@ -1,9 +1,21 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "packId": "calculus-analysis",
   "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "calculus-analysis",
   "title": "Calculus and analysis",
   "description": "Recognition-first catalog for derivatives, integrals, limits, and series without inferred regularity assumptions.",
+  "dependencies": [],
+  "capabilities": { "provides": ["semath:formula-recognition"], "requires": [] },
+  "concepts": [
+    { "id": "function", "conceptKind": "entity", "title": "Function", "description": "A mapping with an explicitly declared domain and codomain.", "parents": [], "references": ["principles-analysis"] },
+    { "id": "derivative", "conceptKind": "operator", "title": "Derivative", "description": "A derivative operator with an explicit variable.", "parents": [], "references": ["principles-analysis"] },
+    { "id": "integral", "conceptKind": "operator", "title": "Integral", "description": "An integral operator with an explicit integrand and differential.", "parents": [], "references": ["principles-analysis"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [],
   "activationRules": [
     { "id": "vocabulary", "topic": "foundations", "patterns": ["derivative", "integral", "gradient", "Jacobian", "Hessian", "convergence", "Taylor series"], "references": ["principles-analysis"] },
     { "id": "calculus-notation", "topic": "notation", "patterns": ["\\frac{d", "\\partial", "\\int", "\\lim", "\\nabla"], "references": ["principles-analysis"] }

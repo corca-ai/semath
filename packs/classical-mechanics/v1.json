@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 3,
+  "packId": "classical-mechanics",
+  "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "classical-mechanics",
+  "title": "Classical mechanics",
+  "description": "Evidence-gated mechanical quantities and law instances with explicit dimensional roles.",
+  "dependencies": [{ "packId": "quantities-units", "versionMajor": 1, "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"] }],
+  "capabilities": { "provides": ["classical-mechanics:law-relations", "semath:formula-recognition"], "requires": ["semath:dimensional-analysis", "semath:quantities"] },
+  "concepts": [
+    { "id": "body", "conceptKind": "entity", "title": "Mechanical body", "description": "A body whose motion and interactions are described by the document.", "parents": [], "references": ["classical-mechanics"] },
+    { "id": "coordinate-frame", "conceptKind": "system", "title": "Coordinate frame", "description": "A frame relative to which vector components are expressed.", "parents": [], "references": ["classical-mechanics"] },
+    { "id": "newton-second-law", "conceptKind": "relation", "title": "Newton's second law", "description": "Net force equals mass times acceleration in an inertial frame.", "parents": [], "references": ["classical-mechanics"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [
+    {
+      "id": "newton-second-law",
+      "title": "Newton's second law",
+      "description": "The net force on a body equals its inertial mass multiplied by its acceleration.",
+      "roles": [
+        { "id": "net-force", "concept": "quantities-units:force", "description": "Net force acting on the body." },
+        { "id": "mass", "concept": "quantities-units:mass", "description": "Inertial mass of the body." },
+        { "id": "acceleration", "concept": "quantities-units:acceleration", "description": "Acceleration in the active inertial frame." }
+      ],
+      "conditions": ["The quantities refer to one body in a common inertial frame."],
+      "references": ["classical-mechanics"]
+    }
+  ],
+  "activationRules": [
+    { "id": "mechanics-vocabulary", "topic": "foundations", "patterns": ["classical mechanics", "Newton's second law", "net force", "inertial frame"], "references": ["classical-mechanics"] }
+  ],
+  "roles": [],
+  "operators": [],
+  "patterns": [
+    {
+      "id": "newton-second-law",
+      "topic": "dynamics",
+      "title": "Newton's second law",
+      "description": "Net force equals mass times acceleration with all three quantities explicitly declared.",
+      "descriptionKey": "newton-second-law",
+      "maturity": "recognition",
+      "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*([A-Za-z])\\s*(?:\\\\cdot\\s*)?([A-Za-z])$" },
+      "parameters": [
+        { "id": "force", "constraint": { "kind": "expression", "concepts": ["quantities-units:force"] } },
+        { "id": "mass", "constraint": { "kind": "expression", "concepts": ["quantities-units:mass"] } },
+        { "id": "acceleration", "constraint": { "kind": "expression", "concepts": ["quantities-units:acceleration"] } }
+      ],
+      "result": { "kind": "proposition", "refinements": ["physical-law-instance"] },
+      "relation": { "law": "newton-second-law", "roleBindings": [{ "parameter": "force", "role": "net-force" }, { "parameter": "mass", "role": "mass" }, { "parameter": "acceleration", "role": "acceleration" }] },
+      "references": ["classical-mechanics"]
+    }
+  ],
+  "rewrites": [],
+  "references": [{ "id": "classical-mechanics", "title": "Classical Mechanics", "citation": "Herbert Goldstein, Charles Poole, and John Safko, Classical Mechanics, 3rd edition, Addison-Wesley, 2002." }]
+}

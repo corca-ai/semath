@@ -1,9 +1,20 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "packId": "optimization-ml",
   "packVersion": "1.1.0",
+  "packKind": "field",
+  "namespace": "optimization-ml",
   "title": "Optimization and machine learning",
   "description": "Recognition-first catalog for objectives, constraints, and learning updates without inferred convexity or optimality.",
+  "dependencies": [],
+  "capabilities": { "provides": ["semath:formula-recognition"], "requires": [] },
+  "concepts": [
+    { "id": "objective-function", "conceptKind": "entity", "title": "Objective function", "description": "A function optimized over an explicitly declared variable.", "parents": [], "references": ["convex-optimization"] },
+    { "id": "argmin", "conceptKind": "operator", "title": "Argmin", "description": "An operator denoting minimizers of an objective.", "parents": [], "references": ["convex-optimization"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [],
   "activationRules": [
     { "id": "vocabulary", "topic": "foundations", "patterns": ["optimization", "objective function", "gradient descent", "machine learning", "empirical risk", "Lagrangian"], "references": ["convex-optimization"] },
     { "id": "optimization-notation", "topic": "notation", "patterns": ["\\argmin", "\\argmax", "\\min_", "\\max_", "\\mathcal{L}"], "references": ["convex-optimization"] }

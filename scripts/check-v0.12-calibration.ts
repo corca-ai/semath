@@ -1,10 +1,9 @@
 import actionCorpus from "../fixtures/v0.12/action-pattern-calibration.json";
 import domainCorpus from "../fixtures/v0.11/domain-pack-recognition-corpus.json";
-import { builtInPacks } from "../packages/packs/src/index";
-import "./check-v0.11-calibration";
+import { legacyPacks } from "./check-v0.11-calibration";
 import { recognitionVariants } from "./v0.11-domain-fixture.mjs";
 
-const packs = builtInPacks();
+const packs = legacyPacks();
 const patternOwners = new Map(
   packs.flatMap((pack) =>
     pack.patterns.map((pattern) => [pattern.id, pack.packId] as const),

@@ -1,9 +1,20 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "packId": "linear-algebra",
   "packVersion": "1.2.0",
+  "packKind": "field",
+  "namespace": "linear-algebra",
   "title": "Linear algebra",
   "description": "Typed vector and matrix formulas with conservative dimension evidence.",
+  "dependencies": [],
+  "capabilities": { "provides": ["semath:formula-recognition", "semath:shape-analysis"], "requires": [] },
+  "concepts": [
+    { "id": "linear-operator", "conceptKind": "operator", "title": "Linear operator", "description": "A linear map between vector spaces.", "parents": [], "references": ["matrix-computations"] },
+    { "id": "transpose", "conceptKind": "operator", "title": "Transpose", "description": "An operator that exchanges matrix axes.", "parents": [], "references": ["matrix-computations"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [],
   "activationRules": [
     {
       "id": "vocabulary",

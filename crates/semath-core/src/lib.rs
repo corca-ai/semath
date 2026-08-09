@@ -11,8 +11,10 @@ mod pattern;
 mod project_order;
 mod prose;
 mod protocol;
+mod quantity;
 mod rewrite;
 mod scope;
+mod semantic;
 mod shape;
 mod source_index;
 

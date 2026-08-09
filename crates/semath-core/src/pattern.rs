@@ -5,11 +5,16 @@ use crate::consistency::ConsistencyAnalysis;
 use crate::matcher::primitive_matcher;
 use crate::pack::{PackPattern, built_in_packs};
 use crate::parser::ParsedMath;
+#[cfg(test)]
+use crate::prose::analyze_prose;
+use crate::quantity::QuantityAnalysis;
+#[cfg(test)]
+use crate::quantity::analyze_quantities;
 use crate::shape::{KnownShape, Shape, ShapeAnalysis};
 use crate::{
     EquationNode, Evidence, FormulaBinding, FormulaCompletion, FormulaConditionInfo,
-    FormulaConstraint, FormulaRecognition, ProjectDocument, RoleInfo, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
+    FormulaConstraint, FormulaRecognition, ProjectDocument, RelationInfo, RelationRoleInfo,
+    RoleInfo, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SourceIndex, SourceRange,
 };
 use regex::Regex;
 
@@ -72,6 +77,12 @@ struct MatchedRecognition {
     specificity: usize,
 }
 
+struct RecognitionFacts<'a> {
+    shapes: &'a BTreeMap<String, KnownShape>,
+    roles: &'a BTreeMap<String, Vec<RoleInfo>>,
+    quantities: &'a BTreeMap<String, crate::QuantityInfo>,
+}
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct FormulaAnalysis {
     recognitions: Vec<FormulaRecognition>,
@@ -92,11 +103,24 @@ impl FormulaAnalysis {
     }
 }
 
+#[cfg(test)]
 pub(crate) fn analyze_formulas(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     shapes: &ShapeAnalysis,
     consistency: &ConsistencyAnalysis,
+) -> FormulaAnalysis {
+    let prose = analyze_prose(document, parsed);
+    let quantities = analyze_quantities(document, parsed, &prose.definitions);
+    analyze_formulas_with_quantities(document, parsed, shapes, consistency, &quantities)
+}
+
+pub(crate) fn analyze_formulas_with_quantities(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    shapes: &ShapeAnalysis,
+    consistency: &ConsistencyAnalysis,
+    quantities: &QuantityAnalysis,
 ) -> FormulaAnalysis {
     let index = SourceIndex::new(&document.content);
     let mut recognitions = Vec::new();
@@ -124,7 +148,13 @@ pub(crate) fn analyze_formulas(
             content_start + expression.end(),
         );
         let known = known_by_symbol(shapes.known_shapes_at(expression_range.start_offset));
+        let known_quantities = quantities.known_at(expression_range.start_offset);
         let roles = roles_by_symbol(consistency.effective_roles_at(expression_range.start_offset));
+        let facts = RecognitionFacts {
+            shapes: &known,
+            roles: &roles,
+            quantities: &known_quantities,
+        };
         let mut found = Vec::new();
         if let Some(full_expression) = full_expression {
             let full_range = absolute_range(
@@ -138,8 +168,7 @@ pub(crate) fn analyze_formulas(
                 content_start + full_expression.start(),
                 &index,
                 &math.root,
-                &known,
-                &roles,
+                &facts,
             ));
             if let Some((transparent, transparent_start)) =
                 transparent_math_body(document, math, &index)
@@ -150,8 +179,7 @@ pub(crate) fn analyze_formulas(
                     transparent_start,
                     &index,
                     &math.root,
-                    &known,
-                    &roles,
+                    &facts,
                 ));
                 if let Some(assignment) = ASSIGNMENT
                     .captures(transparent)
@@ -163,8 +191,7 @@ pub(crate) fn analyze_formulas(
                         transparent_start + assignment.start(),
                         &index,
                         &math.root,
-                        &known,
-                        &roles,
+                        &facts,
                     ));
                 }
             }
@@ -178,8 +205,7 @@ pub(crate) fn analyze_formulas(
                 content_start + expression.start(),
                 &index,
                 &math.root,
-                &known,
-                &roles,
+                &facts,
             ));
         }
         let mut seen = HashSet::new();
@@ -510,8 +536,7 @@ fn recognize_pack_patterns(
     expression_byte_start: usize,
     index: &SourceIndex,
     root: &EquationNode,
-    known: &BTreeMap<String, KnownShape>,
-    roles: &BTreeMap<String, Vec<RoleInfo>>,
+    facts: &RecognitionFacts<'_>,
 ) -> Vec<MatchedRecognition> {
     if !complete_expression_surface(expression) || !structurally_complete_span(root, &range) {
         return Vec::new();
@@ -559,8 +584,9 @@ fn recognize_pack_patterns(
                         parameter,
                         symbol?,
                         ranges,
-                        known,
-                        roles,
+                        facts.shapes,
+                        facts.roles,
+                        facts.quantities,
                         &mut dimensions,
                     )
                     .map(Some)
@@ -590,6 +616,7 @@ fn recognize_pack_patterns(
                 .map(|binding| binding.evidence.clone())
                 .collect::<Vec<_>>();
             evidence.push(pattern_evidence);
+            let relation = relation_for(compiled.pattern, &bindings, &evidence, range.clone());
             Some(MatchedRecognition {
                 recognition: FormulaRecognition {
                     pattern_id: compiled.pattern.id.clone(),
@@ -610,6 +637,7 @@ fn recognize_pack_patterns(
                     result: substitute_dimensions(&compiled.pattern.result, &dimensions),
                     conditions: verified_conditions(compiled.pattern),
                     evidence,
+                    relation,
                     rank: if compiled.pattern.maturity.as_str() == "recognition" {
                         50
                     } else {
@@ -620,6 +648,57 @@ fn recognize_pack_patterns(
             })
         })
         .collect()
+}
+
+fn relation_for(
+    pattern: &PackPattern,
+    bindings: &[crate::FormulaBinding],
+    evidence: &[Evidence],
+    range: SourceRange,
+) -> Option<RelationInfo> {
+    let relation = pattern.relation.as_ref()?;
+    let pack = built_in_packs()
+        .iter()
+        .find(|pack| pack.pack_id == pattern.pack_id)?;
+    let law = pack.laws.iter().find(|law| law.id == relation.law)?;
+    let roles = relation
+        .role_bindings
+        .iter()
+        .filter_map(|role_binding| {
+            let binding = bindings
+                .iter()
+                .find(|binding| binding.parameter == role_binding.parameter)?;
+            let role = law.roles.iter().find(|role| role.id == role_binding.role)?;
+            Some(RelationRoleInfo {
+                role: role.id.clone(),
+                label: title_case(&role.id),
+                symbol: binding.symbol.clone(),
+                concept_id: Some(role.concept.clone()),
+            })
+        })
+        .collect::<Vec<_>>();
+    Some(RelationInfo {
+        relation_id: format!("{}:{}", pack.namespace, law.id),
+        title: law.title.clone(),
+        description: law.description.clone(),
+        roles,
+        conditions: law.conditions.clone(),
+        evidence: evidence.to_vec(),
+        range,
+    })
+}
+
+fn title_case(value: &str) -> String {
+    value
+        .split('-')
+        .map(|part| {
+            let mut characters = part.chars();
+            characters.next().map_or_else(String::new, |first| {
+                first.to_uppercase().collect::<String>() + characters.as_str()
+            })
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn trimmed_capture(captured: &str) -> Option<(&str, usize, usize)> {
@@ -733,10 +812,24 @@ fn regex_binding(
     capture_ranges: Vec<SourceRange>,
     known: &BTreeMap<String, KnownShape>,
     roles: &BTreeMap<String, Vec<RoleInfo>>,
+    quantities: &BTreeMap<String, crate::QuantityInfo>,
     dimensions: &mut BTreeMap<String, String>,
 ) -> Option<FormulaBinding> {
     if symbol.is_empty() {
         return None;
+    }
+    if !parameter.constraint.concepts.is_empty() {
+        let quantity = quantities.get(symbol)?;
+        let concept = quantity.quantity_kind_id.as_ref()?;
+        if !parameter.constraint.concepts.contains(concept) {
+            return None;
+        }
+        return Some(FormulaBinding {
+            parameter: parameter.id.clone(),
+            symbol: symbol.into(),
+            constraint: parameter.constraint.clone(),
+            evidence: quantity.evidence.clone(),
+        });
     }
     if parameter.constraint.kind == "expression" {
         return Some(FormulaBinding {
@@ -819,6 +912,7 @@ fn substitute_dimensions(
 ) -> FormulaConstraint {
     FormulaConstraint {
         kind: constraint.kind.clone(),
+        concepts: constraint.concepts.clone(),
         dimensions: constraint
             .dimensions
             .iter()
@@ -883,6 +977,7 @@ fn verified_conditions(pattern: &PackPattern) -> Vec<FormulaConditionInfo> {
 fn role_constraint(role: &RoleInfo) -> FormulaConstraint {
     FormulaConstraint {
         kind: role.role.clone(),
+        concepts: Vec::new(),
         dimensions: Vec::new(),
         refinements: if role.role == "event" && has_positive_probability_evidence(role) {
             vec!["positive-probability".into()]
@@ -1095,6 +1190,51 @@ mod tests {
     }
 
     #[test]
+    fn recognizes_engineering_laws_only_with_explicit_semantic_constraints() {
+        for (source, expected) in [
+            (
+                "Let $F$ be force in newtons. Let $m$ be mass in kilograms. Let $a$ be acceleration in metres per second squared. $F = m a$",
+                "newton-second-law",
+            ),
+            (
+                "Let $V$ be voltage in volts. Let $I$ be electric current in amperes. Let $R$ be resistance in ohms. $V = I R$",
+                "ohm-law",
+            ),
+            (
+                "Let $x$ be an n-dimensional vector. Let $u$ be an m-dimensional vector. Let $A$ be an n by n matrix. Let $B$ be an n by m matrix. $x_{k+1} = A x_k + B u_k$",
+                "discrete-state-transition",
+            ),
+        ] {
+            let (document, parsed, shapes, consistency) = analyze(source);
+            let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
+            let recognition = formulas
+                .all()
+                .iter()
+                .find(|recognition| recognition.pattern_id == expected)
+                .unwrap_or_else(|| panic!("expected {expected}, got {:?}", formulas.all()));
+            assert_eq!(
+                recognition
+                    .relation
+                    .as_ref()
+                    .map(|relation| relation.roles.len()),
+                Some(if expected == "discrete-state-transition" {
+                    5
+                } else {
+                    3
+                })
+            );
+        }
+
+        let (document, parsed, shapes, consistency) = analyze("$F = m a$");
+        assert!(
+            analyze_formulas(&document, &parsed, &shapes, &consistency)
+                .all()
+                .iter()
+                .all(|recognition| recognition.pattern_id != "newton-second-law")
+        );
+    }
+
+    #[test]
     fn does_not_promote_nested_set_operators_to_whole_formula_meanings() {
         for (source, forbidden_pattern) in [
             ("$\\Pr(A \\cap B)$", "set-intersection"),
@@ -1235,6 +1375,16 @@ mod tests {
         assert_eq!(corpus.false_positive_budget, 0);
         let expected = built_in_packs()
             .iter()
+            .filter(|pack| {
+                matches!(
+                    pack.pack_id.as_str(),
+                    "linear-algebra"
+                        | "probability"
+                        | "calculus-analysis"
+                        | "optimization-ml"
+                        | "discrete-math"
+                )
+            })
             .flat_map(|pack| &pack.patterns)
             .filter(|pattern| pattern.maturity == PackMaturity::Recognition)
             .map(|pattern| pattern.id.as_str())

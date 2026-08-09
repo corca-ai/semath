@@ -47,8 +47,16 @@ multiply-expanded candidates, and validates change batches before mutation.
 The five existing packs retain 68 patterns while adding generated Unicode/CRLF
 contexts, mutation refusals, and executable per-pack scorecards.
 
+Version 0.14 establishes the domain-neutral scientific foundation. Pack schema
+3 adds namespaces, explicit dependencies and capabilities, concepts, laws,
+relation roles, quantities, units, and exact physical dimensions. A bounded
+`semanticContext` projection and the existing `inspection` query expose
+evidence-backed claims and relations without hard-coding fields in the core.
+Classical mechanics, circuits, and control systems are the first engineering
+pilots; their laws activate only when quantity or shape constraints are explicit.
+
 The synthetic v1 corpus complements those compact calibration fixtures with
-independently LLM-authored English/TeX cases. Six mathematical fields contain
+independently LLM-authored English/TeX cases. Nine mathematical and engineering fields contain
 supported surfaces, hard refusals, and explicit coverage targets; a separate
 English mathematical-prose corpus measures definition extraction. The corpus
 checker executes every annotation against the native engine and reports current
@@ -110,7 +118,8 @@ The Rust core is host-independent. The standalone [public API](docs/public-api.m
 [domain-pack contract](docs/domain-packs.md), and [compatibility policy](docs/compatibility.md)
 are documented separately from the CorTeX host. Browser artifacts under `lib/wasm` are built on an x86_64
 Linux build host; Apple Silicon machines run native tests but must not produce release WASM.
-See [draft.md](./draft.md) for the architecture and roadmap.
+See [draft.md](./draft.md) for the architecture and roadmap. The canonical pack
+schema is [`schemas/domain-pack-v3.schema.json`](./schemas/domain-pack-v3.schema.json).
 
 ## Language server
 

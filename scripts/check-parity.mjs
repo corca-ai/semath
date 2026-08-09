@@ -13,6 +13,10 @@ import {
   assertRealisticProjectResults,
   buildRealisticProjectFixture,
 } from "./v0.12-realistic-project-fixture.mjs";
+import {
+  assertScientificResults,
+  buildScientificFixture,
+} from "./v0.14-scientific-fixture.ts";
 
 const fixtureSets = [
   {
@@ -264,4 +268,44 @@ const realisticSummary = assertRealisticProjectResults(
 );
 console.log(
   `parity OK: ${realisticSummary.results} v0.12 realistic mixed-project queries`,
+);
+
+const scientificCorpus = JSON.parse(
+  await readFile(
+    new URL("../fixtures/v0.14/scientific-foundation.json", import.meta.url),
+    "utf8",
+  ),
+);
+const scientific = buildScientificFixture(scientificCorpus);
+const scientificText = JSON.stringify(scientific.fixture);
+const nativeScientific = spawnSync("./target/debug/semath-native", [], {
+  encoding: "utf8",
+  input: scientificText,
+});
+if (nativeScientific.status !== 0) {
+  throw new Error(nativeScientific.stderr || "v0.14 native scientific fixture failed");
+}
+const nativeScientificResults = JSON.parse(nativeScientific.stdout);
+const scientificEngine = new SemathEngine();
+scientificEngine.resetProject(
+  encoder.encode(JSON.stringify(scientific.fixture.snapshot)),
+);
+const wasmScientificResults = scientific.fixture.queries.map((query) =>
+  JSON.parse(
+    decoder.decode(scientificEngine.query(encoder.encode(JSON.stringify(query)))),
+  ),
+);
+scientificEngine.free();
+if (
+  JSON.stringify(nativeScientificResults) !==
+  JSON.stringify(wasmScientificResults)
+) {
+  throw new Error("native/WASM semantic result mismatch for v0.14 scientific foundation");
+}
+const scientificSummary = assertScientificResults(
+  nativeScientificResults,
+  scientific.expectations,
+);
+console.log(
+  `parity OK: ${scientificSummary.queries} v0.14 scientific foundation queries`,
 );
