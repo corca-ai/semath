@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "suites": [
+    {
+      "id": "linear-products-probe",
+      "packId": "linear-algebra",
+      "laws": [
+        {
+          "lawId": "matrix-matrix-product",
+          "positives": [
+            ["matrix-product-basic", "Let $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$", "C=AB", {"result":"C","left":"A","right":"B"}],
+            ["matrix-product-spaced", "Let $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$", "Y = M \\, N", {"result":"Y","left":"M","right":"N"}],
+          ["matrix-product-grouped", "Let $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$", "Q=(R S)", {"result":"Q","left":"R","right":"S"}],
+          ["matrix-product-reversed", "Let $E$, $F$, and $D$ be compatible matrices. $E F = D$", "E F = D", {"result":"D","left":"E","right":"F"}],
+            ["matrix-product-styled", "Let $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$", "\\mathbf{W}=\\mathbf{U}\\mathbf{V}", {"result":"W","left":"U","right":"V"}]
+          ],
+          "refusals": [
+            ["matrix-product-addition", "Let $A$, $B$, and $C$ be matrices. $C=A+B$", "C=A+B", "wrong-operator"],
+            ["matrix-product-division", "Let $A$, $B$, and $C$ be matrices. $C=A/B$", "C=A/B", "wrong-operator"],
+            ["matrix-product-vector-result", "Let $A$ and $B$ be matrices, but let $c$ be a vector. $c=AB$", "c=AB", "wrong-shape"],
+            ["matrix-product-incompatible", "Let $A$ be an m by n matrix and $B$ a q by r matrix with $n\\ne q$. $C=AB$", "C=AB", "shape-mismatch"],
+            ["matrix-product-missing-roles", "Three undeclared symbols occur in $Q=RS$.", "Q=RS", "missing-role-evidence"]
+          ]
+        },
+        {
+          "lawId": "matrix-transpose-definition",
+          "positives": [
+            ["transpose-basic", "Let $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$", "B=A^T", {"result":"B","operator":"A"}],
+            ["transpose-top", "Let $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$", "N=M^{\\top}", {"result":"N","operator":"M"}],
+            ["transpose-intercal", "Let $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$", "S=R^{\\intercal}", {"result":"S","operator":"R"}],
+            ["transpose-reversed", "Let $U$ and $V$ be matrices. The transpose relation is $U^T=V$", "U^T=V", {"result":"V","operator":"U"}],
+            ["transpose-styled", "Let $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$", "\\mathbf{L}=\\mathbf{K}^{T}", {"result":"L","operator":"K"}]
+          ],
+          "refusals": [
+            ["transpose-identity", "Let $A$ and $B$ be matrices. $B=A$", "B=A", "missing-operator"],
+            ["transpose-inverse", "Let $A$ and $B$ be matrices. $B=A^{-1}$", "B=A^{-1}", "wrong-operator"],
+            ["transpose-vector", "Let $x$ and $y$ be vectors. $y=x^T$", "y=x^T", "wrong-shape"],
+            ["transpose-sum", "Let $A$, $B$, and $C$ be matrices. $C=A+B$", "C=A+B", "wrong-operator"],
+            ["transpose-undeclared", "No matrix roles are declared for $q=p^T$.", "q=p^T", "missing-role-evidence"]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probability-union-probe",
+      "packId": "probability",
+      "laws": [{
+        "lawId": "event-union",
+        "positives": [
+          ["event-union-basic", "Let $A$ and $B$ denote events. $A\\cup B$", "A\\cup B", {"left":"A","right":"B"}],
+          ["event-union-spaced", "Let $E$ be an event and $F$ another event. $E \\cup F$", "E \\cup F", {"left":"E","right":"F"}],
+          ["event-union-grouped", "Let $G$ and $H$ represent events. ${G}\\cup{H}$", "{G}\\cup{H}", {"left":"G","right":"H"}],
+          ["event-union-reversed", "Let $U$ and $V$ be events. The event union is $V\\cup U$", "V\\cup U", {"left":"V","right":"U"}],
+          ["event-union-styled", "Let $C$ and $D$ denote events. $\\mathrm{C}\\cup\\mathrm{D}$", "\\mathrm{C}\\cup\\mathrm{D}", {"left":"C","right":"D"}]
+        ],
+        "refusals": [
+          ["event-union-intersection", "Let $A$ and $B$ be events. $A\\cap B$", "A\\cap B", "wrong-operator"],
+          ["event-union-addition", "Let $A$ and $B$ be events. $A+B$", "A+B", "wrong-operator"],
+          ["event-union-set-collision", "Let $A$ and $B$ be ordinary sets, not events. $A\\cup B$", "A\\cup B", "wrong-role"],
+          ["event-union-missing-role", "The operands are undeclared in $Q\\cup R$.", "Q\\cup R", "missing-role-evidence"],
+          ["event-union-single-event", "Let $A$ be an event while $x$ is a scalar. $A\\cup x$", "A\\cup x", "role-mismatch"]
+        ]
+      }]
+    },
+    {
+      "id": "calculus-probe",
+      "packId": "calculus-analysis",
+      "laws": [{
+        "lawId": "first-derivative-relation",
+        "positives": [
+          ["derivative-basic", "Let $f$ be a function of $x$, and let $g$ denote its first derivative. $g=\\frac{d f}{d x}$", "g=\\frac{d f}{d x}", {"derivative":"g","function":"f","variable":"x"}],
+          ["derivative-spaced", "Let $y$ be a differentiable function of $t$ and $v$ its derivative. $v = \\frac{d y}{d t}$", "v = \\frac{d y}{d t}", {"derivative":"v","function":"y","variable":"t"}],
+          ["derivative-reversed", "Let $h$ be a function of $s$ and $k$ its first derivative. $\\frac{d h}{d s}=k$", "\\frac{d h}{d s}=k", {"derivative":"k","function":"h","variable":"s"}],
+          ["derivative-grouped", "Let $f$ be a function of $x$ and $g$ its derivative. ${g}=\\frac{d {f}}{d {x}}$", "{g}=\\frac{d {f}}{d {x}}", {"derivative":"g","function":"f","variable":"x"}],
+          ["derivative-display", "Suppose $f$ is differentiable with respect to $x$ and $g$ represents the derivative. \\[g=\\dfrac{d f}{d x}\\]", "g=\\dfrac{d f}{d x}", {"derivative":"g","function":"f","variable":"x"}]
+        ],
+        "refusals": [
+          ["derivative-missing-operator", "Let $f$ be a function and $g$ another function. $g=f$", "g=f", "missing-derivative"],
+          ["derivative-wrong-variable", "Let $f$ be a function of $x$ and $g$ its derivative, but $z$ is undeclared. $g=\\frac{d f}{d z}$", "g=\\frac{d f}{d z}", "wrong-derivative-variable"],
+          ["derivative-second-order", "Let $f$ be a function of $x$ and $g$ its first derivative. $g=\\frac{d^2 f}{d x^2}$", "g=\\frac{d^2 f}{d x^2}", "wrong-exponent"],
+          ["derivative-product", "Let $f$ be a function and $g$ its derivative. $g=fx$", "g=fx", "wrong-operator"],
+          ["derivative-undeclared", "No function or variable roles are declared for $q=\\frac{d p}{d r}$.", "q=\\frac{d p}{d r}", "missing-role-evidence"]
+        ]
+      }]
+    },
+    {
+      "id": "discrete-probe",
+      "packId": "discrete-math",
+      "laws": [
+        {
+          "lawId": "set-intersection",
+          "positives": [
+            ["set-intersection-basic", "Let $S$ and $T$ be sets. $S\\cap T$", "S\\cap T", {"left":"S","right":"T"}],
+          ["set-intersection-spaced", "Let $A$ and $B$ represent sets. $A \\cap B$", "A \\cap B", {"left":"A","right":"B"}],
+            ["set-intersection-grouped", "Let $U$ and $V$ denote sets. ${U}\\cap{V}$", "{U}\\cap{V}", {"left":"U","right":"V"}],
+            ["set-intersection-reversed", "Let $X$ and $Y$ be sets. The set intersection is $Y\\cap X$", "Y\\cap X", {"left":"Y","right":"X"}],
+            ["set-intersection-styled", "Let $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$", "\\mathcal{C}\\cap\\mathcal{D}", {"left":"C","right":"D"}]
+          ],
+          "refusals": [
+            ["set-intersection-union", "Let $S$ and $T$ be sets. $S\\cup T$", "S\\cup T", "wrong-operator"],
+            ["set-intersection-addition", "Let $S$ and $T$ be sets. $S+T$", "S+T", "wrong-operator"],
+            ["set-intersection-events", "Let $A$ and $B$ be events, not sets. $A\\cap B$", "A\\cap B", "wrong-role"],
+            ["set-intersection-missing", "No set roles are declared for $Q\\cap R$.", "Q\\cap R", "missing-role-evidence"],
+            ["set-intersection-mixed", "Let $S$ be a set and $x$ a scalar. $S\\cap x$", "S\\cap x", "role-mismatch"]
+          ]
+        },
+        {
+          "lawId": "set-union",
+          "positives": [
+            ["set-union-basic", "Let $S$ and $T$ be sets. $S\\cup T$", "S\\cup T", {"left":"S","right":"T"}],
+          ["set-union-spaced", "Let $A$ and $B$ denote sets. $A \\cup B$", "A \\cup B", {"left":"A","right":"B"}],
+            ["set-union-grouped", "Let $U$ and $V$ be sets. ${U}\\cup{V}$", "{U}\\cup{V}", {"left":"U","right":"V"}],
+            ["set-union-reversed", "Let $X$ and $Y$ be sets. The set union is $Y\\cup X$", "Y\\cup X", {"left":"Y","right":"X"}],
+            ["set-union-styled", "Let $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$", "\\mathcal{C}\\cup\\mathcal{D}", {"left":"C","right":"D"}]
+          ],
+          "refusals": [
+            ["set-union-intersection", "Let $S$ and $T$ be sets. $S\\cap T$", "S\\cap T", "wrong-operator"],
+            ["set-union-addition", "Let $S$ and $T$ be sets. $S+T$", "S+T", "wrong-operator"],
+            ["set-union-events", "Let $A$ and $B$ be events, not sets. $A\\cup B$", "A\\cup B", "wrong-role"],
+            ["set-union-missing", "No set roles are declared for $Q\\cup R$.", "Q\\cup R", "missing-role-evidence"],
+            ["set-union-mixed", "Let $S$ be a set and $x$ a scalar. $S\\cup x$", "S\\cup x", "role-mismatch"]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "optimization-probe",
+      "packId": "optimization-ml",
+      "laws": [{
+        "lawId": "gradient-descent-update",
+        "positives": [
+          ["gradient-update-basic", "In a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$", "y=x-\\alpha g", {"next":"y","current":"x","step":"alpha","gradient":"g"}],
+          ["gradient-update-greek", "For the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$", "z=w-\\eta d", {"next":"z","current":"w","step":"eta","gradient":"d"}],
+          ["gradient-update-spaced", "During gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$", "y = x - \\alpha \\, g", {"next":"y","current":"x","step":"alpha","gradient":"g"}],
+          ["gradient-update-reversed", "Let $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$", "x-\\alpha g=y", {"next":"y","current":"x","step":"alpha","gradient":"g"}],
+          ["gradient-update-grouped", "For a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$", "{z}={w}-(\\gamma d)", {"next":"z","current":"w","step":"gamma","gradient":"d"}]
+        ],
+        "refusals": [
+          ["gradient-update-plus", "Let $x$, $y$, and $g$ be vectors and $\\alpha$ scalar. $y=x+\\alpha g$", "y=x+\\alpha g", "wrong-sign"],
+          ["gradient-update-missing-step", "Let $x$, $y$, and $g$ be vectors. $y=x-g$", "y=x-g", "missing-term"],
+          ["gradient-update-vector-step", "Let $x$, $y$, $g$, and $\\alpha$ all be vectors. $y=x-\\alpha g$", "y=x-\\alpha g", "wrong-shape"],
+          ["gradient-update-scalar-gradient", "Let $x$ and $y$ be vectors. Let $g$ and $\\alpha$ be scalars. $y=x-\\alpha g$", "y=x-\\alpha g", "wrong-gradient-shape"],
+          ["gradient-update-undeclared", "No optimization roles are declared for $q=p-rs$.", "q=p-rs", "missing-role-evidence"]
+        ]
+      }]
+    }
+  ]
+}

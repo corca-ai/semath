@@ -1,5 +1,15 @@
-export type SupportTier = "evaluated" | "probe" | "vocabulary-only";
-export type SuiteTier = Exclude<SupportTier, "vocabulary-only">;
+export type SuiteTier = "evaluated" | "probe";
+export type CapabilityMaturity = "evaluated" | "probe" | "unsupported";
+export const CAPABILITY_IDS = [
+  "concept-vocabulary",
+  "declarations-roles",
+  "shape-quantity-unit",
+  "law-recognition",
+  "diagnostics-refusal",
+  "project-macro",
+  "navigation-explanation",
+] as const;
+export type CapabilityId = (typeof CAPABILITY_IDS)[number];
 export type CorpusExpectation = "established" | "refused";
 export type MetamorphicTransform =
   | "document-order"
@@ -59,20 +69,35 @@ export type CorpusSuiteConfig =
   | LawCorpusSuiteConfig
   | GlobalRefusalSuiteConfig;
 
-export interface PackSupport {
-  corpusSuiteIds: readonly string[];
+export interface FoundationSuiteConfig {
+  capability: "shape-quantity-unit";
+  id: string;
+  minimumCases: number;
   packId: string;
-  tier: SupportTier;
+  path: string;
+  requiredDimensions: readonly string[];
+  tier: SuiteTier;
+}
+
+export interface CapabilitySupport {
+  maturity: CapabilityMaturity;
+  suiteIds: readonly string[];
+}
+
+export interface PackSupport {
+  capabilities: Readonly<Record<CapabilityId, CapabilitySupport>>;
+  packId: string;
 }
 
 export interface QualityManifest {
   dimensions: readonly CoverageDimension[];
+  foundationSuites: readonly FoundationSuiteConfig[];
   metamorphic: {
     casesPerLaw: number;
     transforms: readonly MetamorphicTransform[];
   };
   packs: readonly PackSupport[];
-  schemaVersion: 2;
+  schemaVersion: 3;
   suites: readonly CorpusSuiteConfig[];
   thresholds: QualityThresholds;
 }
@@ -145,11 +170,19 @@ export function parseQualityManifest(value: unknown): QualityManifest {
   const root = object(value, "manifest");
   exactKeys(
     root,
-    ["schemaVersion", "thresholds", "dimensions", "metamorphic", "packs", "suites"],
+    [
+      "schemaVersion",
+      "thresholds",
+      "dimensions",
+      "metamorphic",
+      "packs",
+      "suites",
+      "foundationSuites",
+    ],
     "manifest",
   );
-  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 2) {
-    fail("manifest.schemaVersion", "must be 2");
+  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 3) {
+    fail("manifest.schemaVersion", "must be 3");
   }
   const thresholds = parseThresholds(root.thresholds);
   const dimensions = array(root.dimensions, "manifest.dimensions").map(
@@ -167,19 +200,39 @@ export function parseQualityManifest(value: unknown): QualityManifest {
   );
   unique(suites.map((item) => item.id), "manifest.suites");
   unique(suites.map((item) => item.path), "manifest.suites paths");
-  const suiteIds = new Set(suites.map((item) => item.id));
+  const foundationSuites = array(
+    root.foundationSuites,
+    "manifest.foundationSuites",
+  ).map((item, index) =>
+    parseFoundationSuite(item, `manifest.foundationSuites[${index}]`, dimensionIds),
+  );
+  unique(foundationSuites.map((item) => item.id), "manifest.foundationSuites");
+  unique(foundationSuites.map((item) => item.path), "manifest.foundationSuites paths");
+  const suiteIds = new Set([
+    ...suites.map((item) => item.id),
+    ...foundationSuites.map((item) => item.id),
+  ]);
+  if (suiteIds.size !== suites.length + foundationSuites.length) {
+    fail("manifest suites", "suite ids must be globally unique");
+  }
   for (const [index, pack] of packs.entries()) {
-    for (const suiteId of pack.corpusSuiteIds) {
-      if (!suiteIds.has(suiteId)) {
-        fail(`manifest.packs[${index}].corpusSuiteIds`, `unknown suite ${suiteId}`);
+    for (const capability of CAPABILITY_IDS) {
+      for (const suiteId of pack.capabilities[capability].suiteIds) {
+        if (!suiteIds.has(suiteId)) {
+          fail(
+            `manifest.packs[${index}].capabilities.${capability}.suiteIds`,
+            `unknown suite ${suiteId}`,
+          );
+        }
       }
     }
   }
   return {
     dimensions,
+    foundationSuites,
     metamorphic,
     packs,
-    schemaVersion: 2,
+    schemaVersion: 3,
     suites,
     thresholds,
   };
@@ -268,24 +321,89 @@ function parseMetamorphic(value: unknown): QualityManifest["metamorphic"] {
 
 function parsePackSupport(value: unknown, path: string): PackSupport {
   const item = object(value, path);
-  exactKeys(item, ["packId", "tier", "corpusSuiteIds"], path);
-  const tier = oneOf(
-    item.tier,
-    ["evaluated", "probe", "vocabulary-only"],
-    `${path}.tier`,
+  exactKeys(item, ["packId", "capabilities"], path);
+  const capabilityValues = object(item.capabilities, `${path}.capabilities`);
+  exactKeys(capabilityValues, CAPABILITY_IDS, `${path}.capabilities`);
+  const capabilities = Object.fromEntries(
+    CAPABILITY_IDS.map((capability) => {
+      const capabilityPath = `${path}.capabilities.${capability}`;
+      const entry = object(capabilityValues[capability], capabilityPath);
+      exactKeys(entry, ["maturity", "suiteIds"], capabilityPath);
+      const maturity = oneOf(
+        entry.maturity,
+        ["evaluated", "probe", "unsupported"],
+        `${capabilityPath}.maturity`,
+      );
+      const suiteIds = strings(entry.suiteIds, `${capabilityPath}.suiteIds`);
+      unique(suiteIds, `${capabilityPath}.suiteIds`);
+      if (maturity === "unsupported" && suiteIds.length) {
+        fail(`${capabilityPath}.suiteIds`, "unsupported capabilities cannot cite suites");
+      }
+      if (
+        maturity !== "unsupported" &&
+        capability !== "concept-vocabulary" &&
+        suiteIds.length === 0
+      ) {
+        fail(`${capabilityPath}.suiteIds`, `${maturity} capability requires evidence`);
+      }
+      return [capability, { maturity, suiteIds }];
+    }),
+  ) as unknown as Readonly<Record<CapabilityId, CapabilitySupport>>;
+  return {
+    capabilities,
+    packId: identifier(item.packId, `${path}.packId`),
+  };
+}
+
+function parseFoundationSuite(
+  value: unknown,
+  path: string,
+  dimensionIds: ReadonlySet<string>,
+): FoundationSuiteConfig {
+  const item = object(value, path);
+  exactKeys(
+    item,
+    [
+      "id",
+      "packId",
+      "capability",
+      "path",
+      "tier",
+      "minimumCases",
+      "requiredDimensions",
+    ],
+    path,
   );
-  const corpusSuiteIds = strings(item.corpusSuiteIds, `${path}.corpusSuiteIds`);
-  unique(corpusSuiteIds, `${path}.corpusSuiteIds`);
-  if (tier === "vocabulary-only" && corpusSuiteIds.length !== 0) {
-    fail(`${path}.corpusSuiteIds`, "vocabulary-only packs cannot own corpus suites");
+  const corpusPath = text(item.path, `${path}.path`);
+  if (
+    corpusPath.startsWith("/") ||
+    corpusPath.split("/").includes("..") ||
+    !corpusPath.endsWith(".json")
+  ) {
+    fail(`${path}.path`, "must be a safe relative JSON path");
   }
-  if (tier !== "vocabulary-only" && corpusSuiteIds.length === 0) {
-    fail(`${path}.corpusSuiteIds`, `${tier} packs must own a corpus suite`);
+  const requiredDimensions = strings(
+    item.requiredDimensions,
+    `${path}.requiredDimensions`,
+  );
+  unique(requiredDimensions, `${path}.requiredDimensions`);
+  for (const dimension of requiredDimensions) {
+    if (!dimensionIds.has(dimension)) {
+      fail(`${path}.requiredDimensions`, `unknown dimension ${dimension}`);
+    }
   }
   return {
-    corpusSuiteIds,
+    capability: oneOf(
+      item.capability,
+      ["shape-quantity-unit"],
+      `${path}.capability`,
+    ),
+    id: identifier(item.id, `${path}.id`),
+    minimumCases: positiveInteger(item.minimumCases, `${path}.minimumCases`),
     packId: identifier(item.packId, `${path}.packId`),
-    tier,
+    path: corpusPath,
+    requiredDimensions,
+    tier: oneOf(item.tier, ["evaluated", "probe"], `${path}.tier`),
   };
 }
 

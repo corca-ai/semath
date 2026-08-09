@@ -74,6 +74,18 @@
       "references": [
         "probability-theory"
       ]
+    },
+    {
+      "id": "event-union",
+      "title": "Event union",
+      "description": "The union contains outcomes belonging to either event.",
+      "semanticForms": ["left \\cup right"],
+      "roles": [
+        { "id": "left", "concept": "probability:event", "description": "Left event." },
+        { "id": "right", "concept": "probability:event", "description": "Right event." }
+      ],
+      "conditions": ["Both operands are events in a common probability space."],
+      "references": ["probability-theory"]
     }
   ],
   "activationRules": [

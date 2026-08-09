@@ -21,9 +21,11 @@ Thresholds apply to every law, so a broad suite cannot hide a weak law. The
 evaluator also rejects missing or unexpected generated observations rather than
 treating an empty set as success.
 
-The current baseline has 1,260 checked-in synthetic cases and 94 deterministic
-runtime variants. It includes 800 additional per-law cases plus 40 independently
-scored unknown and cross-pack collision cases. Evaluated laws require
+The current baseline has 1,890 checked-in synthetic law cases and 157
+deterministic runtime variants. It includes 40 independently scored unknown and
+cross-pack collision cases. A separate 46-case foundation corpus evaluates
+quantity, unit, dimension, and diagnostic behavior without inventing laws.
+Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
 live production telemetry. It contains no imported real-world corpus, so it must
@@ -34,6 +36,8 @@ Run the concise gate or write a stable machine-readable artifact with:
 ```sh
 bun run corpus
 bun run corpus:generate:check
+bun run foundation
+bun run foundation:generate:check
 bun run scorecard
 ```
 

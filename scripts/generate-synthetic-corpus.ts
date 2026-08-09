@@ -1,16 +1,21 @@
 import { readFile, writeFile } from "node:fs/promises";
 import {
   annotateCorpus,
+  buildPromotionSeedCorpus,
   type Corpus,
   generateGlobalRefusalCorpus,
   generateLawDiversityCorpus,
   parseSyntheticDiversitySpec,
+  parsePromotionSeedSpec,
 } from "../packages/evaluation/src/index";
 
 const root = new URL("../", import.meta.url);
 const check = process.argv.includes("--check");
 const spec = parseSyntheticDiversitySpec(
   JSON.parse(await readFile(new URL("fixtures/synthetic-diversity-spec.json", root), "utf8")),
+);
+const promotionSeeds = parsePromotionSeedSpec(
+  JSON.parse(await readFile(new URL("fixtures/promotion-law-seeds.json", root), "utf8")),
 );
 
 const groups = [
@@ -55,6 +60,15 @@ outputs.set(
   "fixtures/corpus/global-adversarial.json",
   generateGlobalRefusalCorpus("global-adversarial", spec),
 );
+for (const suite of promotionSeeds.suites) {
+  const baseline = annotateCorpus(buildPromotionSeedCorpus(suite));
+  const diversityDomain = suite.id.replace(/-probe$/u, "-diversity");
+  outputs.set(`fixtures/corpus/${suite.id}.json`, baseline);
+  outputs.set(
+    `fixtures/corpus/${diversityDomain}.json`,
+    generateLawDiversityCorpus(diversityDomain, baseline.cases, spec),
+  );
+}
 
 for (const [path, corpus] of outputs) {
   const next = `${JSON.stringify(corpus, null, 2)}\n`;

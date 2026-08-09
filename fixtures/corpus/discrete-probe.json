@@ -1,0 +1,666 @@
+{
+  "cases": [
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S\\cap T",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "S",
+        "right": "T"
+      },
+      "id": "set-intersection-basic",
+      "lawId": "set-intersection",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A \\cap B",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "A",
+        "right": "B"
+      },
+      "id": "set-intersection-spaced",
+      "lawId": "set-intersection",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "{U}\\cap{V}",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "U",
+        "right": "V"
+      },
+      "id": "set-intersection-grouped",
+      "lawId": "set-intersection",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "Y\\cap X",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "Y",
+        "right": "X"
+      },
+      "id": "set-intersection-reversed",
+      "lawId": "set-intersection",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathcal{C}\\cap\\mathcal{D}",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "C",
+        "right": "D"
+      },
+      "id": "set-intersection-styled",
+      "lawId": "set-intersection",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S\\cup T",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-intersection-union",
+      "lawId": "set-intersection",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S+T",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "wrong-operator-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $S$ and $T$ be sets. $S+T$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-intersection-addition",
+      "lawId": "set-intersection",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A\\cap B",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "wrong-role-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $A$ and $B$ be events, not sets. $A\\cap B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-intersection-events",
+      "lawId": "set-intersection",
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q\\cap R",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "missing-role-evidence",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "missing-role-evidence-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nNo set roles are declared for $Q\\cap R$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-intersection-missing",
+      "lawId": "set-intersection",
+      "refusalCategory": "missing-role-evidence",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "missing-role-evidence"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S\\cap x",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "role-mismatch",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "role-mismatch-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $S$ be a set and $x$ a scalar. $S\\cap x$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-intersection-mixed",
+      "lawId": "set-intersection",
+      "refusalCategory": "role-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "role-mismatch"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S\\cup T",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "S",
+        "right": "T"
+      },
+      "id": "set-union-basic",
+      "lawId": "set-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A \\cup B",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "A",
+        "right": "B"
+      },
+      "id": "set-union-spaced",
+      "lawId": "set-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "{U}\\cup{V}",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "U",
+        "right": "V"
+      },
+      "id": "set-union-grouped",
+      "lawId": "set-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "Y\\cup X",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "Y",
+        "right": "X"
+      },
+      "id": "set-union-reversed",
+      "lawId": "set-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathcal{C}\\cup\\mathcal{D}",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "C",
+        "right": "D"
+      },
+      "id": "set-union-styled",
+      "lawId": "set-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S\\cap T",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-union-intersection",
+      "lawId": "set-union",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S+T",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "wrong-operator-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nLet $S$ and $T$ be sets. $S+T$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-union-addition",
+      "lawId": "set-union",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A\\cup B",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "wrong-role-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nLet $A$ and $B$ be events, not sets. $A\\cup B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-union-events",
+      "lawId": "set-union",
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q\\cup R",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "missing-role-evidence",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "missing-role-evidence-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nNo set roles are declared for $Q\\cup R$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-union-missing",
+      "lawId": "set-union",
+      "refusalCategory": "missing-role-evidence",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "missing-role-evidence"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "S\\cup x",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "role-mismatch",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "role-mismatch-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nLet $S$ be a set and $x$ a scalar. $S\\cup x$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "set-union-mixed",
+      "lawId": "set-union",
+      "refusalCategory": "role-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "role-mismatch"
+      ]
+    }
+  ],
+  "domain": "discrete-probe",
+  "schemaVersion": 2
+}

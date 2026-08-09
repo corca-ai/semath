@@ -33,11 +33,50 @@
       "references": [
         "convex-optimization"
       ]
+    },
+    {
+      "id": "iterate",
+      "conceptKind": "entity",
+      "title": "Optimization iterate",
+      "description": "A current or updated candidate point in an iterative method.",
+      "parents": [],
+      "references": ["convex-optimization"]
+    },
+    {
+      "id": "gradient",
+      "conceptKind": "quantity",
+      "title": "Objective gradient",
+      "description": "The gradient of an objective evaluated at the current iterate.",
+      "parents": [],
+      "references": ["convex-optimization"]
+    },
+    {
+      "id": "step-size",
+      "conceptKind": "quantity",
+      "title": "Step size",
+      "description": "A scalar multiplier controlling an optimization update.",
+      "parents": [],
+      "references": ["convex-optimization"]
     }
   ],
   "quantityKinds": [],
   "units": [],
-  "laws": [],
+  "laws": [
+    {
+      "id": "gradient-descent-update",
+      "title": "Gradient descent update",
+      "description": "The next iterate is the current iterate minus a scalar step times the objective gradient.",
+      "semanticForms": ["next = current - step gradient"],
+      "roles": [
+        { "id": "next", "concept": "optimization-ml:iterate", "description": "Next iterate.", "shape": "vector", "notation": ["xnext", "y", "z"] },
+        { "id": "current", "concept": "optimization-ml:iterate", "description": "Current iterate.", "shape": "vector", "notation": ["x", "ycurrent", "w"] },
+        { "id": "step", "concept": "optimization-ml:step-size", "description": "Scalar step size.", "shape": "scalar", "notation": ["alpha", "eta", "gamma"] },
+        { "id": "gradient", "concept": "optimization-ml:gradient", "description": "Objective gradient.", "shape": "vector", "notation": ["g", "d", "nabla"] }
+      ],
+      "conditions": ["The gradient and iterates share a vector space and the step size is scalar."],
+      "references": ["convex-optimization"]
+    }
+  ],
   "activationRules": [
     {
       "id": "vocabulary",

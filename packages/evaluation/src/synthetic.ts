@@ -18,6 +18,21 @@ export interface SyntheticDiversitySpec {
   syntaxStructures: readonly string[];
 }
 
+export interface PromotionSeedSuite {
+  id: string;
+  laws: readonly {
+    lawId: string;
+    positives: readonly [string, string, string, Readonly<Record<string, string>>][];
+    refusals: readonly [string, string, string, string][];
+  }[];
+  packId: string;
+}
+
+export interface PromotionSeedSpec {
+  schemaVersion: 1;
+  suites: readonly PromotionSeedSuite[];
+}
+
 type LawCase = EstablishedCorpusCase | LawRefusalCorpusCase;
 
 const BASELINE_PROSE_FAMILIES = [
@@ -90,6 +105,90 @@ export function parseSyntheticDiversitySpec(
     syntaxStructures: identifiers(item.syntaxStructures, "syntaxStructures", 4),
   };
 }
+
+export function parsePromotionSeedSpec(value: unknown): PromotionSeedSpec {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("promotion seed spec must be an object");
+  }
+  const root = value as Record<string, unknown>;
+  rejectUnknown(root, ["schemaVersion", "suites"], "promotion seed spec");
+  if (root.schemaVersion !== 1) throw new Error("promotion seed spec version must be 1");
+  if (!Array.isArray(root.suites)) throw new Error("promotion seed suites must be an array");
+  const suites = root.suites.map((value, suiteIndex) => {
+    const path = `promotion seed suites[${suiteIndex}]`;
+    const suite = record(value, path);
+    rejectUnknown(suite, ["id", "packId", "laws"], path);
+    if (!Array.isArray(suite.laws) || !suite.laws.length) {
+      throw new Error(`${path}.laws must be a nonempty array`);
+    }
+    return {
+      id: checkedIdentifier(suite.id, `${path}.id`),
+      laws: suite.laws.map((value, lawIndex) => {
+        const lawPath = `${path}.laws[${lawIndex}]`;
+        const law = record(value, lawPath);
+        rejectUnknown(law, ["lawId", "positives", "refusals"], lawPath);
+        return {
+          lawId: checkedIdentifier(law.lawId, `${lawPath}.lawId`),
+          positives: positiveSeedRows(law.positives, `${lawPath}.positives`),
+          refusals: refusalSeedRows(law.refusals, `${lawPath}.refusals`),
+        };
+      }),
+      packId: checkedIdentifier(suite.packId, `${path}.packId`),
+    };
+  });
+  if (new Set(suites.map((suite) => suite.id)).size !== suites.length) {
+    throw new Error("promotion seed suite ids must be unique");
+  }
+  return { schemaVersion: 1, suites };
+}
+
+export function buildPromotionSeedCorpus(suite: PromotionSeedSuite): Corpus {
+  const cases = suite.laws.flatMap((law) => [
+    ...law.positives.map(([id, content, needle, expectedRoles]): CorpusCase => ({
+      cursor: { fileId: "main", needle },
+      diversity: placeholderDiversity,
+      documents: [{
+        content,
+        fileId: "main",
+        path: "main.md",
+      }],
+      expectation: "established",
+      expectedRoles,
+      id,
+      lawId: law.lawId,
+      variationTags: [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit",
+      ],
+    })),
+    ...law.refusals.map(([id, content, needle, refusalCategory]): CorpusCase => ({
+      cursor: { fileId: "main", needle },
+      diversity: placeholderDiversity,
+      documents: [{
+        content,
+        fileId: "main",
+        path: "main.md",
+      }],
+      expectation: "refused",
+      id,
+      lawId: law.lawId,
+      refusalCategory,
+      variationTags: ["hard-negative", "role-prose", refusalCategory],
+    })),
+  ]);
+  return { cases, domain: suite.id, schemaVersion: 2 };
+}
+
+const placeholderDiversity: DiversityProfile = {
+  batch: "promotion-seed",
+  mutationFamily: "unclassified",
+  projectTopology: "single-document",
+  proseFamily: "unclassified",
+  semanticSkeleton: "unclassified",
+  syntaxStructure: "inline-math",
+};
 
 export function annotateCorpus(corpus: Corpus): Corpus {
   return {
@@ -256,12 +355,19 @@ function synthesizeLawCase(
 ): LawCase {
   const proseFamily = spec.proseFamilies[(index * 5 + Math.floor(index / 7)) % spec.proseFamilies.length]!;
   const projectTopology = spec.projectTopologies[(index * 3 + Math.floor(index / 11)) % spec.projectTopologies.length]!;
+  const diversity = diversityFor(
+    index,
+    spec,
+    semanticSkeleton(source, index),
+    projectTopology,
+    proseFamily,
+  );
   const prefix = neutralPrelude(proseFamily, index);
   const documents = source.documents.map((document) =>
     document.fileId === source.cursor.fileId
       ? {
           ...document,
-          content: `${prefix}\n${syntaxExample(spec.syntaxStructures[index % spec.syntaxStructures.length]!, index)}\n\n${document.content}`,
+          content: `${prefix}\n${syntaxExample(diversity.syntaxStructure, index)}\n\n${document.content}`,
         }
       : { ...document },
   );
@@ -277,13 +383,7 @@ function synthesizeLawCase(
   return {
     ...source,
     cursor: { ...source.cursor, edge: index % 2 ? "after" : "before" },
-    diversity: diversityFor(
-      index,
-      spec,
-      semanticSkeleton(source, index),
-      projectTopology,
-      proseFamily,
-    ),
+    diversity,
     documents,
     id: `synthetic-${lawId}-${expectation}-${ordinal}`,
     variationTags: [
@@ -293,6 +393,7 @@ function synthesizeLawCase(
         `prose-${proseFamily}`,
         `topology-${projectTopology}`,
         ...(projectTopology === "single-document" ? [] : ["multi-file"]),
+        ...(diversity.syntaxStructure === "macro-expanded" ? ["macro"] : []),
       ]),
     ],
   };
@@ -513,6 +614,78 @@ function identifiers(
   });
   if (new Set(result).size !== result.length) throw new Error(`${path} contains duplicates`);
   if (result.length < minimum) throw new Error(`${path} requires at least ${minimum} values`);
+  return result;
+}
+
+function positiveSeedRows(
+  value: unknown,
+  path: string,
+): [string, string, string, Readonly<Record<string, string>>][] {
+  if (!Array.isArray(value) || value.length !== 5) {
+    throw new Error(`${path} must contain exactly five rows`);
+  }
+  return value.map((row, index) => {
+    const rowPath = `${path}[${index}]`;
+    if (!Array.isArray(row) || row.length !== 4) {
+      throw new Error(`${rowPath} must be [id, content, needle, expectedRoles]`);
+    }
+    const roles = record(row[3], `${rowPath}[3]`);
+    const expectedRoles = Object.fromEntries(
+      Object.entries(roles).map(([role, symbol]) => [
+        checkedIdentifier(role, `${rowPath}[3].${role}`),
+        checkedText(symbol, `${rowPath}[3].${role}`),
+      ]),
+    );
+    if (!Object.keys(expectedRoles).length) throw new Error(`${rowPath}[3] must not be empty`);
+    return [
+      checkedIdentifier(row[0], `${rowPath}[0]`),
+      checkedText(row[1], `${rowPath}[1]`),
+      checkedText(row[2], `${rowPath}[2]`),
+      expectedRoles,
+    ];
+  });
+}
+
+function refusalSeedRows(
+  value: unknown,
+  path: string,
+): [string, string, string, string][] {
+  if (!Array.isArray(value) || value.length !== 5) {
+    throw new Error(`${path} must contain exactly five rows`);
+  }
+  return value.map((row, index) => {
+    const rowPath = `${path}[${index}]`;
+    if (!Array.isArray(row) || row.length !== 4) {
+      throw new Error(`${rowPath} must be [id, content, needle, refusalCategory]`);
+    }
+    return [
+      checkedIdentifier(row[0], `${rowPath}[0]`),
+      checkedText(row[1], `${rowPath}[1]`),
+      checkedText(row[2], `${rowPath}[2]`),
+      checkedIdentifier(row[3], `${rowPath}[3]`),
+    ];
+  });
+}
+
+function record(value: unknown, path: string): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${path} must be an object`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function checkedText(value: unknown, path: string): string {
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`${path} must be a nonempty string`);
+  }
+  return value;
+}
+
+function checkedIdentifier(value: unknown, path: string): string {
+  const result = checkedText(value, path);
+  if (safeIdentifier(result) !== result) {
+    throw new Error(`${path} must be a lowercase kebab-case identifier`);
+  }
   return result;
 }
 

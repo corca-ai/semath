@@ -30,7 +30,7 @@ static QUANTIFIED_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
 });
 static QUANTIFIED_SUFFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*[,.;:]").unwrap());
 static COORDINATED_LET_PREFIX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)let\s*$").unwrap());
+    LazyLock::new(|| Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*|,\s*)let\s*$").unwrap());
 static COORDINATED_DIRECT_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here\s+)?(?:the\s+(?:symbols|notations)\s+)?$").unwrap()
 });
@@ -1168,5 +1168,19 @@ mod tests {
                 .iter()
                 .any(|(symbol, _)| ["i", "j", "k"].contains(symbol))
         );
+    }
+
+    #[test]
+    fn maps_shared_declarations_after_an_introductory_clause() {
+        let analysis = analyze(
+            "During optimization, let $x$ and $y$ be n-dimensional iterates, $g$ the gradient.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        assert!(definitions.contains(&("x", "n-dimensional iterates")));
+        assert!(definitions.contains(&("y", "n-dimensional iterates")));
     }
 }

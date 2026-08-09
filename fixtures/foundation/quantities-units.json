@@ -1,0 +1,1204 @@
+{
+  "cases": [
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be length in meter.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length",
+        "quantityKindId": "quantities-units:length",
+        "unitId": "quantities-units:metre"
+      },
+      "id": "quantity-kind-length",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be surface area.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^2",
+        "quantityKindId": "quantities-units:area"
+      },
+      "id": "quantity-kind-area",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be time in second.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "time",
+        "quantityKindId": "quantities-units:duration",
+        "unitId": "quantities-units:second"
+      },
+      "id": "quantity-kind-duration",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be inertial mass in kilogram.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "mass",
+        "quantityKindId": "quantities-units:mass",
+        "unitId": "quantities-units:kilogram"
+      },
+      "id": "quantity-kind-mass",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be speed in meter per second.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · time^-1",
+        "quantityKindId": "quantities-units:velocity",
+        "unitId": "quantities-units:metre-per-second"
+      },
+      "id": "quantity-kind-velocity",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be acceleration vector in meter per second squared.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · time^-2",
+        "quantityKindId": "quantities-units:acceleration",
+        "unitId": "quantities-units:metre-per-second-squared"
+      },
+      "id": "quantity-kind-acceleration",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be net force in newton.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · mass · time^-2",
+        "quantityKindId": "quantities-units:force",
+        "unitId": "quantities-units:newton"
+      },
+      "id": "quantity-kind-force",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be mechanical pressure.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^-1 · mass · time^-2",
+        "quantityKindId": "quantities-units:pressure"
+      },
+      "id": "quantity-kind-pressure",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be momentum.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · mass · time^-1",
+        "quantityKindId": "quantities-units:momentum"
+      },
+      "id": "quantity-kind-momentum",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be kinetic energy.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^2 · mass · time^-2",
+        "quantityKindId": "quantities-units:energy"
+      },
+      "id": "quantity-kind-energy",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be mechanical power.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^2 · mass · time^-3",
+        "quantityKindId": "quantities-units:power"
+      },
+      "id": "quantity-kind-power",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be stiffness.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "mass · time^-2",
+        "quantityKindId": "quantities-units:stiffness"
+      },
+      "id": "quantity-kind-stiffness",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be damping coefficient.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "mass · time^-1",
+        "quantityKindId": "quantities-units:damping-coefficient"
+      },
+      "id": "quantity-kind-damping-coefficient",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be electric charge.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current · time",
+        "quantityKindId": "quantities-units:electric-charge"
+      },
+      "id": "quantity-kind-electric-charge",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be capacitor capacitance.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^2 · length^-2 · mass^-1 · time^4",
+        "quantityKindId": "quantities-units:capacitance"
+      },
+      "id": "quantity-kind-capacitance",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be inductance.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^-2 · length^2 · mass · time^-2",
+        "quantityKindId": "quantities-units:inductance"
+      },
+      "id": "quantity-kind-inductance",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be current in ampere.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current",
+        "quantityKindId": "quantities-units:electric-current",
+        "unitId": "quantities-units:ampere"
+      },
+      "id": "quantity-kind-electric-current",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be voltage drop in volt.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^-1 · length^2 · mass · time^-3",
+        "quantityKindId": "quantities-units:voltage",
+        "unitId": "quantities-units:volt"
+      },
+      "id": "quantity-kind-voltage",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be electric field.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^-1 · length · mass · time^-3",
+        "quantityKindId": "quantities-units:electric-field"
+      },
+      "id": "quantity-kind-electric-field",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be resistance in ohm.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^-2 · length^2 · mass · time^-3",
+        "quantityKindId": "quantities-units:resistance",
+        "unitId": "quantities-units:ohm"
+      },
+      "id": "quantity-kind-resistance",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be frequency in hertz.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "time^-1",
+        "quantityKindId": "quantities-units:frequency",
+        "unitId": "quantities-units:hertz"
+      },
+      "id": "quantity-kind-frequency",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be thermodynamic temperature in kelvin.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "thermodynamic-temperature",
+        "quantityKindId": "quantities-units:temperature",
+        "unitId": "quantities-units:kelvin"
+      },
+      "id": "quantity-kind-temperature",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "Q"
+      },
+      "documents": [
+        {
+          "content": "Let $Q$ be probability.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "dimensionless",
+        "quantityKindId": "quantities-units:dimensionless"
+      },
+      "id": "quantity-kind-dimensionless",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "F"
+      },
+      "documents": [
+        {
+          "content": "let $F$ denote an applied force measured in newtons.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · mass · time^-2",
+        "quantityKindId": "quantities-units:force",
+        "unitId": "quantities-units:newton"
+      },
+      "id": "force-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "V"
+      },
+      "documents": [
+        {
+          "content": "we write $V$ for point velocity in metres per second.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · time^-1",
+        "quantityKindId": "quantities-units:velocity",
+        "unitId": "quantities-units:metre-per-second"
+      },
+      "id": "velocity-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "T"
+      },
+      "documents": [
+        {
+          "content": "let $T$ be elapsed time in seconds.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "time",
+        "quantityKindId": "quantities-units:duration",
+        "unitId": "quantities-units:second"
+      },
+      "id": "duration-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "I"
+      },
+      "documents": [
+        {
+          "content": "let $I$ be branch current in amperes.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current",
+        "quantityKindId": "quantities-units:electric-current",
+        "unitId": "quantities-units:ampere"
+      },
+      "id": "current-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "U"
+      },
+      "documents": [
+        {
+          "content": "here $U$ denotes potential difference in volts.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^-1 · length^2 · mass · time^-3",
+        "quantityKindId": "quantities-units:voltage",
+        "unitId": "quantities-units:volt"
+      },
+      "id": "voltage-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "R"
+      },
+      "documents": [
+        {
+          "content": "define $R$ as resistor resistance in ohms.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current^-2 · length^2 · mass · time^-3",
+        "quantityKindId": "quantities-units:resistance",
+        "unitId": "quantities-units:ohm"
+      },
+      "id": "resistance-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "A"
+      },
+      "documents": [
+        {
+          "content": "let $A$ represent an acceleration vector in metres per second squared.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · time^-2",
+        "quantityKindId": "quantities-units:acceleration",
+        "unitId": "quantities-units:metre-per-second-squared"
+      },
+      "id": "acceleration-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "L"
+      },
+      "documents": [
+        {
+          "content": "let $L$ denote length measured in metres.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "length",
+        "quantityKindId": "quantities-units:length",
+        "unitId": "quantities-units:metre"
+      },
+      "id": "length-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "H"
+      },
+      "documents": [
+        {
+          "content": "let $H$ denote frequency in hertz.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "time^-1",
+        "quantityKindId": "quantities-units:frequency",
+        "unitId": "quantities-units:hertz"
+      },
+      "id": "frequency-alias",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "S"
+      },
+      "documents": [
+        {
+          "content": "let $S$ be cross-sectional area.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^2",
+        "quantityKindId": "quantities-units:area"
+      },
+      "id": "area-paraphrase",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "T"
+      },
+      "documents": [
+        {
+          "content": "let $T$ be thermodynamic temperature in kelvin.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "dimension": "thermodynamic-temperature",
+        "quantityKindId": "quantities-units:temperature",
+        "unitId": "quantities-units:kelvin"
+      },
+      "id": "temperature-paraphrase",
+      "variationTags": [
+        "conventional-notation",
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "unit-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "$m$"
+      },
+      "documents": [
+        {
+          "content": "Let $m$ be mass in seconds.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "diagnosticCode": "quantity-unit-dimension-mismatch"
+      },
+      "id": "mass-in-seconds",
+      "variationTags": [
+        "dimension-mismatch",
+        "hard-negative",
+        "semantic-mutation",
+        "unit-conflict",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "$t$"
+      },
+      "documents": [
+        {
+          "content": "Let $t$ be duration in kilograms.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "diagnosticCode": "quantity-unit-dimension-mismatch"
+      },
+      "id": "duration-in-kilograms",
+      "variationTags": [
+        "dimension-mismatch",
+        "hard-negative",
+        "semantic-mutation",
+        "unit-conflict",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "$v$"
+      },
+      "documents": [
+        {
+          "content": "Let $v$ be velocity in newtons.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "diagnosticCode": "quantity-unit-dimension-mismatch"
+      },
+      "id": "velocity-in-newtons",
+      "variationTags": [
+        "dimension-mismatch",
+        "hard-negative",
+        "semantic-mutation",
+        "unit-conflict",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "F=m+a"
+      },
+      "documents": [
+        {
+          "content": "Let $F$ be force, $m$ mass, and $a$ acceleration. $F=m+a$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "diagnosticCode": "quantity-addition-dimension-mismatch"
+      },
+      "id": "force-plus-acceleration",
+      "variationTags": [
+        "dimension-mismatch",
+        "hard-negative",
+        "semantic-mutation",
+        "unit-conflict",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "v=m/t"
+      },
+      "documents": [
+        {
+          "content": "Let $v$ be velocity, $m$ mass, and $t$ duration. $v=m/t$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "diagnosticCode": "quantity-assignment-dimension-mismatch"
+      },
+      "id": "velocity-from-mass-time",
+      "variationTags": [
+        "dimension-mismatch",
+        "hard-negative",
+        "semantic-mutation",
+        "unit-conflict",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "F=m/t"
+      },
+      "documents": [
+        {
+          "content": "Let $F$ be force, $m$ mass, and $t$ duration. $F=m/t$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "diagnosticCode": "quantity-assignment-dimension-mismatch"
+      },
+      "id": "force-from-mass-time",
+      "variationTags": [
+        "dimension-mismatch",
+        "hard-negative",
+        "semantic-mutation",
+        "unit-conflict",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "v$"
+      },
+      "documents": [
+        {
+          "content": "Let $d$ be length and $t$ duration. $v=d/t$. The derived value is $v$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · time^-1",
+        "symbol": "v"
+      },
+      "id": "velocity-propagation",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "same-dimension",
+        "typed"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "F$"
+      },
+      "documents": [
+        {
+          "content": "Let $m$ be mass and $a$ acceleration. $F=m*a$. The derived value is $F$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · mass · time^-2",
+        "symbol": "F"
+      },
+      "id": "force-propagation",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "same-dimension",
+        "typed"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "P$"
+      },
+      "documents": [
+        {
+          "content": "Let $F$ be force and $v$ velocity. $P=F\\cdot v$. The derived value is $P$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length^2 · mass · time^-3",
+        "symbol": "P"
+      },
+      "id": "power-propagation",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "same-dimension",
+        "typed"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "I$"
+      },
+      "documents": [
+        {
+          "content": "Let $q$ be electric charge and $t$ duration. $I=q/t$. The derived value is $I$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "electric-current",
+        "symbol": "I"
+      },
+      "id": "current-propagation",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "same-dimension",
+        "typed"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u$"
+      },
+      "documents": [
+        {
+          "content": "Let $v$ be velocity. $u=v$. The derived value is $u$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length · time^-1",
+        "symbol": "u"
+      },
+      "id": "alias-propagation",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "same-dimension",
+        "typed"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "s$"
+      },
+      "documents": [
+        {
+          "content": "Let $x$ be length. Let $y$ be length. $s=x+y$. The derived value is $s$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "dimension": "length",
+        "symbol": "s"
+      },
+      "id": "addition-propagation",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "role-prose",
+        "same-dimension",
+        "typed"
+      ]
+    }
+  ],
+  "domain": "quantities-foundation",
+  "schemaVersion": 1
+}

@@ -1,22 +1,42 @@
-import type { Corpus, QualityManifest, SupportTier } from "./model";
+import type {
+  CapabilityId,
+  CapabilityMaturity,
+  Corpus,
+  QualityManifest,
+  SuiteTier,
+} from "./model";
 
 export interface PackCatalogEntry {
+  activationRules: number;
+  concepts: number;
   lawIds: readonly string[];
+  operators: number;
   packId: string;
+  quantityKinds: number;
+  roles: number;
+  units: number;
 }
+
+export type PackSummary =
+  | "evaluated"
+  | "mixed"
+  | "probe"
+  | "unsupported"
+  | "vocabulary-only";
 
 export interface PackConformanceScore {
   authoredCases: number;
+  capabilities: Readonly<Record<CapabilityId, CapabilityMaturity>>;
   coveredLaws: number;
   laws: number;
   packId: string;
-  tier: SupportTier;
+  summary: PackSummary;
 }
 
 export interface PackConformanceReport {
   failures: readonly string[];
   packs: readonly PackConformanceScore[];
-  schemaVersion: 1;
+  schemaVersion: 2;
 }
 
 const TIER_MINIMUMS = {
@@ -24,10 +44,19 @@ const TIER_MINIMUMS = {
   probe: { dimensions: 3, positives: 5, refusals: 5 },
 } as const;
 
+const CAPABILITY_DIMENSIONS: Partial<Record<CapabilityId, readonly string[]>> = {
+  "declarations-roles": ["prose", "roles"],
+  "diagnostics-refusal": ["semantic-mutation"],
+  "navigation-explanation": ["roles"],
+  "project-macro": ["project-context", "macro-provenance"],
+  "shape-quantity-unit": ["constraints"],
+};
+
 export function checkPackConformance(
   manifest: QualityManifest,
   catalog: readonly PackCatalogEntry[],
   corpora: ReadonlyMap<string, Corpus>,
+  foundationCaseCounts: ReadonlyMap<string, number> = new Map(),
 ): PackConformanceReport {
   const failures: string[] = [];
   const catalogById = uniqueCatalog(catalog, failures);
@@ -41,10 +70,15 @@ export function checkPackConformance(
 
   const suiteOwners = new Map<string, string>();
   for (const support of manifest.packs) {
-    for (const suiteId of support.corpusSuiteIds) {
-      const existing = suiteOwners.get(suiteId);
-      if (existing) failures.push(`${suiteId}: owned by both ${existing} and ${support.packId}`);
-      else suiteOwners.set(suiteId, support.packId);
+    for (const capability of Object.values(support.capabilities)) {
+      for (const suiteId of capability.suiteIds) {
+        const existing = suiteOwners.get(suiteId);
+        if (existing && existing !== support.packId) {
+          failures.push(`${suiteId}: owned by both ${existing} and ${support.packId}`);
+        } else {
+          suiteOwners.set(suiteId, support.packId);
+        }
+      }
     }
   }
   for (const suite of manifest.suites) {
@@ -54,30 +88,28 @@ export function checkPackConformance(
       }
       continue;
     }
-    const owner = suiteOwners.get(suite.id);
-    if (owner !== suite.packId) {
-      failures.push(`${suite.id}: suite owner is ${owner ?? "missing"}, expected ${suite.packId}`);
-    }
-    const support = supportById.get(suite.packId);
-    if (support && support.tier !== suite.tier) {
+    if (suiteOwners.get(suite.id) !== suite.packId) {
       failures.push(
-        `${suite.id}: suite tier ${suite.tier} differs from pack tier ${support.tier}`,
+        `${suite.id}: suite owner is ${suiteOwners.get(suite.id) ?? "missing"}, expected ${suite.packId}`,
       );
     }
-    const minimum = TIER_MINIMUMS[suite.tier];
-    if (suite.minimumPositiveCasesPerLaw < minimum.positives) {
+    validateLawSuiteBudget(suite, failures);
+  }
+  for (const suite of manifest.foundationSuites) {
+    if (suiteOwners.get(suite.id) !== suite.packId) {
       failures.push(
-        `${suite.id}: ${suite.tier} requires at least ${minimum.positives} positive cases per law`,
+        `${suite.id}: suite owner is ${suiteOwners.get(suite.id) ?? "missing"}, expected ${suite.packId}`,
       );
     }
-    if (suite.minimumRefusalCasesPerLaw < minimum.refusals) {
-      failures.push(
-        `${suite.id}: ${suite.tier} requires at least ${minimum.refusals} refusal cases per law`,
-      );
+    const count = foundationCaseCounts.get(suite.id);
+    if (count === undefined) failures.push(`${suite.id}: foundation corpus was not loaded`);
+    else if (count < suite.minimumCases) {
+      failures.push(`${suite.id}: ${count} cases; requires ${suite.minimumCases}`);
     }
-    if (suite.requiredDimensions.length < minimum.dimensions) {
+    const minimumDimensions = suite.tier === "evaluated" ? 4 : 2;
+    if (suite.requiredDimensions.length < minimumDimensions) {
       failures.push(
-        `${suite.id}: ${suite.tier} requires at least ${minimum.dimensions} coverage dimensions`,
+        `${suite.id}: ${suite.tier} foundation requires ${minimumDimensions} dimensions`,
       );
     }
   }
@@ -88,12 +120,13 @@ export function checkPackConformance(
   )) {
     const pack = catalogById.get(support.packId);
     if (!pack) continue;
-    const ownedSuites = support.corpusSuiteIds
+    validateCapabilities(manifest, support, pack, corpora, failures);
+    const lawSuites = support.capabilities["law-recognition"].suiteIds
       .map((suiteId) => manifest.suites.find((suite) => suite.id === suiteId))
       .filter((suite) => suite?.kind === "law");
     const covered = new Set<string>();
     let authoredCases = 0;
-    for (const suite of ownedSuites) {
+    for (const suite of lawSuites) {
       const corpus = corpora.get(suite.id);
       if (!corpus) {
         failures.push(`${suite.id}: corpus was not loaded`);
@@ -105,30 +138,144 @@ export function checkPackConformance(
       ))) {
         if (!pack.lawIds.includes(lawId)) {
           failures.push(`${suite.id}: corpus targets unknown law ${lawId}`);
-          continue;
+        } else {
+          covered.add(lawId);
         }
-        covered.add(lawId);
       }
     }
     for (const lawId of pack.lawIds) {
       if (!covered.has(lawId)) failures.push(`${support.packId}/${lawId}: no corpus coverage`);
     }
-    if (support.tier === "vocabulary-only") {
-      if (pack.lawIds.length !== 0) {
-        failures.push(`${support.packId}: vocabulary-only pack contains laws`);
-      }
-    } else if (pack.lawIds.length === 0) {
-      failures.push(`${support.packId}: ${support.tier} pack contains no laws`);
-    }
     scores.push({
       authoredCases,
+      capabilities: Object.fromEntries(
+        Object.entries(support.capabilities).map(([id, capability]) => [
+          id,
+          capability.maturity,
+        ]),
+      ) as Readonly<Record<CapabilityId, CapabilityMaturity>>,
       coveredLaws: covered.size,
       laws: pack.lawIds.length,
       packId: support.packId,
-      tier: support.tier,
+      summary: summarizeMaturity(support.capabilities),
     });
   }
-  return { failures: [...new Set(failures)].sort(), packs: scores, schemaVersion: 1 };
+  return { failures: [...new Set(failures)].sort(), packs: scores, schemaVersion: 2 };
+}
+
+function validateCapabilities(
+  manifest: QualityManifest,
+  support: QualityManifest["packs"][number],
+  pack: PackCatalogEntry,
+  corpora: ReadonlyMap<string, Corpus>,
+  failures: string[],
+): void {
+  for (const [id, declaration] of Object.entries(support.capabilities) as [
+    CapabilityId,
+    (typeof support.capabilities)[CapabilityId],
+  ][]) {
+    if (id === "concept-vocabulary") {
+      if (declaration.maturity !== "unsupported" && pack.concepts === 0) {
+        failures.push(`${pack.packId}/${id}: supported vocabulary has no concepts`);
+      }
+      continue;
+    }
+    if (id === "law-recognition") {
+      validateLawCapability(manifest, support.packId, declaration, pack, corpora, failures);
+      continue;
+    }
+    if (declaration.maturity === "unsupported") continue;
+    const suites = declaration.suiteIds.flatMap((suiteId) => [
+      ...manifest.suites.flatMap((suite) =>
+        suite.id === suiteId && suite.kind === "law" ? [suite] : [],
+      ),
+      ...manifest.foundationSuites.filter((suite) => suite.id === suiteId),
+    ]);
+    if (
+      declaration.maturity === "evaluated" &&
+      !suites.some((suite) => suite.tier === "evaluated")
+    ) {
+      failures.push(`${pack.packId}/${id}: evaluated capability lacks evaluated evidence`);
+    }
+    const dimensions = new Set(suites.flatMap((suite) => suite.requiredDimensions));
+    for (const required of CAPABILITY_DIMENSIONS[id] ?? []) {
+      if (!dimensions.has(required)) {
+        failures.push(`${pack.packId}/${id}: evidence lacks ${required} dimension`);
+      }
+    }
+  }
+}
+
+function validateLawCapability(
+  manifest: QualityManifest,
+  packId: string,
+  declaration: QualityManifest["packs"][number]["capabilities"]["law-recognition"],
+  pack: PackCatalogEntry,
+  corpora: ReadonlyMap<string, Corpus>,
+  failures: string[],
+): void {
+  if (declaration.maturity === "unsupported") {
+    if (pack.lawIds.length) failures.push(`${packId}: unsupported law capability contains laws`);
+    return;
+  }
+  if (!pack.lawIds.length) {
+    failures.push(`${packId}: ${declaration.maturity} law capability contains no laws`);
+    return;
+  }
+  const minimum = TIER_MINIMUMS[declaration.maturity];
+  const suites = declaration.suiteIds
+    .map((suiteId) => manifest.suites.find((suite) => suite.id === suiteId))
+    .filter((suite) => suite?.kind === "law");
+  if (
+    declaration.maturity === "evaluated" &&
+    !suites.some((suite) => suite.tier === "evaluated")
+  ) {
+    failures.push(`${packId}/law-recognition: evaluated capability lacks evaluated evidence`);
+  }
+  for (const lawId of pack.lawIds) {
+    let positives = 0;
+    let refusals = 0;
+    const dimensions = new Set<string>();
+    for (const suite of suites) {
+      const cases = corpora.get(suite.id)?.cases.filter(
+        (item) => "lawId" in item && item.lawId === lawId,
+      ) ?? [];
+      positives += cases.filter((item) => item.expectation === "established").length;
+      refusals += cases.filter((item) => item.expectation === "refused").length;
+      if (cases.length) suite.requiredDimensions.forEach((dimension) => dimensions.add(dimension));
+    }
+    if (positives < minimum.positives) {
+      failures.push(`${packId}/${lawId}: ${positives} positives; requires ${minimum.positives}`);
+    }
+    if (refusals < minimum.refusals) {
+      failures.push(`${packId}/${lawId}: ${refusals} refusals; requires ${minimum.refusals}`);
+    }
+    if (dimensions.size < minimum.dimensions) {
+      failures.push(`${packId}/${lawId}: ${dimensions.size} dimensions; requires ${minimum.dimensions}`);
+    }
+  }
+}
+
+function validateLawSuiteBudget(
+  suite: Extract<QualityManifest["suites"][number], { kind: "law" }>,
+  failures: string[],
+): void {
+  const minimum = TIER_MINIMUMS[suite.tier];
+  if (suite.minimumPositiveCasesPerLaw < minimum.positives) {
+    failures.push(
+      `${suite.id}: ${suite.tier} requires at least ${minimum.positives} positive cases per law`,
+    );
+  }
+  if (suite.minimumRefusalCasesPerLaw < minimum.refusals) {
+    failures.push(
+      `${suite.id}: ${suite.tier} requires at least ${minimum.refusals} refusal cases per law`,
+    );
+  }
+  if (suite.requiredDimensions.length < minimum.dimensions) {
+    failures.push(
+      `${suite.id}: ${suite.tier} requires at least ${minimum.dimensions} coverage dimensions`,
+    );
+  }
 }
 
 export function summarizePack(value: unknown, path: string): PackCatalogEntry {
@@ -153,7 +300,36 @@ export function summarizePack(value: unknown, path: string): PackCatalogEntry {
   if (new Set(lawIds).size !== lawIds.length) {
     throw new Error(`${path}.laws: duplicate law id`);
   }
-  return { lawIds, packId: pack.packId };
+  return {
+    activationRules: arrayLength(pack.activationRules),
+    concepts: arrayLength(pack.concepts),
+    lawIds,
+    operators: arrayLength(pack.operators),
+    packId: pack.packId,
+    quantityKinds: arrayLength(pack.quantityKinds),
+    roles: arrayLength(pack.roles),
+    units: arrayLength(pack.units),
+  };
+}
+
+function summarizeMaturity(
+  capabilities: QualityManifest["packs"][number]["capabilities"],
+): PackSummary {
+  const supported = Object.entries(capabilities).filter(
+    ([, capability]) => capability.maturity !== "unsupported",
+  );
+  if (!supported.length) return "unsupported";
+  if (
+    supported.length === 1 &&
+    supported[0]![0] === "concept-vocabulary"
+  ) return "vocabulary-only";
+  const maturities = new Set(supported.map(([, capability]) => capability.maturity));
+  if (maturities.size > 1) return "mixed";
+  return maturities.has("evaluated") ? "evaluated" : "probe";
+}
+
+function arrayLength(value: unknown): number {
+  return Array.isArray(value) ? value.length : 0;
 }
 
 function uniqueCatalog(
