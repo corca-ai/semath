@@ -141,11 +141,6 @@
       "id": "convex-optimization",
       "title": "Convex Optimization",
       "citation": "Stephen Boyd and Lieven Vandenberghe, Convex Optimization, Cambridge University Press, 2004."
-    },
-    {
-      "id": "deep-learning",
-      "title": "Deep Learning",
-      "citation": "Ian Goodfellow, Yoshua Bengio, and Aaron Courville, Deep Learning, MIT Press, 2016."
     }
   ]
 }

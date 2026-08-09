@@ -7,6 +7,17 @@ pub struct SemathEngine {
     core: CoreEngine,
 }
 
+#[wasm_bindgen(js_name = inspectPackCatalog)]
+pub fn inspect_pack_catalog(payload: &[u8]) -> Result<Vec<u8>, JsError> {
+    semath_core::inspect_pack_catalog_json(payload)
+        .map_err(|error| JsError::new(&error.to_string()))
+}
+
+#[wasm_bindgen(js_name = createPackTemplate)]
+pub fn create_pack_template(pack_id: &str) -> Result<String, JsError> {
+    semath_core::pack_template(pack_id).map_err(|error| JsError::new(&error.to_string()))
+}
+
 #[wasm_bindgen]
 impl SemathEngine {
     #[wasm_bindgen(constructor)]
