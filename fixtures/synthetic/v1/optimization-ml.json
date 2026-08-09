@@ -1,0 +1,492 @@
+{
+  "schemaVersion": 1,
+  "domain": "optimization-ml",
+  "cases": [
+    {
+      "id": "recognize-argmin-parameter-fit",
+      "topic": "objectives",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Choose the fitted parameter from $\\argmin_{\\theta} J(\\theta)$ before evaluating the model.",
+      "cursorNeedle": "\\argmin",
+      "expectedPatterns": ["argmin-objective"]
+    },
+    {
+      "id": "recognize-argmin-control-policy",
+      "topic": "objectives",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The controller uses the policy selected by \\[\\argmin_{u} C(u)\\].",
+      "cursorNeedle": "C(u)",
+      "expectedPatterns": ["argmin-objective"]
+    },
+    {
+      "id": "recognize-argmax-likelihood",
+      "topic": "objectives",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Estimate the latent parameter with $\\argmax_{\\phi} L(\\phi)$ in the likelihood stage.",
+      "cursorNeedle": "\\argmax",
+      "expectedPatterns": ["argmax-objective"]
+    },
+    {
+      "id": "recognize-argmax-policy-score",
+      "topic": "objectives",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The serving rule selects the action \\[\\argmax_{a} Q(a)\\] for the current state.",
+      "cursorNeedle": "Q(a)",
+      "expectedPatterns": ["argmax-objective"]
+    },
+    {
+      "id": "recognize-constrained-budget",
+      "topic": "constrained-optimization",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The allocation problem is $\\min_{z} F(z) \\text{subject to} c(z) \\leq B$ under the fixed budget.",
+      "cursorNeedle": "\\text{subject to}",
+      "expectedPatterns": ["constrained-minimum"]
+    },
+    {
+      "id": "recognize-constrained-feasible-set",
+      "topic": "constrained-optimization",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The feasible design is obtained from \\[\\min_{v} R(v) \\text{s.t.} h(v)=0\\].",
+      "cursorNeedle": "\\text{s.t.}",
+      "expectedPatterns": ["constrained-minimum"]
+    },
+    {
+      "id": "recognize-lagrangian-inequality",
+      "topic": "duality",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "For the inequality constraint, define $\\mathcal{L}(x,\\lambda)=f(x)+\\lambda g(x)$ before deriving the dual.",
+      "cursorNeedle": "\\mathcal{L}",
+      "expectedPatterns": ["lagrangian"]
+    },
+    {
+      "id": "recognize-lagrangian-equality",
+      "topic": "duality",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The equality-constrained derivation begins with \\[\\mathcal{L}(w,\\nu)=R(w)+\\nu c(w)\\].",
+      "cursorNeedle": "\\nu c(w)",
+      "expectedPatterns": ["lagrangian"]
+    },
+    {
+      "id": "recognize-gradient-step-auxiliary",
+      "topic": "algorithms",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The auxiliary sequence takes the step $y_{t+1}=x_t-\\eta_t\\nabla f(x_t)$ at each round.",
+      "cursorNeedle": "\\eta_t",
+      "expectedPatterns": ["gradient-descent-update"]
+    },
+    {
+      "id": "recognize-gradient-step-trial-point",
+      "topic": "algorithms",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "A trial point is formed by \\[p_{r+1}=q_r-\\gamma\\nabla G(q_r)\\] before line search.",
+      "cursorNeedle": "\\gamma",
+      "expectedPatterns": ["gradient-descent-update"]
+    },
+    {
+      "id": "recognize-proximal-composite-step",
+      "topic": "algorithms",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The composite solver records $u_{k+1}=\\operatorname{prox}_{\\tau h}(v_k)$ after its forward step.",
+      "cursorNeedle": "\\operatorname{prox}",
+      "expectedPatterns": ["proximal-update"]
+    },
+    {
+      "id": "recognize-proximal-denoising-step",
+      "topic": "algorithms",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The denoising stage applies \\[z_{n+1}=\\operatorname{prox}_{\\rho R}(s_n)\\] to the current signal.",
+      "cursorNeedle": "\\rho R",
+      "expectedPatterns": ["proximal-update"]
+    },
+    {
+      "id": "recognize-least-squares-calibration",
+      "topic": "least-squares",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Calibration solves $\\min_{c}\\lVert Dc-r\\rVert^{2}$ for the sensor coefficients.",
+      "cursorNeedle": "Dc-r",
+      "expectedPatterns": ["least-squares-objective"]
+    },
+    {
+      "id": "recognize-least-squares-reconstruction",
+      "topic": "least-squares",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The reconstruction is defined by \\[\\min_{s} \\lVert Hs-y \\rVert^2\\].",
+      "cursorNeedle": "Hs-y",
+      "expectedPatterns": ["least-squares-objective"]
+    },
+    {
+      "id": "recognize-regularized-risk",
+      "topic": "regularization",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The estimator minimizes $\\min_{w} R(w)+\\lambda\\lVert w\\rVert_1$ to encourage sparse weights.",
+      "cursorNeedle": "\\lambda",
+      "expectedPatterns": ["regularized-objective"]
+    },
+    {
+      "id": "recognize-regularized-reconstruction",
+      "topic": "regularization",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "A stable reconstruction uses \\[\\min_{z} E(z) + \\alpha \\lVert z \\rVert^{2}\\].",
+      "cursorNeedle": "\\alpha",
+      "expectedPatterns": ["regularized-objective"]
+    },
+    {
+      "id": "recognize-sigmoid-logit",
+      "topic": "models",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Convert the scalar logit with $\\sigma(a)$ before thresholding the prediction.",
+      "cursorNeedle": "\\sigma",
+      "expectedPatterns": ["sigmoid"]
+    },
+    {
+      "id": "recognize-sigmoid-linear-score",
+      "topic": "models",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The binary head returns \\[\\sigma(w^\\top x+b)\\] as its probability.",
+      "cursorNeedle": "w^\\top",
+      "expectedPatterns": ["sigmoid"]
+    },
+    {
+      "id": "recognize-softmax-class-logits",
+      "topic": "models",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Normalize the class logits with $\\operatorname{softmax}(z)$ before decoding.",
+      "cursorNeedle": "\\operatorname{softmax}",
+      "expectedPatterns": ["softmax"]
+    },
+    {
+      "id": "recognize-softmax-temperature-score",
+      "topic": "models",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Temperature scaling produces \\[\\operatorname{softmax}(s/T)\\] for the calibrated classes.",
+      "cursorNeedle": "s/T",
+      "expectedPatterns": ["softmax"]
+    },
+    {
+      "id": "recognize-empirical-risk-training",
+      "topic": "learning-objectives",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The training report uses $\\frac{1}{m}\\sum_{i=1}^{m}\\ell_i$ as the empirical risk.",
+      "cursorNeedle": "\\ell_i",
+      "expectedPatterns": ["empirical-risk"]
+    },
+    {
+      "id": "recognize-empirical-risk-validation",
+      "topic": "learning-objectives",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The validation fold is summarized by \\[\\frac{1}{N} \\sum_{j=1}^{N} \\ell_{j}\\].",
+      "cursorNeedle": "\\ell_{j}",
+      "expectedPatterns": ["empirical-risk"]
+    },
+    {
+      "id": "recognize-cross-entropy-labels",
+      "topic": "learning-objectives",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "For one labeled example, the loss is $-\\sum_{c} y_c \\log \\hat{y}_c$ across classes.",
+      "cursorNeedle": "\\log",
+      "expectedPatterns": ["cross-entropy-loss"]
+    },
+    {
+      "id": "recognize-cross-entropy-targets",
+      "topic": "learning-objectives",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The categorical training term is \\[-\\sum_{j} t_j \\log p_j\\].",
+      "cursorNeedle": "t_j",
+      "expectedPatterns": ["cross-entropy-loss"]
+    },
+    {
+      "id": "refuse-argmin-missing-variable",
+      "topic": "objectives",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "This note names the operator but omits its optimization variable: $\\argmin f(z)$.",
+      "cursorNeedle": "\\argmin",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-argmax-missing-variable",
+      "topic": "objectives",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The shorthand \\[\\argmax q(s)\\] does not state the variable being optimized.",
+      "cursorNeedle": "\\argmax",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-constrained-minimum-mathrm",
+      "topic": "constrained-optimization",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The draft writes $\\min_{x} f(x) \\mathrm{s.t.} g(x)\\leq 0$ with an unsupported qualifier form.",
+      "cursorNeedle": "\\mathrm{s.t.}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-constrained-maximum",
+      "topic": "constrained-optimization",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The maximization variant \\[\\max_{z} U(z) \\text{subject to} b(z)\\leq 1\\] is outside the current constrained matcher.",
+      "cursorNeedle": "\\max",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-lagrangian-brackets",
+      "topic": "duality",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The bracketed definition $\\mathcal{L}[x,\\lambda]=f(x)+\\lambda g(x)$ is deliberately not the supported call form.",
+      "cursorNeedle": "\\mathcal{L}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-gradient-ascent-sign",
+      "topic": "algorithms",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The ascent trial \\[y_{k+1}=x^{(k)}+\\eta\\nabla f(x^{(k)})\\] uses the opposite sign.",
+      "cursorNeedle": "\\nabla",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-gradient-step-without-scale",
+      "topic": "algorithms",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The unscaled step $u_{n+1}=v^{(n)}-\\nabla R(v^{(n)})$ lacks an explicit step size.",
+      "cursorNeedle": "\\nabla",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-proximal-mathrm",
+      "topic": "algorithms",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "This notation uses \\[u_{k+1}=\\mathrm{prox}_{h}(v^{(k)})\\] instead of the recognized operator form.",
+      "cursorNeedle": "\\mathrm{prox}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-least-squares-unsquared",
+      "topic": "least-squares",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The robust variant minimizes an unsquared residual norm $\\min_{z}\\lVert Az-b\\rVert$.",
+      "cursorNeedle": "Az-b",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-regularizer-without-norm",
+      "topic": "regularization",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The scalar penalty objective \\[\\min_{w} R(w)+\\lambda w^2\\] has no explicit norm penalty.",
+      "cursorNeedle": "\\lambda",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-sigmoid-subscripted-family",
+      "topic": "models",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The temperature-indexed family $\\sigma_T(a)$ is not the plain sigmoid call.",
+      "cursorNeedle": "\\sigma_T",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-softmax-mathrm",
+      "topic": "models",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The alternative spelling \\[\\mathrm{softmax}(z)\\] is not the recognized operator notation.",
+      "cursorNeedle": "\\mathrm{softmax}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-empirical-risk-zero-index",
+      "topic": "learning-objectives",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The zero-based average $\\frac{1}{m}\\sum_{i=0}^{m-1}\\ell_i$ differs from the supported sample bounds.",
+      "cursorNeedle": "\\ell_i",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-empirical-risk-functional-loss",
+      "topic": "learning-objectives",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The explicit loss-call average \\[\\frac{1}{m}\\sum_{i=1}^{m}\\ell(z_i)\\] is not the indexed-loss surface.",
+      "cursorNeedle": "\\ell(z_i)",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-cross-entropy-natural-log",
+      "topic": "learning-objectives",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The notation $-\\sum_{c} y_c \\ln p_c$ uses a natural-log command outside the current surface.",
+      "cursorNeedle": "\\ln",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-generic-minimum",
+      "topic": "objectives",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "A generic training problem may be written as \\[\\min_{\\theta} J(\\theta)\\].",
+      "cursorNeedle": "J(\\theta)",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-minimax-game",
+      "topic": "game-optimization",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Adversarial learning often studies $\\min_u\\max_v \\Phi(u,v)$ as a saddle problem.",
+      "cursorNeedle": "\\Phi",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-kkt-stationarity",
+      "topic": "optimality-conditions",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "One stationarity condition is \\[\\nabla_x \\mathcal{L}(x,\\lambda)=0\\].",
+      "cursorNeedle": "\\nabla_x",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-kkt-complementarity",
+      "topic": "optimality-conditions",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Complementary slackness requires $\\lambda_j g_j(x)=0$ for every active constraint index.",
+      "cursorNeedle": "\\lambda_j",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-projected-gradient-map",
+      "topic": "algorithms",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "A constrained method applies the projection \\[\\Pi_C(x-\\eta\\nabla f(x))\\] after a gradient step.",
+      "cursorNeedle": "\\Pi_C",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-newton-direction",
+      "topic": "second-order-methods",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The Newton direction is $d=-[\\nabla^2 f(x)]^{-1}\\nabla f(x)$ when the Hessian is invertible.",
+      "cursorNeedle": "[\\nabla^2",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-hessian-vector-product",
+      "topic": "second-order-methods",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Matrix-free solvers evaluate \\[\\nabla^2 f(x)v\\] without materializing the Hessian.",
+      "cursorNeedle": "f(x)v",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-relu-activation",
+      "topic": "models",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "A hidden unit uses $\\operatorname{ReLU}(a)=\\max(0,a)$ as its activation.",
+      "cursorNeedle": "\\operatorname{ReLU}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-hinge-loss",
+      "topic": "learning-objectives",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The margin penalty is \\[\\max(0,1-yz)\\] for a signed example.",
+      "cursorNeedle": "1-yz",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-log-sum-exp",
+      "topic": "smooth-optimization",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "A smooth maximum can use $\\log\\sum_j e^{z_j}$ for the score vector.",
+      "cursorNeedle": "e^{z_j}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-attention-map",
+      "topic": "models",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "A transformer block computes \\[\\operatorname{Attention}(Q,K,V)\\] from queries, keys, and values.",
+      "cursorNeedle": "Attention",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-minibatch-gradient",
+      "topic": "stochastic-optimization",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The mini-batch estimate is $g_B(\\theta)=\\frac{1}{|B|}\\sum_{i\\in B}\\nabla_\\theta \\ell_i(\\theta)$.",
+      "cursorNeedle": "g_B",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-variational-elbo",
+      "topic": "probabilistic-learning",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Variational training maximizes the bound \\[\\mathbb{E}_{q(z)}[\\log p(x,z)-\\log q(z)]\\].",
+      "cursorNeedle": "q(z)]",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-fenchel-conjugate",
+      "topic": "duality",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Convex duality defines the conjugate by $f^\\star(y)=\\sup_x (xy-f(x))$.",
+      "cursorNeedle": "\\sup_x",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-policy-gradient-integrand",
+      "topic": "reinforcement-learning",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "A policy-gradient estimator contains \\[\\mathbb{E}_{\\pi_\\theta}[R(\\tau)\\nabla_\\theta\\log \\pi_\\theta(a\\mid s)]\\].",
+      "cursorNeedle": "R(\\tau)",
+      "expectedPatterns": []
+    }
+  ]
+}

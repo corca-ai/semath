@@ -1,0 +1,528 @@
+{
+  "schemaVersion": 1,
+  "domain": "discrete-math",
+  "cases": [
+    {
+      "id": "membership-vertex-class",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The selected vertex satisfies $u_7 \\in V(H)$ before the search begins.",
+      "cursorNeedle": "\\in",
+      "expectedPatterns": ["set-membership"]
+    },
+    {
+      "id": "membership-residue-class",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The residue test records \\[r \\in \\mathbb{Z}_{11}\\] for the chosen representative.",
+      "cursorNeedle": "\\mathbb{Z}_{11}",
+      "expectedPatterns": ["set-membership"]
+    },
+    {
+      "id": "subset-feasible-families",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Every feasible family in this stage obeys $\\mathcal{F} \\subseteq \\mathcal{G}$ by construction.",
+      "cursorNeedle": "\\subseteq",
+      "expectedPatterns": ["subset-relation"]
+    },
+    {
+      "id": "subset-neighborhoods",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The neighborhood comparison gives \\[N_G(a) \\subset N_G(b)\\] in this graph.",
+      "cursorNeedle": "\\subset",
+      "expectedPatterns": ["subset-relation"]
+    },
+    {
+      "id": "union-color-classes",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The two color classes form $C_{red} \\cup C_{blue}$ after the merge.",
+      "cursorNeedle": "\\cup",
+      "expectedPatterns": ["set-union"]
+    },
+    {
+      "id": "union-reachable-sets",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The next frontier is assembled from \\[R_t \\cup N(R_t)\\] during traversal.",
+      "cursorNeedle": "N(R_t)",
+      "expectedPatterns": ["set-union"]
+    },
+    {
+      "id": "intersection-constraint-sets",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The admissible objects lie in $S_1 \\cap S_2$ for both constraints.",
+      "cursorNeedle": "\\cap",
+      "expectedPatterns": ["set-intersection"]
+    },
+    {
+      "id": "intersection-edge-families",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The shared edges are exactly \\[E(T) \\cap E(K)\\] in the comparison.",
+      "cursorNeedle": "E(K)",
+      "expectedPatterns": ["set-intersection"]
+    },
+    {
+      "id": "difference-unused-labels",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The unused labels are $L \\setminus U$ at the end of the round.",
+      "cursorNeedle": "\\setminus",
+      "expectedPatterns": ["set-difference"]
+    },
+    {
+      "id": "difference-deleted-vertices",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The induced subgraph retains \\[V(G) \\setminus \\{w\\}\\] after deletion.",
+      "cursorNeedle": "\\{w\\}",
+      "expectedPatterns": ["set-difference"]
+    },
+    {
+      "id": "power-set-edges",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "All possible edge selections comprise $\\mathcal{P}(E_G)$ in the enumeration.",
+      "cursorNeedle": "\\mathcal{P}",
+      "expectedPatterns": ["power-set"]
+    },
+    {
+      "id": "power-set-neighborhood",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The candidate subfamilies range over \\[\\mathcal{P}(N(v))\\] for the local step.",
+      "cursorNeedle": "N(v)",
+      "expectedPatterns": ["power-set"]
+    },
+    {
+      "id": "cardinality-boundary",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The boundary size is measured by $\\lvert \\partial X \\rvert$ in the expansion bound.",
+      "cursorNeedle": "\\partial X",
+      "expectedPatterns": ["set-cardinality"]
+    },
+    {
+      "id": "cardinality-edge-set",
+      "topic": "sets",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The proof uses \\[\\lvert E(J) \\rvert\\] as the number of available edges.",
+      "cursorNeedle": "E(J)",
+      "expectedPatterns": ["set-cardinality"]
+    },
+    {
+      "id": "universal-with-domain",
+      "topic": "logic",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The invariant states $\\forall x \\in X: Q(x)$ throughout the induction.",
+      "cursorNeedle": "\\forall",
+      "expectedPatterns": ["universal-quantifier"]
+    },
+    {
+      "id": "universal-index-claim",
+      "topic": "logic",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The argument establishes \\[\\forall j.\\; c_j \\leq d_j\\] for every index.",
+      "cursorNeedle": "c_j",
+      "expectedPatterns": ["universal-quantifier"]
+    },
+    {
+      "id": "existential-witness",
+      "topic": "logic",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The certificate asserts $\\exists y: R(y) \\land T(y)$ for one witness.",
+      "cursorNeedle": "\\exists",
+      "expectedPatterns": ["existential-quantifier"]
+    },
+    {
+      "id": "existential-color",
+      "topic": "logic",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The coloring condition requires \\[\\exists k,\\; color(v)=k\\] at this vertex.",
+      "cursorNeedle": "color(v)",
+      "expectedPatterns": ["existential-quantifier"]
+    },
+    {
+      "id": "implication-divisibility",
+      "topic": "logic",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The divisibility step uses $a \\mid b \\implies a \\mid bc$ directly.",
+      "cursorNeedle": "\\implies",
+      "expectedPatterns": ["logical-implication"]
+    },
+    {
+      "id": "implication-reachability",
+      "topic": "logic",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The reachability invariant is \\[Reach(s,v) \\Rightarrow marked(v)\\] after the visit.",
+      "cursorNeedle": "\\Rightarrow",
+      "expectedPatterns": ["logical-implication"]
+    },
+    {
+      "id": "binomial-team-choice",
+      "topic": "combinatorics",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The number of possible teams is $\\binom{m}{t}$ when order is irrelevant.",
+      "cursorNeedle": "\\binom",
+      "expectedPatterns": ["binomial-coefficient"]
+    },
+    {
+      "id": "binomial-edge-choice",
+      "topic": "combinatorics",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Choosing the missing edges contributes \\[\\binom{q+1}{2}\\] possibilities.",
+      "cursorNeedle": "q+1",
+      "expectedPatterns": ["binomial-coefficient"]
+    },
+    {
+      "id": "recurrence-delayed-count",
+      "topic": "recurrences",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The delayed count follows $b_{n+2}=3b_{n+1}+b_n$ for later stages.",
+      "cursorNeedle": "3b_{n+1}",
+      "expectedPatterns": ["linear-recurrence"]
+    },
+    {
+      "id": "recurrence-alternating-walks",
+      "topic": "recurrences",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The walk totals satisfy \\[w_{k}=2w_{k-1}-w_{k-3}\\] once initial values are fixed.",
+      "cursorNeedle": "w_{k-3}",
+      "expectedPatterns": ["linear-recurrence"]
+    },
+    {
+      "id": "degree-contracted-vertex",
+      "topic": "graphs",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "After contraction, the relevant quantity is $\\deg(v^{*})$ for the new vertex.",
+      "cursorNeedle": "v^{*}",
+      "expectedPatterns": ["graph-degree"]
+    },
+    {
+      "id": "degree-terminal",
+      "topic": "graphs",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The terminal contributes \\[\\deg(t_0)\\] incident edges to the count.",
+      "cursorNeedle": "\\deg",
+      "expectedPatterns": ["graph-degree"]
+    },
+    {
+      "id": "laplacian-standard-symbols",
+      "topic": "graphs",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "For this graph, the matrix identity is $L=D-A$ in the chosen ordering.",
+      "cursorNeedle": "D-A",
+      "expectedPatterns": ["graph-laplacian"]
+    },
+    {
+      "id": "laplacian-renamed-matrices",
+      "topic": "graphs",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "With renamed matrices, the same construction reads \\[Q=R-B\\] for the graph.",
+      "cursorNeedle": "R-B",
+      "expectedPatterns": ["graph-laplacian"]
+    },
+    {
+      "id": "refuse-nonmembership",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The excluded label satisfies $z \\notin S$ in this branch.",
+      "cursorNeedle": "\\notin",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-superset",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The reverse containment is written \\[A \\supseteq B\\] in the note.",
+      "cursorNeedle": "\\supseteq",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-disjoint-union",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The decomposition uses the disjoint union $P \\uplus Q$ here.",
+      "cursorNeedle": "\\uplus",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-big-intersection",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The common core is expressed as \\[\\bigcap_{i=1}^{h} F_i\\] over the family.",
+      "cursorNeedle": "\\bigcap",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-backslash-difference",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "An alternate difference notation gives $M \\backslash N$ in the manuscript.",
+      "cursorNeedle": "\\backslash",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-bracketed-power-set",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The author informally writes \\[\\mathcal{P}[T]\\] for a family of subsets.",
+      "cursorNeedle": "\\mathcal{P}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-plain-cardinality-bars",
+      "topic": "sets",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The draft denotes the size by $|W|$ using plain bars.",
+      "cursorNeedle": "|W|",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-unpunctuated-universal",
+      "topic": "logic",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The shorthand claim is \\[\\forall x P(x)\\] without a binder separator.",
+      "cursorNeedle": "\\forall",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-unique-existence",
+      "topic": "logic",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The uniqueness assertion is $\\exists! y: U(y)$ in the lemma.",
+      "cursorNeedle": "\\exists!",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-logical-equivalence",
+      "topic": "logic",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The two conditions satisfy \\[P \\iff Q\\] in the truth table.",
+      "cursorNeedle": "\\iff",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-choose-notation",
+      "topic": "combinatorics",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The older text writes the selection count as ${n \\choose k}$.",
+      "cursorNeedle": "\\choose",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-nonrecursive-sequence-assignment",
+      "topic": "recurrences",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The initial term is fixed by \\[a_j=5\\] rather than a recurrence.",
+      "cursorNeedle": "a_j",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-operatorname-degree",
+      "topic": "graphs",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The manuscript spells the quantity as $\\operatorname{deg}(v)$ for clarity.",
+      "cursorNeedle": "\\operatorname{deg}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-signless-laplacian-form",
+      "topic": "graphs",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The signless construction instead uses \\[Q=D+A\\] for its matrix.",
+      "cursorNeedle": "D+A",
+      "expectedPatterns": []
+    },
+    {
+      "id": "refuse-degree-without-parentheses",
+      "topic": "graphs",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "A compact annotation labels the value as $\\deg v$ beside the vertex.",
+      "cursorNeedle": "\\deg v",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-symmetric-difference",
+      "topic": "sets",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The vertices appearing in exactly one side form $A \\triangle B$ in the partition.",
+      "cursorNeedle": "\\triangle",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-set-complement",
+      "topic": "sets",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Relative to the universe, the omitted elements form \\[S^{\\mathsf{c}}\\].",
+      "cursorNeedle": "\\mathsf{c}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-cartesian-product",
+      "topic": "sets",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The ordered pairs are drawn from $X \\times Y$ in the relation.",
+      "cursorNeedle": "\\times",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-indexed-union",
+      "topic": "sets",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The layers cover the graph through \\[\\bigcup_{j=0}^{d} L_j\\].",
+      "cursorNeedle": "\\bigcup",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-relation-composition",
+      "topic": "sets",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The composed relation is $R \\circ S$ on the underlying domain.",
+      "cursorNeedle": "\\circ",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-factorial",
+      "topic": "combinatorics",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "All orderings of the labels give \\[n!\\] possible arrangements.",
+      "cursorNeedle": "n!",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-stirling-number",
+      "topic": "combinatorics",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The partition count is denoted by $\\left\\{ {n \\atop k} \\right\\}$ in this convention.",
+      "cursorNeedle": "\\atop",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-derangement",
+      "topic": "combinatorics",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The number of fixed-point-free permutations is written \\[!m\\] in the count.",
+      "cursorNeedle": "!m",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-partition-function",
+      "topic": "combinatorics",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The integer partition total is $p_{\\mathrm{part}}(n)$ for the selected size.",
+      "cursorNeedle": "\\mathrm{part}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-vertex-adjacency",
+      "topic": "graphs",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The edge test is summarized by \\[u \\sim_G v\\] for adjacent vertices.",
+      "cursorNeedle": "\\sim_G",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-graph-distance",
+      "topic": "graphs",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The shortest-path length is $d_G(s,t)$ between the terminals.",
+      "cursorNeedle": "d_G",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-chromatic-number",
+      "topic": "graphs",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The least number of colors is \\[\\chi(H)\\] for this graph.",
+      "cursorNeedle": "\\chi",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-conjunction",
+      "topic": "logic",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Both conditions are required in $P \\land Q$ for the rule to fire.",
+      "cursorNeedle": "\\land",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-biconditional",
+      "topic": "logic",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The characterization is stated as \\[R \\leftrightarrow S\\] in the theorem.",
+      "cursorNeedle": "\\leftrightarrow",
+      "expectedPatterns": []
+    },
+    {
+      "id": "coverage-negation",
+      "topic": "logic",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The forbidden condition is represented by $\\neg T$ in the Boolean formula.",
+      "cursorNeedle": "\\neg",
+      "expectedPatterns": []
+    }
+  ]
+}
