@@ -1,6 +1,6 @@
 # Semantic Math Analysis Library Proposal
 
-> **구현 상태 — v0.10 (2026-08-08):** recoverable matrix/cases/application IR, include·scope 기반 semantic identity, bounded macro provenance와 재사용 가능한 Worker lifecycle을 추가했다. CorTeX의 LaTeX provider는 wasmtex와 Semath 결과를 한 곳에서 합성하고 interactive parsing은 authoring Worker가 담당한다.
+> **구현 상태 — v0.15 (2026-08-09):** 수학 5개 pack과 역학·회로·제어 pack의 의미 인식 범위를 넓히고, 486개 수식 및 180개 영어 선언 corpus를 분야·topic·capability별 독립 scorecard로 고정했다. CorTeX의 LaTeX provider는 wasmtex와 Semath 결과를 한 곳에서 합성하고 interactive parsing은 authoring Worker가 담당한다.
 
 ## 1. 개요
 
@@ -593,6 +593,13 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * quantity kind, unit과 유리수 지수 dimension을 정확히 표현하고 명시적 선언과 곱·나눗셈만 보수적으로 전파한다.
 * classical mechanics, circuits와 control systems를 pilot pack으로 추가하되 명시적 quantity/shape가 없으면 전문 law로 인식하지 않는다.
 * 기존 다섯 pack은 같은 schema로 이관하되 동작과 edit authority를 넓히지 않는다.
+
+### Iteration 15 — 분야 깊이와 제품 품질 gate
+
+* 역학은 운동량·에너지·탄성·감쇠·동력, 회로는 Kirchhoff 법칙과 capacitor/inductor, 제어는 연속 상태공간·feedback·Lyapunov 관계까지 typed role로 확장한다.
+* 기존 수학 5개 pack은 분야별로 가치가 큰 미지원 target을 우선 승격하되 completion·rewrite 권한은 넓히지 않는다.
+* 영어 선언 180개와 수식 486개의 exact 결과를 field/domain/topic/capability별로 분리하고, refusal·holdout·교차 pack collision과 false navigation/diagnostic/edit의 zero budget을 CI에서 고정한다.
+* score 분류·집계·budget 비교와 Inspector presentation은 순수 함수로 검증하고, browser E2E는 실제 host 연결과 staging smoke test에만 사용한다.
 
 Later work에는 더 넓은 quantity calculus, 분야별 ontology/corpus, semantic fingerprint,
 e-graph, cross-paper navigation과 optional LLM assistance가 포함된다. 수백 분야 지원은

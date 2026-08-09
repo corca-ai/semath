@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath v0.14 ships one schema-3 catalog used by semantic concepts, relations,
+Semath v0.15 ships one schema-3 catalog used by semantic concepts, relations,
 domain activation, formula recognition, completion, diagnostics, and rewrites.
 `semath/packs` exposes the same immutable metadata and validators to TypeScript;
 `semath-pack` validates JSON without loading an editor.
@@ -20,8 +20,9 @@ create definitions, warnings, or edits.
 
 ## Catalog
 
-The five legacy mathematical packs retain their v0.13 behavior. v0.14 adds one
-shared quantity capability and three engineering pilots.
+The five established mathematical packs retain their guarded edit authority
+while adding recognition depth. The engineering pilots now cover coherent
+families of laws rather than one demonstration each.
 
 | Pack | Responsibility | Edit authority |
 | --- | --- | --- |
@@ -31,14 +32,21 @@ shared quantity capability and three engineering pilots.
 | Optimization/ML | objectives, constraints, updates, losses | recognition only |
 | Discrete mathematics | sets, logic, combinatorics, recurrences, graphs | recognition only |
 | Quantities/units | exact dimensions, SI unit vocabulary, propagation | no formula edits |
-| Classical mechanics | Newton's second-law relation pilot | recognition only |
-| Circuits | Ohm's-law relation pilot | recognition only |
-| Control systems | discrete state-transition relation pilot | recognition only |
+| Classical mechanics | force, momentum, energy, spring/damping, power, circular motion | recognition only |
+| Circuits | Ohm/Kirchhoff laws, capacitor/inductor relations and energy, power | recognition only |
+| Control systems | continuous/discrete state space, feedback, closed loop, Lyapunov equations | recognition only |
 
 The checked-in synthetic corpus has at least 50 independently authored cases
 per field, split into positive surfaces, hard refusals, and unsupported coverage
-targets. Exact vertical fixtures additionally assert quantity facts, dimensions,
-relation roles, cross-pack collisions, diagnostics, and native/WASM parity.
+targets. v0.15 promotes 41 previously unsupported targets while preserving 129
+untouched formula holdouts. Exact vertical fixtures additionally assert quantity
+facts, dimensions, relation roles, cross-pack collisions, diagnostics, and
+native/WASM parity.
+
+The catalog is intentionally conservative: a familiar surface is not enough
+when a law requires quantity or shape evidence. Adding patterns cannot weaken
+the checked refusal and holdout budgets. See
+[`semantic-quality-scorecards.md`](semantic-quality-scorecards.md).
 
 ## Schema-3 authoring contract
 

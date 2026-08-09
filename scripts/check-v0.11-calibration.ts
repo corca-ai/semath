@@ -21,7 +21,7 @@ const packs = legacyPacks();
 const patterns = packs.flatMap((pack) =>
   pack.patterns.map((pattern) => ({ pack, pattern })),
 );
-if (packs.length !== 5 || patterns.length !== 68) {
+if (packs.length !== 5 || patterns.length !== 83) {
   throw new Error(`catalog size changed: ${packs.length} packs, ${patterns.length} patterns`);
 }
 
@@ -82,7 +82,7 @@ for (const pack of packs) {
     `${pack.packId}: ${pack.patterns.length} entries (${recognition} recognition-only, ${pack.patterns.length - recognition} action-capable)`,
   );
 }
-console.log("v0.11 calibration OK: 68 entries, zero known false links/edits");
+console.log("catalog calibration OK: 83 entries, zero known false links/edits");
 
 function assertSameSet(label: string, expected: Set<string>, actual: Set<string>) {
   const missing = [...expected].filter((value) => !actual.has(value));

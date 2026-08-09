@@ -1545,6 +1545,59 @@ mod tests {
     }
 
     #[test]
+    fn exposes_typed_roles_for_deep_engineering_relations() {
+        let cases = [
+            (
+                "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$",
+                "P=",
+                "classical-mechanics:mechanical-power",
+                ["power", "force", "velocity"].as_slice(),
+            ),
+            (
+                "Let $i$ be electric current. Let $C$ be capacitance. Let $v$ be voltage. Let $t$ be duration. $i=C\\frac{dv}{dt}$",
+                "i=",
+                "circuits:capacitor-current-law",
+                ["current", "capacitance", "voltage", "time"].as_slice(),
+            ),
+            (
+                "Let $x$ be an n-dimensional vector. Let $u$ be an m-dimensional vector. Let $A$ be an n by n matrix. Let $B$ be an n by m matrix. $\\dot{x}=Ax+Bu$",
+                "\\dot{x}",
+                "control-systems:continuous-state-equation",
+                ["state", "state-matrix", "input-matrix", "control-input"].as_slice(),
+            ),
+        ];
+
+        for (content, needle, relation_id, expected_roles) in cases {
+            let mut engine = SemathEngine::default();
+            engine.reset(snapshot(content)).unwrap();
+            let offset = content.rfind(needle).unwrap() as u32 + 1;
+            let result = engine
+                .query(query(Query::SemanticContext {
+                    file_id: "main".into(),
+                    offset,
+                }))
+                .unwrap();
+            let QueryValue::SemanticContext { context } = result.value else {
+                panic!("expected semantic context")
+            };
+            let relation = context
+                .relations
+                .iter()
+                .find(|relation| relation.relation_id == relation_id)
+                .unwrap_or_else(|| panic!("missing relation {relation_id}"));
+            assert_eq!(
+                relation
+                    .roles
+                    .iter()
+                    .map(|role| role.role.as_str())
+                    .collect::<Vec<_>>(),
+                expected_roles,
+            );
+            assert!(relation.roles.iter().all(|role| role.concept_id.is_some()));
+        }
+    }
+
+    #[test]
     fn bounds_large_inspection_trees_and_exposes_rename_availability() {
         let large_formula = format!("$x={}$", "a+".repeat(140));
         let mut engine = SemathEngine::default();

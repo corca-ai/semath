@@ -360,7 +360,7 @@
       "language": "latex",
       "source": "A generic training problem may be written as \\[\\min_{\\theta} J(\\theta)\\].",
       "cursorNeedle": "J(\\theta)",
-      "expectedPatterns": []
+      "expectedPatterns": ["minimum-objective"]
     },
     {
       "id": "coverage-minimax-game",
@@ -369,7 +369,7 @@
       "language": "markdown",
       "source": "Adversarial learning often studies $\\min_u\\max_v \\Phi(u,v)$ as a saddle problem.",
       "cursorNeedle": "\\Phi",
-      "expectedPatterns": []
+      "expectedPatterns": ["minimax-objective"]
     },
     {
       "id": "coverage-kkt-stationarity",
@@ -378,7 +378,7 @@
       "language": "latex",
       "source": "One stationarity condition is \\[\\nabla_x \\mathcal{L}(x,\\lambda)=0\\].",
       "cursorNeedle": "\\nabla_x",
-      "expectedPatterns": []
+      "expectedPatterns": ["kkt-stationarity"]
     },
     {
       "id": "coverage-kkt-complementarity",

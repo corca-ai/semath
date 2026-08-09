@@ -94,11 +94,12 @@ static CALL_SUFFIX: LazyLock<Regex> =
 static EXPRESSION_DEFINES_SUFFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)^\s+defines?\s+(?:(?:an?|the)\s+)?([^.;\n]+)").unwrap());
 static VECTOR_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\b([a-z0-9]+)[ -]dimensional\s+(?:(?:real|normalized)\s+)*vector\s*$").unwrap()
+    Regex::new(r"(?i)\b([a-z0-9]+)[ -]dimensional\s+(?:(?:real|normalized)\s+)*vectors?\s*$")
+        .unwrap()
 });
 static MATRIX_DIMENSIONS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r"(?i)\b([a-z0-9]+)\s*(?:by|x|×)\s*([a-z0-9]+)\s+(?:(?:real|symmetric|diagonal|orthogonal|positive[ -]definite|positive[ -]semidefinite)\s+)*matrix\s*$",
+        r"(?i)\b([a-z0-9]+)\s*(?:by|x|×)\s*([a-z0-9]+)\s+(?:(?:real|symmetric|diagonal|orthogonal|positive[ -]definite|positive[ -]semidefinite)\s+)*(?:matrix|matrices)\s*$",
     )
     .unwrap()
 });
@@ -675,13 +676,13 @@ fn shape_claim(description: &str) -> Option<(ProseShape, Vec<String>)> {
         )
     } else if let Some(captures) = VECTOR_DIMENSION.captures(description) {
         ProseShape::Vector(captures.get(1).unwrap().as_str().into())
-    } else if last_word(&normalized) == Some("matrix") {
+    } else if matches!(last_word(&normalized), Some("matrix" | "matrices")) {
         ProseShape::Matrix("?".into(), "?".into())
-    } else if last_word(&normalized) == Some("vector") {
+    } else if matches!(last_word(&normalized), Some("vector" | "vectors")) {
         ProseShape::Vector("?".into())
-    } else if last_word(&normalized) == Some("scalar") {
+    } else if matches!(last_word(&normalized), Some("scalar" | "scalars")) {
         ProseShape::Scalar
-    } else if last_word(&normalized) == Some("tensor") {
+    } else if matches!(last_word(&normalized), Some("tensor" | "tensors")) {
         ProseShape::Tensor(vec!["?".into()])
     } else {
         return None;

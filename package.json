@@ -1,6 +1,6 @@
 {
   "name": "semath",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -40,7 +40,7 @@
     "corpus:synthetic": "bun scripts/check-synthetic-corpus.ts",
     "pack:conformance": "bun packages/packs/conformance.mjs",
     "package:smoke": "node scripts/check-package-smoke.mjs",
-    "parity": "node scripts/check-parity.mjs",
+    "parity": "bun scripts/check-parity.mjs",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit",
     "update:goldens": "node scripts/update-native-goldens.mjs"
