@@ -47,8 +47,8 @@ const scorecards = legacyPacks().map((pack) => {
   };
 });
 
-if (scorecards.reduce((total, score) => total + score.patterns, 0) !== 68) {
-  throw new Error("v0.13 must retain exactly 68 patterns");
+if (scorecards.reduce((total, score) => total + score.patterns, 0) !== 83) {
+  throw new Error("the established pack catalog must contain exactly 83 patterns");
 }
 
 for (const score of scorecards) {

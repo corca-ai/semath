@@ -412,18 +412,18 @@
       "topic": "matrix-operations",
       "purpose": "coverage",
       "language": "markdown",
-      "source": "A future rule could type-check the matrix sum $A+B$.",
+      "source": "Let $A \\in \\mathbb{R}^{m \\times n}$ and $B \\in \\mathbb{R}^{m \\times n}$. The matrix sum is $A+B$.",
       "cursorNeedle": "A+B",
-      "expectedPatterns": []
+      "expectedPatterns": ["matrix-addition"]
     },
     {
       "id": "la-cov-matrix-exponential",
       "topic": "matrix-functions",
       "purpose": "coverage",
       "language": "latex",
-      "source": "Continuous linear dynamics use the matrix exponential \\[e^{tA}\\].",
+      "source": "Let $t \\in \\mathbb{R}$ and $A \\in \\mathbb{R}^{n \\times n}$. Continuous linear dynamics use \\[e^{tA}\\].",
       "cursorNeedle": "e^{tA}",
-      "expectedPatterns": []
+      "expectedPatterns": ["matrix-exponential"]
     },
     {
       "id": "la-cov-characteristic-equation",
@@ -432,7 +432,7 @@
       "language": "markdown",
       "source": "Eigenvalues solve the characteristic equation $\\det(\\lambda I-A)=0$.",
       "cursorNeedle": "\\det(\\lambda I-A)=0",
-      "expectedPatterns": []
+      "expectedPatterns": ["characteristic-equation"]
     },
     {
       "id": "la-cov-null-space",

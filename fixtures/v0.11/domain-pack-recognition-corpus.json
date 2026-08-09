@@ -11,6 +11,9 @@
     { "id": "linear-eigenvalue", "content": "$Av=\\lambda v$", "expectedPattern": "eigenvalue-equation" },
     { "id": "linear-svd", "content": "$A=U\\Sigma V^{\\top}$", "expectedPattern": "singular-value-decomposition" },
     { "id": "linear-normal-equations", "content": "$A^{\\top}Ax=A^{\\top}b$", "expectedPattern": "normal-equations" },
+    { "id": "linear-matrix-addition", "context": "Let $A \\in \\mathbb{R}^{m \\times n}$ and $B \\in \\mathbb{R}^{m \\times n}$. ", "content": "$A+B$", "expectedPattern": "matrix-addition" },
+    { "id": "linear-matrix-exponential", "context": "Let $t \\in \\mathbb{R}$ and $A \\in \\mathbb{R}^{n \\times n}$. ", "content": "$e^{tA}$", "expectedPattern": "matrix-exponential" },
+    { "id": "linear-characteristic-equation", "content": "$\\det(\\lambda I-A)=0$", "expectedPattern": "characteristic-equation" },
 
     { "id": "probability-joint-event", "content": "$\\mathbb{P}(A \\cap B)$", "expectedPattern": "joint-event-probability" },
     { "id": "probability-complement", "content": "$\\mathbb{P}(A^c)$", "expectedPattern": "complement-probability" },
@@ -23,6 +26,9 @@
     { "id": "probability-entropy", "content": "$H(X)$", "expectedPattern": "entropy" },
     { "id": "probability-kl", "content": "$D_{\\mathrm{KL}}(P||Q)$", "expectedPattern": "kl-divergence" },
     { "id": "probability-sample-mean", "content": "$\\frac{1}{n}\\sum_{i=1}^{n}X_i$", "expectedPattern": "sample-mean" },
+    { "id": "probability-bernoulli", "content": "$X \\sim \\operatorname{Bernoulli}(\\theta)$", "expectedPattern": "bernoulli-distribution" },
+    { "id": "probability-poisson", "content": "$N \\sim \\operatorname{Poisson}(\\lambda)$", "expectedPattern": "poisson-distribution" },
+    { "id": "probability-binomial", "content": "$K \\sim \\operatorname{Binomial}(n,p)$", "expectedPattern": "binomial-distribution" },
 
     { "id": "calculus-ordinary-derivative", "content": "$\\frac{d f}{d x}$", "expectedPattern": "ordinary-derivative" },
     { "id": "calculus-partial-derivative", "content": "$\\frac{\\partial f}{\\partial x}$", "expectedPattern": "partial-derivative" },
@@ -36,6 +42,9 @@
     { "id": "calculus-finite-product", "content": "$\\prod_{i=1}^{n} a_i$", "expectedPattern": "finite-product" },
     { "id": "calculus-divergence", "content": "$\\nabla \\cdot F$", "expectedPattern": "divergence" },
     { "id": "calculus-curl", "content": "$\\nabla \\times F$", "expectedPattern": "curl" },
+    { "id": "calculus-directional-derivative", "content": "$D_v f(x)$", "expectedPattern": "directional-derivative" },
+    { "id": "calculus-jacobian", "content": "$J_f(x)$", "expectedPattern": "jacobian" },
+    { "id": "calculus-frechet-derivative", "content": "$Df(x)[h]$", "expectedPattern": "frechet-derivative" },
 
     { "id": "optimization-argmin", "content": "$\\argmin_{x} f(x)$", "expectedPattern": "argmin-objective" },
     { "id": "optimization-argmax", "content": "$\\argmax_{x} f(x)$", "expectedPattern": "argmax-objective" },
@@ -49,6 +58,9 @@
     { "id": "optimization-softmax", "content": "$\\operatorname{softmax}(z)$", "expectedPattern": "softmax" },
     { "id": "optimization-empirical-risk", "content": "$\\frac{1}{n}\\sum_{i=1}^{n}\\ell_i$", "expectedPattern": "empirical-risk" },
     { "id": "optimization-cross-entropy", "content": "$-\\sum_{k} y_k \\log p_k$", "expectedPattern": "cross-entropy-loss" },
+    { "id": "optimization-minimum", "content": "$\\min_{\\theta} J(\\theta)$", "expectedPattern": "minimum-objective" },
+    { "id": "optimization-minimax", "content": "$\\min_u\\max_v \\Phi(u,v)$", "expectedPattern": "minimax-objective" },
+    { "id": "optimization-kkt-stationarity", "content": "$\\nabla_x \\mathcal{L}(x,\\lambda)=0$", "expectedPattern": "kkt-stationarity" },
 
     { "id": "discrete-membership", "content": "$x \\in S$", "expectedPattern": "set-membership" },
     { "id": "discrete-subset", "content": "$A \\subseteq B$", "expectedPattern": "subset-relation" },
@@ -63,7 +75,10 @@
     { "id": "discrete-binomial", "content": "$\\binom{n}{k}$", "expectedPattern": "binomial-coefficient" },
     { "id": "discrete-recurrence", "content": "$a_n=a_{n-1}+a_{n-2}$", "expectedPattern": "linear-recurrence" },
     { "id": "discrete-degree", "content": "$\\deg(v)$", "expectedPattern": "graph-degree" },
-    { "id": "discrete-graph-laplacian", "content": "$L=D-A$", "expectedPattern": "graph-laplacian" }
+    { "id": "discrete-graph-laplacian", "content": "$L=D-A$", "expectedPattern": "graph-laplacian" },
+    { "id": "discrete-symmetric-difference", "content": "$A \\triangle B$", "expectedPattern": "symmetric-difference" },
+    { "id": "discrete-set-complement", "content": "$S^{\\mathsf{c}}$", "expectedPattern": "set-complement" },
+    { "id": "discrete-cartesian-product", "content": "$X \\times Y$", "expectedPattern": "cartesian-product" }
   ],
   "collisions": [
     { "id": "linear-probability", "packs": ["linear-algebra", "probability"], "content": "$\\det(\\mathbb{P}(A \\cap B))$", "expectedPatterns": ["determinant"] },

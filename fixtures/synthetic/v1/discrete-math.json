@@ -396,7 +396,7 @@
       "language": "markdown",
       "source": "The vertices appearing in exactly one side form $A \\triangle B$ in the partition.",
       "cursorNeedle": "\\triangle",
-      "expectedPatterns": []
+      "expectedPatterns": ["symmetric-difference"]
     },
     {
       "id": "coverage-set-complement",
@@ -405,7 +405,7 @@
       "language": "latex",
       "source": "Relative to the universe, the omitted elements form \\[S^{\\mathsf{c}}\\].",
       "cursorNeedle": "\\mathsf{c}",
-      "expectedPatterns": []
+      "expectedPatterns": ["set-complement"]
     },
     {
       "id": "coverage-cartesian-product",
@@ -414,7 +414,7 @@
       "language": "markdown",
       "source": "The ordered pairs are drawn from $X \\times Y$ in the relation.",
       "cursorNeedle": "\\times",
-      "expectedPatterns": []
+      "expectedPatterns": ["cartesian-product"]
     },
     {
       "id": "coverage-indexed-union",

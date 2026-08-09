@@ -22,6 +22,17 @@ import {
   buildSyntheticProseFixture,
   parseSyntheticProseCorpus,
 } from "./synthetic-prose-corpus.ts";
+import {
+  assertSyntheticFormulaResults,
+  buildSyntheticFormulaFixture,
+  parseSyntheticDomainCorpus,
+} from "./synthetic-corpus.ts";
+import {
+  aggregateSemanticQuality,
+  evaluateSemanticQualityBudgets,
+} from "./semantic-quality.ts";
+
+const productQuality = [];
 
 const fixtureSets = [
   {
@@ -162,6 +173,7 @@ for (const { fixtureUrl, goldenUrl, version } of fixtureSets) {
   if (nativeJson !== JSON.stringify(golden.results)) {
     throw new Error(`semantic result differs from the ${version} golden fixture`);
   }
+  recordProductQuality(fixture.queries, version);
   console.log(`parity OK: ${fixture.queries.length} ${version} queries`);
 }
 
@@ -176,6 +188,7 @@ const fixtureText = JSON.stringify(fixture);
 const native = spawnSync("./target/debug/semath-native", [], {
   encoding: "utf8",
   input: fixtureText,
+  maxBuffer: 64 * 1024 * 1024,
 });
 if (native.status !== 0) throw new Error(native.stderr || "v0.11 native fixture failed");
 const nativeResults = JSON.parse(native.stdout);
@@ -189,6 +202,7 @@ if (JSON.stringify(nativeResults) !== JSON.stringify(wasmResults)) {
   throw new Error("native/WASM semantic result mismatch for v0.11 domain packs");
 }
 const summary = assertDomainPackResults(nativeResults, expectations);
+recordProductQuality(fixture.queries, "v0.11-domain-packs");
 console.log(
   `parity OK: ${summary.recognized} v0.11 patterns, ${summary.results} safety queries`,
 );
@@ -229,6 +243,7 @@ const actionSummary = assertActionPatternResults(
   nativeActionResults,
   actionFixture.expectations,
 );
+recordProductQuality(actionFixture.fixture.queries, "v0.12-actions");
 console.log(
   `parity OK: ${actionSummary.recognized} action patterns, ${actionSummary.results} v0.12 surface/adversarial queries`,
 );
@@ -271,6 +286,7 @@ const realisticSummary = assertRealisticProjectResults(
   nativeRealisticResults,
   realistic.expectations,
 );
+recordProductQuality(realistic.fixture.queries, "v0.12-realistic-project");
 console.log(
   `parity OK: ${realisticSummary.results} v0.12 realistic mixed-project queries`,
 );
@@ -311,6 +327,7 @@ const scientificSummary = assertScientificResults(
   nativeScientificResults,
   scientific.expectations,
 );
+recordProductQuality(scientific.fixture.queries, "v0.14-scientific");
 console.log(
   `parity OK: ${scientificSummary.queries} v0.14 scientific foundation queries`,
 );
@@ -353,6 +370,119 @@ const proseSummary = assertSyntheticProseResults(
   nativeProseResults,
   prose.expectations,
 );
+recordProductQuality(prose.fixture.queries, "synthetic-prose");
 console.log(
   `parity OK: ${proseSummary.cases} synthetic prose queries (${proseSummary.supportedCoverageTargets}/${proseSummary.coverageTargets} coverage targets supported)`,
 );
+
+const formulaRoot = new URL("../fixtures/synthetic/v1/", import.meta.url);
+const formulaNames = (await readdir(formulaRoot))
+  .filter((name) => name.endsWith(".json"))
+  .sort();
+const formulaCorpora = await Promise.all(
+  formulaNames.map(async (name) =>
+    parseSyntheticDomainCorpus(
+      JSON.parse(await readFile(new URL(name, formulaRoot), "utf8")),
+      name,
+    ),
+  ),
+);
+const formula = buildSyntheticFormulaFixture(formulaCorpora);
+const formulaText = JSON.stringify(formula.fixture);
+const nativeFormula = spawnSync("./target/debug/semath-native", [], {
+  encoding: "utf8",
+  input: formulaText,
+  maxBuffer: 64 * 1024 * 1024,
+});
+if (nativeFormula.status !== 0) {
+  throw new Error(nativeFormula.stderr || "synthetic formula native fixture failed");
+}
+const nativeFormulaResults = JSON.parse(nativeFormula.stdout);
+const formulaEngine = new SemathEngine();
+formulaEngine.resetProject(
+  encoder.encode(JSON.stringify(formula.fixture.snapshot)),
+);
+const wasmFormulaResults = formula.fixture.queries.map((query) =>
+  JSON.parse(
+    decoder.decode(formulaEngine.query(encoder.encode(JSON.stringify(query)))),
+  ),
+);
+formulaEngine.free();
+if (JSON.stringify(nativeFormulaResults) !== JSON.stringify(wasmFormulaResults)) {
+  throw new Error("native/WASM semantic result mismatch for synthetic formulas");
+}
+const formulaSummary = assertSyntheticFormulaResults(
+  nativeFormulaResults,
+  formula.expectations,
+);
+recordProductQuality(formula.fixture.queries, "synthetic-formulas");
+console.log(
+  `parity OK: ${formula.expectations.length} synthetic formula queries across ${formulaSummary.length} domains`,
+);
+
+const qualityBudgetFile = JSON.parse(
+  await readFile(
+    new URL("../fixtures/v0.15/semantic-quality-budgets.json", import.meta.url),
+    "utf8",
+  ),
+);
+const productBudgets = qualityBudgetFile.budgets.filter(
+  (budget) => budget.selector.field === "product",
+);
+const productScores = aggregateSemanticQuality(productQuality, ["capability"]);
+for (const score of productScores) {
+  console.log(
+    `quality guardrail: ${score.capability} cases=${score.cases} exact=${score.caseAccuracyPercent}% known-false=${score.unexpectedItems}`,
+  );
+}
+const productBudgetResults = evaluateSemanticQualityBudgets(
+  productQuality,
+  productBudgets,
+);
+const productViolations = productBudgetResults.flatMap((result) =>
+  result.violations.map((violation) => `${result.budgetId}: ${violation}`),
+);
+if (productViolations.length > 0) {
+  throw new Error(`product quality budget regression:\n${productViolations.join("\n")}`);
+}
+console.log(`product quality budgets OK: ${productBudgetResults.length} zero-defect/parity gates`);
+
+function recordProductQuality(queries, suite) {
+  for (const envelope of queries) {
+    productQuality.push(observation("native-wasm-parity", suite));
+    const capability = productCapability(envelope.query.kind);
+    if (capability) productQuality.push(observation(capability, suite));
+  }
+}
+
+function observation(capability, suite) {
+  return {
+    field: "product",
+    domain: suite,
+    topic: "exact-regression",
+    capability,
+    cases: 1,
+    exactCases: 1,
+    expectedItems: 0,
+    matchedItems: 0,
+    actualItems: 0,
+    unexpectedItems: 0,
+  };
+}
+
+function productCapability(kind) {
+  if (kind === "definition") return "definitions";
+  if (kind === "references") return "references";
+  if (kind === "diagnostics" || kind === "explainDiagnostic") {
+    return "diagnostics";
+  }
+  if (
+    kind === "formulaCompletion" ||
+    kind === "formulaRewrite" ||
+    kind === "rename" ||
+    kind === "prepareRename"
+  ) {
+    return "edits";
+  }
+  return undefined;
+}

@@ -360,7 +360,7 @@
       "language": "markdown",
       "source": "The directional derivative is $D_v f(x)$.",
       "cursorNeedle": "D_v",
-      "expectedPatterns": []
+      "expectedPatterns": ["directional-derivative"]
     },
     {
       "id": "calculus-coverage-jacobian",
@@ -369,7 +369,7 @@
       "language": "latex",
       "source": "Represent the Jacobian by \\[J_f(x)\\].",
       "cursorNeedle": "J_f",
-      "expectedPatterns": []
+      "expectedPatterns": ["jacobian"]
     },
     {
       "id": "calculus-coverage-frechet-derivative",
@@ -378,7 +378,7 @@
       "language": "markdown",
       "source": "Apply the Frechet derivative to a direction: $Df(x)[h]$.",
       "cursorNeedle": "[h]",
-      "expectedPatterns": []
+      "expectedPatterns": ["frechet-derivative"]
     },
     {
       "id": "calculus-coverage-closed-line-integral",

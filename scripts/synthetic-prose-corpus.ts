@@ -1,4 +1,5 @@
 import type { SyntheticPurpose } from "./synthetic-corpus";
+import type { SemanticQualityObservation } from "./semantic-quality";
 
 const CURSOR_MARKER = "<<CURSOR>>";
 
@@ -212,15 +213,60 @@ export function assertSyntheticProseResults(
   };
 }
 
+export function observeSyntheticProseResults(
+  results: HoverResult[],
+  expectations: SyntheticProseExpectation[],
+): SemanticQualityObservation[] {
+  if (results.length !== expectations.length) {
+    throw new Error(
+      `synthetic prose result count ${results.length} differs from ${expectations.length}`,
+    );
+  }
+  return expectations.map((expectation, index) => {
+    const value = results[index]?.value;
+    if (value?.kind !== "hover" || !Array.isArray(value.definitions)) {
+      throw new Error(`${expectation.domain}/${expectation.case.id}: missing hover result`);
+    }
+    const actual = value.definitions.map((definition) => ({
+      description: definition.description ?? "",
+      ruleId: definition.evidence?.ruleId ?? "",
+    }));
+    const expected = expectation.case.expectedDefinitions;
+    const expectedKeys = new Set(expected.map(definitionKey));
+    const matchedItems = actual.filter((definition) =>
+      expectedKeys.has(definitionKey(definition)),
+    ).length;
+    return {
+      field: "prose",
+      domain: expectation.domain,
+      topic: expectation.case.topic,
+      capability:
+        expectation.case.purpose === "coverage"
+          ? expected.length > 0
+            ? "supported-coverage"
+            : "coverage-holdout"
+          : expectation.case.purpose,
+      cases: 1,
+      exactCases: sameDefinitions(actual, expected) ? 1 : 0,
+      expectedItems: expected.length,
+      matchedItems,
+      actualItems: actual.length,
+      unexpectedItems: actual.length - matchedItems,
+    };
+  });
+}
+
 function sameDefinitions(
   actual: ExpectedSyntheticDefinition[],
   expected: ExpectedSyntheticDefinition[],
 ) {
-  const key = (definition: ExpectedSyntheticDefinition) =>
-    `${definition.ruleId}\0${definition.description}`;
-  const left = actual.map(key).sort();
-  const right = expected.map(key).sort();
+  const left = actual.map(definitionKey).sort();
+  const right = expected.map(definitionKey).sort();
   return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function definitionKey(definition: ExpectedSyntheticDefinition) {
+  return `${definition.ruleId}\0${definition.description}`;
 }
 
 function formatDefinitions(definitions: ExpectedSyntheticDefinition[]) {

@@ -3,18 +3,30 @@ export function buildDomainPackFixture(corpus) {
   const queries = [];
   const expectations = [];
   const catalogs = [];
+  const catalogsByKey = new Map();
 
   for (const [index, entry] of corpus.cases.entries()) {
     for (const [variantIndex, variant] of recognitionVariants(entry).entries()) {
-      const batch = index * 2 + (variantIndex < 3 ? 0 : 1);
-      const catalog = catalogs[batch] ?? {
+      const group = variantIndex < 3 ? 0 : 1;
+      const key = `${index}-${group}`;
+      const catalog = catalogsByKey.get(key) ?? {
         content: "",
-        fileId: `catalog-${batch}`,
+        fileId: `catalog-${key}`,
       };
-      catalogs[batch] = catalog;
+      if (!catalogsByKey.has(key)) {
+        catalogsByKey.set(key, catalog);
+        catalogs.push(catalog);
+      }
+      const omitRepeatedContext = Boolean(entry.context && catalog.content);
+      const segment = omitRepeatedContext
+        ? variant.content.slice(entry.context.length)
+        : variant.content;
       const start = catalog.content.length;
-      catalog.content += `${variant.content}\n`;
-      const offset = cursorInsideSegment(variant.content, start);
+      catalog.content += `${segment}\n`;
+      const offset =
+        start +
+        variant.cursorOffset -
+        (omitRepeatedContext ? entry.context.length : 0);
       if (variant.expected) {
         for (const kind of [
           "formulaRecognition",
@@ -131,6 +143,7 @@ export function assertDomainPackResults(results, expectations) {
 
 export function recognitionVariants(entry) {
   const formula = mathBody(entry.content);
+  const context = entry.context ?? "";
   const truncated = formula.slice(0, Math.max(1, formula.length - 1));
   const positives = [
     { id: "positive-inline", content: `$${formula}$`, expected: true },
@@ -152,7 +165,7 @@ export function recognitionVariants(entry) {
       expected: true,
     },
   ];
-  if (!formula.includes("=")) {
+  if (!formula.includes("=") && !entry.context) {
     positives.push({
       id: "positive-assignment",
       content: `$q=${formula}$`,
@@ -187,7 +200,11 @@ export function recognitionVariants(entry) {
       content: `$\\semathUnknown{${formula}}$`,
       expected: false,
     },
-  ];
+  ].map((variant) => ({
+    ...variant,
+    content: `${context}${variant.content}`,
+    cursorOffset: context.length + cursorInsideSegment(variant.content, 0),
+  }));
 }
 
 function mathBody(content) {

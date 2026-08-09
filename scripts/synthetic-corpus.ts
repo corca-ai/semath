@@ -38,6 +38,8 @@ export interface SyntheticScorecard {
   semanticCoveragePercent: number;
 }
 
+import type { SemanticQualityObservation } from "./semantic-quality";
+
 export function parseSyntheticDomainCorpus(
   value: unknown,
   sourceName: string,
@@ -191,6 +193,41 @@ export function assertSyntheticFormulaResults(
   return scoreSyntheticCorpora(expectations);
 }
 
+export function observeSyntheticFormulaResults(
+  results: FormulaRecognitionResult[],
+  expectations: SyntheticExpectation[],
+): SemanticQualityObservation[] {
+  if (results.length !== expectations.length) {
+    throw new Error(
+      `synthetic result count ${results.length} differs from ${expectations.length}`,
+    );
+  }
+  return expectations.map((expectation, index) => {
+    const value = results[index]?.value;
+    if (value?.kind !== "formulaRecognitions" || !Array.isArray(value.recognitions)) {
+      throw new Error(`${expectation.domain}/${expectation.case.id}: missing recognition result`);
+    }
+    const actual = value.recognitions.flatMap((recognition) =>
+      recognition.patternId ? [recognition.patternId] : [],
+    );
+    const expected = expectation.case.expectedPatterns;
+    const expectedSet = new Set(expected);
+    const matchedItems = actual.filter((pattern) => expectedSet.has(pattern)).length;
+    return {
+      field: "formula",
+      domain: expectation.domain,
+      topic: expectation.case.topic,
+      capability: formulaCapability(expectation.case),
+      cases: 1,
+      exactCases: sameValues(actual, expected) ? 1 : 0,
+      expectedItems: expected.length,
+      matchedItems,
+      actualItems: actual.length,
+      unexpectedItems: actual.length - matchedItems,
+    };
+  });
+}
+
 export function scoreSyntheticCorpora(
   expectations: SyntheticExpectation[],
 ): SyntheticScorecard[] {
@@ -235,6 +272,13 @@ function countPurpose(
   purpose: SyntheticPurpose,
 ) {
   return entries.filter((entry) => entry.case.purpose === purpose).length;
+}
+
+function formulaCapability(entry: SyntheticFormulaCase) {
+  if (entry.purpose !== "coverage") return entry.purpose;
+  return entry.expectedPatterns.length > 0
+    ? "supported-coverage"
+    : "coverage-holdout";
 }
 
 function sameValues(actual: string[], expected: string[]) {

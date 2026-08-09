@@ -4,13 +4,20 @@ import { builtInPacks } from "../packages/packs/src/index";
 import {
   assertSyntheticFormulaResults,
   buildSyntheticFormulaFixture,
+  observeSyntheticFormulaResults,
   parseSyntheticDomainCorpus,
 } from "./synthetic-corpus";
 import {
   assertSyntheticProseResults,
   buildSyntheticProseFixture,
+  observeSyntheticProseResults,
   parseSyntheticProseCorpus,
 } from "./synthetic-prose-corpus";
+import {
+  aggregateSemanticQuality,
+  evaluateSemanticQualityBudgets,
+  type SemanticQualityBudget,
+} from "./semantic-quality";
 
 const corpusRoot = new URL("../fixtures/synthetic/v1/", import.meta.url);
 const names = (await readdir(corpusRoot, { withFileTypes: true }))
@@ -44,8 +51,13 @@ for (const corpus of corpora) {
 }
 
 const { expectations, fixture } = buildSyntheticFormulaFixture(corpora);
+const formulaResults = runNative(fixture, "formula corpus");
 const scorecards = assertSyntheticFormulaResults(
-  runNative(fixture, "formula corpus"),
+  formulaResults,
+  expectations,
+);
+const qualityObservations = observeSyntheticFormulaResults(
+  formulaResults,
   expectations,
 );
 for (const score of scorecards) {
@@ -100,13 +112,63 @@ for (const [purpose, minimum] of [
     );
   }
 }
-const proseScore = assertSyntheticProseResults(
-  runNative(prose.fixture, "prose corpus"),
-  prose.expectations,
+const proseResults = runNative(prose.fixture, "prose corpus");
+const proseScore = assertSyntheticProseResults(proseResults, prose.expectations);
+qualityObservations.push(
+  ...observeSyntheticProseResults(proseResults, prose.expectations),
 );
 console.log(
   `synthetic prose: ${proseScore.cases} cases, ${proseScore.recognition} recognized definitions, ${proseScore.refusals} refusals, ${proseScore.supportedCoverageTargets}/${proseScore.coverageTargets} coverage targets supported (${proseScore.semanticCoveragePercent}%)`,
 );
+
+const qualityBudgetFile = JSON.parse(
+  await readFile(
+    new URL("../fixtures/v0.15/semantic-quality-budgets.json", import.meta.url),
+    "utf8",
+  ),
+) as { schemaVersion?: unknown; budgets?: unknown };
+if (qualityBudgetFile.schemaVersion !== 1 || !Array.isArray(qualityBudgetFile.budgets)) {
+  throw new Error("semantic quality budget file must use schemaVersion 1");
+}
+const qualityScores = aggregateSemanticQuality(qualityObservations, [
+  "field",
+  "domain",
+  "capability",
+]);
+for (const score of qualityScores) {
+  console.log(
+    `quality: ${score.field}/${score.domain}/${score.capability} cases=${score.cases} exact=${score.caseAccuracyPercent}% precision=${score.precisionPercent}% recall=${score.recallPercent}% unexpected=${score.unexpectedItems}`,
+  );
+}
+const topicScores = aggregateSemanticQuality(qualityObservations, [
+  "field",
+  "domain",
+  "topic",
+  "capability",
+]);
+const imperfectTopics = topicScores.filter(
+  (score) =>
+    score.caseAccuracyPercent < 100 ||
+    score.precisionPercent < 100 ||
+    score.recallPercent < 100 ||
+    score.unexpectedItems > 0,
+);
+console.log(
+  `quality topics: ${topicScores.length} field/domain/topic/capability cells, ${imperfectTopics.length} regressions`,
+);
+const budgetResults = evaluateSemanticQualityBudgets(
+  qualityObservations,
+  (qualityBudgetFile.budgets as SemanticQualityBudget[]).filter(
+    (budget) => budget.selector.field !== "product",
+  ),
+);
+const violations = budgetResults.flatMap((result) =>
+  result.violations.map((violation) => `${result.budgetId}: ${violation}`),
+);
+if (violations.length > 0) {
+  throw new Error(`semantic quality budget regression:\n${violations.join("\n")}`);
+}
+console.log(`semantic quality budgets OK: ${budgetResults.length} versioned gates`);
 
 function runNative(fixture: unknown, label: string) {
   const native = spawnSync(

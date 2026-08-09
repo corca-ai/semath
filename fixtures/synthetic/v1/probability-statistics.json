@@ -414,7 +414,7 @@
       "language": "markdown",
       "source": "A binary response follows $X \\sim \\operatorname{Bernoulli}(\\theta)$.",
       "cursorNeedle": "X \\sim \\operatorname{Bernoulli}(\\theta)",
-      "expectedPatterns": []
+      "expectedPatterns": ["bernoulli-distribution"]
     },
     {
       "id": "coverage-poisson-distribution",
@@ -423,7 +423,7 @@
       "language": "latex",
       "source": "The arrival count is modeled by \\[N \\sim \\operatorname{Poisson}(\\lambda)\\].",
       "cursorNeedle": "N \\sim \\operatorname{Poisson}(\\lambda)",
-      "expectedPatterns": []
+      "expectedPatterns": ["poisson-distribution"]
     },
     {
       "id": "coverage-binomial-distribution",
@@ -432,7 +432,7 @@
       "language": "markdown",
       "source": "The success total satisfies $K \\sim \\operatorname{Binomial}(n,p)$.",
       "cursorNeedle": "K \\sim \\operatorname{Binomial}(n,p)",
-      "expectedPatterns": []
+      "expectedPatterns": ["binomial-distribution"]
     },
     {
       "id": "coverage-exponential-distribution",

@@ -1337,8 +1337,12 @@ mod tests {
     #[serde(rename_all = "camelCase")]
     struct PackCase {
         id: String,
+        #[serde(default)]
+        context: String,
         content: String,
         expected_pattern: String,
+        #[serde(default)]
+        unfinished_content: Option<String>,
     }
 
     #[test]
@@ -1397,8 +1401,9 @@ mod tests {
         assert_eq!(covered, expected, "corpus must account for every entry");
 
         for case in corpus.cases {
+            let content = format!("{}{}", case.context, case.content);
             let (document, parsed, shapes, consistency) =
-                analyze_language(&case.content, DocumentLanguage::Markdown);
+                analyze_language(&content, DocumentLanguage::Markdown);
             let actual = analyze_formulas(&document, &parsed, &shapes, &consistency)
                 .all()
                 .iter()
@@ -1411,12 +1416,15 @@ mod tests {
                 case.expected_pattern
             );
 
-            let expression = case
-                .content
-                .strip_prefix('$')
-                .and_then(|value| value.strip_suffix('$'))
-                .expect("pack corpus uses inline math");
-            let unfinished = format!("${expression}{{$");
+            let unfinished_math = case.unfinished_content.unwrap_or_else(|| {
+                let expression = case
+                    .content
+                    .strip_prefix('$')
+                    .and_then(|value| value.strip_suffix('$'))
+                    .expect("pack corpus uses inline math unless unfinishedContent is explicit");
+                format!("${expression}{{$")
+            });
+            let unfinished = format!("{}{}", case.context, unfinished_math);
             let (document, parsed, shapes, consistency) =
                 analyze_language(&unfinished, DocumentLanguage::Markdown);
             let adversarial = analyze_formulas(&document, &parsed, &shapes, &consistency);
