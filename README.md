@@ -47,6 +47,14 @@ multiply-expanded candidates, and validates change batches before mutation.
 The five existing packs retain 68 patterns while adding generated Unicode/CRLF
 contexts, mutation refusals, and executable per-pack scorecards.
 
+The synthetic v1 corpus complements those compact calibration fixtures with
+independently LLM-authored English/TeX cases. Six mathematical fields contain
+supported surfaces, hard refusals, and explicit coverage targets; a separate
+English mathematical-prose corpus measures definition extraction. The corpus
+checker executes every annotation against the native engine and reports current
+coverage without manufacturing variants at test time. See
+[`fixtures/synthetic/v1`](./fixtures/synthetic/v1/README.md).
+
 Version 0.10 adds recoverable application, matrix, cases, and paired-delimiter
 IR; project/include/scope-aware semantic symbol identities; bounded macro
 provenance through wasmtex syntax schema 2; and a reusable prioritized Worker

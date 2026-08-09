@@ -1,0 +1,492 @@
+{
+  "schemaVersion": 1,
+  "domain": "calculus-analysis",
+  "cases": [
+    {
+      "id": "calculus-recognition-ordinary-derivative-01",
+      "topic": "differentiation",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "For this trajectory, use $\\frac{d q}{d t}$ as the instantaneous rate.",
+      "cursorNeedle": "\\frac",
+      "expectedPatterns": ["ordinary-derivative"]
+    },
+    {
+      "id": "calculus-recognition-ordinary-derivative-02",
+      "topic": "differentiation",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The measured slope is \\[\\frac { d r(s) } { d x }\\].",
+      "cursorNeedle": "r(s)",
+      "expectedPatterns": ["ordinary-derivative"]
+    },
+    {
+      "id": "calculus-recognition-partial-derivative-01",
+      "topic": "differentiation",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Hold the other coordinate fixed in $\\frac{\\partial u}{\\partial y}$.",
+      "cursorNeedle": "\\partial u",
+      "expectedPatterns": ["partial-derivative"]
+    },
+    {
+      "id": "calculus-recognition-partial-derivative-02",
+      "topic": "differentiation",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The local sensitivity is \\[\\frac { \\partial v(s) } { \\partial z }\\].",
+      "cursorNeedle": "v(s)",
+      "expectedPatterns": ["partial-derivative"]
+    },
+    {
+      "id": "calculus-recognition-gradient-01",
+      "topic": "multivariable-calculus",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The steepest ascent direction comes from $\\nabla g$.",
+      "cursorNeedle": "\\nabla",
+      "expectedPatterns": ["gradient"]
+    },
+    {
+      "id": "calculus-recognition-gradient-02",
+      "topic": "multivariable-calculus",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Evaluate the field \\[\\nabla   h(x,y)\\] at the sample point.",
+      "cursorNeedle": "h(x,y)",
+      "expectedPatterns": ["gradient"]
+    },
+    {
+      "id": "calculus-recognition-hessian-01",
+      "topic": "multivariable-calculus",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The second-order model uses $\\nabla^2 f$.",
+      "cursorNeedle": "^2",
+      "expectedPatterns": ["hessian", "laplacian"]
+    },
+    {
+      "id": "calculus-recognition-hessian-02",
+      "topic": "multivariable-calculus",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "At the trial point, inspect \\[\\nabla ^ {2} q(u,v)\\].",
+      "cursorNeedle": "q(u,v)",
+      "expectedPatterns": ["hessian", "laplacian"]
+    },
+    {
+      "id": "calculus-recognition-laplacian-01",
+      "topic": "vector-calculus",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The diffusion term is $\\Delta p$.",
+      "cursorNeedle": "\\Delta",
+      "expectedPatterns": ["laplacian"]
+    },
+    {
+      "id": "calculus-recognition-laplacian-02",
+      "topic": "vector-calculus",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Apply the spatial operator \\[\\Delta   r(x,y,z)\\] before updating the state.",
+      "cursorNeedle": "r(x,y,z)",
+      "expectedPatterns": ["laplacian"]
+    },
+    {
+      "id": "calculus-recognition-definite-integral-01",
+      "topic": "integration",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The accumulated moment is $\\int_{0}^{1} x^2 dx$.",
+      "cursorNeedle": "x^2",
+      "expectedPatterns": ["definite-integral"]
+    },
+    {
+      "id": "calculus-recognition-definite-integral-02",
+      "topic": "integration",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Compute \\[\\int _ {-1} ^ {1} (1-z^2) dz\\] for the profile.",
+      "cursorNeedle": "1-z^2",
+      "expectedPatterns": ["definite-integral"]
+    },
+    {
+      "id": "calculus-recognition-indefinite-integral-01",
+      "topic": "integration",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "An antiderivative family is represented by $\\int t^4 dt$.",
+      "cursorNeedle": "t^4",
+      "expectedPatterns": ["indefinite-integral"]
+    },
+    {
+      "id": "calculus-recognition-indefinite-integral-02",
+      "topic": "integration",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Integrate the response \\[\\int   (1+s^2) ds\\].",
+      "cursorNeedle": "1+s^2",
+      "expectedPatterns": ["indefinite-integral"]
+    },
+    {
+      "id": "calculus-recognition-limit-01",
+      "topic": "limits",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The removable singularity is studied through $\\lim_{x \\to 0} \\frac{\\sin x}{x}$.",
+      "cursorNeedle": "\\sin",
+      "expectedPatterns": ["limit"]
+    },
+    {
+      "id": "calculus-recognition-limit-02",
+      "topic": "limits",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "For the tail behavior, consider \\[\\lim _ { n \\to \\infty } a_n\\].",
+      "cursorNeedle": "a_n",
+      "expectedPatterns": ["limit"]
+    },
+    {
+      "id": "calculus-recognition-infinite-series-01",
+      "topic": "series",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The generating expression is $\\sum_{k=0}^{\\infty} r^k$.",
+      "cursorNeedle": "r^k",
+      "expectedPatterns": ["infinite-series"]
+    },
+    {
+      "id": "calculus-recognition-infinite-series-02",
+      "topic": "series",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Use the convergent benchmark \\[\\sum _ { j = 1 } ^ { \\infty } \\frac{1}{j^2}\\].",
+      "cursorNeedle": "j^2",
+      "expectedPatterns": ["infinite-series"]
+    },
+    {
+      "id": "calculus-recognition-finite-product-01",
+      "topic": "sequences",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The normalization factor is $\\prod_{i=1}^{N} a_i$.",
+      "cursorNeedle": "a_i",
+      "expectedPatterns": ["finite-product"]
+    },
+    {
+      "id": "calculus-recognition-finite-product-02",
+      "topic": "sequences",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Collect the factors as \\[\\prod _ { k = 0 } ^ { M } (1+b_k)\\].",
+      "cursorNeedle": "1+b_k",
+      "expectedPatterns": ["finite-product"]
+    },
+    {
+      "id": "calculus-recognition-divergence-01",
+      "topic": "vector-calculus",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "The source density is $\\nabla\\cdot F$.",
+      "cursorNeedle": "\\cdot",
+      "expectedPatterns": ["divergence"]
+    },
+    {
+      "id": "calculus-recognition-divergence-02",
+      "topic": "vector-calculus",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "Measure local expansion with \\[\\nabla \\cdot   V(x,y)\\].",
+      "cursorNeedle": "V(x,y)",
+      "expectedPatterns": ["divergence"]
+    },
+    {
+      "id": "calculus-recognition-curl-01",
+      "topic": "vector-calculus",
+      "purpose": "recognition",
+      "language": "latex",
+      "source": "The rotational component is $\\nabla\\times U$.",
+      "cursorNeedle": "\\times",
+      "expectedPatterns": ["curl"]
+    },
+    {
+      "id": "calculus-recognition-curl-02",
+      "topic": "vector-calculus",
+      "purpose": "recognition",
+      "language": "markdown",
+      "source": "Inspect the vortex field \\[\\nabla   \\times W(r,s)\\].",
+      "cursorNeedle": "W(r,s)",
+      "expectedPatterns": ["curl"]
+    },
+    {
+      "id": "calculus-refusal-higher-ordinary-derivative",
+      "topic": "differentiation",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "This is a second derivative: $\\frac{d^2 y}{d x^2}$.",
+      "cursorNeedle": "d^2",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-evaluated-derivative",
+      "topic": "differentiation",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "Evaluate the derivative at the origin: \\[\\left.\\frac{d f}{d x}\\right|_{x=0}\\].",
+      "cursorNeedle": "\\right|",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-mixed-partial",
+      "topic": "differentiation",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The mixed derivative is $\\frac{\\partial^2 u}{\\partial x\\partial y}$.",
+      "cursorNeedle": "\\partial^2",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-gradient-greek-symbol",
+      "topic": "multivariable-calculus",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "Take the gradient of the potential \\[\\nabla \\phi\\].",
+      "cursorNeedle": "\\phi",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-gradient-compound-expression",
+      "topic": "multivariable-calculus",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "Differentiate the summed field $\\nabla(f+g)$.",
+      "cursorNeedle": "f+g",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-named-hessian",
+      "topic": "multivariable-calculus",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "Use named Hessian notation \\[H_f(x)\\].",
+      "cursorNeedle": "H_f",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-laplacian-compound-expression",
+      "topic": "vector-calculus",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "Apply the Laplacian to a sum: $\\Delta(f+g)$.",
+      "cursorNeedle": "\\Delta",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-definite-integral-no-differential",
+      "topic": "integration",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The differential is absent from \\[\\int_0^1 x^2\\].",
+      "cursorNeedle": "x^2",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-indefinite-integral-no-differential",
+      "topic": "integration",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "This integral omits its differential: $\\int f(x)$.",
+      "cursorNeedle": "f(x)",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-limit-alternate-arrow",
+      "topic": "limits",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "Use a longer arrow in \\[\\lim_{x \\rightarrow 0} f(x)\\].",
+      "cursorNeedle": "\\rightarrow",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-finite-sum",
+      "topic": "series",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "This is a finite sum: $\\sum_{n=1}^{N} a_n$.",
+      "cursorNeedle": "a_n",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-series-without-initial-value",
+      "topic": "series",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "The lower index has no initial value in \\[\\sum_{n}^{\\infty} a_n\\].",
+      "cursorNeedle": "\\sum",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-product-without-initial-value",
+      "topic": "sequences",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The product leaves its initial index unspecified: $\\prod_{k}^{N} b_k$.",
+      "cursorNeedle": "b_k",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-divergence-of-sum",
+      "topic": "vector-calculus",
+      "purpose": "refusal",
+      "language": "latex",
+      "source": "Take the divergence of the combined fields \\[\\nabla\\cdot(F+G)\\].",
+      "cursorNeedle": "F+G",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-refusal-named-curl",
+      "topic": "vector-calculus",
+      "purpose": "refusal",
+      "language": "markdown",
+      "source": "The named operator appears as $\\operatorname{curl} F$.",
+      "cursorNeedle": "{curl}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-directional-derivative",
+      "topic": "directional-derivatives",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The directional derivative is $D_v f(x)$.",
+      "cursorNeedle": "D_v",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-jacobian",
+      "topic": "multivariable-calculus",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Represent the Jacobian by \\[J_f(x)\\].",
+      "cursorNeedle": "J_f",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-frechet-derivative",
+      "topic": "functional-analysis",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Apply the Frechet derivative to a direction: $Df(x)[h]$.",
+      "cursorNeedle": "[h]",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-closed-line-integral",
+      "topic": "integration",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The circulation is \\[\\oint_C F\\cdot dr\\].",
+      "cursorNeedle": "\\oint",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-double-integral",
+      "topic": "integration",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Integrate over the planar region with $\\iint_\\Omega g(x,y)\\,dx\\,dy$.",
+      "cursorNeedle": "\\iint",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-contour-integral",
+      "topic": "complex-analysis",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Integrate along the contour \\[\\int_C h(z)\\,dz\\].",
+      "cursorNeedle": "h(z)",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-taylor-polynomial",
+      "topic": "series",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The truncated Taylor polynomial is $T_N(x)=\\sum_{k=0}^{N} \\frac{f^{(k)}(0)}{k!}x^k$.",
+      "cursorNeedle": "f^{(k)}",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-sequence-convergence",
+      "topic": "sequences",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Express ordinary sequence convergence as \\[a_n \\to L\\].",
+      "cursorNeedle": "a_n",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-epsilon-delta-condition",
+      "topic": "limits",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "State the local condition as $\\forall \\varepsilon>0 \\exists \\delta>0$.",
+      "cursorNeedle": "\\varepsilon",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-supremum",
+      "topic": "real-analysis",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "Take the upper envelope \\[\\sup_{x\\in A} f(x)\\].",
+      "cursorNeedle": "\\sup",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-infimum",
+      "topic": "real-analysis",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "The lower envelope is $\\inf_{y\\in B} g(y)$.",
+      "cursorNeedle": "\\inf",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-limit-superior",
+      "topic": "sequences",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The asymptotic upper value is \\[\\limsup_{n\\to\\infty} a_n\\].",
+      "cursorNeedle": "\\limsup",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-uniform-convergence",
+      "topic": "function-sequences",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Denote uniform convergence by $f_n \\rightrightarrows f$.",
+      "cursorNeedle": "\\rightrightarrows",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-differential-equation",
+      "topic": "differential-equations",
+      "purpose": "coverage",
+      "language": "latex",
+      "source": "The oscillator satisfies \\[y''+\\omega^2 y=0\\].",
+      "cursorNeedle": "\\omega",
+      "expectedPatterns": []
+    },
+    {
+      "id": "calculus-coverage-fourier-transform",
+      "topic": "harmonic-analysis",
+      "purpose": "coverage",
+      "language": "markdown",
+      "source": "Write the transform as $\\widehat f(\\xi)=\\mathcal{F}\\{f\\}(\\xi)$.",
+      "cursorNeedle": "\\mathcal{F}",
+      "expectedPatterns": []
+    }
+  ]
+}
