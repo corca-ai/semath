@@ -29,7 +29,12 @@ pub(crate) fn item_at_cursor_with_trailing_edge<T>(
 }
 
 pub(crate) fn interior_offset(range: &SourceRange, cursor_offset: u32) -> u32 {
-    cursor_offset.min(range.end_offset.saturating_sub(1))
+    if range.start_offset >= range.end_offset {
+        return cursor_offset;
+    }
+    cursor_offset
+        .max(range.start_offset)
+        .min(range.end_offset - 1)
 }
 
 #[cfg(test)]

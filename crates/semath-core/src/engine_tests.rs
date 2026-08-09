@@ -105,6 +105,37 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
 }
 
 #[test]
+fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
+    let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}$.";
+    let offsets = [
+        content.find("$P=").unwrap() as u32,
+        content.find("P=").unwrap() as u32,
+        content.find("\\mathbf{F}").unwrap() as u32,
+        content.rfind('v').unwrap() as u32 + 1,
+        content.rfind('$').unwrap() as u32 + 1,
+    ];
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    for offset in offsets {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert_eq!(view.status, "established", "offset {offset}");
+        assert_eq!(view.summary, "Mechanical power", "offset {offset}");
+    }
+}
+
+#[test]
 fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
     let content = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\power{F}{v}$";
     let invocation_start = content.find("\\power").unwrap() as u32;

@@ -257,9 +257,14 @@ impl SemathEngine {
         let parsed =
             query_offset.and_then(|offset| parsed_math_at_cursor(&document.parsed, offset));
         let symbol = parsed.and_then(|math| symbol_at_cursor(math, offset));
-        let cursor_offset = symbol
-            .as_ref()
-            .map_or(offset, |(_, range)| interior_offset(range, offset));
+        let cursor_offset = symbol.as_ref().map_or_else(
+            || {
+                parsed.map_or(offset, |math| {
+                    interior_offset(&math.region.content_range, offset)
+                })
+            },
+            |(_, range)| interior_offset(range, offset),
+        );
 
         let hygiene_enabled = self.index.documents.len() == 1;
         let value = match envelope.query {
@@ -894,6 +899,17 @@ fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMa
     parsed
         .iter()
         .find(|math| math.region.full_range.contains(offset))
+        .or_else(|| {
+            let mut trailing = parsed.iter().filter(|math| {
+                math.region.full_range.start_offset < math.region.full_range.end_offset
+                    && math.region.full_range.end_offset == offset
+            });
+            let selected = trailing.next()?;
+            if trailing.next().is_some() {
+                return None;
+            }
+            Some(selected)
+        })
         .or_else(|| {
             parsed.iter().find(|math| {
                 math.symbols.iter().any(|(_, range)| {
