@@ -347,7 +347,8 @@ impl<'a> Parser<'a> {
             "lim" => "limit",
             "forall" | "exists" => "quantifier",
             "left" | "right" => "delimiter-command",
-            "mathbb" | "mathbf" | "mathrm" | "operatorname" => {
+            "mathbb" | "mathbf" | "mathrm" | "mathcal" | "mathsf" | "mathtt" | "mathit"
+            | "operatorname" => {
                 self.skip_whitespace();
                 if self.peek() == Some('{') {
                     children.push(self.parse_group());

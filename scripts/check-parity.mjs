@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import init, { SemathEngine } from "../lib/wasm/semath_wasm.js";
 import {
@@ -17,6 +17,11 @@ import {
   assertScientificResults,
   buildScientificFixture,
 } from "./v0.14-scientific-fixture.ts";
+import {
+  assertSyntheticProseResults,
+  buildSyntheticProseFixture,
+  parseSyntheticProseCorpus,
+} from "./synthetic-prose-corpus.ts";
 
 const fixtureSets = [
   {
@@ -308,4 +313,46 @@ const scientificSummary = assertScientificResults(
 );
 console.log(
   `parity OK: ${scientificSummary.queries} v0.14 scientific foundation queries`,
+);
+
+const proseRoot = new URL("../fixtures/synthetic/v1/prose/", import.meta.url);
+const proseNames = (await readdir(proseRoot))
+  .filter((name) => name.endsWith(".json"))
+  .sort();
+const proseCorpora = await Promise.all(
+  proseNames.map(async (name) =>
+    parseSyntheticProseCorpus(
+      JSON.parse(await readFile(new URL(name, proseRoot), "utf8")),
+      name,
+    ),
+  ),
+);
+const prose = buildSyntheticProseFixture(proseCorpora);
+const proseText = JSON.stringify(prose.fixture);
+const nativeProse = spawnSync("./target/debug/semath-native", [], {
+  encoding: "utf8",
+  input: proseText,
+  maxBuffer: 64 * 1024 * 1024,
+});
+if (nativeProse.status !== 0) {
+  throw new Error(nativeProse.stderr || "synthetic prose native fixture failed");
+}
+const nativeProseResults = JSON.parse(nativeProse.stdout);
+const proseEngine = new SemathEngine();
+proseEngine.resetProject(encoder.encode(JSON.stringify(prose.fixture.snapshot)));
+const wasmProseResults = prose.fixture.queries.map((query) =>
+  JSON.parse(
+    decoder.decode(proseEngine.query(encoder.encode(JSON.stringify(query)))),
+  ),
+);
+proseEngine.free();
+if (JSON.stringify(nativeProseResults) !== JSON.stringify(wasmProseResults)) {
+  throw new Error("native/WASM semantic result mismatch for synthetic prose");
+}
+const proseSummary = assertSyntheticProseResults(
+  nativeProseResults,
+  prose.expectations,
+);
+console.log(
+  `parity OK: ${proseSummary.cases} synthetic prose queries (${proseSummary.supportedCoverageTargets}/${proseSummary.coverageTargets} coverage targets supported)`,
 );

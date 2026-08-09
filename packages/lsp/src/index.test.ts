@@ -88,6 +88,46 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("maps three-way English declarations through hover and definition", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///declarations.md";
+    const content = [
+      "Let $x$, $y$, and $z$ denote the input, state, and output, respectively.",
+      "The estimator updates $y$.",
+    ].join("\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          languageId: "markdown",
+          text: content,
+          uri,
+          version: 1,
+        },
+      },
+    });
+    const use = content.lastIndexOf("$y$") + 1;
+    await server.handle({
+      id: 41,
+      method: "textDocument/hover",
+      params: { position: positionAt(content, use), textDocument: { uri } },
+    });
+    await server.handle({
+      id: 42,
+      method: "textDocument/definition",
+      params: { position: positionAt(content, use), textDocument: { uri } },
+    });
+
+    expect(response(messages, 41).contents.value).toContain("state");
+    expect(response(messages, 42)).toMatchObject({
+      range: {
+        start: positionAt(content, content.indexOf("$y$") + 1),
+      },
+      uri,
+    });
+    server.dispose();
+  });
+
   test("falls back to wasmtex for cross-file LaTeX navigation", async () => {
     const { messages, server } = await setup();
     await server.handle({

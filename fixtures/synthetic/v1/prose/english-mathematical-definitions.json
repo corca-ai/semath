@@ -467,10 +467,15 @@
     {
       "id": "english-prose-refusal-010",
       "topic": "in-that-order",
-      "purpose": "refusal",
+      "purpose": "recognition",
       "language": "markdown",
       "annotatedSource": "Let $u$ and $v$ denote input and output in that order. The map returns $<<CURSOR>>v$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "output",
+          "ruleId": "english-respectively-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-refusal-011",
@@ -518,7 +523,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "We write $x$ for the input scalar. The formula uses $<<CURSOR>>x$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the input scalar",
+          "ruleId": "english-write-for-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-002",
@@ -526,7 +536,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "The symbol $G$ stands for the graph. Every path belongs to $<<CURSOR>>G$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the graph",
+          "ruleId": "english-relational-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-003",
@@ -534,7 +549,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "$f := g + h$ defines the combined function. We evaluate $<<CURSOR>>f$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "combined function",
+          "ruleId": "english-math-assignment-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-004",
@@ -542,7 +562,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "$A$ means the adjacency matrix. The graph algorithm reads $<<CURSOR>>A$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the adjacency matrix",
+          "ruleId": "english-relational-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-005",
@@ -550,7 +575,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "$n$ will denote the number of samples. The rate depends on $<<CURSOR>>n$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the number of samples",
+          "ruleId": "english-relational-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-006",
@@ -558,7 +588,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "Define $p$ as the empirical probability. The interval estimates $<<CURSOR>>p$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the empirical probability",
+          "ruleId": "english-imperative-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-007",
@@ -566,7 +601,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "Denote by $d$ the distance between the points. The inequality bounds $<<CURSOR>>d$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "distance between the points",
+          "ruleId": "english-imperative-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-008",
@@ -574,7 +614,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "Set $r$ equal to the residual norm. The stopping rule checks $<<CURSOR>>r$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the residual norm",
+          "ruleId": "english-imperative-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-009",
@@ -582,7 +627,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "We use $I$ to represent the identity matrix. Multiplication by $<<CURSOR>>I$ changes nothing.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the identity matrix",
+          "ruleId": "english-use-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-010",
@@ -590,7 +640,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "$X$ refers to the random variable. The expectation of $<<CURSOR>>X$ is finite.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the random variable",
+          "ruleId": "english-relational-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-011",
@@ -598,7 +653,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "Call $e$ the identity element. Every element commutes with $<<CURSOR>>e$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "identity element",
+          "ruleId": "english-imperative-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-012",
@@ -606,7 +666,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "$V$ shall be the ambient vector space. Each point lies in $<<CURSOR>>V$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the ambient vector space",
+          "ruleId": "english-relational-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-013",
@@ -614,7 +679,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "Throughout, $k$ designates the iteration index. The update at $<<CURSOR>>k$ is stable.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the iteration index",
+          "ruleId": "english-contextual-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-014",
@@ -622,7 +692,12 @@
       "purpose": "coverage",
       "language": "markdown",
       "annotatedSource": "Here $T$ denotes the linear operator. The spectrum of $<<CURSOR>>T$ is real.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the linear operator",
+          "ruleId": "english-contextual-definition"
+        }
+      ]
     },
     {
       "id": "english-prose-coverage-015",
@@ -630,7 +705,12 @@
       "purpose": "coverage",
       "language": "latex",
       "annotatedSource": "With $m$ denoting the row count, the matrix is rectangular. Its height is $<<CURSOR>>m$.",
-      "expectedDefinitions": []
+      "expectedDefinitions": [
+        {
+          "description": "the row count",
+          "ruleId": "english-contextual-definition"
+        }
+      ]
     }
   ]
 }
