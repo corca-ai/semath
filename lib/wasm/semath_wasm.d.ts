@@ -1,5 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
+export function createPackTemplate(pack_id: string): string;
+export function inspectPackCatalog(payload: Uint8Array): Uint8Array;
 export class SemathEngine {
   free(): void;
   applyChanges(payload: Uint8Array): Uint8Array;
@@ -13,6 +15,8 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_semathengine_free: (a: number, b: number) => void;
+  readonly createPackTemplate: (a: number, b: number, c: number) => void;
+  readonly inspectPackCatalog: (a: number, b: number, c: number) => void;
   readonly semathengine_applyChanges: (a: number, b: number, c: number, d: number) => void;
   readonly semathengine_new: () => number;
   readonly semathengine_query: (a: number, b: number, c: number, d: number) => void;
@@ -20,6 +24,7 @@ export interface InitOutput {
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_export_0: (a: number, b: number) => number;
   readonly __wbindgen_export_1: (a: number, b: number, c: number) => void;
+  readonly __wbindgen_export_2: (a: number, b: number, c: number, d: number) => number;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;

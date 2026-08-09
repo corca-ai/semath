@@ -8,41 +8,7 @@ use thiserror::Error;
 pub const PACK_SCHEMA_VERSION: u32 = 4;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
-const BUILTIN_PACK_SOURCES: &[(&str, &str)] = &[
-    (
-        "linear-algebra",
-        include_str!("../../../packs/linear-algebra/v1.json"),
-    ),
-    (
-        "probability",
-        include_str!("../../../packs/probability/v1.json"),
-    ),
-    (
-        "calculus-analysis",
-        include_str!("../../../packs/calculus-analysis/v1.json"),
-    ),
-    (
-        "optimization-ml",
-        include_str!("../../../packs/optimization-ml/v1.json"),
-    ),
-    (
-        "discrete-math",
-        include_str!("../../../packs/discrete-math/v1.json"),
-    ),
-    (
-        "quantities-units",
-        include_str!("../../../packs/quantities-units/v1.json"),
-    ),
-    (
-        "classical-mechanics",
-        include_str!("../../../packs/classical-mechanics/v1.json"),
-    ),
-    ("circuits", include_str!("../../../packs/circuits/v1.json")),
-    (
-        "control-systems",
-        include_str!("../../../packs/control-systems/v1.json"),
-    ),
-];
+include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
 
 static IDENTIFIER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$").unwrap());
@@ -243,8 +209,15 @@ pub fn compile_pack(source: &str) -> Result<DomainPack, PackValidationError> {
     if source.len() > MAX_PACK_BYTES {
         return Err(error("pack", "source exceeds the 256 KiB limit"));
     }
-    let pack = serde_json::from_str::<DomainPack>(source)
-        .map_err(|cause| error("pack", format!("invalid schema: {cause}")))?;
+    let mut deserializer = serde_json::Deserializer::from_str(source);
+    let pack =
+        serde_path_to_error::deserialize::<_, DomainPack>(&mut deserializer).map_err(|cause| {
+            let path = cause.path().to_string();
+            error(
+                if path == "." { "pack".into() } else { path },
+                format!("invalid schema: {}", cause.inner()),
+            )
+        })?;
     validate_pack(&pack)?;
     Ok(pack)
 }
@@ -275,6 +248,7 @@ pub fn validate_pack(pack: &DomainPack) -> Result<(), PackValidationError> {
             .iter()
             .map(|reference| reference.id.as_str()),
     )?;
+    validate_entries(pack)?;
     validate_links(pack, &references)?;
     validate_laws(pack)?;
     validate_quantities(pack)?;
@@ -283,6 +257,10 @@ pub fn validate_pack(pack: &DomainPack) -> Result<(), PackValidationError> {
 
 pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError> {
     let ids = unique_ids("packs", packs.iter().map(|pack| pack.pack_id.as_str()))?;
+    unique_ids(
+        "namespaces",
+        packs.iter().map(|pack| pack.namespace.as_str()),
+    )?;
     let concepts = packs
         .iter()
         .flat_map(|pack| {
@@ -299,6 +277,14 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
     let by_id = packs
         .iter()
         .map(|pack| (pack.pack_id.as_str(), pack))
+        .collect::<BTreeMap<_, _>>();
+    let units = packs
+        .iter()
+        .flat_map(|pack| {
+            pack.units
+                .iter()
+                .map(move |unit| (format!("{}:{}", pack.namespace, unit.id), unit))
+        })
         .collect::<BTreeMap<_, _>>();
     for (pack_index, pack) in packs.iter().enumerate() {
         for (dependency_index, dependency) in pack.dependencies.iter().enumerate() {
@@ -324,6 +310,33 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                 }
             }
         }
+        let declared_requirements = pack
+            .dependencies
+            .iter()
+            .flat_map(|dependency| dependency.required_capabilities.iter().cloned())
+            .collect::<BTreeSet<_>>();
+        let pack_requirements = pack
+            .capabilities
+            .requires
+            .iter()
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        if declared_requirements != pack_requirements {
+            return Err(error(
+                format!("packs[{pack_index}].capabilities.requires"),
+                "must equal the capabilities required from declared dependencies",
+            ));
+        }
+        for (concept_index, concept) in pack.concepts.iter().enumerate() {
+            for parent in &concept.parents {
+                if !concepts.contains(parent) {
+                    return Err(error(
+                        format!("packs[{pack_index}].concepts[{concept_index}].parents"),
+                        format!("unknown parent concept {parent}"),
+                    ));
+                }
+            }
+        }
         for (law_index, law) in pack.laws.iter().enumerate() {
             for (role_index, role) in law.roles.iter().enumerate() {
                 if !concepts.contains(&role.concept) {
@@ -336,8 +349,47 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                 }
             }
         }
+        for (quantity_index, quantity) in pack.quantity_kinds.iter().enumerate() {
+            let Some(default_unit) = &quantity.default_unit else {
+                continue;
+            };
+            let path = format!("packs[{pack_index}].quantityKinds[{quantity_index}].defaultUnit");
+            let Some(unit) = units.get(default_unit) else {
+                return Err(error(path, format!("unknown unit {default_unit}")));
+            };
+            if !same_dimension(&quantity.dimension, &unit.dimension) {
+                return Err(error(
+                    path,
+                    format!("unit {default_unit} has an incompatible dimension"),
+                ));
+            }
+        }
     }
     dependency_cycles(packs, &ids)
+}
+
+fn same_dimension(left: &[PackDimensionExponent], right: &[PackDimensionExponent]) -> bool {
+    let left = left
+        .iter()
+        .filter(|value| value.numerator != 0)
+        .map(|value| (value.base.as_str(), (value.numerator, value.denominator)))
+        .collect::<BTreeMap<_, _>>();
+    let right = right
+        .iter()
+        .filter(|value| value.numerator != 0)
+        .map(|value| (value.base.as_str(), (value.numerator, value.denominator)))
+        .collect::<BTreeMap<_, _>>();
+    left.len() == right.len()
+        && left
+            .iter()
+            .all(|(base, (left_numerator, left_denominator))| {
+                right
+                    .get(base)
+                    .is_some_and(|(right_numerator, right_denominator)| {
+                        i64::from(*left_numerator) * i64::from(*right_denominator)
+                            == i64::from(*right_numerator) * i64::from(*left_denominator)
+                    })
+            })
 }
 
 pub fn built_in_packs() -> &'static [DomainPack] {
@@ -380,6 +432,80 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
                     ));
                 }
             }
+        }
+    }
+    Ok(())
+}
+
+fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
+    let concepts = unique_ids(
+        "concepts",
+        pack.concepts.iter().map(|entry| entry.id.as_str()),
+    )?;
+    unique_ids(
+        "activationRules",
+        pack.activation_rules.iter().map(|entry| entry.id.as_str()),
+    )?;
+    unique_ids("roles", pack.roles.iter().map(|entry| entry.id.as_str()))?;
+    unique_ids(
+        "operators",
+        pack.operators.iter().map(|entry| entry.id.as_str()),
+    )?;
+    for (index, concept) in pack.concepts.iter().enumerate() {
+        let path = format!("concepts[{index}]");
+        if !matches!(
+            concept.concept_kind.as_str(),
+            "entity" | "operator" | "quantity" | "relation" | "system"
+        ) {
+            return Err(error(
+                format!("{path}.conceptKind"),
+                "must be entity, operator, quantity, relation, or system",
+            ));
+        }
+        require_text(&format!("{path}.title"), &concept.title)?;
+        require_text(&format!("{path}.description"), &concept.description)?;
+    }
+    for capability in pack
+        .capabilities
+        .provides
+        .iter()
+        .chain(&pack.capabilities.requires)
+        .chain(
+            pack.dependencies
+                .iter()
+                .flat_map(|dependency| &dependency.required_capabilities),
+        )
+    {
+        validate_qualified_id("capabilities", capability)?;
+    }
+    for (index, rule) in pack.activation_rules.iter().enumerate() {
+        let path = format!("activationRules[{index}]");
+        require_text(&format!("{path}.topic"), &rule.topic)?;
+        if rule.patterns.is_empty()
+            || rule
+                .patterns
+                .iter()
+                .any(|pattern| pattern.trim().is_empty())
+        {
+            return Err(error(
+                format!("{path}.patterns"),
+                "must contain nonempty activation phrases",
+            ));
+        }
+    }
+    for (collection, entries) in [("roles", &pack.roles), ("operators", &pack.operators)] {
+        for (index, entry) in entries.iter().enumerate() {
+            if !concepts.contains(entry.id.as_str()) {
+                return Err(error(
+                    format!("{collection}[{index}].id"),
+                    format!("has no concept {}:{}", pack.namespace, entry.id),
+                ));
+            }
+            require_text(&format!("{collection}[{index}].topic"), &entry.topic)?;
+            require_text(
+                &format!("{collection}[{index}].description"),
+                &entry.description,
+            )?;
         }
     }
     Ok(())
@@ -523,6 +649,14 @@ fn validate_id(path: &str, value: &str) -> Result<(), PackValidationError> {
     }
 }
 
+fn validate_qualified_id(path: &str, value: &str) -> Result<(), PackValidationError> {
+    let Some((namespace, local)) = value.split_once(':') else {
+        return Err(error(path, "must be a namespace-qualified identifier"));
+    };
+    validate_id(path, namespace)?;
+    validate_id(path, local)
+}
+
 fn require_text(path: &str, value: &str) -> Result<(), PackValidationError> {
     if value.trim().is_empty() {
         Err(error(path, "must not be empty"))
@@ -566,5 +700,28 @@ mod tests {
                 compile_pack(&source).unwrap()
             );
         }
+    }
+
+    #[test]
+    fn rejects_unknown_and_dimensionally_wrong_default_units() {
+        let mut packs = built_in_packs().to_vec();
+        let quantities = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "quantities-units")
+            .unwrap();
+        quantities.quantity_kinds[0].default_unit = Some("quantities-units:missing".into());
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.path.ends_with("quantityKinds[0].defaultUnit"));
+        assert!(error.message.contains("unknown unit"));
+
+        let mut packs = built_in_packs().to_vec();
+        let quantities = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "quantities-units")
+            .unwrap();
+        quantities.quantity_kinds[0].default_unit = Some("quantities-units:second".into());
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.path.ends_with("quantityKinds[0].defaultUnit"));
+        assert!(error.message.contains("incompatible dimension"));
     }
 }

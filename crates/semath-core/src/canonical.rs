@@ -84,6 +84,66 @@ pub(crate) fn lower_template(source: &str) -> SemanticExpr {
     .parse_relation()
 }
 
+pub(crate) fn canonical_template(source: &str) -> String {
+    render_canonical(&lower_template(source))
+}
+
+fn render_canonical(expression: &SemanticExpr) -> String {
+    match &expression.kind {
+        SemanticExprKind::Symbol(value) => format!("symbol({value})"),
+        SemanticExprKind::Number(value) => format!("number({value})"),
+        SemanticExprKind::Sum(items) => render_list("sum", items),
+        SemanticExprKind::Product(items) => render_list("product", items),
+        SemanticExprKind::Dot(left, right) => render_pair("dot", left, right),
+        SemanticExprKind::Cross(left, right) => render_pair("cross", left, right),
+        SemanticExprKind::Fraction(left, right) => render_pair("fraction", left, right),
+        SemanticExprKind::Power(left, right) => render_pair("power", left, right),
+        SemanticExprKind::Negate(inner) => format!("negate({})", render_canonical(inner)),
+        SemanticExprKind::Derivative {
+            expression,
+            variable,
+            order,
+        } => format!(
+            "derivative({},{variable},{order})",
+            render_canonical(expression)
+        ),
+        SemanticExprKind::Relation {
+            operator,
+            left,
+            right,
+        } => format!(
+            "relation({operator},{},{})",
+            render_canonical(left),
+            render_canonical(right)
+        ),
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } => format!("apply({operator},{})", render_items(arguments)),
+        SemanticExprKind::Unknown(value) => format!("unknown({value})"),
+    }
+}
+
+fn render_list(name: &str, items: &[SemanticExpr]) -> String {
+    format!("{name}({})", render_items(items))
+}
+
+fn render_items(items: &[SemanticExpr]) -> String {
+    items
+        .iter()
+        .map(render_canonical)
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn render_pair(name: &str, left: &SemanticExpr, right: &SemanticExpr) -> String {
+    format!(
+        "{name}({},{})",
+        render_canonical(left),
+        render_canonical(right)
+    )
+}
+
 pub(crate) fn declared_symbols(
     document: &ProjectDocument,
     range: &SourceRange,

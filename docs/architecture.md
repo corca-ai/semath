@@ -79,10 +79,19 @@ conditions, activation evidence, quantities, units, and references. The generic
 unifier applies every compiled law; selecting a pack or law in orchestration
 code is forbidden.
 
-Pack compilation rejects unknown fields, unresolved concepts, invalid
-dependencies, cycles, and inconsistent dimensions. Built-in JSON is compiled
-once into bounded indexes. There is no second TypeScript validator or legacy
-pattern runtime.
+Pack compilation rejects unknown fields, unresolved or wrong-kind concepts,
+invalid dependencies, cycles, and inconsistent dimensions. A build-generated,
+sorted catalog discovers versioned pack JSON without a handwritten Rust
+registry; the same compiler report is exposed through WASM to authoring tools.
+Built-in JSON is compiled once into bounded indexes. There is no second
+TypeScript validator or legacy pattern runtime.
+
+Authoring keeps a functional core and an effectful shell. Rust owns schema,
+catalog, dependency, canonical-form, unit, and dimension validation. Pure
+TypeScript functions plan reviewed probe cells, quality runs, explanations,
+runtime-branch audits, and per-metric baseline diffs. The CLI alone reads,
+writes, and packages files. Existing packs and external authors use this same
+boundary in CI; generated reports are artifacts rather than maintained docs.
 
 Surface language patterns remain adapters for declarations and evidence. They
 do not encode formula laws. Adding a new law should normally require pack data

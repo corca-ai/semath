@@ -13,10 +13,10 @@ static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, bool)>> = LazyLock::n
     let mut terms = built_in_packs()
         .iter()
         .flat_map(|pack| {
-            let vocabulary = pack.roles.iter().map(|role| {
+            let vocabulary = pack.roles.iter().chain(&pack.operators).map(|entry| {
                 (
-                    role.id.as_str(),
-                    format!("{}:{}", pack.namespace, role.id),
+                    entry.id.as_str(),
+                    format!("{}:{}", pack.namespace, entry.id),
                     false,
                 )
             });

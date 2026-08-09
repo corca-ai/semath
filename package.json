@@ -5,9 +5,11 @@
   "type": "module",
   "packageManager": "bun@1.3.14",
   "bin": {
-    "semath-lsp": "./packages/lsp/stdio.mjs"
+    "semath-lsp": "./packages/lsp/stdio.mjs",
+    "semath-pack": "./packages/authoring/cli.mjs"
   },
   "exports": {
+    "./authoring": "./packages/authoring/src/index.ts",
     "./evaluation": "./packages/evaluation/src/index.ts",
     "./lsp": "./packages/lsp/src/index.ts",
     "./protocol": "./packages/protocol/src/index.ts",
@@ -27,7 +29,7 @@
   ],
   "scripts": {
     "budget": "bun scripts/check-budget.ts",
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run corpus:generate:check && bun run foundation:generate:check && bun run pack:conformance && bun run corpus && bun run foundation && bun run parity && bun run budget && bun run package:smoke",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run corpus:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run corpus && bun run foundation && bun run parity && bun run budget && bun run package:smoke",
     "corpus": "bun scripts/check-corpus.ts",
     "corpus:generate": "bun scripts/generate-synthetic-corpus.ts",
     "corpus:generate:check": "bun scripts/generate-synthetic-corpus.ts --check",
@@ -35,6 +37,7 @@
     "foundation:generate": "bun scripts/generate-foundation-corpus.ts",
     "foundation:generate:check": "bun scripts/generate-foundation-corpus.ts --check",
     "package:smoke": "node scripts/check-package-smoke.mjs",
+    "pack:authoring": "bun packages/authoring/cli.mjs validate packs/*/v1.json && bun packages/authoring/cli.mjs audit-runtime packs/*/v1.json",
     "pack:conformance": "bun scripts/check-pack-conformance.ts",
     "parity": "bun scripts/check-parity.mjs",
     "scorecard": "SEMATH_SCORECARD_PATH=.artifacts/semantic-scorecard.json bun scripts/check-corpus.ts",

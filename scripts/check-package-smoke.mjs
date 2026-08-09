@@ -12,6 +12,8 @@ try {
     "lib/wasm/semath_wasm.d.ts",
     "examples/worker.mjs",
     "examples/lsp.mjs",
+    "packages/authoring/cli.mjs",
+    "packages/authoring/src/index.ts",
     "packages/evaluation/src/index.ts",
   ];
   const names = new Set(metadata.files.map((file) => file.path));
@@ -26,6 +28,20 @@ try {
   run("bun", ["add", tarball], temporary);
   run("bun", ["node_modules/semath/examples/worker.mjs"], temporary);
   run("bun", ["node_modules/semath/examples/lsp.mjs"], temporary);
+  run(
+    "bun",
+    ["node_modules/semath/packages/authoring/cli.mjs", "init", "authoring", "smoke-field"],
+    temporary,
+  );
+  run(
+    "bun",
+    [
+      "node_modules/semath/packages/authoring/cli.mjs",
+      "validate",
+      "authoring/pack.json",
+    ],
+    temporary,
+  );
   run(
     "bun",
     [

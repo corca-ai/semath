@@ -40,21 +40,43 @@ Each pack declares `schemaVersion: 4`, stable identity and SemVer, dependencies,
 concepts, and typed laws. A law supplies canonical semantic forms and roles
 with optional concept, shape, quantity, notation, and variadic constraints.
 
-The Rust compiler rejects unknown fields, dependency cycles, missing concepts,
-invalid capability edges, inconsistent dimensions, and malformed law forms.
-All laws enter the same generic unifier. A pack or law ID branch in analysis
-code indicates a missing core abstraction.
+The Rust compiler rejects unknown fields, duplicate identities, dependency
+cycles, missing or wrong-kind targets, invalid capability edges, inconsistent
+dimensions, and malformed law forms. Diagnostics identify the source file and
+JSON path. All laws enter the same generic unifier. A pack or law ID branch in
+analysis code indicates a missing core abstraction.
 
 Every new law must have an owning corpus suite with positive, refusal, role,
 notation, constraint, and project-context evidence appropriate to its maturity.
 Foundation capabilities require a suite that observes their actual public
-outputs. Run:
+outputs.
+
+## Authoring workflow
+
+`semath-pack` is the public authoring boundary. It delegates pack compilation
+to Rust/WASM and uses TypeScript only for pure corpus planning, scorecard diffs,
+and presentation. A minimal workflow is:
 
 ```sh
-bun run pack:conformance
-bun run foundation
-bun run corpus
+semath-pack init ./my-pack my-field
+# Replace the sample concepts, law, reference, and reviewed corpus cells.
+semath-pack validate ./my-pack/pack.json
+semath-pack scaffold ./my-pack/pack.json ./my-pack/reviewed
+semath-pack package ./my-pack/bundle.json ./my-pack/pack.json
 ```
+
+To exercise a pack in the engine, add its versioned JSON under `packs/`, add
+its reviewed suites to the quality manifest, and rebuild. Pack discovery is
+automatic; no Rust registry or recognizer branch is edited. Then use
+`semath-pack score <manifest> <pack-id>` for a focused scorecard and
+`semath-pack explain <manifest> <pack-id> <case-id>` for one decision. Compare
+reviewed results with `semath-pack compare <baseline> <candidate>`.
+
+The generated corpus is a balanced set of editable positive and refusal seeds,
+not evidence of maturity by itself. The checked-in schema-4 pack files and the
+[quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
+Repository gates run the same compiler workflow with `bun run pack:authoring`,
+then conformance, foundation, and corpus evaluation.
 
 Pack breadth does not grant edit authority. Unknown roles, incompatible types,
 missing conditions, and opaque notation remain partial, ambiguous, conflicting,

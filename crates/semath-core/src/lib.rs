@@ -7,6 +7,7 @@ mod engine;
 mod hygiene;
 mod law;
 mod pack;
+mod pack_authoring;
 mod parser;
 mod project_order;
 mod prose;
@@ -19,5 +20,6 @@ mod source_index;
 
 pub use engine::SemathEngine;
 pub use pack::*;
+pub use pack_authoring::*;
 pub use protocol::*;
 pub use source_index::SourceIndex;

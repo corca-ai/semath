@@ -1,0 +1,563 @@
+use std::collections::{BTreeMap, BTreeSet};
+
+use serde::{Deserialize, Serialize};
+
+use crate::canonical::canonical_template;
+use crate::pack::{
+    DomainPack, PackActivationRule, PackCapabilities, PackConcept, PackKind, PackLaw, PackLawRole,
+    PackReference, PackValidationError, compile_pack, validate_catalog,
+};
+
+pub const PACK_AUTHORING_SCHEMA_VERSION: u32 = 1;
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PackSource {
+    pub path: String,
+    pub source: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PackAuthoringRequest {
+    pub schema_version: u32,
+    pub sources: Vec<PackSource>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackAuthoringDiagnostic {
+    pub code: String,
+    pub severity: String,
+    pub file: String,
+    pub json_path: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entity_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackCanonicalForm {
+    pub pack_id: String,
+    pub law_id: String,
+    pub form_index: usize,
+    pub source: String,
+    pub canonical: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackAuthoringSummary {
+    pub pack_id: String,
+    pub pack_version: String,
+    pub concepts: usize,
+    pub laws: usize,
+    pub quantity_kinds: usize,
+    pub units: usize,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackAuthoringReport {
+    pub schema_version: u32,
+    pub diagnostics: Vec<PackAuthoringDiagnostic>,
+    pub forms: Vec<PackCanonicalForm>,
+    pub packs: Vec<PackAuthoringSummary>,
+}
+
+pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringReport {
+    let mut diagnostics = Vec::new();
+    if request.schema_version != PACK_AUTHORING_SCHEMA_VERSION {
+        diagnostics.push(PackAuthoringDiagnostic {
+            code: "request.unsupported-schema".into(),
+            severity: "error".into(),
+            file: "request".into(),
+            json_path: "schemaVersion".into(),
+            message: format!(
+                "unsupported schema {}; expected {PACK_AUTHORING_SCHEMA_VERSION}",
+                request.schema_version
+            ),
+            entity_id: None,
+        });
+    }
+    let mut compiled = Vec::new();
+    for source in &request.sources {
+        match compile_pack(&source.source) {
+            Ok(pack) => compiled.push((source.path.clone(), pack)),
+            Err(error) => diagnostics.push(compile_diagnostic(&source.path, error)),
+        }
+    }
+    if diagnostics.iter().all(|item| item.severity != "error") {
+        let packs = compiled
+            .iter()
+            .map(|(_, pack)| pack.clone())
+            .collect::<Vec<_>>();
+        if let Err(error) = validate_catalog(&packs) {
+            let (file, path) = catalog_location(&compiled, &error.path);
+            let entity_id = diagnostic_entity(&error);
+            diagnostics.push(PackAuthoringDiagnostic {
+                code: diagnostic_code(&error).into(),
+                severity: "error".into(),
+                file,
+                json_path: path,
+                message: error.message,
+                entity_id,
+            });
+        }
+    }
+    for (path, pack) in &compiled {
+        audit_pack(path, pack, &mut diagnostics);
+    }
+    diagnostics.sort_by(|left, right| {
+        (&left.severity, &left.file, &left.json_path, &left.code).cmp(&(
+            &right.severity,
+            &right.file,
+            &right.json_path,
+            &right.code,
+        ))
+    });
+    let forms = compiled
+        .iter()
+        .flat_map(|(_, pack)| {
+            pack.laws.iter().flat_map(move |law| {
+                law.semantic_forms
+                    .iter()
+                    .enumerate()
+                    .map(move |(form_index, source)| PackCanonicalForm {
+                        pack_id: pack.pack_id.clone(),
+                        law_id: law.id.clone(),
+                        form_index,
+                        canonical: canonical_template(source),
+                        source: source.clone(),
+                    })
+            })
+        })
+        .collect();
+    let packs = compiled
+        .into_iter()
+        .map(|(_, pack)| PackAuthoringSummary {
+            pack_id: pack.pack_id,
+            pack_version: pack.pack_version,
+            concepts: pack.concepts.len(),
+            laws: pack.laws.len(),
+            quantity_kinds: pack.quantity_kinds.len(),
+            units: pack.units.len(),
+        })
+        .collect();
+    PackAuthoringReport {
+        schema_version: PACK_AUTHORING_SCHEMA_VERSION,
+        diagnostics,
+        forms,
+        packs,
+    }
+}
+
+pub fn inspect_pack_catalog_json(payload: &[u8]) -> Result<Vec<u8>, serde_json::Error> {
+    let request = serde_json::from_slice(payload)?;
+    serde_json::to_vec(&inspect_pack_catalog(request))
+}
+
+pub fn pack_template(pack_id: &str) -> Result<String, PackValidationError> {
+    if !is_identifier(pack_id) {
+        return Err(PackValidationError {
+            path: "packId".into(),
+            message: "must be a lowercase kebab-case identifier".into(),
+        });
+    }
+    let title = pack_id
+        .split('-')
+        .map(|word| {
+            let mut characters = word.chars();
+            characters
+                .next()
+                .map(|first| first.to_uppercase().collect::<String>() + characters.as_str())
+                .unwrap_or_default()
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
+    let reference_id = format!("{pack_id}-reference");
+    let pack = DomainPack {
+        schema_version: crate::pack::PACK_SCHEMA_VERSION,
+        pack_id: pack_id.into(),
+        pack_version: "0.1.0".into(),
+        pack_kind: PackKind::Field,
+        namespace: pack_id.into(),
+        title: title.clone(),
+        description: format!("Typed semantic support for {title}."),
+        dependencies: Vec::new(),
+        capabilities: PackCapabilities {
+            provides: vec![
+                format!("{pack_id}:law-relations"),
+                "semath:formula-recognition".into(),
+            ],
+            requires: Vec::new(),
+        },
+        concepts: vec![
+            template_concept("output", "Output", &reference_id),
+            template_concept("coefficient", "Coefficient", &reference_id),
+            template_concept("input", "Input", &reference_id),
+        ],
+        quantity_kinds: Vec::new(),
+        units: Vec::new(),
+        laws: vec![PackLaw {
+            id: "scaled-output".into(),
+            title: "Scaled output".into(),
+            description: "The output equals a scalar coefficient times the input.".into(),
+            semantic_forms: vec!["output = coefficient input".into()],
+            roles: vec![
+                template_role(pack_id, "output", "Output value."),
+                template_role(pack_id, "coefficient", "Scalar coefficient."),
+                template_role(pack_id, "input", "Input value."),
+            ],
+            conditions: vec!["The coefficient, input, and output are scalar.".into()],
+            activation_phrases: Vec::new(),
+            references: vec![reference_id.clone()],
+        }],
+        activation_rules: vec![PackActivationRule {
+            id: "field-vocabulary".into(),
+            topic: "foundations".into(),
+            patterns: vec![title.to_ascii_lowercase()],
+            references: vec![reference_id.clone()],
+        }],
+        roles: Vec::new(),
+        operators: Vec::new(),
+        references: vec![PackReference {
+            id: reference_id,
+            title: format!("{title} reference"),
+            citation: "Replace with an authoritative domain reference.".into(),
+            url: None,
+        }],
+    };
+    validate_catalog(std::slice::from_ref(&pack))?;
+    Ok(serde_json::to_string_pretty(&pack).unwrap() + "\n")
+}
+
+fn template_concept(id: &str, title: &str, reference: &str) -> PackConcept {
+    PackConcept {
+        id: id.into(),
+        concept_kind: "entity".into(),
+        title: title.into(),
+        description: format!("The {title} role in the domain relation."),
+        parents: Vec::new(),
+        references: vec![reference.into()],
+    }
+}
+
+fn template_role(pack_id: &str, id: &str, description: &str) -> PackLawRole {
+    PackLawRole {
+        id: id.into(),
+        concept: format!("{pack_id}:{id}"),
+        description: description.into(),
+        shape: Some("scalar".into()),
+        notation: Vec::new(),
+        variadic: false,
+    }
+}
+
+fn audit_pack(path: &str, pack: &DomainPack, diagnostics: &mut Vec<PackAuthoringDiagnostic>) {
+    let mut used_references = BTreeSet::new();
+    for reference in pack
+        .concepts
+        .iter()
+        .flat_map(|value| &value.references)
+        .chain(
+            pack.quantity_kinds
+                .iter()
+                .flat_map(|value| &value.references),
+        )
+        .chain(pack.units.iter().flat_map(|value| &value.references))
+        .chain(pack.laws.iter().flat_map(|value| &value.references))
+        .chain(
+            pack.activation_rules
+                .iter()
+                .flat_map(|value| &value.references),
+        )
+        .chain(pack.roles.iter().flat_map(|value| &value.references))
+        .chain(pack.operators.iter().flat_map(|value| &value.references))
+    {
+        used_references.insert(reference);
+    }
+    for (index, reference) in pack.references.iter().enumerate() {
+        if !used_references.contains(&reference.id) {
+            diagnostics.push(warning(
+                "reference.unused",
+                path,
+                format!("references[{index}]"),
+                format!("reference {} is not used", reference.id),
+                Some(reference.id.clone()),
+            ));
+        }
+    }
+    let concept_kinds = pack
+        .concepts
+        .iter()
+        .map(|concept| {
+            (
+                format!("{}:{}", pack.namespace, concept.id),
+                concept.concept_kind.as_str(),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    for (law_index, law) in pack.laws.iter().enumerate() {
+        let mut canonical_forms = BTreeMap::<String, usize>::new();
+        for (form_index, form) in law.semantic_forms.iter().enumerate() {
+            let canonical = canonical_template(form);
+            if let Some(first) = canonical_forms.insert(canonical.clone(), form_index) {
+                diagnostics.push(warning(
+                    "form.duplicate-canonical",
+                    path,
+                    format!("laws[{law_index}].semanticForms[{form_index}]"),
+                    format!("duplicates canonical form {first}: {canonical}"),
+                    Some(law.id.clone()),
+                ));
+            }
+            if canonical.contains("unknown(") {
+                diagnostics.push(error_diagnostic(
+                    "form.unknown-lowering",
+                    path,
+                    format!("laws[{law_index}].semanticForms[{form_index}]"),
+                    "semantic form contains an unsupported canonical fragment".into(),
+                    Some(law.id.clone()),
+                ));
+            }
+        }
+        for (role_index, role) in law.roles.iter().enumerate() {
+            if concept_kinds
+                .get(&role.concept)
+                .is_some_and(|kind| matches!(*kind, "relation" | "system"))
+            {
+                diagnostics.push(error_diagnostic(
+                    "constraint.impossible-role-kind",
+                    path,
+                    format!("laws[{law_index}].roles[{role_index}].concept"),
+                    format!("{} cannot bind a value role", role.concept),
+                    Some(role.id.clone()),
+                ));
+            }
+        }
+    }
+}
+
+fn compile_diagnostic(path: &str, error: PackValidationError) -> PackAuthoringDiagnostic {
+    let entity_id = diagnostic_entity(&error);
+    PackAuthoringDiagnostic {
+        code: diagnostic_code(&error).into(),
+        severity: "error".into(),
+        file: path.into(),
+        json_path: error.path,
+        message: error.message,
+        entity_id,
+    }
+}
+
+fn diagnostic_entity(error: &PackValidationError) -> Option<String> {
+    [
+        "duplicate id ",
+        "missing capability ",
+        "unknown concept ",
+        "unknown pack ",
+        "unknown parent concept ",
+        "unknown reference ",
+        "unknown unit ",
+    ]
+    .iter()
+    .find_map(|prefix| error.message.strip_prefix(prefix).map(str::to_owned))
+    .or_else(|| {
+        error
+            .message
+            .strip_prefix("unit ")
+            .and_then(|message| message.split_whitespace().next())
+            .map(str::to_owned)
+    })
+}
+
+fn diagnostic_code(error: &PackValidationError) -> &'static str {
+    if error.message.contains("unknown field") {
+        "schema.unknown-field"
+    } else if error.message.contains("duplicate id") {
+        "schema.duplicate-id"
+    } else if error.message.contains("dependency cycle") {
+        "dependency.cycle"
+    } else if error.message.contains("missing capability")
+        || error.message.contains("capabilities required")
+    {
+        "dependency.capability"
+    } else if error.message.contains("unknown pack") {
+        "dependency.unknown-pack"
+    } else if error.message.contains("unknown concept")
+        || error.message.contains("unknown parent concept")
+    {
+        "reference.unknown-concept"
+    } else if error.message.contains("unknown reference") {
+        "reference.unknown-reference"
+    } else if error.message.contains("unknown unit") {
+        "reference.unknown-unit"
+    } else if error.message.contains("incompatible dimension") {
+        "constraint.unit-dimension"
+    } else {
+        "schema.invalid"
+    }
+}
+
+fn catalog_location(compiled: &[(String, DomainPack)], path: &str) -> (String, String) {
+    let Some(rest) = path.strip_prefix("packs[") else {
+        return ("catalog".into(), path.into());
+    };
+    let Some((index, suffix)) = rest.split_once(']') else {
+        return ("catalog".into(), path.into());
+    };
+    let Some((file, _)) = index
+        .parse::<usize>()
+        .ok()
+        .and_then(|index| compiled.get(index))
+    else {
+        return ("catalog".into(), path.into());
+    };
+    (file.clone(), suffix.trim_start_matches('.').into())
+}
+
+fn warning(
+    code: &str,
+    file: &str,
+    json_path: String,
+    message: String,
+    entity_id: Option<String>,
+) -> PackAuthoringDiagnostic {
+    PackAuthoringDiagnostic {
+        code: code.into(),
+        severity: "warning".into(),
+        file: file.into(),
+        json_path,
+        message,
+        entity_id,
+    }
+}
+
+fn error_diagnostic(
+    code: &str,
+    file: &str,
+    json_path: String,
+    message: String,
+    entity_id: Option<String>,
+) -> PackAuthoringDiagnostic {
+    PackAuthoringDiagnostic {
+        code: code.into(),
+        severity: "error".into(),
+        file: file.into(),
+        json_path,
+        message,
+        entity_id,
+    }
+}
+
+fn is_identifier(value: &str) -> bool {
+    let mut parts = value.split('-');
+    let Some(first) = parts.next() else {
+        return false;
+    };
+    valid_id_part(first, true) && parts.all(|part| valid_id_part(part, false))
+}
+
+fn valid_id_part(value: &str, first_part: bool) -> bool {
+    !value.is_empty()
+        && value.chars().enumerate().all(|(index, character)| {
+            character.is_ascii_lowercase()
+                || character.is_ascii_digit() && (!first_part || index > 0)
+        })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::pack::built_in_packs;
+
+    #[test]
+    fn inspects_the_authoritative_catalog_and_canonical_forms() {
+        let report = inspect_pack_catalog(PackAuthoringRequest {
+            schema_version: PACK_AUTHORING_SCHEMA_VERSION,
+            sources: built_in_packs()
+                .iter()
+                .map(|pack| PackSource {
+                    path: format!("packs/{}/v1.json", pack.pack_id),
+                    source: serde_json::to_string(pack).unwrap(),
+                })
+                .collect(),
+        });
+        assert!(
+            report
+                .diagnostics
+                .iter()
+                .all(|diagnostic| diagnostic.severity != "error"),
+            "{:?}",
+            report.diagnostics
+        );
+        let expected_forms = built_in_packs()
+            .iter()
+            .flat_map(|pack| &pack.laws)
+            .map(|law| law.semantic_forms.len())
+            .sum::<usize>();
+        assert_eq!(report.forms.len(), expected_forms);
+        assert!(report.forms.iter().all(|form| !form.canonical.is_empty()));
+    }
+
+    #[test]
+    fn creates_a_typed_pack_without_a_rust_registry_edit() {
+        let source = pack_template("fluid-dynamics").unwrap();
+        let report = inspect_pack_catalog(PackAuthoringRequest {
+            schema_version: PACK_AUTHORING_SCHEMA_VERSION,
+            sources: vec![PackSource {
+                path: "fluid-dynamics/v1.json".into(),
+                source,
+            }],
+        });
+        assert!(report.diagnostics.is_empty(), "{:?}", report.diagnostics);
+        assert_eq!(report.packs[0].pack_id, "fluid-dynamics");
+        assert_eq!(report.forms[0].law_id, "scaled-output");
+    }
+
+    #[test]
+    fn reports_precise_schema_catalog_and_hygiene_failures() {
+        let mut malformed = serde_json::to_value(
+            serde_json::from_str::<DomainPack>(&pack_template("sample-field").unwrap()).unwrap(),
+        )
+        .unwrap();
+        malformed["extra"] = serde_json::json!(true);
+        let report = inspect_pack_catalog(PackAuthoringRequest {
+            schema_version: PACK_AUTHORING_SCHEMA_VERSION,
+            sources: vec![PackSource {
+                path: "sample.json".into(),
+                source: serde_json::to_string(&malformed).unwrap(),
+            }],
+        });
+        assert_eq!(report.diagnostics[0].code, "schema.unknown-field");
+        assert_eq!(report.diagnostics[0].file, "sample.json");
+        assert_eq!(report.diagnostics[0].json_path, "extra");
+
+        let mut duplicate =
+            serde_json::from_str::<DomainPack>(&pack_template("sample-field").unwrap()).unwrap();
+        duplicate.laws[0]
+            .semantic_forms
+            .push("output=(coefficient input)".into());
+        duplicate.references.push(PackReference {
+            id: "unused-source".into(),
+            title: "Unused".into(),
+            citation: "Unused".into(),
+            url: None,
+        });
+        let report = inspect_pack_catalog(PackAuthoringRequest {
+            schema_version: PACK_AUTHORING_SCHEMA_VERSION,
+            sources: vec![PackSource {
+                path: "sample.json".into(),
+                source: serde_json::to_string(&duplicate).unwrap(),
+            }],
+        });
+        let codes = report
+            .diagnostics
+            .iter()
+            .map(|diagnostic| diagnostic.code.as_str())
+            .collect::<BTreeSet<_>>();
+        assert!(codes.contains("form.duplicate-canonical"));
+        assert!(codes.contains("reference.unused"));
+    }
+}
