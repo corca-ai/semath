@@ -361,7 +361,7 @@ pub struct QuantityInfo {
     pub dimension: PhysicalDimensionInfo,
     pub display: String,
     pub evidence: Evidence,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub derived_from: Vec<String>,
 }
 
@@ -643,4 +643,35 @@ pub struct UpdateResult {
     pub inventory_version: u64,
     pub analysis_generation: u64,
     pub changed_file_ids: Vec<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Evidence, PhysicalDimensionInfo, QuantityInfo};
+
+    #[test]
+    fn quantity_wire_contract_keeps_an_empty_derivation_array() {
+        let quantity = QuantityInfo {
+            symbol: "F".into(),
+            quantity_kind_id: None,
+            quantity_kind: Some("Force".into()),
+            unit_id: None,
+            unit: Some("N".into()),
+            dimension: PhysicalDimensionInfo {
+                exponents: Vec::new(),
+                display: "1".into(),
+            },
+            display: "Force · N".into(),
+            evidence: Evidence {
+                rule_id: "test/quantity".into(),
+                kind: "explicit-prose".into(),
+                strength: "strong".into(),
+                source_ranges: Vec::new(),
+            },
+            derived_from: Vec::new(),
+        };
+
+        let value = serde_json::to_value(quantity).unwrap();
+        assert_eq!(value["derivedFrom"], serde_json::json!([]));
+    }
 }

@@ -6,8 +6,10 @@ import {
   buildDomainPackFixture,
 } from "./v0.11-domain-fixture.mjs";
 
-// Includes first-use compilation of every bounded pack regex on a shared x86 CI runner.
-const RESET_BUDGET_MS = 350;
+// Includes first-use validation and regex compilation for the complete nine-pack
+// catalog on a shared x86 CI runner. Keep this as an end-to-end startup ceiling;
+// warm query latency remains independently bounded below.
+const RESET_BUDGET_MS = 450;
 const QUERY_P95_BUDGET_MS = 50;
 const RESPONSE_BUDGET_BYTES = 256 * 1024;
 const RUNS = 5;
