@@ -19,15 +19,45 @@ export interface CoverageDimension {
   tags: readonly string[];
 }
 
-export interface CorpusSuiteConfig {
+export const DIVERSITY_FACETS = [
+  "semanticSkeleton",
+  "syntaxStructure",
+  "proseFamily",
+  "projectTopology",
+  "mutationFamily",
+] as const;
+
+export type DiversityFacet = (typeof DIVERSITY_FACETS)[number];
+
+export interface DiversityRequirements {
+  maximumProfileShare: number;
+  minimumDistinct: Readonly<Record<DiversityFacet, number>>;
+}
+
+export interface LawCorpusSuiteConfig {
   id: string;
+  kind: "law";
   minimumPositiveCasesPerLaw: number;
   minimumRefusalCasesPerLaw: number;
   packId: string;
   path: string;
   requiredDimensions: readonly string[];
+  requiredDiversity: DiversityRequirements;
   tier: SuiteTier;
 }
+
+export interface GlobalRefusalSuiteConfig {
+  id: string;
+  kind: "global-refusal";
+  minimumCases: number;
+  path: string;
+  requiredDimensions: readonly string[];
+  requiredDiversity: DiversityRequirements;
+}
+
+export type CorpusSuiteConfig =
+  | LawCorpusSuiteConfig
+  | GlobalRefusalSuiteConfig;
 
 export interface PackSupport {
   corpusSuiteIds: readonly string[];
@@ -42,7 +72,7 @@ export interface QualityManifest {
     transforms: readonly MetamorphicTransform[];
   };
   packs: readonly PackSupport[];
-  schemaVersion: 1;
+  schemaVersion: 2;
   suites: readonly CorpusSuiteConfig[];
   thresholds: QualityThresholds;
 }
@@ -59,27 +89,56 @@ export interface CorpusMacro {
   parameterCount?: number;
 }
 
-export interface CorpusCase {
+export interface DiversityProfile {
+  batch: string;
+  mutationFamily: string;
+  projectTopology: string;
+  proseFamily: string;
+  semanticSkeleton: string;
+  syntaxStructure: string;
+}
+
+interface CorpusCaseBase {
   cursor: {
     edge?: "after" | "before";
     fileId: string;
     needle: string;
   };
   documents: readonly CorpusDocument[];
+  diversity: DiversityProfile;
   expectation: CorpusExpectation;
-  expectedRoles?: Readonly<Record<string, string>>;
   id: string;
-  lawId: string;
   macros?: readonly CorpusMacro[];
   mainFileId?: string;
-  refusalCategory?: string;
   variationTags: readonly string[];
 }
+
+export interface EstablishedCorpusCase extends CorpusCaseBase {
+  expectation: "established";
+  expectedRoles: Readonly<Record<string, string>>;
+  lawId: string;
+}
+
+export interface LawRefusalCorpusCase extends CorpusCaseBase {
+  expectation: "refused";
+  lawId: string;
+  refusalCategory: string;
+}
+
+export interface GlobalRefusalCorpusCase extends CorpusCaseBase {
+  expectation: "refused";
+  refusalCategory: string;
+}
+
+export type CorpusCase =
+  | EstablishedCorpusCase
+  | LawRefusalCorpusCase
+  | GlobalRefusalCorpusCase;
 
 export interface Corpus {
   cases: readonly CorpusCase[];
   domain: string;
-  schemaVersion: 1;
+  schemaVersion: 2;
 }
 
 export function parseQualityManifest(value: unknown): QualityManifest {
@@ -89,8 +148,8 @@ export function parseQualityManifest(value: unknown): QualityManifest {
     ["schemaVersion", "thresholds", "dimensions", "metamorphic", "packs", "suites"],
     "manifest",
   );
-  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 1) {
-    fail("manifest.schemaVersion", "must be 1");
+  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 2) {
+    fail("manifest.schemaVersion", "must be 2");
   }
   const thresholds = parseThresholds(root.thresholds);
   const dimensions = array(root.dimensions, "manifest.dimensions").map(
@@ -120,7 +179,7 @@ export function parseQualityManifest(value: unknown): QualityManifest {
     dimensions,
     metamorphic,
     packs,
-    schemaVersion: 1,
+    schemaVersion: 2,
     suites,
     thresholds,
   };
@@ -129,19 +188,19 @@ export function parseQualityManifest(value: unknown): QualityManifest {
 export function parseCorpus(value: unknown, suite: CorpusSuiteConfig): Corpus {
   const root = object(value, `corpus ${suite.id}`);
   exactKeys(root, ["schemaVersion", "domain", "cases"], `corpus ${suite.id}`);
-  if (integer(root.schemaVersion, `${suite.id}.schemaVersion`) !== 1) {
-    fail(`${suite.id}.schemaVersion`, "must be 1");
+  if (integer(root.schemaVersion, `${suite.id}.schemaVersion`) !== 2) {
+    fail(`${suite.id}.schemaVersion`, "must be 2");
   }
   const domain = text(root.domain, `${suite.id}.domain`);
   if (domain !== suite.id) {
     fail(`${suite.id}.domain`, `must equal suite id ${suite.id}`);
   }
   const cases = array(root.cases, `${suite.id}.cases`).map((item, index) =>
-    parseCase(item, `${suite.id}.cases[${index}]`),
+    parseCase(item, `${suite.id}.cases[${index}]`, suite),
   );
   if (cases.length === 0) fail(`${suite.id}.cases`, "must not be empty");
   unique(cases.map((item) => item.id), `${suite.id}.cases`);
-  return { cases, domain, schemaVersion: 1 };
+  return { cases, domain, schemaVersion: 2 };
 }
 
 function parseThresholds(value: unknown): QualityThresholds {
@@ -236,17 +295,25 @@ function parseSuite(
   dimensionIds: ReadonlySet<string>,
 ): CorpusSuiteConfig {
   const item = object(value, path);
+  const kind = oneOf(item.kind, ["law", "global-refusal"], `${path}.kind`);
+  const commonKeys = [
+    "id",
+    "kind",
+    "path",
+    "requiredDimensions",
+    "requiredDiversity",
+  ];
   exactKeys(
     item,
-    [
-      "id",
-      "packId",
-      "path",
-      "tier",
-      "minimumPositiveCasesPerLaw",
-      "minimumRefusalCasesPerLaw",
-      "requiredDimensions",
-    ],
+    kind === "law"
+      ? [
+          ...commonKeys,
+          "packId",
+          "tier",
+          "minimumPositiveCasesPerLaw",
+          "minimumRefusalCasesPerLaw",
+        ]
+      : [...commonKeys, "minimumCases"],
     path,
   );
   const corpusPath = text(item.path, `${path}.path`);
@@ -267,8 +334,26 @@ function parseSuite(
       fail(`${path}.requiredDimensions`, `unknown dimension ${dimension}`);
     }
   }
-  return {
+  const common = {
     id: identifier(item.id, `${path}.id`),
+    kind,
+    path: corpusPath,
+    requiredDimensions,
+    requiredDiversity: parseDiversityRequirements(
+      item.requiredDiversity,
+      `${path}.requiredDiversity`,
+    ),
+  };
+  if (kind === "global-refusal") {
+    return {
+      ...common,
+      kind,
+      minimumCases: positiveInteger(item.minimumCases, `${path}.minimumCases`),
+    };
+  }
+  return {
+    ...common,
+    kind,
     minimumPositiveCasesPerLaw: positiveInteger(
       item.minimumPositiveCasesPerLaw,
       `${path}.minimumPositiveCasesPerLaw`,
@@ -278,13 +363,39 @@ function parseSuite(
       `${path}.minimumRefusalCasesPerLaw`,
     ),
     packId: identifier(item.packId, `${path}.packId`),
-    path: corpusPath,
-    requiredDimensions,
     tier: oneOf(item.tier, ["evaluated", "probe"], `${path}.tier`),
   };
 }
 
-function parseCase(value: unknown, path: string): CorpusCase {
+function parseDiversityRequirements(
+  value: unknown,
+  path: string,
+): DiversityRequirements {
+  const item = object(value, path);
+  exactKeys(item, ["minimumDistinct", "maximumProfileShare"], path);
+  const minimum = object(item.minimumDistinct, `${path}.minimumDistinct`);
+  exactKeys(minimum, DIVERSITY_FACETS, `${path}.minimumDistinct`);
+  const minimumDistinct = Object.fromEntries(
+    DIVERSITY_FACETS.map((facet) => [
+      facet,
+      positiveInteger(minimum[facet], `${path}.minimumDistinct.${facet}`),
+    ]),
+  ) as unknown as Readonly<Record<DiversityFacet, number>>;
+  const maximumProfileShare = number(
+    item.maximumProfileShare,
+    `${path}.maximumProfileShare`,
+  );
+  if (maximumProfileShare <= 0 || maximumProfileShare > 1) {
+    fail(`${path}.maximumProfileShare`, "must be greater than 0 and at most 1");
+  }
+  return { maximumProfileShare, minimumDistinct };
+}
+
+function parseCase(
+  value: unknown,
+  path: string,
+  suite: CorpusSuiteConfig,
+): CorpusCase {
   const item = object(value, path);
   exactKeys(
     item,
@@ -293,6 +404,7 @@ function parseCase(value: unknown, path: string): CorpusCase {
       "lawId",
       "expectation",
       "documents",
+      "diversity",
       "mainFileId",
       "cursor",
       "expectedRoles",
@@ -307,6 +419,9 @@ function parseCase(value: unknown, path: string): CorpusCase {
     ["established", "refused"],
     `${path}.expectation`,
   );
+  if (suite.kind === "global-refusal" && expectation !== "refused") {
+    fail(`${path}.expectation`, "global-refusal suites only accept refused cases");
+  }
   const documents = array(item.documents, `${path}.documents`).map(
     (document, index) => parseDocument(document, `${path}.documents[${index}]`),
   );
@@ -329,8 +444,14 @@ function parseCase(value: unknown, path: string): CorpusCase {
   if (expectation === "established" && !expectedRoles) {
     fail(`${path}.expectedRoles`, "established cases require expected roles");
   }
+  if (expectation === "established" && refusalCategory) {
+    fail(`${path}.refusalCategory`, "established cases cannot have a refusal category");
+  }
   if (expectation === "refused" && !refusalCategory) {
     fail(`${path}.refusalCategory`, "refused cases require a category");
+  }
+  if (expectation === "refused" && expectedRoles) {
+    fail(`${path}.expectedRoles`, "refused cases cannot declare expected roles");
   }
   const macros = optionalArray(item.macros, `${path}.macros`)?.map((macro, index) =>
     parseMacro(macro, `${path}.macros[${index}]`),
@@ -339,13 +460,12 @@ function parseCase(value: unknown, path: string): CorpusCase {
   const variationTags = strings(item.variationTags, `${path}.variationTags`);
   if (variationTags.length === 0) fail(`${path}.variationTags`, "must not be empty");
   unique(variationTags, `${path}.variationTags`);
-  return {
+  const common = {
     cursor,
     documents,
+    diversity: parseDiversityProfile(item.diversity, `${path}.diversity`),
     expectation,
-    ...(expectedRoles ? { expectedRoles } : {}),
     id: identifier(item.id, `${path}.id`),
-    lawId: identifier(item.lawId, `${path}.lawId`),
     ...(macros?.length ? { macros } : {}),
     ...(item.mainFileId === undefined
       ? {}
@@ -356,8 +476,30 @@ function parseCase(value: unknown, path: string): CorpusCase {
             `${path}.mainFileId`,
           ),
         }),
-    ...(refusalCategory ? { refusalCategory } : {}),
     variationTags,
+  };
+  if (suite.kind === "global-refusal") {
+    if (item.lawId !== undefined) {
+      fail(`${path}.lawId`, "global-refusal cases must not target a law");
+    }
+    return { ...common, expectation: "refused", refusalCategory: refusalCategory! };
+  }
+  const lawId = identifier(item.lawId, `${path}.lawId`);
+  return expectation === "established"
+    ? { ...common, expectation, expectedRoles: expectedRoles!, lawId }
+    : { ...common, expectation, lawId, refusalCategory: refusalCategory! };
+}
+
+function parseDiversityProfile(value: unknown, path: string): DiversityProfile {
+  const item = object(value, path);
+  exactKeys(item, ["batch", ...DIVERSITY_FACETS], path);
+  return {
+    batch: identifier(item.batch, `${path}.batch`),
+    mutationFamily: identifier(item.mutationFamily, `${path}.mutationFamily`),
+    projectTopology: identifier(item.projectTopology, `${path}.projectTopology`),
+    proseFamily: identifier(item.proseFamily, `${path}.proseFamily`),
+    semanticSkeleton: identifier(item.semanticSkeleton, `${path}.semanticSkeleton`),
+    syntaxStructure: identifier(item.syntaxStructure, `${path}.syntaxStructure`),
   };
 }
 

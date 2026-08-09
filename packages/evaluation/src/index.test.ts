@@ -3,6 +3,8 @@ import {
   checkPackConformance,
   type Corpus,
   type CorpusCase,
+  type EstablishedCorpusCase,
+  type LawRefusalCorpusCase,
   type CaseObservation,
   parseCorpus,
   parseQualityManifest,
@@ -56,7 +58,7 @@ describe("observation helpers", () => {
 
 function manifestValue() {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     thresholds: {
       evidenceIntegrity: 100,
       lawPrecision: 99,
@@ -91,6 +93,7 @@ function manifestValue() {
     suites: [
       {
         id: "mechanics",
+        kind: "law",
         minimumPositiveCasesPerLaw: 30,
         minimumRefusalCasesPerLaw: 20,
         packId: "classical-mechanics",
@@ -103,13 +106,34 @@ function manifestValue() {
           "project",
           "mutation",
         ],
+        requiredDiversity: {
+          maximumProfileShare: 1,
+          minimumDistinct: {
+            mutationFamily: 1,
+            projectTopology: 1,
+            proseFamily: 1,
+            semanticSkeleton: 1,
+            syntaxStructure: 1,
+          },
+        },
         tier: "evaluated",
       },
     ],
   };
 }
 
-function corpusCase(overrides: Partial<CorpusCase> = {}): CorpusCase {
+const diversity = {
+  batch: "test-batch",
+  mutationFamily: "affirmative",
+  projectTopology: "single-document",
+  proseFamily: "let-singular",
+  semanticSkeleton: "product-equality",
+  syntaxStructure: "inline-math",
+} as const;
+
+function corpusCase(
+  overrides: Partial<EstablishedCorpusCase> = {},
+): EstablishedCorpusCase {
   return {
     cursor: { fileId: "main", needle: "F=ma" },
     documents: [
@@ -119,6 +143,7 @@ function corpusCase(overrides: Partial<CorpusCase> = {}): CorpusCase {
         path: "main.md",
       },
     ],
+    diversity,
     expectation: "established",
     expectedRoles: { force: "F", mass: "m" },
     id: "positive",
@@ -128,10 +153,13 @@ function corpusCase(overrides: Partial<CorpusCase> = {}): CorpusCase {
   };
 }
 
-function refusalCase(overrides: Partial<CorpusCase> = {}): CorpusCase {
+function refusalCase(
+  overrides: Partial<LawRefusalCorpusCase> = {},
+): LawRefusalCorpusCase {
   const { expectedRoles: _expectedRoles, ...positive } = corpusCase();
   return {
     ...positive,
+    diversity: { ...diversity, mutationFamily: "wrong-operator" },
     expectation: "refused",
     id: "negative",
     refusalCategory: "wrong-operator",
@@ -141,7 +169,7 @@ function refusalCase(overrides: Partial<CorpusCase> = {}): CorpusCase {
 }
 
 function corpus(cases: readonly CorpusCase[]): Corpus {
-  return { cases, domain: "mechanics", schemaVersion: 1 };
+  return { cases, domain: "mechanics", schemaVersion: 2 };
 }
 
 function passingMetamorphicObservations(
@@ -153,6 +181,9 @@ function passingMetamorphicObservations(
     return {
       caseId: planned.case.id,
       evidenceIntegrity: established,
+      establishedLawIds: established && "lawId" in planned.case
+        ? [planned.case.lawId]
+        : [],
       generatedFrom: {
         caseId: planned.sourceCaseId,
         transform: planned.transform,
@@ -212,7 +243,7 @@ describe("corpus contract", () => {
           refusalCase(),
         ],
         domain: "mechanics",
-        schemaVersion: 1,
+        schemaVersion: 2,
       },
       suite,
     );
@@ -221,7 +252,7 @@ describe("corpus contract", () => {
 
   test("rejects an unowned domain and uncategorized refusal", () => {
     expect(() =>
-      parseCorpus({ cases: [corpusCase()], domain: "other", schemaVersion: 1 }, suite),
+      parseCorpus({ cases: [corpusCase()], domain: "other", schemaVersion: 2 }, suite),
     ).toThrow("must equal suite id mechanics");
     expect(() =>
       parseCorpus(
@@ -234,7 +265,7 @@ describe("corpus contract", () => {
             },
           ],
           domain: "mechanics",
-          schemaVersion: 1,
+          schemaVersion: 2,
         },
         suite,
       ),
@@ -253,7 +284,7 @@ describe("corpus contract", () => {
     });
     expect(() =>
       parseCorpus(
-        { cases: [repeated], domain: "mechanics", schemaVersion: 1 },
+        { cases: [repeated], domain: "mechanics", schemaVersion: 2 },
         suite,
       ),
     ).toThrow("must occur exactly once; found 2");
@@ -263,7 +294,7 @@ describe("corpus contract", () => {
         {
           cases: [{ ...corpusCase(), mainFileId: "missing" }],
           domain: "mechanics",
-          schemaVersion: 1,
+          schemaVersion: 2,
         },
         suite,
       ),
@@ -274,7 +305,7 @@ describe("corpus contract", () => {
         {
           cases: [{ ...corpusCase(), macros: [{ body: "F", name: "\\force" }] }],
           domain: "mechanics",
-          schemaVersion: 1,
+          schemaVersion: 2,
         },
         suite,
       ),
@@ -334,6 +365,7 @@ describe("multidimensional scorecard", () => {
       {
         caseId: positive.id,
         evidenceIntegrity: true,
+        establishedLawIds: [positive.lawId],
         rolesCorrect: true,
         status: "established",
         suiteId: "mechanics",
@@ -342,6 +374,7 @@ describe("multidimensional scorecard", () => {
       {
         caseId: negative.id,
         evidenceIntegrity: false,
+        establishedLawIds: [],
         rolesCorrect: false,
         status: "unsupported",
         suiteId: "mechanics",
@@ -383,6 +416,7 @@ describe("multidimensional scorecard", () => {
         {
           caseId: positive.id,
           evidenceIntegrity: false,
+          establishedLawIds: [positive.lawId],
           rolesCorrect: true,
           status: "established",
           suiteId: "mechanics",
@@ -391,6 +425,7 @@ describe("multidimensional scorecard", () => {
         {
           caseId: negative.id,
           evidenceIntegrity: false,
+          establishedLawIds: [],
           rolesCorrect: false,
           status: "unsupported",
           suiteId: "mechanics",

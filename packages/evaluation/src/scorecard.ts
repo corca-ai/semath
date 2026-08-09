@@ -2,6 +2,7 @@ import type {
   Corpus,
   CorpusCase,
   CorpusExpectation,
+  DiversityFacet,
   MetamorphicTransform,
   QualityManifest,
 } from "./model";
@@ -10,6 +11,7 @@ import { planMetamorphicCases } from "./metamorphic";
 export interface CaseObservation {
   caseId: string;
   evidenceIntegrity: boolean;
+  establishedLawIds: readonly string[];
   generatedFrom?: {
     caseId: string;
     transform: MetamorphicTransform;
@@ -59,15 +61,25 @@ export interface VariationScore {
   tag: string;
 }
 
+export interface DiversityScore {
+  distinct: number;
+  facet: DiversityFacet | "combined-profile";
+  largestCell: number;
+  largestShare: number;
+  suiteId: string;
+}
+
 export interface QualityScorecard {
+  adversarialRefusal: Metric;
   authoredCases: number;
   coverage: readonly CoverageScore[];
+  diversity: readonly DiversityScore[];
   failures: readonly string[];
   generatedCases: number;
   laws: readonly LawScore[];
   metamorphic: Metric;
   refusalCategories: number;
-  schemaVersion: 1;
+  schemaVersion: 2;
   variations: readonly VariationScore[];
 }
 
@@ -122,6 +134,8 @@ export function scoreQuality(
   const variationCounters = new Map<string, { cases: number; passed: number }>();
   const dimensionCounters = new Map<string, { cases: number; passed: number }>();
   const refusalCategories = new Set<string>();
+  let adversarialCases = 0;
+  let adversarialPassed = 0;
   for (const [key, item] of expected) {
     const observation = baseObservations.get(key);
     if (!observation) {
@@ -129,10 +143,21 @@ export function scoreQuality(
       continue;
     }
     const passed = casePassed(item.case, observation);
-    const lawKey = caseKey(item.suiteId, item.case.lawId);
-    const counters = lawCounters.get(lawKey) ?? emptyCounters();
-    countCase(counters, item.case, observation);
-    lawCounters.set(lawKey, counters);
+    if ("lawId" in item.case) {
+      const lawKey = caseKey(item.suiteId, item.case.lawId);
+      const counters = lawCounters.get(lawKey) ?? emptyCounters();
+      countCase(counters, item.case, observation);
+      lawCounters.set(lawKey, counters);
+    }
+    if (item.case.expectation === "refused" && !("lawId" in item.case)) {
+      adversarialCases += 1;
+      if (observation.establishedLawIds.length === 0) adversarialPassed += 1;
+      else {
+        failures.push(
+          `${displayKey(key)}: refusal established unexpected laws ${observation.establishedLawIds.join(", ")}`,
+        );
+      }
+    }
     for (const tag of item.case.variationTags) {
       const cell = variationCounters.get(tag) ?? { cases: 0, passed: 0 };
       cell.cases += 1;
@@ -147,7 +172,9 @@ export function scoreQuality(
       if (passed) cell.passed += 1;
       dimensionCounters.set(dimensionKey, cell);
     }
-    if (item.case.refusalCategory) refusalCategories.add(item.case.refusalCategory);
+    if ("refusalCategory" in item.case) {
+      refusalCategories.add(item.case.refusalCategory);
+    }
   }
 
   const laws = [...lawCounters]
@@ -155,7 +182,7 @@ export function scoreQuality(
     .sort(compareLawScores);
   for (const law of laws) {
     const suite = manifest.suites.find((item) => item.id === law.suiteId);
-    if (!suite) continue;
+    if (!suite || suite.kind !== "law") continue;
     if (law.positives < suite.minimumPositiveCasesPerLaw) {
       failures.push(
         `${law.suiteId}/${law.lawId}: ${law.positives} positive cases; requires ${suite.minimumPositiveCasesPerLaw}`,
@@ -182,6 +209,8 @@ export function scoreQuality(
       manifest.thresholds.refusalPreservation,
     );
   }
+
+  const diversity = scoreDiversity(manifest, corpora, failures);
 
   const coverage = [...dimensionCounters]
     .map(([key, cell]) => {
@@ -255,14 +284,16 @@ export function scoreQuality(
   }
 
   return {
+    adversarialRefusal: metric(adversarialPassed, adversarialCases),
     authoredCases: expected.size,
     coverage,
+    diversity,
     failures: [...new Set(failures)].sort(),
     generatedCases: plannedMetamorphic.length,
     laws,
     metamorphic: metric(metamorphicPassed, plannedMetamorphic.length),
     refusalCategories: refusalCategories.size,
-    schemaVersion: 1,
+    schemaVersion: 2,
     variations: [...variationCounters]
       .map(([tag, cell]) => ({
         cases: cell.cases,
@@ -322,11 +353,106 @@ function countCase(
 }
 
 function casePassed(item: CorpusCase, observation: CaseObservation): boolean {
+  const allowed = "lawId" in item ? new Set([item.lawId]) : new Set<string>();
+  const hasUnexpectedLaw = observation.establishedLawIds.some(
+    (lawId) => !allowed.has(lawId),
+  );
   return item.expectation === "established"
     ? recognized(item.expectation, observation) &&
         observation.rolesCorrect &&
-        observation.evidenceIntegrity
-    : !observation.targetPresent;
+        observation.evidenceIntegrity &&
+        !hasUnexpectedLaw
+    : "lawId" in item
+      ? !observation.targetPresent
+      : observation.establishedLawIds.length === 0;
+}
+
+function scoreDiversity(
+  manifest: QualityManifest,
+  corpora: ReadonlyMap<string, Corpus>,
+  failures: string[],
+): DiversityScore[] {
+  const facets = [
+    "semanticSkeleton",
+    "syntaxStructure",
+    "proseFamily",
+    "projectTopology",
+    "mutationFamily",
+  ] as const;
+  const scores: DiversityScore[] = [];
+  for (const suite of manifest.suites) {
+    const cases = corpora.get(suite.id)?.cases ?? [];
+    if (suite.kind === "global-refusal" && cases.length < suite.minimumCases) {
+      failures.push(
+        `${suite.id}: ${cases.length} cases; requires ${suite.minimumCases}`,
+      );
+    }
+    for (const facet of facets) {
+      const counts = frequencies(cases.map((item) => item.diversity[facet]));
+      const largestCell = Math.max(0, ...counts.values());
+      scores.push({
+        distinct: counts.size,
+        facet,
+        largestCell,
+        largestShare: cases.length ? largestCell / cases.length : 0,
+        suiteId: suite.id,
+      });
+      const required = suite.requiredDiversity.minimumDistinct[facet];
+      if (counts.size < required) {
+        failures.push(
+          `${suite.id}: diversity ${facet} has ${counts.size} distinct values; requires ${required}`,
+        );
+      }
+    }
+    const profiles = cases.map((item) =>
+      facets.map((facet) => item.diversity[facet]).join("\u0000"),
+    );
+    const counts = frequencies(profiles);
+    const largestCell = Math.max(0, ...counts.values());
+    const largestShare = cases.length ? largestCell / cases.length : 0;
+    scores.push({
+      distinct: counts.size,
+      facet: "combined-profile",
+      largestCell,
+      largestShare,
+      suiteId: suite.id,
+    });
+    if (largestShare > suite.requiredDiversity.maximumProfileShare) {
+      failures.push(
+        `${suite.id}: largest diversity profile is ${(largestShare * 100).toFixed(1)}%; maximum ${(suite.requiredDiversity.maximumProfileShare * 100).toFixed(1)}%`,
+      );
+    }
+    if (suite.kind === "law") {
+      const lawIds = new Set(cases.flatMap((item) =>
+        "lawId" in item ? [item.lawId] : [],
+      ));
+      for (const lawId of lawIds) {
+        const lawCases = cases.filter(
+          (item) => "lawId" in item && item.lawId === lawId,
+        );
+        const skeletonProse = frequencies(lawCases.map((item) =>
+          `${item.diversity.semanticSkeleton}\u0000${item.diversity.proseFamily}`,
+        ));
+        const largest = Math.max(0, ...skeletonProse.values());
+        const share = lawCases.length ? largest / lawCases.length : 0;
+        if (share > suite.requiredDiversity.maximumProfileShare) {
+          failures.push(
+            `${suite.id}/${lawId}: largest semantic-skeleton/prose family is ${(share * 100).toFixed(1)}%; maximum ${(suite.requiredDiversity.maximumProfileShare * 100).toFixed(1)}%`,
+          );
+        }
+      }
+    }
+  }
+  return scores.sort((left, right) =>
+    left.suiteId.localeCompare(right.suiteId) ||
+    left.facet.localeCompare(right.facet),
+  );
+}
+
+function frequencies(values: readonly string[]): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const value of values) result.set(value, (result.get(value) ?? 0) + 1);
+  return result;
 }
 
 function recognized(

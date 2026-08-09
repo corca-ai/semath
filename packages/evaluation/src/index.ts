@@ -3,3 +3,4 @@ export * from "./metamorphic";
 export * from "./model";
 export * from "./observation";
 export * from "./scorecard";
+export * from "./synthetic";

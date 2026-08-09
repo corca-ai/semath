@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "casesPerLaw": 80,
+  "positiveCasesPerLaw": 48,
+  "globalCases": 40,
+  "batches": [
+    "declaration-cardinality",
+    "english-paraphrases",
+    "math-presentation",
+    "project-scope",
+    "macro-provenance",
+    "roles-and-constraints",
+    "semantic-mutations",
+    "cursor-boundaries"
+  ],
+  "proseFamilies": [
+    "let-singular",
+    "let-paired",
+    "let-series",
+    "respectively",
+    "where-clause",
+    "we-write",
+    "symbol-list",
+    "role-first",
+    "suppose-that",
+    "given-that",
+    "define-as",
+    "in-this-model",
+    "throughout-section",
+    "compact-parenthetical",
+    "separate-sentences",
+    "declaration-after"
+  ],
+  "projectTopologies": [
+    "single-document",
+    "context-file",
+    "definitions-file",
+    "appendix-file",
+    "nested-section"
+  ],
+  "syntaxStructures": [
+    "inline-math",
+    "display-math",
+    "equation-environment",
+    "aligned-environment",
+    "grouped-expression",
+    "styled-symbols",
+    "indexed-instance",
+    "macro-expanded"
+  ],
+  "mutationFamilies": [
+    "affirmative",
+    "wrong-operator",
+    "wrong-sign",
+    "wrong-factor",
+    "missing-term",
+    "wrong-role",
+    "shape-conflict",
+    "scope-conflict"
+  ]
+}

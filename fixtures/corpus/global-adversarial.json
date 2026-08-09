@@ -1,0 +1,1206 @@
+{
+  "cases": [
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "z_{11}=q_{11}+r_{11}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "unsupported-0",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 1. [let singular]\n\n$z_{11}=q_{11}+r_{11}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-01",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "h_{12}=j_{12}-k_{12}"
+      },
+      "diversity": {
+        "batch": "cursor-boundaries",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "appendix-file",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "unsupported-1",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 2. [respectively]\n\n$h_{12}=j_{12}-k_{12}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-02",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "w_{13}=s_{13}\\cdotd_{13}"
+      },
+      "diversity": {
+        "batch": "semantic-mutations",
+        "mutationFamily": "wrong-sign",
+        "projectTopology": "context-file",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "unsupported-2",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (3). [symbol list]\n\n$w_{13}=s_{13}\\cdotd_{13}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-03",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "g_{14}=b_{14}/c_{14}"
+      },
+      "diversity": {
+        "batch": "roles-and-constraints",
+        "mutationFamily": "scope-conflict",
+        "projectTopology": "nested-section",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "unsupported-3",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (4). [given that]\n\n$g_{14}=b_{14}/c_{14}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-04",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "n_{15}=u_{15}\\neqe_{15}"
+      },
+      "diversity": {
+        "batch": "macro-provenance",
+        "mutationFamily": "missing-term",
+        "projectTopology": "definitions-file",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "unsupported-4",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 5. [throughout section]\n\n$n_{15}=u_{15}\\neqe_{15}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-05",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "z_{16}=q_{16}+r_{16}"
+      },
+      "diversity": {
+        "batch": "project-scope",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "unsupported-5",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (6). [declaration after]\n\n$z_{16}=q_{16}+r_{16}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-06",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "h_{17}=j_{17}-k_{17}"
+      },
+      "diversity": {
+        "batch": "math-presentation",
+        "mutationFamily": "shape-conflict",
+        "projectTopology": "appendix-file",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "unsupported-6",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 7. [let series]\n\n$h_{17}=j_{17}-k_{17}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-07",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "w_{18}=s_{18}\\cdotd_{18}"
+      },
+      "diversity": {
+        "batch": "english-paraphrases",
+        "mutationFamily": "missing-term",
+        "projectTopology": "context-file",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "unsupported-7",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (8). [we write]\n\n$w_{18}=s_{18}\\cdotd_{18}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-08",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g_{19}=b_{19}/c_{19}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "nested-section",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "unsupported-8",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 9. [suppose that]\n\n$g_{19}=b_{19}/c_{19}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-09",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "n_{20}=u_{20}\\neqe_{20}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "shape-conflict",
+        "projectTopology": "definitions-file",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "unsupported-9",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 10. [in this model]\n\n$n_{20}=u_{20}\\neqe_{20}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-10",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "z_{21}=q_{21}+r_{21}"
+      },
+      "diversity": {
+        "batch": "cursor-boundaries",
+        "mutationFamily": "wrong-factor",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "unsupported-0",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (11). [separate sentences]\n\n$z_{21}=q_{21}+r_{21}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-11",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "h_{22}=j_{22}-k_{22}"
+      },
+      "diversity": {
+        "batch": "semantic-mutations",
+        "mutationFamily": "affirmative",
+        "projectTopology": "appendix-file",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "unsupported-1",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (12). [let paired]\n\n$h_{22}=j_{22}-k_{22}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-12",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "w_{23}=s_{23}\\cdotd_{23}"
+      },
+      "diversity": {
+        "batch": "roles-and-constraints",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "context-file",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "unsupported-2",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 13. [where clause]\n\n$w_{23}=s_{23}\\cdotd_{23}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-13",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "g_{24}=b_{24}/c_{24}"
+      },
+      "diversity": {
+        "batch": "macro-provenance",
+        "mutationFamily": "wrong-sign",
+        "projectTopology": "nested-section",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "unsupported-3",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (14). [role first]\n\n$g_{24}=b_{24}/c_{24}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-14",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "n_{25}=u_{25}\\neqe_{25}"
+      },
+      "diversity": {
+        "batch": "project-scope",
+        "mutationFamily": "affirmative",
+        "projectTopology": "definitions-file",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "unsupported-4",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 15. [define as]\n\n$n_{25}=u_{25}\\neqe_{25}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-15",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "z_{26}=q_{26}+r_{26}"
+      },
+      "diversity": {
+        "batch": "math-presentation",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "unsupported-5",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\n\n$z_{26}=q_{26}+r_{26}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-16",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "h_{27}=j_{27}-k_{27}"
+      },
+      "diversity": {
+        "batch": "english-paraphrases",
+        "mutationFamily": "wrong-sign",
+        "projectTopology": "appendix-file",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "unsupported-6",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 17. [let singular]\n\n$h_{27}=j_{27}-k_{27}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-17",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "w_{28}=s_{28}\\cdotd_{28}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "scope-conflict",
+        "projectTopology": "context-file",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "unsupported-7",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 18. [respectively]\n\n$w_{28}=s_{28}\\cdotd_{28}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-18",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g_{29}=b_{29}/c_{29}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "missing-term",
+        "projectTopology": "nested-section",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "unsupported-8",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (19). [symbol list]\n\n$g_{29}=b_{29}/c_{29}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-19",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "n_{30}=u_{30}\\neqe_{30}"
+      },
+      "diversity": {
+        "batch": "cursor-boundaries",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "definitions-file",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "unsupported-9",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (20). [given that]\n\n$n_{30}=u_{30}\\neqe_{30}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-20",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "z_{31}=q_{31}+r_{31}"
+      },
+      "diversity": {
+        "batch": "semantic-mutations",
+        "mutationFamily": "shape-conflict",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "unsupported-0",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 21. [throughout section]\n\n$z_{31}=q_{31}+r_{31}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-21",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "h_{32}=j_{32}-k_{32}"
+      },
+      "diversity": {
+        "batch": "roles-and-constraints",
+        "mutationFamily": "missing-term",
+        "projectTopology": "appendix-file",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "unsupported-1",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (22). [declaration after]\n\n$h_{32}=j_{32}-k_{32}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-22",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "w_{33}=s_{33}\\cdotd_{33}"
+      },
+      "diversity": {
+        "batch": "macro-provenance",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "context-file",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "unsupported-2",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 23. [let series]\n\n$w_{33}=s_{33}\\cdotd_{33}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-23",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "g_{34}=b_{34}/c_{34}"
+      },
+      "diversity": {
+        "batch": "project-scope",
+        "mutationFamily": "shape-conflict",
+        "projectTopology": "nested-section",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "unsupported-3",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (24). [we write]\n\n$g_{34}=b_{34}/c_{34}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-24",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "n_{35}=u_{35}\\neqe_{35}"
+      },
+      "diversity": {
+        "batch": "math-presentation",
+        "mutationFamily": "wrong-factor",
+        "projectTopology": "definitions-file",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "unsupported-4",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 25. [suppose that]\n\n$n_{35}=u_{35}\\neqe_{35}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-25",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "z_{36}=q_{36}+r_{36}"
+      },
+      "diversity": {
+        "batch": "english-paraphrases",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "unsupported-5",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 26. [in this model]\n\n$z_{36}=q_{36}+r_{36}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-26",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "h_{37}=j_{37}-k_{37}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "appendix-file",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "unsupported-6",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (27). [separate sentences]\n\n$h_{37}=j_{37}-k_{37}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-27",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "w_{38}=s_{38}\\cdotd_{38}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "wrong-sign",
+        "projectTopology": "context-file",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "unsupported-7",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (28). [let paired]\n\n$w_{38}=s_{38}\\cdotd_{38}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-28",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g_{39}=b_{39}/c_{39}"
+      },
+      "diversity": {
+        "batch": "cursor-boundaries",
+        "mutationFamily": "affirmative",
+        "projectTopology": "nested-section",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "unsupported-8",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 29. [where clause]\n\n$g_{39}=b_{39}/c_{39}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-29",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "n_{40}=u_{40}\\neqe_{40}"
+      },
+      "diversity": {
+        "batch": "semantic-mutations",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "definitions-file",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "unsupported-9",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (30). [role first]\n\n$n_{40}=u_{40}\\neqe_{40}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-30",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "z_{41}=q_{41}+r_{41}"
+      },
+      "diversity": {
+        "batch": "roles-and-constraints",
+        "mutationFamily": "wrong-sign",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "unsupported-0",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\n\n$z_{41}=q_{41}+r_{41}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-31",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "h_{42}=j_{42}-k_{42}"
+      },
+      "diversity": {
+        "batch": "macro-provenance",
+        "mutationFamily": "scope-conflict",
+        "projectTopology": "appendix-file",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "unsupported-1",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (32). [compact parenthetical]\n\n$h_{42}=j_{42}-k_{42}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-32",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "w_{43}=s_{43}\\cdotd_{43}"
+      },
+      "diversity": {
+        "batch": "project-scope",
+        "mutationFamily": "missing-term",
+        "projectTopology": "context-file",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "unsupported-2",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 33. [let singular]\n\n$w_{43}=s_{43}\\cdotd_{43}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-33",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "g_{44}=b_{44}/c_{44}"
+      },
+      "diversity": {
+        "batch": "math-presentation",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "nested-section",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "unsupported-3",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 34. [respectively]\n\n$g_{44}=b_{44}/c_{44}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-34",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "n_{45}=u_{45}\\neqe_{45}"
+      },
+      "diversity": {
+        "batch": "english-paraphrases",
+        "mutationFamily": "shape-conflict",
+        "projectTopology": "definitions-file",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "unsupported-4",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (35). [symbol list]\n\n$n_{45}=u_{45}\\neqe_{45}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-35",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "z_{46}=q_{46}+r_{46}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "missing-term",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "unsupported-5",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (36). [given that]\n\n$z_{46}=q_{46}+r_{46}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-36",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "h_{47}=j_{47}-k_{47}"
+      },
+      "diversity": {
+        "batch": "declaration-cardinality",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "appendix-file",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "unsupported-6",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 37. [throughout section]\n\n$h_{47}=j_{47}-k_{47}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-37",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "w_{48}=s_{48}\\cdotd_{48}"
+      },
+      "diversity": {
+        "batch": "cursor-boundaries",
+        "mutationFamily": "shape-conflict",
+        "projectTopology": "context-file",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "unsupported-7",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (38). [declaration after]\n\n$w_{48}=s_{48}\\cdotd_{48}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-38",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g_{49}=b_{49}/c_{49}"
+      },
+      "diversity": {
+        "batch": "semantic-mutations",
+        "mutationFamily": "wrong-factor",
+        "projectTopology": "nested-section",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "unsupported-8",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 39. [let series]\n\n$g_{49}=b_{49}/c_{49}$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-39",
+      "refusalCategory": "cross-pack-symbol-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "notation-collision"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "n_{50}=u_{50}\\neqe_{50}"
+      },
+      "diversity": {
+        "batch": "roles-and-constraints",
+        "mutationFamily": "affirmative",
+        "projectTopology": "definitions-file",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "unsupported-9",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (40). [we write]\n\n$n_{50}=u_{50}\\neqe_{50}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "synthetic-unknown-40",
+      "refusalCategory": "unknown-domain-relation",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "unknown-domain"
+      ]
+    }
+  ],
+  "domain": "global-adversarial",
+  "schemaVersion": 2
+}

@@ -48,6 +48,12 @@ export function checkPackConformance(
     }
   }
   for (const suite of manifest.suites) {
+    if (suite.kind === "global-refusal") {
+      if (suiteOwners.has(suite.id)) {
+        failures.push(`${suite.id}: global-refusal suite must not be pack-owned`);
+      }
+      continue;
+    }
     const owner = suiteOwners.get(suite.id);
     if (owner !== suite.packId) {
       failures.push(`${suite.id}: suite owner is ${owner ?? "missing"}, expected ${suite.packId}`);
@@ -84,8 +90,8 @@ export function checkPackConformance(
     if (!pack) continue;
     const ownedSuites = support.corpusSuiteIds
       .map((suiteId) => manifest.suites.find((suite) => suite.id === suiteId))
-      .filter((suite) => suite !== undefined);
-    const covered = new Map<string, string>();
+      .filter((suite) => suite?.kind === "law");
+    const covered = new Set<string>();
     let authoredCases = 0;
     for (const suite of ownedSuites) {
       const corpus = corpora.get(suite.id);
@@ -94,17 +100,14 @@ export function checkPackConformance(
         continue;
       }
       authoredCases += corpus.cases.length;
-      for (const lawId of new Set(corpus.cases.map((item) => item.lawId))) {
+      for (const lawId of new Set(corpus.cases.flatMap((item) =>
+        "lawId" in item ? [item.lawId] : [],
+      ))) {
         if (!pack.lawIds.includes(lawId)) {
           failures.push(`${suite.id}: corpus targets unknown law ${lawId}`);
           continue;
         }
-        const previous = covered.get(lawId);
-        if (previous) {
-          failures.push(`${support.packId}/${lawId}: covered by ${previous} and ${suite.id}`);
-        } else {
-          covered.set(lawId, suite.id);
-        }
+        covered.add(lawId);
       }
     }
     for (const lawId of pack.lawIds) {
