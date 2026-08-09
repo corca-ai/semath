@@ -47,6 +47,13 @@ reverse-include invalidation, cancellation, and caching form the effectful
 shell. An edit reanalyzes only the changed document and its reverse include
 closure; clean and incremental rebuilds must produce the same semantic result.
 
+English scientific prose follows the same functional-core boundary. A bounded
+clause segmenter classifies establishing, negated, hypothetical, hedged, cited,
+and alternative statements. Separate pure stages extract symbols, align
+coordinated descriptions, classify assumptions, and construct exact evidence.
+Only establishing clauses enter the semantic store. Packs classify resulting
+descriptions through namespaced concepts; they do not add sentence recognizers.
+
 ## Canonical semantic IR
 
 Source spelling and layout remain in the structural representation. The
@@ -116,10 +123,11 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 3 exposes selection, `semanticView`, definition, references, rename,
+Protocol 4 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView` is meaning-first: summary, roles, conditions,
-evidence, declarations, conflicts, and refusal are public; raw parser trees are
-not. Native, WASM, Worker, LSP, and CorTeX consume the same result model.
+explicit assumptions, evidence, declarations, conflicts, and refusal are
+public; raw parser trees are not. Native, WASM, Worker, LSP, and CorTeX consume
+the same result model.
 
 Breaking API or UI changes are acceptable before 1.0 when they remove a
 duplicate path or produce a cleaner architecture. Compatibility layers must not

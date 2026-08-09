@@ -35,7 +35,7 @@ field completeness.
 | Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
 | Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
 | Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
-| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 3 and the core now use pack-qualified concept identities without a legacy role field |
+| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 4 and the core use pack-qualified concept identities without a legacy role field |
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 

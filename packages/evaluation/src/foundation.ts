@@ -1,10 +1,17 @@
 import type { CorpusDocument, FoundationSuiteConfig } from "./model";
 
 export interface FoundationExpectation {
+  assumptionKind?: string;
+  assumptionSubject?: string;
+  assumptionValue?: string;
   conceptId?: string;
+  definitionDescription?: string;
+  definitionEvidenceRuleId?: string;
   diagnosticCode?: string;
   dimension?: string;
   excludedConceptId?: string;
+  excludedDefinitionSymbol?: string;
+  excludedAssumptionValue?: string;
   excludedQuantityKindId?: string;
   excludedRelationId?: string;
   quantityKindId?: string;
@@ -14,11 +21,20 @@ export interface FoundationExpectation {
   unitId?: string;
 }
 
+export type FoundationMetric =
+  | "association"
+  | "assumption"
+  | "classification"
+  | "evidence"
+  | "refusal"
+  | "scope";
+
 export interface FoundationCase {
   cursor: { edge?: "after" | "before"; fileId: string; needle: string };
   documents: readonly CorpusDocument[];
   expectation: FoundationExpectation;
   id: string;
+  metric?: FoundationMetric;
   variationTags: readonly string[];
 }
 
@@ -29,9 +45,19 @@ export interface FoundationCorpus {
 }
 
 export interface FoundationObservation {
+  assumptions: readonly {
+    kind: string;
+    subjects: readonly string[];
+    value: string;
+  }[];
   caseId: string;
   conceptIds: readonly string[];
   diagnosticCodes: readonly string[];
+  definitions: readonly {
+    description: string;
+    evidenceRuleIds: readonly string[];
+    symbol: string;
+  }[];
   dimensions: readonly string[];
   quantityKindIds: readonly string[];
   relationIds: readonly string[];
@@ -45,6 +71,7 @@ export interface FoundationScorecard {
   cases: number;
   dimensions: Readonly<Record<string, number>>;
   failures: readonly string[];
+  metrics: Readonly<Record<string, { cases: number; passed: number }>>;
   passed: number;
   schemaVersion: 1;
 }
@@ -77,6 +104,7 @@ export function scoreFoundation(
   const byId = new Map(observations.map((item) => [item.caseId, item]));
   if (byId.size !== observations.length) failures.push(`${suite.id}: duplicate observations`);
   let passed = 0;
+  const metrics = new Map<string, { cases: number; passed: number }>();
   for (const item of corpus.cases) {
     const observation = byId.get(item.id);
     if (!observation) {
@@ -84,7 +112,16 @@ export function scoreFoundation(
       continue;
     }
     const expected = item.expectation;
+    const matchingAssumption = observation.assumptions.some((assumption) =>
+      (!expected.assumptionKind || assumption.kind === expected.assumptionKind)
+      && (!expected.assumptionValue || assumption.value === expected.assumptionValue)
+      && (!expected.assumptionSubject || assumption.subjects.includes(expected.assumptionSubject))
+    );
     const mismatches = [
+      (expected.assumptionKind || expected.assumptionValue || expected.assumptionSubject)
+        && !matchingAssumption
+        ? `assumption ${[expected.assumptionKind, expected.assumptionValue, expected.assumptionSubject].filter(Boolean).join("/")}`
+        : undefined,
       expected.conceptId && !observation.conceptIds.includes(expected.conceptId)
         ? `concept ${expected.conceptId}`
         : undefined,
@@ -93,6 +130,25 @@ export function scoreFoundation(
         : undefined,
       expected.excludedConceptId && observation.conceptIds.includes(expected.excludedConceptId)
         ? `excluded concept ${expected.excludedConceptId}`
+        : undefined,
+      expected.excludedAssumptionValue
+        && observation.assumptions.some((item) => item.value === expected.excludedAssumptionValue)
+        ? `excluded assumption ${expected.excludedAssumptionValue}`
+        : undefined,
+      expected.excludedDefinitionSymbol
+        && observation.definitions.some((item) => item.symbol === expected.excludedDefinitionSymbol)
+        ? `excluded definition ${expected.excludedDefinitionSymbol}`
+        : undefined,
+      expected.definitionDescription
+        && !observation.definitions.some((item) =>
+          item.symbol === expected.symbol && item.description === expected.definitionDescription)
+        ? `definition ${expected.symbol ?? "?"}/${expected.definitionDescription}`
+        : undefined,
+      expected.definitionEvidenceRuleId
+        && !observation.definitions.some((item) =>
+          item.symbol === expected.symbol
+          && item.evidenceRuleIds.includes(expected.definitionEvidenceRuleId!))
+        ? `definition evidence ${expected.symbol ?? "?"}/${expected.definitionEvidenceRuleId}`
         : undefined,
       expected.excludedQuantityKindId && observation.quantityKindIds.includes(expected.excludedQuantityKindId)
         ? `excluded quantity ${expected.excludedQuantityKindId}`
@@ -119,8 +175,15 @@ export function scoreFoundation(
         ? `unit ${expected.unitId}`
         : undefined,
     ].filter((value): value is string => Boolean(value));
-    if (mismatches.length) failures.push(`${suite.id}/${item.id}: missing ${mismatches.join(", ")}`);
+    const succeeded = mismatches.length === 0;
+    if (!succeeded) failures.push(`${suite.id}/${item.id}: missing ${mismatches.join(", ")}`);
     else passed += 1;
+    if (item.metric) {
+      const metric = metrics.get(item.metric) ?? { cases: 0, passed: 0 };
+      metric.cases += 1;
+      if (succeeded) metric.passed += 1;
+      metrics.set(item.metric, metric);
+    }
   }
   for (const observation of observations) {
     if (!corpus.cases.some((item) => item.id === observation.caseId)) {
@@ -146,6 +209,7 @@ export function scoreFoundation(
     cases: corpus.cases.length,
     dimensions,
     failures: [...new Set(failures)].sort(),
+    metrics: Object.fromEntries([...metrics.entries()].sort(([left], [right]) => left.localeCompare(right))),
     passed,
     schemaVersion: 1,
   };
@@ -153,7 +217,7 @@ export function scoreFoundation(
 
 function parseCase(value: unknown, path: string): FoundationCase {
   const item = record(value, path);
-  exact(item, ["id", "documents", "cursor", "expectation", "variationTags"], path);
+  exact(item, ["id", "documents", "cursor", "expectation", "metric", "variationTags"], path);
   if (!Array.isArray(item.documents) || !item.documents.length) {
     throw new Error(`${path}.documents: must be a nonempty array`);
   }
@@ -185,9 +249,16 @@ function parseCase(value: unknown, path: string): FoundationCase {
     expectationValue,
     [
       "conceptId",
+      "assumptionKind",
+      "assumptionSubject",
+      "assumptionValue",
+      "definitionDescription",
+      "definitionEvidenceRuleId",
       "diagnosticCode",
       "dimension",
       "excludedConceptId",
+      "excludedAssumptionValue",
+      "excludedDefinitionSymbol",
       "excludedQuantityKindId",
       "excludedRelationId",
       "quantityKindId",
@@ -212,11 +283,19 @@ function parseCase(value: unknown, path: string): FoundationCase {
     text(tag, `${path}.variationTags[${index}]`),
   );
   unique(variationTags, `${path}.variationTags`);
+  const metric = item.metric === undefined
+    ? undefined
+    : oneOf(
+      item.metric,
+      ["association", "assumption", "classification", "evidence", "refusal", "scope"],
+      `${path}.metric`,
+    );
   return {
     cursor: { ...(edge ? { edge } : {}), fileId, needle },
     documents,
     expectation,
     id: identifier(item.id, `${path}.id`),
+    ...(metric ? { metric } : {}),
     variationTags,
   };
 }

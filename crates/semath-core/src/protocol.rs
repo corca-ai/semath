@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub const PROTOCOL_VERSION: u32 = 3;
+pub const PROTOCOL_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -281,6 +281,16 @@ pub struct ConceptInfo {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct AssumptionInfo {
+    pub kind: String,
+    pub value: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub subjects: Vec<String>,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum SemanticClaimStatus {
     Certain,
@@ -330,6 +340,8 @@ pub struct SemanticContextInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semantic_id: Option<SemanticSymbolId>,
     pub concepts: Vec<ConceptInfo>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub assumptions: Vec<AssumptionInfo>,
     pub claims: Vec<SemanticClaimInfo>,
     pub relations: Vec<RelationInfo>,
     pub quantities: Vec<QuantityInfo>,

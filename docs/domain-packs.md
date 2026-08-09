@@ -21,7 +21,7 @@ the summary is only a compact view and never replaces the detailed contract.
 | Calculus and analysis | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
 | Discrete mathematics | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 2 / 180 |
 | Optimization and ML | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
-| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 62 foundation |
+| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 96 foundation |
 
 The seven capabilities are concept vocabulary, English declarations and roles,
 shape/quantity/unit typing, law recognition, diagnostic refusal,
@@ -33,6 +33,11 @@ across six dimensions; current diversity suites cover all seven. Probe suites
 require at least 5 and 5 across three dimensions. The quantities foundation is
 measured with a separate non-law suite because law count is not meaningful for
 quantity, unit, dimension, and diagnostic behavior.
+
+English prose is shared infrastructure rather than duplicated per pack. Its
+foundation suite covers declarations, coordinated alignment, assumptions,
+non-evidence refusal, source evidence, scope, and include order. Pack concepts
+extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 

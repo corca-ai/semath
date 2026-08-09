@@ -1,0 +1,930 @@
+{
+  "cases": [
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "x$"
+      },
+      "documents": [
+        {
+          "content": "Let $x$ be a scalar.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "a scalar",
+        "symbol": "x"
+      },
+      "id": "let-scalar",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "let",
+        "single-symbol"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A$"
+      },
+      "documents": [
+        {
+          "content": "Given $A$ as the system matrix.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the system matrix",
+        "symbol": "A"
+      },
+      "id": "given-matrix",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "given",
+        "role-descriptions"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "z$"
+      },
+      "documents": [
+        {
+          "content": "Take $z$ to be the latent state.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the latent state",
+        "symbol": "z"
+      },
+      "id": "take-state",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "take",
+        "role-descriptions"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "n$"
+      },
+      "documents": [
+        {
+          "content": "Suppose $n$ is the sample count.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the sample count",
+        "symbol": "n"
+      },
+      "id": "suppose-count",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "suppose",
+        "role-descriptions"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "t$"
+      },
+      "documents": [
+        {
+          "content": "Where $t$ represents elapsed time.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "elapsed time",
+        "symbol": "t"
+      },
+      "id": "where-duration",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "where-clause",
+        "declaration-after"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "f$"
+      },
+      "documents": [
+        {
+          "content": "We write $f$ for the objective function.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the objective function",
+        "symbol": "f"
+      },
+      "id": "write-objective",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "write",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "p$"
+      },
+      "documents": [
+        {
+          "content": "Define $p$ as the empirical probability.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the empirical probability",
+        "symbol": "p"
+      },
+      "id": "define-probability",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "define",
+        "role-descriptions"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u$"
+      },
+      "documents": [
+        {
+          "content": "The control input is denoted by $u$.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "control input",
+        "definitionEvidenceRuleId": "english-passive-definition",
+        "symbol": "u"
+      },
+      "id": "passive-input",
+      "metric": "evidence",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "passive",
+        "declaration-before"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "a$"
+      },
+      "documents": [
+        {
+          "content": "Let $a$ and $b$ denote the lower bound and the upper bound, respectively.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "lower bound",
+        "symbol": "a"
+      },
+      "id": "pair-respectively",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "respectively",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "y$"
+      },
+      "documents": [
+        {
+          "content": "Let $x$, $y$, and $z$ represent the input, state, and output, in that order.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "state",
+        "symbol": "y"
+      },
+      "id": "triple-in-order",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "in-that-order",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "d$"
+      },
+      "documents": [
+        {
+          "content": "Let $a$, $b$, $c$, and $d$ denote gain, bias, scale, and offset, respectively.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "offset",
+        "symbol": "d"
+      },
+      "id": "quad-respectively",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "respectively",
+        "plural-declaration"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "V$"
+      },
+      "documents": [
+        {
+          "content": "Let $U$ and $V$ be vector spaces.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "vector spaces",
+        "symbol": "V"
+      },
+      "id": "shared-vector-spaces",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "shared-description",
+        "plural-declaration"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "S$"
+      },
+      "documents": [
+        {
+          "content": "$S$, the covariance matrix, is fixed.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "covariance matrix",
+        "symbol": "S"
+      },
+      "id": "apposition",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "apposition",
+        "declaration-after"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "v$"
+      },
+      "documents": [
+        {
+          "content": "The normalized vector ($v$) is observed.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "normalized vector",
+        "symbol": "v"
+      },
+      "id": "parenthetical",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "parenthetical",
+        "declaration-before"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "r$"
+      },
+      "documents": [
+        {
+          "content": "| Symbol | Meaning |\n|---|---|\n| $r$ | residual norm |",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "residual norm",
+        "symbol": "r"
+      },
+      "id": "notation-table",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "notation-table",
+        "multiline-prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "m$"
+      },
+      "documents": [
+        {
+          "content": "Assume $m$ is strictly positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "sign",
+        "assumptionSubject": "m",
+        "assumptionValue": "strictly-positive"
+      },
+      "id": "positive",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "positivity",
+        "assume"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A$"
+      },
+      "documents": [
+        {
+          "content": "Suppose $A$ is symmetric.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "structure",
+        "assumptionSubject": "A",
+        "assumptionValue": "symmetric"
+      },
+      "id": "symmetric",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "symmetry",
+        "suppose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "H$"
+      },
+      "documents": [
+        {
+          "content": "Assume $H$ is positive definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "definiteness",
+        "assumptionSubject": "H",
+        "assumptionValue": "positive-definite"
+      },
+      "id": "positive-definite",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "definiteness",
+        "assume"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "f$"
+      },
+      "documents": [
+        {
+          "content": "Let $f$ be continuous on the domain.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "regularity",
+        "assumptionSubject": "f",
+        "assumptionValue": "continuous"
+      },
+      "id": "continuous",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "continuity",
+        "constraints"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g$"
+      },
+      "documents": [
+        {
+          "content": "Given $g$ differentiable near the optimum.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "regularity",
+        "assumptionSubject": "g",
+        "assumptionValue": "differentiable"
+      },
+      "id": "differentiable",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "differentiability",
+        "constraints"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "J$"
+      },
+      "documents": [
+        {
+          "content": "Assume $J$ is invertible at the solution.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "algebraic-property",
+        "assumptionSubject": "J",
+        "assumptionValue": "invertible"
+      },
+      "id": "invertible",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "invertibility",
+        "constraints"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "x$"
+      },
+      "documents": [
+        {
+          "content": "At steady state, let $x$ denote the operating point.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "regime",
+        "assumptionSubject": "x",
+        "assumptionValue": "steady-state"
+      },
+      "id": "steady-state",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "steady-state",
+        "constraints"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u$"
+      },
+      "documents": [
+        {
+          "content": "Under small-signal operation, $u$ is the perturbation input.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "assumptionKind": "regime",
+        "assumptionSubject": "u",
+        "assumptionValue": "small-signal"
+      },
+      "id": "small-signal",
+      "metric": "assumption",
+      "variationTags": [
+        "dimensions",
+        "english-declarations",
+        "prose",
+        "typed",
+        "small-signal",
+        "constraints"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B$"
+      },
+      "documents": [
+        {
+          "content": "If $B$ were invertible, the solve would be unique.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "invertible",
+        "excludedDefinitionSymbol": "B"
+      },
+      "id": "hypothetical",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "counterfactual"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C$"
+      },
+      "documents": [
+        {
+          "content": "The symbol $C$ may be a continuous function.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "continuous",
+        "excludedDefinitionSymbol": "C"
+      },
+      "id": "hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D$"
+      },
+      "documents": [
+        {
+          "content": "According to \\cite{prior}, $D$ is symmetric.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "symmetric",
+        "excludedDefinitionSymbol": "D"
+      },
+      "id": "cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "E$"
+      },
+      "documents": [
+        {
+          "content": "The matrix $E$ is not positive definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive-definite",
+        "excludedDefinitionSymbol": "E"
+      },
+      "id": "negated",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "q$"
+      },
+      "documents": [
+        {
+          "content": "Alternatively, $q$ represents the heat flux.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "q"
+      },
+      "id": "alternative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "alternative"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "R$"
+      },
+      "documents": [
+        {
+          "content": "% Assume $R$ is invertible.\nThe calculation continues.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "invertible",
+        "excludedDefinitionSymbol": "R"
+      },
+      "id": "commented",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "comment"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "j$"
+      },
+      "documents": [
+        {
+          "content": "Let $i$, $j$, and $k$ denote row and column indices, respectively.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "j"
+      },
+      "id": "arity-mismatch",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "arity-mismatch",
+        "respectively"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "v$."
+      },
+      "documents": [
+        {
+          "content": "Let $v$ be velocity. The measured signal is $v$.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "quantityKindId": "quantities-units:velocity",
+        "symbol": "v"
+      },
+      "id": "classify-velocity",
+      "metric": "classification",
+      "variationTags": [
+        "english-declarations",
+        "prose",
+        "role-descriptions"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "x$."
+      },
+      "documents": [
+        {
+          "content": "Let $x$ be the input. The estimate is $x$.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the input",
+        "symbol": "x"
+      },
+      "id": "scope-after-declaration",
+      "metric": "scope",
+      "variationTags": [
+        "declarations-before",
+        "project-scope",
+        "prose"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "y$."
+      },
+      "documents": [
+        {
+          "content": "The estimate is $y$. Let $y$ be the output.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "y"
+      },
+      "id": "scope-refuses-future-declaration",
+      "metric": "scope",
+      "variationTags": [
+        "declarations-after",
+        "project-scope",
+        "semantic-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "s$."
+      },
+      "documents": [
+        {
+          "content": "Let $s$ be the system state.",
+          "fileId": "defs",
+          "path": "defs.tex"
+        },
+        {
+          "content": "\\input{defs}\nThe estimate is $s$.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the system state",
+        "symbol": "s"
+      },
+      "id": "scope-included-declaration",
+      "metric": "scope",
+      "variationTags": [
+        "included-declarations",
+        "multi-file",
+        "project-context",
+        "project-scope"
+      ]
+    }
+  ],
+  "domain": "scientific-prose-foundation",
+  "schemaVersion": 1
+}

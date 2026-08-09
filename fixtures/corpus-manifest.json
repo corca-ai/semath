@@ -305,16 +305,25 @@
       "packId": "quantities-units",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation", "scientific-prose-foundation"] },
         "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] },
         "law-recognition": { "maturity": "unsupported", "suiteIds": [] },
-        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] },
-        "project-macro": { "maturity": "evaluated", "suiteIds": ["scientific-kernel-foundation"] },
-        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] }
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation", "scientific-prose-foundation"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["scientific-kernel-foundation", "scientific-prose-foundation"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation", "scientific-prose-foundation"] }
       }
     }
   ],
   "foundationSuites": [
+    {
+      "id": "scientific-prose-foundation",
+      "packId": "quantities-units",
+      "capability": "scientific-prose",
+      "path": "foundation/scientific-prose.json",
+      "tier": "evaluated",
+      "minimumCases": 30,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "semantic-mutation"]
+    },
     {
       "id": "scientific-kernel-foundation",
       "packId": "quantities-units",

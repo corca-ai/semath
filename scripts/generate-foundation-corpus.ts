@@ -146,6 +146,93 @@ if (check) {
 }
 console.log(`${check ? "verified" : "generated"} quantities foundation corpus (${cases.length} cases)`);
 
+const scientificCases: FoundationCase[] = [
+  proseDefinition("let-scalar", "Let $x$ be a scalar.", "$x$", "x", "a scalar", "association", ["let", "single-symbol"]),
+  proseDefinition("given-matrix", "Given $A$ as the system matrix.", "$A$", "A", "the system matrix", "association", ["given", "role-descriptions"]),
+  proseDefinition("take-state", "Take $z$ to be the latent state.", "$z$", "z", "the latent state", "association", ["take", "role-descriptions"]),
+  proseDefinition("suppose-count", "Suppose $n$ is the sample count.", "$n$", "n", "the sample count", "association", ["suppose", "role-descriptions"]),
+  proseDefinition("where-duration", "Where $t$ represents elapsed time.", "$t$", "t", "elapsed time", "association", ["where-clause", "declaration-after"]),
+  proseDefinition("write-objective", "We write $f$ for the objective function.", "$f$", "f", "the objective function", "association", ["write", "conventional-notation"]),
+  proseDefinition("define-probability", "Define $p$ as the empirical probability.", "$p$", "p", "the empirical probability", "association", ["define", "role-descriptions"]),
+  proseDefinition("passive-input", "The control input is denoted by $u$.", "$u$", "u", "control input", "evidence", ["passive", "declaration-before"], "english-passive-definition"),
+  proseDefinition("pair-respectively", "Let $a$ and $b$ denote the lower bound and the upper bound, respectively.", "$a$", "a", "lower bound", "association", ["respectively", "multi-symbol-declaration"]),
+  proseDefinition("triple-in-order", "Let $x$, $y$, and $z$ represent the input, state, and output, in that order.", "$y$", "y", "state", "association", ["in-that-order", "multi-symbol-declaration"]),
+  proseDefinition("quad-respectively", "Let $a$, $b$, $c$, and $d$ denote gain, bias, scale, and offset, respectively.", "$d$", "d", "offset", "association", ["respectively", "plural-declaration"]),
+  proseDefinition("shared-vector-spaces", "Let $U$ and $V$ be vector spaces.", "$V$", "V", "vector spaces", "association", ["shared-description", "plural-declaration"]),
+  proseDefinition("apposition", "$S$, the covariance matrix, is fixed.", "$S$", "S", "covariance matrix", "association", ["apposition", "declaration-after"]),
+  proseDefinition("parenthetical", "The normalized vector ($v$) is observed.", "$v$", "v", "normalized vector", "association", ["parenthetical", "declaration-before"]),
+  proseDefinition("notation-table", "| Symbol | Meaning |\n|---|---|\n| $r$ | residual norm |", "$r$", "r", "residual norm", "association", ["notation-table", "multiline-prose"]),
+  proseAssumption("positive", "Assume $m$ is strictly positive.", "$m$", "m", "sign", "strictly-positive", ["positivity", "assume"]),
+  proseAssumption("symmetric", "Suppose $A$ is symmetric.", "$A$", "A", "structure", "symmetric", ["symmetry", "suppose"]),
+  proseAssumption("positive-definite", "Assume $H$ is positive definite.", "$H$", "H", "definiteness", "positive-definite", ["definiteness", "assume"]),
+  proseAssumption("continuous", "Let $f$ be continuous on the domain.", "$f$", "f", "regularity", "continuous", ["continuity", "constraints"]),
+  proseAssumption("differentiable", "Given $g$ differentiable near the optimum.", "$g$", "g", "regularity", "differentiable", ["differentiability", "constraints"]),
+  proseAssumption("invertible", "Assume $J$ is invertible at the solution.", "$J$", "J", "algebraic-property", "invertible", ["invertibility", "constraints"]),
+  proseAssumption("steady-state", "At steady state, let $x$ denote the operating point.", "$x$", "x", "regime", "steady-state", ["steady-state", "constraints"]),
+  proseAssumption("small-signal", "Under small-signal operation, $u$ is the perturbation input.", "$u$", "u", "regime", "small-signal", ["small-signal", "constraints"]),
+  proseRefusal("hypothetical", "If $B$ were invertible, the solve would be unique.", "$B$", "B", "invertible", ["counterfactual", "semantic-mutation"]),
+  proseRefusal("hedged", "The symbol $C$ may be a continuous function.", "$C$", "C", "continuous", ["hedging", "semantic-mutation"]),
+  proseRefusal("cited", "According to \\cite{prior}, $D$ is symmetric.", "$D$", "D", "symmetric", ["citation", "semantic-mutation"]),
+  proseRefusal("negated", "The matrix $E$ is not positive definite.", "$E$", "E", "positive-definite", ["negation", "semantic-mutation"]),
+  proseRefusal("alternative", "Alternatively, $q$ represents the heat flux.", "$q$", "q", undefined, ["alternative", "semantic-mutation"]),
+  proseRefusal("commented", "% Assume $R$ is invertible.\nThe calculation continues.", "$R$", "R", "invertible", ["comment", "semantic-mutation"]),
+  proseRefusal("arity-mismatch", "Let $i$, $j$, and $k$ denote row and column indices, respectively.", "$j$", "j", undefined, ["arity-mismatch", "respectively"]),
+  {
+    cursor: { edge: "before", fileId: "main", needle: "v$." },
+    documents: [{ content: "Let $v$ be velocity. The measured signal is $v$.", fileId: "main", path: "main.tex" }],
+    expectation: { quantityKindId: "quantities-units:velocity", symbol: "v" },
+    id: "classify-velocity",
+    metric: "classification",
+    variationTags: ["english-declarations", "prose", "role-descriptions"],
+  },
+  {
+    cursor: { edge: "before", fileId: "main", needle: "x$." },
+    documents: [{ content: "Let $x$ be the input. The estimate is $x$.", fileId: "main", path: "main.tex" }],
+    expectation: { definitionDescription: "the input", symbol: "x" },
+    id: "scope-after-declaration",
+    metric: "scope",
+    variationTags: ["declarations-before", "project-scope", "prose"],
+  },
+  {
+    cursor: { edge: "before", fileId: "main", needle: "y$." },
+    documents: [{ content: "The estimate is $y$. Let $y$ be the output.", fileId: "main", path: "main.tex" }],
+    expectation: { excludedDefinitionSymbol: "y" },
+    id: "scope-refuses-future-declaration",
+    metric: "scope",
+    variationTags: ["declarations-after", "project-scope", "semantic-mutation"],
+  },
+  {
+    cursor: { edge: "before", fileId: "main", needle: "s$." },
+    documents: [
+      { content: "Let $s$ be the system state.", fileId: "defs", path: "defs.tex" },
+      { content: "\\input{defs}\nThe estimate is $s$.", fileId: "main", path: "main.tex" },
+    ],
+    expectation: { definitionDescription: "the system state", symbol: "s" },
+    id: "scope-included-declaration",
+    metric: "scope",
+    variationTags: ["included-declarations", "multi-file", "project-context", "project-scope"],
+  },
+];
+
+if (scientificCases.length !== 34) {
+  throw new Error(`expected 34 scientific prose cases, got ${scientificCases.length}`);
+}
+const scientificCorpus: FoundationCorpus = {
+  cases: scientificCases,
+  domain: "scientific-prose-foundation",
+  schemaVersion: 1,
+};
+const scientificOutput = `${JSON.stringify(scientificCorpus, null, 2)}\n`;
+const scientificPath = new URL("fixtures/foundation/scientific-prose.json", root);
+if (check) {
+  if (await readFile(scientificPath, "utf8").catch(() => "") !== scientificOutput) {
+    throw new Error("fixtures/foundation/scientific-prose.json: generated corpus is stale");
+  }
+} else {
+  await writeFile(scientificPath, scientificOutput);
+}
+console.log(`${check ? "verified" : "generated"} scientific prose foundation corpus (${scientificCases.length} cases)`);
+
 function declarationCase(
   id: string,
   content: string,
@@ -180,4 +267,68 @@ function dimensionDisplay(
       return `${base}^(${numerator}/${denominator})`;
     })
     .join(" · ");
+}
+
+function proseDefinition(
+  id: string,
+  content: string,
+  needle: string,
+  symbol: string,
+  definitionDescription: string,
+  metric: FoundationCase["metric"],
+  tags: readonly string[],
+  definitionEvidenceRuleId?: string,
+): FoundationCase {
+  return {
+    cursor: { edge: "before", fileId: "main", needle: needle.replace(/^\$/u, "") },
+    documents: [{ content, fileId: "main", path: "main.tex" }],
+    expectation: {
+      definitionDescription,
+      ...(definitionEvidenceRuleId ? { definitionEvidenceRuleId } : {}),
+      symbol,
+    },
+    id,
+    ...(metric ? { metric } : {}),
+    variationTags: [...new Set(["different-role-set", "english-declarations", "prose", ...tags])],
+  };
+}
+
+function proseAssumption(
+  id: string,
+  content: string,
+  needle: string,
+  subject: string,
+  assumptionKind: string,
+  assumptionValue: string,
+  tags: readonly string[],
+): FoundationCase {
+  return {
+    cursor: { edge: "before", fileId: "main", needle: needle.replace(/^\$/u, "") },
+    documents: [{ content, fileId: "main", path: "main.tex" }],
+    expectation: { assumptionKind, assumptionSubject: subject, assumptionValue },
+    id,
+    metric: "assumption",
+    variationTags: [...new Set(["dimensions", "english-declarations", "prose", "typed", ...tags])],
+  };
+}
+
+function proseRefusal(
+  id: string,
+  content: string,
+  needle: string,
+  symbol: string,
+  excludedAssumptionValue: string | undefined,
+  tags: readonly string[],
+): FoundationCase {
+  return {
+    cursor: { edge: "before", fileId: "main", needle: needle.replace(/^\$/u, "") },
+    documents: [{ content, fileId: "main", path: "main.tex" }],
+    expectation: {
+      ...(excludedAssumptionValue ? { excludedAssumptionValue } : {}),
+      excludedDefinitionSymbol: symbol,
+    },
+    id,
+    metric: "refusal",
+    variationTags: [...new Set(["hard-negative", "prose", "semantic-mutation", ...tags])],
+  };
 }

@@ -13,6 +13,7 @@ mod project_order;
 mod prose;
 mod protocol;
 mod quantity;
+mod scientific_prose;
 mod scope;
 mod semantic;
 mod shape;

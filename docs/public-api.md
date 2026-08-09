@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 3 is a deliberate
+Semath is a library and language-service runtime. Protocol 4 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -29,10 +29,11 @@ The query surface is:
 `semanticView` returns an established, partial, ambiguous, conflicting, or
 unsupported interpretation. It includes bound relation roles, conditions,
 source-linked evidence, declarations, domain evidence, diagnostics, and a
-refusal explanation when appropriate. Parser ASTs, formula completions, and
-legacy rewrite queries are not public.
+refusal explanation when appropriate. `context.assumptions` contains explicit,
+source-linked assumptions with their subjects; omission means none were
+established. Parser ASTs and legacy rewrite queries are not public.
 
-Protocol 3 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 4 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
