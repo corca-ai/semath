@@ -77,6 +77,29 @@ for (const corpus of proseCorpora) {
   }
 }
 const prose = buildSyntheticProseFixture(proseCorpora);
+if (prose.expectations.length < 180) {
+  throw new Error(
+    `synthetic prose corpus requires at least 180 independent cases, got ${prose.expectations.length}`,
+  );
+}
+const prosePurposeCounts = new Map(
+  (["recognition", "refusal", "coverage"] as const).map((purpose) => [
+    purpose,
+    prose.expectations.filter((entry) => entry.case.purpose === purpose).length,
+  ]),
+);
+for (const [purpose, minimum] of [
+  ["recognition", 90],
+  ["refusal", 45],
+  ["coverage", 30],
+] as const) {
+  const count = prosePurposeCounts.get(purpose) ?? 0;
+  if (count < minimum) {
+    throw new Error(
+      `synthetic prose corpus requires at least ${minimum} ${purpose} cases, got ${count}`,
+    );
+  }
+}
 const proseScore = assertSyntheticProseResults(
   runNative(prose.fixture, "prose corpus"),
   prose.expectations,

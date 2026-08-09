@@ -22,3 +22,22 @@ validates the schema, cursor annotation, pattern ownership, cross-file
 duplication, and exact native-engine result. It prints current semantic coverage
 without generating additional examples. Real-project corpora can be added as a
 separate layer later.
+
+The English declaration lane contains 180 cases rather than template-expanded
+renamings. Its diversity dimensions include:
+
+- singular, two-symbol, and three-symbol declarations;
+- shared descriptions and exact two-way or three-way mappings using
+  `respectively` or `in that order`;
+- `let`, direct relational, `write ... for`, imperative, contextual,
+  appositional, parenthetical, quantified, notation-table, and mathematical
+  assignment/declaration surfaces;
+- Latin, Greek, styled, indexed, scalar, set, function, matrix, quantity, and
+  engineering notation in both Markdown and LaTeX prose;
+- mismatched arity, missing order evidence, modal/conditional/negated mentions,
+  malformed declarations, forward references, and ambiguous glosses.
+
+New cases must add a natural construction, structural variation, notation class,
+domain context, or refusal boundary. Renaming symbols or substituting synonyms in
+the same sentence frame does not qualify as independent diversity. The release
+gate keeps at least 90 recognition, 45 refusal, and 30 explicit coverage cases.
