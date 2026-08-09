@@ -165,6 +165,7 @@ mod tests {
             content: content.into(),
             document_version: 1,
             math_regions: Vec::new(),
+            macros: Vec::new(),
             includes: Vec::new(),
         }
     }

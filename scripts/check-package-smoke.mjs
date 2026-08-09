@@ -10,8 +10,6 @@ try {
   const required = [
     "lib/wasm/semath_wasm_bg.wasm",
     "lib/wasm/semath_wasm.d.ts",
-    "packages/packs/src/index.ts",
-    "schemas/domain-pack-v3.schema.json",
     "examples/worker.mjs",
     "examples/lsp.mjs",
   ];
@@ -27,8 +25,6 @@ try {
   run("bun", ["add", tarball], temporary);
   run("bun", ["node_modules/semath/examples/worker.mjs"], temporary);
   run("bun", ["node_modules/semath/examples/lsp.mjs"], temporary);
-  run("bun", ["node_modules/semath/packages/packs/conformance.mjs"], temporary);
-
   const sums = await readFile(
     join(temporary, "node_modules/semath/lib/wasm/SHA256SUMS"),
     "utf8",

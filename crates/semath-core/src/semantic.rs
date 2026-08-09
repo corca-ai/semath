@@ -1,10 +1,17 @@
 use std::collections::BTreeMap;
 
 use crate::consistency::roles_conflict;
+use crate::consistency::{RoleObservations, observe_roles};
+use crate::domain::{DomainObservations, observe_domains};
+use crate::law::{ExternalTypeEnvironment, LawObservations, observe_laws};
+use crate::parser::ParsedMath;
+use crate::prose::observe_prose;
+use crate::quantity::{QuantityObservations, observe_quantities};
+use crate::shape::{ShapeObservations, observe_shapes};
 use crate::{
-    ConceptInfo, DefinitionInfo, Evidence, FormulaRecognition, QuantityInfo, RelationInfo,
-    RoleInfo, SemanticClaimInfo, SemanticClaimStatus, SemanticContextInfo, SemanticSymbolId,
-    ShapeInfo,
+    ConceptInfo, DefinitionInfo, Evidence, LawRecognition, ProjectDocument, QuantityInfo,
+    RelationInfo, RoleInfo, SemanticClaimInfo, SemanticClaimStatus, SemanticContextInfo,
+    SemanticSymbolId, ShapeInfo,
 };
 
 const MAX_CONCEPTS: usize = 16;
@@ -17,22 +24,22 @@ enum SemanticObservation {
     Role(RoleInfo),
     Shape(ShapeInfo),
     Quantity(QuantityInfo),
-    Formula(Box<FormulaRecognition>),
+    Formula(Box<LawRecognition>),
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct SemanticGraph {
+struct SemanticClaims {
     observations: Vec<SemanticObservation>,
     relations: Vec<RelationInfo>,
     quantities: Vec<QuantityInfo>,
 }
 
-impl SemanticGraph {
+impl SemanticClaims {
     pub fn from_symbol_observations(
         definitions: Vec<DefinitionInfo>,
         roles: Vec<RoleInfo>,
         shapes: Vec<ShapeInfo>,
-        formulas: Vec<FormulaRecognition>,
+        formulas: Vec<LawRecognition>,
         relations: Vec<RelationInfo>,
         quantities: Vec<QuantityInfo>,
     ) -> Self {
@@ -151,6 +158,102 @@ impl SemanticGraph {
     }
 }
 
+#[derive(Clone, Debug)]
+pub(crate) struct SemanticFactStore {
+    pub definitions: Vec<DefinitionInfo>,
+    pub shapes: ShapeObservations,
+    pub quantities: QuantityObservations,
+    pub roles: RoleObservations,
+    pub laws: LawObservations,
+    pub domains: DomainObservations,
+}
+
+impl SemanticFactStore {
+    pub fn build(document: &ProjectDocument, parsed: &[ParsedMath]) -> Self {
+        let prose = observe_prose(document, parsed);
+        let shapes = observe_shapes(document, parsed, &prose.shapes);
+        let quantities = observe_quantities(document, parsed, &prose.definitions);
+        let roles = observe_roles(document, &prose.definitions, &shapes);
+        let laws = observe_laws(
+            document,
+            parsed,
+            &shapes,
+            &quantities,
+            &roles,
+            &ExternalTypeEnvironment::default(),
+        );
+        let domains = observe_domains(document, laws.all());
+        Self {
+            definitions: prose.definitions,
+            shapes,
+            quantities,
+            roles,
+            laws,
+            domains,
+        }
+    }
+
+    pub fn refresh_laws(
+        &mut self,
+        document: &ProjectDocument,
+        parsed: &[ParsedMath],
+        external: &ExternalTypeEnvironment,
+    ) {
+        self.laws = observe_laws(
+            document,
+            parsed,
+            &self.shapes,
+            &self.quantities,
+            &self.roles,
+            external,
+        );
+        self.domains = observe_domains(document, self.laws.all());
+    }
+
+    pub fn context(
+        &self,
+        definitions: Vec<DefinitionInfo>,
+        symbol: Option<String>,
+        semantic_id: Option<SemanticSymbolId>,
+        offset: u32,
+    ) -> SemanticContextInfo {
+        let roles = symbol
+            .as_deref()
+            .map(|name| self.roles.roles_at(name, offset).0)
+            .unwrap_or_default();
+        let shapes = symbol
+            .as_deref()
+            .map(|name| self.shapes.claims_at(name, offset).0)
+            .unwrap_or_default();
+        let quantities = symbol
+            .as_deref()
+            .map(|name| self.quantities.at(name, offset).0)
+            .unwrap_or_default();
+        let formulas = self.laws.at(offset);
+        let relations = formulas
+            .iter()
+            .filter_map(|formula| formula.relation.clone())
+            .collect();
+        SemanticClaims::from_symbol_observations(
+            definitions,
+            roles,
+            shapes,
+            formulas,
+            relations,
+            quantities,
+        )
+        .context(symbol, semantic_id)
+    }
+
+    pub fn constraint_count(&self) -> u32 {
+        (self.definitions.len()
+            + self.shapes.exported().len()
+            + self.quantities.exported().len()
+            + self.roles.exported().len()
+            + self.laws.all().len()) as u32
+    }
+}
+
 fn claim_from_observation(observation: &SemanticObservation) -> SemanticClaimInfo {
     let (predicate, value, evidence) = match observation {
         SemanticObservation::Definition(definition) => (
@@ -173,7 +276,7 @@ fn claim_from_observation(observation: &SemanticObservation) -> SemanticClaimInf
         ),
         SemanticObservation::Formula(formula) => (
             "formula",
-            format!("{}:{}", formula.pack_id, formula.pattern_id),
+            format!("{}:{}", formula.pack_id, formula.law_id),
             formula.evidence.clone(),
         ),
     };
@@ -255,7 +358,7 @@ fn role_label(role: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::SemanticGraph;
+    use super::SemanticClaims;
     use crate::{Evidence, RoleInfo, SemanticClaimStatus, SourceRange};
 
     fn role(role: &str, start: u32) -> RoleInfo {
@@ -277,7 +380,7 @@ mod tests {
 
     #[test]
     fn namespaced_concepts_do_not_require_a_closed_role_enum() {
-        let context = SemanticGraph::from_symbol_observations(
+        let context = SemanticClaims::from_symbol_observations(
             Vec::new(),
             vec![role("state-vector", 4)],
             Vec::new(),
@@ -294,7 +397,7 @@ mod tests {
 
     #[test]
     fn incompatible_concept_claims_remain_visible_as_conflicts() {
-        let context = SemanticGraph::from_symbol_observations(
+        let context = SemanticClaims::from_symbol_observations(
             Vec::new(),
             vec![role("event", 4), role("function", 12)],
             Vec::new(),
@@ -321,7 +424,7 @@ mod tests {
 
     #[test]
     fn compatible_concept_claims_are_not_reported_as_conflicts() {
-        let context = SemanticGraph::from_symbol_observations(
+        let context = SemanticClaims::from_symbol_observations(
             Vec::new(),
             vec![role("function", 4), role("operator", 12)],
             Vec::new(),

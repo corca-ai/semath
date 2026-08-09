@@ -14,6 +14,7 @@ pub(crate) struct ProjectOrderDocument {
 pub(crate) struct ProjectOrder {
     component_by_file: HashMap<String, String>,
     positions: HashMap<(String, u32), Option<u64>>,
+    reverse_dependencies: HashMap<String, HashSet<String>>,
 }
 
 impl ProjectOrder {
@@ -32,11 +33,13 @@ impl ProjectOrder {
             })
             .collect::<HashMap<_, _>>();
         let directed = directed_edges(&by_id, &path_to_id);
+        let reverse_dependencies = reverse_dependencies(&directed);
         let component_by_file = components(&by_id, &directed, main_file_id);
         let positions = source_positions(&by_id, &directed, &component_by_file, main_file_id);
         Self {
             component_by_file,
             positions,
+            reverse_dependencies,
         }
     }
 
@@ -63,6 +66,39 @@ impl ProjectOrder {
             .flatten();
         matches!((definition, occurrence), (Some(left), Some(right)) if left <= right)
     }
+
+    pub fn affected_by(&self, changed: &HashSet<String>) -> HashSet<String> {
+        let mut affected = changed.clone();
+        let mut pending = changed.iter().cloned().collect::<Vec<_>>();
+        while let Some(file_id) = pending.pop() {
+            for dependent in self
+                .reverse_dependencies
+                .get(&file_id)
+                .into_iter()
+                .flatten()
+            {
+                if affected.insert(dependent.clone()) {
+                    pending.push(dependent.clone());
+                }
+            }
+        }
+        affected
+    }
+}
+
+fn reverse_dependencies(
+    directed: &HashMap<String, Vec<IncludeEdge>>,
+) -> HashMap<String, HashSet<String>> {
+    let mut reverse = HashMap::<String, HashSet<String>>::new();
+    for (source, edges) in directed {
+        for edge in edges {
+            reverse
+                .entry(edge.target.clone())
+                .or_default()
+                .insert(source.clone());
+        }
+    }
+    reverse
 }
 
 #[derive(Clone, Debug)]
@@ -402,5 +438,24 @@ mod tests {
 
         assert!(!order.precedes("chapter", 2, "main", 9));
         assert!(!order.precedes("main", 1, "chapter", 4));
+    }
+
+    #[test]
+    fn limits_incremental_reanalysis_to_reverse_include_closure() {
+        let order = ProjectOrder::new(
+            vec![
+                document("main", "main.tex", &[1], &[("chapter", 2)]),
+                document("chapter", "chapter.tex", &[1], &[("shared", 2)]),
+                document("shared", "shared.tex", &[1], &[]),
+                document("orphan", "orphan.tex", &[1], &[]),
+            ],
+            Some("main"),
+        );
+        let affected = order.affected_by(&["shared".to_string()].into_iter().collect());
+        assert_eq!(affected.len(), 3);
+        assert!(affected.contains("shared"));
+        assert!(affected.contains("chapter"));
+        assert!(affected.contains("main"));
+        assert!(!affected.contains("orphan"));
     }
 }

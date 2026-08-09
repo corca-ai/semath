@@ -217,10 +217,10 @@ fn first_symbol_in<'a>(
 mod tests {
     use super::{binder_at, binders, bound_occurrences, rename_rejection};
     use crate::DocumentLanguage;
-    use crate::parser::{math_regions, parse_regions};
+    use crate::parser::{parse_regions, test_math_regions};
 
     fn parsed(source: &str) -> crate::parser::ParsedMath {
-        parse_regions(source, &math_regions(source, DocumentLanguage::Latex)).remove(0)
+        parse_regions(source, &test_math_regions(source, DocumentLanguage::Latex)).remove(0)
     }
 
     #[test]

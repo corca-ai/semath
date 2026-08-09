@@ -1,24 +1,22 @@
-use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
 
+use crate::canonical::declared_symbols;
 use crate::parser::ParsedMath;
 use crate::prose::{ProseShape, ProseShapeClaim};
 use crate::scope::ScopeGraph;
 use crate::{
-    Evidence, FormulaConstraint, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceIndex,
+    Evidence, ProjectDocument, SemanticConstraint, SemanticDiagnostic, ShapeInfo, SourceIndex,
     SourceRange,
 };
 
-static DECLARATION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"(?x)([A-Za-z])\s*\\in\s*\\mathbb\s*\{\s*R\s*\}(?:\s*\^\s*(?:\{([^}]*)\}|([A-Za-z0-9]+)))?",
-    )
-    .unwrap()
-});
 static DIMENSION_PRODUCT: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\s*(?:\\times|×)\s*").unwrap());
+static REAL_SPACE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\\in\s*\\mathbb\s*(?:\{\s*R\s*\}|R)(?:\s*\^\s*(?:\{([^}]*)\}|([A-Za-z0-9]+)))?")
+        .unwrap()
+});
 static INEQUALITY: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"([A-Za-z0-9]+)\s*(?:\\(?:ne|neq)|!=)\s*([A-Za-z0-9]+)").unwrap());
 static ASSIGNMENT: LazyLock<Regex> =
@@ -80,14 +78,14 @@ impl Shape {
         }
     }
 
-    pub(crate) fn constraint(&self) -> FormulaConstraint {
+    pub(crate) fn constraint(&self) -> SemanticConstraint {
         let (kind, dimensions) = match self {
             Self::Scalar => ("scalar", Vec::new()),
             Self::Vector(dimension) => ("vector", vec![dimension.clone()]),
             Self::Matrix(rows, columns) => ("matrix", vec![rows.clone(), columns.clone()]),
             Self::Tensor(dimensions) => ("tensor", dimensions.clone()),
         };
-        FormulaConstraint {
+        SemanticConstraint {
             kind: kind.into(),
             concepts: Vec::new(),
             dimensions,
@@ -124,18 +122,10 @@ struct DimensionMismatch {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct ShapeAnalysis {
+pub(crate) struct ShapeObservations {
     facts: Vec<ShapeFact>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     scopes: ScopeGraph,
-}
-
-#[derive(Clone, Debug)]
-pub(crate) struct KnownShape {
-    pub symbol: String,
-    pub shape: Shape,
-    pub evidence: Evidence,
-    pub refinements: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -147,15 +137,21 @@ pub(crate) struct ExplicitShapeClaim {
     pub evidence: Evidence,
 }
 
-impl KnownShape {
-    pub fn constraint(&self) -> FormulaConstraint {
-        let mut constraint = self.shape.constraint();
-        constraint.refinements = self.refinements.clone();
-        constraint
+impl ShapeObservations {
+    pub fn exported(&self) -> Vec<ShapeInfo> {
+        self.facts
+            .iter()
+            .filter(|fact| self.scopes.depth(fact.scope_id) == 0)
+            .map(|fact| {
+                fact.shape.info(
+                    &fact.symbol,
+                    fact.evidence.clone(),
+                    fact.refinements.clone(),
+                )
+            })
+            .collect()
     }
-}
 
-impl ShapeAnalysis {
     pub fn explicit_claims(&self) -> Vec<ExplicitShapeClaim> {
         self.facts
             .iter()
@@ -175,7 +171,9 @@ impl ShapeAnalysis {
             .iter()
             .filter(|fact| {
                 fact.symbol == symbol
-                    && (fact.available_from <= offset || fact.symbol_range.contains(offset))
+                    && (self.scopes.depth(fact.scope_id) == 0
+                        || fact.available_from <= offset
+                        || fact.symbol_range.contains(offset))
                     && self.scopes.visible(fact.scope_id, offset)
             })
             .max_by_key(|fact| (self.scopes.depth(fact.scope_id), fact.available_from))
@@ -192,37 +190,15 @@ impl ShapeAnalysis {
             .cloned()
     }
 
-    pub fn known_shapes_at(&self, offset: u32) -> Vec<KnownShape> {
-        let mut latest = BTreeMap::<&str, &ShapeFact>::new();
-        for fact in &self.facts {
-            if fact.available_from <= offset
-                && self.scopes.visible(fact.scope_id, offset)
-                && latest.get(fact.symbol.as_str()).is_none_or(|current| {
-                    (self.scopes.depth(current.scope_id), current.available_from)
-                        < (self.scopes.depth(fact.scope_id), fact.available_from)
-                })
-            {
-                latest.insert(fact.symbol.as_str(), fact);
-            }
-        }
-        latest
-            .into_values()
-            .map(|fact| KnownShape {
-                symbol: fact.symbol.clone(),
-                shape: fact.shape.clone(),
-                evidence: fact.evidence.clone(),
-                refinements: fact.refinements.clone(),
-            })
-            .collect()
-    }
-
     pub fn claims_at(&self, symbol: &str, offset: u32) -> (Vec<ShapeInfo>, bool) {
         let mut facts = self
             .facts
             .iter()
             .filter(|fact| {
                 fact.symbol == symbol
-                    && (fact.available_from <= offset || fact.symbol_range.contains(offset))
+                    && (self.scopes.depth(fact.scope_id) == 0
+                        || fact.available_from <= offset
+                        || fact.symbol_range.contains(offset))
                     && self.scopes.visible(fact.scope_id, offset)
             })
             .collect::<Vec<_>>();
@@ -279,15 +255,15 @@ impl ShapeAnalysis {
     }
 }
 
-pub(crate) fn analyze_shapes(
+pub(crate) fn observe_shapes(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     prose_claims: &[ProseShapeClaim],
-) -> ShapeAnalysis {
+) -> ShapeObservations {
     let index = SourceIndex::new(&document.content);
     let scopes = ScopeGraph::new(document);
     let inequalities = collect_inequalities(document, parsed, &index, &scopes);
-    let mut analysis = ShapeAnalysis {
+    let mut analysis = ShapeObservations {
         facts: Vec::new(),
         diagnostics: Vec::new(),
         scopes,
@@ -310,43 +286,59 @@ pub(crate) fn analyze_shapes(
         let Some((content, content_start)) = math_content(document, math, &index) else {
             continue;
         };
-        for captures in DECLARATION.captures_iter(content) {
-            let whole = captures.get(0).unwrap();
-            let symbol_match = captures.get(1).unwrap();
+        let mut previous_space_end = 0;
+        for captures in REAL_SPACE.captures_iter(content) {
+            let declaration = captures.get(0).unwrap();
             let dimensions = captures
-                .get(2)
-                .or_else(|| captures.get(3))
+                .get(1)
+                .or_else(|| captures.get(2))
                 .map(|found| found.as_str());
             let Some(shape) = declared_shape(dimensions) else {
                 continue;
             };
-            let declaration_range = absolute_range(
-                &index,
-                content_start + whole.start(),
-                content_start + whole.end(),
+            let in_offset = index.utf16_for_byte(content_start + declaration.start());
+            let segment_offset = index.utf16_for_byte(content_start + previous_space_end);
+            let declaration_range =
+                absolute_range(&index, content_start, content_start + declaration.end());
+            let mut symbols = declared_symbols(document, &math.region.content_range);
+            let canonical_ranges = symbols
+                .iter()
+                .map(|(_, range)| range.clone())
+                .collect::<Vec<_>>();
+            symbols.extend(
+                math.symbols
+                    .iter()
+                    .filter(|(_, range)| {
+                        !canonical_ranges.iter().any(|canonical| {
+                            canonical.start_offset <= range.start_offset
+                                && range.end_offset <= canonical.end_offset
+                        })
+                    })
+                    .cloned(),
             );
-            let symbol_range = absolute_range(
-                &index,
-                content_start + symbol_match.start(),
-                content_start + symbol_match.end(),
-            );
-            let symbol = symbol_match.as_str();
-            let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
-            analysis.facts.push(ShapeFact {
-                symbol: symbol.into(),
-                shape,
-                symbol_range,
-                available_from: declaration_range.end_offset,
-                evidence: Evidence {
-                    rule_id: "explicit-real-shape-declaration".into(),
-                    kind: "explicit-math".into(),
-                    strength: "hard".into(),
-                    source_ranges: vec![declaration_range],
-                },
-                refinements: Vec::new(),
-                explicit: true,
-                scope_id,
-            });
+            symbols.sort_by_key(|(symbol, range)| (range.start_offset, symbol.clone()));
+            symbols.dedup();
+            for (symbol, symbol_range) in symbols.into_iter().filter(|(_, range)| {
+                segment_offset <= range.start_offset && range.start_offset < in_offset
+            }) {
+                let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
+                analysis.facts.push(ShapeFact {
+                    symbol,
+                    shape: shape.clone(),
+                    symbol_range,
+                    available_from: declaration_range.end_offset,
+                    evidence: Evidence {
+                        rule_id: "explicit-real-space-declaration".into(),
+                        kind: "explicit-math".into(),
+                        strength: "hard".into(),
+                        source_ranges: vec![declaration_range.clone()],
+                    },
+                    refinements: Vec::new(),
+                    explicit: true,
+                    scope_id,
+                });
+            }
+            previous_space_end = declaration.end();
         }
     }
 
@@ -403,7 +395,10 @@ fn prose_shape(shape: &ProseShape) -> Shape {
     }
 }
 
-fn add_explicit_conflict_diagnostics(analysis: &mut ShapeAnalysis, inequalities: &[Inequality]) {
+fn add_explicit_conflict_diagnostics(
+    analysis: &mut ShapeObservations,
+    inequalities: &[Inequality],
+) {
     let mut facts = analysis
         .facts
         .iter()
@@ -447,7 +442,7 @@ fn add_explicit_conflict_diagnostics(analysis: &mut ShapeAnalysis, inequalities:
 }
 
 fn analyze_assignment(
-    analysis: &mut ShapeAnalysis,
+    analysis: &mut ShapeObservations,
     inequalities: &[Inequality],
     expression: &str,
     expression_range: SourceRange,
@@ -642,7 +637,7 @@ fn analyze_assignment(
 }
 
 fn push_derived_fact(
-    analysis: &mut ShapeAnalysis,
+    analysis: &mut ShapeObservations,
     symbol: &str,
     symbol_range: SourceRange,
     available_from: u32,
@@ -725,7 +720,11 @@ fn normalize_dimension(value: &str) -> String {
         .collect()
 }
 
-fn latest_fact<'a>(analysis: &'a ShapeAnalysis, symbol: &str, at: u32) -> Option<&'a ShapeFact> {
+fn latest_fact<'a>(
+    analysis: &'a ShapeObservations,
+    symbol: &str,
+    at: u32,
+) -> Option<&'a ShapeFact> {
     analysis
         .facts
         .iter()
@@ -829,12 +828,12 @@ fn absolute_range(index: &SourceIndex, start: usize, end: usize) -> SourceRange 
 
 #[cfg(test)]
 mod tests {
-    use super::analyze_shapes;
-    use crate::parser::{math_regions, parse_regions};
+    use super::observe_shapes;
+    use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
-    fn analyze(source: &str) -> super::ShapeAnalysis {
-        let regions = math_regions(source, DocumentLanguage::Latex);
+    fn analyze(source: &str) -> super::ShapeObservations {
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             file_id: "main".into(),
             path: "main.tex".into(),
@@ -842,9 +841,10 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            macros: Vec::new(),
             includes: Vec::new(),
         };
-        analyze_shapes(&document, &parse_regions(source, &regions), &[])
+        observe_shapes(&document, &parse_regions(source, &regions), &[])
     }
 
     #[test]
@@ -882,7 +882,7 @@ mod tests {
     #[test]
     fn keeps_explicit_shadowing_in_separate_sections() {
         let source = "# First\n$x \\in \\mathbb{R}^{n}$\n$x$\n# Second\n$x \\in \\mathbb{R}^{m \\times n}$\n$x$";
-        let regions = math_regions(source, DocumentLanguage::Markdown);
+        let regions = test_math_regions(source, DocumentLanguage::Markdown);
         let document = ProjectDocument {
             file_id: "main".into(),
             path: "main.md".into(),
@@ -890,9 +890,10 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            macros: Vec::new(),
             includes: Vec::new(),
         };
-        let analysis = analyze_shapes(&document, &parse_regions(source, &regions), &[]);
+        let analysis = observe_shapes(&document, &parse_regions(source, &regions), &[]);
         assert!(analysis.diagnostics.is_empty());
         let first_use = source.find("$x$\n#").unwrap() as u32 + 1;
         let second_use = source.rfind("$x$").unwrap() as u32 + 1;

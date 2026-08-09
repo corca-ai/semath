@@ -185,11 +185,8 @@ export class SemathLspServer {
             ),
           );
           return;
-        case "textDocument/codeAction":
-          this.respond(id, this.codeActions(params));
-          return;
-        case "semath/inspection":
-          this.respond(id, this.queryAt(params, "inspection").value);
+        case "semath/semanticView":
+          this.respond(id, this.queryAt(params).value);
           return;
         case "semath/runtimeStats":
           this.respond(id, this.getRuntimeStats());
@@ -305,7 +302,16 @@ export class SemathLspServer {
     let document: ProjectDocument;
     if (language === "bibtex") {
       this.latex.updateFile(path, content);
-      document = { content, documentVersion, fileId, language, path };
+      document = {
+        content,
+        documentVersion,
+        fileId,
+        includes: [],
+        language,
+        macros: [],
+        mathRegions: [],
+        path,
+      };
     } else {
       const syntax = this.latex.updateDocument({
         content,
@@ -373,16 +379,17 @@ export class SemathLspServer {
     const result = this.queryPosition(
       params.textDocument.uri,
       params.position,
-      "hover",
+      "semanticView",
     );
-    if (result.value.kind === "hover") {
-      const value = result.value;
+    if (result.value.kind === "semanticView") {
+      const value = result.value.view;
       const lines = [
-        value.symbol ? `**${value.symbol}**` : "",
-        value.shape?.display ?? "",
-        ...(value.roles ?? []).map((role) => role.description),
-        ...value.definitions.map((definition) => definition.description),
-        ...(value.formulas ?? []).map((formula) => formula.title),
+        `**${value.summary}**`,
+        value.symbol?.shapes[0]?.display ?? "",
+        ...(value.symbol?.roles ?? []).map((role) => role.description),
+        ...(value.symbol?.definitions ?? []).map((definition) => definition.description),
+        ...value.context.relations.map((relation) => relation.description),
+        value.refusal ?? "",
       ].filter(Boolean);
       if (lines.length)
         return { contents: { kind: "markdown", value: lines.join("\n\n") } };
@@ -479,34 +486,6 @@ export class SemathLspServer {
     params: TextDocumentPositionParams,
     id: JsonRpcMessage["id"],
   ): Promise<object> {
-    const semantic = this.queryPosition(
-      params.textDocument.uri,
-      params.position,
-      "formulaCompletion",
-    );
-    const semanticItems =
-      semantic.value.kind === "formulaCompletions"
-        ? semantic.value.completions.flatMap((completion) => {
-            const fileId = this.stateForUri(params.textDocument.uri).document
-              .fileId;
-            const edit = completion.proposal.files.find(
-              (file) => file.fileId === fileId,
-            )?.edits[0];
-            return edit
-              ? [
-                  {
-                    detail: completion.detail,
-                    kind: 15,
-                    label: completion.title,
-                    textEdit: {
-                      newText: edit.replacementText,
-                      range: this.lspRange(params.textDocument.uri, edit.range),
-                    },
-                  },
-                ]
-              : [];
-          })
-        : [];
     const { path, line, column } = this.locate(params);
     const thisServer = this;
     const token = {
@@ -525,42 +504,18 @@ export class SemathLspServer {
     );
     return {
       isIncomplete: latex.isIncomplete,
-      items: dedupe([...semanticItems, ...latexItems]),
+      items: dedupe(latexItems),
     };
-  }
-
-  private codeActions(params: Record<string, unknown> | undefined): object[] {
-    const uri = ((params?.textDocument ?? {}) as { uri: string }).uri;
-    const position = ((params?.range ?? {}) as { start?: LspPosition })
-      .start ?? { line: 0, character: 0 };
-    const kinds = ["formulaCompletion", "formulaRewrite"] as const;
-    const results = kinds.map((kind) =>
-      this.queryPosition(uri, position, kind),
-    );
-    const proposals = results.flatMap((result) => {
-      if (result.value.kind === "formulaCompletions")
-        return result.value.completions.map((item) => item.proposal);
-      if (result.value.kind === "formulaRewrites")
-        return result.value.rewrites.map((item) => item.proposal);
-      return [];
-    });
-    return proposals.map((proposal) => ({
-      edit: this.workspaceEdit(proposal),
-      isPreferred: false,
-      kind: "refactor.rewrite",
-      title: proposal.title,
-    }));
   }
 
   private queryAt(
     params: Record<string, unknown> | undefined,
-    kind: "inspection",
   ): QueryResult {
     const position = params as unknown as TextDocumentPositionParams;
     return this.queryPosition(
       position.textDocument.uri,
       position.position,
-      kind,
+      "semanticView",
     );
   }
 
@@ -569,14 +524,11 @@ export class SemathLspServer {
     position: LspPosition,
     kind:
       | "definition"
-      | "formulaCompletion"
-      | "formulaRewrite"
-      | "hover"
-      | "inspection"
       | "prepareRename"
       | "references"
       | "rename"
-      | "selection",
+      | "selection"
+      | "semanticView",
     extra: Record<string, unknown> = {},
   ): QueryResult {
     const state = this.stateForUri(uri);
@@ -585,13 +537,7 @@ export class SemathLspServer {
     switch (kind) {
       case "definition":
         return this.query(state, { fileId, kind, offset });
-      case "formulaCompletion":
-        return this.query(state, { fileId, kind, offset });
-      case "formulaRewrite":
-        return this.query(state, { fileId, kind, offset });
-      case "hover":
-        return this.query(state, { fileId, kind, offset });
-      case "inspection":
+      case "semanticView":
         return this.query(state, { fileId, kind, offset });
       case "prepareRename":
         return this.query(state, { fileId, kind, offset });
@@ -869,7 +815,6 @@ function dedupe(items: object[]): object[] {
 
 function capabilities(): object {
   return {
-    codeActionProvider: { codeActionKinds: ["refactor.rewrite"] },
     completionProvider: { triggerCharacters: ["\\", "{", "[", ",", "=", "@"] },
     definitionProvider: true,
     hoverProvider: true,

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "domain": "linear-algebra-blind-extension",
+  "cases": [
+    {
+      "id":"matrix-vector-basic",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"}],
+      "cursor":{"fileId":"main","needle":"y ="},"expectation":"established","lawId":"matrix-vector-product","expectedRoles":{"result":"y","operator":"M","vector":"x"},
+      "variationTags":["basic","implicit-product","matrix","vector"]
+    },
+    {
+      "id":"matrix-vector-spaced",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"}],
+      "cursor":{"fileId":"main","needle":"v=A"},"expectation":"established","lawId":"matrix-vector-product","expectedRoles":{"result":"v","operator":"A","vector":"u"},
+      "variationTags":["spacing-command","compact-equality","coordinated","lowercase"]
+    },
+    {
+      "id":"matrix-vector-reversed-equality",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"}],
+      "cursor":{"fileId":"main","needle":"b ="},"expectation":"established","lawId":"matrix-vector-product","expectedRoles":{"result":"b","operator":"T","vector":"a"},
+      "variationTags":["parenthesized-product","spaced-product","operator-name","grouping"]
+    },
+    {
+      "id":"matrix-vector-styled",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"}],
+      "cursor":{"fileId":"main","needle":"z}="},"expectation":"established","lawId":"matrix-vector-product","expectedRoles":{"result":"z","operator":"K","vector":"x"},
+      "variationTags":["bold-vector","presentation-normalization","styled","no-space"]
+    },
+    {
+      "id":"matrix-vector-grouped",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"}],
+      "cursor":{"fileId":"main","needle":"s} ="},"expectation":"established","lawId":"matrix-vector-product","expectedRoles":{"result":"s","operator":"H","vector":"r"},
+      "variationTags":["grouped","brace-layout","separate-declarations","uppercase-operator"]
+    },
+    {
+      "id":"matrix-vector-untyped-refusal",
+      "documents":[{"fileId":"main","path":"main.tex","content":"No matrix or vector shapes are declared. $y=Mx$"}],
+      "cursor":{"fileId":"main","needle":"y=M"},"expectation":"refused","lawId":"matrix-vector-product","refusalCategory":"missing-shapes",
+      "variationTags":["negative","untyped","missing-shape","safe-refusal"]
+    },
+    {
+      "id":"matrix-vector-reversed-product-refusal",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"}],
+      "cursor":{"fileId":"main","needle":"y=x"},"expectation":"refused","lawId":"matrix-vector-product","refusalCategory":"wrong-order",
+      "variationTags":["negative","reversed-product","shape-error","noncommutative"]
+    },
+    {
+      "id":"matrix-matrix-refusal",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let A, B, and C be matrices. $C=AB$"}],
+      "cursor":{"fileId":"main","needle":"C=A"},"expectation":"refused","lawId":"matrix-vector-product","refusalCategory":"wrong-result-shape",
+      "variationTags":["negative","matrix-matrix","wrong-role","three-symbol"]
+    },
+    {
+      "id":"matrix-vector-sum-refusal",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"}],
+      "cursor":{"fileId":"main","needle":"y=M"},"expectation":"refused","lawId":"matrix-vector-product","refusalCategory":"wrong-operator",
+      "variationTags":["negative","sum","operator-change","typed"]
+    },
+    {
+      "id":"matrix-vector-negated-context-refusal",
+      "documents":[{"fileId":"main","path":"main.tex","content":"Let $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."}],
+      "cursor":{"fileId":"main","needle":"y=M"},"expectation":"refused","lawId":"matrix-vector-product","refusalCategory":"negated-context",
+      "variationTags":["negative","negation","context","explicit-refusal"]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "packId": "linear-algebra",
   "packVersion": "1.2.0",
   "packKind": "field",
@@ -7,26 +7,107 @@
   "title": "Linear algebra",
   "description": "Typed vector and matrix formulas with conservative dimension evidence.",
   "dependencies": [],
-  "capabilities": { "provides": ["semath:formula-recognition", "semath:shape-analysis"], "requires": [] },
+  "capabilities": {
+    "provides": [
+      "semath:formula-recognition",
+      "semath:shape-analysis"
+    ],
+    "requires": []
+  },
   "concepts": [
-    { "id": "linear-operator", "conceptKind": "operator", "title": "Linear operator", "description": "A linear map between vector spaces.", "parents": [], "references": ["matrix-computations"] },
-    { "id": "transpose", "conceptKind": "operator", "title": "Transpose", "description": "An operator that exchanges matrix axes.", "parents": [], "references": ["matrix-computations"] }
+    {
+      "id": "linear-operator",
+      "conceptKind": "operator",
+      "title": "Linear operator",
+      "description": "A linear map between vector spaces.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "transpose",
+      "conceptKind": "operator",
+      "title": "Transpose",
+      "description": "An operator that exchanges matrix axes.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "vector",
+      "conceptKind": "entity",
+      "title": "Vector",
+      "description": "An element of a finite-dimensional vector space.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    }
   ],
   "quantityKinds": [],
   "units": [],
-  "laws": [],
+  "laws": [
+    {
+      "id": "matrix-vector-product",
+      "title": "Matrix-vector product",
+      "description": "A matrix maps an input vector to an output vector with compatible dimensions.",
+      "semanticForms": [
+        "result = operator vector"
+      ],
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:vector",
+          "description": "Output vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Linear operator represented by a matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "vector",
+          "concept": "linear-algebra:vector",
+          "description": "Input vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        "The matrix column dimension equals the input-vector dimension."
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    }
+  ],
   "activationRules": [
     {
       "id": "vocabulary",
       "topic": "foundations",
-      "patterns": ["linear algebra", "matrix", "vector", "eigenvalue", "eigenvector"],
-      "references": ["matrix-computations"]
+      "patterns": [
+        "linear algebra",
+        "matrix",
+        "vector",
+        "eigenvalue",
+        "eigenvector"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
     },
     {
       "id": "real-coordinate-notation",
       "topic": "vector-spaces",
-      "patterns": ["\\mathbb{R}"],
-      "references": ["matrix-computations"]
+      "patterns": [
+        "\\mathbb{R}"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
     }
   ],
   "roles": [
@@ -34,8 +115,13 @@
       "id": "linear-operator",
       "topic": "linear-maps",
       "description": "A linear map between vector spaces.",
-      "notation": ["A", "T"],
-      "references": ["matrix-computations"]
+      "notation": [
+        "A",
+        "T"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
     }
   ],
   "operators": [
@@ -43,129 +129,14 @@
       "id": "transpose",
       "topic": "matrix-operations",
       "description": "Transpose swaps the row and column axes of a matrix.",
-      "notation": ["^{\\top}"],
-      "references": ["matrix-computations"]
+      "notation": [
+        "^{\\top}"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
     }
   ],
-  "patterns": [
-    {
-      "id": "matrix-vector-product",
-      "topic": "matrix-products",
-      "title": "Matrix-vector product",
-      "description": "Applies a matrix to a dimension-compatible vector.",
-      "descriptionKey": "matrix-vector-product",
-      "maturity": "completion",
-      "matcher": { "primitive": "binary-product" },
-      "parameters": [
-        { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } },
-        { "id": "vector", "constraint": { "kind": "vector", "dimensions": ["n"] } }
-      ],
-      "result": { "kind": "vector", "dimensions": ["m"] },
-      "sideConditions": [
-        { "kind": "dimension-equality", "left": "matrix.columns", "right": "vector.length" }
-      ],
-      "conditionDescriptions": ["The matrix column count equals the vector length."],
-      "generationTemplate": "{{matrix}}{{vector}}",
-      "references": ["matrix-computations"]
-    },
-    {
-      "id": "matrix-matrix-product",
-      "topic": "matrix-products",
-      "title": "Matrix-matrix product",
-      "description": "Multiplies matrices whose inner dimensions agree.",
-      "descriptionKey": "matrix-matrix-product",
-      "maturity": "completion",
-      "matcher": { "primitive": "binary-product" },
-      "parameters": [
-        { "id": "left", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } },
-        { "id": "right", "constraint": { "kind": "matrix", "dimensions": ["n", "p"] } }
-      ],
-      "result": { "kind": "matrix", "dimensions": ["m", "p"] },
-      "sideConditions": [
-        { "kind": "dimension-equality", "left": "left.columns", "right": "right.rows" }
-      ],
-      "conditionDescriptions": ["The left column count equals the right row count."],
-      "generationTemplate": "{{left}}{{right}}",
-      "references": ["matrix-computations"]
-    },
-    {
-      "id": "matrix-transpose",
-      "topic": "matrix-operations",
-      "title": "Matrix transpose",
-      "description": "Swaps a matrix's row and column dimensions.",
-      "descriptionKey": "matrix-transpose",
-      "maturity": "completion",
-      "matcher": { "primitive": "transpose" },
-      "parameters": [
-        { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } }
-      ],
-      "result": { "kind": "matrix", "dimensions": ["n", "m"] },
-      "sideConditions": [
-        { "kind": "presentation-safe", "left": "matrix", "right": "transpose" }
-      ],
-      "conditionDescriptions": ["The source is an explicitly typed matrix."],
-      "generationTemplate": "{{matrix}}^{\\top}",
-      "references": ["matrix-computations"]
-    },
-    {
-      "id": "vector-inner-product",
-      "topic": "inner-products",
-      "title": "Vector inner product",
-      "description": "Combines two equal-length vectors into a scalar.",
-      "descriptionKey": "vector-inner-product",
-      "maturity": "completion",
-      "matcher": { "primitive": "transposed-binary-product" },
-      "parameters": [
-        { "id": "left", "constraint": { "kind": "vector", "dimensions": ["n"] } },
-        { "id": "right", "constraint": { "kind": "vector", "dimensions": ["n"] } }
-      ],
-      "result": { "kind": "scalar" },
-      "sideConditions": [
-        { "kind": "dimension-equality", "left": "left.length", "right": "right.length" }
-      ],
-      "conditionDescriptions": ["Both vectors have the same declared length."],
-      "generationTemplate": "{{left}}^{\\top}{{right}}",
-      "references": ["matrix-computations"]
-    },
-    {
-      "id": "quadratic-form",
-      "topic": "quadratic-forms",
-      "title": "Quadratic form",
-      "description": "Evaluates a square matrix on the same vector on both sides.",
-      "descriptionKey": "quadratic-form",
-      "maturity": "completion",
-      "matcher": { "primitive": "quadratic-form" },
-      "parameters": [
-        { "id": "vector", "constraint": { "kind": "vector", "dimensions": ["n"] } },
-        { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["n", "n"] } }
-      ],
-      "result": { "kind": "scalar" },
-      "sideConditions": [
-        { "kind": "dimension-equality", "left": "matrix.rows", "right": "vector.length" },
-        { "kind": "dimension-equality", "left": "matrix.columns", "right": "vector.length" }
-      ],
-      "conditionDescriptions": [
-        "The matrix row count equals the vector length.",
-        "The matrix column count equals the vector length."
-      ],
-      "generationTemplate": "{{vector}}^{\\top}{{matrix}}{{vector}}",
-      "references": ["matrix-computations"]
-    },
-    { "id": "determinant", "topic": "matrix-invariants", "title": "Determinant", "description": "Determinant of an explicit matrix expression.", "descriptionKey": "determinant", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\det\\s*\\((.+)\\)$" }, "parameters": [{ "id": "matrix-expression", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["determinant"] }, "references": ["matrix-computations"] },
-    { "id": "matrix-trace", "topic": "matrix-invariants", "title": "Matrix trace", "description": "Trace of an explicit square-matrix expression.", "descriptionKey": "matrix-trace", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\operatorname\\s*\\{tr\\}\\s*\\((.+)\\)$" }, "parameters": [{ "id": "matrix-expression", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["trace"] }, "references": ["matrix-computations"] },
-    { "id": "matrix-rank", "topic": "matrix-invariants", "title": "Matrix rank", "description": "Rank of an explicit matrix expression.", "descriptionKey": "matrix-rank", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\operatorname\\s*\\{rank\\}\\s*\\((.+)\\)$" }, "parameters": [{ "id": "matrix-expression", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["nonnegative-integer", "rank"] }, "references": ["matrix-computations"] },
-    { "id": "matrix-inverse", "topic": "matrix-operations", "title": "Matrix inverse", "description": "Inverse notation for an explicitly written matrix symbol.", "descriptionKey": "matrix-inverse", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*\\^\\s*(?:\\{\\s*-1\\s*\\}|-1)$" }, "parameters": [{ "id": "matrix", "constraint": { "kind": "expression" } }], "result": { "kind": "matrix", "refinements": ["inverse"] }, "references": ["matrix-computations"] },
-    { "id": "vector-norm", "topic": "norms", "title": "Vector or matrix norm", "description": "Norm of an explicit expression with an optional subscript.", "descriptionKey": "vector-norm", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\lVert\\s*(.+)\\s*\\\\rVert(?:\\s*_\\s*\\{?([^{}]+)\\}?)?$" }, "parameters": [{ "id": "expression", "constraint": { "kind": "expression" } }, { "id": "norm-kind", "constraint": { "kind": "expression" }, "optional": true }], "result": { "kind": "scalar", "refinements": ["nonnegative", "norm"] }, "references": ["matrix-computations"] },
-    { "id": "outer-product", "topic": "matrix-products", "title": "Vector outer product", "description": "A column vector multiplied by a transposed vector.", "descriptionKey": "outer-product", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*([A-Za-z])\\s*\\^\\s*(?:\\{\\s*\\\\top\\s*\\}|\\\\top)$" }, "parameters": [{ "id": "left-vector", "constraint": { "kind": "expression" } }, { "id": "right-vector", "constraint": { "kind": "expression" } }], "result": { "kind": "matrix", "refinements": ["rank-at-most-one"] }, "references": ["matrix-computations"] },
-    { "id": "linear-system", "topic": "linear-systems", "title": "Linear system", "description": "A matrix-vector expression equated to a right-hand side.", "descriptionKey": "linear-system", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*([A-Za-z])\\s*=\\s*([A-Za-z])$" }, "parameters": [{ "id": "matrix", "constraint": { "kind": "expression" } }, { "id": "unknown", "constraint": { "kind": "expression" } }, { "id": "right-hand-side", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["linear-system"] }, "references": ["matrix-computations"] },
-    { "id": "eigenvalue-equation", "topic": "eigenvalues", "title": "Eigenvalue equation", "description": "A matrix acting on a vector equals a scalar multiple of that vector.", "descriptionKey": "eigenvalue-equation", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*([A-Za-z])\\s*=\\s*(\\\\lambda(?:\\s*_\\s*\\{?[^{}]+\\}?)?)\\s*([A-Za-z])$" }, "parameters": [{ "id": "matrix", "constraint": { "kind": "expression" } }, { "id": "left-vector", "constraint": { "kind": "expression" } }, { "id": "eigenvalue", "constraint": { "kind": "expression" } }, { "id": "right-vector", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["eigenvalue-equation"] }, "references": ["matrix-computations"] },
-    { "id": "singular-value-decomposition", "topic": "factorizations", "title": "Singular value decomposition", "description": "Product of left singular vectors, singular values, and transposed right singular vectors.", "descriptionKey": "singular-value-decomposition", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*\\\\Sigma\\s*([A-Za-z])\\s*\\^\\s*(?:\\{\\s*\\\\top\\s*\\}|\\\\top)$" }, "parameters": [{ "id": "left-factor", "constraint": { "kind": "expression" } }, { "id": "right-factor", "constraint": { "kind": "expression" } }], "result": { "kind": "matrix", "refinements": ["singular-value-factorization"] }, "references": ["matrix-computations"] },
-    { "id": "normal-equations", "topic": "least-squares", "title": "Normal equations", "description": "Normal-equation form associated with a least-squares problem.", "descriptionKey": "normal-equations", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*\\^\\s*(?:\\{\\s*\\\\top\\s*\\}|\\\\top)\\s*([A-Za-z])\\s*([A-Za-z])\\s*=\\s*([A-Za-z])\\s*\\^\\s*(?:\\{\\s*\\\\top\\s*\\}|\\\\top)\\s*([A-Za-z])$" }, "parameters": [{ "id": "left-transpose-base", "constraint": { "kind": "expression" } }, { "id": "matrix", "constraint": { "kind": "expression" } }, { "id": "unknown", "constraint": { "kind": "expression" } }, { "id": "right-transpose-base", "constraint": { "kind": "expression" } }, { "id": "right-hand-side", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["normal-equations"] }, "references": ["matrix-computations"] },
-    { "id": "matrix-addition", "topic": "matrix-operations", "title": "Matrix addition", "description": "Sum of two matrices with identical declared dimensions.", "descriptionKey": "matrix-addition", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*\\+\\s*([A-Za-z])$" }, "parameters": [{ "id": "left", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } }, { "id": "right", "constraint": { "kind": "matrix", "dimensions": ["m", "n"] } }], "result": { "kind": "matrix", "dimensions": ["m", "n"], "refinements": ["matrix-sum"] }, "references": ["matrix-computations"] },
-    { "id": "matrix-exponential", "topic": "matrix-functions", "title": "Matrix exponential", "description": "Exponential of a square matrix scaled by a declared scalar.", "descriptionKey": "matrix-exponential", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^e\\s*\\^\\s*\\{\\s*([A-Za-z])\\s*([A-Za-z])\\s*\\}$" }, "parameters": [{ "id": "scalar", "constraint": { "kind": "scalar" } }, { "id": "matrix", "constraint": { "kind": "matrix", "dimensions": ["n", "n"] } }], "result": { "kind": "matrix", "dimensions": ["n", "n"], "refinements": ["matrix-exponential"] }, "references": ["matrix-computations"] },
-    { "id": "characteristic-equation", "topic": "eigenvalues", "title": "Characteristic equation", "description": "Determinant equation whose roots are the eigenvalues of a matrix.", "descriptionKey": "characteristic-equation", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\det\\s*\\(\\s*([^ ]+)\\s+([A-Za-z])\\s*-\\s*([A-Za-z])\\s*\\)\\s*=\\s*0$" }, "parameters": [{ "id": "eigenvalue", "constraint": { "kind": "expression" } }, { "id": "identity", "constraint": { "kind": "expression" } }, { "id": "matrix", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["characteristic-equation"] }, "references": ["matrix-computations"] }
-  ],
-  "rewrites": [],
   "references": [
     {
       "id": "matrix-computations",

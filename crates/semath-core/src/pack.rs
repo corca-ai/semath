@@ -1,18 +1,12 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::sync::LazyLock;
 
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::matcher::primitive_matcher;
-use crate::{FormulaConstraint, FormulaParameter, FormulaSideCondition};
-
-pub const PACK_SCHEMA_VERSION: u32 = 3;
+pub const PACK_SCHEMA_VERSION: u32 = 4;
 const MAX_PACK_BYTES: usize = 256 * 1024;
-const MAX_ACTIVATION_PATTERNS: usize = 128;
-const MAX_PATTERN_RULES: usize = 256;
-const MAX_REGEX_BYTES: usize = 512;
 
 const BUILTIN_PACK_SOURCES: &[(&str, &str)] = &[
     (
@@ -54,20 +48,13 @@ static IDENTIFIER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$").unwrap());
 static VERSION: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9.-]+)?$").unwrap());
-static QUALIFIED_IDENTIFIER: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z][a-z0-9]*(?:-[a-z0-9]+)*$").unwrap()
-});
-
 static BUILTIN_PACKS: LazyLock<Vec<DomainPack>> = LazyLock::new(|| {
     let packs = BUILTIN_PACK_SOURCES
         .iter()
         .map(|(expected_id, source)| {
-            let pack = load_pack(source)
+            let pack = compile_pack(source)
                 .unwrap_or_else(|error| panic!("invalid built-in pack {expected_id}: {error}"));
-            assert_eq!(
-                pack.pack_id, *expected_id,
-                "built-in pack registration must match its declared ID"
-            );
+            assert_eq!(&pack.pack_id, expected_id);
             pack
         })
         .collect::<Vec<_>>();
@@ -75,40 +62,8 @@ static BUILTIN_PACKS: LazyLock<Vec<DomainPack>> = LazyLock::new(|| {
     packs
 });
 
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "kebab-case")]
-pub enum PackMaturity {
-    Recognition,
-    Completion,
-    Diagnostic,
-    Rewrite,
-}
-
-impl PackMaturity {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Recognition => "recognition",
-            Self::Completion => "completion",
-            Self::Diagnostic => "diagnostic",
-            Self::Rewrite => "rewrite",
-        }
-    }
-
-    pub fn allows_completion(self) -> bool {
-        matches!(self, Self::Completion | Self::Rewrite)
-    }
-
-    pub fn allows_diagnostic(self) -> bool {
-        matches!(self, Self::Diagnostic)
-    }
-
-    pub fn allows_rewrite(self) -> bool {
-        matches!(self, Self::Rewrite)
-    }
-}
-
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DomainPack {
     pub schema_version: u32,
     pub pack_id: String,
@@ -128,14 +83,12 @@ pub struct DomainPack {
     pub units: Vec<PackUnit>,
     #[serde(default)]
     pub laws: Vec<PackLaw>,
+    #[serde(default)]
     pub activation_rules: Vec<PackActivationRule>,
     #[serde(default)]
     pub roles: Vec<PackVocabularyEntry>,
     #[serde(default)]
     pub operators: Vec<PackVocabularyEntry>,
-    pub patterns: Vec<PackPattern>,
-    #[serde(default)]
-    pub rewrites: Vec<PackRewrite>,
     pub references: Vec<PackReference>,
 }
 
@@ -148,7 +101,7 @@ pub enum PackKind {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackDependency {
     pub pack_id: String,
     pub version_major: u32,
@@ -157,7 +110,7 @@ pub struct PackDependency {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackCapabilities {
     #[serde(default)]
     pub provides: Vec<String>,
@@ -166,7 +119,7 @@ pub struct PackCapabilities {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackConcept {
     pub id: String,
     pub concept_kind: String,
@@ -178,7 +131,7 @@ pub struct PackConcept {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackDimensionExponent {
     pub base: String,
     pub numerator: i32,
@@ -186,26 +139,28 @@ pub struct PackDimensionExponent {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackRational {
     pub numerator: i64,
     pub denominator: u64,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackQuantityKind {
     pub id: String,
     pub title: String,
     pub description: String,
+    #[serde(default)]
+    pub aliases: Vec<String>,
     pub dimension: Vec<PackDimensionExponent>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub default_unit: Option<String>,
     pub references: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackUnit {
     pub id: String,
     pub symbol: String,
@@ -213,34 +168,42 @@ pub struct PackUnit {
     pub aliases: Vec<String>,
     pub dimension: Vec<PackDimensionExponent>,
     pub scale: PackRational,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub offset: Option<PackRational>,
     pub references: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackLaw {
     pub id: String,
     pub title: String,
     pub description: String,
-    #[serde(default)]
+    pub semantic_forms: Vec<String>,
     pub roles: Vec<PackLawRole>,
     #[serde(default)]
     pub conditions: Vec<String>,
+    #[serde(default)]
+    pub activation_phrases: Vec<String>,
     pub references: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackLawRole {
     pub id: String,
     pub concept: String,
     pub description: String,
+    #[serde(default)]
+    pub shape: Option<String>,
+    #[serde(default)]
+    pub notation: Vec<String>,
+    #[serde(default)]
+    pub variadic: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackActivationRule {
     pub id: String,
     pub topic: String,
@@ -249,7 +212,7 @@ pub struct PackActivationRule {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackVocabularyEntry {
     pub id: String,
     pub topic: String,
@@ -260,97 +223,13 @@ pub struct PackVocabularyEntry {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackPattern {
-    #[serde(skip)]
-    pub pack_id: String,
-    #[serde(skip)]
-    pub pack_version: String,
-    pub id: String,
-    pub topic: String,
-    pub title: String,
-    pub description: String,
-    pub description_key: String,
-    pub maturity: PackMaturity,
-    pub matcher: PackMatcher,
-    #[serde(default)]
-    pub parameters: Vec<FormulaParameter>,
-    pub result: FormulaConstraint,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub relation: Option<PackPatternRelation>,
-    #[serde(default)]
-    pub side_conditions: Vec<FormulaSideCondition>,
-    #[serde(default)]
-    pub condition_descriptions: Vec<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub generation_template: Option<String>,
-    pub references: Vec<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackPatternRelation {
-    pub law: String,
-    pub role_bindings: Vec<PackRelationRoleBinding>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackRelationRoleBinding {
-    pub parameter: String,
-    pub role: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackMatcher {
-    pub primitive: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub expression: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackRewrite {
-    pub id: String,
-    pub topic: String,
-    pub title: String,
-    pub description: String,
-    pub source_pattern: String,
-    pub required_refinements: Vec<PackRequiredRefinement>,
-    pub replacement_template: String,
-    pub references: Vec<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackRequiredRefinement {
-    pub parameter: String,
-    pub refinement: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PackReference {
     pub id: String,
     pub title: String,
     pub citation: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub url: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct PackSummary {
-    pub schema_version: u32,
-    pub pack_id: String,
-    pub pack_version: String,
-    pub pack_kind: PackKind,
-    pub namespace: String,
-    pub title: String,
-    pub description: String,
-    pub pattern_count: u32,
-    pub rewrite_count: u32,
 }
 
 #[derive(Clone, Debug, Error, PartialEq, Eq)]
@@ -360,16 +239,12 @@ pub struct PackValidationError {
     pub message: String,
 }
 
-pub fn load_pack(source: &str) -> Result<DomainPack, PackValidationError> {
+pub fn compile_pack(source: &str) -> Result<DomainPack, PackValidationError> {
     if source.len() > MAX_PACK_BYTES {
         return Err(error("pack", "source exceeds the 256 KiB limit"));
     }
-    let mut pack = serde_json::from_str::<DomainPack>(source)
-        .map_err(|cause| error("pack", format!("invalid JSON: {cause}")))?;
-    for pattern in &mut pack.patterns {
-        pattern.pack_id.clone_from(&pack.pack_id);
-        pattern.pack_version.clone_from(&pack.pack_version);
-    }
+    let pack = serde_json::from_str::<DomainPack>(source)
+        .map_err(|cause| error("pack", format!("invalid schema: {cause}")))?;
     validate_pack(&pack)?;
     Ok(pack)
 }
@@ -391,371 +266,152 @@ pub fn validate_pack(pack: &DomainPack) -> Result<(), PackValidationError> {
     }
     require_text("title", &pack.title)?;
     require_text("description", &pack.description)?;
-    if pack.activation_rules.is_empty() && pack.pack_kind != PackKind::Capability {
-        return Err(error("activationRules", "must not be empty"));
-    }
-    if pack.patterns.is_empty() && pack.laws.is_empty() && pack.pack_kind != PackKind::Capability {
-        return Err(error("patterns", "must not be empty"));
-    }
-    if pack.patterns.len() > MAX_PATTERN_RULES {
-        return Err(error("patterns", "exceeds the 256-entry limit"));
-    }
     if pack.references.is_empty() {
         return Err(error("references", "must not be empty"));
     }
-
-    let reference_ids = validate_references(pack)?;
-    validate_manifest(pack)?;
-    validate_concepts(pack, &reference_ids)?;
-    validate_quantities(pack, &reference_ids)?;
-    validate_laws(pack, &reference_ids)?;
-    validate_activation_rules(pack, &reference_ids)?;
-    validate_vocabulary("roles", &pack.roles, &reference_ids)?;
-    validate_vocabulary("operators", &pack.operators, &reference_ids)?;
-    validate_patterns(pack, &reference_ids)?;
-    validate_rewrites(pack, &reference_ids)?;
+    let references = unique_ids(
+        "references",
+        pack.references
+            .iter()
+            .map(|reference| reference.id.as_str()),
+    )?;
+    validate_links(pack, &references)?;
+    validate_laws(pack)?;
+    validate_quantities(pack)?;
     Ok(())
+}
+
+pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError> {
+    let ids = unique_ids("packs", packs.iter().map(|pack| pack.pack_id.as_str()))?;
+    let concepts = packs
+        .iter()
+        .flat_map(|pack| {
+            pack.concepts
+                .iter()
+                .map(move |concept| format!("{}:{}", pack.namespace, concept.id))
+                .chain(
+                    pack.quantity_kinds
+                        .iter()
+                        .map(move |quantity| format!("{}:{}", pack.namespace, quantity.id)),
+                )
+        })
+        .collect::<BTreeSet<_>>();
+    let by_id = packs
+        .iter()
+        .map(|pack| (pack.pack_id.as_str(), pack))
+        .collect::<BTreeMap<_, _>>();
+    for (pack_index, pack) in packs.iter().enumerate() {
+        for (dependency_index, dependency) in pack.dependencies.iter().enumerate() {
+            let path = format!("packs[{pack_index}].dependencies[{dependency_index}]");
+            let Some(target) = by_id.get(dependency.pack_id.as_str()) else {
+                return Err(error(path, format!("unknown pack {}", dependency.pack_id)));
+            };
+            let actual_major = target
+                .pack_version
+                .split('.')
+                .next()
+                .and_then(|major| major.parse::<u32>().ok())
+                .unwrap_or_default();
+            if actual_major != dependency.version_major {
+                return Err(error(path, "dependency major version does not match"));
+            }
+            for capability in &dependency.required_capabilities {
+                if !target.capabilities.provides.contains(capability) {
+                    return Err(error(
+                        path.clone(),
+                        format!("missing capability {capability}"),
+                    ));
+                }
+            }
+        }
+        for (law_index, law) in pack.laws.iter().enumerate() {
+            for (role_index, role) in law.roles.iter().enumerate() {
+                if !concepts.contains(&role.concept) {
+                    return Err(error(
+                        format!(
+                            "packs[{pack_index}].laws[{law_index}].roles[{role_index}].concept"
+                        ),
+                        format!("unknown concept {}", role.concept),
+                    ));
+                }
+            }
+        }
+    }
+    dependency_cycles(packs, &ids)
 }
 
 pub fn built_in_packs() -> &'static [DomainPack] {
     &BUILTIN_PACKS
 }
 
-pub fn built_in_pack_summaries() -> Vec<PackSummary> {
-    BUILTIN_PACKS
-        .iter()
-        .map(|pack| PackSummary {
-            schema_version: pack.schema_version,
-            pack_id: pack.pack_id.clone(),
-            pack_version: pack.pack_version.clone(),
-            pack_kind: pack.pack_kind,
-            namespace: pack.namespace.clone(),
-            title: pack.title.clone(),
-            description: pack.description.clone(),
-            pattern_count: pack.patterns.len() as u32,
-            rewrite_count: pack.rewrites.len() as u32,
-        })
-        .collect()
-}
-
-fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError> {
-    let mut ids = HashSet::new();
-    let mut namespaces = HashSet::new();
-    for (index, pack) in packs.iter().enumerate() {
-        if !ids.insert(pack.pack_id.as_str()) {
-            return Err(error(
-                format!("packs[{index}].packId"),
-                format!("duplicate built-in pack {}", pack.pack_id),
-            ));
+fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
+    unique_ids("laws", pack.laws.iter().map(|law| law.id.as_str()))?;
+    for (law_index, law) in pack.laws.iter().enumerate() {
+        let path = format!("laws[{law_index}]");
+        validate_id(&format!("{path}.id"), &law.id)?;
+        require_text(&format!("{path}.title"), &law.title)?;
+        require_text(&format!("{path}.description"), &law.description)?;
+        if law.semantic_forms.is_empty() {
+            return Err(error(format!("{path}.semanticForms"), "must not be empty"));
         }
-        if !namespaces.insert(pack.namespace.as_str()) {
-            return Err(error(
-                format!("packs[{index}].namespace"),
-                format!("duplicate namespace {}", pack.namespace),
-            ));
-        }
-    }
-    let packs_by_id = packs
-        .iter()
-        .map(|pack| (pack.pack_id.as_str(), pack))
-        .collect::<BTreeMap<_, _>>();
-    for (index, pack) in packs.iter().enumerate() {
-        for (dependency_index, dependency) in pack.dependencies.iter().enumerate() {
-            let path = format!("packs[{index}].dependencies[{dependency_index}]");
-            let dependency_pack =
-                packs_by_id
-                    .get(dependency.pack_id.as_str())
-                    .ok_or_else(|| {
-                        error(
-                            format!("{path}.packId"),
-                            format!("unknown dependency {}", dependency.pack_id),
-                        )
-                    })?;
-            if version_major(&dependency_pack.pack_version) != Some(dependency.version_major) {
+        unique_ids(
+            &format!("{path}.roles"),
+            law.roles.iter().map(|role| role.id.as_str()),
+        )?;
+        for (role_index, role) in law.roles.iter().enumerate() {
+            if role
+                .shape
+                .as_deref()
+                .is_some_and(|shape| !matches!(shape, "scalar" | "vector" | "matrix" | "tensor"))
+            {
                 return Err(error(
-                    format!("{path}.versionMajor"),
-                    format!(
-                        "dependency {} has incompatible version {}",
-                        dependency.pack_id, dependency_pack.pack_version
-                    ),
+                    format!("{path}.roles[{role_index}].shape"),
+                    "must be scalar, vector, matrix, or tensor",
                 ));
             }
-            for capability in &dependency.required_capabilities {
-                if !dependency_pack.capabilities.provides.contains(capability) {
+        }
+        for (form_index, form) in law.semantic_forms.iter().enumerate() {
+            require_text(&format!("{path}.semanticForms[{form_index}]"), form)?;
+            for role in &law.roles {
+                if !form.contains(&role.id) {
                     return Err(error(
-                        format!("{path}.requiredCapabilities"),
-                        format!(
-                            "dependency {} does not provide {capability}",
-                            dependency.pack_id
-                        ),
+                        format!("{path}.semanticForms[{form_index}]"),
+                        format!("does not bind role {}", role.id),
                     ));
                 }
             }
         }
     }
-    validate_dependency_cycles(packs, &packs_by_id)?;
-    validate_catalog_references(packs, &packs_by_id)?;
     Ok(())
 }
 
-fn validate_catalog_references<'a>(
-    packs: &'a [DomainPack],
-    packs_by_id: &BTreeMap<&'a str, &'a DomainPack>,
-) -> Result<(), PackValidationError> {
-    let concepts = packs
-        .iter()
-        .flat_map(|pack| {
-            pack.concepts
-                .iter()
-                .map(|concept| format!("{}:{}", pack.namespace, concept.id))
-                .chain(
-                    pack.quantity_kinds
-                        .iter()
-                        .map(|quantity| format!("{}:{}", pack.namespace, quantity.id)),
-                )
-        })
-        .collect::<HashSet<_>>();
-    let units = packs
-        .iter()
-        .flat_map(|pack| {
-            pack.units
-                .iter()
-                .map(|unit| (format!("{}:{}", pack.namespace, unit.id), unit))
-        })
-        .collect::<BTreeMap<_, _>>();
-
-    for (pack_index, pack) in packs.iter().enumerate() {
-        let dependencies = dependency_closure(pack, packs_by_id);
-        let allowed_namespaces = dependencies
+fn validate_quantities(pack: &DomainPack) -> Result<(), PackValidationError> {
+    unique_ids(
+        "quantityKinds",
+        pack.quantity_kinds
             .iter()
-            .map(|dependency| dependency.namespace.as_str())
-            .chain(std::iter::once(pack.namespace.as_str()))
-            .collect::<HashSet<_>>();
-        let provided_capabilities = dependencies
-            .iter()
-            .flat_map(|dependency| dependency.capabilities.provides.iter().map(String::as_str))
-            .collect::<HashSet<_>>();
-        for capability in &pack.capabilities.requires {
-            if !provided_capabilities.contains(capability.as_str()) {
-                return Err(error(
-                    format!("packs[{pack_index}].capabilities.requires"),
-                    format!("required capability {capability} is not provided by a dependency"),
-                ));
-            }
-        }
-        for (concept_index, concept) in pack.concepts.iter().enumerate() {
-            for parent in &concept.parents {
-                validate_catalog_concept(
-                    parent,
-                    &concepts,
-                    &allowed_namespaces,
-                    format!("packs[{pack_index}].concepts[{concept_index}].parents"),
-                )?;
-            }
-        }
-        for (quantity_index, quantity) in pack.quantity_kinds.iter().enumerate() {
-            let Some(default_unit) = &quantity.default_unit else {
-                continue;
-            };
-            let unit = units.get(default_unit).ok_or_else(|| {
-                error(
-                    format!("packs[{pack_index}].quantityKinds[{quantity_index}].defaultUnit"),
-                    format!("unknown unit {default_unit}"),
-                )
-            })?;
-            validate_catalog_namespace(
-                default_unit,
-                &allowed_namespaces,
-                format!("packs[{pack_index}].quantityKinds[{quantity_index}].defaultUnit"),
-            )?;
-            if quantity.dimension != unit.dimension {
-                return Err(error(
-                    format!("packs[{pack_index}].quantityKinds[{quantity_index}].defaultUnit"),
-                    format!("unit {default_unit} has an incompatible dimension"),
-                ));
-            }
-        }
-        for (law_index, law) in pack.laws.iter().enumerate() {
-            for (role_index, role) in law.roles.iter().enumerate() {
-                validate_catalog_concept(
-                    &role.concept,
-                    &concepts,
-                    &allowed_namespaces,
-                    format!("packs[{pack_index}].laws[{law_index}].roles[{role_index}].concept"),
-                )?;
-            }
-        }
-        for (pattern_index, pattern) in pack.patterns.iter().enumerate() {
-            for (parameter_index, parameter) in pattern.parameters.iter().enumerate() {
-                for concept in &parameter.constraint.concepts {
-                    validate_catalog_concept(
-                        concept,
-                        &concepts,
-                        &allowed_namespaces,
-                        format!(
-                            "packs[{pack_index}].patterns[{pattern_index}].parameters[{parameter_index}].constraint.concepts"
-                        ),
-                    )?;
-                }
-            }
-            for concept in &pattern.result.concepts {
-                validate_catalog_concept(
-                    concept,
-                    &concepts,
-                    &allowed_namespaces,
-                    format!("packs[{pack_index}].patterns[{pattern_index}].result.concepts"),
-                )?;
-            }
-        }
-    }
-    Ok(())
-}
-
-fn dependency_closure<'a>(
-    pack: &'a DomainPack,
-    packs_by_id: &BTreeMap<&'a str, &'a DomainPack>,
-) -> Vec<&'a DomainPack> {
-    let mut result = Vec::new();
-    let mut pending = pack.dependencies.iter().collect::<Vec<_>>();
-    let mut seen = HashSet::new();
-    while let Some(dependency) = pending.pop() {
-        if !seen.insert(dependency.pack_id.as_str()) {
-            continue;
-        }
-        let Some(dependency_pack) = packs_by_id.get(dependency.pack_id.as_str()).copied() else {
-            continue;
-        };
-        pending.extend(dependency_pack.dependencies.iter());
-        result.push(dependency_pack);
-    }
-    result
-}
-
-fn validate_catalog_concept(
-    concept: &str,
-    concepts: &HashSet<String>,
-    allowed_namespaces: &HashSet<&str>,
-    path: String,
-) -> Result<(), PackValidationError> {
-    if !concepts.contains(concept) {
-        return Err(error(path, format!("unknown concept {concept}")));
-    }
-    validate_catalog_namespace(concept, allowed_namespaces, path)
-}
-
-fn validate_catalog_namespace(
-    qualified_id: &str,
-    allowed_namespaces: &HashSet<&str>,
-    path: String,
-) -> Result<(), PackValidationError> {
-    let namespace = qualified_id.split_once(':').map(|(namespace, _)| namespace);
-    if namespace.is_none_or(|namespace| !allowed_namespaces.contains(namespace)) {
-        return Err(error(
-            path,
-            format!("{qualified_id} belongs to an undeclared dependency"),
-        ));
-    }
-    Ok(())
-}
-
-fn validate_manifest(pack: &DomainPack) -> Result<(), PackValidationError> {
-    let mut dependencies = HashSet::new();
-    for (index, dependency) in pack.dependencies.iter().enumerate() {
-        let path = format!("dependencies[{index}]");
-        validate_id(&format!("{path}.packId"), &dependency.pack_id)?;
-        if dependency.pack_id == pack.pack_id {
-            return Err(error(
-                format!("{path}.packId"),
-                "pack cannot depend on itself",
-            ));
-        }
-        if !dependencies.insert(dependency.pack_id.as_str()) {
-            return Err(error(format!("{path}.packId"), "dependency must be unique"));
-        }
-        validate_qualified_ids(
-            &format!("{path}.requiredCapabilities"),
-            &dependency.required_capabilities,
+            .map(|quantity| quantity.id.as_str()),
+    )?;
+    unique_ids("units", pack.units.iter().map(|unit| unit.id.as_str()))?;
+    for (index, quantity) in pack.quantity_kinds.iter().enumerate() {
+        validate_dimension(
+            &format!("quantityKinds[{index}].dimension"),
+            &quantity.dimension,
         )?;
     }
-    validate_qualified_ids("capabilities.provides", &pack.capabilities.provides)?;
-    validate_qualified_ids("capabilities.requires", &pack.capabilities.requires)?;
-    Ok(())
-}
-
-fn validate_concepts(
-    pack: &DomainPack,
-    references: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    const CONCEPT_KINDS: &[&str] = &["entity", "operator", "quantity", "relation", "system"];
-    let mut ids = HashSet::new();
-    for (index, concept) in pack.concepts.iter().enumerate() {
-        let path = format!("concepts[{index}]");
-        validate_id(&format!("{path}.id"), &concept.id)?;
-        if !ids.insert(concept.id.as_str()) {
-            return Err(error(format!("{path}.id"), "concept ID must be unique"));
-        }
-        if !CONCEPT_KINDS.contains(&concept.concept_kind.as_str()) {
-            return Err(error(
-                format!("{path}.conceptKind"),
-                format!("unknown concept kind {}", concept.concept_kind),
-            ));
-        }
-        require_text(&format!("{path}.title"), &concept.title)?;
-        require_text(&format!("{path}.description"), &concept.description)?;
-        validate_qualified_ids(&format!("{path}.parents"), &concept.parents)?;
-        validate_reference_links(&path, &concept.references, references)?;
-    }
-    Ok(())
-}
-
-fn validate_quantities(
-    pack: &DomainPack,
-    references: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    let mut quantity_ids = HashSet::new();
-    for (index, quantity) in pack.quantity_kinds.iter().enumerate() {
-        let path = format!("quantityKinds[{index}]");
-        validate_id(&format!("{path}.id"), &quantity.id)?;
-        if !quantity_ids.insert(quantity.id.as_str()) {
-            return Err(error(
-                format!("{path}.id"),
-                "quantity kind ID must be unique",
-            ));
-        }
-        require_text(&format!("{path}.title"), &quantity.title)?;
-        require_text(&format!("{path}.description"), &quantity.description)?;
-        validate_dimension(&format!("{path}.dimension"), &quantity.dimension)?;
-        if let Some(default_unit) = &quantity.default_unit
-            && !QUALIFIED_IDENTIFIER.is_match(default_unit)
+    for (index, unit) in pack.units.iter().enumerate() {
+        validate_dimension(&format!("units[{index}].dimension"), &unit.dimension)?;
+        if unit.scale.denominator == 0
+            || unit
+                .offset
+                .as_ref()
+                .is_some_and(|value| value.denominator == 0)
         {
             return Err(error(
-                format!("{path}.defaultUnit"),
-                "must be a qualified unit ID",
+                format!("units[{index}]"),
+                "rational denominator must be positive",
             ));
         }
-        validate_reference_links(&path, &quantity.references, references)?;
-    }
-
-    let mut unit_ids = HashSet::new();
-    for (index, unit) in pack.units.iter().enumerate() {
-        let path = format!("units[{index}]");
-        validate_id(&format!("{path}.id"), &unit.id)?;
-        if !unit_ids.insert(unit.id.as_str()) {
-            return Err(error(format!("{path}.id"), "unit ID must be unique"));
-        }
-        require_text(&format!("{path}.symbol"), &unit.symbol)?;
-        if unit.aliases.iter().any(|alias| alias.trim().is_empty()) {
-            return Err(error(
-                format!("{path}.aliases"),
-                "unit aliases must not be blank",
-            ));
-        }
-        validate_dimension(&format!("{path}.dimension"), &unit.dimension)?;
-        validate_rational(&format!("{path}.scale"), &unit.scale, false)?;
-        if let Some(offset) = &unit.offset {
-            validate_rational(&format!("{path}.offset"), offset, true)?;
-        }
-        validate_reference_links(&path, &unit.references, references)?;
     }
     Ok(())
 }
@@ -765,650 +421,114 @@ fn validate_dimension(
     dimension: &[PackDimensionExponent],
 ) -> Result<(), PackValidationError> {
     let mut bases = HashSet::new();
-    for (index, exponent) in dimension.iter().enumerate() {
-        let exponent_path = format!("{path}[{index}]");
-        validate_id(&format!("{exponent_path}.base"), &exponent.base)?;
-        if !bases.insert(exponent.base.as_str()) {
-            return Err(error(
-                format!("{exponent_path}.base"),
-                "dimension base must be unique",
-            ));
+    for exponent in dimension {
+        validate_id(path, &exponent.base)?;
+        if exponent.denominator == 0 {
+            return Err(error(path, "dimension denominator must be positive"));
         }
-        if exponent.numerator == 0 || exponent.denominator == 0 {
-            return Err(error(
-                exponent_path,
-                "dimension exponent requires a nonzero numerator and denominator",
-            ));
+        if !bases.insert(&exponent.base) {
+            return Err(error(path, format!("duplicate base {}", exponent.base)));
         }
     }
     Ok(())
 }
 
-fn validate_rational(
-    path: &str,
-    rational: &PackRational,
-    allow_zero: bool,
+fn validate_links(
+    pack: &DomainPack,
+    references: &HashSet<&str>,
 ) -> Result<(), PackValidationError> {
-    if rational.denominator == 0 || (!allow_zero && rational.numerator == 0) {
-        return Err(error(
-            path,
-            "rational requires a nonzero denominator and scale numerator",
-        ));
-    }
-    Ok(())
-}
-
-fn validate_laws(pack: &DomainPack, references: &HashSet<&str>) -> Result<(), PackValidationError> {
-    let concepts = pack
+    let links = pack
         .concepts
         .iter()
-        .map(|concept| format!("{}:{}", pack.namespace, concept.id))
-        .collect::<HashSet<_>>();
-    let mut ids = HashSet::new();
-    for (index, law) in pack.laws.iter().enumerate() {
-        let path = format!("laws[{index}]");
-        validate_id(&format!("{path}.id"), &law.id)?;
-        if !ids.insert(law.id.as_str()) {
-            return Err(error(format!("{path}.id"), "law ID must be unique"));
-        }
-        require_text(&format!("{path}.title"), &law.title)?;
-        require_text(&format!("{path}.description"), &law.description)?;
-        let mut roles = HashSet::new();
-        for (role_index, role) in law.roles.iter().enumerate() {
-            let role_path = format!("{path}.roles[{role_index}]");
-            validate_id(&format!("{role_path}.id"), &role.id)?;
-            if !roles.insert(role.id.as_str()) {
-                return Err(error(format!("{role_path}.id"), "law role must be unique"));
-            }
-            if !QUALIFIED_IDENTIFIER.is_match(&role.concept) {
-                return Err(error(
-                    format!("{role_path}.concept"),
-                    "must be a qualified concept ID",
-                ));
-            }
-            if role.concept.starts_with(&format!("{}:", pack.namespace))
-                && !concepts.contains(&role.concept)
-            {
-                return Err(error(
-                    format!("{role_path}.concept"),
-                    format!("unknown local concept {}", role.concept),
-                ));
-            }
-            require_text(&format!("{role_path}.description"), &role.description)?;
-        }
-        if law
-            .conditions
-            .iter()
-            .any(|condition| condition.trim().is_empty())
-        {
+        .flat_map(|value| &value.references)
+        .chain(
+            pack.quantity_kinds
+                .iter()
+                .flat_map(|value| &value.references),
+        )
+        .chain(pack.units.iter().flat_map(|value| &value.references))
+        .chain(pack.laws.iter().flat_map(|value| &value.references))
+        .chain(
+            pack.activation_rules
+                .iter()
+                .flat_map(|value| &value.references),
+        )
+        .chain(pack.roles.iter().flat_map(|value| &value.references))
+        .chain(pack.operators.iter().flat_map(|value| &value.references));
+    for reference in links {
+        if !references.contains(reference.as_str()) {
             return Err(error(
-                format!("{path}.conditions"),
-                "conditions must not be blank",
+                "references",
+                format!("unknown reference {reference}"),
             ));
         }
-        validate_reference_links(&path, &law.references, references)?;
     }
     Ok(())
 }
 
-fn validate_qualified_ids(path: &str, values: &[String]) -> Result<(), PackValidationError> {
-    let mut unique = HashSet::new();
-    for value in values {
-        if !QUALIFIED_IDENTIFIER.is_match(value) {
-            return Err(error(path, format!("invalid qualified ID {value}")));
-        }
-        if !unique.insert(value) {
-            return Err(error(path, format!("duplicate qualified ID {value}")));
-        }
-    }
-    Ok(())
-}
-
-fn version_major(version: &str) -> Option<u32> {
-    version.split('.').next()?.parse().ok()
-}
-
-fn validate_dependency_cycles<'a>(
-    packs: &'a [DomainPack],
-    packs_by_id: &BTreeMap<&'a str, &'a DomainPack>,
-) -> Result<(), PackValidationError> {
+fn dependency_cycles(packs: &[DomainPack], ids: &HashSet<&str>) -> Result<(), PackValidationError> {
     fn visit<'a>(
-        pack: &'a DomainPack,
-        packs_by_id: &BTreeMap<&'a str, &'a DomainPack>,
+        id: &'a str,
+        packs: &'a [DomainPack],
         visiting: &mut HashSet<&'a str>,
         visited: &mut HashSet<&'a str>,
-    ) -> Result<(), PackValidationError> {
-        if visited.contains(pack.pack_id.as_str()) {
-            return Ok(());
+    ) -> bool {
+        if visited.contains(id) {
+            return false;
         }
-        if !visiting.insert(pack.pack_id.as_str()) {
-            return Err(error(
-                "dependencies",
-                format!("dependency cycle includes {}", pack.pack_id),
-            ));
+        if !visiting.insert(id) {
+            return true;
         }
-        for dependency in &pack.dependencies {
-            if let Some(next) = packs_by_id.get(dependency.pack_id.as_str()) {
-                visit(next, packs_by_id, visiting, visited)?;
-            }
-        }
-        visiting.remove(pack.pack_id.as_str());
-        visited.insert(pack.pack_id.as_str());
-        Ok(())
+        let cycle = packs
+            .iter()
+            .find(|pack| pack.pack_id == id)
+            .is_some_and(|pack| {
+                pack.dependencies
+                    .iter()
+                    .any(|dependency| visit(&dependency.pack_id, packs, visiting, visited))
+            });
+        visiting.remove(id);
+        visited.insert(id);
+        cycle
     }
-
+    let mut visiting = HashSet::new();
     let mut visited = HashSet::new();
-    for pack in packs {
-        visit(pack, packs_by_id, &mut HashSet::new(), &mut visited)?;
+    for id in ids {
+        if visit(id, packs, &mut visiting, &mut visited) {
+            return Err(error("dependencies", "dependency cycle"));
+        }
     }
     Ok(())
 }
 
-fn validate_references(pack: &DomainPack) -> Result<HashSet<&str>, PackValidationError> {
+fn unique_ids<'a>(
+    path: &str,
+    values: impl IntoIterator<Item = &'a str>,
+) -> Result<HashSet<&'a str>, PackValidationError> {
     let mut ids = HashSet::new();
-    for (index, reference) in pack.references.iter().enumerate() {
-        let path = format!("references[{index}]");
-        validate_id(&format!("{path}.id"), &reference.id)?;
-        require_text(&format!("{path}.title"), &reference.title)?;
-        require_text(&format!("{path}.citation"), &reference.citation)?;
-        if !ids.insert(reference.id.as_str()) {
-            return Err(error(
-                format!("{path}.id"),
-                format!("duplicate reference {}", reference.id),
-            ));
+    for value in values {
+        validate_id(path, value)?;
+        if !ids.insert(value) {
+            return Err(error(path, format!("duplicate id {value}")));
         }
     }
     Ok(ids)
 }
 
-fn validate_activation_rules(
-    pack: &DomainPack,
-    reference_ids: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    let mut ids = HashSet::new();
-    let mut count = 0;
-    for (index, rule) in pack.activation_rules.iter().enumerate() {
-        let path = format!("activationRules[{index}]");
-        validate_id(&format!("{path}.id"), &rule.id)?;
-        require_text(&format!("{path}.topic"), &rule.topic)?;
-        if !ids.insert(rule.id.as_str()) {
-            return Err(error(
-                format!("{path}.id"),
-                format!("duplicate activation rule {}", rule.id),
-            ));
-        }
-        if rule.patterns.is_empty()
-            || rule
-                .patterns
-                .iter()
-                .any(|pattern| pattern.trim().is_empty())
-        {
-            return Err(error(
-                format!("{path}.patterns"),
-                "must contain non-empty literals",
-            ));
-        }
-        count += rule.patterns.len();
-        validate_reference_links(&path, &rule.references, reference_ids)?;
-    }
-    if count > MAX_ACTIVATION_PATTERNS {
-        return Err(error("activationRules", "exceeds the 128-literal limit"));
-    }
-    Ok(())
-}
-
-fn validate_vocabulary(
-    category: &str,
-    entries: &[PackVocabularyEntry],
-    reference_ids: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    let mut ids = HashSet::new();
-    for (index, entry) in entries.iter().enumerate() {
-        let path = format!("{category}[{index}]");
-        validate_id(&format!("{path}.id"), &entry.id)?;
-        require_text(&format!("{path}.topic"), &entry.topic)?;
-        require_text(&format!("{path}.description"), &entry.description)?;
-        if !ids.insert(entry.id.as_str()) {
-            return Err(error(
-                format!("{path}.id"),
-                format!("duplicate {category} entry {}", entry.id),
-            ));
-        }
-        validate_reference_links(&path, &entry.references, reference_ids)?;
-    }
-    Ok(())
-}
-
-fn validate_patterns(
-    pack: &DomainPack,
-    reference_ids: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    let mut ids = HashSet::new();
-    let mut signatures = HashSet::new();
-    for (index, pattern) in pack.patterns.iter().enumerate() {
-        let path = format!("patterns[{index}]");
-        validate_id(&format!("{path}.id"), &pattern.id)?;
-        require_text(&format!("{path}.topic"), &pattern.topic)?;
-        require_text(&format!("{path}.title"), &pattern.title)?;
-        require_text(&format!("{path}.description"), &pattern.description)?;
-        validate_id(&format!("{path}.descriptionKey"), &pattern.description_key)?;
-        if !ids.insert(pattern.id.as_str()) {
-            return Err(error(
-                format!("{path}.id"),
-                format!("duplicate pattern {}", pattern.id),
-            ));
-        }
-        validate_matcher(&path, &pattern.matcher, pattern.parameters.len())?;
-        let signature =
-            serde_json::to_string(&(&pattern.matcher, &pattern.parameters, &pattern.result))
-                .expect("pack signatures contain serializable data");
-        if !signatures.insert(signature) {
-            return Err(error(
-                format!("{path}.matcher"),
-                "duplicates another formula matcher",
-            ));
-        }
-        validate_parameters(&path, &pattern.parameters)?;
-        validate_constraint(&format!("{path}.result"), &pattern.result)?;
-        validate_pattern_relation(&path, pattern, pack)?;
-        validate_side_conditions(&path, pattern)?;
-        validate_reference_links(&path, &pattern.references, reference_ids)?;
-
-        if pattern.maturity.allows_completion() {
-            let template = pattern.generation_template.as_deref().ok_or_else(|| {
-                error(
-                    format!("{path}.generationTemplate"),
-                    "completion/rewrite maturity requires a template",
-                )
-            })?;
-            validate_template(&path, template, &pattern.parameters, true)?;
-        } else if pattern.generation_template.is_some() {
-            return Err(error(
-                format!("{path}.generationTemplate"),
-                "recognition/diagnostic maturity cannot declare completion output",
-            ));
-        }
-    }
-    Ok(())
-}
-
-fn validate_pattern_relation(
-    path: &str,
-    pattern: &PackPattern,
-    pack: &DomainPack,
-) -> Result<(), PackValidationError> {
-    let Some(relation) = &pattern.relation else {
-        return Ok(());
-    };
-    let law = pack
-        .laws
-        .iter()
-        .find(|law| law.id == relation.law)
-        .ok_or_else(|| {
-            error(
-                format!("{path}.relation.law"),
-                format!("unknown law {}", relation.law),
-            )
-        })?;
-    let parameters = pattern
-        .parameters
-        .iter()
-        .map(|parameter| parameter.id.as_str())
-        .collect::<HashSet<_>>();
-    let roles = law
-        .roles
-        .iter()
-        .map(|role| role.id.as_str())
-        .collect::<HashSet<_>>();
-    let mut bound_roles = HashSet::new();
-    for (index, binding) in relation.role_bindings.iter().enumerate() {
-        let binding_path = format!("{path}.relation.roleBindings[{index}]");
-        if !parameters.contains(binding.parameter.as_str()) {
-            return Err(error(
-                format!("{binding_path}.parameter"),
-                format!("unknown parameter {}", binding.parameter),
-            ));
-        }
-        if !roles.contains(binding.role.as_str()) {
-            return Err(error(
-                format!("{binding_path}.role"),
-                format!("unknown law role {}", binding.role),
-            ));
-        }
-        if !bound_roles.insert(binding.role.as_str()) {
-            return Err(error(
-                format!("{binding_path}.role"),
-                "law role must be bound at most once",
-            ));
-        }
-    }
-    Ok(())
-}
-
-fn validate_matcher(
-    path: &str,
-    matcher: &PackMatcher,
-    parameter_count: usize,
-) -> Result<(), PackValidationError> {
-    match (matcher.primitive.as_str(), matcher.expression.as_deref()) {
-        ("regex-captures", Some(expression)) => {
-            if expression.len() > MAX_REGEX_BYTES {
-                return Err(error(
-                    format!("{path}.matcher.expression"),
-                    "regex exceeds the 512-byte limit",
-                ));
-            }
-            let regex = Regex::new(expression).map_err(|cause| {
-                error(
-                    format!("{path}.matcher.expression"),
-                    format!("invalid bounded regex: {cause}"),
-                )
-            })?;
-            if regex.is_match("") {
-                return Err(error(
-                    format!("{path}.matcher.expression"),
-                    "matcher must not accept an empty expression",
-                ));
-            }
-            if regex.captures_len().saturating_sub(1) != parameter_count {
-                return Err(error(
-                    format!("{path}.matcher.expression"),
-                    "capture count must equal parameter count",
-                ));
-            }
-        }
-        ("regex-captures", None) => {
-            return Err(error(
-                format!("{path}.matcher.expression"),
-                "regex-captures requires an expression",
-            ));
-        }
-        (primitive, Some(_)) => {
-            if primitive_matcher(primitive).is_none() {
-                return Err(error(
-                    format!("{path}.matcher.primitive"),
-                    format!("unknown matcher primitive {primitive}"),
-                ));
-            }
-            return Err(error(
-                format!("{path}.matcher.expression"),
-                "only regex-captures accepts an expression",
-            ));
-        }
-        (primitive, None) => {
-            let Some(spec) = primitive_matcher(primitive) else {
-                return Err(error(
-                    format!("{path}.matcher.primitive"),
-                    format!("unknown matcher primitive {primitive}"),
-                ));
-            };
-            if spec.parameter_captures.len() != parameter_count {
-                return Err(error(
-                    format!("{path}.parameters"),
-                    format!(
-                        "matcher primitive {primitive} requires {} parameters",
-                        spec.parameter_captures.len()
-                    ),
-                ));
-            }
-        }
-    }
-    Ok(())
-}
-
-fn validate_parameters(
-    path: &str,
-    parameters: &[FormulaParameter],
-) -> Result<(), PackValidationError> {
-    let mut ids = HashSet::new();
-    for (index, parameter) in parameters.iter().enumerate() {
-        let parameter_path = format!("{path}.parameters[{index}]");
-        validate_id(&format!("{parameter_path}.id"), &parameter.id)?;
-        if !ids.insert(parameter.id.as_str()) {
-            return Err(error(
-                format!("{parameter_path}.id"),
-                format!("duplicate parameter {}", parameter.id),
-            ));
-        }
-        validate_constraint(
-            &format!("{parameter_path}.constraint"),
-            &parameter.constraint,
-        )?;
-    }
-    Ok(())
-}
-
-fn validate_constraint(
-    path: &str,
-    constraint: &FormulaConstraint,
-) -> Result<(), PackValidationError> {
-    const KINDS: &[&str] = &[
-        "distribution",
-        "event",
-        "expression",
-        "function",
-        "graph",
-        "index",
-        "matrix",
-        "proposition",
-        "random-variable",
-        "scalar",
-        "set",
-        "tensor",
-        "vector",
-    ];
-    if !KINDS.contains(&constraint.kind.as_str()) {
-        return Err(error(
-            format!("{path}.kind"),
-            format!("unknown constraint kind {}", constraint.kind),
-        ));
-    }
-    validate_qualified_ids(&format!("{path}.concepts"), &constraint.concepts)?;
-    if constraint
-        .dimensions
-        .iter()
-        .any(|value| value.trim().is_empty())
-        || constraint
-            .refinements
-            .iter()
-            .any(|value| value.trim().is_empty())
-    {
-        return Err(error(path, "constraint values must not be blank"));
-    }
-    Ok(())
-}
-
-fn validate_side_conditions(path: &str, pattern: &PackPattern) -> Result<(), PackValidationError> {
-    const CONDITIONS: &[&str] = &[
-        "dimension-equality",
-        "distinct-binding",
-        "explicit-role",
-        "positive-probability",
-        "presentation-safe",
-    ];
-    if pattern.condition_descriptions.len() != pattern.side_conditions.len() {
-        return Err(error(
-            format!("{path}.conditionDescriptions"),
-            "must contain one user-facing label per side condition",
-        ));
-    }
-    for (index, condition) in pattern.side_conditions.iter().enumerate() {
-        let condition_path = format!("{path}.sideConditions[{index}]");
-        if !CONDITIONS.contains(&condition.kind.as_str()) {
-            return Err(error(
-                format!("{condition_path}.kind"),
-                format!("unknown constraint primitive {}", condition.kind),
-            ));
-        }
-        require_text(&format!("{condition_path}.left"), &condition.left)?;
-        require_text(&format!("{condition_path}.right"), &condition.right)?;
-        require_text(
-            &format!("{path}.conditionDescriptions[{index}]"),
-            &pattern.condition_descriptions[index],
-        )?;
-    }
-    Ok(())
-}
-
-fn validate_rewrites(
-    pack: &DomainPack,
-    reference_ids: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    let patterns = pack
-        .patterns
-        .iter()
-        .map(|pattern| (pattern.id.as_str(), pattern))
-        .collect::<BTreeMap<_, _>>();
-    let mut ids = HashSet::new();
-    for (index, rewrite) in pack.rewrites.iter().enumerate() {
-        let path = format!("rewrites[{index}]");
-        validate_id(&format!("{path}.id"), &rewrite.id)?;
-        require_text(&format!("{path}.topic"), &rewrite.topic)?;
-        require_text(&format!("{path}.title"), &rewrite.title)?;
-        require_text(&format!("{path}.description"), &rewrite.description)?;
-        if !ids.insert(rewrite.id.as_str()) {
-            return Err(error(
-                format!("{path}.id"),
-                format!("duplicate rewrite {}", rewrite.id),
-            ));
-        }
-        let source = patterns
-            .get(rewrite.source_pattern.as_str())
-            .ok_or_else(|| {
-                error(
-                    format!("{path}.sourcePattern"),
-                    format!("unknown source pattern {}", rewrite.source_pattern),
-                )
-            })?;
-        if !source.maturity.allows_rewrite() {
-            return Err(error(
-                format!("{path}.sourcePattern"),
-                "source pattern is not rewrite-mature",
-            ));
-        }
-        if rewrite.required_refinements.is_empty() {
-            return Err(error(
-                format!("{path}.requiredRefinements"),
-                "rewrite requires explicit side-condition evidence",
-            ));
-        }
-        for (required_index, required) in rewrite.required_refinements.iter().enumerate() {
-            let required_path = format!("{path}.requiredRefinements[{required_index}]");
-            let Some(_parameter) = source
-                .parameters
-                .iter()
-                .find(|parameter| parameter.id == required.parameter)
-            else {
-                return Err(error(
-                    format!("{required_path}.parameter"),
-                    format!("unknown parameter {}", required.parameter),
-                ));
-            };
-            if required.refinement.trim().is_empty() {
-                return Err(error(
-                    format!("{required_path}.refinement"),
-                    "required refinement must not be blank",
-                ));
-            }
-        }
-        validate_template(
-            &path,
-            &rewrite.replacement_template,
-            &source.parameters,
-            false,
-        )?;
-        validate_reference_links(&path, &rewrite.references, reference_ids)?;
-    }
-    Ok(())
-}
-
-fn validate_template(
-    path: &str,
-    template: &str,
-    parameters: &[FormulaParameter],
-    require_every_parameter: bool,
-) -> Result<(), PackValidationError> {
-    require_text(&format!("{path}.template"), template)?;
-    let placeholders = template_placeholders(template).map_err(|message| error(path, message))?;
-    let parameter_ids = parameters
-        .iter()
-        .map(|parameter| parameter.id.as_str())
-        .collect::<HashSet<_>>();
-    if let Some(unknown) = placeholders
-        .iter()
-        .find(|placeholder| !parameter_ids.contains(placeholder.as_str()))
-    {
-        return Err(error(
-            path,
-            format!("template references unknown parameter {unknown}"),
-        ));
-    }
-    if require_every_parameter
-        && let Some(missing) = parameter_ids
-            .iter()
-            .find(|parameter| !placeholders.contains(**parameter))
-    {
-        return Err(error(path, format!("template omits parameter {missing}")));
-    }
-    Ok(())
-}
-
-fn template_placeholders(template: &str) -> Result<HashSet<String>, String> {
-    let mut values = HashSet::new();
-    let mut rest = template;
-    while let Some(start) = rest.find("{{") {
-        let after = &rest[start + 2..];
-        let end = after
-            .find("}}")
-            .ok_or_else(|| "template has an unclosed placeholder".to_string())?;
-        let value = &after[..end];
-        if !IDENTIFIER.is_match(value) {
-            return Err(format!("invalid template placeholder {value}"));
-        }
-        values.insert(value.to_string());
-        rest = &after[end + 2..];
-    }
-    if rest.contains("}}") {
-        return Err("template has an unmatched closing delimiter".into());
-    }
-    Ok(values)
-}
-
-fn validate_reference_links(
-    path: &str,
-    references: &[String],
-    known: &HashSet<&str>,
-) -> Result<(), PackValidationError> {
-    if references.is_empty() {
-        return Err(error(
-            format!("{path}.references"),
-            "must cite at least one pack reference",
-        ));
-    }
-    if let Some(reference) = references
-        .iter()
-        .find(|reference| !known.contains(reference.as_str()))
-    {
-        return Err(error(
-            format!("{path}.references"),
-            format!("unknown reference {reference}"),
-        ));
-    }
-    Ok(())
-}
-
 fn validate_id(path: &str, value: &str) -> Result<(), PackValidationError> {
-    if !IDENTIFIER.is_match(value) {
-        return Err(error(path, "must be a lowercase kebab-case identifier"));
+    if IDENTIFIER.is_match(value) {
+        Ok(())
+    } else {
+        Err(error(path, "must be a lowercase kebab-case identifier"))
     }
-    Ok(())
 }
 
 fn require_text(path: &str, value: &str) -> Result<(), PackValidationError> {
     if value.trim().is_empty() {
-        return Err(error(path, "must not be blank"));
+        Err(error(path, "must not be empty"))
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 fn error(path: impl Into<String>, message: impl Into<String>) -> PackValidationError {
@@ -1420,81 +540,31 @@ fn error(path: impl Into<String>, message: impl Into<String>) -> PackValidationE
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        DomainPack, PACK_SCHEMA_VERSION, PackMaturity, built_in_pack_summaries, built_in_packs,
-        load_pack, validate_catalog,
-    };
+    use super::{PACK_SCHEMA_VERSION, built_in_packs, compile_pack, validate_catalog};
 
     #[test]
-    fn loads_one_validated_catalog_for_every_capability() {
-        let packs = built_in_packs();
-        assert_eq!(packs.len(), 9);
-        assert_eq!(built_in_pack_summaries()[0].pack_id, "linear-algebra");
-        assert!(
-            packs
-                .iter()
-                .flat_map(|pack| &pack.patterns)
-                .any(|pattern| pattern.maturity == PackMaturity::Rewrite)
-        );
-        assert!(packs.iter().any(|pack| {
-            pack.pack_id == "quantities-units"
-                && pack
-                    .capabilities
-                    .provides
-                    .iter()
-                    .any(|capability| capability == "semath:dimensional-analysis")
-        }));
+    fn compiles_the_single_current_schema_and_catalog() {
+        assert_eq!(PACK_SCHEMA_VERSION, 4);
+        assert_eq!(built_in_packs().len(), 9);
+        validate_catalog(built_in_packs()).unwrap();
     }
 
     #[test]
-    fn reports_a_precise_path_for_an_unknown_primitive() {
-        let mut pack = built_in_packs()[0].clone();
-        pack.patterns[0].matcher.primitive = "run-user-code".into();
-        let source = serde_json::to_string(&pack).unwrap();
-        let error = load_pack(&source).unwrap_err();
-        assert_eq!(error.path, "patterns[0].matcher.primitive");
-        assert!(error.message.contains("unknown matcher primitive"));
+    fn rejects_unknown_fields_instead_of_preserving_legacy_schema() {
+        let mut source = serde_json::to_value(&built_in_packs()[0]).unwrap();
+        source["patterns"] = serde_json::json!([]);
+        let error = compile_pack(&serde_json::to_string(&source).unwrap()).unwrap_err();
+        assert!(error.message.contains("unknown field"));
     }
 
     #[test]
-    fn recognition_only_entries_cannot_smuggle_an_edit_template() {
-        let mut pack = built_in_packs()[0].clone();
-        let pattern = &mut pack.patterns[0];
-        pattern.maturity = PackMaturity::Recognition;
-        let source = serde_json::to_string(&pack).unwrap();
-        let error = load_pack(&source).unwrap_err();
-        assert_eq!(error.path, "patterns[0].generationTemplate");
-    }
-
-    #[test]
-    fn rejects_an_unknown_schema_before_exposing_metadata() {
-        let source = format!(
-            r#"{{"schemaVersion":{},"packId":"future"}}"#,
-            PACK_SCHEMA_VERSION + 1
-        );
-        let error = load_pack(&source).unwrap_err();
-        assert_eq!(error.path, "pack");
-    }
-
-    #[test]
-    fn serialized_public_schema_round_trips() {
-        let pack: DomainPack = built_in_packs()[0].clone();
-        let encoded = serde_json::to_string(&pack).unwrap();
-        assert_eq!(load_pack(&encoded).unwrap(), pack);
-    }
-
-    #[test]
-    fn catalog_rejects_unknown_cross_pack_concepts_and_missing_capabilities() {
-        let mut packs = built_in_packs().to_vec();
-        packs[6].laws[0].roles[0].concept = "quantities-units:unknown-force".into();
-        let error = validate_catalog(&packs).unwrap_err();
-        assert_eq!(error.path, "packs[6].laws[0].roles[0].concept");
-        assert!(error.message.contains("unknown concept"));
-
-        let mut packs = built_in_packs().to_vec();
-        packs[8].dependencies.clear();
-        let error = validate_catalog(&packs).unwrap_err();
-        assert_eq!(error.path, "packs[8].capabilities.requires");
-        assert!(error.message.contains("not provided by a dependency"));
+    fn compilation_is_deterministic() {
+        for pack in built_in_packs() {
+            let source = serde_json::to_string(pack).unwrap();
+            assert_eq!(
+                compile_pack(&source).unwrap(),
+                compile_pack(&source).unwrap()
+            );
+        }
     }
 }

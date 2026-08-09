@@ -3,9 +3,10 @@ use std::collections::BTreeMap;
 use regex::Regex;
 
 use crate::pack::built_in_packs;
-use crate::pattern::FormulaAnalysis;
 use crate::scope::ScopeGraph;
-use crate::{DomainActivation, Evidence, ProjectDocument, SourceIndex, SourceRange};
+use crate::{
+    DomainActivation, Evidence, LawRecognition, ProjectDocument, SourceIndex, SourceRange,
+};
 
 const MAX_PRIOR_MATCHES: usize = 64;
 const MAX_ACTIVATIONS: usize = 8;
@@ -30,7 +31,7 @@ struct EquationActivation {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct DomainAnalysis {
+pub(crate) struct DomainObservations {
     priors: Vec<ScopedPrior>,
     equations: Vec<EquationActivation>,
     scopes: ScopeGraph,
@@ -44,7 +45,7 @@ struct ActivationAccumulator {
     evidence: Vec<Evidence>,
 }
 
-impl DomainAnalysis {
+impl DomainObservations {
     pub fn at(&self, offset: u32) -> (Vec<DomainActivation>, bool) {
         let mut active = BTreeMap::<String, ActivationAccumulator>::new();
         for prior in &self.priors {
@@ -135,10 +136,10 @@ impl DomainAnalysis {
     }
 }
 
-pub(crate) fn analyze_domains(
+pub(crate) fn observe_domains(
     document: &ProjectDocument,
-    formulas: &FormulaAnalysis,
-) -> DomainAnalysis {
+    formulas: &[LawRecognition],
+) -> DomainObservations {
     let scopes = ScopeGraph::new(document);
     let priors = collect_priors(document, &scopes);
     let titles = built_in_packs()
@@ -146,14 +147,9 @@ pub(crate) fn analyze_domains(
         .map(|pack| (pack.pack_id.as_str(), pack.title.as_str()))
         .collect::<BTreeMap<_, _>>();
     let equations = formulas
-        .all()
         .iter()
         .filter_map(|formula| {
-            let evidence = formula
-                .evidence
-                .iter()
-                .find(|evidence| evidence.kind == "domain-pattern")?
-                .clone();
+            let evidence = formula.evidence.first()?.clone();
             Some(EquationActivation {
                 pack_id: formula.pack_id.clone(),
                 pack_version: formula.pack_version.clone(),
@@ -167,7 +163,7 @@ pub(crate) fn analyze_domains(
             })
         })
         .collect();
-    DomainAnalysis {
+    DomainObservations {
         priors,
         equations,
         scopes,
@@ -277,16 +273,12 @@ fn in_markdown_code(source: &str, byte_offset: usize) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::analyze_domains;
-    use crate::consistency::analyze_consistency;
-    use crate::parser::{math_regions, parse_regions};
-    use crate::pattern::analyze_formulas;
-    use crate::prose::analyze_prose;
-    use crate::shape::analyze_shapes;
+    use super::observe_domains;
+    use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
-    fn analyze(source: &str, language: DocumentLanguage) -> super::DomainAnalysis {
-        let regions = math_regions(source, language);
+    fn analyze(source: &str, language: DocumentLanguage) -> super::DomainObservations {
+        let regions = test_math_regions(source, language);
         let document = ProjectDocument {
             file_id: "main".into(),
             path: "main.md".into(),
@@ -294,14 +286,12 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            macros: Vec::new(),
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let prose = analyze_prose(&document, &parsed);
-        let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
-        let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
-        let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
-        analyze_domains(&document, &formulas)
+        let _ = parsed;
+        observe_domains(&document, &[])
     }
 
     #[test]
@@ -328,28 +318,6 @@ mod tests {
         let (active, _) = domains.at(source.rfind('A').unwrap() as u32);
         assert_eq!(active.len(), 1);
         assert_eq!(active[0].pack_id, "linear-algebra");
-    }
-
-    #[test]
-    fn promotes_a_typed_formula_pattern_only_in_its_equation() {
-        let source = "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}$\n$y = Ax$\n$z$";
-        let domains = analyze(source, DocumentLanguage::Latex);
-        let (formula_domains, _) = domains.at(source.rfind("Ax").unwrap() as u32);
-        let algebra = formula_domains
-            .iter()
-            .find(|domain| domain.pack_id == "linear-algebra")
-            .unwrap();
-        assert_eq!(algebra.strength, "strong");
-        assert_eq!(algebra.scope_kind, "equation");
-        assert!(
-            algebra
-                .evidence
-                .iter()
-                .any(|evidence| evidence.kind == "domain-pattern")
-        );
-
-        let (later_domains, _) = domains.at(source.rfind('z').unwrap() as u32);
-        assert!(later_domains.iter().all(|domain| domain.strength == "weak"));
     }
 
     #[test]

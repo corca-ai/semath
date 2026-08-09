@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "packId": "optimization-ml",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -7,40 +7,106 @@
   "title": "Optimization and machine learning",
   "description": "Recognition-first catalog for objectives, constraints, and learning updates without inferred convexity or optimality.",
   "dependencies": [],
-  "capabilities": { "provides": ["semath:formula-recognition"], "requires": [] },
+  "capabilities": {
+    "provides": [
+      "semath:formula-recognition"
+    ],
+    "requires": []
+  },
   "concepts": [
-    { "id": "objective-function", "conceptKind": "entity", "title": "Objective function", "description": "A function optimized over an explicitly declared variable.", "parents": [], "references": ["convex-optimization"] },
-    { "id": "argmin", "conceptKind": "operator", "title": "Argmin", "description": "An operator denoting minimizers of an objective.", "parents": [], "references": ["convex-optimization"] }
+    {
+      "id": "objective-function",
+      "conceptKind": "entity",
+      "title": "Objective function",
+      "description": "A function optimized over an explicitly declared variable.",
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "argmin",
+      "conceptKind": "operator",
+      "title": "Argmin",
+      "description": "An operator denoting minimizers of an objective.",
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    }
   ],
   "quantityKinds": [],
   "units": [],
   "laws": [],
   "activationRules": [
-    { "id": "vocabulary", "topic": "foundations", "patterns": ["optimization", "objective function", "gradient descent", "machine learning", "empirical risk", "Lagrangian"], "references": ["convex-optimization"] },
-    { "id": "optimization-notation", "topic": "notation", "patterns": ["\\argmin", "\\argmax", "\\min_", "\\max_", "\\mathcal{L}"], "references": ["convex-optimization"] }
+    {
+      "id": "vocabulary",
+      "topic": "foundations",
+      "patterns": [
+        "optimization",
+        "objective function",
+        "gradient descent",
+        "machine learning",
+        "empirical risk",
+        "Lagrangian"
+      ],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "optimization-notation",
+      "topic": "notation",
+      "patterns": [
+        "\\argmin",
+        "\\argmax",
+        "\\min_",
+        "\\max_",
+        "\\mathcal{L}"
+      ],
+      "references": [
+        "convex-optimization"
+      ]
+    }
   ],
-  "roles": [{ "id": "objective-function", "topic": "objectives", "description": "An explicitly declared function used as an optimization objective.", "notation": ["f", "L", "J"], "references": ["convex-optimization"] }],
-  "operators": [{ "id": "argmin", "topic": "objectives", "description": "The set or point minimizing an objective over an explicit variable.", "notation": ["\\argmin"], "references": ["convex-optimization"] }],
-  "patterns": [
-    { "id": "argmin-objective", "topic": "objectives", "title": "Argmin objective", "description": "Minimizer notation with an explicit optimization variable and objective.", "descriptionKey": "argmin-objective", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\argmin\\s*_\\s*\\{?([^{}]+)\\}?\\s+(.+)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "objective", "constraint": { "kind": "expression" } }], "result": { "kind": "expression", "refinements": ["minimizer"] }, "references": ["convex-optimization"] },
-    { "id": "argmax-objective", "topic": "objectives", "title": "Argmax objective", "description": "Maximizer notation with an explicit optimization variable and objective.", "descriptionKey": "argmax-objective", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\argmax\\s*_\\s*\\{?([^{}]+)\\}?\\s+(.+)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "objective", "constraint": { "kind": "expression" } }], "result": { "kind": "expression", "refinements": ["maximizer"] }, "references": ["convex-optimization"] },
-    { "id": "constrained-minimum", "topic": "constrained-optimization", "title": "Constrained minimum", "description": "Minimum of an objective subject to an explicit constraint.", "descriptionKey": "constrained-minimum", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\min\\s*_\\s*\\{?([^{}]+)\\}?\\s+(.+)\\s+\\\\text\\s*\\{\\s*(?:s\\.?t\\.?|subject to)\\s*\\}\\s+(.+)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "objective", "constraint": { "kind": "expression" } }, { "id": "constraint", "constraint": { "kind": "expression" } }], "result": { "kind": "expression", "refinements": ["constrained-objective"] }, "references": ["convex-optimization"] },
-    { "id": "lagrangian", "topic": "duality", "title": "Lagrangian", "description": "A Lagrangian combining an objective and explicit constraint terms.", "descriptionKey": "lagrangian", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\mathcal\\s*\\{L\\}\\s*\\(([^,]+),([^)]*)\\)\\s*=\\s*(.+)$" }, "parameters": [{ "id": "primal-variable", "constraint": { "kind": "expression" } }, { "id": "multiplier", "constraint": { "kind": "expression" } }, { "id": "definition", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["lagrangian"] }, "references": ["convex-optimization"] },
-    { "id": "gradient-descent-update", "topic": "algorithms", "title": "Gradient descent update", "description": "A first-order update with an explicit step size and gradient.", "descriptionKey": "gradient-descent-update", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*_\\s*\\{?([^{}]+)\\}?\\s*=\\s*([A-Za-z])\\s*_\\s*\\{?([^{}]+)\\}?\\s*-\\s*([^ ]+)\\s*\\\\nabla\\s*(.+)$" }, "parameters": [{ "id": "next-variable", "constraint": { "kind": "expression" } }, { "id": "next-index", "constraint": { "kind": "expression" } }, { "id": "current-variable", "constraint": { "kind": "expression" } }, { "id": "current-index", "constraint": { "kind": "expression" } }, { "id": "step-size", "constraint": { "kind": "expression" } }, { "id": "objective", "constraint": { "kind": "expression" } }], "result": { "kind": "expression", "refinements": ["iterative-update"] }, "references": ["convex-optimization"] },
-    { "id": "proximal-update", "topic": "algorithms", "title": "Proximal update", "description": "A proximal-operator update with explicit argument.", "descriptionKey": "proximal-update", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*_\\s*\\{?([^{}]+)\\}?\\s*=\\s*\\\\operatorname\\s*\\{prox\\}\\s*_\\s*\\{?([^{}]+)\\}?\\s*\\((.+)\\)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "index", "constraint": { "kind": "expression" } }, { "id": "penalty", "constraint": { "kind": "expression" } }, { "id": "argument", "constraint": { "kind": "expression" } }], "result": { "kind": "expression", "refinements": ["proximal-update"] }, "references": ["convex-optimization"] },
-    { "id": "least-squares-objective", "topic": "least-squares", "title": "Least-squares objective", "description": "Squared residual norm minimized over an explicit variable.", "descriptionKey": "least-squares-objective", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\min\\s*_\\s*\\{?([^{}]+)\\}?\\s*\\\\lVert\\s*(.+)\\s*\\\\rVert\\s*\\^\\s*\\{?2\\}?$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "residual", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["least-squares-objective"] }, "references": ["convex-optimization"] },
-    { "id": "regularized-objective", "topic": "regularization", "title": "Regularized objective", "description": "Objective plus an explicit weighted penalty term.", "descriptionKey": "regularized-objective", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\min\\s*_\\s*\\{?([^{}]+)\\}?\\s+(.+)\\s*\\+\\s*([^ ]+)\\s*(\\\\lVert.+\\\\rVert.*)$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "loss", "constraint": { "kind": "expression" } }, { "id": "weight", "constraint": { "kind": "expression" } }, { "id": "penalty", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["regularized-objective"] }, "references": ["convex-optimization"] },
-    { "id": "sigmoid", "topic": "models", "title": "Sigmoid function", "description": "Logistic sigmoid applied to an explicit argument.", "descriptionKey": "sigmoid", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\sigma\\s*\\((.+)\\)$" }, "parameters": [{ "id": "argument", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["unit-interval"] }, "references": ["deep-learning"] },
-    { "id": "softmax", "topic": "models", "title": "Softmax", "description": "Softmax transformation of an explicit vector expression.", "descriptionKey": "softmax", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\operatorname\\s*\\{softmax\\}\\s*\\((.+)\\)$" }, "parameters": [{ "id": "argument", "constraint": { "kind": "expression" } }], "result": { "kind": "vector", "refinements": ["probability-simplex"] }, "references": ["deep-learning"] },
-    { "id": "empirical-risk", "topic": "learning-objectives", "title": "Empirical risk", "description": "Average loss over an explicitly indexed sample.", "descriptionKey": "empirical-risk", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\frac\\s*\\{1\\}\\s*\\{([^{}]+)\\}\\s*\\\\sum\\s*_\\s*\\{\\s*([A-Za-z])\\s*=\\s*1\\s*\\}\\s*\\^\\s*\\{([^{}]+)\\}\\s*((?:\\\\ell|L)\\s*_\\s*(?:\\{[^{}]+\\}|[A-Za-z0-9]+))$" }, "parameters": [{ "id": "normalizer", "constraint": { "kind": "expression" } }, { "id": "index", "constraint": { "kind": "expression" } }, { "id": "sample-count", "constraint": { "kind": "expression" } }, { "id": "loss", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["empirical-risk"] }, "references": ["deep-learning"] },
-    { "id": "cross-entropy-loss", "topic": "learning-objectives", "title": "Cross-entropy loss", "description": "Negative categorical log-likelihood over explicit labels and predictions.", "descriptionKey": "cross-entropy-loss", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^-\\s*\\\\sum\\s*_\\s*\\{?([^{}]+)\\}?\\s+(.+)\\s*\\\\log\\s*(.+)$" }, "parameters": [{ "id": "index", "constraint": { "kind": "expression" } }, { "id": "target", "constraint": { "kind": "expression" } }, { "id": "prediction", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["cross-entropy"] }, "references": ["deep-learning"] },
-    { "id": "minimum-objective", "topic": "optimization-problems", "title": "Minimum objective", "description": "Unconstrained minimization of one explicit function application.", "descriptionKey": "minimum-objective", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\min\\s*_\\s*\\{?((?:[A-Za-z]|\\\\[A-Za-z]+))\\}?\\s+((?:[A-Za-z]|\\\\[A-Za-z]+)\\s*\\([^)]*\\))$" }, "parameters": [{ "id": "variable", "constraint": { "kind": "expression" } }, { "id": "objective", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["minimum-objective"] }, "references": ["convex-optimization"] },
-    { "id": "minimax-objective", "topic": "optimization-problems", "title": "Minimax objective", "description": "Nested minimization and maximization of one explicit function application.", "descriptionKey": "minimax-objective", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\min\\s*_\\s*\\{?((?:[A-Za-z]|\\\\[A-Za-z]+))\\}?\\s*\\\\max\\s*_\\s*\\{?((?:[A-Za-z]|\\\\[A-Za-z]+))\\}?\\s+((?:[A-Za-z]|\\\\[A-Za-z]+)\\s*\\([^)]*\\))$" }, "parameters": [{ "id": "min-variable", "constraint": { "kind": "expression" } }, { "id": "max-variable", "constraint": { "kind": "expression" } }, { "id": "objective", "constraint": { "kind": "expression" } }], "result": { "kind": "scalar", "refinements": ["saddle-objective"] }, "references": ["convex-optimization"] },
-    { "id": "kkt-stationarity", "topic": "optimality-conditions", "title": "KKT stationarity", "description": "Stationarity of a Lagrangian with explicit primal and dual variables.", "descriptionKey": "kkt-stationarity", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^\\\\nabla\\s*_\\s*\\{?([^{}]+)\\}?\\s*\\\\mathcal\\s*\\{L\\}\\s*\\(([^,]+),([^)]*)\\)\\s*=\\s*0$" }, "parameters": [{ "id": "differentiation-variable", "constraint": { "kind": "expression" } }, { "id": "primal-variable", "constraint": { "kind": "expression" } }, { "id": "dual-variable", "constraint": { "kind": "expression" } }], "result": { "kind": "proposition", "refinements": ["kkt-stationarity"] }, "references": ["convex-optimization"] }
+  "roles": [
+    {
+      "id": "objective-function",
+      "topic": "objectives",
+      "description": "An explicitly declared function used as an optimization objective.",
+      "notation": [
+        "f",
+        "L",
+        "J"
+      ],
+      "references": [
+        "convex-optimization"
+      ]
+    }
   ],
-  "rewrites": [],
+  "operators": [
+    {
+      "id": "argmin",
+      "topic": "objectives",
+      "description": "The set or point minimizing an objective over an explicit variable.",
+      "notation": [
+        "\\argmin"
+      ],
+      "references": [
+        "convex-optimization"
+      ]
+    }
+  ],
   "references": [
-    { "id": "convex-optimization", "title": "Convex Optimization", "citation": "Stephen Boyd and Lieven Vandenberghe, Convex Optimization, Cambridge University Press, 2004." },
-    { "id": "deep-learning", "title": "Deep Learning", "citation": "Ian Goodfellow, Yoshua Bengio, and Aaron Courville, Deep Learning, MIT Press, 2016." }
+    {
+      "id": "convex-optimization",
+      "title": "Convex Optimization",
+      "citation": "Stephen Boyd and Lieven Vandenberghe, Convex Optimization, Cambridge University Press, 2004."
+    },
+    {
+      "id": "deep-learning",
+      "title": "Deep Learning",
+      "citation": "Ian Goodfellow, Yoshua Bengio, and Aaron Courville, Deep Learning, MIT Press, 2016."
+    }
   ]
 }

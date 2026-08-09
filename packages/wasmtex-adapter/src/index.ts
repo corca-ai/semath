@@ -4,31 +4,12 @@ import {
   type ProjectDocument,
   type ProjectSnapshot,
 } from "../../protocol/src/index";
-
-/** Structural subset of wasmtex/syntax kept separate from wasmtex's release cycle. */
-export interface WasmtexFileSyntax {
-  documentVersion: number;
-  fileId: string;
-  includes: readonly {
-    path: string;
-    source: {
-      range: { endOffset: number; startOffset: number };
-    };
-  }[];
-  mathRegions: readonly {
-    closed: boolean;
-    contentRange: { endOffset: number; startOffset: number };
-    delimiter: string;
-    fullRange: { endOffset: number; startOffset: number };
-  }[];
-  path: string;
-  schemaVersion: 2;
-}
+import type { LatexFileSyntax } from "wasmtex/syntax";
 
 export interface SourceDocument {
   content: string;
   language: DocumentLanguage;
-  syntax: WasmtexFileSyntax;
+  syntax: LatexFileSyntax;
 }
 
 export function adaptWasmtexDocument(source: SourceDocument): ProjectDocument {
@@ -41,6 +22,7 @@ export function adaptWasmtexDocument(source: SourceDocument): ProjectDocument {
       sourceRange: include.source.range,
     })),
     language: source.language,
+    macros: source.syntax.macros,
     mathRegions: source.syntax.mathRegions,
     path: source.syntax.path,
   };

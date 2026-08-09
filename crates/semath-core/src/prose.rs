@@ -2,6 +2,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
+use crate::canonical::declared_symbols;
 use crate::parser::ParsedMath;
 use crate::scope::ScopeGraph;
 use crate::{
@@ -11,7 +12,7 @@ use crate::{
 static LET_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?:let|where)\s*$").unwrap());
 static DEFINITION_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)^\s*(?:denote(?:s)?|be|is|represent(?:s)?)\s+([^.;\n]+)").unwrap()
+    Regex::new(r"(?i)^\s*(?:denote(?:s)?|be|is|represent(?:s)?)\s+([^$.;\n]+)").unwrap()
 });
 static DIRECT_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?:^|[.!?]\s*|\n\s*)$").unwrap());
@@ -31,7 +32,7 @@ static QUANTIFIED_SUFFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*[,
 static COORDINATED_LET_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)let\s*$").unwrap());
 static COORDINATED_DIRECT_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)(?:the\s+(?:symbols|notations)\s+)?$").unwrap()
+    Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here\s+)?(?:the\s+(?:symbols|notations)\s+)?$").unwrap()
 });
 static COORDINATED_WRITE_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)we\s+write\s*$").unwrap());
@@ -50,7 +51,7 @@ static COORDINATED_DENOTE_BY_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s+(.+?)(?:,\s*|\s+)(?:respectively|in\s+that\s+order)\s*[.;]").unwrap()
 });
 static COORDINATED_SHARED_SUFFIX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)^\s+(?:denote|represent|be)\s+([^.;\n]+)[.;]").unwrap());
+    LazyLock::new(|| Regex::new(r"(?i)^\s+(?:denote|represent|be)\s+([^,.;\n]+)[,.;]").unwrap());
 static CONTEXTUAL_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here|throughout,?|with)\s*$").unwrap()
 });
@@ -94,14 +95,21 @@ static CALL_SUFFIX: LazyLock<Regex> =
 static EXPRESSION_DEFINES_SUFFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)^\s+defines?\s+(?:(?:an?|the)\s+)?([^.;\n]+)").unwrap());
 static VECTOR_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\b([a-z0-9]+)[ -]dimensional\s+(?:(?:real|normalized)\s+)*vectors?\s*$")
+    Regex::new(r"(?i)\b([a-z]|[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)(?:[ -]dimensional|[ -])\s*(?:(?:real|normalized)\s+)*(?:state\s+|control\s+)?(?:vectors?|states?|inputs?|controls?)(?:\s+of\s+[a-z -]+)?\s*(?:,?\s+and)?\s*$")
         .unwrap()
 });
 static MATRIX_DIMENSIONS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r"(?i)\b([a-z0-9]+)\s*(?:by|x|×)\s*([a-z0-9]+)\s+(?:(?:real|symmetric|diagonal|orthogonal|positive[ -]definite|positive[ -]semidefinite)\s+)*(?:matrix|matrices)\s*$",
+        r"(?i)\b([a-z0-9]+)(?:\s+by\s+|\s+x\s+|\s*×\s*|\s*\\times\s*)([a-z0-9]+)(?:\s+(?:(?:real|symmetric|diagonal|orthogonal|positive[ -]definite|positive[ -]semidefinite|state|input|system)\s+)*(?:matrix|matrices))?\s*(?:,?\s+and)?\s*$",
     )
     .unwrap()
+});
+static SQUARE_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)\bsquare(?:\s+matrices?)?(?:\s+(?:of|with))?(?:\s+(?:the\s+)?(?:same|common))?\s*(?:size|order|dimension)?\s*([a-z0-9]+)\s*$").unwrap()
+});
+static INLINE_VECTOR_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)^\s*(?:be|is)\s+an?\s+\$([a-z0-9]+)\$[ -]dimensional\s+(?:real\s+)?vector")
+        .unwrap()
 });
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -123,18 +131,29 @@ pub(crate) struct ProseShapeClaim {
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct ProseAnalysis {
+pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ProseShapeClaim>,
 }
 
-pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -> ProseAnalysis {
+fn primary_symbol(document: &ProjectDocument, math: &ParsedMath) -> Option<(String, SourceRange)> {
+    declared_symbols(document, &math.region.content_range)
+        .into_iter()
+        .next()
+        .or_else(|| math.symbols.first().cloned())
+}
+
+pub(crate) fn observe_prose(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+) -> ProseObservations {
     let index = SourceIndex::new(&document.content);
-    let mut analysis = ProseAnalysis::default();
+    let mut analysis = ProseObservations::default();
 
     collect_coordinated_definitions(document, parsed, &index, &mut analysis);
+    collect_clause_definitions(document, parsed, &index, &mut analysis);
     for math in parsed {
-        let Some((symbol, symbol_range)) = math.symbols.first() else {
+        let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
             continue;
         };
         let start_byte = index.byte_for_utf16(math.region.full_range.start_offset);
@@ -143,14 +162,44 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
         let after_end = bounded_end(&document.content, end_byte, 240);
         let before = &document.content[before_start..start_byte];
         let after = &document.content[end_byte..after_end];
+        let trimmed_after = after.trim_start().to_ascii_lowercase();
+        if let Some(captures) = INLINE_VECTOR_SUFFIX.captures(after) {
+            let evidence_end = end_byte + captures.get(0).unwrap().end();
+            push_claim(
+                &mut analysis,
+                document,
+                &index,
+                &symbol,
+                &symbol_range,
+                &format!("{}-dimensional vector", &captures[1]),
+                "english-inline-dimension-definition",
+                start_byte,
+                evidence_end,
+            );
+            continue;
+        }
+        if [
+            "-dimensional",
+            "dimensional",
+            "-vector",
+            "-state",
+            "-input",
+            " by ",
+            "\\times",
+        ]
+        .iter()
+        .any(|prefix| trimmed_after.starts_with(prefix))
+        {
+            continue;
+        }
 
         if let Some(explicit) = explicit_single_definition(before, after, math, document, &index) {
             push_claim(
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 explicit.description,
                 explicit.rule_id,
                 before_start + explicit.prefix_start,
@@ -165,21 +214,24 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 description,
                 "english-let-definition",
                 before_start + prefix.start(),
                 end,
             );
-        } else if let Some(captures) = APPOSITION_SUFFIX.captures(after) {
+        } else if let Some(captures) = APPOSITION_SUFFIX.captures(after)
+            && !captures.get(1).unwrap().as_str().contains("\\(")
+            && !captures.get(1).unwrap().as_str().contains("\\[")
+        {
             let description = captures.get(1).unwrap().as_str().trim();
             push_claim(
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 description,
                 "english-apposition-definition",
                 start_byte,
@@ -194,8 +246,8 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 description,
                 "english-parenthetical-definition",
                 before_start + prefix.get(0).unwrap().start(),
@@ -210,8 +262,8 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 description,
                 "english-quantified-definition",
                 before_start + prefix.get(0).unwrap().start(),
@@ -225,8 +277,8 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 description,
                 "english-relational-definition",
                 start_byte,
@@ -237,8 +289,8 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
                 &mut analysis,
                 document,
                 &index,
-                symbol,
-                symbol_range,
+                &symbol,
+                &symbol_range,
                 "explicit mathematical declaration",
                 "english-let-math-declaration",
                 start_byte,
@@ -249,8 +301,8 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
         collect_notation_table(
             document,
             &index,
-            symbol,
-            symbol_range,
+            &symbol,
+            &symbol_range,
             start_byte,
             end_byte,
             &mut analysis,
@@ -268,6 +320,248 @@ pub(crate) fn analyze_prose(document: &ProjectDocument, parsed: &[ParsedMath]) -
         });
     }
     analysis
+}
+
+fn collect_clause_definitions(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    index: &SourceIndex,
+    output: &mut ProseObservations,
+) {
+    for (sentence_start, sentence_end) in sentence_ranges(&document.content) {
+        let sentence = &document.content[sentence_start..sentence_end];
+        let sentence_lower = sentence.to_ascii_lowercase();
+        if sentence_lower.contains("respectively") || sentence_lower.contains("in that order") {
+            collect_ordered_clause_definition(
+                document,
+                parsed,
+                index,
+                output,
+                sentence_start,
+                sentence_end,
+            );
+            continue;
+        }
+        let regions = parsed
+            .iter()
+            .filter(|math| {
+                let start = index.byte_for_utf16(math.region.full_range.start_offset);
+                sentence_start <= start
+                    && start < sentence_end
+                    && !is_description_parameter(
+                        document,
+                        math,
+                        sentence_start,
+                        sentence_end,
+                        index,
+                    )
+            })
+            .collect::<Vec<_>>();
+        if regions.len() < 2 {
+            continue;
+        }
+        let prefix_end = index.byte_for_utf16(regions[0].region.full_range.start_offset);
+        let prefix = &document.content[sentence_start..prefix_end];
+        let contextual = [
+            "let",
+            "where",
+            "here",
+            "throughout",
+            "symbols",
+            "notations",
+            "declares",
+        ]
+        .iter()
+        .any(|word| prefix.to_ascii_lowercase().contains(word));
+        let explicit = regions
+            .iter()
+            .filter(|math| {
+                let end = index.byte_for_utf16(math.region.full_range.end_offset);
+                definition_clause(&document.content[end..sentence_end]).1
+            })
+            .count();
+        if !contextual && explicit < 2 {
+            continue;
+        }
+        for (position, math) in regions.iter().enumerate() {
+            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                continue;
+            };
+            let end = index.byte_for_utf16(math.region.full_range.end_offset);
+            let next = regions.get(position + 1).map_or(sentence_end, |next| {
+                index.byte_for_utf16(next.region.full_range.start_offset)
+            });
+            let (description, _) = definition_clause(&document.content[end..next]);
+            let Some(description) = description else {
+                continue;
+            };
+            push_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                description,
+                "english-clause-definition",
+                sentence_start,
+                next,
+            );
+        }
+    }
+}
+
+fn collect_ordered_clause_definition(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    index: &SourceIndex,
+    output: &mut ProseObservations,
+    sentence_start: usize,
+    sentence_end: usize,
+) {
+    let regions = parsed
+        .iter()
+        .filter(|math| {
+            let start = index.byte_for_utf16(math.region.full_range.start_offset);
+            sentence_start <= start
+                && start < sentence_end
+                && !is_description_parameter(document, math, sentence_start, sentence_end, index)
+        })
+        .filter(|math| primary_symbol(document, math).is_some())
+        .collect::<Vec<_>>();
+    if regions.len() < 2 {
+        return;
+    }
+    let last_end = index.byte_for_utf16(regions.last().unwrap().region.full_range.end_offset);
+    let suffix = document.content[last_end..sentence_end].trim();
+    let suffix = suffix
+        .trim_end_matches(|character: char| character.is_whitespace() || character == '.')
+        .trim_end_matches("respectively")
+        .trim_end_matches("in that order")
+        .trim_end_matches(|character: char| character.is_whitespace() || character == ',');
+    let (description, explicit) = definition_clause(suffix);
+    if !explicit {
+        return;
+    }
+    let Some(descriptions) =
+        description.and_then(|description| split_ordered_descriptions(description, regions.len()))
+    else {
+        return;
+    };
+    for (math, description) in regions.into_iter().zip(descriptions) {
+        let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+            return;
+        };
+        push_claim(
+            output,
+            document,
+            index,
+            &symbol,
+            &symbol_range,
+            description,
+            "english-clause-ordered-definition",
+            sentence_start,
+            sentence_end,
+        );
+    }
+}
+
+fn is_description_parameter(
+    document: &ProjectDocument,
+    math: &ParsedMath,
+    sentence_start: usize,
+    sentence_end: usize,
+    index: &SourceIndex,
+) -> bool {
+    let start = index.byte_for_utf16(math.region.full_range.start_offset);
+    let end = index.byte_for_utf16(math.region.full_range.end_offset);
+    if end > sentence_end {
+        return false;
+    }
+    let before = document.content[sentence_start..start]
+        .trim_end()
+        .to_ascii_lowercase();
+    let after = document.content[end..sentence_end]
+        .trim_start()
+        .to_ascii_lowercase();
+    after.starts_with("-dimensional")
+        || after.starts_with("dimensional")
+        || after.starts_with("by ")
+        || after.starts_with("\\times")
+        || before.ends_with(" by")
+        || before.ends_with("\\times")
+}
+
+fn sentence_ranges(source: &str) -> Vec<(usize, usize)> {
+    let mut ranges = Vec::new();
+    let mut start = 0;
+    for (index, character) in source.char_indices() {
+        if matches!(character, '.' | '!' | '?' | '\n') {
+            let end = index + character.len_utf8();
+            if source[start..end]
+                .chars()
+                .any(|character| !character.is_whitespace())
+            {
+                ranges.push((start, end));
+            }
+            start = end;
+        }
+    }
+    if start < source.len() {
+        ranges.push((start, source.len()));
+    }
+    ranges
+}
+
+fn definition_clause(segment: &str) -> (Option<&str>, bool) {
+    let mut clause = segment.trim();
+    clause = clause.trim_start_matches([',', ';', ':']).trim_start();
+    for connector in ["and ", "while ", "whereas "] {
+        if clause.to_ascii_lowercase().starts_with(connector) {
+            clause = clause[connector.len()..].trim_start();
+            break;
+        }
+    }
+    let lower = clause.to_ascii_lowercase();
+    let mut explicit = false;
+    for verb in [
+        "denotes ",
+        "denote ",
+        "represents ",
+        "represent ",
+        "stands for ",
+        "stand for ",
+        "is ",
+        "are ",
+        "be ",
+        "in ",
+    ] {
+        if lower.starts_with(verb) {
+            clause = clause[verb.len()..].trim_start();
+            explicit = true;
+            break;
+        }
+    }
+    clause = clause
+        .trim_end_matches(|character: char| {
+            character.is_whitespace() || matches!(character, ',' | ';' | ':' | '.')
+        })
+        .trim_end_matches(" and")
+        .trim_end_matches(" while")
+        .trim();
+    let lower = clause.to_ascii_lowercase();
+    for prefix in ["a ", "an ", "the "] {
+        if lower.starts_with(prefix) {
+            clause = clause[prefix.len()..].trim_start();
+            break;
+        }
+    }
+    let valid = !clause.is_empty()
+        && !matches!(lower.as_str(), "and" | "while" | "whereas")
+        && clause.len() <= 120
+        && !clause.contains('=')
+        && !clause.contains("\\[")
+        && !clause.contains("$$");
+    (valid.then_some(clause), explicit)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -377,7 +671,7 @@ fn collect_coordinated_definitions(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     index: &SourceIndex,
-    analysis: &mut ProseAnalysis,
+    analysis: &mut ProseObservations,
 ) {
     for arity in [3, 2] {
         for group in parsed.windows(arity) {
@@ -389,9 +683,9 @@ fn collect_coordinated_definitions(
                     analysis,
                     document,
                     index,
-                    definition.symbol,
-                    definition.range,
-                    definition.description,
+                    &definition.symbol,
+                    &definition.range,
+                    &definition.description,
                     definition.rule_id,
                     definition.statement_start,
                     definition.statement_end,
@@ -401,23 +695,26 @@ fn collect_coordinated_definitions(
     }
 }
 
-struct CoordinatedDefinition<'a> {
-    symbol: &'a str,
-    range: &'a SourceRange,
-    description: &'a str,
+struct CoordinatedDefinition {
+    symbol: String,
+    range: SourceRange,
+    description: String,
     rule_id: &'static str,
     statement_start: usize,
     statement_end: usize,
 }
 
-fn coordinated_group<'a>(
-    document: &'a ProjectDocument,
-    group: &'a [ParsedMath],
+fn coordinated_group(
+    document: &ProjectDocument,
+    group: &[ParsedMath],
     index: &SourceIndex,
-) -> Option<Vec<CoordinatedDefinition<'a>>> {
+) -> Option<Vec<CoordinatedDefinition>> {
     group.first()?;
     group.last()?;
-    if group.iter().any(|math| math.symbols.is_empty()) {
+    if group
+        .iter()
+        .any(|math| primary_symbol(document, math).is_none())
+    {
         return None;
     }
     let starts = group
@@ -445,11 +742,11 @@ fn coordinated_group<'a>(
 
     let mut definitions = Vec::with_capacity(group.len());
     for (math, description) in group.iter().zip(descriptions) {
-        let (symbol, range) = math.symbols.first()?;
+        let (symbol, range) = primary_symbol(document, math)?;
         definitions.push(CoordinatedDefinition {
             symbol,
             range,
-            description,
+            description: description.into(),
             rule_id,
             statement_start,
             statement_end,
@@ -577,7 +874,7 @@ fn collect_notation_table(
     symbol_range: &SourceRange,
     start_byte: usize,
     end_byte: usize,
-    analysis: &mut ProseAnalysis,
+    analysis: &mut ProseObservations,
 ) {
     let line_start = document.content[..start_byte]
         .rfind('\n')
@@ -613,7 +910,7 @@ fn collect_notation_table(
 
 #[allow(clippy::too_many_arguments)]
 fn push_claim(
-    analysis: &mut ProseAnalysis,
+    analysis: &mut ProseObservations,
     document: &ProjectDocument,
     index: &SourceIndex,
     symbol: &str,
@@ -627,7 +924,7 @@ fn push_claim(
         start_offset: index.utf16_for_byte(evidence_start),
         end_offset: index.utf16_for_byte(evidence_end),
     };
-    let legacy_definition_range = matches!(
+    let definition_uses_symbol_range = matches!(
         rule_id,
         "english-let-definition" | "english-let-math-declaration" | "notation-table-definition"
     );
@@ -635,7 +932,7 @@ fn push_claim(
         rule_id: rule_id.into(),
         kind: "explicit-prose".into(),
         strength: "strong".into(),
-        source_ranges: vec![if legacy_definition_range {
+        source_ranges: vec![if definition_uses_symbol_range {
             symbol_range.clone()
         } else {
             evidence_range.clone()
@@ -668,19 +965,32 @@ fn push_claim(
 }
 
 fn shape_claim(description: &str) -> Option<(ProseShape, Vec<String>)> {
-    let normalized = description.to_ascii_lowercase().replace('-', " ");
-    let shape = if let Some(captures) = MATRIX_DIMENSIONS.captures(description) {
+    let description = description
+        .split_once(", and let")
+        .map_or(description, |(description, _)| description);
+    let shape_source = description.replace('$', "");
+    let normalized = shape_source.to_ascii_lowercase().replace('-', " ");
+    let shape = if let Some(captures) = MATRIX_DIMENSIONS.captures(&shape_source) {
         ProseShape::Matrix(
             captures.get(1).unwrap().as_str().into(),
             captures.get(2).unwrap().as_str().into(),
         )
-    } else if let Some(captures) = VECTOR_DIMENSION.captures(description) {
+    } else if let Some(captures) = VECTOR_DIMENSION.captures(&shape_source) {
         ProseShape::Vector(captures.get(1).unwrap().as_str().into())
+    } else if let Some(captures) = SQUARE_DIMENSION.captures(&shape_source) {
+        let dimension = captures.get(1).unwrap().as_str().to_owned();
+        if matches!(dimension.as_str(), "size" | "order" | "dimension") {
+            return None;
+        }
+        ProseShape::Matrix(dimension.clone(), dimension)
     } else if matches!(last_word(&normalized), Some("matrix" | "matrices")) {
         ProseShape::Matrix("?".into(), "?".into())
     } else if matches!(last_word(&normalized), Some("vector" | "vectors")) {
         ProseShape::Vector("?".into())
-    } else if matches!(last_word(&normalized), Some("scalar" | "scalars")) {
+    } else if normalized
+        .split_whitespace()
+        .any(|word| matches!(word, "scalar" | "scalars"))
+    {
         ProseShape::Scalar
     } else if matches!(last_word(&normalized), Some("tensor" | "tensors")) {
         ProseShape::Tensor(vec!["?".into()])
@@ -723,35 +1033,35 @@ fn bounded_end(source: &str, start: usize, characters: usize) -> usize {
         .map_or(source.len(), |(offset, _)| start + offset)
 }
 
-fn deduplicate(analysis: &mut ProseAnalysis) {
+fn deduplicate(analysis: &mut ProseObservations) {
     analysis.definitions.sort_by_key(|definition| {
         (
             definition.location.range.start_offset,
             definition.evidence.rule_id.clone(),
         )
     });
-    analysis.definitions.dedup_by(|left, right| {
-        left.location == right.location && left.evidence.rule_id == right.evidence.rule_id
-    });
+    analysis
+        .definitions
+        .dedup_by(|left, right| left.location == right.location);
     analysis.shapes.sort_by_key(|claim| {
         (
             claim.symbol_range.start_offset,
             claim.evidence.rule_id.clone(),
         )
     });
-    analysis.shapes.dedup_by(|left, right| {
-        left.symbol_range == right.symbol_range && left.evidence.rule_id == right.evidence.rule_id
-    });
+    analysis
+        .shapes
+        .dedup_by(|left, right| left.symbol_range == right.symbol_range);
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ProseShape, analyze_prose, split_ordered_descriptions};
-    use crate::parser::{math_regions, parse_regions};
+    use super::{ProseShape, observe_prose, split_ordered_descriptions};
+    use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
-    fn analyze(source: &str) -> super::ProseAnalysis {
-        let regions = math_regions(source, DocumentLanguage::Latex);
+    fn analyze(source: &str) -> super::ProseObservations {
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             file_id: "main".into(),
             path: "main.tex".into(),
@@ -759,9 +1069,10 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            macros: Vec::new(),
             includes: Vec::new(),
         };
-        analyze_prose(&document, &parse_regions(source, &regions))
+        observe_prose(&document, &parse_regions(source, &regions))
     }
 
     #[test]
@@ -790,7 +1101,7 @@ mod tests {
             "The vector near $x$ is only an example.\nWe compare $A$ with a matrix.\n$v$ is a vector field.\n$G$ is a matrix group.",
         );
         assert_eq!(analysis.definitions.len(), 2);
-        assert!(analysis.shapes.is_empty());
+        assert!(analysis.shapes.is_empty(), "{:?}", analysis.shapes);
     }
 
     #[test]
@@ -847,7 +1158,10 @@ mod tests {
         assert!(descriptions.contains(&("p", "$d$")));
         assert!(descriptions.contains(&("q", "$e$")));
         assert!(descriptions.contains(&("r", "$f$")));
-        assert!(descriptions.contains(&("U", "vector spaces")));
+        assert!(
+            descriptions.contains(&("U", "vector spaces")),
+            "{descriptions:?}"
+        );
         assert!(descriptions.contains(&("V", "vector spaces")));
         assert!(
             !descriptions
