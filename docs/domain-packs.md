@@ -13,11 +13,11 @@ law recognition.
 
 | Pack | Tier | Laws covered | Authored cases |
 | --- | --- | ---: | ---: |
-| Circuits | evaluated | 3/3 | 150 |
-| Classical mechanics | evaluated | 3/3 | 150 |
-| Control systems | evaluated | 2/2 | 100 |
-| Linear algebra | probe | 1/1 | 10 |
-| Probability | probe | 1/1 | 10 |
+| Circuits | evaluated | 3/3 | 390 |
+| Classical mechanics | evaluated | 3/3 | 390 |
+| Control systems | evaluated | 2/2 | 260 |
+| Linear algebra | probe | 1/1 | 90 |
+| Probability | probe | 1/1 | 90 |
 | Calculus and analysis | vocabulary-only | 0/0 | 0 |
 | Discrete mathematics | vocabulary-only | 0/0 | 0 |
 | Optimization and ML | vocabulary-only | 0/0 | 0 |

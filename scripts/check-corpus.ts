@@ -8,6 +8,7 @@ import {
   type CorpusDocument,
   type MetamorphicTransform,
   evidenceIsSourceLinked,
+  findCorpusDuplicates,
   planMetamorphicCases,
   rolesMatch,
   scoreQuality,
@@ -32,6 +33,10 @@ interface PlannedCase {
 }
 
 const { corpora, manifest } = await loadQualityFixtures();
+const corpusIntegrityFailures = findCorpusDuplicates([...corpora.values()]);
+if (corpusIntegrityFailures.length) {
+  throw new Error(`corpus integrity gate failed:\n${corpusIntegrityFailures.join("\n")}`);
+}
 const planned: PlannedCase[] = manifest.suites.flatMap((suite) => {
   const corpus = corpora.get(suite.id);
   if (!corpus) throw new Error(`${suite.id}: corpus was not loaded`);
@@ -149,12 +154,24 @@ for (const law of scorecard.laws) {
     ].join(" "),
   );
 }
+console.log(
+  `adversarial refusal=${format(scorecard.adversarialRefusal.percent)} cases=${scorecard.adversarialRefusal.denominator}`,
+);
 for (const suite of manifest.suites) {
   const dimensions = scorecard.coverage
     .filter((score) => score.suiteId === suite.id)
     .map((score) => `${score.dimension}:${score.cases}`)
     .join(",");
   console.log(`${suite.id}: dimensions=${dimensions}`);
+  const diversity = scorecard.diversity
+    .filter((score) => score.suiteId === suite.id)
+    .map((score) =>
+      score.facet === "combined-profile"
+        ? `profiles:${score.distinct},max:${(score.largestShare * 100).toFixed(1)}%`
+        : `${score.facet}:${score.distinct}`,
+    )
+    .join(",");
+  console.log(`${suite.id}: diversity=${diversity}`);
 }
 console.log(
   `metamorphic invariance=${format(scorecard.metamorphic.percent)} cases=${scorecard.generatedCases}`,
@@ -187,18 +204,29 @@ function observe(
   result: QueryResult | undefined,
 ): CaseObservation {
   const view = result?.value.kind === "semanticView" ? result.value.view : undefined;
-  const relation = view?.context.relations.find((candidate) =>
-    candidate.relationId.endsWith(`:${item.case.lawId}`),
-  );
+  const targetLawId = "lawId" in item.case ? item.case.lawId : undefined;
+  const relation = targetLawId
+    ? view?.context.relations.find((candidate) =>
+        candidate.relationId.endsWith(`:${targetLawId}`),
+      )
+    : undefined;
+  const establishedLawIds = [
+    ...new Set(
+      (view?.context.relations ?? []).map((candidate) =>
+        candidate.relationId.slice(candidate.relationId.lastIndexOf(":") + 1),
+      ),
+    ),
+  ].sort();
   const observation: CaseObservation = {
     caseId: item.case.id,
     evidenceIntegrity: Boolean(
       relation && evidenceIsSourceLinked(relation.evidence, relation.conditions),
     ),
+    establishedLawIds,
     ...(item.generatedFrom ? { generatedFrom: item.generatedFrom } : {}),
     rolesCorrect: rolesMatch(
       relation?.roles ?? [],
-      item.case.expectedRoles,
+      "expectedRoles" in item.case ? item.case.expectedRoles : undefined,
       item.case.macros,
     ),
     ...(view ? { status: view.status } : {}),

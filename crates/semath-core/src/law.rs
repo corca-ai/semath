@@ -1445,6 +1445,13 @@ mod tests {
     }
 
     #[test]
+    fn a_capacitor_refusal_can_still_be_a_valid_resistor_law() {
+        let source =
+            "The equation $i=V/R$ is a resistor current law, not a capacitor derivative law.";
+        assert_eq!(recognized_laws(source), ["ohm-law"]);
+    }
+
+    #[test]
     fn recognizes_typed_mechanical_power_without_a_law_specific_matcher() {
         let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$";
         let regions = test_math_regions(source, DocumentLanguage::Latex);

@@ -1,76 +1,342 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "domain": "probability-probe",
   "cases": [
     {
       "id": "event-intersection-basic",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event. Let $B$ be an event. $A \\cap B$"}],
-      "cursor":{"fileId":"main","needle":"A \\cap"},
-      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"A","right":"B"},
-      "variationTags":["basic","spaced","two-symbol","inline"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an event. Let $B$ be an event. $A \\cap B$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "A \\cap",
+        "edge": "before"
+      },
+      "expectation": "established",
+      "lawId": "event-intersection",
+      "expectedRoles": {
+        "left": "A",
+        "right": "B"
+      },
+      "variationTags": [
+        "basic",
+        "spaced",
+        "two-symbol",
+        "inline"
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "event-intersection-reversed",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $B$ be an event. Let $A$ be an event. $B\\cap A$"}],
-      "cursor":{"fileId":"main","needle":"B\\cap"},
-      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"B","right":"A"},
-      "variationTags":["reordered","compact","plural-declaration","symbolic"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $B$ be an event. Let $A$ be an event. $B\\cap A$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "B\\cap",
+        "edge": "after"
+      },
+      "expectation": "established",
+      "lawId": "event-intersection",
+      "expectedRoles": {
+        "left": "B",
+        "right": "A"
+      },
+      "variationTags": [
+        "reordered",
+        "compact",
+        "plural-declaration",
+        "symbolic"
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "event-intersection-grouped",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $E$ be an event. Let $F$ be an event. ${E} \\cap {F}$"}],
-      "cursor":{"fileId":"main","needle":"E} \\cap"},
-      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"E","right":"F"},
-      "variationTags":["grouped","separate-declarations","uppercase","brace-layout"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $E$ be an event. Let $F$ be an event. ${E} \\cap {F}$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "E} \\cap",
+        "edge": "before"
+      },
+      "expectation": "established",
+      "lawId": "event-intersection",
+      "expectedRoles": {
+        "left": "E",
+        "right": "F"
+      },
+      "variationTags": [
+        "grouped",
+        "separate-declarations",
+        "uppercase",
+        "brace-layout"
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "event-intersection-styled",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $C$ be an event. Let $D$ be an event. $\\mathrm{C} \\cap \\mathrm{D}$"}],
-      "cursor":{"fileId":"main","needle":"C} \\cap"},
-      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"C","right":"D"},
-      "variationTags":["styled","roman","presentation-normalization","paired"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $C$ be an event. Let $D$ be an event. $\\mathrm{C} \\cap \\mathrm{D}$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "C} \\cap",
+        "edge": "after"
+      },
+      "expectation": "established",
+      "lawId": "event-intersection",
+      "expectedRoles": {
+        "left": "C",
+        "right": "D"
+      },
+      "variationTags": [
+        "styled",
+        "roman",
+        "presentation-normalization",
+        "paired"
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "event-intersection-parenthesized",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $U$ be an event. Let $V$ be an event. $\\left(U\\right) \\cap \\left(V\\right)$"}],
-      "cursor":{"fileId":"main","needle":"U\\right"},
-      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"U","right":"V"},
-      "variationTags":["parenthesized","left-right","denote","layout"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an event. Let $V$ be an event. $\\left(U\\right) \\cap \\left(V\\right)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "U\\right",
+        "edge": "before"
+      },
+      "expectation": "established",
+      "lawId": "event-intersection",
+      "expectedRoles": {
+        "left": "U",
+        "right": "V"
+      },
+      "variationTags": [
+        "parenthesized",
+        "left-right",
+        "denote",
+        "layout"
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "event-untyped-refusal",
-      "documents": [{"fileId":"main","path":"main.tex","content":"The symbols are otherwise undeclared. $A \\cap B$"}],
-      "cursor":{"fileId":"main","needle":"A \\cap"},
-      "expectation":"refused","lawId":"event-intersection","refusalCategory":"missing-event-types",
-      "variationTags":["negative","untyped","undeclared","safe-refusal"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nThe symbols are otherwise undeclared. $A \\cap B$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "A \\cap",
+        "edge": "after"
+      },
+      "expectation": "refused",
+      "lawId": "event-intersection",
+      "refusalCategory": "missing-event-types",
+      "variationTags": [
+        "negative",
+        "untyped",
+        "undeclared",
+        "safe-refusal"
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "missing-event-types",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "missing-event-types-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "event-function-refusal",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let f and g be functions. $f \\cap g$"}],
-      "cursor":{"fileId":"main","needle":"f \\cap"},
-      "expectation":"refused","lawId":"event-intersection","refusalCategory":"wrong-roles",
-      "variationTags":["negative","functions","wrong-roles","type-conflict","lowercase"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet f and g be functions. $f \\cap g$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "f \\cap",
+        "edge": "before"
+      },
+      "expectation": "refused",
+      "lawId": "event-intersection",
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "negative",
+        "functions",
+        "wrong-roles",
+        "type-conflict",
+        "lowercase"
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "wrong-roles-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "event-union-refusal",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event. Let $B$ be an event. $A \\cup B$"}],
-      "cursor":{"fileId":"main","needle":"A \\cup"},
-      "expectation":"refused","lawId":"event-intersection","refusalCategory":"wrong-operator",
-      "variationTags":["negative","union","operator-change","events"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $A$ be an event. Let $B$ be an event. $A \\cup B$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "A \\cup",
+        "edge": "after"
+      },
+      "expectation": "refused",
+      "lawId": "event-intersection",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "negative",
+        "union",
+        "operator-change",
+        "events"
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "wrong-operator-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "event-single-operand-refusal",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event. $\\!A\\!$"}],
-      "cursor":{"fileId":"main","needle":"\\!A"},
-      "expectation":"refused","lawId":"event-intersection","refusalCategory":"missing-operand",
-      "variationTags":["negative","arity","single-symbol","incomplete"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $A$ be an event. $\\!A\\!$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\!A",
+        "edge": "before"
+      },
+      "expectation": "refused",
+      "lawId": "event-intersection",
+      "refusalCategory": "missing-operand",
+      "variationTags": [
+        "negative",
+        "arity",
+        "single-symbol",
+        "incomplete"
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "missing-operand",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "missing-operand-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "event-prose-negation-refusal",
-      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event and let $B$ be an event, but this law does not apply: $A \\cap B$."}],
-      "cursor":{"fileId":"main","needle":"A \\cap"},
-      "expectation":"refused","lawId":"event-intersection","refusalCategory":"negated-context",
-      "variationTags":["negative","negation","context","explicit-refusal"]
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $A$ be an event and let $B$ be an event, but this law does not apply: $A \\cap B$."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "A \\cap",
+        "edge": "after"
+      },
+      "expectation": "refused",
+      "lawId": "event-intersection",
+      "refusalCategory": "negated-context",
+      "variationTags": [
+        "negative",
+        "negation",
+        "context",
+        "explicit-refusal"
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "negated-context",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "negated-context-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     }
   ]
 }

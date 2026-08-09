@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "domain": "circuits",
   "cases": [
     {
@@ -10,13 +10,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For the resistor branch, the constitutive relation is $V=IR$."
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nFor the resistor branch, the constitutive relation is $V=IR$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR"
+        "needle": "V=IR",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "V",
@@ -26,7 +27,15 @@
       "variationTags": [
         "conventional-notation",
         "inline"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-pos-solve-current",
@@ -36,13 +45,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The branch current follows from \\[I=\\frac{V}{R}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nThe branch current follows from \\[I=\\frac{V}{R}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I=\\frac{V}{R}"
+        "needle": "I=\\frac{V}{R}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "I",
@@ -52,7 +62,15 @@
       "variationTags": [
         "reordered-equality",
         "display"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "ohm-pos-solve-resistance",
@@ -62,13 +80,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For a measured operating point, use $R=\\frac{V}{I}$."
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nFor a measured operating point, use $R=\\frac{V}{I}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "R=\\frac{V}{I}"
+        "needle": "R=\\frac{V}{I}",
+        "edge": "before"
       },
       "expectedRoles": {
         "resistance": "R",
@@ -78,7 +97,15 @@
       "variationTags": [
         "reordered-equality",
         "measurement"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "ohm-pos-source-subscripts",
@@ -88,13 +115,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The source resistor obeys \\[V_s=I_sR_s\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe source resistor obeys \\[V_s=I_sR_s\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_s=I_sR_s"
+        "needle": "V_s=I_sR_s",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V_s",
@@ -104,7 +132,15 @@
       "variationTags": [
         "subscripts",
         "source-branch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "ohm-pos-terminal-voltage",
@@ -114,13 +150,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Across terminals \\(a\\) and \\(b\\), the passive-sign relation is $V_{ab}=R_b I_{ab}$."
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nAcross terminals \\(a\\) and \\(b\\), the passive-sign relation is $V_{ab}=R_b I_{ab}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_{ab}=R_b I_{ab}"
+        "needle": "V_{ab}=R_b I_{ab}",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "V_{ab}",
@@ -130,7 +167,15 @@
       "variationTags": [
         "subscripts",
         "passive-sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "ohm-pos-time-domain",
@@ -140,13 +185,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For an ideal time-invariant resistor, \\[v(t)=R\\,i(t)\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor an ideal time-invariant resistor, \\[v(t)=R\\,i(t)\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "v(t)=R\\,i(t)"
+        "needle": "v(t)=R\\,i(t)",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "v(t)",
@@ -156,7 +202,15 @@
       "variationTags": [
         "lowercase",
         "time-domain"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "ohm-pos-time-domain-current",
@@ -166,13 +220,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Solving the same device law for current gives $i(t)=v(t)/R$."
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nSolving the same device law for current gives $i(t)=v(t)/R$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i(t)=v(t)/R"
+        "needle": "i(t)=v(t)/R",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i(t)",
@@ -182,7 +237,15 @@
       "variationTags": [
         "lowercase",
         "reordered-equality"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "ohm-pos-element-labels",
@@ -192,13 +255,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The labeled element satisfies \\[V_R=R\\,I_R\\]."
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe labeled element satisfies \\[V_R=R\\,I_R\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_R=R\\,I_R"
+        "needle": "V_R=R\\,I_R",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V_R",
@@ -208,7 +272,15 @@
       "variationTags": [
         "subscripts",
         "element-label"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "ohm-pos-delta-voltage",
@@ -218,13 +290,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Let \\(\\Delta V\\) be the signed drop. Then $\\Delta V=I_\\ell R_\\ell$."
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet \\(\\Delta V\\) be the signed drop. Then $\\Delta V=I_\\ell R_\\ell$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\Delta V=I_\\ell R_\\ell"
+        "needle": "\\Delta V=I_\\ell R_\\ell",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "\\Delta V",
@@ -234,7 +307,15 @@
       "variationTags": [
         "declaration-before",
         "subscripts"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-pos-emf-symbol",
@@ -244,13 +325,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Here \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; $E=J\\rho$."
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nHere \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; $E=J\\rho$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "E=J\\rho"
+        "needle": "E=J\\rho",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "E",
@@ -260,7 +342,15 @@
       "variationTags": [
         "multi-symbol-declaration",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "ohm-pos-european-voltage",
@@ -270,13 +360,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Using \\(U\\) for voltage, the resistor equation is \\[U=R I\\]."
+          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nUsing \\(U\\) for voltage, the resistor equation is \\[U=R I\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "U=R I"
+        "needle": "U=R I",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "U",
@@ -286,7 +377,15 @@
       "variationTags": [
         "alternative-symbols",
         "declaration-before"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "ohm-pos-product-first",
@@ -296,13 +395,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The lab sheet presents the relation with the product first: \\[I R=V\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nThe lab sheet presents the relation with the product first: \\[I R=V\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I R=V"
+        "needle": "I R=V",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "I",
@@ -312,7 +412,15 @@
       "variationTags": [
         "reordered-equality",
         "spacing"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "ohm-pos-grouped-product",
@@ -322,13 +430,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For clarity, the report groups the measured factors as $V=(I)(R)$."
+          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nFor clarity, the report groups the measured factors as $V=(I)(R)$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=(I)(R)"
+        "needle": "V=(I)(R)",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "V",
@@ -338,7 +447,15 @@
       "variationTags": [
         "grouping",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "ohm-pos-parenthesized-law",
@@ -348,13 +465,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The asserted device law is \\[(V)=(R\\,I)\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nThe asserted device law is \\[(V)=(R\\,I)\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "(V)=(R\\,I)"
+        "needle": "(V)=(R\\,I)",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V",
@@ -364,7 +482,15 @@
       "variationTags": [
         "grouping",
         "display"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "ohm-pos-declared-before",
@@ -374,13 +500,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Let \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses $V_d=I_dR_d$."
+          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses $V_d=I_dR_d$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_d=I_dR_d"
+        "needle": "V_d=I_dR_d",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "V_d",
@@ -390,7 +517,15 @@
       "variationTags": [
         "declaration-before",
         "multi-symbol-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "ohm-pos-declared-after",
@@ -400,13 +535,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The branch model is \\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
+          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe branch model is \\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "e_b=j_b r_b"
+        "needle": "e_b=j_b r_b",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "e_b",
@@ -416,7 +552,15 @@
       "variationTags": [
         "declaration-after",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "ohm-pos-sentence-interleaved",
@@ -426,13 +570,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With current \\(i_L\\) directed into the marked terminal, $v_L=R_L i_L$ gives the load voltage."
+          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nWith current \\(i_L\\) directed into the marked terminal, $v_L=R_L i_L$ gives the load voltage."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "v_L=R_L i_L"
+        "needle": "v_L=R_L i_L",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "v_L",
@@ -442,7 +587,15 @@
       "variationTags": [
         "english-context",
         "passive-sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-pos-units-in-prose",
@@ -452,13 +605,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Voltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is \\[V_m=I_mR_m\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nVoltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is \\[V_m=I_mR_m\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_m=I_mR_m"
+        "needle": "V_m=I_mR_m",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V_m",
@@ -468,7 +622,15 @@
       "variationTags": [
         "unit-context",
         "multi-symbol-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "ohm-pos-macro-single",
@@ -478,13 +640,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Using the project voltage alias, the component equation is $\\Vdrop=I R$."
+          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nUsing the project voltage alias, the component equation is $\\Vdrop=I R$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\Vdrop=I R"
+        "needle": "\\Vdrop=I R",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "\\Vdrop",
@@ -500,7 +663,15 @@
           "name": "\\Vdrop",
           "definition": "V_d"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "macro-context",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "ohm-pos-macro-all-roles",
@@ -510,13 +681,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The schematic notation states \\[\\Volt=\\Ampere\\,\\Ohmic\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nThe schematic notation states \\[\\Volt=\\Ampere\\,\\Ohmic\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\Volt=\\Ampere\\,\\Ohmic"
+        "needle": "\\Volt=\\Ampere\\,\\Ohmic",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "\\Volt",
@@ -540,7 +712,15 @@
           "name": "\\Ohmic",
           "definition": "R"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "macro-context",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "ohm-pos-reference-direction",
@@ -550,13 +730,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For the marked positive voltage terminal and entering current arrow, \\[v_+=r_p i_+\\]."
+          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nFor the marked positive voltage terminal and entering current arrow, \\[v_+=r_p i_+\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "v_+=r_p i_+"
+        "needle": "v_+=r_p i_+",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "v_+",
@@ -566,7 +747,15 @@
       "variationTags": [
         "sign-convention",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "ohm-pos-load-subscript",
@@ -576,13 +765,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The load line uses $V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
+          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe load line uses $V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}"
+        "needle": "V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V_{\\mathrm{load}}",
@@ -592,7 +782,15 @@
       "variationTags": [
         "descriptive-subscripts",
         "inline"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "ohm-pos-sensor-branch",
@@ -602,13 +800,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For sensor branch \\(3\\), \\[v_3=i_3 r_3\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nFor sensor branch \\(3\\), \\[v_3=i_3 r_3\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "v_3=i_3 r_3"
+        "needle": "v_3=i_3 r_3",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "v_3",
@@ -618,7 +817,15 @@
       "variationTags": [
         "numeric-subscripts",
         "lowercase"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "ohm-pos-resistance-left",
@@ -628,13 +835,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The inferred element value is $\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
+          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe inferred element value is $\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\mathcal{R}_x=V_x/I_x"
+        "needle": "\\mathcal{R}_x=V_x/I_x",
+        "edge": "after"
       },
       "expectedRoles": {
         "resistance": "\\mathcal{R}_x",
@@ -644,7 +852,15 @@
       "variationTags": [
         "calligraphic-symbol",
         "reordered-equality"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "ohm-pos-aligned-presentation",
@@ -654,13 +870,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The selected row of the derivation is \\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
+          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nThe selected row of the derivation is \\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_o&=I_oR_o"
+        "needle": "V_o&=I_oR_o",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "V_o",
@@ -670,7 +887,15 @@
       "variationTags": [
         "aligned",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-pos-boxed-presentation",
@@ -680,13 +905,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The final component model is highlighted as \\[\\boxed{V_c=R_c I_c}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nThe final component model is highlighted as \\[\\boxed{V_c=R_c I_c}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_c=R_c I_c"
+        "needle": "V_c=R_c I_c",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V_c",
@@ -696,7 +922,15 @@
       "variationTags": [
         "boxed",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "ohm-pos-ratio-grouping",
@@ -706,13 +940,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "After isolating current, the worksheet obtains \\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
+          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nAfter isolating current, the worksheet obtains \\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_x=\\left(\\frac{v_x}{r_x}\\right)"
+        "needle": "i_x=\\left(\\frac{v_x}{r_x}\\right)",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i_x",
@@ -722,7 +957,15 @@
       "variationTags": [
         "grouping",
         "reordered-equality"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "ohm-pos-multiline-declaration",
@@ -732,13 +975,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Voltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus \\[V_h=R_h I_h\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nVoltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus \\[V_h=R_h I_h\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_h=R_h I_h"
+        "needle": "V_h=R_h I_h",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "V_h",
@@ -748,7 +992,15 @@
       "variationTags": [
         "multiline-prose",
         "multi-symbol-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "ohm-pos-multifile-declaration",
@@ -758,7 +1010,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "\\input{symbols}\nThe resistor equation is \\[V_b=I_bR_b\\]."
+          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\n\\input{symbols}\nThe resistor equation is \\[V_b=I_bR_b\\]."
         },
         {
           "fileId": "symbols",
@@ -769,7 +1021,8 @@
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_b=I_bR_b"
+        "needle": "V_b=I_bR_b",
+        "edge": "before"
       },
       "expectedRoles": {
         "voltage": "V_b",
@@ -779,7 +1032,15 @@
       "variationTags": [
         "multi-file",
         "declaration-separate-file"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "multiple-documents",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "ohm-pos-multifile-macro",
@@ -789,7 +1050,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "\\input{notation}\nThe branch law is $\\BranchV=\\BranchI\\BranchR$."
+          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\n\\input{notation}\nThe branch law is $\\BranchV=\\BranchI\\BranchR$."
         },
         {
           "fileId": "notation",
@@ -800,7 +1061,8 @@
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\BranchV=\\BranchI\\BranchR"
+        "needle": "\\BranchV=\\BranchI\\BranchR",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "\\BranchV",
@@ -824,7 +1086,15 @@
           "name": "\\BranchR",
           "definition": "R_z"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "multiple-documents",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "ohm-neg-sum-instead-product",
@@ -834,19 +1104,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The proposed relation is $V=I+R$, which combines unlike roles additively."
+          "content": "As a deliberately unsupported instance, examine relation 1031. [separate sentences]\nAn indexed symbol is $q_{1231}$.\n\nThe proposed relation is $V=I+R$, which combines unlike roles additively."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=I+R"
+        "needle": "V=I+R",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "wrong-operator",
         "dimension-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "ohm-neg-squared-resistance",
@@ -856,19 +1135,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The nonlinear expression \\[V=IR^2\\] is not the ideal resistor law."
+          "content": "No domain interpretation is asserted for the following formula (1032). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1232}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe nonlinear expression \\[V=IR^2\\] is not the ideal resistor law."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR^2"
+        "needle": "V=IR^2",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "wrong-exponent",
         "nonlinear"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-number",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "ohm-neg-inverted-current",
@@ -878,19 +1166,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The draft claims $V=R/I$ for the branch."
+          "content": "Consider the following independently stated relation in example 1033. [let singular]\nA presentation-only symbol is $q_{1233}$.\n\nThe draft claims $V=R/I$ for the branch."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=R/I"
+        "needle": "V=R/I",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "wrong-quotient",
         "reordered-roles"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-neg-roles-swapped",
@@ -900,19 +1197,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Here \\(R\\) is declared to be current, \\(I\\) resistance, and \\(V\\) voltage, followed by \\[V=IR\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1034. [let paired]\nA presentation-only symbol follows: \\[q_{1234}\\]\n\nHere \\(R\\) is declared to be current, \\(I\\) resistance, and \\(V\\) voltage, followed by \\[V=IR\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR"
+        "needle": "V=IR",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "conflicting-declaration",
         "role-swap"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "wrong-roles-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "ohm-neg-negative-passive",
@@ -922,19 +1228,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Current enters the positive-voltage terminal, yet the sheet asserts $V=-IR$."
+          "content": "The next formula is presented without an assumed named law (1035). [let series]\n\\begin{equation}q_{1235}\\end{equation}\n\nCurrent enters the positive-voltage terminal, yet the sheet asserts $V=-IR$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=-IR"
+        "needle": "V=-IR",
+        "edge": "before"
       },
       "refusalCategory": "wrong-sign-convention",
       "variationTags": [
         "sign-convention",
         "wrong-sign"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-sign-convention",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "wrong-sign-convention-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "ohm-neg-conductance-form",
@@ -944,19 +1259,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With \\(G\\) declared as conductance, the valid but different relation is \\[I=GV\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1036). [respectively]\n\\[\\begin{aligned}q_{1236}\\end{aligned}\\]\n\nWith \\(G\\) declared as conductance, the valid but different relation is \\[I=GV\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I=GV"
+        "needle": "I=GV",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "conductance",
         "related-law"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "wrong-roles-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "ohm-neg-impedance-form",
@@ -966,19 +1290,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For an AC impedance \\(Z\\), the phasors satisfy $\\tilde V=\\tilde I Z$."
+          "content": "Suppose the notation is local to this calculation, case 1037. [where clause]\nA grouped symbol is $ {q_{1237}} $.\n\nFor an AC impedance \\(Z\\), the phasors satisfy $\\tilde V=\\tilde I Z$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\tilde V=\\tilde I Z"
+        "needle": "\\tilde V=\\tilde I Z",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "impedance",
         "phasor"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "ohm-neg-power-law",
@@ -988,19 +1321,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The power identity \\[P=VI\\] is present, but no resistance law is asserted."
+          "content": "The symbols below have no meaning beyond this standalone example (1038). [we write]\nA styled symbol is $\\mathbf{q}_{1238}$.\n\nThe power identity \\[P=VI\\] is present, but no resistance law is asserted."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "P=VI"
+        "needle": "P=VI",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "related-law",
         "power"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "wrong-roles-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "ohm-neg-capacitor-charge",
@@ -1010,19 +1352,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The capacitor relation $V=Q/C$ concerns charge and capacitance."
+          "content": "As a deliberately unsupported instance, examine relation 1039. [symbol list]\nAn indexed symbol is $q_{1239}$.\n\nThe capacitor relation $V=Q/C$ concerns charge and capacitance."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=Q/C"
+        "needle": "V=Q/C",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "related-law",
         "capacitor"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "ohm-neg-voltage-sum",
@@ -1032,19 +1383,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The loop equation \\[V_1=V_2+V_3\\] relates only voltages."
+          "content": "No domain interpretation is asserted for the following formula (1040). [role first]\n\\newcommand{\\baselineprobe}{q_{1240}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe loop equation \\[V_1=V_2+V_3\\] relates only voltages."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V_1=V_2+V_3"
+        "needle": "V_1=V_2+V_3",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "kirchhoff-voltage",
         "wrong-roles"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "wrong-roles-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "ohm-neg-nonlinear-device",
@@ -1054,19 +1414,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The device is explicitly nonlinear and follows $V=kI^2$."
+          "content": "Consider the following independently stated relation in example 1041. [suppose that]\nA presentation-only symbol is $q_{1241}$.\n\nThe device is explicitly nonlinear and follows $V=kI^2$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=kI^2"
+        "needle": "V=kI^2",
+        "edge": "before"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "nonlinear",
         "device-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-number",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-neg-differential-resistance",
@@ -1076,19 +1445,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Only the small-signal increments obey \\[dV=r_d\\,dI\\]; this does not establish a global static law."
+          "content": "For comparison, inspect the displayed expression numbered 1042. [given that]\nA presentation-only symbol follows: \\[q_{1242}\\]\n\nOnly the small-signal increments obey \\[dV=r_d\\,dI\\]; this does not establish a global static law."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "dV=r_d\\,dI"
+        "needle": "dV=r_d\\,dI",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "differential-law",
         "local-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "ohm-neg-approximate-fit",
@@ -1098,19 +1476,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The regression reports merely $V\\approx IR$ over the sampled range."
+          "content": "The next formula is presented without an assumed named law (1043). [define as]\n\\begin{equation}q_{1243}\\end{equation}\n\nThe regression reports merely $V\\approx IR$ over the sampled range."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V\\approx IR"
+        "needle": "V\\approx IR",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "approximation",
         "wrong-operator"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "ohm-neg-upper-bound",
@@ -1120,19 +1507,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "A safety constraint imposes \\[V\\leq IR\\] rather than an equality."
+          "content": "In this local discussion, only the explicit statement below is available (1044). [in this model]\n\\[\\begin{aligned}q_{1244}\\end{aligned}\\]\n\nA safety constraint imposes \\[V\\leq IR\\] rather than an equality."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V\\leq IR"
+        "needle": "V\\leq IR",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "inequality",
         "constraint"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "ohm-neg-wrong-unit-current",
@@ -1142,19 +1538,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The document declares \\(I\\) in volts and \\(V\\) in amperes, then writes $V=IR$."
+          "content": "Suppose the notation is local to this calculation, case 1045. [throughout section]\nA grouped symbol is $ {q_{1245}} $.\n\nThe document declares \\(I\\) in volts and \\(V\\) in amperes, then writes $V=IR$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR"
+        "needle": "V=IR",
+        "edge": "before"
       },
       "refusalCategory": "wrong-unit",
       "variationTags": [
         "unit-conflict",
         "role-conflict"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-unit",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "wrong-unit-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "ohm-neg-negated-assertion",
@@ -1164,19 +1569,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The manual explicitly says that $V=IR$ does not apply to this diode."
+          "content": "The symbols below have no meaning beyond this standalone example (1046). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1246}$.\n\nThe manual explicitly says that $V=IR$ does not apply to this diode."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR"
+        "needle": "V=IR",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "negation",
         "device-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "wrong-scope-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "ohm-neg-hypothetical-only",
@@ -1186,19 +1600,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "If the unknown element were an ideal resistor, one could test \\[V=IR\\], but its type is not known."
+          "content": "As a deliberately unsupported instance, examine relation 1047. [separate sentences]\nAn indexed symbol is $q_{1247}$.\n\nIf the unknown element were an ideal resistor, one could test \\[V=IR\\], but its type is not known."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR"
+        "needle": "V=IR",
+        "edge": "before"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "hypothetical",
         "uncertain-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "wrong-scope-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "ohm-neg-function-ambiguity",
@@ -1208,19 +1631,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In the control model, \\(I\\) names a function and the expression is $V=I(R)$, not a current-times-resistance product."
+          "content": "No domain interpretation is asserted for the following formula (1048). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1248}}A macro-expanded symbol is $\\baselineprobe$.\n\nIn the control model, \\(I\\) names a function and the expression is $V=I(R)$, not a current-times-resistance product."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=I(R)"
+        "needle": "V=I(R)",
+        "edge": "after"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "function-application",
         "symbol-ambiguity"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "ambiguity-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "ohm-neg-opaque-alias",
@@ -1230,19 +1662,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Without any definition of the alias, the report contains $\\mysteryOhm{V}{I}{R}$."
+          "content": "Consider the following independently stated relation in example 1049. [let singular]\nA presentation-only symbol is $q_{1249}$.\n\nWithout any definition of the alias, the report contains $\\mysteryOhm{V}{I}{R}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\mysteryOhm{V}{I}{R}"
+        "needle": "\\mysteryOhm{V}{I}{R}",
+        "edge": "before"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "opaque-macro",
         "missing-definition"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "ambiguity-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "ohm-neg-conflicting-models",
@@ -1252,19 +1693,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Two incompatible candidates are listed: $V=IR$ for model A and \\(V=-IR\\) for model B, with no selected model."
+          "content": "For comparison, inspect the displayed expression numbered 1050. [let paired]\nA presentation-only symbol follows: \\[q_{1250}\\]\n\nTwo incompatible candidates are listed: $V=IR$ for model A and \\(V=-IR\\) for model B, with no selected model."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "V=IR"
+        "needle": "V=IR",
+        "edge": "after"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "conflicting-formulas",
         "unresolved-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "ambiguity-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-pos-two-in-one-out",
@@ -1274,13 +1724,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "At node \\(n\\), the entering currents balance the leaving branch: $I_1+I_2=I_3$."
+          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nAt node \\(n\\), the entering currents balance the leaving branch: $I_1+I_2=I_3$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2=I_3"
+        "needle": "I_1+I_2=I_3",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "I_1",
@@ -1290,7 +1741,15 @@
       "variationTags": [
         "conventional-notation",
         "node-balance"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-pos-one-in-two-out",
@@ -1300,13 +1759,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The junction equation is \\[I_{\\mathrm{in}}=I_a+I_b\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nThe junction equation is \\[I_{\\mathrm{in}}=I_a+I_b\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_{\\mathrm{in}}=I_a+I_b"
+        "needle": "I_{\\mathrm{in}}=I_a+I_b",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent": "I_{\\mathrm{in}}",
@@ -1316,7 +1776,15 @@
       "variationTags": [
         "descriptive-subscripts",
         "reordered-equality"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "kcl-pos-signed-zero",
@@ -1326,13 +1794,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With entering currents positive, the node law is $I_a+I_b-I_c=0$."
+          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nWith entering currents positive, the node law is $I_a+I_b-I_c=0$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_a+I_b-I_c=0"
+        "needle": "I_a+I_b-I_c=0",
+        "edge": "before"
       },
       "expectedRoles": {
         "branchCurrent1": "I_a",
@@ -1342,7 +1811,15 @@
       "variationTags": [
         "signed-sum",
         "sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "kcl-pos-zero-left",
@@ -1352,13 +1829,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The same node balance is displayed as \\[0=I_p+I_q-I_r\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nThe same node balance is displayed as \\[0=I_p+I_q-I_r\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "0=I_p+I_q-I_r"
+        "needle": "0=I_p+I_q-I_r",
+        "edge": "after"
       },
       "expectedRoles": {
         "branchCurrent1": "I_p",
@@ -1368,7 +1846,15 @@
       "variationTags": [
         "reordered-equality",
         "signed-sum"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "established-number-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "kcl-pos-indexed-sum",
@@ -1378,13 +1864,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Using outward reference directions, KCL gives $\\sum_{k=1}^{m} I_k=0$."
+          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nUsing outward reference directions, KCL gives $\\sum_{k=1}^{m} I_k=0$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\sum_{k=1}^{m} I_k=0"
+        "needle": "\\sum_{k=1}^{m} I_k=0",
+        "edge": "before"
       },
       "expectedRoles": {
         "branchCurrent": "I_k"
@@ -1392,7 +1879,15 @@
       "variationTags": [
         "summation",
         "all-outward"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "kcl-pos-in-out-sums",
@@ -1402,13 +1897,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The aggregate statement is \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
+          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe aggregate statement is \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j"
+        "needle": "\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent": "i_j",
@@ -1417,7 +1913,15 @@
       "variationTags": [
         "summation",
         "partitioned-branches"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "kcl-pos-node-subscripts",
@@ -1427,13 +1931,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "At node \\(A\\), the labeled branches satisfy $I_{A1}+I_{A2}=I_{A3}$."
+          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nAt node \\(A\\), the labeled branches satisfy $I_{A1}+I_{A2}=I_{A3}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_{A1}+I_{A2}=I_{A3}"
+        "needle": "I_{A1}+I_{A2}=I_{A3}",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "I_{A1}",
@@ -1443,7 +1948,15 @@
       "variationTags": [
         "node-subscripts",
         "inline"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "kcl-pos-lowercase-time",
@@ -1453,13 +1966,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Instantaneously, \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
+          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nInstantaneously, \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_1(t)+i_2(t)=i_3(t)"
+        "needle": "i_1(t)+i_2(t)=i_3(t)",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent1": "i_1(t)",
@@ -1469,7 +1983,15 @@
       "variationTags": [
         "lowercase",
         "time-domain"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "established-symbol-number-symbol-symbol-number-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-pos-branch-names",
@@ -1479,13 +2001,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The source current splits according to $I_S=I_L+I_B$."
+          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nThe source current splits according to $I_S=I_L+I_B$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_S=I_L+I_B"
+        "needle": "I_S=I_L+I_B",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent": "I_S",
@@ -1495,7 +2018,15 @@
       "variationTags": [
         "branch-labels",
         "current-split"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-pos-product-free-reorder",
@@ -1505,13 +2036,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The report writes the outgoing side first: \\[I_o+I_p=I_s\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nThe report writes the outgoing side first: \\[I_o+I_p=I_s\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_o+I_p=I_s"
+        "needle": "I_o+I_p=I_s",
+        "edge": "after"
       },
       "expectedRoles": {
         "outgoingCurrent1": "I_o",
@@ -1521,7 +2053,15 @@
       "variationTags": [
         "reordered-equality",
         "current-split"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "kcl-pos-grouped-sides",
@@ -1531,13 +2071,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For presentation, the balance is $(I_1+I_2)=(I_3+I_4)$."
+          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nFor presentation, the balance is $(I_1+I_2)=(I_3+I_4)$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "(I_1+I_2)=(I_3+I_4)"
+        "needle": "(I_1+I_2)=(I_3+I_4)",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "I_1",
@@ -1548,7 +2089,15 @@
       "variationTags": [
         "grouping",
         "four-branch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "kcl-pos-boxed-node-law",
@@ -1558,13 +2107,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The selected node equation is \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nThe selected node equation is \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_a+i_b-i_c-i_d=0"
+        "needle": "i_a+i_b-i_c-i_d=0",
+        "edge": "after"
       },
       "expectedRoles": {
         "branchCurrent1": "i_a",
@@ -1575,7 +2125,15 @@
       "variationTags": [
         "boxed",
         "signed-sum"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "kcl-pos-declared-before",
@@ -1585,13 +2143,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Let \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then $j_1+j_2=j_3$."
+          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nLet \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then $j_1+j_2=j_3$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "j_1+j_2=j_3"
+        "needle": "j_1+j_2=j_3",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "j_1",
@@ -1601,7 +2160,15 @@
       "variationTags": [
         "declaration-before",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "kcl-pos-declared-after",
@@ -1611,13 +2178,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The junction obeys \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
+          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe junction obeys \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "a+b=c"
+        "needle": "a+b=c",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent1": "a",
@@ -1627,7 +2195,15 @@
       "variationTags": [
         "declaration-after",
         "multi-symbol-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "kcl-pos-all-leaving",
@@ -1637,13 +2213,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "All four branch arrows point away from the node, so $i_a+i_b+i_c+i_d=0$."
+          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nAll four branch arrows point away from the node, so $i_a+i_b+i_c+i_d=0$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_a+i_b+i_c+i_d=0"
+        "needle": "i_a+i_b+i_c+i_d=0",
+        "edge": "before"
       },
       "expectedRoles": {
         "branchCurrent1": "i_a",
@@ -1654,7 +2231,15 @@
       "variationTags": [
         "all-outward",
         "sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "kcl-pos-all-entering",
@@ -1664,13 +2249,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With every arrow defined toward the node, the signed currents satisfy \\[j_a+j_b+j_c=0\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nWith every arrow defined toward the node, the signed currents satisfy \\[j_a+j_b+j_c=0\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "j_a+j_b+j_c=0"
+        "needle": "j_a+j_b+j_c=0",
+        "edge": "after"
       },
       "expectedRoles": {
         "branchCurrent1": "j_a",
@@ -1680,7 +2266,15 @@
       "variationTags": [
         "all-inward",
         "sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-pos-explicit-negative",
@@ -1690,13 +2284,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The measured negative branch value is retained in $I_1+(-I_2)+I_3=0$."
+          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nThe measured negative branch value is retained in $I_1+(-I_2)+I_3=0$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+(-I_2)+I_3=0"
+        "needle": "I_1+(-I_2)+I_3=0",
+        "edge": "before"
       },
       "expectedRoles": {
         "branchCurrent1": "I_1",
@@ -1706,7 +2301,15 @@
       "variationTags": [
         "grouping",
         "signed-value"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-pos-four-way-split",
@@ -1716,13 +2319,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "At the distribution node, \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nAt the distribution node, \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_{\\rm feed}=I_1+I_2+I_3"
+        "needle": "I_{\\rm feed}=I_1+I_2+I_3",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent": "I_{\\rm feed}",
@@ -1733,7 +2337,15 @@
       "variationTags": [
         "four-branch",
         "descriptive-subscript"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-number-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "kcl-pos-small-signal",
@@ -1743,13 +2355,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For the transistor terminal currents, the node equation is $i_e=i_b+i_c$."
+          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nFor the transistor terminal currents, the node equation is $i_e=i_b+i_c$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_e=i_b+i_c"
+        "needle": "i_e=i_b+i_c",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent": "i_e",
@@ -1759,7 +2372,15 @@
       "variationTags": [
         "small-signal",
         "device-terminal"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "kcl-pos-phasor-balance",
@@ -1769,13 +2390,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "At the AC node the phasor currents obey \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nAt the AC node the phasor currents obey \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\tilde I_1+\\tilde I_2=\\tilde I_3"
+        "needle": "\\tilde I_1+\\tilde I_2=\\tilde I_3",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent1": "\\tilde I_1",
@@ -1785,7 +2407,15 @@
       "variationTags": [
         "phasor",
         "node-balance"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "kcl-pos-aligned",
@@ -1795,13 +2425,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The derivation isolates the node row as \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe derivation isolates the node row as \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_x+I_y-I_z&=0"
+        "needle": "I_x+I_y-I_z&=0",
+        "edge": "before"
       },
       "expectedRoles": {
         "branchCurrent1": "I_x",
@@ -1811,7 +2442,15 @@
       "variationTags": [
         "aligned",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "kcl-pos-underbraced-groups",
@@ -1821,13 +2460,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The flow groups are shown as $\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}$."
+          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe flow groups are shown as $\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}"
+        "needle": "\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent1": "I_a",
@@ -1838,7 +2478,15 @@
       "variationTags": [
         "underbrace",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "kcl-pos-multi-symbol-prose",
@@ -1848,13 +2496,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Currents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives \\[p+q=r+s\\]."
+          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nCurrents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives \\[p+q=r+s\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "p+q=r+s"
+        "needle": "p+q=r+s",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "p",
@@ -1865,7 +2514,15 @@
       "variationTags": [
         "multi-symbol-declaration",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "kcl-pos-unit-context",
@@ -1875,13 +2532,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Every branch quantity is measured in amperes, and the junction balance is $J_0-J_1-J_2=0$."
+          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nEvery branch quantity is measured in amperes, and the junction balance is $J_0-J_1-J_2=0$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "J_0-J_1-J_2=0"
+        "needle": "J_0-J_1-J_2=0",
+        "edge": "after"
       },
       "expectedRoles": {
         "branchCurrent1": "J_0",
@@ -1891,7 +2549,15 @@
       "variationTags": [
         "unit-context",
         "signed-sum"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-pos-node-label-after",
@@ -1901,13 +2567,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The equation \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
+          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe equation \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "k_1+k_2=k_3"
+        "needle": "k_1+k_2=k_3",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "k_1",
@@ -1917,7 +2584,15 @@
       "variationTags": [
         "declaration-after",
         "node-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-pos-comma-subscripts",
@@ -1927,13 +2602,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The two feeders satisfy $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
+          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nThe two feeders satisfy $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}"
+        "needle": "I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent1": "I_{\\mathrm{in},1}",
@@ -1943,7 +2619,15 @@
       "variationTags": [
         "descriptive-subscripts",
         "multiple-feeders"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "kcl-pos-reference-node",
@@ -1953,13 +2637,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Relative to reference node \\(n_0\\), \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
+          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nRelative to reference node \\(n_0\\), \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_{n0,1}-i_{n0,2}+i_{n0,3}=0"
+        "needle": "i_{n0,1}-i_{n0,2}+i_{n0,3}=0",
+        "edge": "before"
       },
       "expectedRoles": {
         "branchCurrent1": "i_{n0,1}",
@@ -1969,7 +2654,15 @@
       "variationTags": [
         "node-scope",
         "signed-sum"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-symbol-number-number-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "kcl-pos-macro-branches",
@@ -1979,13 +2672,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The aliased branch currents satisfy $\\InOne+\\InTwo=\\OutOne$."
+          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nThe aliased branch currents satisfy $\\InOne+\\InTwo=\\OutOne$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\InOne+\\InTwo=\\OutOne"
+        "needle": "\\InOne+\\InTwo=\\OutOne",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent1": "\\InOne",
@@ -2009,7 +2703,15 @@
           "name": "\\OutOne",
           "definition": "I_3"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "macro-context",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "kcl-pos-multifile-declaration",
@@ -2019,7 +2721,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "\\input{branches}\nAt node \\(q\\), \\[I_u+I_v=I_w\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\n\\input{branches}\nAt node \\(q\\), \\[I_u+I_v=I_w\\]."
         },
         {
           "fileId": "branches",
@@ -2030,7 +2732,8 @@
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_u+I_v=I_w"
+        "needle": "I_u+I_v=I_w",
+        "edge": "before"
       },
       "expectedRoles": {
         "incomingCurrent1": "I_u",
@@ -2040,7 +2743,15 @@
       "variationTags": [
         "multi-file",
         "declaration-separate-file"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "multiple-documents",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "kcl-pos-multifile-macro",
@@ -2050,7 +2761,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "\\input{node-macros}\nThe node law is $\\Feed=\\LoadA+\\LoadB$."
+          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{node-macros}\nThe node law is $\\Feed=\\LoadA+\\LoadB$."
         },
         {
           "fileId": "node-macros",
@@ -2061,7 +2772,8 @@
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\Feed=\\LoadA+\\LoadB"
+        "needle": "\\Feed=\\LoadA+\\LoadB",
+        "edge": "after"
       },
       "expectedRoles": {
         "incomingCurrent": "\\Feed",
@@ -2085,7 +2797,15 @@
           "name": "\\LoadB",
           "definition": "I_b"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "multiple-documents",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "kcl-neg-voltage-loop",
@@ -2095,19 +2815,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The loop equation $\\sum_{k=1}^{3}V_k=0$ sums voltages, not node currents."
+          "content": "Consider the following independently stated relation in example 1081. [let singular]\nA presentation-only symbol is $q_{1281}$.\n\nThe loop equation $\\sum_{k=1}^{3}V_k=0$ sums voltages, not node currents."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\sum_{k=1}^{3}V_k=0"
+        "needle": "\\sum_{k=1}^{3}V_k=0",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "kirchhoff-voltage",
         "role-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-number-number-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "kcl-neg-power-balance",
@@ -2117,19 +2846,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The expression \\[P_1+P_2-P_3=0\\] is a power balance."
+          "content": "For comparison, inspect the displayed expression numbered 1082. [let paired]\nA presentation-only symbol follows: \\[q_{1282}\\]\n\nThe expression \\[P_1+P_2-P_3=0\\] is a power balance."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "P_1+P_2-P_3=0"
+        "needle": "P_1+P_2-P_3=0",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "power",
         "role-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "wrong-roles-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-neg-charge-balance",
@@ -2139,19 +2877,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The stored charges satisfy $Q_1+Q_2=Q_3$, without a current statement."
+          "content": "The next formula is presented without an assumed named law (1083). [let series]\n\\begin{equation}q_{1283}\\end{equation}\n\nThe stored charges satisfy $Q_1+Q_2=Q_3$, without a current statement."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "Q_1+Q_2=Q_3"
+        "needle": "Q_1+Q_2=Q_3",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "charge",
         "role-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "wrong-roles-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-neg-nonzero-residual",
@@ -2161,19 +2908,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The measured node has an unexplained residual: \\[I_1+I_2-I_3=\\epsilon\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1084). [respectively]\n\\[\\begin{aligned}q_{1284}\\end{aligned}\\]\n\nThe measured node has an unexplained residual: \\[I_1+I_2-I_3=\\epsilon\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2-I_3=\\epsilon"
+        "needle": "I_1+I_2-I_3=\\epsilon",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "nonzero-residual",
         "measurement-error"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "wrong-operator-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "kcl-neg-inequality",
@@ -2183,19 +2939,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "A current limit imposes $I_1+I_2\\leq I_{\\max}$."
+          "content": "Suppose the notation is local to this calculation, case 1085. [where clause]\nA grouped symbol is $ {q_{1285}} $.\n\nA current limit imposes $I_1+I_2\\leq I_{\\max}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2\\leq I_{\\max}"
+        "needle": "I_1+I_2\\leq I_{\\max}",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "inequality",
         "constraint"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "wrong-operator-symbol-number-symbol-number-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "kcl-neg-current-product",
@@ -2205,19 +2970,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The expression \\[I_1I_2=I_3\\] multiplies branch currents."
+          "content": "The symbols below have no meaning beyond this standalone example (1086). [we write]\nA styled symbol is $\\mathbf{q}_{1286}$.\n\nThe expression \\[I_1I_2=I_3\\] multiplies branch currents."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1I_2=I_3"
+        "needle": "I_1I_2=I_3",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "product",
         "dimension-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "wrong-operator-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "kcl-neg-current-ratio",
@@ -2227,19 +3001,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The gain relation $I_o/I_i=\\beta$ is not a node conservation equation."
+          "content": "As a deliberately unsupported instance, examine relation 1087. [symbol list]\nAn indexed symbol is $q_{1287}$.\n\nThe gain relation $I_o/I_i=\\beta$ is not a node conservation equation."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_o/I_i=\\beta"
+        "needle": "I_o/I_i=\\beta",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "ratio",
         "device-gain"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "kcl-neg-capacitor-current",
@@ -2249,19 +3032,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The identity \\[i=dq/dt\\] defines current from charge flow but does not balance a node."
+          "content": "No domain interpretation is asserted for the following formula (1088). [role first]\n\\newcommand{\\baselineprobe}{q_{1288}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe identity \\[i=dq/dt\\] defines current from charge flow but does not balance a node."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=dq/dt"
+        "needle": "i=dq/dt",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "related-law",
         "no-node-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "kcl-neg-two-branch-ambiguity",
@@ -2271,19 +3063,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The isolated equality $I_1=I_2$ gives no node, directions, or conservation scope."
+          "content": "Consider the following independently stated relation in example 1089. [suppose that]\nA presentation-only symbol is $q_{1289}$.\n\nThe isolated equality $I_1=I_2$ gives no node, directions, or conservation scope."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1=I_2"
+        "needle": "I_1=I_2",
+        "edge": "before"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "missing-node-scope",
         "missing-directions"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "ambiguity-symbol-number-symbol-number",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "kcl-neg-negated-node-law",
@@ -2293,19 +3094,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Because charge accumulates in the modeled region, the text says $I_1+I_2=I_3$ must not be imposed."
+          "content": "For comparison, inspect the displayed expression numbered 1090. [given that]\nA presentation-only symbol follows: \\[q_{1290}\\]\n\nBecause charge accumulates in the modeled region, the text says $I_1+I_2=I_3$ must not be imposed."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2=I_3"
+        "needle": "I_1+I_2=I_3",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "negation",
         "accumulating-region"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "wrong-scope-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-neg-hypothetical-node",
@@ -2315,19 +3125,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "If the connector were ideal, one might write \\[I_a+I_b=I_c\\], but leakage is unspecified."
+          "content": "The next formula is presented without an assumed named law (1091). [define as]\n\\begin{equation}q_{1291}\\end{equation}\n\nIf the connector were ideal, one might write \\[I_a+I_b=I_c\\], but leakage is unspecified."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_a+I_b=I_c"
+        "needle": "I_a+I_b=I_c",
+        "edge": "before"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "hypothetical",
         "uncertain-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-neg-wrong-sign-declared",
@@ -2337,19 +3156,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "All three arrows are declared entering the node, yet the report uses $I_1+I_2-I_3=0$ without assigning \\(I_3\\) a negative value."
+          "content": "In this local discussion, only the explicit statement below is available (1092). [in this model]\n\\[\\begin{aligned}q_{1292}\\end{aligned}\\]\n\nAll three arrows are declared entering the node, yet the report uses $I_1+I_2-I_3=0$ without assigning \\(I_3\\) a negative value."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2-I_3=0"
+        "needle": "I_1+I_2-I_3=0",
+        "edge": "after"
       },
       "refusalCategory": "wrong-sign-convention",
       "variationTags": [
         "sign-conflict",
         "direction-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-sign-convention",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "wrong-sign-convention-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "kcl-neg-mixed-voltage-current",
@@ -2359,19 +3187,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Here \\(I_a\\) and \\(I_b\\) are currents but \\(V_c\\) is a voltage; \\[I_a+I_b=V_c\\] is dimensionally invalid."
+          "content": "Suppose the notation is local to this calculation, case 1093. [throughout section]\nA grouped symbol is $ {q_{1293}} $.\n\nHere \\(I_a\\) and \\(I_b\\) are currents but \\(V_c\\) is a voltage; \\[I_a+I_b=V_c\\] is dimensionally invalid."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_a+I_b=V_c"
+        "needle": "I_a+I_b=V_c",
+        "edge": "before"
       },
       "refusalCategory": "wrong-unit",
       "variationTags": [
         "mixed-roles",
         "dimension-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-unit",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "wrong-unit-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "kcl-neg-opaque-node-macro",
@@ -2381,19 +3218,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No definition is provided for the assertion $\\mysteryNode{I_1}{I_2}{I_3}$."
+          "content": "The symbols below have no meaning beyond this standalone example (1094). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1294}$.\n\nNo definition is provided for the assertion $\\mysteryNode{I_1}{I_2}{I_3}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\mysteryNode{I_1}{I_2}{I_3}"
+        "needle": "\\mysteryNode{I_1}{I_2}{I_3}",
+        "edge": "after"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "opaque-macro",
         "missing-definition"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "ambiguity-symbol-symbol-number-symbol-number-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "kcl-neg-two-node-collision",
@@ -2403,19 +3249,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The unscoped line $I_1+I_2=I_3+I_4$ combines labels from two different nodes according to the schematic."
+          "content": "As a deliberately unsupported instance, examine relation 1095. [separate sentences]\nAn indexed symbol is $q_{1295}$.\n\nThe unscoped line $I_1+I_2=I_3+I_4$ combines labels from two different nodes according to the schematic."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2=I_3+I_4"
+        "needle": "I_1+I_2=I_3+I_4",
+        "edge": "before"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "multiple-nodes",
         "scope-conflict"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "wrong-scope-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "kcl-neg-integrated-current",
@@ -2425,19 +3280,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The accumulated charge relation is \\[\\int_0^T I_1\\,dt=\\int_0^T I_2\\,dt\\], not an instantaneous node balance."
+          "content": "No domain interpretation is asserted for the following formula (1096). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1296}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe accumulated charge relation is \\[\\int_0^T I_1\\,dt=\\int_0^T I_2\\,dt\\], not an instantaneous node balance."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\int_0^T I_1\\,dt=\\int_0^T I_2\\,dt"
+        "needle": "\\int_0^T I_1\\,dt=\\int_0^T I_2\\,dt",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "integral",
         "time-aggregate"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "wrong-scope-symbol-number-symbol-symbol-number-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "kcl-neg-probability-normalization",
@@ -2447,19 +3311,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols are probabilities, and $p_1+p_2+p_3=1$ normalizes outcomes."
+          "content": "Consider the following independently stated relation in example 1097. [let singular]\nA presentation-only symbol is $q_{1297}$.\n\nThe symbols are probabilities, and $p_1+p_2+p_3=1$ normalizes outcomes."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "p_1+p_2+p_3=1"
+        "needle": "p_1+p_2+p_3=1",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "probability",
         "role-ambiguity"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "wrong-roles-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "kcl-neg-set-membership",
@@ -2469,19 +3342,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The constraint \\[(I_1,I_2)\\in\\mathcal{F}\\] only states feasible current pairs."
+          "content": "For comparison, inspect the displayed expression numbered 1098. [let paired]\nA presentation-only symbol follows: \\[q_{1298}\\]\n\nThe constraint \\[(I_1,I_2)\\in\\mathcal{F}\\] only states feasible current pairs."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "(I_1,I_2)\\in\\mathcal{F}"
+        "needle": "(I_1,I_2)\\in\\mathcal{F}",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "set-membership",
         "constraint"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "wrong-operator-symbol-number-symbol-number-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "kcl-neg-unit-conflict",
@@ -2491,19 +3373,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The quantities are declared as \\(I_1=2\\,\\mathrm{A}\\), \\(I_2=3\\,\\mathrm{A}\\), and \\(I_3=5\\,\\mathrm{V}\\), followed by $I_1+I_2=I_3$."
+          "content": "The next formula is presented without an assumed named law (1099). [let series]\n\\begin{equation}q_{1299}\\end{equation}\n\nThe quantities are declared as \\(I_1=2\\,\\mathrm{A}\\), \\(I_2=3\\,\\mathrm{A}\\), and \\(I_3=5\\,\\mathrm{V}\\), followed by $I_1+I_2=I_3$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_1+I_2=I_3"
+        "needle": "I_1+I_2=I_3",
+        "edge": "before"
       },
       "refusalCategory": "wrong-unit",
       "variationTags": [
         "unit-conflict",
         "dimension-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-unit",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "wrong-unit-symbol-number-symbol-number-symbol-number",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "kcl-neg-conflicting-directions",
@@ -2513,19 +3404,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Two captions assign opposite directions to \\(I_b\\), so the candidate equation \\[I_a+I_b=I_c\\] has no unambiguous sign convention."
+          "content": "In this local discussion, only the explicit statement below is available (1100). [respectively]\n\\[\\begin{aligned}q_{1300}\\end{aligned}\\]\n\nTwo captions assign opposite directions to \\(I_b\\), so the candidate equation \\[I_a+I_b=I_c\\] has no unambiguous sign convention."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_a+I_b=I_c"
+        "needle": "I_a+I_b=I_c",
+        "edge": "after"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "conflicting-declarations",
         "sign-ambiguity"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "ambiguity-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-pos-basic-derivative",
@@ -2535,13 +3435,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For the ideal capacitor, the passive-sign relation is $i=C\\frac{dv}{dt}$."
+          "content": "Suppose the notation is local to this calculation, case 1101. [where clause]\nA grouped symbol is $ {q_{1301}} $.\n\nFor the ideal capacitor, the passive-sign relation is $i=C\\frac{dv}{dt}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\frac{dv}{dt}"
+        "needle": "i=C\\frac{dv}{dt}",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i",
@@ -2552,7 +3453,15 @@
       "variationTags": [
         "conventional-notation",
         "passive-sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-pos-element-subscripts",
@@ -2562,13 +3471,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The labeled component obeys \\[I_C=C\\frac{dV_C}{dt}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1102). [we write]\nA styled symbol is $\\mathbf{q}_{1302}$.\n\nThe labeled component obeys \\[I_C=C\\frac{dV_C}{dt}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_C=C\\frac{dV_C}{dt}"
+        "needle": "I_C=C\\frac{dV_C}{dt}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "I_C",
@@ -2579,7 +3489,15 @@
       "variationTags": [
         "subscripts",
         "display"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "cap-pos-solve-capacitance",
@@ -2589,13 +3507,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "From a transient measurement, compute $C=\\frac{i}{dv/dt}$."
+          "content": "As a deliberately unsupported instance, examine relation 1103. [symbol list]\nAn indexed symbol is $q_{1303}$.\n\nFrom a transient measurement, compute $C=\\frac{i}{dv/dt}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "C=\\frac{i}{dv/dt}"
+        "needle": "C=\\frac{i}{dv/dt}",
+        "edge": "before"
       },
       "expectedRoles": {
         "capacitance": "C",
@@ -2606,7 +3525,15 @@
       "variationTags": [
         "reordered-equality",
         "measurement"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "cap-pos-solve-slope",
@@ -2616,13 +3543,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The voltage slope is \\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
+          "content": "No domain interpretation is asserted for the following formula (1104). [role first]\n\\newcommand{\\baselineprobe}{q_{1304}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe voltage slope is \\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\frac{dv}{dt}=\\frac{i}{C}"
+        "needle": "\\frac{dv}{dt}=\\frac{i}{C}",
+        "edge": "after"
       },
       "expectedRoles": {
         "voltage": "v",
@@ -2633,7 +3561,15 @@
       "variationTags": [
         "reordered-equality",
         "derivative-left"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "cap-pos-time-functions",
@@ -2643,13 +3579,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With explicit time dependence, $i(t)=C\\,\\frac{d v(t)}{dt}$."
+          "content": "Consider the following independently stated relation in example 1105. [suppose that]\nA presentation-only symbol is $q_{1305}$.\n\nWith explicit time dependence, $i(t)=C\\,\\frac{d v(t)}{dt}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i(t)=C\\,\\frac{d v(t)}{dt}"
+        "needle": "i(t)=C\\,\\frac{d v(t)}{dt}",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i(t)",
@@ -2660,7 +3597,15 @@
       "variationTags": [
         "time-domain",
         "lowercase"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "cap-pos-dot-notation",
@@ -2670,13 +3615,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The same constitutive law in dot notation is \\[i(t)=C\\dot v(t)\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1106. [given that]\nA presentation-only symbol follows: \\[q_{1306}\\]\n\nThe same constitutive law in dot notation is \\[i(t)=C\\dot v(t)\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i(t)=C\\dot v(t)"
+        "needle": "i(t)=C\\dot v(t)",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i(t)",
@@ -2687,7 +3633,15 @@
       "variationTags": [
         "dot-derivative",
         "time-domain"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "cap-pos-phasor-free-dot",
@@ -2697,13 +3651,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For the transient waveform, $I_c=C_c\\dot V_c$."
+          "content": "The next formula is presented without an assumed named law (1107). [define as]\n\\begin{equation}q_{1307}\\end{equation}\n\nFor the transient waveform, $I_c=C_c\\dot V_c$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_c=C_c\\dot V_c"
+        "needle": "I_c=C_c\\dot V_c",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "I_c",
@@ -2714,7 +3669,15 @@
       "variationTags": [
         "dot-derivative",
         "subscripts"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "cap-pos-product-first",
@@ -2724,13 +3687,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The worksheet writes the derivative product first: \\[C\\,\\frac{dV}{dt}=I\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1108). [in this model]\n\\[\\begin{aligned}q_{1308}\\end{aligned}\\]\n\nThe worksheet writes the derivative product first: \\[C\\,\\frac{dV}{dt}=I\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "C\\,\\frac{dV}{dt}=I"
+        "needle": "C\\,\\frac{dV}{dt}=I",
+        "edge": "after"
       },
       "expectedRoles": {
         "capacitance": "C",
@@ -2741,7 +3705,15 @@
       "variationTags": [
         "reordered-equality",
         "spacing"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-pos-grouped",
@@ -2751,13 +3723,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The constitutive equation is presented as $(i)=\\left(C\\,dv/dt\\right)$."
+          "content": "Suppose the notation is local to this calculation, case 1109. [throughout section]\nA grouped symbol is $ {q_{1309}} $.\n\nThe constitutive equation is presented as $(i)=\\left(C\\,dv/dt\\right)$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "(i)=\\left(C\\,dv/dt\\right)"
+        "needle": "(i)=\\left(C\\,dv/dt\\right)",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i",
@@ -2768,7 +3741,15 @@
       "variationTags": [
         "grouping",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-pos-terminal-pair",
@@ -2778,13 +3759,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Across terminals \\(a,b\\), \\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1110). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1310}$.\n\nAcross terminals \\(a,b\\), \\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}"
+        "needle": "i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i_{ab}",
@@ -2795,7 +3777,15 @@
       "variationTags": [
         "terminal-subscripts",
         "passive-sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "cap-pos-declared-before",
@@ -2805,13 +3795,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Let \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then $j=K\\,du/dt$."
+          "content": "As a deliberately unsupported instance, examine relation 1111. [separate sentences]\nAn indexed symbol is $q_{1311}$.\n\nLet \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then $j=K\\,du/dt$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "j=K\\,du/dt"
+        "needle": "j=K\\,du/dt",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "j",
@@ -2822,7 +3813,15 @@
       "variationTags": [
         "declaration-before",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "cap-pos-declared-after",
@@ -2832,13 +3831,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The device follows \\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
+          "content": "No domain interpretation is asserted for the following formula (1112). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1312}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe device follows \\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "a=B\\dot e"
+        "needle": "a=B\\dot e",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "a",
@@ -2849,7 +3849,15 @@
       "variationTags": [
         "declaration-after",
         "multi-symbol-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "cap-pos-multi-symbol-prose",
@@ -2859,13 +3867,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Current \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; $j_x=K_x\\frac{du_x}{dt}$."
+          "content": "Consider the following independently stated relation in example 1113. [let singular]\nA presentation-only symbol is $q_{1313}$.\n\nCurrent \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; $j_x=K_x\\frac{du_x}{dt}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "j_x=K_x\\frac{du_x}{dt}"
+        "needle": "j_x=K_x\\frac{du_x}{dt}",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "j_x",
@@ -2876,7 +3885,15 @@
       "variationTags": [
         "multi-symbol-declaration",
         "sign-convention"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "cap-pos-macro-voltage",
@@ -2886,13 +3903,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Using the project voltage alias, the capacitor law is $i=C\\frac{d\\CapV}{dt}$."
+          "content": "For comparison, inspect the displayed expression numbered 1114. [let paired]\nA presentation-only symbol follows: \\[q_{1314}\\]\n\nUsing the project voltage alias, the capacitor law is $i=C\\frac{d\\CapV}{dt}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\frac{d\\CapV}{dt}"
+        "needle": "i=C\\frac{d\\CapV}{dt}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i",
@@ -2909,7 +3927,15 @@
           "name": "\\CapV",
           "definition": "v_c"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "macro-context",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "cap-pos-macro-all-roles",
@@ -2919,13 +3945,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The aliased transient equation is \\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
+          "content": "The next formula is presented without an assumed named law (1115). [let series]\n\\begin{equation}q_{1315}\\end{equation}\n\nThe aliased transient equation is \\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\CapI=\\CapC\\,\\dot{\\CapV}"
+        "needle": "\\CapI=\\CapC\\,\\dot{\\CapV}",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "\\CapI",
@@ -2950,7 +3977,15 @@
           "name": "\\CapV",
           "definition": "v_c"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "macro-context",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "cap-pos-aligned",
@@ -2960,13 +3995,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The derivation highlights \\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1116). [respectively]\n\\[\\begin{aligned}q_{1316}\\end{aligned}\\]\n\nThe derivation highlights \\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_o&=C_o\\frac{dv_o}{dt}"
+        "needle": "i_o&=C_o\\frac{dv_o}{dt}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i_o",
@@ -2977,7 +4013,15 @@
       "variationTags": [
         "aligned",
         "presentation"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-pos-boxed",
@@ -2987,13 +4031,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The final capacitor model is \\[\\boxed{I_x=C_x\\dot V_x}\\]."
+          "content": "Suppose the notation is local to this calculation, case 1117. [where clause]\nA grouped symbol is $ {q_{1317}} $.\n\nThe final capacitor model is \\[\\boxed{I_x=C_x\\dot V_x}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_x=C_x\\dot V_x"
+        "needle": "I_x=C_x\\dot V_x",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "I_x",
@@ -3004,7 +4049,15 @@
       "variationTags": [
         "boxed",
         "dot-derivative"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-pos-at-time-tau",
@@ -3014,13 +4067,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "At the sample instant, \\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1118). [we write]\nA styled symbol is $\\mathbf{q}_{1318}$.\n\nAt the sample instant, \\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}"
+        "needle": "i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i(\\tau)",
@@ -3031,7 +4085,15 @@
       "variationTags": [
         "evaluation-point",
         "grouping"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "cap-pos-european-voltage",
@@ -3041,13 +4103,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Using \\(u\\) for voltage, the element law is $i_c=C_c\\,du_c/dt$."
+          "content": "As a deliberately unsupported instance, examine relation 1119. [symbol list]\nAn indexed symbol is $q_{1319}$.\n\nUsing \\(u\\) for voltage, the element law is $i_c=C_c\\,du_c/dt$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_c=C_c\\,du_c/dt"
+        "needle": "i_c=C_c\\,du_c/dt",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i_c",
@@ -3058,7 +4121,15 @@
       "variationTags": [
         "alternative-symbols",
         "subscripts"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "cap-pos-current-j",
@@ -3068,13 +4139,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The current symbol \\(j(t)\\) is defined by \\[j(t)=C_s\\dot v_s(t)\\]."
+          "content": "No domain interpretation is asserted for the following formula (1120). [role first]\n\\newcommand{\\baselineprobe}{q_{1320}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current symbol \\(j(t)\\) is defined by \\[j(t)=C_s\\dot v_s(t)\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "j(t)=C_s\\dot v_s(t)"
+        "needle": "j(t)=C_s\\dot v_s(t)",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "j(t)",
@@ -3085,7 +4157,15 @@
       "variationTags": [
         "alternative-symbols",
         "dot-derivative"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "cap-pos-capacitance-k",
@@ -3095,13 +4175,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For capacitance \\(K_m\\), the law reads $i_m=K_m\\,v_m'$."
+          "content": "Consider the following independently stated relation in example 1121. [suppose that]\nA presentation-only symbol is $q_{1321}$.\n\nFor capacitance \\(K_m\\), the law reads $i_m=K_m\\,v_m'$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_m=K_m\\,v_m'"
+        "needle": "i_m=K_m\\,v_m'",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i_m",
@@ -3112,7 +4193,15 @@
       "variationTags": [
         "prime-derivative",
         "alternative-symbols"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "cap-pos-descriptive-subscripts",
@@ -3122,13 +4211,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The storage element satisfies \\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1122. [given that]\nA presentation-only symbol follows: \\[q_{1322}\\]\n\nThe storage element satisfies \\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}"
+        "needle": "I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "I_{\\mathrm{cap}}",
@@ -3139,7 +4229,15 @@
       "variationTags": [
         "descriptive-subscripts",
         "display"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "cap-pos-opposite-reference",
@@ -3149,13 +4247,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Current \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so \\[i_{\\rm out}=-C\\,dv/dt\\]."
+          "content": "The next formula is presented without an assumed named law (1123). [define as]\n\\begin{equation}q_{1323}\\end{equation}\n\nCurrent \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so \\[i_{\\rm out}=-C\\,dv/dt\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_{\\rm out}=-C\\,dv/dt"
+        "needle": "i_{\\rm out}=-C\\,dv/dt",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i_{\\rm out}",
@@ -3166,7 +4265,15 @@
       "variationTags": [
         "opposite-reference",
         "valid-negative-sign"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "cap-pos-differential-operator",
@@ -3176,13 +4283,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With \\(D_t\\) denoting time differentiation, the model is $i=C D_t v$."
+          "content": "In this local discussion, only the explicit statement below is available (1124). [in this model]\n\\[\\begin{aligned}q_{1324}\\end{aligned}\\]\n\nWith \\(D_t\\) denoting time differentiation, the model is $i=C D_t v$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C D_t v"
+        "needle": "i=C D_t v",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i",
@@ -3193,7 +4301,15 @@
       "variationTags": [
         "operator-notation",
         "declaration-before"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-pos-prime-voltage",
@@ -3203,13 +4319,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The prime denotes differentiation with respect to time in \\[i_q=C_q v_q'\\]."
+          "content": "Suppose the notation is local to this calculation, case 1125. [throughout section]\nA grouped symbol is $ {q_{1325}} $.\n\nThe prime denotes differentiation with respect to time in \\[i_q=C_q v_q'\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_q=C_q v_q'"
+        "needle": "i_q=C_q v_q'",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i_q",
@@ -3220,7 +4337,15 @@
       "variationTags": [
         "prime-derivative",
         "declaration-before"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-pos-units-context",
@@ -3230,13 +4355,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "With capacitance in farads and voltage slope in volts per second, $I_m=C_m\\,dV_m/dt$ yields amperes."
+          "content": "The symbols below have no meaning beyond this standalone example (1126). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1326}$.\n\nWith capacitance in farads and voltage slope in volts per second, $I_m=C_m\\,dV_m/dt$ yields amperes."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "I_m=C_m\\,dV_m/dt"
+        "needle": "I_m=C_m\\,dV_m/dt",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "I_m",
@@ -3247,7 +4373,15 @@
       "variationTags": [
         "unit-context",
         "dimensional-context"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "cap-pos-spaced-derivative",
@@ -3257,13 +4391,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The notation deliberately spaces the differential: \\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1127. [separate sentences]\nAn indexed symbol is $q_{1327}$.\n\nThe notation deliberately spaces the differential: \\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}"
+        "needle": "i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "i_z",
@@ -3274,7 +4409,15 @@
       "variationTags": [
         "spacing",
         "roman-differential"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "cap-pos-parenthesized-slope",
@@ -3284,13 +4427,14 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The current relation is $i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
+          "content": "No domain interpretation is asserted for the following formula (1128). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1328}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current relation is $i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i_n=C_n\\left(\\frac{dv_n}{dt}\\right)"
+        "needle": "i_n=C_n\\left(\\frac{dv_n}{dt}\\right)",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "i_n",
@@ -3301,7 +4445,15 @@
       "variationTags": [
         "grouping",
         "subscripts"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "cap-pos-multifile-declaration",
@@ -3311,7 +4463,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "\\input{cap-symbols}\nThe element obeys \\[j_f=K_f\\frac{du_f}{dt}\\]."
+          "content": "Consider the following independently stated relation in example 1129. [let singular]\nA presentation-only symbol is $q_{1329}$.\n\n\\input{cap-symbols}\nThe element obeys \\[j_f=K_f\\frac{du_f}{dt}\\]."
         },
         {
           "fileId": "symbols",
@@ -3322,7 +4474,8 @@
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "j_f=K_f\\frac{du_f}{dt}"
+        "needle": "j_f=K_f\\frac{du_f}{dt}",
+        "edge": "before"
       },
       "expectedRoles": {
         "current": "j_f",
@@ -3333,7 +4486,15 @@
       "variationTags": [
         "multi-file",
         "declaration-separate-file"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "multiple-documents",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "cap-pos-multifile-macro",
@@ -3343,7 +4504,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "\\input{cap-notation}\nThe transient law is $\\StoreI=\\StoreC\\dot{\\StoreV}$."
+          "content": "For comparison, inspect the displayed expression numbered 1130. [let paired]\nA presentation-only symbol follows: \\[q_{1330}\\]\n\n\\input{cap-notation}\nThe transient law is $\\StoreI=\\StoreC\\dot{\\StoreV}$."
         },
         {
           "fileId": "notation",
@@ -3354,7 +4515,8 @@
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\StoreI=\\StoreC\\dot{\\StoreV}"
+        "needle": "\\StoreI=\\StoreC\\dot{\\StoreV}",
+        "edge": "after"
       },
       "expectedRoles": {
         "current": "\\StoreI",
@@ -3379,7 +4541,15 @@
           "name": "\\StoreV",
           "definition": "v_s"
         }
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "multiple-documents",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "cap-neg-resistor-law",
@@ -3389,19 +4559,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The equation $i=V/R$ is a resistor current law, not a capacitor derivative law."
+          "content": "The next formula is presented without an assumed named law (1131). [let series]\n\\begin{equation}q_{1331}\\end{equation}\n\nThe equation $i=V/R$ is a resistor current law, not a capacitor derivative law."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=V/R"
+        "needle": "i=V/R",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "related-law",
         "resistor"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "cap-neg-inductor-law",
@@ -3411,19 +4590,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The display \\[v=L\\frac{di}{dt}\\] describes an inductor."
+          "content": "In this local discussion, only the explicit statement below is available (1132). [respectively]\n\\[\\begin{aligned}q_{1332}\\end{aligned}\\]\n\nThe display \\[v=L\\frac{di}{dt}\\] describes an inductor."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "v=L\\frac{di}{dt}"
+        "needle": "v=L\\frac{di}{dt}",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "related-law",
         "inductor"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-neg-differentiate-current",
@@ -3433,19 +4621,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The draft incorrectly writes $i=C\\frac{di}{dt}$, differentiating current instead of voltage."
+          "content": "Suppose the notation is local to this calculation, case 1133. [where clause]\nA grouped symbol is $ {q_{1333}} $.\n\nThe draft incorrectly writes $i=C\\frac{di}{dt}$, differentiating current instead of voltage."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\frac{di}{dt}"
+        "needle": "i=C\\frac{di}{dt}",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "wrong-derivative-variable",
         "role-conflict"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-neg-sum-operator",
@@ -3455,19 +4652,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The expression \\[i=C+\\frac{dv}{dt}\\] adds capacitance to a voltage slope."
+          "content": "The symbols below have no meaning beyond this standalone example (1134). [we write]\nA styled symbol is $\\mathbf{q}_{1334}$.\n\nThe expression \\[i=C+\\frac{dv}{dt}\\] adds capacitance to a voltage slope."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C+\\frac{dv}{dt}"
+        "needle": "i=C+\\frac{dv}{dt}",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "addition",
         "dimension-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "cap-neg-divide-by-capacitance",
@@ -3477,19 +4683,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The proposed model $i=\\frac{1}{C}\\frac{dv}{dt}$ uses reciprocal capacitance."
+          "content": "As a deliberately unsupported instance, examine relation 1135. [symbol list]\nAn indexed symbol is $q_{1335}$.\n\nThe proposed model $i=\\frac{1}{C}\\frac{dv}{dt}$ uses reciprocal capacitance."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=\\frac{1}{C}\\frac{dv}{dt}"
+        "needle": "i=\\frac{1}{C}\\frac{dv}{dt}",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "wrong-factor",
         "reciprocal"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-number-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "cap-neg-missing-derivative",
@@ -3499,19 +4714,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The static expression \\[i=Cv\\] omits time differentiation."
+          "content": "No domain interpretation is asserted for the following formula (1136). [role first]\n\\newcommand{\\baselineprobe}{q_{1336}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe static expression \\[i=Cv\\] omits time differentiation."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=Cv"
+        "needle": "i=Cv",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "missing-derivative",
         "dimension-mismatch"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "wrong-operator-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "cap-neg-squared-slope",
@@ -3521,19 +4745,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The nonlinear candidate is $i=C(dv/dt)^2$."
+          "content": "Consider the following independently stated relation in example 1137. [suppose that]\nA presentation-only symbol is $q_{1337}$.\n\nThe nonlinear candidate is $i=C(dv/dt)^2$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C(dv/dt)^2"
+        "needle": "i=C(dv/dt)^2",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "wrong-exponent",
         "nonlinear"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol-symbol-number",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "cap-neg-wrong-passive-sign",
@@ -3543,19 +4776,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Current is declared entering the positive terminal, but the formula is \\[i=-C\\,dv/dt\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1138. [given that]\nA presentation-only symbol follows: \\[q_{1338}\\]\n\nCurrent is declared entering the positive terminal, but the formula is \\[i=-C\\,dv/dt\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=-C\\,dv/dt"
+        "needle": "i=-C\\,dv/dt",
+        "edge": "after"
       },
       "refusalCategory": "wrong-sign-convention",
       "variationTags": [
         "passive-sign",
         "wrong-sign"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-sign-convention",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "wrong-sign-convention-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "cap-neg-wrong-active-sign",
@@ -3565,19 +4807,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Current is declared leaving the positive terminal, yet the document asserts $i=C\\,dv/dt$."
+          "content": "The next formula is presented without an assumed named law (1139). [define as]\n\\begin{equation}q_{1339}\\end{equation}\n\nCurrent is declared leaving the positive terminal, yet the document asserts $i=C\\,dv/dt$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\,dv/dt"
+        "needle": "i=C\\,dv/dt",
+        "edge": "before"
       },
       "refusalCategory": "wrong-sign-convention",
       "variationTags": [
         "opposite-reference",
         "wrong-sign"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-sign-convention",
+        "projectTopology": "single-document",
+        "proseFamily": "define-as",
+        "semanticSkeleton": "wrong-sign-convention-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "cap-neg-capacitance-unit-conflict",
@@ -3587,19 +4838,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbol \\(C\\) is declared to be resistance in ohms, followed by \\[i=C\\,dv/dt\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1140). [in this model]\n\\[\\begin{aligned}q_{1340}\\end{aligned}\\]\n\nThe symbol \\(C\\) is declared to be resistance in ohms, followed by \\[i=C\\,dv/dt\\]."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\,dv/dt"
+        "needle": "i=C\\,dv/dt",
+        "edge": "after"
       },
       "refusalCategory": "wrong-unit",
       "variationTags": [
         "unit-conflict",
         "role-conflict"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-unit",
+        "projectTopology": "single-document",
+        "proseFamily": "in-this-model",
+        "semanticSkeleton": "wrong-unit-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-neg-negated-law",
@@ -3609,19 +4869,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For the nonlinear dielectric, the text explicitly says $i=C\\,dv/dt$ is not valid."
+          "content": "Suppose the notation is local to this calculation, case 1141. [throughout section]\nA grouped symbol is $ {q_{1341}} $.\n\nFor the nonlinear dielectric, the text explicitly says $i=C\\,dv/dt$ is not valid."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\,dv/dt"
+        "needle": "i=C\\,dv/dt",
+        "edge": "before"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "negation",
         "device-scope"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "throughout-section",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-neg-hypothetical-only",
@@ -3631,19 +4900,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "If the device capacitance were constant, one could use \\[i=C\\,dv/dt\\], but \\(C\\) is stated to vary."
+          "content": "The symbols below have no meaning beyond this standalone example (1142). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1342}$.\n\nIf the device capacitance were constant, one could use \\[i=C\\,dv/dt\\], but \\(C\\) is stated to vary."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\,dv/dt"
+        "needle": "i=C\\,dv/dt",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "hypothetical",
         "time-varying-capacitance"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "compact-parenthetical",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     },
     {
       "id": "cap-neg-opaque-cap-macro",
@@ -3653,19 +4931,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No macro definition accompanies $\\mysteryCap{i}{C}{v}{t}$."
+          "content": "As a deliberately unsupported instance, examine relation 1143. [separate sentences]\nAn indexed symbol is $q_{1343}$.\n\nNo macro definition accompanies $\\mysteryCap{i}{C}{v}{t}$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\mysteryCap{i}{C}{v}{t}"
+        "needle": "\\mysteryCap{i}{C}{v}{t}",
+        "edge": "before"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "opaque-macro",
         "missing-definition"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "separate-sentences",
+        "semanticSkeleton": "ambiguity-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      }
     },
     {
       "id": "cap-neg-symbol-c-ambiguous",
@@ -3675,19 +4962,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Here \\(C\\) is explicitly the speed of light, so $i=C\\,dv/dt$ cannot be a capacitance law."
+          "content": "No domain interpretation is asserted for the following formula (1144). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1344}}A macro-expanded symbol is $\\baselineprobe$.\n\nHere \\(C\\) is explicitly the speed of light, so $i=C\\,dv/dt$ cannot be a capacitance law."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\,dv/dt"
+        "needle": "i=C\\,dv/dt",
+        "edge": "after"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "symbol-ambiguity",
         "conflicting-declaration"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "declaration-after",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      }
     },
     {
       "id": "cap-neg-space-derivative",
@@ -3697,19 +4993,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The field profile uses \\[i=C\\frac{dv}{dx}\\], a spatial derivative rather than a time derivative."
+          "content": "Consider the following independently stated relation in example 1145. [let singular]\nA presentation-only symbol is $q_{1345}$.\n\nThe field profile uses \\[i=C\\frac{dv}{dx}\\], a spatial derivative rather than a time derivative."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\frac{dv}{dx}"
+        "needle": "i=C\\frac{dv}{dx}",
+        "edge": "before"
       },
       "refusalCategory": "wrong-roles",
       "variationTags": [
         "wrong-independent-variable",
         "spatial-derivative"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "wrong-roles",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "wrong-roles-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      }
     },
     {
       "id": "cap-neg-finite-difference-only",
@@ -3719,19 +5024,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The numerical approximation $i\\approx C\\frac{v_{n+1}-v_n}{\\Delta t}$ is not asserted as an exact constitutive equation."
+          "content": "For comparison, inspect the displayed expression numbered 1146. [let paired]\nA presentation-only symbol follows: \\[q_{1346}\\]\n\nThe numerical approximation $i\\approx C\\frac{v_{n+1}-v_n}{\\Delta t}$ is not asserted as an exact constitutive equation."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i\\approx C\\frac{v_{n+1}-v_n}{\\Delta t}"
+        "needle": "i\\approx C\\frac{v_{n+1}-v_n}{\\Delta t}",
+        "edge": "after"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "approximation",
         "finite-difference"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      }
     },
     {
       "id": "cap-neg-integral-instead-derivative",
@@ -3741,19 +5055,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The candidate \\[i=C\\int_0^t v(\\tau)\\,d\\tau\\] integrates voltage instead of differentiating it."
+          "content": "The next formula is presented without an assumed named law (1147). [let series]\n\\begin{equation}q_{1347}\\end{equation}\n\nThe candidate \\[i=C\\int_0^t v(\\tau)\\,d\\tau\\] integrates voltage instead of differentiating it."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\int_0^t v(\\tau)\\,d\\tau"
+        "needle": "i=C\\int_0^t v(\\tau)\\,d\\tau",
+        "edge": "before"
       },
       "refusalCategory": "wrong-operator",
       "variationTags": [
         "integral",
         "wrong-operator"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol-number-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      }
     },
     {
       "id": "cap-neg-charge-voltage-only",
@@ -3763,19 +5086,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The related identity $q=CV$ states charge versus voltage but not capacitor current."
+          "content": "In this local discussion, only the explicit statement below is available (1148). [respectively]\n\\[\\begin{aligned}q_{1348}\\end{aligned}\\]\n\nThe related identity $q=CV$ states charge versus voltage but not capacitor current."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "q=CV"
+        "needle": "q=CV",
+        "edge": "after"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "related-law",
         "charge-voltage"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "wrong-scope-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      }
     },
     {
       "id": "cap-neg-varying-capacitance",
@@ -3785,19 +5117,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The capacitance is \\(C(t)\\), yet the document drops the product derivative and claims \\[i=C(t)\\frac{dv}{dt}\\] without assuming \\(\\dot C=0\\)."
+          "content": "Suppose the notation is local to this calculation, case 1149. [where clause]\nA grouped symbol is $ {q_{1349}} $.\n\nThe capacitance is \\(C(t)\\), yet the document drops the product derivative and claims \\[i=C(t)\\frac{dv}{dt}\\] without assuming \\(\\dot C=0\\)."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C(t)\\frac{dv}{dt}"
+        "needle": "i=C(t)\\frac{dv}{dt}",
+        "edge": "before"
       },
       "refusalCategory": "wrong-scope",
       "variationTags": [
         "time-varying-capacitance",
         "missing-term"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "wrong-scope",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "wrong-scope-symbol-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      }
     },
     {
       "id": "cap-neg-conflicting-orientation",
@@ -3807,19 +5148,28 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Two diagrams assign opposite current arrows, so the isolated candidate $i=C\\,dv/dt$ has no resolvable sign convention."
+          "content": "The symbols below have no meaning beyond this standalone example (1150). [we write]\nA styled symbol is $\\mathbf{q}_{1350}$.\n\nTwo diagrams assign opposite current arrows, so the isolated candidate $i=C\\,dv/dt$ has no resolvable sign convention."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "i=C\\,dv/dt"
+        "needle": "i=C\\,dv/dt",
+        "edge": "after"
       },
       "refusalCategory": "ambiguity",
       "variationTags": [
         "conflicting-declarations",
         "sign-ambiguity"
-      ]
+      ],
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "ambiguity",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "ambiguity-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      }
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "thresholds": {
     "lawRecall": 95,
     "lawPrecision": 99,
@@ -213,17 +213,17 @@
     {
       "packId": "circuits",
       "tier": "evaluated",
-      "corpusSuiteIds": ["circuits"]
+      "corpusSuiteIds": ["circuits", "circuits-diversity"]
     },
     {
       "packId": "classical-mechanics",
       "tier": "evaluated",
-      "corpusSuiteIds": ["mechanics"]
+      "corpusSuiteIds": ["mechanics", "mechanics-diversity"]
     },
     {
       "packId": "control-systems",
       "tier": "evaluated",
-      "corpusSuiteIds": ["control-systems"]
+      "corpusSuiteIds": ["control-systems", "control-systems-diversity"]
     },
     {
       "packId": "discrete-math",
@@ -233,7 +233,7 @@
     {
       "packId": "linear-algebra",
       "tier": "probe",
-      "corpusSuiteIds": ["linear-algebra-probe"]
+      "corpusSuiteIds": ["linear-algebra-probe", "linear-algebra-diversity"]
     },
     {
       "packId": "optimization-ml",
@@ -243,7 +243,7 @@
     {
       "packId": "probability",
       "tier": "probe",
-      "corpusSuiteIds": ["probability-probe"]
+      "corpusSuiteIds": ["probability-probe", "probability-diversity"]
     },
     {
       "packId": "quantities-units",
@@ -254,6 +254,7 @@
   "suites": [
     {
       "id": "circuits",
+      "kind": "law",
       "packId": "circuits",
       "path": "corpus/circuits.json",
       "tier": "evaluated",
@@ -267,10 +268,15 @@
         "project-context",
         "macro-provenance",
         "semantic-mutation"
-      ]
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 4, "proseFamily": 4, "projectTopology": 2, "mutationFamily": 6 },
+        "maximumProfileShare": 0.2
+      }
     },
     {
       "id": "control-systems",
+      "kind": "law",
       "packId": "control-systems",
       "path": "corpus/control-systems.json",
       "tier": "evaluated",
@@ -284,19 +290,29 @@
         "project-context",
         "macro-provenance",
         "semantic-mutation"
-      ]
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 5, "syntaxStructure": 4, "proseFamily": 4, "projectTopology": 2, "mutationFamily": 5 },
+        "maximumProfileShare": 0.2
+      }
     },
     {
       "id": "linear-algebra-probe",
+      "kind": "law",
       "packId": "linear-algebra",
       "path": "corpus/linear-algebra-probe.json",
       "tier": "probe",
       "minimumPositiveCasesPerLaw": 5,
       "minimumRefusalCasesPerLaw": 5,
-      "requiredDimensions": ["notation", "roles", "semantic-mutation"]
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
     },
     {
       "id": "mechanics",
+      "kind": "law",
       "packId": "classical-mechanics",
       "path": "corpus/mechanics.json",
       "tier": "evaluated",
@@ -310,16 +326,106 @@
         "project-context",
         "macro-provenance",
         "semantic-mutation"
-      ]
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 4, "proseFamily": 4, "projectTopology": 2, "mutationFamily": 6 },
+        "maximumProfileShare": 0.2
+      }
     },
     {
       "id": "probability-probe",
+      "kind": "law",
       "packId": "probability",
       "path": "corpus/probability-probe.json",
       "tier": "probe",
       "minimumPositiveCasesPerLaw": 5,
       "minimumRefusalCasesPerLaw": 5,
-      "requiredDimensions": ["notation", "roles", "semantic-mutation"]
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "circuits-diversity",
+      "kind": "law",
+      "packId": "circuits",
+      "path": "corpus/circuits-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 8, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "control-systems-diversity",
+      "kind": "law",
+      "packId": "control-systems",
+      "path": "corpus/control-systems-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 8, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "mechanics-diversity",
+      "kind": "law",
+      "packId": "classical-mechanics",
+      "path": "corpus/mechanics-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 8, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "linear-algebra-diversity",
+      "kind": "law",
+      "packId": "linear-algebra",
+      "path": "corpus/linear-algebra-diversity.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "project-context", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "probability-diversity",
+      "kind": "law",
+      "packId": "probability",
+      "path": "corpus/probability-diversity.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "project-context", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "global-adversarial",
+      "kind": "global-refusal",
+      "path": "corpus/global-adversarial.json",
+      "minimumCases": 40,
+      "requiredDimensions": ["notation", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 10, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.1
+      }
     }
   ]
 }

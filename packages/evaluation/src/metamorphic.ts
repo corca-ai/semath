@@ -45,7 +45,8 @@ export function planMetamorphicCases(
 function representatives(corpus: Corpus, limit: number): CorpusCase[] {
   const groups = new Map<string, CorpusCase[]>();
   for (const item of corpus.cases) {
-    const key = `${item.lawId}\u0000${item.expectation}`;
+    const target = "lawId" in item ? item.lawId : `global:${item.refusalCategory}`;
+    const key = `${target}\u0000${item.expectation}`;
     const group = groups.get(key) ?? [];
     group.push(item);
     groups.set(key, group);
