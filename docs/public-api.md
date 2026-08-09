@@ -5,6 +5,7 @@ hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
 | --- | --- |
+| `semath/evaluation` | pure corpus validation, metamorphic planning, scoring, and pack conformance |
 | `semath/protocol` | snapshots, deltas, semantic queries, results, and diagnostics |
 | `semath/wasm` | release WASM and its byte-oriented engine ABI |
 | `semath/worker` | typed WASM engine wrapper |

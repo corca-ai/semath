@@ -1,0 +1,537 @@
+export type SupportTier = "evaluated" | "probe" | "vocabulary-only";
+export type SuiteTier = Exclude<SupportTier, "vocabulary-only">;
+export type CorpusExpectation = "established" | "refused";
+export type MetamorphicTransform =
+  | "document-order"
+  | "neutral-prose"
+  | "trailing-comment";
+
+export interface QualityThresholds {
+  evidenceIntegrity: number;
+  lawPrecision: number;
+  lawRecall: number;
+  refusalPreservation: number;
+  roleAccuracy: number;
+}
+
+export interface CoverageDimension {
+  id: string;
+  tags: readonly string[];
+}
+
+export interface CorpusSuiteConfig {
+  id: string;
+  minimumPositiveCasesPerLaw: number;
+  minimumRefusalCasesPerLaw: number;
+  packId: string;
+  path: string;
+  requiredDimensions: readonly string[];
+  tier: SuiteTier;
+}
+
+export interface PackSupport {
+  corpusSuiteIds: readonly string[];
+  packId: string;
+  tier: SupportTier;
+}
+
+export interface QualityManifest {
+  dimensions: readonly CoverageDimension[];
+  metamorphic: {
+    casesPerLaw: number;
+    transforms: readonly MetamorphicTransform[];
+  };
+  packs: readonly PackSupport[];
+  schemaVersion: 1;
+  suites: readonly CorpusSuiteConfig[];
+  thresholds: QualityThresholds;
+}
+
+export interface CorpusDocument {
+  content: string;
+  fileId: string;
+  path: string;
+}
+
+export interface CorpusMacro {
+  definition: string;
+  name: string;
+  parameterCount?: number;
+}
+
+export interface CorpusCase {
+  cursor: {
+    edge?: "after" | "before";
+    fileId: string;
+    needle: string;
+  };
+  documents: readonly CorpusDocument[];
+  expectation: CorpusExpectation;
+  expectedRoles?: Readonly<Record<string, string>>;
+  id: string;
+  lawId: string;
+  macros?: readonly CorpusMacro[];
+  mainFileId?: string;
+  refusalCategory?: string;
+  variationTags: readonly string[];
+}
+
+export interface Corpus {
+  cases: readonly CorpusCase[];
+  domain: string;
+  schemaVersion: 1;
+}
+
+export function parseQualityManifest(value: unknown): QualityManifest {
+  const root = object(value, "manifest");
+  exactKeys(
+    root,
+    ["schemaVersion", "thresholds", "dimensions", "metamorphic", "packs", "suites"],
+    "manifest",
+  );
+  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 1) {
+    fail("manifest.schemaVersion", "must be 1");
+  }
+  const thresholds = parseThresholds(root.thresholds);
+  const dimensions = array(root.dimensions, "manifest.dimensions").map(
+    (item, index) => parseDimension(item, `manifest.dimensions[${index}]`),
+  );
+  unique(dimensions.map((item) => item.id), "manifest.dimensions");
+  const dimensionIds = new Set(dimensions.map((item) => item.id));
+  const metamorphic = parseMetamorphic(root.metamorphic);
+  const packs = array(root.packs, "manifest.packs").map((item, index) =>
+    parsePackSupport(item, `manifest.packs[${index}]`),
+  );
+  unique(packs.map((item) => item.packId), "manifest.packs");
+  const suites = array(root.suites, "manifest.suites").map((item, index) =>
+    parseSuite(item, `manifest.suites[${index}]`, dimensionIds),
+  );
+  unique(suites.map((item) => item.id), "manifest.suites");
+  unique(suites.map((item) => item.path), "manifest.suites paths");
+  const suiteIds = new Set(suites.map((item) => item.id));
+  for (const [index, pack] of packs.entries()) {
+    for (const suiteId of pack.corpusSuiteIds) {
+      if (!suiteIds.has(suiteId)) {
+        fail(`manifest.packs[${index}].corpusSuiteIds`, `unknown suite ${suiteId}`);
+      }
+    }
+  }
+  return {
+    dimensions,
+    metamorphic,
+    packs,
+    schemaVersion: 1,
+    suites,
+    thresholds,
+  };
+}
+
+export function parseCorpus(value: unknown, suite: CorpusSuiteConfig): Corpus {
+  const root = object(value, `corpus ${suite.id}`);
+  exactKeys(root, ["schemaVersion", "domain", "cases"], `corpus ${suite.id}`);
+  if (integer(root.schemaVersion, `${suite.id}.schemaVersion`) !== 1) {
+    fail(`${suite.id}.schemaVersion`, "must be 1");
+  }
+  const domain = text(root.domain, `${suite.id}.domain`);
+  if (domain !== suite.id) {
+    fail(`${suite.id}.domain`, `must equal suite id ${suite.id}`);
+  }
+  const cases = array(root.cases, `${suite.id}.cases`).map((item, index) =>
+    parseCase(item, `${suite.id}.cases[${index}]`),
+  );
+  if (cases.length === 0) fail(`${suite.id}.cases`, "must not be empty");
+  unique(cases.map((item) => item.id), `${suite.id}.cases`);
+  return { cases, domain, schemaVersion: 1 };
+}
+
+function parseThresholds(value: unknown): QualityThresholds {
+  const item = object(value, "manifest.thresholds");
+  const keys = [
+    "evidenceIntegrity",
+    "lawPrecision",
+    "lawRecall",
+    "refusalPreservation",
+    "roleAccuracy",
+  ] as const;
+  exactKeys(item, [...keys], "manifest.thresholds");
+  const threshold = (key: (typeof keys)[number]): number => {
+    const result = number(item[key], `manifest.thresholds.${key}`);
+    if (result < 0 || result > 100) {
+      fail(`manifest.thresholds.${key}`, "must be between 0 and 100");
+    }
+    return result;
+  };
+  return {
+    evidenceIntegrity: threshold("evidenceIntegrity"),
+    lawPrecision: threshold("lawPrecision"),
+    lawRecall: threshold("lawRecall"),
+    refusalPreservation: threshold("refusalPreservation"),
+    roleAccuracy: threshold("roleAccuracy"),
+  };
+}
+
+function parseDimension(value: unknown, path: string): CoverageDimension {
+  const item = object(value, path);
+  exactKeys(item, ["id", "tags"], path);
+  const tags = strings(item.tags, `${path}.tags`);
+  if (tags.length === 0) fail(`${path}.tags`, "must not be empty");
+  unique(tags, `${path}.tags`);
+  return { id: identifier(item.id, `${path}.id`), tags };
+}
+
+function parseMetamorphic(value: unknown): QualityManifest["metamorphic"] {
+  const item = object(value, "manifest.metamorphic");
+  exactKeys(item, ["casesPerLaw", "transforms"], "manifest.metamorphic");
+  const casesPerLaw = positiveInteger(
+    item.casesPerLaw,
+    "manifest.metamorphic.casesPerLaw",
+  );
+  const allowed = new Set<MetamorphicTransform>([
+    "document-order",
+    "neutral-prose",
+    "trailing-comment",
+  ]);
+  const transforms = strings(
+    item.transforms,
+    "manifest.metamorphic.transforms",
+  ).map((transform) => {
+    if (!allowed.has(transform as MetamorphicTransform)) {
+      fail("manifest.metamorphic.transforms", `unknown transform ${transform}`);
+    }
+    return transform as MetamorphicTransform;
+  });
+  unique(transforms, "manifest.metamorphic.transforms");
+  if (transforms.length === 0) {
+    fail("manifest.metamorphic.transforms", "must not be empty");
+  }
+  return { casesPerLaw, transforms };
+}
+
+function parsePackSupport(value: unknown, path: string): PackSupport {
+  const item = object(value, path);
+  exactKeys(item, ["packId", "tier", "corpusSuiteIds"], path);
+  const tier = oneOf(
+    item.tier,
+    ["evaluated", "probe", "vocabulary-only"],
+    `${path}.tier`,
+  );
+  const corpusSuiteIds = strings(item.corpusSuiteIds, `${path}.corpusSuiteIds`);
+  unique(corpusSuiteIds, `${path}.corpusSuiteIds`);
+  if (tier === "vocabulary-only" && corpusSuiteIds.length !== 0) {
+    fail(`${path}.corpusSuiteIds`, "vocabulary-only packs cannot own corpus suites");
+  }
+  if (tier !== "vocabulary-only" && corpusSuiteIds.length === 0) {
+    fail(`${path}.corpusSuiteIds`, `${tier} packs must own a corpus suite`);
+  }
+  return {
+    corpusSuiteIds,
+    packId: identifier(item.packId, `${path}.packId`),
+    tier,
+  };
+}
+
+function parseSuite(
+  value: unknown,
+  path: string,
+  dimensionIds: ReadonlySet<string>,
+): CorpusSuiteConfig {
+  const item = object(value, path);
+  exactKeys(
+    item,
+    [
+      "id",
+      "packId",
+      "path",
+      "tier",
+      "minimumPositiveCasesPerLaw",
+      "minimumRefusalCasesPerLaw",
+      "requiredDimensions",
+    ],
+    path,
+  );
+  const corpusPath = text(item.path, `${path}.path`);
+  if (
+    corpusPath.startsWith("/") ||
+    corpusPath.split("/").includes("..") ||
+    !corpusPath.endsWith(".json")
+  ) {
+    fail(`${path}.path`, "must be a safe relative JSON path");
+  }
+  const requiredDimensions = strings(
+    item.requiredDimensions,
+    `${path}.requiredDimensions`,
+  );
+  unique(requiredDimensions, `${path}.requiredDimensions`);
+  for (const dimension of requiredDimensions) {
+    if (!dimensionIds.has(dimension)) {
+      fail(`${path}.requiredDimensions`, `unknown dimension ${dimension}`);
+    }
+  }
+  return {
+    id: identifier(item.id, `${path}.id`),
+    minimumPositiveCasesPerLaw: positiveInteger(
+      item.minimumPositiveCasesPerLaw,
+      `${path}.minimumPositiveCasesPerLaw`,
+    ),
+    minimumRefusalCasesPerLaw: positiveInteger(
+      item.minimumRefusalCasesPerLaw,
+      `${path}.minimumRefusalCasesPerLaw`,
+    ),
+    packId: identifier(item.packId, `${path}.packId`),
+    path: corpusPath,
+    requiredDimensions,
+    tier: oneOf(item.tier, ["evaluated", "probe"], `${path}.tier`),
+  };
+}
+
+function parseCase(value: unknown, path: string): CorpusCase {
+  const item = object(value, path);
+  exactKeys(
+    item,
+    [
+      "id",
+      "lawId",
+      "expectation",
+      "documents",
+      "mainFileId",
+      "cursor",
+      "expectedRoles",
+      "macros",
+      "refusalCategory",
+      "variationTags",
+    ],
+    path,
+  );
+  const expectation = oneOf(
+    item.expectation,
+    ["established", "refused"],
+    `${path}.expectation`,
+  );
+  const documents = array(item.documents, `${path}.documents`).map(
+    (document, index) => parseDocument(document, `${path}.documents[${index}]`),
+  );
+  if (documents.length === 0) fail(`${path}.documents`, "must not be empty");
+  unique(documents.map((document) => document.fileId), `${path}.documents fileId`);
+  unique(documents.map((document) => document.path), `${path}.documents path`);
+  const cursor = parseCursor(item.cursor, `${path}.cursor`);
+  const cursorDocument = documents.find(
+    (document) => document.fileId === cursor.fileId,
+  );
+  if (!cursorDocument) {
+    fail(`${path}.cursor.fileId`, `unknown document ${cursor.fileId}`);
+  }
+  const occurrences = cursorDocument.content.split(cursor.needle).length - 1;
+  if (occurrences !== 1) {
+    fail(`${path}.cursor.needle`, `must occur exactly once; found ${occurrences}`);
+  }
+  const expectedRoles = optionalStringRecord(item.expectedRoles, `${path}.expectedRoles`);
+  const refusalCategory = optionalText(item.refusalCategory, `${path}.refusalCategory`);
+  if (expectation === "established" && !expectedRoles) {
+    fail(`${path}.expectedRoles`, "established cases require expected roles");
+  }
+  if (expectation === "refused" && !refusalCategory) {
+    fail(`${path}.refusalCategory`, "refused cases require a category");
+  }
+  const macros = optionalArray(item.macros, `${path}.macros`)?.map((macro, index) =>
+    parseMacro(macro, `${path}.macros[${index}]`),
+  );
+  if (macros) unique(macros.map((macro) => macro.name), `${path}.macros`);
+  const variationTags = strings(item.variationTags, `${path}.variationTags`);
+  if (variationTags.length === 0) fail(`${path}.variationTags`, "must not be empty");
+  unique(variationTags, `${path}.variationTags`);
+  return {
+    cursor,
+    documents,
+    expectation,
+    ...(expectedRoles ? { expectedRoles } : {}),
+    id: identifier(item.id, `${path}.id`),
+    lawId: identifier(item.lawId, `${path}.lawId`),
+    ...(macros?.length ? { macros } : {}),
+    ...(item.mainFileId === undefined
+      ? {}
+      : {
+          mainFileId: documentId(
+            item.mainFileId,
+            documents,
+            `${path}.mainFileId`,
+          ),
+        }),
+    ...(refusalCategory ? { refusalCategory } : {}),
+    variationTags,
+  };
+}
+
+function parseDocument(value: unknown, path: string): CorpusDocument {
+  const item = object(value, path);
+  exactKeys(item, ["content", "fileId", "path"], path);
+  const documentPath = text(item.path, `${path}.path`);
+  if (documentPath.startsWith("/") || documentPath.split("/").includes("..")) {
+    fail(`${path}.path`, "must be a safe relative path");
+  }
+  return {
+    content: string(item.content, `${path}.content`),
+    fileId: text(item.fileId, `${path}.fileId`),
+    path: documentPath,
+  };
+}
+
+function parseCursor(value: unknown, path: string): CorpusCase["cursor"] {
+  const item = object(value, path);
+  exactKeys(item, ["fileId", "needle", "edge"], path);
+  const edge =
+    item.edge === undefined
+      ? undefined
+      : oneOf(item.edge, ["after", "before"], `${path}.edge`);
+  return {
+    ...(edge ? { edge } : {}),
+    fileId: text(item.fileId, `${path}.fileId`),
+    needle: text(item.needle, `${path}.needle`),
+  };
+}
+
+function parseMacro(value: unknown, path: string): CorpusMacro {
+  const item = object(value, path);
+  exactKeys(item, ["name", "definition", "parameterCount"], path);
+  const name = text(item.name, `${path}.name`);
+  if (!/^\\[A-Za-z@]+$/u.test(name)) {
+    fail(`${path}.name`, "must be a control-sequence name");
+  }
+  const parameterCount =
+    item.parameterCount === undefined
+      ? undefined
+      : integer(item.parameterCount, `${path}.parameterCount`);
+  if (parameterCount !== undefined && (parameterCount < 0 || parameterCount > 9)) {
+    fail(`${path}.parameterCount`, "must be between 0 and 9");
+  }
+  return {
+    definition: string(item.definition, `${path}.definition`),
+    name,
+    ...(parameterCount === undefined ? {} : { parameterCount }),
+  };
+}
+
+function documentId(
+  value: unknown,
+  documents: readonly CorpusDocument[],
+  path: string,
+): string {
+  const result = text(value, path);
+  if (!documents.some((document) => document.fileId === result)) {
+    fail(path, `unknown document ${result}`);
+  }
+  return result;
+}
+
+function object(value: unknown, path: string): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    fail(path, "must be an object");
+  }
+  return value as Record<string, unknown>;
+}
+
+function array(value: unknown, path: string): unknown[] {
+  if (!Array.isArray(value)) fail(path, "must be an array");
+  return value;
+}
+
+function optionalArray(value: unknown, path: string): unknown[] | undefined {
+  return value === undefined ? undefined : array(value, path);
+}
+
+function strings(value: unknown, path: string): string[] {
+  return array(value, path).map((item, index) => text(item, `${path}[${index}]`));
+}
+
+function string(value: unknown, path: string): string {
+  if (typeof value !== "string") fail(path, "must be a string");
+  return value;
+}
+
+function text(value: unknown, path: string): string {
+  const result = string(value, path);
+  if (!result.trim()) fail(path, "must not be empty");
+  return result;
+}
+
+function optionalString(value: unknown, path: string): string | undefined {
+  return value === undefined ? undefined : string(value, path);
+}
+
+function optionalText(value: unknown, path: string): string | undefined {
+  return value === undefined ? undefined : text(value, path);
+}
+
+function number(value: unknown, path: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    fail(path, "must be a finite number");
+  }
+  return value;
+}
+
+function integer(value: unknown, path: string): number {
+  const result = number(value, path);
+  if (!Number.isInteger(result)) fail(path, "must be an integer");
+  return result;
+}
+
+function positiveInteger(value: unknown, path: string): number {
+  const result = integer(value, path);
+  if (result < 1) fail(path, "must be positive");
+  return result;
+}
+
+function identifier(value: unknown, path: string): string {
+  const result = text(value, path);
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u.test(result)) {
+    fail(path, "must be a lowercase kebab-case identifier");
+  }
+  return result;
+}
+
+function oneOf<const Values extends readonly string[]>(
+  value: unknown,
+  values: Values,
+  path: string,
+): Values[number] {
+  if (typeof value !== "string" || !values.includes(value)) {
+    fail(path, `must be one of ${values.join(", ")}`);
+  }
+  return value as Values[number];
+}
+
+function optionalStringRecord(
+  value: unknown,
+  path: string,
+): Record<string, string> | undefined {
+  if (value === undefined) return undefined;
+  const item = object(value, path);
+  const result: Record<string, string> = {};
+  for (const [key, entry] of Object.entries(item)) {
+    if (!key.trim()) fail(path, "role keys must not be empty");
+    result[key] = text(entry, `${path}.${key}`);
+  }
+  if (Object.keys(result).length === 0) fail(path, "must not be empty");
+  return result;
+}
+
+function exactKeys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+  path: string,
+): void {
+  const allowedKeys = new Set(allowed);
+  const unknown = Object.keys(value).filter((key) => !allowedKeys.has(key));
+  if (unknown.length) fail(path, `unknown fields: ${unknown.sort().join(", ")}`);
+}
+
+function unique(values: readonly string[], path: string): void {
+  const seen = new Set<string>();
+  for (const value of values) {
+    if (seen.has(value)) fail(path, `duplicate value ${value}`);
+    seen.add(value);
+  }
+}
+
+function fail(path: string, message: string): never {
+  throw new Error(`${path}: ${message}`);
+}

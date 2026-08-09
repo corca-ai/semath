@@ -77,7 +77,7 @@ const reset = decode(engine.resetProject(encode(snapshot)));
 const wasmResults = queries.map((entry) => decode(engine.query(encode(entry))));
 assertEqual(nativeResults, wasmResults, "native/WASM query results");
 if (reset.stats.totalDocuments !== sources.length || reset.stats.semanticNodes <= 0) {
-  throw new Error("v0.16 reset did not expose trustworthy analysis counters");
+  throw new Error("parity reset did not expose trustworthy analysis counters");
 }
 const established = wasmResults[0]?.value;
 if (
@@ -86,12 +86,12 @@ if (
   established.view.context.relations.length !== 1
 ) {
   throw new Error(
-    `v0.16 meaning-first probability scenario was not established: ${JSON.stringify(established)}`,
+    `parity meaning-first probability scenario was not established: ${JSON.stringify(established)}`,
   );
 }
 const refused = wasmResults[1]?.value;
 if (refused?.kind !== "semanticView" || refused.view.status === "established") {
-  throw new Error("v0.16 unsupported algebraic scenario was not safely refused");
+  throw new Error("parity unsupported algebraic scenario was not safely refused");
 }
 
 const updatedSource = {
@@ -132,7 +132,7 @@ assertEqual(incrementalResult.value, cleanResult.value, "incremental/clean seman
 engine.free();
 clean.free();
 console.log(
-  `v0.16 parity OK: ${queries.length} native/WASM queries, refusal, counters, and incremental closure`,
+  `parity OK: ${queries.length} native/WASM queries, refusal, counters, and incremental closure`,
 );
 
 function makeSnapshot(documents, inventoryVersion) {
@@ -148,10 +148,10 @@ function makeSnapshot(documents, inventoryVersion) {
         syntax: parsed,
       });
     }),
-    epoch: "v0.16-parity",
+    epoch: "quality-parity",
     inventoryVersion,
     mainFileId: "main",
-    projectId: "v0.16-parity",
+    projectId: "quality-parity",
     protocolVersion: SEMATH_PROTOCOL_VERSION,
   };
 }
@@ -160,7 +160,7 @@ function query(fileId, offset) {
   return {
     analysisGeneration: 0,
     documentVersion: 1,
-    epoch: "v0.16-parity",
+    epoch: "quality-parity",
     inventoryVersion: 1,
     protocolVersion: SEMATH_PROTOCOL_VERSION,
     query: { fileId, kind: "semanticView", offset },

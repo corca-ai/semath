@@ -7,9 +7,9 @@ reserved for real editor, Worker, and deployment wiring.
 | --- | --- | --- | --- |
 | Syntax, UTF-16, selection, binders | wasmtex contract plus Rust cursor/parser/binder tests | adapter and native/WASM parity | editor selection wiring |
 | Definitions, references, rename | pure scope and include-order tests | LSP mapping and both cursor edges | one navigation journey |
-| Canonical meaning and typed laws | Rust canonical/unifier tests plus held-out corpus | protocol and native/WASM equality | one meaning-first view |
+| Canonical meaning and typed laws | Rust canonical/unifier tests plus manifest-owned corpus | protocol and native/WASM equality | one meaning-first view |
 | Shapes, quantities, roles, diagnostics | pure extractors and contradiction tests | Worker/LSP result mapping | reveal one source-linked conflict |
-| Domain packs | Rust schema-4 compiler tests and blind-extension corpus | clean package and compiled catalog | none |
+| Domain packs | Rust schema-4 compiler tests, conformance, and evaluated or probe corpus | clean package and compiled catalog | none |
 | Incremental analysis | pure reverse-include closure and clean-rebuild equivalence | 61-document WASM budget | one rapid-edit wiring case |
 | Worker lifecycle | pure queue and generation policy tests | real engine recreation | one project-switch or crash case |
 | CorTeX semantic view | pure view-model state tests | component integration tests | one cursor-to-evidence journey |

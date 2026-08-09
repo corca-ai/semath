@@ -48,10 +48,10 @@ const documents = [main, ...sources].map((source) => {
 });
 const snapshot: ProjectSnapshot = {
   documents,
-  epoch: "v0.16-budget",
+  epoch: "quality-budget",
   inventoryVersion: 1,
   mainFileId: main.fileId,
-  projectId: "v0.16-budget",
+  projectId: "quality-budget",
   protocolVersion: SEMATH_PROTOCOL_VERSION,
 };
 
@@ -92,11 +92,11 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
   maxAffected = Math.max(maxAffected, update.analyzedFileIds.length);
   if (update.analyzedFileIds.length > MAX_AFFECTED_DOCUMENTS) {
     throw new Error(
-      `v0.16 delta analyzed ${update.analyzedFileIds.length} documents; expected at most ${MAX_AFFECTED_DOCUMENTS}`,
+      `budget delta analyzed ${update.analyzedFileIds.length} documents; expected at most ${MAX_AFFECTED_DOCUMENTS}`,
     );
   }
   if (!update.analyzedFileIds.includes(current.fileId) || !update.analyzedFileIds.includes("main")) {
-    throw new Error(`v0.16 affected closure omitted the changed file or its dependent main file`);
+    throw new Error(`budget affected closure omitted the changed file or its dependent main file`);
   }
   assertCounters(update, update.analyzedFileIds.length);
 }
@@ -115,7 +115,7 @@ const incremental = decodeUpdate(
   ),
 );
 if (incremental.analyzedFileIds.length !== 0) {
-  throw new Error("v0.16 empty delta unexpectedly reanalyzed documents");
+  throw new Error("budget empty delta unexpectedly reanalyzed documents");
 }
 
 const clean = new SemathEngine();
@@ -137,7 +137,7 @@ if (
   initial.stats.totalDocuments !== cleanUpdate.stats.totalDocuments ||
   initial.stats.recognizedLaws !== cleanUpdate.stats.recognizedLaws
 ) {
-  throw new Error("v0.16 incremental and clean rebuild summaries diverged");
+  throw new Error("budget incremental and clean rebuild summaries diverged");
 }
 engine.free();
 clean.free();
@@ -146,16 +146,16 @@ const deltaP95 = percentile(deltaDurations, 0.95);
 const deltaMedian = percentile(deltaDurations, 0.5);
 const peakRssGrowth = Math.max(0, peakRss - rssBefore);
 if (coldMs > COLD_BUDGET_MS) {
-  throw new Error(`v0.16 cold start ${coldMs.toFixed(2)}ms exceeded ${COLD_BUDGET_MS}ms`);
+  throw new Error(`budget cold start ${coldMs.toFixed(2)}ms exceeded ${COLD_BUDGET_MS}ms`);
 }
 if (deltaP95 > DELTA_P95_BUDGET_MS) {
-  throw new Error(`v0.16 delta p95 ${deltaP95.toFixed(2)}ms exceeded ${DELTA_P95_BUDGET_MS}ms`);
+  throw new Error(`budget delta p95 ${deltaP95.toFixed(2)}ms exceeded ${DELTA_P95_BUDGET_MS}ms`);
 }
 if (peakRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
-  throw new Error(`v0.16 peak RSS growth ${peakRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`);
+  throw new Error(`budget peak RSS growth ${peakRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`);
 }
 console.log(
-  `v0.16 budget OK: documents=${DOCUMENT_COUNT + 1} cold=${coldMs.toFixed(2)}ms delta-median=${deltaMedian.toFixed(2)}ms delta-p95=${deltaP95.toFixed(2)}ms peak-rss-growth=${peakRssGrowth}B max-affected=${maxAffected}`,
+  `budget OK: documents=${DOCUMENT_COUNT + 1} cold=${coldMs.toFixed(2)}ms delta-median=${deltaMedian.toFixed(2)}ms delta-p95=${deltaP95.toFixed(2)}ms peak-rss-growth=${peakRssGrowth}B max-affected=${maxAffected}`,
 );
 
 function decodeUpdate(bytes: Uint8Array): UpdateResult {
@@ -164,11 +164,11 @@ function decodeUpdate(bytes: Uint8Array): UpdateResult {
 
 function assertCounters(update: UpdateResult, analyzedDocuments: number) {
   if (update.stats.analyzedDocuments !== analyzedDocuments) {
-    throw new Error("v0.16 analyzed-document counter is inconsistent");
+    throw new Error("budget analyzed-document counter is inconsistent");
   }
   for (const key of ["semanticNodes", "constraints", "lawRulesVisited"] as const) {
     if (update.stats[key] < 0 || !Number.isFinite(update.stats[key])) {
-      throw new Error(`v0.16 ${key} counter is invalid`);
+      throw new Error(`budget ${key} counter is invalid`);
     }
   }
 }

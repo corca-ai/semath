@@ -318,16 +318,16 @@
         {
           "fileId": "main",
           "path": "state12.tex",
-          "content": "Let $r_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n\\[\\dot{r_1}=\\left(K_1r_1\\right)+\\left(L_1v_1\\right)\\]"
+          "content": "Let $s_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n\\[\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)\\]"
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\dot{r_1}=\\left(K_1r_1\\right)+\\left(L_1v_1\\right)"
+        "needle": "\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)"
       },
       "expectedRoles": {
-        "state": "r_1",
+        "state": "s_1",
         "state-matrix": "K_1",
         "input-matrix": "L_1",
         "control-input": "v_1"
@@ -536,19 +536,19 @@
       "macros": [
         {
           "name": "\\sv",
-          "expansion": "x_m"
+          "definition": "x_m"
         },
         {
           "name": "\\uv",
-          "expansion": "u_m"
+          "definition": "u_m"
         },
         {
           "name": "\\Am",
-          "expansion": "A_m"
+          "definition": "A_m"
         },
         {
           "name": "\\Bm",
-          "expansion": "B_m"
+          "definition": "B_m"
         }
       ]
     },
@@ -582,11 +582,11 @@
       "macros": [
         {
           "name": "\\SysA",
-          "expansion": "F_m"
+          "definition": "F_m"
         },
         {
           "name": "\\SysB",
-          "expansion": "G_m"
+          "definition": "G_m"
         }
       ]
     },
@@ -1335,8 +1335,8 @@
       "macros": [
         {
           "name": "\\dyn",
-          "parameters": 1,
-          "expansion": "\\operatorname{mystery}(#1)"
+          "parameterCount": 1,
+          "definition": "\\operatorname{mystery}(#1)"
         }
       ]
     },
@@ -1851,15 +1851,15 @@
       "macros": [
         {
           "name": "\\Aa",
-          "expansion": "A_m"
+          "definition": "A_m"
         },
         {
           "name": "\\Pp",
-          "expansion": "P_m"
+          "definition": "P_m"
         },
         {
           "name": "\\Qq",
-          "expansion": "Q_m"
+          "definition": "Q_m"
         }
       ]
     },
@@ -1892,7 +1892,7 @@
       "macros": [
         {
           "name": "\\tr",
-          "expansion": "^{\\mathsf T}"
+          "definition": "^{\\mathsf T}"
         }
       ]
     },
@@ -2167,7 +2167,7 @@
         {
           "fileId": "main",
           "path": "lyap29.tex",
-          "content": "Let $M_a,H_a,S_a\\in\\mathbb R^{d\\times d}$.\n\\begin{aligned}M_a^T H_a&+H_aM_a\\\\&=-S_a\\end{aligned}"
+          "content": "Let $M_a,H_a,S_a\\in\\mathbb R^{d\\times d}$.\n\\[\\begin{aligned}M_a^T H_a&+H_aM_a\\\\&=-S_a\\end{aligned}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2658,7 +2658,7 @@
       "macros": [
         {
           "name": "\\adjoint",
-          "expansion": "\\operatorname{adj}"
+          "definition": "\\operatorname{adj}"
         }
       ]
     },

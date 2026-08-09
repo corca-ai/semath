@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "domain": "linear-algebra-blind-extension",
+  "domain": "linear-algebra-probe",
   "cases": [
     {
       "id":"matrix-vector-basic",
