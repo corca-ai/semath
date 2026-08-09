@@ -4,15 +4,21 @@ use regex::Regex;
 
 use crate::canonical::declared_symbols;
 use crate::parser::ParsedMath;
+use crate::scientific_prose::{
+    ClauseDisposition, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
+    extract_assumptions, segment_scientific_clauses,
+};
 use crate::scope::ScopeGraph;
 use crate::{
-    DefinitionInfo, Evidence, Location, ProjectDocument, SemanticSymbolId, SourceIndex, SourceRange,
+    AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, SemanticSymbolId,
+    SourceIndex, SourceRange,
 };
 
-static LET_PREFIX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)(?:let|where)\s*$").unwrap());
+static LET_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:let|where|take|given|suppose|assume|subject\s+to)\s*$").unwrap()
+});
 static DEFINITION_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)^\s*(?:denote(?:s)?|be|is|represent(?:s)?)\s+([^$.;\n]+)").unwrap()
+    Regex::new(r"(?i)^\s*(?:denote(?:s)?|stand(?:s)?\s+for|to\s+be|be|is|are|as|represent(?:s)?)\s+([^$.;\n]+)").unwrap()
 });
 static DIRECT_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?:^|[.!?]\s*|\n\s*)$").unwrap());
@@ -29,8 +35,9 @@ static QUANTIFIED_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 static QUANTIFIED_SUFFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*[,.;:]").unwrap());
-static COORDINATED_LET_PREFIX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*|,\s*)let\s*$").unwrap());
+static COORDINATED_LET_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*|,\s*)(?:let|take|given|suppose|assume)\s*$").unwrap()
+});
 static COORDINATED_DIRECT_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here\s+)?(?:the\s+(?:symbols|notations)\s+)?$").unwrap()
 });
@@ -50,10 +57,15 @@ static COORDINATED_WRITE_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
 static COORDINATED_DENOTE_BY_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s+(.+?)(?:,\s*|\s+)(?:respectively|in\s+that\s+order)\s*[.;]").unwrap()
 });
-static COORDINATED_SHARED_SUFFIX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)^\s+(?:denote|represent|be)\s+([^,.;\n]+)[,.;]").unwrap());
+static COORDINATED_SHARED_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)^\s+(?:denote|represent|stand\s+for|to\s+be|be|are)\s+([^,.;\n]+)[,.;]")
+        .unwrap()
+});
 static CONTEXTUAL_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here|throughout,?|with)\s*$").unwrap()
+    Regex::new(
+        r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here|throughout,?|with|given|suppose|assume|subject\s+to)\s*$",
+    )
+    .unwrap()
 });
 static CONTEXTUAL_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s*(?:denot(?:e|es|ing)|designate(?:s)?|be|is|represent(?:s)?)\s+([^,.;\n]+)")
@@ -111,6 +123,14 @@ static INLINE_VECTOR_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s*(?:be|is)\s+an?\s+\$([a-z0-9]+)\$[ -]dimensional\s+(?:real\s+)?vector")
         .unwrap()
 });
+static PASSIVE_DEFINITION_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?i)(?:^|[.!?]\s*|\n\s*)(?:(?:an?|the)\s+)?([a-z][a-z0-9 -]{0,119})\s+(?:is|are)\s+(?:denoted|represented|written)\s+by\s*$",
+    )
+    .unwrap()
+});
+static PASSIVE_DEFINITION_SUFFIX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*[,.;:]").unwrap());
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum ProseShape {
@@ -134,6 +154,7 @@ pub(crate) struct ProseShapeClaim {
 pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ProseShapeClaim>,
+    pub assumptions: Vec<AssumptionInfo>,
 }
 
 fn primary_symbol(document: &ProjectDocument, math: &ParsedMath) -> Option<(String, SourceRange)> {
@@ -149,15 +170,33 @@ pub(crate) fn observe_prose(
 ) -> ProseObservations {
     let index = SourceIndex::new(&document.content);
     let mut analysis = ProseObservations::default();
+    let clauses = segment_scientific_clauses(&document.content, document.language);
+    let mentions = parsed
+        .iter()
+        .filter_map(|math| {
+            let (symbol, _) = primary_symbol(document, math)?;
+            Some(ScientificMention {
+                symbol,
+                start: index.byte_for_utf16(math.region.full_range.start_offset),
+                end: index.byte_for_utf16(math.region.full_range.end_offset),
+            })
+        })
+        .collect::<Vec<_>>();
+    collect_assumptions(&index, &clauses, &mentions, &mut analysis);
 
-    collect_coordinated_definitions(document, parsed, &index, &mut analysis);
-    collect_clause_definitions(document, parsed, &index, &mut analysis);
+    collect_coordinated_definitions(document, parsed, &index, &clauses, &mut analysis);
+    collect_clause_definitions(document, parsed, &index, &clauses, &mut analysis);
     for math in parsed {
         let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
             continue;
         };
         let start_byte = index.byte_for_utf16(math.region.full_range.start_offset);
         let end_byte = index.byte_for_utf16(math.region.full_range.end_offset);
+        if clause_at(&clauses, start_byte)
+            .is_some_and(|clause| clause.disposition != ClauseDisposition::Establishing)
+        {
+            continue;
+        }
         let before_start = bounded_start(&document.content, start_byte, 160);
         let after_end = bounded_end(&document.content, end_byte, 240);
         let before = &document.content[before_start..start_byte];
@@ -193,7 +232,25 @@ pub(crate) fn observe_prose(
             continue;
         }
 
-        if let Some(explicit) = explicit_single_definition(before, after, math, document, &index) {
+        if let (Some(prefix), Some(suffix)) = (
+            PASSIVE_DEFINITION_PREFIX.captures(before),
+            PASSIVE_DEFINITION_SUFFIX.find(after),
+        ) {
+            let description = prefix.get(1).unwrap().as_str().trim();
+            push_claim(
+                &mut analysis,
+                document,
+                &index,
+                &symbol,
+                &symbol_range,
+                description,
+                "english-passive-definition",
+                before_start + prefix.get(0).unwrap().start(),
+                end_byte + suffix.end(),
+            );
+        } else if let Some(explicit) =
+            explicit_single_definition(before, after, math, document, &index)
+        {
             push_claim(
                 &mut analysis,
                 document,
@@ -326,10 +383,16 @@ fn collect_clause_definitions(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
     output: &mut ProseObservations,
 ) {
-    for (sentence_start, sentence_end) in sentence_ranges(&document.content) {
-        let sentence = &document.content[sentence_start..sentence_end];
+    for clause in clauses {
+        if clause.disposition != ClauseDisposition::Establishing {
+            continue;
+        }
+        let sentence_start = clause.start;
+        let sentence_end = clause.end;
+        let sentence = clause.text;
         let sentence_lower = sentence.to_ascii_lowercase();
         if sentence_lower.contains("respectively") || sentence_lower.contains("in that order") {
             collect_ordered_clause_definition(
@@ -443,7 +506,7 @@ fn collect_ordered_clause_definition(
         return;
     }
     let Some(descriptions) =
-        description.and_then(|description| split_ordered_descriptions(description, regions.len()))
+        description.and_then(|description| align_ordered_descriptions(description, regions.len()))
     else {
         return;
     };
@@ -463,6 +526,61 @@ fn collect_ordered_clause_definition(
             sentence_end,
         );
     }
+}
+
+fn collect_assumptions(
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    output: &mut ProseObservations,
+) {
+    for clause in clauses {
+        for assumption in extract_assumptions(clause, mentions) {
+            let mut source_ranges = assumption
+                .subjects
+                .iter()
+                .map(|subject| SourceRange {
+                    start_offset: index.utf16_for_byte(subject.start),
+                    end_offset: index.utf16_for_byte(subject.end),
+                })
+                .collect::<Vec<_>>();
+            source_ranges.push(SourceRange {
+                start_offset: index.utf16_for_byte(assumption.phrase_start),
+                end_offset: index.utf16_for_byte(assumption.phrase_end),
+            });
+            output.assumptions.push(AssumptionInfo {
+                kind: assumption.kind,
+                value: assumption.value,
+                subjects: assumption
+                    .subjects
+                    .into_iter()
+                    .map(|subject| subject.symbol)
+                    .collect(),
+                evidence: Evidence {
+                    rule_id: "english-scientific-assumption".into(),
+                    kind: "explicit-prose".into(),
+                    strength: "strong".into(),
+                    source_ranges,
+                },
+            });
+        }
+    }
+    output.assumptions.sort_by(|left, right| {
+        left.evidence
+            .source_ranges
+            .last()
+            .map(|range| range.start_offset)
+            .cmp(
+                &right
+                    .evidence
+                    .source_ranges
+                    .last()
+                    .map(|range| range.start_offset),
+            )
+            .then(left.kind.cmp(&right.kind))
+            .then(left.value.cmp(&right.value))
+    });
+    output.assumptions.dedup();
 }
 
 fn is_description_parameter(
@@ -489,27 +607,6 @@ fn is_description_parameter(
         || after.starts_with("\\times")
         || before.ends_with(" by")
         || before.ends_with("\\times")
-}
-
-fn sentence_ranges(source: &str) -> Vec<(usize, usize)> {
-    let mut ranges = Vec::new();
-    let mut start = 0;
-    for (index, character) in source.char_indices() {
-        if matches!(character, '.' | '!' | '?' | '\n') {
-            let end = index + character.len_utf8();
-            if source[start..end]
-                .chars()
-                .any(|character| !character.is_whitespace())
-            {
-                ranges.push((start, end));
-            }
-            start = end;
-        }
-    }
-    if start < source.len() {
-        ranges.push((start, source.len()));
-    }
-    ranges
 }
 
 fn definition_clause(segment: &str) -> (Option<&str>, bool) {
@@ -671,11 +768,12 @@ fn collect_coordinated_definitions(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
     analysis: &mut ProseObservations,
 ) {
-    for arity in [3, 2] {
+    for arity in (2..=8).rev() {
         for group in parsed.windows(arity) {
-            let Some(definitions) = coordinated_group(document, group, index) else {
+            let Some(definitions) = coordinated_group(document, group, index, clauses) else {
                 continue;
             };
             for definition in definitions {
@@ -708,6 +806,7 @@ fn coordinated_group(
     document: &ProjectDocument,
     group: &[ParsedMath],
     index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
 ) -> Option<Vec<CoordinatedDefinition>> {
     group.first()?;
     group.last()?;
@@ -731,6 +830,10 @@ fn coordinated_group(
 
     let first_start = starts[0];
     let last_end = *ends.last()?;
+    let clause = clause_at(clauses, first_start)?;
+    if clause.disposition != ClauseDisposition::Establishing || last_end > clause.end {
+        return None;
+    }
     let before_start = bounded_start(&document.content, first_start, 120);
     let after_end = bounded_end(&document.content, last_end, 360);
     let before = &document.content[before_start..first_start];
@@ -788,7 +891,7 @@ fn coordinated_descriptions(
         CoordinationLead::DenoteBy => &*COORDINATED_DENOTE_BY_SUFFIX,
     };
     if let Some(captures) = mapping_pattern.captures(after) {
-        let descriptions = split_ordered_descriptions(captures.get(1)?.as_str(), arity)?;
+        let descriptions = align_ordered_descriptions(captures.get(1)?.as_str(), arity)?;
         return Some((
             descriptions,
             "english-respectively-definition",
@@ -815,55 +918,6 @@ fn shared_description_is_unambiguous(description: &str) -> bool {
     !description.contains(',')
         && !description.to_ascii_lowercase().contains(" and ")
         && !description.to_ascii_lowercase().contains(" or ")
-}
-
-fn split_ordered_descriptions(value: &str, arity: usize) -> Option<Vec<&str>> {
-    let mut parts = Vec::new();
-    let mut start = 0;
-    let mut in_math = false;
-    let mut brace_depth = 0usize;
-    let mut parenthesis_depth = 0usize;
-    for (offset, character) in value.char_indices() {
-        match character {
-            '$' => in_math = !in_math,
-            '{' if !in_math => brace_depth += 1,
-            '}' if !in_math => brace_depth = brace_depth.saturating_sub(1),
-            '(' if !in_math => parenthesis_depth += 1,
-            ')' if !in_math => parenthesis_depth = parenthesis_depth.saturating_sub(1),
-            ',' if !in_math && brace_depth == 0 && parenthesis_depth == 0 => {
-                parts.push(&value[start..offset]);
-                start = offset + character.len_utf8();
-            }
-            _ => {}
-        }
-    }
-    parts.push(&value[start..]);
-    if parts.len() != arity {
-        if arity == 2 && parts.len() == 1 {
-            let normalized = parts[0].trim();
-            let split = normalized.rfind(" and ")?;
-            parts = vec![&normalized[..split], &normalized[split + 5..]];
-        } else {
-            return None;
-        }
-    }
-    let last = parts.last_mut()?;
-    *last = last.trim().strip_prefix("and ").unwrap_or(last.trim());
-    let normalized = parts
-        .into_iter()
-        .map(|part| strip_article(part.trim()))
-        .collect::<Vec<_>>();
-    normalized
-        .iter()
-        .all(|part| !part.is_empty())
-        .then_some(normalized)
-}
-
-fn strip_article(value: &str) -> &str {
-    ["a ", "an ", "the "]
-        .into_iter()
-        .find_map(|article| value.strip_prefix(article))
-        .unwrap_or(value)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1048,7 +1102,7 @@ fn deduplicate(analysis: &mut ProseObservations) {
 
 #[cfg(test)]
 mod tests {
-    use super::{ProseShape, observe_prose, split_ordered_descriptions};
+    use super::{ProseShape, observe_prose};
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
@@ -1094,23 +1148,6 @@ mod tests {
         );
         assert_eq!(analysis.definitions.len(), 2);
         assert!(analysis.shapes.is_empty(), "{:?}", analysis.shapes);
-    }
-
-    #[test]
-    fn parses_two_and_three_way_ordered_descriptions_without_splitting_math() {
-        assert_eq!(
-            split_ordered_descriptions("a lower bound and an upper bound", 2),
-            Some(vec!["lower bound", "upper bound"])
-        );
-        assert_eq!(
-            split_ordered_descriptions("the input, the state, and the output", 3),
-            Some(vec!["input", "state", "output"])
-        );
-        assert_eq!(
-            split_ordered_descriptions("$d$, $e$, and $f$", 3),
-            Some(vec!["$d$", "$e$", "$f$"])
-        );
-        assert_eq!(split_ordered_descriptions("input and output", 3), None);
     }
 
     #[test]
@@ -1174,5 +1211,56 @@ mod tests {
             .collect::<Vec<_>>();
         assert!(definitions.contains(&("x", "n-dimensional iterates")));
         assert!(definitions.contains(&("y", "n-dimensional iterates")));
+    }
+
+    #[test]
+    fn composes_active_passive_and_arbitrary_arity_declarations() {
+        let source = "Given $A$ as the system matrix.\nTake $x$ to be the state vector.\nThe control input is denoted by $u$.\nLet $a$, $b$, $c$, and $d$ denote gain, bias, scale, and offset, respectively.";
+        let analysis = analyze(source);
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        assert!(
+            definitions.contains(&("A", "the system matrix")),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.contains(&("x", "the state vector")),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.contains(&("u", "control input")),
+            "{definitions:?}"
+        );
+        assert!(definitions.contains(&("a", "gain")), "{definitions:?}");
+        assert!(definitions.contains(&("b", "bias")), "{definitions:?}");
+        assert!(definitions.contains(&("c", "scale")), "{definitions:?}");
+        assert!(definitions.contains(&("d", "offset")), "{definitions:?}");
+    }
+
+    #[test]
+    fn records_assumptions_but_refuses_non_evidence() {
+        let source = "Assume $A$ is symmetric and positive definite.\nIf $B$ were invertible, the solve would be unique.\nAccording to \\cite{prior}, $C$ is continuous.\n$D$ may be differentiable.\n$E$ is not independent.";
+        let analysis = analyze(source);
+        let assumptions = analysis
+            .assumptions
+            .iter()
+            .map(|assumption| (assumption.kind.as_str(), assumption.value.as_str()))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            assumptions,
+            vec![
+                ("structure", "symmetric"),
+                ("definiteness", "positive-definite")
+            ]
+        );
+        assert!(
+            analysis
+                .definitions
+                .iter()
+                .all(|definition| { !["B", "C", "D", "E"].contains(&definition.symbol.as_str()) })
+        );
     }
 }

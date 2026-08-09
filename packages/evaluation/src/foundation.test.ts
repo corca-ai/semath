@@ -41,9 +41,11 @@ describe("foundation corpus", () => {
   test("scores semantic output and reports missing evidence by case", () => {
     const corpus = parseFoundationCorpus(corpusValue(), suite);
     const complete: FoundationObservation = {
+      assumptions: [],
       caseId: "velocity-declaration",
       conceptIds: [],
       diagnosticCodes: [],
+      definitions: [],
       dimensions: ["length*time^-1"],
       quantityKindIds: ["velocity"],
       relationIds: [],

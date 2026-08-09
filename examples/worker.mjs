@@ -1,4 +1,5 @@
 import { SemathWorkerEngine } from "semath/worker";
+import { SEMATH_PROTOCOL_VERSION } from "semath/protocol";
 
 const epoch = "standalone-worker-example";
 const engine = await SemathWorkerEngine.create(() => import("semath/wasm"));
@@ -16,7 +17,7 @@ const mathRegions = [...content.matchAll(/\$([^$]+)\$/g)].map((match) => ({
   },
 }));
 engine.reset({
-  protocolVersion: 3,
+  protocolVersion: SEMATH_PROTOCOL_VERSION,
   epoch,
   inventoryVersion: 1,
   projectId: "example",
@@ -35,7 +36,7 @@ engine.reset({
   ],
 });
 const result = engine.query({
-  protocolVersion: 3,
+  protocolVersion: SEMATH_PROTOCOL_VERSION,
   epoch,
   inventoryVersion: 1,
   documentVersion: 1,

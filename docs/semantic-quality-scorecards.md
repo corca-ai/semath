@@ -16,6 +16,9 @@ thresholds.
 | Variation coverage | labeled notation, prose, role, constraint, project, macro, and mutation families | equal real-world frequency |
 | Diversity cells | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles | real-world prevalence |
 | Metamorphic invariance | irrelevant prose, comments, and document ordering preserve outcomes | arbitrary source rewrites are safe |
+| Prose association | declared symbols receive their exact descriptions | the description is a supported domain concept |
+| Assumption extraction | explicit assumptions retain subjects and evidence | hypothetical or cited properties are assumptions |
+| Prose scope | declarations and assumptions obey section and include order | later or disconnected evidence is visible |
 
 Thresholds apply to every law, so a broad suite cannot hide a weak law. The
 evaluator also rejects missing or unexpected generated observations rather than
@@ -23,8 +26,10 @@ treating an empty set as success.
 
 The current baseline has 1,890 checked-in synthetic law cases and 157
 deterministic runtime variants. It includes 40 independently scored unknown and
-cross-pack collision cases. A separate 46-case foundation corpus evaluates
-quantity, unit, dimension, and diagnostic behavior without inventing laws.
+cross-pack collision cases. Separate foundation suites contain 96 cases for the
+scientific kernel, quantities and units, and English scientific prose. The prose
+suite reports association, classification, assumption, evidence, refusal, and
+scope independently instead of blending them into one recognition number.
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or

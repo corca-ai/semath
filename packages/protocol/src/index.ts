@@ -1,4 +1,4 @@
-export const SEMATH_PROTOCOL_VERSION = 3 as const;
+export const SEMATH_PROTOCOL_VERSION = 4 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -195,6 +195,13 @@ export interface ConceptInfo {
   label: string;
 }
 
+export interface AssumptionInfo {
+  evidence: Evidence;
+  kind: string;
+  subjects?: readonly string[];
+  value: string;
+}
+
 export type SemanticClaimStatus =
   "certain" | "supported" | "speculative" | "conflicting";
 
@@ -225,6 +232,7 @@ export interface RelationInfo {
 }
 
 export interface SemanticContextInfo {
+  assumptions?: readonly AssumptionInfo[];
   claims: readonly SemanticClaimInfo[];
   concepts: readonly ConceptInfo[];
   relations: readonly RelationInfo[];

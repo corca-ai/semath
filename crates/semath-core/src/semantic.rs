@@ -7,11 +7,12 @@ use crate::law::{ExternalTypeEnvironment, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
 use crate::prose::observe_prose;
 use crate::quantity::{QuantityObservations, observe_quantities};
+use crate::scope::ScopeGraph;
 use crate::shape::{ShapeObservations, observe_shapes};
 use crate::{
-    ConceptInfo, DefinitionInfo, Evidence, LawRecognition, ProjectDocument, QuantityInfo,
-    RelationInfo, RoleInfo, SemanticClaimInfo, SemanticClaimStatus, SemanticContextInfo,
-    SemanticSymbolId, ShapeInfo,
+    AssumptionInfo, ConceptInfo, DefinitionInfo, Evidence, LawRecognition, ProjectDocument,
+    QuantityInfo, RelationInfo, RoleInfo, SemanticClaimInfo, SemanticClaimStatus,
+    SemanticContextInfo, SemanticSymbolId, ShapeInfo,
 };
 
 const MAX_CONCEPTS: usize = 16;
@@ -32,6 +33,7 @@ struct SemanticClaims {
     observations: Vec<SemanticObservation>,
     relations: Vec<RelationInfo>,
     quantities: Vec<QuantityInfo>,
+    assumptions: Vec<AssumptionInfo>,
 }
 
 impl SemanticClaims {
@@ -42,6 +44,7 @@ impl SemanticClaims {
         formulas: Vec<LawRecognition>,
         relations: Vec<RelationInfo>,
         quantities: Vec<QuantityInfo>,
+        assumptions: Vec<AssumptionInfo>,
     ) -> Self {
         let mut observations = Vec::new();
         observations.extend(definitions.into_iter().map(SemanticObservation::Definition));
@@ -63,6 +66,7 @@ impl SemanticClaims {
             observations,
             relations,
             quantities,
+            assumptions,
         }
     }
 
@@ -97,6 +101,7 @@ impl SemanticClaims {
             symbol,
             semantic_id,
             concepts,
+            assumptions: self.assumptions.clone(),
             claims,
             relations,
             quantities: self.quantities.clone(),
@@ -166,6 +171,8 @@ pub(crate) struct SemanticFactStore {
     pub roles: RoleObservations,
     pub laws: LawObservations,
     pub domains: DomainObservations,
+    assumptions: Vec<AssumptionInfo>,
+    assumption_scopes: ScopeGraph,
 }
 
 impl SemanticFactStore {
@@ -183,6 +190,7 @@ impl SemanticFactStore {
             &ExternalTypeEnvironment::default(),
         );
         let domains = observe_domains(document, laws.all());
+        let assumption_scopes = ScopeGraph::new(document);
         Self {
             definitions: prose.definitions,
             shapes,
@@ -190,6 +198,8 @@ impl SemanticFactStore {
             roles,
             laws,
             domains,
+            assumptions: prose.assumptions,
+            assumption_scopes,
         }
     }
 
@@ -253,8 +263,29 @@ impl SemanticFactStore {
             formulas,
             relations,
             quantities,
+            self.assumptions_at(offset),
         )
         .context(symbol, semantic_id)
+    }
+
+    fn assumptions_at(&self, offset: u32) -> Vec<AssumptionInfo> {
+        self.assumptions
+            .iter()
+            .filter(|assumption| {
+                let Some(phrase) = assumption.evidence.source_ranges.last() else {
+                    return false;
+                };
+                let scope_id = self.assumption_scopes.id_at(phrase.start_offset);
+                self.assumption_scopes.visible(scope_id, offset)
+                    && (phrase.end_offset <= offset
+                        || assumption
+                            .evidence
+                            .source_ranges
+                            .iter()
+                            .any(|range| range.contains(offset)))
+            })
+            .cloned()
+            .collect()
     }
 
     pub fn constraint_count(&self) -> u32 {
@@ -402,6 +433,7 @@ mod tests {
             Vec::new(),
             Vec::new(),
             Vec::new(),
+            Vec::new(),
         )
         .context(Some("x".into()), None);
 
@@ -415,6 +447,7 @@ mod tests {
         let context = SemanticClaims::from_symbol_observations(
             Vec::new(),
             vec![role("event", 4), role("function", 12)],
+            Vec::new(),
             Vec::new(),
             Vec::new(),
             Vec::new(),
@@ -442,6 +475,7 @@ mod tests {
         let context = SemanticClaims::from_symbol_observations(
             Vec::new(),
             vec![role("function", 4), role("operator", 12)],
+            Vec::new(),
             Vec::new(),
             Vec::new(),
             Vec::new(),

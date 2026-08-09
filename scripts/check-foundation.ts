@@ -103,9 +103,19 @@ const observations = planned.map((item, index): FoundationObservation => {
     ...(view?.symbol?.quantities ?? []),
   ];
   const observation = {
+    assumptions: (view?.context.assumptions ?? []).map((item) => ({
+      kind: item.kind,
+      subjects: item.subjects ?? [],
+      value: item.value,
+    })),
     caseId: item.case.id,
     conceptIds: [...new Set((view?.context.concepts ?? []).map((entry) => entry.conceptId))],
     diagnosticCodes: [...new Set((view?.diagnostics ?? []).map((entry) => entry.code))],
+    definitions: (view?.symbol?.definitions ?? []).map((item) => ({
+      description: item.description,
+      evidenceRuleIds: [item.evidence.ruleId],
+      symbol: item.symbol,
+    })),
     dimensions: [...new Set(quantities.map((entry) => entry.dimension.display))],
     quantityKindIds: [...new Set(quantities.flatMap((entry) =>
       entry.quantityKindId ? [entry.quantityKindId] : [],
@@ -113,7 +123,10 @@ const observations = planned.map((item, index): FoundationObservation => {
     relationIds: [...new Set((view?.context.relations ?? []).map((entry) => entry.relationId))],
     ...(view ? { status: view.status } : {}),
     suiteId: item.suite.id,
-    symbols: [...new Set(quantities.map((entry) => entry.symbol))],
+    symbols: [...new Set([
+      ...quantities.map((entry) => entry.symbol),
+      ...(view?.symbol ? [view.symbol.symbol] : []),
+    ])],
     unitIds: [...new Set(quantities.flatMap((entry) => entry.unitId ? [entry.unitId] : []))],
   };
   if (process.env.SEMATH_FOUNDATION_DEBUG?.split(",").includes(item.case.id)) {
@@ -131,7 +144,7 @@ for (const suite of manifest.foundationSuites) {
     new Map(manifest.dimensions.map((dimension) => [dimension.id, dimension.tags])),
   );
   console.log(
-    `${suite.id}: passed=${scorecard.passed}/${scorecard.cases} dimensions=${Object.entries(scorecard.dimensions).map(([id, count]) => `${id}:${count}`).join(",")}`,
+    `${suite.id}: passed=${scorecard.passed}/${scorecard.cases} dimensions=${Object.entries(scorecard.dimensions).map(([id, count]) => `${id}:${count}`).join(",")} metrics=${Object.entries(scorecard.metrics).map(([id, value]) => `${id}:${value.passed}/${value.cases}`).join(",")}`,
   );
   if (scorecard.failures.length) {
     throw new Error(`foundation quality gate failed:\n${scorecard.failures.join("\n")}`);
