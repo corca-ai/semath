@@ -1,9 +1,15 @@
 import type { CorpusDocument, FoundationSuiteConfig } from "./model";
 
 export interface FoundationExpectation {
+  conceptId?: string;
   diagnosticCode?: string;
   dimension?: string;
+  excludedConceptId?: string;
+  excludedQuantityKindId?: string;
+  excludedRelationId?: string;
   quantityKindId?: string;
+  relationId?: string;
+  status?: string;
   symbol?: string;
   unitId?: string;
 }
@@ -24,9 +30,12 @@ export interface FoundationCorpus {
 
 export interface FoundationObservation {
   caseId: string;
+  conceptIds: readonly string[];
   diagnosticCodes: readonly string[];
   dimensions: readonly string[];
   quantityKindIds: readonly string[];
+  relationIds: readonly string[];
+  status?: string;
   suiteId: string;
   symbols: readonly string[];
   unitIds: readonly string[];
@@ -76,14 +85,32 @@ export function scoreFoundation(
     }
     const expected = item.expectation;
     const mismatches = [
+      expected.conceptId && !observation.conceptIds.includes(expected.conceptId)
+        ? `concept ${expected.conceptId}`
+        : undefined,
       expected.diagnosticCode && !observation.diagnosticCodes.includes(expected.diagnosticCode)
         ? `diagnostic ${expected.diagnosticCode}`
+        : undefined,
+      expected.excludedConceptId && observation.conceptIds.includes(expected.excludedConceptId)
+        ? `excluded concept ${expected.excludedConceptId}`
+        : undefined,
+      expected.excludedQuantityKindId && observation.quantityKindIds.includes(expected.excludedQuantityKindId)
+        ? `excluded quantity ${expected.excludedQuantityKindId}`
+        : undefined,
+      expected.excludedRelationId && observation.relationIds.includes(expected.excludedRelationId)
+        ? `excluded relation ${expected.excludedRelationId}`
         : undefined,
       expected.dimension && !observation.dimensions.includes(expected.dimension)
         ? `dimension ${expected.dimension}`
         : undefined,
       expected.quantityKindId && !observation.quantityKindIds.includes(expected.quantityKindId)
         ? `quantity ${expected.quantityKindId}`
+        : undefined,
+      expected.relationId && !observation.relationIds.includes(expected.relationId)
+        ? `relation ${expected.relationId}`
+        : undefined,
+      expected.status && observation.status !== expected.status
+        ? `status ${expected.status}`
         : undefined,
       expected.symbol && !observation.symbols.includes(expected.symbol)
         ? `symbol ${expected.symbol}`
@@ -156,7 +183,19 @@ function parseCase(value: unknown, path: string): FoundationCase {
   const expectationValue = record(item.expectation, `${path}.expectation`);
   exact(
     expectationValue,
-    ["diagnosticCode", "dimension", "quantityKindId", "symbol", "unitId"],
+    [
+      "conceptId",
+      "diagnosticCode",
+      "dimension",
+      "excludedConceptId",
+      "excludedQuantityKindId",
+      "excludedRelationId",
+      "quantityKindId",
+      "relationId",
+      "status",
+      "symbol",
+      "unitId",
+    ],
     `${path}.expectation`,
   );
   const expectation = Object.fromEntries(

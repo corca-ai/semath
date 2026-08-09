@@ -14,6 +14,9 @@ holds approved support policy; GitHub issues hold planned work.
   source-linked evidence, and refusal preservation.
 - The quantities/units foundation passes 46 of 46 non-law cases for quantity,
   unit, dimension, propagation diagnostics, notation, prose, and role evidence.
+- The shared scientific-kernel foundation passes 16 of 16 positive and refusal
+  cases across explicit operators, typed application, namespaced concepts,
+  include order, and transparent or opaque prose macros.
 - Linear algebra and probability meet evaluated policy. Calculus, discrete
   mathematics, and optimization have useful probe families but do not claim
   field-wide coverage from one or two law families.
@@ -30,21 +33,20 @@ field completeness.
 | Generic prose | “In this setting, let X and Y …” lost the first coordinated declaration | Coordinated declarations now accept an introductory clause without a pack branch |
 | Fixture quality | Several seeds used invalid TeX words such as `alpha` or semantically invalid “respectively” phrasing | Corrected authored seeds; generation and duplicate/integrity gates prevent silent drift |
 | Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
-| Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 40-case non-law corpus and pure scorer |
+| Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
+| Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
+| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 3 and the core now use pack-qualified concept identities without a legacy role field |
+| Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
+| Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 
 ## Remaining measured gaps
 
 | Category | Current limitation | Affected evidence |
 | --- | --- | --- |
-| Generic IR | Set union and intersection match canonically but are not yet first-class relation operators with membership/result typing | Probability and discrete mathematics |
-| Generic IR | Function application, composition, indexed families, binders, partial derivatives, gradients, and integrals lack one complete compositional typing path | Calculus, optimization, linear algebra, and control systems |
-| Concept identity | Law-role prose is discovered from pack data, but runtime role claims still use unnamespaced suffixes that can collide as the catalog grows | Future packs with shared role names |
+| Generic IR | Indexed families, partial derivatives, gradients, integrals, and operator result typing do not yet share a complete constraint path | Calculus, optimization, linear algebra, and control systems |
 | Constraints | Side conditions are reported but not uniformly represented as reusable typed constraints over independent variables, domains, shapes, and assumptions | Matrix products, derivatives, optimization updates, and engineering laws |
-| Project environment | Exported project facts do not yet propagate quantity/unit declarations through includes with the same contract as local facts | Quantities/units and any quantity-bearing field pack |
-| Macro semantics | Macros used inside prose declarations do not yet contribute quantity facts; opaque expansion must continue to refuse | Quantities/units and future notation-heavy packs |
 | Coverage | Probe packs demonstrate runtime viability, not broad field recognition | Calculus, discrete mathematics, and optimization/ML |
 
-The first six limitations are concrete inputs to
-[Roadmap 3/7](https://github.com/corca-ai/semath/issues/149). They require
-domain-neutral primitives shared by multiple packs; they must not be hidden by
+The remaining limitations are inputs to later roadmap issues. They require
+shared primitives and measured evidence; they must not be hidden by
 pack-specific matchers or lower thresholds.

@@ -924,19 +924,11 @@ fn push_claim(
         start_offset: index.utf16_for_byte(evidence_start),
         end_offset: index.utf16_for_byte(evidence_end),
     };
-    let definition_uses_symbol_range = matches!(
-        rule_id,
-        "english-let-definition" | "english-let-math-declaration" | "notation-table-definition"
-    );
     let definition_evidence = Evidence {
         rule_id: rule_id.into(),
         kind: "explicit-prose".into(),
         strength: "strong".into(),
-        source_ranges: vec![if definition_uses_symbol_range {
-            symbol_range.clone()
-        } else {
-            evidence_range.clone()
-        }],
+        source_ranges: vec![evidence_range.clone()],
     };
     analysis.definitions.push(DefinitionInfo {
         symbol: symbol.into(),

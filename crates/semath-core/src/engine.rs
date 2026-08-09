@@ -12,10 +12,10 @@ use crate::scope::ScopeGraph;
 use crate::semantic::SemanticFactStore;
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
-    ProjectChange, ProjectDocument, ProjectSnapshot, Query, QueryEnvelope, QueryResult, QueryValue,
-    RenamePreparation, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    ProjectChange, ProjectDocument, ProjectSnapshot, QuantityInfo, Query, QueryEnvelope,
+    QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticContextInfo, SemanticDiagnostic,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
+    SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -50,9 +50,9 @@ struct AnalyzedDocument {
 
 #[derive(Clone)]
 enum ExportedTypeFact {
-    Role { symbol: String, value: String },
-    Quantity { symbol: String, value: String },
-    Shape { symbol: String, value: String },
+    Role(RoleInfo),
+    Quantity(QuantityInfo),
+    Shape(ShapeInfo),
 }
 
 #[derive(Clone)]
@@ -87,6 +87,7 @@ struct ProjectSemanticIndex {
     documents: HashMap<String, AnalyzedDocument>,
     facts: HashMap<String, SemanticFactStore>,
     order: ProjectOrder,
+    external_types: HashMap<String, ExternalTypeEnvironment>,
 }
 
 impl ProjectSemanticIndex {
@@ -100,6 +101,7 @@ impl ProjectSemanticIndex {
     fn remove(&mut self, file_id: &str) {
         self.documents.remove(file_id);
         self.facts.remove(file_id);
+        self.external_types.remove(file_id);
     }
 
     fn facts(&self, file_id: &str) -> &SemanticFactStore {
@@ -569,7 +571,13 @@ impl SemathEngine {
                 )
             })
             .unwrap_or_else(|| (Vec::new(), None, None));
-        facts.context(definitions, symbol_name, semantic_id, offset)
+        facts.context(
+            definitions,
+            symbol_name,
+            semantic_id,
+            offset,
+            self.index.external_types.get(file_id),
+        )
     }
 
     fn semantic_view(
@@ -676,9 +684,21 @@ impl SemathEngine {
             self.visible_definitions(&document.document.file_id, occurrence, name);
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
         definitions.truncate(MAX_SYMBOL_DEFINITIONS);
-        let (shapes, shapes_truncated) = facts.shapes.claims_at(name, offset);
-        let (roles, roles_truncated) = facts.roles.roles_at(name, offset);
-        let (quantities, quantities_truncated) = facts.quantities.at(name, offset);
+        let external = self.index.external_types.get(&document.document.file_id);
+        let (mut shapes, shapes_truncated) = facts.shapes.claims_at(name, offset);
+        let (mut roles, roles_truncated) = facts.roles.roles_at(name, offset);
+        let (mut quantities, quantities_truncated) = facts.quantities.at(name, offset);
+        if let Some(external) = external {
+            shapes.extend(external.shapes_at(offset, name));
+            roles.extend(external.roles_at(offset, name));
+            quantities.extend(external.quantities_at(offset, name));
+            shapes.sort_by(|left, right| left.kind.cmp(&right.kind));
+            shapes.dedup();
+            roles.sort_by(|left, right| left.concept_id.cmp(&right.concept_id));
+            roles.dedup();
+            quantities.sort_by(|left, right| left.display.cmp(&right.display));
+            quantities.dedup();
+        }
         let (diagnostics, diagnostics_truncated) =
             symbol_diagnostics(document, facts, name, offset, &shapes, hygiene_enabled);
         SymbolInfo {
@@ -719,26 +739,17 @@ impl SemathEngine {
                         component_id: component_id.clone(),
                         source_offset: evidence_anchor(&role.evidence),
                         file_id: file_id.clone(),
-                        fact: ExportedTypeFact::Role {
-                            symbol: role.symbol,
-                            value: role.role,
-                        },
+                        fact: ExportedTypeFact::Role(role),
                     }
                 });
-                let quantities = semantic.quantities.exported().into_iter().filter_map({
+                let quantities = semantic.quantities.exported().into_iter().map({
                     let component_id = component_id.clone();
                     let file_id = file_id.clone();
-                    move |quantity| {
-                        let value = quantity.quantity_kind_id?;
-                        Some(IndexedTypeFact {
-                            component_id: component_id.clone(),
-                            source_offset: evidence_anchor(&quantity.evidence),
-                            file_id: file_id.clone(),
-                            fact: ExportedTypeFact::Quantity {
-                                symbol: quantity.symbol,
-                                value,
-                            },
-                        })
+                    move |quantity| IndexedTypeFact {
+                        component_id: component_id.clone(),
+                        source_offset: evidence_anchor(&quantity.evidence),
+                        file_id: file_id.clone(),
+                        fact: ExportedTypeFact::Quantity(quantity),
                     }
                 });
                 let shapes = semantic.shapes.exported().into_iter().map({
@@ -748,10 +759,7 @@ impl SemathEngine {
                         component_id: component_id.clone(),
                         source_offset: evidence_anchor(&shape.evidence),
                         file_id: file_id.clone(),
-                        fact: ExportedTypeFact::Shape {
-                            symbol: shape.symbol,
-                            value: shape.kind,
-                        },
+                        fact: ExportedTypeFact::Shape(shape),
                     }
                 });
                 roles.chain(quantities).chain(shapes)
@@ -782,14 +790,14 @@ impl SemathEngine {
                             continue;
                         }
                         match &fact.fact {
-                            ExportedTypeFact::Role { symbol, value } => {
-                                environment.add_role(semantic_offset, symbol, value);
+                            ExportedTypeFact::Role(role) => {
+                                environment.add_role(semantic_offset, role.clone());
                             }
-                            ExportedTypeFact::Quantity { symbol, value } => {
-                                environment.add_quantity(semantic_offset, symbol, value);
+                            ExportedTypeFact::Quantity(quantity) => {
+                                environment.add_quantity(semantic_offset, quantity.clone());
                             }
-                            ExportedTypeFact::Shape { symbol, value } => {
-                                environment.add_shape(semantic_offset, symbol, value);
+                            ExportedTypeFact::Shape(shape) => {
+                                environment.add_shape(semantic_offset, shape.clone());
                             }
                         }
                     }
@@ -804,6 +812,7 @@ impl SemathEngine {
             self.index
                 .facts_mut(&file_id)
                 .refresh_laws(&source, &parsed, &environment);
+            self.index.external_types.insert(file_id, environment);
         }
     }
 

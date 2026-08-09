@@ -92,6 +92,12 @@ pub(crate) fn declared_symbols(
     if let SemanticExprKind::Symbol(name) = expression.kind {
         return vec![(name, expression.range)];
     }
+    if let SemanticExprKind::Relation { operator, left, .. } = &expression.kind
+        && matches!(operator.as_str(), "member-of" | "not-member-of")
+        && let SemanticExprKind::Symbol(name) = &left.kind
+    {
+        return vec![(name.clone(), left.range.clone())];
+    }
     let SemanticExprKind::Product(items) = expression.kind else {
         return Vec::new();
     };
@@ -315,9 +321,9 @@ impl Parser {
     }
 
     fn parse_relation(&mut self) -> SemanticExpr {
-        let left = self.parse_sum();
+        let left = self.parse_set_operation();
         if let Some(operator) = self.consume_relation() {
-            let right = self.parse_sum();
+            let right = self.parse_set_operation();
             return combined(
                 &left,
                 &right,
@@ -329,6 +335,31 @@ impl Parser {
             );
         }
         left
+    }
+
+    fn parse_set_operation(&mut self) -> SemanticExpr {
+        let mut expression = self.parse_sum();
+        loop {
+            let operator = if self.consume_command("cap") {
+                "intersection"
+            } else if self.consume_command("cup") {
+                "union"
+            } else if self.consume_command("circ") {
+                "compose"
+            } else {
+                break;
+            };
+            let right = self.parse_sum();
+            expression = combined(
+                &expression,
+                &right,
+                SemanticExprKind::Apply {
+                    operator: operator.into(),
+                    arguments: vec![expression.clone(), right.clone()],
+                },
+            );
+        }
+        expression
     }
 
     fn parse_sum(&mut self) -> SemanticExpr {
@@ -408,10 +439,10 @@ impl Parser {
             }
             if matches!(self.peek(), TokenKind::Open('(')) {
                 let argument = self.parse_power();
-                if is_time_argument(&argument)
-                    && let Some(previous) = factors.pop()
-                    && let Some(applied) = apply_argument(previous.clone(), argument.clone())
+                if let Some(previous) = factors.last().cloned()
+                    && let Some(applied) = apply_argument(previous, argument.clone())
                 {
+                    factors.pop();
                     factors.push(applied);
                     continue;
                 }
@@ -586,6 +617,28 @@ impl Parser {
                     }
                     return expression;
                 }
+                "left" => {
+                    let command = self.next();
+                    let mut expression = self.parse_group_or_atom();
+                    let end = if self.consume_command("right") {
+                        let end = self
+                            .tokens
+                            .get(self.cursor)
+                            .map(|token| token.range.clone());
+                        if matches!(self.peek(), TokenKind::Close(_)) {
+                            self.cursor += 1;
+                        }
+                        end
+                    } else {
+                        None
+                    };
+                    expression.range = end.as_ref().map_or_else(
+                        || merge_range(&command.range, &expression.range),
+                        |end| merge_range(&command.range, end),
+                    );
+                    expression.provenance.extend(command.provenance);
+                    return expression;
+                }
                 "lVert" => {
                     let command = self.next();
                     let expression = self.parse_power();
@@ -711,6 +764,18 @@ impl Parser {
             Some("less-or-equal".into())
         } else if self.consume_command("ge") || self.consume_command("geq") {
             Some("greater-or-equal".into())
+        } else if self.consume_command("in") {
+            Some("member-of".into())
+        } else if self.consume_command("notin") {
+            Some("not-member-of".into())
+        } else if self.consume_command("subset") {
+            Some("proper-subset-of".into())
+        } else if self.consume_command("subseteq") {
+            Some("subset-of".into())
+        } else if self.consume_command("supset") {
+            Some("proper-superset-of".into())
+        } else if self.consume_command("supseteq") {
+            Some("superset-of".into())
         } else {
             None
         }
@@ -810,11 +875,6 @@ fn apply_subscript(
     }
 }
 
-fn is_time_argument(expression: &SemanticExpr) -> bool {
-    expression_name(expression)
-        .is_some_and(|name| matches!(name.as_str(), "t" | "tau" | "τ") || name.starts_with("t_"))
-}
-
 fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<SemanticExpr> {
     match expression.kind.clone() {
         SemanticExprKind::Symbol(operator) => Some(SemanticExpr {
@@ -822,7 +882,7 @@ fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<Se
             provenance: merge_provenance(&expression, &argument),
             kind: SemanticExprKind::Apply {
                 operator,
-                arguments: vec![argument],
+                arguments: split_arguments(argument),
             },
         }),
         SemanticExprKind::Derivative {
@@ -845,11 +905,56 @@ fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<Se
     }
 }
 
+fn split_arguments(argument: SemanticExpr) -> Vec<SemanticExpr> {
+    let SemanticExprKind::Product(items) = &argument.kind else {
+        return vec![argument];
+    };
+    if !items
+        .iter()
+        .any(|item| matches!(symbol_name(item), Some(",")))
+    {
+        return vec![argument];
+    }
+    let mut arguments = Vec::new();
+    let mut current = Vec::new();
+    for item in items {
+        if matches!(symbol_name(item), Some(",")) {
+            if !current.is_empty() {
+                arguments.push(associative(
+                    std::mem::take(&mut current),
+                    SemanticExprKind::Product,
+                ));
+            }
+        } else {
+            current.push(item.clone());
+        }
+    }
+    if !current.is_empty() {
+        arguments.push(associative(current, SemanticExprKind::Product));
+    }
+    arguments
+}
+
 fn starts_atom(token: &TokenKind) -> bool {
     match token {
         TokenKind::Command(command) => !matches!(
             command.as_str(),
-            "cdot" | "times" | "le" | "leq" | "ge" | "geq" | "right"
+            "cap"
+                | "cdot"
+                | "circ"
+                | "cup"
+                | "ge"
+                | "geq"
+                | "in"
+                | "le"
+                | "leq"
+                | "notin"
+                | "right"
+                | "subset"
+                | "subseteq"
+                | "supset"
+                | "supseteq"
+                | "times"
         ),
         TokenKind::Identifier(_) | TokenKind::Number(_) | TokenKind::Open(_) => true,
         TokenKind::Operator(',') => true,
@@ -964,5 +1069,28 @@ mod tests {
         assert!(matches!(lyapunov.kind, SemanticExprKind::Relation { .. }));
         let capacitor = lower_template("i=C\\frac{d v}{d t}");
         assert!(matches!(capacitor.kind, SemanticExprKind::Relation { .. }));
+    }
+
+    #[test]
+    fn lowers_scientific_relations_and_applications_as_explicit_operators() {
+        assert!(matches!(
+            lower_template("A \\cup B").kind,
+            SemanticExprKind::Apply { ref operator, ref arguments }
+                if operator == "union" && arguments.len() == 2
+        ));
+        assert!(matches!(
+            lower_template("x \\in A").kind,
+            SemanticExprKind::Relation { ref operator, .. } if operator == "member-of"
+        ));
+        assert!(matches!(
+            lower_template("f(x,y)").kind,
+            SemanticExprKind::Apply { ref operator, ref arguments }
+                if operator == "f" && arguments.len() == 2
+        ));
+        assert!(matches!(
+            lower_template("f \\circ g").kind,
+            SemanticExprKind::Apply { ref operator, ref arguments }
+                if operator == "compose" && arguments.len() == 2
+        ));
     }
 }

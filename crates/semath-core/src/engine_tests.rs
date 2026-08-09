@@ -308,4 +308,136 @@ fn included_type_declarations_drive_project_law_inference() {
     };
     assert_eq!(view.status, "established");
     assert_eq!(view.context.relations[0].relation_id, "circuits:ohm-law");
+
+    let symbol_result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.find("V=").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = symbol_result.value else {
+        panic!("expected semantic view")
+    };
+    let symbol = view.symbol.expect("expected V symbol information");
+    assert_eq!(symbol.roles[0].concept_id, "quantities-units:voltage");
+    assert_eq!(symbol.roles[0].evidence.source_ranges[0].start_offset, 0);
+}
+
+#[test]
+fn declarations_in_a_later_include_do_not_flow_backwards() {
+    let main = "$V=RI$\n\\input{definitions}";
+    let definitions = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
+    let include_start = main.find("\\input").unwrap() as u32;
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "definitions".into(),
+        source_range: SourceRange {
+            start_offset: include_start,
+            end_offset: main.len() as u32,
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("definitions", "definitions.tex", definitions, 1),
+            ],
+        })
+        .unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.find('=').unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.symbol
+            .expect("expected V symbol information")
+            .roles
+            .is_empty(),
+        "a declaration included after the formula must not be visible at the formula"
+    );
+}
+
+#[test]
+fn incremental_project_type_refresh_matches_a_clean_rebuild() {
+    let main = "\\input{definitions}\n$V=RI$";
+    let original = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be a function.";
+    let changed = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "definitions".into(),
+        source_range: SourceRange {
+            start_offset: 0,
+            end_offset: 19,
+        },
+    });
+    let base_snapshot = ProjectSnapshot {
+        protocol_version: PROTOCOL_VERSION,
+        epoch: "project:1".into(),
+        inventory_version: 1,
+        project_id: "project".into(),
+        main_file_id: Some("main".into()),
+        documents: vec![
+            main_document.clone(),
+            document("definitions", "definitions.tex", original, 1),
+        ],
+    };
+    let mut incremental = SemathEngine::default();
+    incremental.reset(base_snapshot).unwrap();
+    incremental
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: document("definitions", "definitions.tex", changed, 2),
+            }],
+        })
+        .unwrap();
+
+    let clean_snapshot = ProjectSnapshot {
+        protocol_version: PROTOCOL_VERSION,
+        epoch: "project:1".into(),
+        inventory_version: 2,
+        project_id: "project".into(),
+        main_file_id: Some("main".into()),
+        documents: vec![
+            main_document,
+            document("definitions", "definitions.tex", changed, 2),
+        ],
+    };
+    let mut clean = SemathEngine::default();
+    clean.reset(clean_snapshot).unwrap();
+    let semantic_query = Query::SemanticView {
+        file_id: "main".into(),
+        offset: main.find('=').unwrap() as u32,
+    };
+    let incremental_value = incremental
+        .query(query(semantic_query.clone(), 2, 1))
+        .unwrap()
+        .value;
+    let clean_value = clean.query(query(semantic_query, 2, 1)).unwrap().value;
+    assert_eq!(
+        serde_json::to_value(incremental_value).unwrap(),
+        serde_json::to_value(clean_value).unwrap()
+    );
 }

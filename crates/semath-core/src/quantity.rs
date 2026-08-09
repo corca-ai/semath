@@ -8,7 +8,8 @@ use crate::parser::ParsedMath;
 use crate::scope::ScopeGraph;
 use crate::{
     DefinitionInfo, DimensionExponentInfo, Evidence, PhysicalDimensionInfo, ProjectDocument,
-    QuantityInfo, SemanticDiagnostic, SourceIndex, SourceRange,
+    ProjectMacroExpansionStatus, ProjectMacroKind, QuantityInfo, SemanticDiagnostic, SourceIndex,
+    SourceRange,
 };
 
 const MAX_QUANTITY_CLAIMS: usize = 8;
@@ -297,7 +298,7 @@ pub(crate) fn observe_quantities(
     definitions: &[DefinitionInfo],
 ) -> QuantityObservations {
     let scopes = ScopeGraph::new(document);
-    let mut facts = explicit_facts(definitions, &scopes);
+    let mut facts = explicit_facts(document, definitions, &scopes);
     let mut diagnostics = explicit_diagnostics(&facts);
     propagate_formula_dimensions(document, parsed, &scopes, &mut facts, &mut diagnostics);
     facts.sort_by_key(|fact| fact.available_from);
@@ -309,12 +310,17 @@ pub(crate) fn observe_quantities(
     }
 }
 
-fn explicit_facts(definitions: &[DefinitionInfo], scopes: &ScopeGraph) -> Vec<QuantityFact> {
+fn explicit_facts(
+    document: &ProjectDocument,
+    definitions: &[DefinitionInfo],
+    scopes: &ScopeGraph,
+) -> Vec<QuantityFact> {
     definitions
         .iter()
         .filter_map(|definition| {
-            let declared_kind = find_quantity_kind(&definition.description);
-            let unit = find_unit(&definition.description);
+            let description = semantic_description(document, definition);
+            let declared_kind = find_quantity_kind(&description);
+            let unit = find_unit(&description);
             let kind = declared_kind.or_else(|| {
                 unit.and_then(|unit| {
                     QUANTITY_CATALOG
@@ -353,6 +359,39 @@ fn explicit_facts(definitions: &[DefinitionInfo], scopes: &ScopeGraph) -> Vec<Qu
             })
         })
         .collect()
+}
+
+fn semantic_description(document: &ProjectDocument, definition: &DefinitionInfo) -> String {
+    let mut description = definition.description.clone();
+    let mut expanded_surfaces = Vec::new();
+    for project_macro in &document.macros {
+        if project_macro.kind != ProjectMacroKind::Call
+            || project_macro.source.file_id != document.file_id
+        {
+            continue;
+        }
+        let input = project_macro
+            .expansion
+            .input_range
+            .as_ref()
+            .unwrap_or(&project_macro.source.range);
+        let belongs_to_definition = definition.evidence.source_ranges.iter().any(|range| {
+            range.start_offset <= input.start_offset && input.end_offset <= range.end_offset
+        });
+        if !belongs_to_definition {
+            continue;
+        }
+        description = description.replace(&format!("\\{}", project_macro.name), "");
+        if project_macro.expansion.status == ProjectMacroExpansionStatus::Expanded
+            && let Some(surface) = &project_macro.expansion.surface
+        {
+            expanded_surfaces.push(surface.as_str());
+        }
+    }
+    std::iter::once(description.as_str())
+        .chain(expanded_surfaces)
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn explicit_diagnostics(facts: &[QuantityFact]) -> Vec<SemanticDiagnostic> {
@@ -623,7 +662,10 @@ mod tests {
 
     use super::{Dimension, Exponent, observe_quantities};
     use crate::parser::{parse_regions, test_math_regions};
-    use crate::{DocumentLanguage, ProjectDocument};
+    use crate::{
+        DocumentLanguage, ProjectDocument, ProjectMacro, ProjectMacroExpansion,
+        ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSourceRef, SourceRange,
+    };
 
     #[test]
     fn dimension_algebra_is_exact_and_canonical() {
@@ -667,5 +709,55 @@ mod tests {
                 .iter()
                 .any(|diagnostic| diagnostic.code == "quantity-addition-dimension-mismatch")
         );
+    }
+
+    #[test]
+    fn transparent_prose_macros_contribute_meaning_but_opaque_macros_do_not() {
+        let content = "Let $v$ be \\velocity.";
+        let call_start = content.find("\\velocity").unwrap() as u32;
+        let call_end = call_start + "\\velocity".len() as u32;
+        let mut document = ProjectDocument {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: content.into(),
+            document_version: 1,
+            math_regions: test_math_regions(content, DocumentLanguage::Latex),
+            macros: vec![ProjectMacro {
+                kind: ProjectMacroKind::Call,
+                name: "velocity".into(),
+                source: ProjectSourceRef {
+                    file_id: "main".into(),
+                    path: "main.tex".into(),
+                    range: SourceRange {
+                        start_offset: call_start,
+                        end_offset: call_end,
+                    },
+                },
+                definitions: Vec::new(),
+                expansion: ProjectMacroExpansion {
+                    status: ProjectMacroExpansionStatus::Expanded,
+                    depth: 0,
+                    editable: false,
+                    surface: Some("velocity".into()),
+                    input_range: Some(SourceRange {
+                        start_offset: call_start,
+                        end_offset: call_end,
+                    }),
+                },
+            }],
+            includes: Vec::new(),
+        };
+        let parsed = parse_regions(&document.content, &document.math_regions);
+        let prose = crate::prose::observe_prose(&document, &parsed);
+        let transparent = observe_quantities(&document, &parsed, &prose.definitions);
+        assert_eq!(
+            transparent.exported()[0].quantity_kind_id.as_deref(),
+            Some("quantities-units:velocity")
+        );
+
+        document.macros[0].expansion.status = ProjectMacroExpansionStatus::Unresolved;
+        let opaque = observe_quantities(&document, &parsed, &prose.definitions);
+        assert!(opaque.exported().is_empty());
     }
 }

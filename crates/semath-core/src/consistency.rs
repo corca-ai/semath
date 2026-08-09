@@ -9,20 +9,42 @@ use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnos
 const MAX_ROLE_CLAIMS: usize = 8;
 const MAX_ROLE_DIAGNOSTICS: usize = 8;
 
-static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String)>> = LazyLock::new(|| {
+static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, bool)>> = LazyLock::new(|| {
     let mut terms = built_in_packs()
         .iter()
-        .flat_map(|pack| pack.laws.iter())
-        .flat_map(|law| law.roles.iter())
-        .filter_map(|role| role.concept.split(':').next_back())
-        .map(|role| {
+        .flat_map(|pack| {
+            let vocabulary = pack.roles.iter().map(|role| {
+                (
+                    role.id.as_str(),
+                    format!("{}:{}", pack.namespace, role.id),
+                    false,
+                )
+            });
+            let law_roles = pack.laws.iter().flat_map(|law| {
+                law.roles.iter().filter_map(|role| {
+                    let concept = role.concept.split(':').next_back()?;
+                    Some((concept, role.concept.clone(), true))
+                })
+            });
+            vocabulary.chain(law_roles)
+        })
+        .filter(|(role, _, _)| !matches!(*role, "matrix" | "scalar" | "tensor" | "vector"))
+        .map(|(role, concept_id, law_backed)| {
             (
                 role.split('-').map(str::to_owned).collect::<Vec<_>>(),
-                role.to_owned(),
+                concept_id,
+                law_backed,
             )
         })
         .collect::<Vec<_>>();
-    terms.sort_by(|left, right| right.0.len().cmp(&left.0.len()).then(left.1.cmp(&right.1)));
+    terms.sort_by(|left, right| {
+        right
+            .0
+            .len()
+            .cmp(&left.0.len())
+            .then(right.2.cmp(&left.2))
+            .then(left.1.cmp(&right.1))
+    });
     terms.dedup();
     terms
 });
@@ -207,10 +229,10 @@ fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<Scoped
     Some(ScopedRoleClaim {
         info: RoleInfo {
             symbol: definition.symbol.clone(),
-            role: role.clone(),
+            concept_id: role.clone(),
             description: definition.description.clone(),
             evidence: Evidence {
-                rule_id: format!("{}/role-{role}", definition.evidence.rule_id),
+                rule_id: format!("{}/concept-{role}", definition.evidence.rule_id),
                 kind: "explicit-prose".into(),
                 strength: "strong".into(),
                 source_ranges: definition.evidence.source_ranges.clone(),
@@ -223,7 +245,11 @@ fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<Scoped
 }
 
 fn classify_role(description: &str) -> Option<String> {
-    let normalized = description
+    let semantic_description = [" along ", " through ", " across "]
+        .iter()
+        .find_map(|separator| description.split_once(separator).map(|(head, _)| head))
+        .unwrap_or(description);
+    let normalized = semantic_description
         .to_ascii_lowercase()
         .replace('-', " ")
         .split_whitespace()
@@ -239,16 +265,12 @@ fn classify_role(description: &str) -> Option<String> {
         .find(|word| !matches!(*word, "a" | "an" | "the"));
     let last = words.last().copied();
 
-    if let Some(role) = PACK_ROLE_TERMS
-        .iter()
-        .find(|(term, _)| contains_term(&words, term))
-        .map(|(_, role)| role.clone())
-    {
+    if let Some(role) = classified_pack_concept(&words) {
         Some(role)
     } else if contains_singular_or_plural(&words, "event") {
-        Some("event".into())
+        Some("semath:event".into())
     } else if normalized.contains("probability distribution") || last == Some("distribution") {
-        Some("distribution".into())
+        Some("semath:distribution".into())
     } else if ["set", "space", "domain", "codomain"]
         .iter()
         .any(|role| first.is_some_and(|word| singular_or_plural(word, role)))
@@ -256,20 +278,42 @@ fn classify_role(description: &str) -> Option<String> {
             .iter()
             .any(|role| last.is_some_and(|word| singular_or_plural(word, role)))
     {
-        Some("set".into())
+        Some("semath:set".into())
     } else if first == Some("index") || last == Some("index") {
-        Some("index".into())
+        Some("semath:index".into())
     } else if contains_singular_or_plural(&words, "operator") {
-        Some("operator".into())
+        Some("semath:operator".into())
     } else if words.iter().any(|word| {
         ["function", "map", "mapping"]
             .iter()
             .any(|role| singular_or_plural(word, role))
     }) {
-        Some("function".into())
+        Some("semath:function".into())
     } else {
         None
     }
+}
+
+fn classified_pack_concept(words: &[&str]) -> Option<String> {
+    if words.iter().any(|word| matches!(*word, "and" | "or")) {
+        return None;
+    }
+    let matches = PACK_ROLE_TERMS
+        .iter()
+        .filter(|(term, _, _)| contains_term(words, term))
+        .collect::<Vec<_>>();
+    let specificity = matches.iter().map(|(term, _, _)| term.len()).max()?;
+    let has_law_backed_match = matches
+        .iter()
+        .any(|(term, _, law_backed)| term.len() == specificity && *law_backed);
+    let concepts = matches
+        .into_iter()
+        .filter(|(term, _, law_backed)| {
+            term.len() == specificity && (!has_law_backed_match || *law_backed)
+        })
+        .map(|(_, concept, _)| concept.as_str())
+        .collect::<BTreeSet<_>>();
+    (concepts.len() == 1).then(|| concepts.into_iter().next().unwrap().to_owned())
 }
 
 fn contains_term(words: &[&str], term: &[String]) -> bool {
@@ -297,7 +341,10 @@ fn role_conflict_diagnostic(
     let mut conflicting = BTreeSet::new();
     for (position, left) in indexes.iter().enumerate() {
         for right in &indexes[position + 1..] {
-            if roles_conflict(&roles[*left].info.role, &roles[*right].info.role) {
+            if roles_conflict(
+                &roles[*left].info.concept_id,
+                &roles[*right].info.concept_id,
+            ) {
                 conflicting.insert(*left);
                 conflicting.insert(*right);
             }
@@ -312,7 +359,7 @@ fn role_conflict_diagnostic(
         .collect::<Vec<_>>();
     let role_names = claims
         .iter()
-        .map(|claim| claim.info.role.as_str())
+        .map(|claim| concept_leaf(&claim.info.concept_id))
         .collect::<BTreeSet<_>>()
         .into_iter()
         .collect::<Vec<_>>()
@@ -341,7 +388,7 @@ fn role_type_conflict_diagnostic(
     let mut conflicting_shapes = BTreeSet::new();
     for role in role_indexes {
         for shape in shape_indexes {
-            if role_shape_conflict(&roles[*role].info.role, &shapes[*shape].claim.kind) {
+            if role_shape_conflict(&roles[*role].info.concept_id, &shapes[*shape].claim.kind) {
                 conflicting_roles.insert(*role);
                 conflicting_shapes.insert(*shape);
             }
@@ -360,7 +407,7 @@ fn role_type_conflict_diagnostic(
         .collect::<Vec<_>>();
     let role_names = role_claims
         .iter()
-        .map(|claim| claim.info.role.as_str())
+        .map(|claim| concept_leaf(&claim.info.concept_id))
         .collect::<BTreeSet<_>>()
         .into_iter()
         .collect::<Vec<_>>()
@@ -404,6 +451,8 @@ fn role_type_conflict_diagnostic(
 }
 
 pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
+    let left = concept_leaf(left);
+    let right = concept_leaf(right);
     if left == right {
         return false;
     }
@@ -423,6 +472,7 @@ pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
 }
 
 fn role_shape_conflict(role: &str, shape: &str) -> bool {
+    let role = concept_leaf(role);
     match role {
         "event" | "set" => true,
         "distribution" => false,
@@ -431,6 +481,10 @@ fn role_shape_conflict(role: &str, shape: &str) -> bool {
         "random-variable" => false,
         _ => false,
     }
+}
+
+fn concept_leaf(concept_id: &str) -> &str {
+    concept_id.split(':').next_back().unwrap_or(concept_id)
 }
 
 fn descriptions<'a>(values: impl Iterator<Item = &'a str>) -> String {
@@ -465,7 +519,7 @@ fn first_source_offset(evidence: &Evidence) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use super::observe_roles;
+    use super::{classify_role, observe_roles};
     use crate::parser::{parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::shape::observe_shapes;
@@ -537,11 +591,17 @@ mod tests {
         let roles = analyze(source).exported();
         let classified = roles
             .iter()
-            .map(|role| (role.symbol.as_str(), role.role.as_str()))
+            .map(|role| (role.symbol.as_str(), role.concept_id.as_str()))
             .collect::<Vec<_>>();
-        assert!(classified.contains(&("x", "iterate")));
-        assert!(classified.contains(&("y", "iterate")));
-        assert!(classified.contains(&("g", "gradient")));
-        assert!(classified.contains(&("a", "step-size")));
+        assert!(classified.contains(&("x", "optimization-ml:iterate")));
+        assert!(classified.contains(&("y", "optimization-ml:iterate")));
+        assert!(classified.contains(&("g", "optimization-ml:gradient")));
+        assert!(classified.contains(&("a", "optimization-ml:step-size")));
+    }
+
+    #[test]
+    fn refuses_to_collapse_coordinated_role_descriptions() {
+        assert_eq!(classify_role("state and input"), None);
+        assert_eq!(classify_role("state or input"), None);
     }
 }

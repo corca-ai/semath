@@ -4,14 +4,14 @@ use std::sync::LazyLock;
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, associative, lower_document_region, lower_template,
 };
-use crate::consistency::RoleObservations;
+use crate::consistency::{RoleObservations, roles_conflict};
 use crate::pack::{PackLaw, PackLawRole, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
-    Evidence, LawBinding, LawConditionInfo, LawRecognition, ProjectDocument, RelationInfo,
-    RelationRoleInfo, SemanticConstraint,
+    Evidence, LawBinding, LawConditionInfo, LawRecognition, ProjectDocument, QuantityInfo,
+    RelationInfo, RelationRoleInfo, RoleInfo, SemanticConstraint, ShapeInfo,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -161,62 +161,80 @@ pub(crate) struct LawObservations {
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ExternalTypeEnvironment {
-    roles: BTreeMap<u32, BTreeMap<String, BTreeSet<String>>>,
-    quantities: BTreeMap<u32, BTreeMap<String, BTreeSet<String>>>,
-    shapes: BTreeMap<u32, BTreeMap<String, BTreeSet<String>>>,
+    roles: BTreeMap<u32, BTreeMap<String, Vec<RoleInfo>>>,
+    quantities: BTreeMap<u32, BTreeMap<String, Vec<QuantityInfo>>>,
+    shapes: BTreeMap<u32, BTreeMap<String, Vec<ShapeInfo>>>,
 }
 
 impl ExternalTypeEnvironment {
-    pub fn add_role(&mut self, offset: u32, symbol: &str, role: &str) {
+    pub fn add_role(&mut self, offset: u32, role: RoleInfo) {
         self.roles
             .entry(offset)
             .or_default()
-            .entry(symbol.into())
+            .entry(role.symbol.clone())
             .or_default()
-            .insert(role.into());
+            .push(role);
     }
 
-    pub fn add_quantity(&mut self, offset: u32, symbol: &str, quantity: &str) {
+    pub fn add_quantity(&mut self, offset: u32, quantity: QuantityInfo) {
         self.quantities
             .entry(offset)
             .or_default()
-            .entry(symbol.into())
+            .entry(quantity.symbol.clone())
             .or_default()
-            .insert(quantity.into());
+            .push(quantity);
     }
 
-    pub fn add_shape(&mut self, offset: u32, symbol: &str, shape: &str) {
+    pub fn add_shape(&mut self, offset: u32, shape: ShapeInfo) {
         self.shapes
             .entry(offset)
             .or_default()
-            .entry(symbol.into())
+            .entry(shape.symbol.clone())
             .or_default()
-            .insert(shape.into());
+            .push(shape);
     }
 
     fn has_role(&self, offset: u32, symbol: &str, role: &str) -> bool {
-        contains_fact(&self.roles, offset, symbol, role)
+        self.roles_at(offset, symbol)
+            .iter()
+            .any(|info| info.concept_id == role)
     }
 
     fn has_quantity(&self, offset: u32, symbol: &str, quantity: &str) -> bool {
-        contains_fact(&self.quantities, offset, symbol, quantity)
+        self.quantities_at(offset, symbol)
+            .iter()
+            .any(|info| info.quantity_kind_id.as_deref() == Some(quantity))
     }
 
     fn has_shape(&self, offset: u32, symbol: &str, shape: &str) -> bool {
-        contains_fact(&self.shapes, offset, symbol, shape)
+        self.shapes_at(offset, symbol)
+            .iter()
+            .any(|info| info.kind == shape)
+    }
+
+    pub fn roles_at(&self, offset: u32, symbol: &str) -> Vec<RoleInfo> {
+        facts_at(&self.roles, offset, symbol)
+    }
+
+    pub fn quantities_at(&self, offset: u32, symbol: &str) -> Vec<QuantityInfo> {
+        facts_at(&self.quantities, offset, symbol)
+    }
+
+    pub fn shapes_at(&self, offset: u32, symbol: &str) -> Vec<ShapeInfo> {
+        facts_at(&self.shapes, offset, symbol)
     }
 }
 
-fn contains_fact(
-    facts: &BTreeMap<u32, BTreeMap<String, BTreeSet<String>>>,
+fn facts_at<T: Clone>(
+    facts: &BTreeMap<u32, BTreeMap<String, Vec<T>>>,
     offset: u32,
     symbol: &str,
-    value: &str,
-) -> bool {
+) -> Vec<T> {
     facts
         .get(&offset)
         .and_then(|symbols| symbols.get(symbol))
-        .is_some_and(|values| values.contains(value))
+        .cloned()
+        .unwrap_or_default()
 }
 
 impl LawObservations {
@@ -681,7 +699,7 @@ fn unify_all(
             }
         };
     }
-    let candidates = match (&template.kind, &actual.kind) {
+    let mut candidates = match (&template.kind, &actual.kind) {
         (SemanticExprKind::Symbol(left), SemanticExprKind::Symbol(right)) if left == right => {
             vec![bindings.clone()]
         }
@@ -690,6 +708,18 @@ fn unify_all(
         }
         (SemanticExprKind::Negate(left), SemanticExprKind::Negate(right)) => {
             unify_all(left, right, placeholders, bindings)
+        }
+        (SemanticExprKind::Power(lb, le), SemanticExprKind::Power(rb, re)) if matches!(&rb.kind, SemanticExprKind::Apply { operator, arguments } if operator == "norm" && arguments.len() == 1) =>
+        {
+            let SemanticExprKind::Apply { arguments, .. } = &rb.kind else {
+                unreachable!()
+            };
+            unify_sequence(
+                [lb.as_ref(), le.as_ref()],
+                [&arguments[0], re.as_ref()],
+                placeholders,
+                bindings,
+            )
         }
         (SemanticExprKind::Power(lb, le), SemanticExprKind::Power(rb, re))
         | (SemanticExprKind::Fraction(lb, le), SemanticExprKind::Fraction(rb, re)) => {
@@ -760,12 +790,17 @@ fn unify_all(
                 placeholders,
                 bindings,
             );
-            let reversed = unify_sequence(
-                [left.as_ref(), right.as_ref()],
-                [actual_right.as_ref(), actual_left.as_ref()],
-                placeholders,
-                bindings,
-            );
+            let reversed = (left_operator == "equals")
+                .then(|| {
+                    unify_sequence(
+                        [left.as_ref(), right.as_ref()],
+                        [actual_right.as_ref(), actual_left.as_ref()],
+                        placeholders,
+                        bindings,
+                    )
+                })
+                .into_iter()
+                .flatten();
             direct.into_iter().chain(reversed).collect()
         }
         (SemanticExprKind::Sum(left), SemanticExprKind::Sum(right))
@@ -784,17 +819,122 @@ fn unify_all(
                 arguments: right,
             },
         ) if left_operator == right_operator && left.len() == right.len() => {
-            unify_sequence(left.iter(), right.iter(), placeholders, bindings)
+            if matches!(left_operator.as_str(), "intersection" | "union") {
+                commutative_unify_all(left, right, placeholders, bindings)
+            } else {
+                unify_sequence(left.iter(), right.iter(), placeholders, bindings)
+            }
+        }
+        (
+            SemanticExprKind::Product(template),
+            SemanticExprKind::Apply {
+                operator,
+                arguments,
+            },
+        ) if arguments.len() == 1 => {
+            let operator = SemanticExpr {
+                kind: SemanticExprKind::Symbol(operator.clone()),
+                range: actual.range.clone(),
+                provenance: actual.provenance.clone(),
+            };
+            commutative_unify_all(
+                template,
+                &[operator, arguments[0].clone()],
+                placeholders,
+                bindings,
+            )
         }
         (SemanticExprKind::Unknown(left), SemanticExprKind::Unknown(right)) if left == right => {
             vec![bindings.clone()]
         }
         _ => Vec::new(),
     };
+    if candidates.is_empty()
+        && matches!(template.kind, SemanticExprKind::Product(_))
+        && let Some(expanded) = expand_ambiguous_juxtaposition(actual)
+    {
+        candidates = unify_all(template, &expanded, placeholders, bindings);
+    }
     candidates
         .into_iter()
         .take(MAX_UNIFICATION_CANDIDATES)
         .collect()
+}
+
+fn expand_ambiguous_juxtaposition(expression: &SemanticExpr) -> Option<SemanticExpr> {
+    let mut changed = false;
+    let factors = match &expression.kind {
+        SemanticExprKind::Product(items) => items
+            .iter()
+            .flat_map(|item| {
+                if let Some(expanded) = ambiguous_factor(item) {
+                    changed = true;
+                    expanded
+                } else {
+                    vec![item.clone()]
+                }
+            })
+            .collect::<Vec<_>>(),
+        _ => {
+            changed = true;
+            ambiguous_factor(expression)?
+        }
+    };
+    changed.then(|| SemanticExpr {
+        kind: SemanticExprKind::Product(factors),
+        range: expression.range.clone(),
+        provenance: expression.provenance.clone(),
+    })
+}
+
+fn ambiguous_factor(expression: &SemanticExpr) -> Option<Vec<SemanticExpr>> {
+    match &expression.kind {
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } if arguments.len() == 1 && !is_structural_application(operator) => Some(vec![
+            SemanticExpr {
+                kind: SemanticExprKind::Symbol(operator.clone()),
+                range: expression.range.clone(),
+                provenance: expression.provenance.clone(),
+            },
+            arguments[0].clone(),
+        ]),
+        SemanticExprKind::Power(base, exponent) => {
+            let SemanticExprKind::Apply {
+                operator,
+                arguments,
+            } = &base.kind
+            else {
+                return None;
+            };
+            (arguments.len() == 1 && !is_structural_application(operator)).then(|| {
+                vec![
+                    SemanticExpr {
+                        kind: SemanticExprKind::Symbol(operator.clone()),
+                        range: base.range.clone(),
+                        provenance: base.provenance.clone(),
+                    },
+                    SemanticExpr {
+                        kind: SemanticExprKind::Power(
+                            Box::new(arguments[0].clone()),
+                            exponent.clone(),
+                        ),
+                        range: expression.range.clone(),
+                        provenance: expression.provenance.clone(),
+                    },
+                ]
+            })
+        }
+        _ => None,
+    }
+}
+
+fn is_structural_application(operator: &str) -> bool {
+    matches!(
+        operator,
+        "compose" | "intersection" | "norm" | "sum" | "transpose" | "union"
+    )
 }
 
 fn bind_name_all(
@@ -973,10 +1113,11 @@ fn unify(
                 && (transaction(bindings, |candidate| {
                     unify(left, actual_left, placeholders, candidate)
                         && unify(right, actual_right, placeholders, candidate)
-                }) || transaction(bindings, |candidate| {
-                    unify(left, actual_right, placeholders, candidate)
-                        && unify(right, actual_left, placeholders, candidate)
-                }))
+                }) || left_operator == "equals"
+                    && transaction(bindings, |candidate| {
+                        unify(left, actual_right, placeholders, candidate)
+                            && unify(right, actual_left, placeholders, candidate)
+                    }))
         }
         (SemanticExprKind::Sum(left), SemanticExprKind::Sum(right))
         | (SemanticExprKind::Product(left), SemanticExprKind::Product(right)) => {
@@ -994,10 +1135,32 @@ fn unify(
         ) => {
             left_operator == right_operator
                 && left.len() == right.len()
-                && left
-                    .iter()
-                    .zip(right)
-                    .all(|(left, right)| unify(left, right, placeholders, bindings))
+                && if matches!(left_operator.as_str(), "intersection" | "union") {
+                    commutative_unify(left, right, placeholders, bindings)
+                } else {
+                    left.iter()
+                        .zip(right)
+                        .all(|(left, right)| unify(left, right, placeholders, bindings))
+                }
+        }
+        (
+            SemanticExprKind::Product(template),
+            SemanticExprKind::Apply {
+                operator,
+                arguments,
+            },
+        ) if arguments.len() == 1 => {
+            let operator = SemanticExpr {
+                kind: SemanticExprKind::Symbol(operator.clone()),
+                range: actual.range.clone(),
+                provenance: actual.provenance.clone(),
+            };
+            commutative_unify(
+                template,
+                &[operator, arguments[0].clone()],
+                placeholders,
+                bindings,
+            )
         }
         (SemanticExprKind::Unknown(left), SemanticExprKind::Unknown(right)) => left == right,
         _ => false,
@@ -1146,6 +1309,14 @@ fn role_symbol_is_supported(
     notation_enabled: bool,
 ) -> bool {
     let notation_symbol = symbol.split('_').next().unwrap_or(symbol);
+    let declared_roles = consistency.roles_at(symbol, offset).0;
+    if !declared_roles.is_empty()
+        && declared_roles
+            .iter()
+            .all(|claim| roles_conflict(&role.concept, &claim.concept_id))
+    {
+        return false;
+    }
     if let Some(expected_shape) = role.shape.as_deref() {
         let mut explicit = shapes.claims_at(symbol, offset).0;
         if notation_symbol != symbol {
@@ -1198,13 +1369,12 @@ fn role_symbol_is_supported(
             || external.has_shape(offset, symbol, "matrix")
             || (notation_enabled && notation_matches(&role.notation, notation_symbol));
     }
-    let expected_role = role.concept.split(':').next_back().unwrap_or(&role.concept);
     consistency
         .roles_at(symbol, offset)
         .0
         .iter()
-        .any(|claim| claim.role == expected_role)
-        || external.has_role(offset, symbol, expected_role)
+        .any(|claim| claim.concept_id == role.concept)
+        || external.has_role(offset, symbol, &role.concept)
         || (notation_enabled && notation_matches(&role.notation, notation_symbol))
 }
 
@@ -1304,7 +1474,7 @@ fn recognition(
             .map(|condition| LawConditionInfo {
                 kind: "applicability".into(),
                 label: condition.clone(),
-                status: "supported".into(),
+                status: "required".into(),
             })
             .collect(),
         relation: Some(RelationInfo {
@@ -1437,6 +1607,24 @@ mod tests {
     }
 
     #[test]
+    fn directional_relations_remain_ordered_while_set_union_is_commutative() {
+        let placeholders = BTreeSet::new();
+        let mut bindings = BTreeMap::new();
+        assert!(!unify(
+            &lower_template("x \\in A"),
+            &lower_template("A \\in x"),
+            &placeholders,
+            &mut bindings,
+        ));
+        assert!(unify(
+            &lower_template("A \\cup B"),
+            &lower_template("B \\cup A"),
+            &placeholders,
+            &mut BTreeMap::new(),
+        ));
+    }
+
+    #[test]
     fn conventional_circuit_notation_is_typed_by_the_pack() {
         assert_eq!(
             recognized_laws("The asserted device law is \\[(V)=(R\\,I)\\]."),
@@ -1527,6 +1715,8 @@ mod tests {
     fn recognizes_reordered_kinetic_energy() {
         let source = "Here $K$ denotes kinetic energy, $m$ denotes mass, and $v$ denotes speed. $\\frac{1}{2}mv^2=K$";
         assert_eq!(recognized_laws(source), ["kinetic-energy-definition"]);
+        let grouped = "Here $K$ denotes kinetic energy, $m$ denotes mass, and $v$ denotes speed. $K=\\frac{1}{2}m(v)^2$";
+        assert_eq!(recognized_laws(grouped), ["kinetic-energy-definition"]);
     }
 
     #[test]
@@ -1543,6 +1733,30 @@ mod tests {
             (
                 "For the pulling rope, let $P_{p08}$ be scalar power, $\\mathbf{F}_{p08}$ the force vector, and $\\mathbf{v}_{p08}$ the velocity vector. Then $P_{p08}=\\left(\\mathbf{F}_{p08}\\right)\\cdot\\left(\\mathbf{v}_{p08}\\right)$.",
                 "mechanical-power",
+            ),
+        ] {
+            assert_eq!(recognized_laws(source), [expected], "{source}");
+        }
+    }
+
+    #[test]
+    fn recognizes_foundation_cases_with_membership_units_and_trailing_roles() {
+        for (source, expected) in [
+            (
+                "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{a}=F_a a+G_a b\\]",
+                "continuous-state-equation",
+            ),
+            (
+                "The vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n\\[\\dot{\\rho}=U\\rho+V\\sigma\\]",
+                "continuous-state-equation",
+            ),
+            (
+                "During steady translation, $P$ is measured in watts, $F$ in newtons, and $v$ in metres per second along the force. Thus \\[P=F\\,v\\]",
+                "mechanical-power",
+            ),
+            (
+                "The calculation shows \\[K=\\tfrac{1}{2}m(v)^{2}\\] The notation note identifies $K$ as kinetic energy, $m$ as mass, and $v$ as speed.",
+                "kinetic-energy-definition",
             ),
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");
@@ -1571,6 +1785,19 @@ mod tests {
     fn blind_extension_adds_matrix_vector_product_with_pack_data_only() {
         let source = "Let $A$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y=Ax$";
         assert_eq!(recognized_laws(source), ["matrix-vector-product"]);
+    }
+
+    #[test]
+    fn typed_matrix_application_can_use_grouped_juxtaposition_without_hiding_function_calls() {
+        assert_eq!(
+            recognized_laws(
+                "Let $A$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y=A(x)$",
+            ),
+            ["matrix-vector-product"],
+        );
+        assert!(
+            recognized_laws("Let $I$ be a function and $R$ be resistance. $V=I(R)$").is_empty()
+        );
     }
 
     #[test]

@@ -42,9 +42,11 @@ describe("foundation corpus", () => {
     const corpus = parseFoundationCorpus(corpusValue(), suite);
     const complete: FoundationObservation = {
       caseId: "velocity-declaration",
+      conceptIds: [],
       diagnosticCodes: [],
       dimensions: ["length*time^-1"],
       quantityKindIds: ["velocity"],
+      relationIds: [],
       suiteId: suite.id,
       symbols: ["v"],
       unitIds: [],

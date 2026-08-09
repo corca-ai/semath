@@ -70,7 +70,7 @@ export type CorpusSuiteConfig =
   | GlobalRefusalSuiteConfig;
 
 export interface FoundationSuiteConfig {
-  capability: "shape-quantity-unit";
+  capability: "scientific-kernel" | "shape-quantity-unit";
   id: string;
   minimumCases: number;
   packId: string;
@@ -395,7 +395,7 @@ function parseFoundationSuite(
   return {
     capability: oneOf(
       item.capability,
-      ["shape-quantity-unit"],
+      ["scientific-kernel", "shape-quantity-unit"],
       `${path}.capability`,
     ),
     id: identifier(item.id, `${path}.id`),

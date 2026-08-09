@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 2 is a deliberate
+Semath is a library and language-service runtime. Protocol 3 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -31,6 +31,11 @@ unsupported interpretation. It includes bound relation roles, conditions,
 source-linked evidence, declarations, domain evidence, diagnostics, and a
 refusal explanation when appropriate. Parser ASTs, formula completions, and
 legacy rewrite queries are not public.
+
+Protocol 3 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+There is no closed role enum or unnamespaced compatibility field. Included-file
+role, shape, and quantity facts use the same records and retain their original
+evidence.
 
 Core semantic behavior belongs to Rust. Packages own transport and lifecycle;
 applications own presentation, permissions, review, apply, and undo.

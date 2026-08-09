@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub const PROTOCOL_VERSION: u32 = 2;
+pub const PROTOCOL_VERSION: u32 = 3;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -254,7 +254,7 @@ pub struct SymbolInfo {
 #[serde(rename_all = "camelCase")]
 pub struct RoleInfo {
     pub symbol: String,
-    pub role: String,
+    pub concept_id: String,
     pub description: String,
     pub evidence: Evidence,
 }
