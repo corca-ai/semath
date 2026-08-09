@@ -23,4 +23,4 @@ rsync --archive --delete \
   --exclude target \
   ./ "$build_host:$remote_dir/"
 ssh -- "$build_host" "cd '$remote_dir' && bash -lc scripts/build-wasm.sh"
-rsync --archive --delete "$build_host:$remote_dir/lib/wasm/" lib/wasm/
+rsync --archive --ignore-times --delete "$build_host:$remote_dir/lib/wasm/" lib/wasm/

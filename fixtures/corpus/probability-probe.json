@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "domain": "probability-blind-extension",
+  "domain": "probability-probe",
   "cases": [
     {
       "id": "event-intersection-basic",
@@ -49,7 +49,7 @@
       "documents": [{"fileId":"main","path":"main.tex","content":"Let f and g be functions. $f \\cap g$"}],
       "cursor":{"fileId":"main","needle":"f \\cap"},
       "expectation":"refused","lawId":"event-intersection","refusalCategory":"wrong-roles",
-      "variationTags":["negative","functions","type-conflict","lowercase"]
+      "variationTags":["negative","functions","wrong-roles","type-conflict","lowercase"]
     },
     {
       "id": "event-union-refusal",

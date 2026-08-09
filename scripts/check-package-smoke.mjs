@@ -12,6 +12,7 @@ try {
     "lib/wasm/semath_wasm.d.ts",
     "examples/worker.mjs",
     "examples/lsp.mjs",
+    "packages/evaluation/src/index.ts",
   ];
   const names = new Set(metadata.files.map((file) => file.path));
   for (const path of required) {
@@ -25,6 +26,14 @@ try {
   run("bun", ["add", tarball], temporary);
   run("bun", ["node_modules/semath/examples/worker.mjs"], temporary);
   run("bun", ["node_modules/semath/examples/lsp.mjs"], temporary);
+  run(
+    "bun",
+    [
+      "-e",
+      'import { parseQualityManifest } from "semath/evaluation"; if (typeof parseQualityManifest !== "function") throw new Error("missing evaluation export")',
+    ],
+    temporary,
+  );
   const sums = await readFile(
     join(temporary, "node_modules/semath/lib/wasm/SHA256SUMS"),
     "utf8",
@@ -34,7 +43,11 @@ try {
     ["-a", "256", "node_modules/semath/lib/wasm/semath_wasm_bg.wasm"],
     temporary,
   ).split(/\s+/)[0];
-  if (!sums.includes(checksum)) {
+  const expectedChecksum = sums
+    .split("\n")
+    .map((line) => line.trim().split(/\s+/))
+    .find(([, name]) => name === "semath_wasm_bg.wasm")?.[0];
+  if (!expectedChecksum || checksum !== expectedChecksum) {
     throw new Error("installed WASM does not match the published checksum");
   }
   console.log(`package smoke OK: ${metadata.filename} (${metadata.size} bytes)`);

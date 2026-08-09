@@ -185,7 +185,7 @@
         {
           "name": "\\newtonBalance",
           "parameterCount": 3,
-          "body": "#1 = #2 #3"
+          "definition": "#1 = #2 #3"
         }
       ]
     },
@@ -484,7 +484,7 @@
         {
           "name": "\\newtonBalance",
           "parameterCount": 3,
-          "body": "#1 = #2 #3"
+          "definition": "#1 = #2 #3"
         }
       ]
     },
@@ -783,7 +783,7 @@
         {
           "name": "\\newtonBalance",
           "parameterCount": 3,
-          "body": "#1 = #2 #3"
+          "definition": "#1 = #2 #3"
         }
       ]
     },
@@ -918,7 +918,7 @@
       "expectedRoles": {
         "energy": "K_{e01}",
         "mass": "m_{e01}",
-        "speed": "v_{e01}"
+        "velocity": "v_{e01}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -946,7 +946,7 @@
       "expectedRoles": {
         "energy": "K_{e02}",
         "mass": "m_{e02}",
-        "speed": "v_{e02}"
+        "velocity": "v_{e02}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -974,7 +974,7 @@
       "expectedRoles": {
         "energy": "K_{e03}",
         "mass": "m_{e03}",
-        "speed": "v_{e03}"
+        "velocity": "v_{e03}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1002,7 +1002,7 @@
       "expectedRoles": {
         "energy": "K_{e04}",
         "mass": "m_{e04}",
-        "speed": "v_{e04}"
+        "velocity": "v_{e04}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1035,7 +1035,7 @@
       "expectedRoles": {
         "energy": "K_{e05}",
         "mass": "m_{e05}",
-        "speed": "v_{e05}"
+        "velocity": "v_{e05}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1068,7 +1068,7 @@
       "expectedRoles": {
         "energy": "K_{e06}",
         "mass": "m_{e06}",
-        "speed": "v_{e06}"
+        "velocity": "v_{e06}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1081,7 +1081,7 @@
         {
           "name": "\\kineticTerm",
           "parameterCount": 3,
-          "body": "#1 = \\frac{1}{2} #2 #3^{2}"
+          "definition": "#1 = \\frac{1}{2} #2 #3^{2}"
         }
       ]
     },
@@ -1104,7 +1104,7 @@
       "expectedRoles": {
         "energy": "K_{e07}",
         "mass": "m_{e07}",
-        "speed": "v_{e07}"
+        "velocity": "v_{e07}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1132,7 +1132,7 @@
       "expectedRoles": {
         "energy": "K_{e08}",
         "mass": "m_{e08}",
-        "speed": "\\mathbf{v}_{e08}"
+        "velocity": "\\mathbf{v}_{e08}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1160,7 +1160,7 @@
       "expectedRoles": {
         "energy": "K_{e09}",
         "mass": "m_{e09}",
-        "speed": "v_{e09}"
+        "velocity": "v_{e09}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1188,7 +1188,7 @@
       "expectedRoles": {
         "energy": "K_{e10}",
         "mass": "m_{e10}",
-        "speed": "v_{e10}"
+        "velocity": "v_{e10}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1216,7 +1216,7 @@
       "expectedRoles": {
         "energy": "K_{e11}",
         "mass": "m_{e11}",
-        "speed": "v_{e11}"
+        "velocity": "v_{e11}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1244,7 +1244,7 @@
       "expectedRoles": {
         "energy": "K_{e12}",
         "mass": "m_{e12}",
-        "speed": "v_{e12}"
+        "velocity": "v_{e12}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1272,7 +1272,7 @@
       "expectedRoles": {
         "energy": "K_{e13}",
         "mass": "m_{e13}",
-        "speed": "v_{e13}"
+        "velocity": "v_{e13}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1300,7 +1300,7 @@
       "expectedRoles": {
         "energy": "K_{e14}",
         "mass": "m_{e14}",
-        "speed": "v_{e14}"
+        "velocity": "v_{e14}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1333,7 +1333,7 @@
       "expectedRoles": {
         "energy": "K_{e15}",
         "mass": "m_{e15}",
-        "speed": "v_{e15}"
+        "velocity": "v_{e15}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1366,7 +1366,7 @@
       "expectedRoles": {
         "energy": "K_{e16}",
         "mass": "m_{e16}",
-        "speed": "v_{e16}"
+        "velocity": "v_{e16}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1379,7 +1379,7 @@
         {
           "name": "\\kineticTerm",
           "parameterCount": 3,
-          "body": "#1 = \\frac{1}{2} #2 #3^{2}"
+          "definition": "#1 = \\frac{1}{2} #2 #3^{2}"
         }
       ]
     },
@@ -1402,7 +1402,7 @@
       "expectedRoles": {
         "energy": "K_{e17}",
         "mass": "m_{e17}",
-        "speed": "v_{e17}"
+        "velocity": "v_{e17}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1430,7 +1430,7 @@
       "expectedRoles": {
         "energy": "K_{e18}",
         "mass": "m_{e18}",
-        "speed": "\\mathbf{v}_{e18}"
+        "velocity": "\\mathbf{v}_{e18}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1458,7 +1458,7 @@
       "expectedRoles": {
         "energy": "K_{e19}",
         "mass": "m_{e19}",
-        "speed": "v_{e19}"
+        "velocity": "v_{e19}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1486,7 +1486,7 @@
       "expectedRoles": {
         "energy": "K_{e20}",
         "mass": "m_{e20}",
-        "speed": "v_{e20}"
+        "velocity": "v_{e20}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1514,7 +1514,7 @@
       "expectedRoles": {
         "energy": "K_{e21}",
         "mass": "m_{e21}",
-        "speed": "v_{e21}"
+        "velocity": "v_{e21}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1542,7 +1542,7 @@
       "expectedRoles": {
         "energy": "K_{e22}",
         "mass": "m_{e22}",
-        "speed": "v_{e22}"
+        "velocity": "v_{e22}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1570,7 +1570,7 @@
       "expectedRoles": {
         "energy": "K_{e23}",
         "mass": "m_{e23}",
-        "speed": "v_{e23}"
+        "velocity": "v_{e23}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1598,7 +1598,7 @@
       "expectedRoles": {
         "energy": "K_{e24}",
         "mass": "m_{e24}",
-        "speed": "v_{e24}"
+        "velocity": "v_{e24}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1631,7 +1631,7 @@
       "expectedRoles": {
         "energy": "K_{e25}",
         "mass": "m_{e25}",
-        "speed": "v_{e25}"
+        "velocity": "v_{e25}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1664,7 +1664,7 @@
       "expectedRoles": {
         "energy": "K_{e26}",
         "mass": "m_{e26}",
-        "speed": "v_{e26}"
+        "velocity": "v_{e26}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1677,7 +1677,7 @@
         {
           "name": "\\kineticTerm",
           "parameterCount": 3,
-          "body": "#1 = \\frac{1}{2} #2 #3^{2}"
+          "definition": "#1 = \\frac{1}{2} #2 #3^{2}"
         }
       ]
     },
@@ -1700,7 +1700,7 @@
       "expectedRoles": {
         "energy": "K_{e27}",
         "mass": "m_{e27}",
-        "speed": "v_{e27}"
+        "velocity": "v_{e27}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1728,7 +1728,7 @@
       "expectedRoles": {
         "energy": "K_{e28}",
         "mass": "m_{e28}",
-        "speed": "\\mathbf{v}_{e28}"
+        "velocity": "\\mathbf{v}_{e28}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1756,7 +1756,7 @@
       "expectedRoles": {
         "energy": "K_{e29}",
         "mass": "m_{e29}",
-        "speed": "v_{e29}"
+        "velocity": "v_{e29}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1784,7 +1784,7 @@
       "expectedRoles": {
         "energy": "K_{e30}",
         "mass": "m_{e30}",
-        "speed": "v_{e30}"
+        "velocity": "v_{e30}"
       },
       "variationTags": [
         "symbol-renaming",
@@ -1975,7 +1975,7 @@
         {
           "name": "\\mechanicalPower",
           "parameterCount": 3,
-          "body": "#1 = #2 #3"
+          "definition": "#1 = #2 #3"
         }
       ]
     },
@@ -2273,7 +2273,7 @@
         {
           "name": "\\mechanicalPower",
           "parameterCount": 3,
-          "body": "#1 = #2 #3"
+          "definition": "#1 = #2 #3"
         }
       ]
     },
@@ -2571,7 +2571,7 @@
         {
           "name": "\\mechanicalPower",
           "parameterCount": 3,
-          "body": "#1 = #2 #3"
+          "definition": "#1 = #2 #3"
         }
       ]
     },
@@ -3123,7 +3123,7 @@
         {
           "name": "\\badBalance",
           "parameterCount": 3,
-          "body": "#1 = #2 + #3"
+          "definition": "#1 = #2 + #3"
         }
       ]
     },
@@ -3584,7 +3584,7 @@
         {
           "name": "\\badKinetic",
           "parameterCount": 3,
-          "body": "#1 = #2 #3^{2}"
+          "definition": "#1 = #2 #3^{2}"
         }
       ]
     },
@@ -4046,7 +4046,7 @@
         {
           "name": "\\badPower",
           "parameterCount": 3,
-          "body": "#1 = #2 / #3"
+          "definition": "#1 = #2 / #3"
         }
       ]
     },

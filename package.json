@@ -1,6 +1,6 @@
 {
   "name": "semath",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -8,6 +8,7 @@
     "semath-lsp": "./packages/lsp/stdio.mjs"
   },
   "exports": {
+    "./evaluation": "./packages/evaluation/src/index.ts",
     "./lsp": "./packages/lsp/src/index.ts",
     "./protocol": "./packages/protocol/src/index.ts",
     "./wasmtex-adapter": "./packages/wasmtex-adapter/src/index.ts",
@@ -25,11 +26,13 @@
     "README.md"
   ],
   "scripts": {
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run corpus:v0.16 && bun run parity && bun run budget:v0.16 && bun run package:smoke",
-    "corpus:v0.16": "bun scripts/check-v0.16-corpus.ts",
-    "budget:v0.16": "bun scripts/check-v0.16-budget.ts",
+    "budget": "bun scripts/check-budget.ts",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run pack:conformance && bun run corpus && bun run parity && bun run budget && bun run package:smoke",
+    "corpus": "bun scripts/check-corpus.ts",
     "package:smoke": "node scripts/check-package-smoke.mjs",
+    "pack:conformance": "bun scripts/check-pack-conformance.ts",
     "parity": "bun scripts/check-parity.mjs",
+    "scorecard": "SEMATH_SCORECARD_PATH=.artifacts/semantic-scorecard.json bun scripts/check-corpus.ts",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit",
     "verify": "bun run check"

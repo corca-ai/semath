@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "thresholds": {
+    "lawRecall": 95,
+    "lawPrecision": 99,
+    "roleAccuracy": 100,
+    "evidenceIntegrity": 100,
+    "refusalPreservation": 100
+  },
+  "dimensions": [
+    {
+      "id": "notation",
+      "tags": [
+        "alternative-symbols",
+        "bold-notation",
+        "bold-vector",
+        "boldsymbol-notation",
+        "brace-grouping",
+        "calligraphic-matrices",
+        "calligraphic-notation",
+        "calligraphic-symbol",
+        "conventional-notation",
+        "greek-symbols",
+        "greek-vectors",
+        "grouped",
+        "grouping",
+        "indexed-symbols",
+        "left-right",
+        "lowercase",
+        "notation-collision",
+        "parenthesized",
+        "presentation-normalization",
+        "roman",
+        "styled",
+        "subscripted-matrices",
+        "subscripted-notation",
+        "subscripted-vectors",
+        "subscripts",
+        "symbol-renaming",
+        "uppercase",
+        "vector-notation"
+      ]
+    },
+    {
+      "id": "prose",
+      "tags": [
+        "compact-declarations",
+        "declaration-after",
+        "declaration-before",
+        "declarations-after",
+        "declarations-after-formula",
+        "declarations-before",
+        "denote",
+        "english-context",
+        "english-declarations",
+        "multi-symbol-declaration",
+        "multiline-prose",
+        "plural-declaration",
+        "respectively",
+        "role-descriptions",
+        "role-prose",
+        "scope-prose",
+        "separate-declarations",
+        "split-declarations",
+        "where-clause"
+      ]
+    },
+    {
+      "id": "roles",
+      "tags": [
+        "ambiguous-factor",
+        "conflicting-declaration",
+        "conflicting-declarations",
+        "different-role-set",
+        "missing-role",
+        "missing-role-evidence",
+        "mixed-roles",
+        "reordered-roles",
+        "role-ambiguity",
+        "role-conflict",
+        "role-mismatch",
+        "role-swap",
+        "symbol-ambiguity",
+        "symbol-mismatch",
+        "wrong-acceleration-role",
+        "wrong-energy-role",
+        "wrong-force-role",
+        "wrong-mass-role",
+        "wrong-power-role",
+        "wrong-role",
+        "wrong-roles",
+        "wrong-speed-role",
+        "wrong-velocity-role"
+      ]
+    },
+    {
+      "id": "constraints",
+      "tags": [
+        "common-dimension",
+        "dimension-mismatch",
+        "dimensional-context",
+        "dimensions",
+        "direction-declaration",
+        "explicit-shapes",
+        "incompatible-equality",
+        "incompatible-product",
+        "incompatible-products",
+        "incompatible-sum",
+        "membership-declaration",
+        "membership-declarations",
+        "missing-directions",
+        "missing-evidence",
+        "missing-shape",
+        "same-dimension",
+        "shape",
+        "shape-error",
+        "shape-explicit",
+        "shape-mismatch",
+        "sign-ambiguity",
+        "sign-conflict",
+        "sign-convention",
+        "type-conflict",
+        "typed",
+        "unit-conflict",
+        "unit-context",
+        "unit-explicit",
+        "wrong-shape"
+      ]
+    },
+    {
+      "id": "project-context",
+      "tags": [
+        "declaration-separate-file",
+        "formula-in-include",
+        "forward-scope",
+        "included-declarations",
+        "local-scope",
+        "multi-file",
+        "multiple-includes",
+        "nonimported-declarations",
+        "project-scope",
+        "scope",
+        "scope-boundary",
+        "scope-conflict",
+        "unreachable-file",
+        "unresolved-scope"
+      ]
+    },
+    {
+      "id": "macro-provenance",
+      "tags": [
+        "addition-in-macro",
+        "incorrect-macro-body",
+        "macro",
+        "macro-operands",
+        "matrix-macros",
+        "multiple-macros",
+        "opaque-macro",
+        "operand-macros",
+        "operator-notation",
+        "transparent-macro",
+        "transparent-macros",
+        "transpose-macro"
+      ]
+    },
+    {
+      "id": "semantic-mutation",
+      "tags": [
+        "addition-instead-of-product",
+        "conflicting-formulas",
+        "division-instead-of-product",
+        "explicit-negation",
+        "extra-term",
+        "hard-negative",
+        "missing-definition",
+        "missing-derivative",
+        "missing-one-half",
+        "missing-square",
+        "missing-term",
+        "near-miss",
+        "negative",
+        "operator-change",
+        "role-swap",
+        "safe-refusal",
+        "wrong-coefficient",
+        "wrong-derivative-variable",
+        "wrong-exponent",
+        "wrong-factor",
+        "wrong-independent-variable",
+        "wrong-law",
+        "wrong-operand",
+        "wrong-operator",
+        "wrong-quotient",
+        "wrong-relational-operator",
+        "wrong-sign"
+      ]
+    }
+  ],
+  "metamorphic": {
+    "casesPerLaw": 1,
+    "transforms": [
+      "neutral-prose",
+      "trailing-comment",
+      "document-order"
+    ]
+  },
+  "packs": [
+    {
+      "packId": "calculus-analysis",
+      "tier": "vocabulary-only",
+      "corpusSuiteIds": []
+    },
+    {
+      "packId": "circuits",
+      "tier": "evaluated",
+      "corpusSuiteIds": ["circuits"]
+    },
+    {
+      "packId": "classical-mechanics",
+      "tier": "evaluated",
+      "corpusSuiteIds": ["mechanics"]
+    },
+    {
+      "packId": "control-systems",
+      "tier": "evaluated",
+      "corpusSuiteIds": ["control-systems"]
+    },
+    {
+      "packId": "discrete-math",
+      "tier": "vocabulary-only",
+      "corpusSuiteIds": []
+    },
+    {
+      "packId": "linear-algebra",
+      "tier": "probe",
+      "corpusSuiteIds": ["linear-algebra-probe"]
+    },
+    {
+      "packId": "optimization-ml",
+      "tier": "vocabulary-only",
+      "corpusSuiteIds": []
+    },
+    {
+      "packId": "probability",
+      "tier": "probe",
+      "corpusSuiteIds": ["probability-probe"]
+    },
+    {
+      "packId": "quantities-units",
+      "tier": "vocabulary-only",
+      "corpusSuiteIds": []
+    }
+  ],
+  "suites": [
+    {
+      "id": "circuits",
+      "packId": "circuits",
+      "path": "corpus/circuits.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 30,
+      "minimumRefusalCasesPerLaw": 20,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ]
+    },
+    {
+      "id": "control-systems",
+      "packId": "control-systems",
+      "path": "corpus/control-systems.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 30,
+      "minimumRefusalCasesPerLaw": 20,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ]
+    },
+    {
+      "id": "linear-algebra-probe",
+      "packId": "linear-algebra",
+      "path": "corpus/linear-algebra-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"]
+    },
+    {
+      "id": "mechanics",
+      "packId": "classical-mechanics",
+      "path": "corpus/mechanics.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 30,
+      "minimumRefusalCasesPerLaw": 20,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ]
+    },
+    {
+      "id": "probability-probe",
+      "packId": "probability",
+      "path": "corpus/probability-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"]
+    }
+  ]
+}

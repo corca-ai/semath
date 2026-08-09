@@ -1,42 +1,53 @@
 # Built-in domain packs
 
-Semath 0.16 ships schema-4 packs compiled into the Rust semantic runtime.
-Packs contain typed concepts, roles, laws, semantic forms, conditions,
-quantities, units, activation evidence, and references. They do not contain
+Semath 0.17 compiles schema-4 JSON packs into one bounded Rust semantic
+runtime. Packs contain concepts, roles, laws, semantic forms, conditions,
+quantities, units, activation evidence, and references. They contain no
 executable code.
 
-## Catalog
+## Support tiers
 
-| Pack | Main knowledge |
-| --- | --- |
-| Linear algebra | shapes, operators, matrix/vector relations |
-| Probability | events, distributions, estimators, probability relations |
-| Calculus and analysis | derivatives, integrals, limits, vector calculus |
-| Optimization and ML | objectives, constraints, updates, losses |
-| Discrete mathematics | sets, logic, combinatorics, recurrences, graphs |
-| Quantities and units | exact dimensions, SI vocabulary, propagation |
-| Classical mechanics | force, energy, momentum, power, motion |
-| Circuits | Kirchhoff and constitutive laws, energy, power |
-| Control systems | state space, feedback, and Lyapunov relations |
+The checked-in [quality manifest](../fixtures/corpus-manifest.json) is the
+authoritative support policy. A large vocabulary is not presented as evaluated
+law recognition.
+
+| Pack | Tier | Laws covered | Authored cases |
+| --- | --- | ---: | ---: |
+| Circuits | evaluated | 3/3 | 150 |
+| Classical mechanics | evaluated | 3/3 | 150 |
+| Control systems | evaluated | 2/2 | 100 |
+| Linear algebra | probe | 1/1 | 10 |
+| Probability | probe | 1/1 | 10 |
+| Calculus and analysis | vocabulary-only | 0/0 | 0 |
+| Discrete mathematics | vocabulary-only | 0/0 | 0 |
+| Optimization and ML | vocabulary-only | 0/0 | 0 |
+| Quantities and units | vocabulary-only | 0/0 | 0 |
+
+Evaluated packs require at least 30 positive and 20 refusal cases per law and at
+least six coverage dimensions; the current suites require all seven. Probe
+packs require 5 and 5 across three dimensions. Vocabulary-only packs may
+provide concepts and activation evidence but cannot silently add untested laws.
 
 ## Authoring contract
 
-Each JSON file must declare `schemaVersion: 4`, a stable namespace and SemVer,
-dependencies, concepts, and typed laws. A law supplies canonical semantic forms
-and roles with optional concept, shape, quantity, and variadic constraints.
+Each pack declares `schemaVersion: 4`, stable identity and SemVer, dependencies,
+concepts, and typed laws. A law supplies canonical semantic forms and roles
+with optional concept, shape, quantity, and variadic constraints.
 
 The Rust compiler rejects unknown fields, dependency cycles, missing concepts,
 invalid capability edges, inconsistent dimensions, and malformed law forms.
-All accepted laws enter the same bounded generic unifier. A pack ID or law ID
-branch in analysis code indicates a missing core abstraction and must be
-removed.
+All laws enter the same generic unifier. A pack or law ID branch in analysis
+code indicates a missing core abstraction.
 
-Pack changes require independently authored positive, negative, ambiguous, and
-cross-file cases. `bun run corpus:v0.16` checks recognition, role binding,
-source-linked evidence, and safe refusal. The blind-extension fixtures prove
-that probability and linear-algebra laws can be added through pack data without
-adding recognizer code.
+Every new law must have an owning corpus suite with positive, refusal, role,
+notation, constraint, and project-context evidence appropriate to its tier.
+Run:
 
-Pack breadth does not grant automatic edit authority. Unknown roles,
-incompatible types, missing conditions, and opaque notation produce partial,
-ambiguous, conflicting, or unsupported results.
+```sh
+bun run pack:conformance
+bun run corpus
+```
+
+Pack breadth does not grant edit authority. Unknown roles, incompatible types,
+missing conditions, and opaque notation must remain partial, ambiguous,
+conflicting, or unsupported.

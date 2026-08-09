@@ -1543,6 +1543,12 @@ mod tests {
     }
 
     #[test]
+    fn recognizes_grouped_subscripted_state_equation() {
+        let source = "Let $s_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n\\[\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)\\]";
+        assert_eq!(recognized_laws(source), ["continuous-state-equation"]);
+    }
+
+    #[test]
     fn explicit_shape_and_role_conflicts_refuse_laws() {
         for source in [
             "Let $\\mathbf{F}_{x12}$ and $\\mathbf{a}_{x12}$ be vectors, and let $\\mathbf{m}_{x12}$ be a three-component mass vector. The model claims $\\mathbf{F}_{x12}=\\mathbf{m}_{x12}\\mathbf{a}_{x12}$.",
