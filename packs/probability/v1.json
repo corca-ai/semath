@@ -1,9 +1,21 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "packId": "probability",
   "packVersion": "1.2.0",
+  "packKind": "field",
+  "namespace": "probability",
   "title": "Probability and statistics",
   "description": "Probability formulas gated by explicit event and random-variable roles.",
+  "dependencies": [],
+  "capabilities": { "provides": ["semath:formula-recognition", "semath:probability-constraints"], "requires": [] },
+  "concepts": [
+    { "id": "event", "conceptKind": "entity", "title": "Event", "description": "A measurable event whose probability may be evaluated.", "parents": [], "references": ["probability-theory"] },
+    { "id": "random-variable", "conceptKind": "quantity", "title": "Random variable", "description": "A measurable numerical quantity defined on a probability space.", "parents": [], "references": ["probability-theory"] },
+    { "id": "expectation", "conceptKind": "operator", "title": "Expectation", "description": "The expected-value operator for a random variable.", "parents": [], "references": ["probability-theory"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [],
   "activationRules": [
     {
       "id": "vocabulary",

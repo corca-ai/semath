@@ -8,18 +8,20 @@ use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
 use crate::domain::{DomainAnalysis, analyze_domains};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::parser::{ParsedMath, deepest_node, math_regions, parse_regions, selection_path};
-use crate::pattern::{FormulaAnalysis, analyze_formulas, formula_completions};
+use crate::pattern::{FormulaAnalysis, analyze_formulas_with_quantities, formula_completions};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
 use crate::prose::analyze_prose;
+use crate::quantity::{QuantityAnalysis, analyze_quantities};
 use crate::rewrite::formula_rewrites;
 use crate::scope::ScopeGraph;
+use crate::semantic::SemanticGraph;
 use crate::shape::{ShapeAnalysis, analyze_shapes};
 use crate::{
     ChangeEnvelope, DefinitionInfo, DocumentLanguage, EquationNode, EquationNodeSummary, Evidence,
     InspectionInfo, Location, PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectSnapshot,
-    Query, QueryEnvelope, QueryResult, QueryValue, RenamePreparation, SemanticDiagnostic,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    Query, QueryEnvelope, QueryResult, QueryValue, RenamePreparation, SemanticContextInfo,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, ShapeInfo,
+    SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -52,6 +54,7 @@ struct AnalyzedDocument {
     parsed: Vec<ParsedMath>,
     definitions: Vec<DefinitionInfo>,
     shapes: ShapeAnalysis,
+    quantities: QuantityAnalysis,
     consistency: ConsistencyAnalysis,
     hygiene: HygieneAnalysis,
     formulas: FormulaAnalysis,
@@ -69,9 +72,16 @@ impl AnalyzedDocument {
         let scopes = ScopeGraph::new(&document);
         let prose = analyze_prose(&document, &parsed);
         let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
+        let quantities = analyze_quantities(&document, &parsed, &prose.definitions);
         let consistency = analyze_consistency(&document, &prose.definitions, &shapes);
         let hygiene = analyze_hygiene(&document, &parsed, &prose.definitions);
-        let formulas = analyze_formulas(&document, &parsed, &shapes, &consistency);
+        let formulas = analyze_formulas_with_quantities(
+            &document,
+            &parsed,
+            &shapes,
+            &consistency,
+            &quantities,
+        );
         let domains = analyze_domains(&document, &formulas);
         Self {
             component_id: document.file_id.clone(),
@@ -79,6 +89,7 @@ impl AnalyzedDocument {
             parsed,
             definitions: prose.definitions,
             shapes,
+            quantities,
             consistency,
             hygiene,
             formulas,
@@ -192,6 +203,7 @@ impl SemathEngine {
             | Query::FormulaCompletion { file_id, offset }
             | Query::FormulaRewrite { file_id, offset }
             | Query::DomainEvidence { file_id, offset }
+            | Query::SemanticContext { file_id, offset }
             | Query::Inspection { file_id, offset } => (file_id, Some(*offset)),
             Query::Diagnostics { file_id } => (file_id, None),
         };
@@ -238,6 +250,15 @@ impl SemathEngine {
                     shape: symbol
                         .as_ref()
                         .and_then(|(name, _)| document.shapes.shape_at(name, cursor_offset)),
+                    quantity: symbol.as_ref().and_then(|(name, _)| {
+                        document
+                            .quantities
+                            .at(name, cursor_offset)
+                            .0
+                            .into_iter()
+                            .next()
+                            .map(Box::new)
+                    }),
                     symbol: symbol.map(|(name, _)| name),
                     equation_kind: parsed
                         .and_then(|math| deepest_node(&math.root, cursor_offset))
@@ -282,6 +303,7 @@ impl SemathEngine {
                     .shapes
                     .diagnostic(&code, cursor_offset)
                     .or_else(|| document.consistency.diagnostic(&code, cursor_offset))
+                    .or_else(|| document.quantities.diagnostic(&code, cursor_offset))
                     .or_else(|| {
                         hygiene_enabled
                             .then(|| document.hygiene.diagnostic(&code, cursor_offset))
@@ -310,6 +332,9 @@ impl SemathEngine {
                     truncated,
                 }
             }
+            Query::SemanticContext { .. } => QueryValue::SemanticContext {
+                context: self.semantic_context(document, file_id, symbol.as_ref(), cursor_offset),
+            },
             Query::Inspection { .. } => {
                 let mut tree_budget = MAX_INSPECTION_TREE_NODES;
                 let mut tree_truncated = false;
@@ -325,6 +350,9 @@ impl SemathEngine {
 
                 let symbol_info = symbol.as_ref().map(|(name, occurrence)| {
                     self.symbol_info(document, name, occurrence, cursor_offset, hygiene_enabled)
+                });
+                let semantic = parsed.map(|_| {
+                    self.semantic_context(document, file_id, symbol.as_ref(), cursor_offset)
                 });
                 let mut references = symbol
                     .as_ref()
@@ -371,6 +399,7 @@ impl SemathEngine {
                         equation,
                         selection_path,
                         symbol: symbol_info,
+                        semantic,
                         references,
                         diagnostics,
                         recognitions,
@@ -579,6 +608,42 @@ impl SemathEngine {
         locations
     }
 
+    fn semantic_context(
+        &self,
+        document: &AnalyzedDocument,
+        file_id: &str,
+        symbol: Option<&(String, SourceRange)>,
+        offset: u32,
+    ) -> SemanticContextInfo {
+        let (definitions, roles, shapes, quantities, semantic_id, symbol_name) = symbol
+            .map(|(name, occurrence)| {
+                (
+                    self.visible_definitions(file_id, occurrence, name),
+                    document.consistency.roles_at(name, offset).0,
+                    document.shapes.claims_at(name, offset).0,
+                    document.quantities.at(name, offset).0,
+                    self.resolve_definition(file_id, occurrence, name)
+                        .and_then(|definition| definition.semantic_id),
+                    Some(name.clone()),
+                )
+            })
+            .unwrap_or_else(|| (Vec::new(), Vec::new(), Vec::new(), Vec::new(), None, None));
+        let formulas = document.formulas.at(offset);
+        let relations = formulas
+            .iter()
+            .filter_map(|formula| formula.relation.clone())
+            .collect();
+        SemanticGraph::from_symbol_observations(
+            definitions,
+            roles,
+            shapes,
+            formulas,
+            relations,
+            quantities,
+        )
+        .context(symbol_name, semantic_id)
+    }
+
     fn symbol_info(
         &self,
         document: &AnalyzedDocument,
@@ -593,6 +658,7 @@ impl SemathEngine {
         definitions.truncate(MAX_SYMBOL_DEFINITIONS);
         let (shapes, shapes_truncated) = document.shapes.claims_at(name, offset);
         let (roles, roles_truncated) = document.consistency.roles_at(name, offset);
+        let (quantities, quantities_truncated) = document.quantities.at(name, offset);
         let (diagnostics, diagnostics_truncated) =
             symbol_diagnostics(document, name, offset, &shapes, hygiene_enabled);
         SymbolInfo {
@@ -607,11 +673,13 @@ impl SemathEngine {
             },
             definitions,
             shapes,
+            quantities,
             roles,
             formulas: document.formulas.at(offset),
             diagnostics,
             truncated: definitions_truncated
                 || shapes_truncated
+                || quantities_truncated
                 || roles_truncated
                 || diagnostics_truncated,
         }
@@ -749,6 +817,7 @@ fn document_diagnostics(
     hygiene_enabled: bool,
 ) -> Vec<SemanticDiagnostic> {
     let mut diagnostics = document.shapes.diagnostics.clone();
+    diagnostics.extend(document.quantities.diagnostics.iter().cloned());
     diagnostics.extend(document.consistency.diagnostics.iter().cloned());
     if hygiene_enabled {
         diagnostics.extend(document.hygiene.diagnostics.iter().cloned());
@@ -767,6 +836,14 @@ fn symbol_diagnostics(
     let (mut diagnostics, shape_truncated) = document.shapes.diagnostics_for(offset, shapes);
     let (role_diagnostics, role_truncated) = document.consistency.diagnostics_for(symbol, offset);
     diagnostics.extend(role_diagnostics);
+    diagnostics.extend(
+        document
+            .quantities
+            .diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.range.contains(offset))
+            .cloned(),
+    );
     let (hygiene_diagnostics, hygiene_truncated) = if hygiene_enabled {
         document.hygiene.diagnostics_for(symbol, offset)
     } else {
@@ -1457,6 +1534,12 @@ mod tests {
             "conditional-probability"
         );
         assert_eq!(inspection.rewrites.len(), 2);
+        assert!(
+            inspection
+                .semantic
+                .as_ref()
+                .is_some_and(|semantic| !semantic.concepts.is_empty())
+        );
         assert!(inspection.rename.range.is_none());
         assert!(!inspection.truncated);
     }

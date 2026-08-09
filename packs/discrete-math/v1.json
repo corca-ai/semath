@@ -1,9 +1,21 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "packId": "discrete-math",
   "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "discrete-math",
   "title": "Discrete mathematics, logic, and sets",
   "description": "Recognition-first catalog for set, logical, combinatorial, and graph notation with overloaded forms kept non-actionable.",
+  "dependencies": [],
+  "capabilities": { "provides": ["semath:formula-recognition"], "requires": [] },
+  "concepts": [
+    { "id": "set", "conceptKind": "entity", "title": "Set", "description": "A collection declared by the document.", "parents": [], "references": ["concrete-mathematics"] },
+    { "id": "graph", "conceptKind": "entity", "title": "Graph", "description": "A graph with declared vertices and edges.", "parents": [], "references": ["graph-theory"] },
+    { "id": "cardinality", "conceptKind": "operator", "title": "Cardinality", "description": "The size of a finite set.", "parents": [], "references": ["concrete-mathematics"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [],
   "activationRules": [
     { "id": "vocabulary", "topic": "foundations", "patterns": ["set theory", "combinatorics", "propositional logic", "graph theory", "vertex set", "edge set"], "references": ["concrete-mathematics"] },
     { "id": "discrete-notation", "topic": "notation", "patterns": ["\\subset", "\\in", "\\cup", "\\cap", "\\forall", "\\exists", "\\binom"], "references": ["concrete-mathematics"] }

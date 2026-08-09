@@ -1,7 +1,7 @@
 import actionCorpus from "../fixtures/v0.12/action-pattern-calibration.json";
 import domainCorpus from "../fixtures/v0.11/domain-pack-recognition-corpus.json";
-import { builtInPacks } from "../packages/packs/src/index";
 import "./check-v0.12-calibration";
+import { legacyPacks } from "./check-v0.11-calibration";
 import { recognitionVariants } from "./v0.11-domain-fixture.mjs";
 import { actionPatternVariants } from "./v0.12-action-fixture.mjs";
 
@@ -11,7 +11,7 @@ const domainByPattern = new Map(
 const actionByPattern = new Map(
   actionCorpus.cases.map((entry) => [entry.expectedPattern, entry] as const),
 );
-const scorecards = builtInPacks().map((pack) => {
+const scorecards = legacyPacks().map((pack) => {
   let positives = 0;
   let refusals = 0;
   for (const pattern of pack.patterns) {

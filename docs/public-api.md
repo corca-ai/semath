@@ -18,3 +18,10 @@ Semath is a library and language-service runtime, not an editor or web applicati
 Semantic parsing, evidence, identity, and edit proposals belong to the Rust core. Host packages own transport and lifecycle policy. Applications own presentation, permissions, review, apply, and undo; they must not apply a semantic edit without review and revision validation.
 
 Runtime loading of arbitrary third-party pack code is intentionally unsupported. The public pack API validates declarative metadata against the bounded built-in primitive registry.
+
+`semanticContext` returns a bounded, evidence-bearing projection for the symbol
+or formula under the cursor: namespaced concepts, claims and conflict status,
+law relations with bound roles, and quantity/unit/dimension facts. The same
+projection is included as optional `inspection.semantic`, so hosts can render a
+meaning-first view without coordinating another query. These additions are
+protocol-v1-compatible optional data; consumers must ignore fields they do not use.

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 3,
+  "packId": "circuits",
+  "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "circuits",
+  "title": "Electric circuits",
+  "description": "Evidence-gated circuit quantities, components, and constitutive law instances.",
+  "dependencies": [{ "packId": "quantities-units", "versionMajor": 1, "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"] }],
+  "capabilities": { "provides": ["circuits:law-relations", "semath:formula-recognition"], "requires": ["semath:dimensional-analysis", "semath:quantities"] },
+  "concepts": [
+    { "id": "component", "conceptKind": "entity", "title": "Circuit component", "description": "A component connected between circuit nodes.", "parents": [], "references": ["engineering-circuits"] },
+    { "id": "node", "conceptKind": "entity", "title": "Circuit node", "description": "An equipotential connection point in a circuit model.", "parents": [], "references": ["engineering-circuits"] },
+    { "id": "ohm-law", "conceptKind": "relation", "title": "Ohm's law", "description": "Voltage across a resistor equals current times resistance.", "parents": [], "references": ["engineering-circuits"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [
+    {
+      "id": "ohm-law",
+      "title": "Ohm's law",
+      "description": "The voltage across a resistive component equals its current multiplied by resistance.",
+      "roles": [
+        { "id": "voltage", "concept": "quantities-units:voltage", "description": "Voltage across the component." },
+        { "id": "current", "concept": "quantities-units:electric-current", "description": "Current through the component." },
+        { "id": "resistance", "concept": "quantities-units:resistance", "description": "Electrical resistance of the component." }
+      ],
+      "conditions": ["Voltage polarity and current reference direction use a consistent sign convention."],
+      "references": ["engineering-circuits"]
+    }
+  ],
+  "activationRules": [
+    { "id": "circuit-vocabulary", "topic": "foundations", "patterns": ["electric circuit", "Ohm's law", "resistor", "circuit node"], "references": ["engineering-circuits"] }
+  ],
+  "roles": [],
+  "operators": [],
+  "patterns": [
+    {
+      "id": "ohm-law",
+      "topic": "resistive-circuits",
+      "title": "Ohm's law",
+      "description": "Voltage equals current times resistance when the quantities are explicitly declared.",
+      "descriptionKey": "ohm-law",
+      "maturity": "recognition",
+      "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*([A-Za-z])\\s*(?:\\\\cdot\\s*)?([A-Za-z])$" },
+      "parameters": [
+        { "id": "voltage", "constraint": { "kind": "expression", "concepts": ["quantities-units:voltage"] } },
+        { "id": "current", "constraint": { "kind": "expression", "concepts": ["quantities-units:electric-current"] } },
+        { "id": "resistance", "constraint": { "kind": "expression", "concepts": ["quantities-units:resistance"] } }
+      ],
+      "result": { "kind": "proposition", "refinements": ["physical-law-instance"] },
+      "relation": { "law": "ohm-law", "roleBindings": [{ "parameter": "voltage", "role": "voltage" }, { "parameter": "current", "role": "current" }, { "parameter": "resistance", "role": "resistance" }] },
+      "references": ["engineering-circuits"]
+    }
+  ],
+  "rewrites": [],
+  "references": [{ "id": "engineering-circuits", "title": "Engineering Circuit Analysis", "citation": "William H. Hayt, Jack E. Kemmerly, and Steven M. Durbin, Engineering Circuit Analysis, 8th edition, McGraw-Hill, 2012." }]
+}

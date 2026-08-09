@@ -580,7 +580,23 @@ Core crate는 wasm-bindgen이나 LSP type에 의존하지 않는다. Browser Wor
 * wasmtex macro provenance와 CorTeX composite provider를 통해 synthetic occurrence는 탐색만 허용하고 모든 edit는 source-backed review plan으로 제한한다.
 * 다중 파일 false-link corpus, native/WASM/LSP parity, Worker failure/cancellation과 cursor latency를 하나의 release gate로 묶는다.
 
-Later work에는 semantic fingerprint, e-graph, unit analysis, physics pack, cross-paper navigation과 optional LLM assistance가 포함된다.
+### Iteration 11–13 — 기존 기능의 신뢰도와 상호작용 완성
+
+* 다섯 수학 pack의 schema·corpus·precision gate를 통일하고, cursor 경계와 project scope를 순수 정책으로 고정한다.
+* Inspector는 AST 자체보다 의미, 문제, 근거와 가능한 action을 우선한다.
+* 브라우저 E2E 조합은 줄이고 corpus, Rust core와 순수 presentation model이 대부분의 경우를 소유한다.
+
+### Iteration 14 — 수학·공학 확장을 위한 과학 의미 기반
+
+* schema-3 pack은 namespace, dependency/capability, concept, law와 role을 명시하며 catalog가 모든 외부 참조를 검증한다.
+* domain-neutral semantic graph가 claim, conflict, relation과 evidence를 bounded query로 제공한다.
+* quantity kind, unit과 유리수 지수 dimension을 정확히 표현하고 명시적 선언과 곱·나눗셈만 보수적으로 전파한다.
+* classical mechanics, circuits와 control systems를 pilot pack으로 추가하되 명시적 quantity/shape가 없으면 전문 law로 인식하지 않는다.
+* 기존 다섯 pack은 같은 schema로 이관하되 동작과 edit authority를 넓히지 않는다.
+
+Later work에는 더 넓은 quantity calculus, 분야별 ontology/corpus, semantic fingerprint,
+e-graph, cross-paper navigation과 optional LLM assistance가 포함된다. 수백 분야 지원은
+core 분기 추가가 아니라 의존성이 명시된 pack과 독립 scorecard의 누적으로 진행한다.
 
 ---
 

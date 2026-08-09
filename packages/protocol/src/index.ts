@@ -71,6 +71,7 @@ export type SemathQuery =
   | { fileId: string; kind: "formulaCompletion"; offset: number }
   | { fileId: string; kind: "formulaRewrite"; offset: number }
   | { fileId: string; kind: "domainEvidence"; offset: number }
+  | { fileId: string; kind: "semanticContext"; offset: number }
   | { fileId: string; kind: "inspection"; offset: number };
 
 export interface QueryEnvelope {
@@ -134,11 +135,35 @@ export interface ShapeInfo {
   symbol: string;
 }
 
+export interface DimensionExponentInfo {
+  base: string;
+  denominator: number;
+  numerator: number;
+}
+
+export interface PhysicalDimensionInfo {
+  display: string;
+  exponents: readonly DimensionExponentInfo[];
+}
+
+export interface QuantityInfo {
+  derivedFrom: readonly string[];
+  dimension: PhysicalDimensionInfo;
+  display: string;
+  evidence: Evidence;
+  quantityKind?: string;
+  quantityKindId?: string;
+  symbol: string;
+  unit?: string;
+  unitId?: string;
+}
+
 export interface SymbolInfo {
   definitions: readonly DefinitionInfo[];
   diagnostics: readonly SemanticDiagnostic[];
   formulas: readonly FormulaRecognition[];
   location: Location;
+  quantities?: readonly QuantityInfo[];
   roles?: readonly RoleInfo[];
   semanticId?: SemanticSymbolId;
   shapes: readonly ShapeInfo[];
@@ -170,6 +195,55 @@ export interface DomainActivation {
   title: string;
 }
 
+export interface ConceptInfo {
+  conceptId: string;
+  description: string;
+  evidence: Evidence;
+  label: string;
+}
+
+export type SemanticClaimStatus =
+  | "certain"
+  | "supported"
+  | "speculative"
+  | "conflicting";
+
+export interface SemanticClaimInfo {
+  claimId: string;
+  conflicts: readonly string[];
+  evidence: readonly Evidence[];
+  predicate: string;
+  status: SemanticClaimStatus;
+  value: string;
+}
+
+export interface RelationRoleInfo {
+  conceptId?: string;
+  label: string;
+  role: string;
+  symbol: string;
+}
+
+export interface RelationInfo {
+  conditions: readonly string[];
+  description: string;
+  evidence: readonly Evidence[];
+  range: SourceRange;
+  relationId: string;
+  roles: readonly RelationRoleInfo[];
+  title: string;
+}
+
+export interface SemanticContextInfo {
+  claims: readonly SemanticClaimInfo[];
+  concepts: readonly ConceptInfo[];
+  relations: readonly RelationInfo[];
+  quantities: readonly QuantityInfo[];
+  semanticId?: SemanticSymbolId;
+  symbol?: string;
+  truncated: boolean;
+}
+
 export interface SemanticDiagnostic {
   code: string;
   evidence: readonly Evidence[];
@@ -180,6 +254,7 @@ export interface SemanticDiagnostic {
 }
 
 export interface FormulaConstraint {
+  concepts?: readonly string[];
   dimensions?: readonly string[];
   kind:
     | "distribution"
@@ -249,6 +324,7 @@ export interface FormulaRecognition {
   patternId: string;
   range: SourceRange;
   rank: number;
+  relation?: RelationInfo;
   result: FormulaConstraint;
   status?: "condition-missing" | "recognized" | "verified";
   title: string;
@@ -286,6 +362,7 @@ export interface InspectionInfo {
   rename: RenamePreparation;
   rewrites: readonly FormulaRewrite[];
   selectionPath: readonly EquationNodeSummary[];
+  semantic?: SemanticContextInfo;
   symbol?: SymbolInfo;
   truncated: boolean;
 }
@@ -319,6 +396,7 @@ export type QueryValue =
       kind: "hover";
       formulas?: readonly FormulaRecognition[];
       roles?: readonly RoleInfo[];
+      quantity?: QuantityInfo;
       shape?: ShapeInfo;
       symbol?: string;
     }
@@ -357,6 +435,7 @@ export type QueryValue =
       kind: "domainActivations";
       truncated: boolean;
     }
+  | { context: SemanticContextInfo; kind: "semanticContext" }
   | { inspection: InspectionInfo; kind: "inspection" };
 
 export interface QueryResult {

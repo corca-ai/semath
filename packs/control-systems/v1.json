@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 3,
+  "packId": "control-systems",
+  "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "control-systems",
+  "title": "Control systems",
+  "description": "State, input, and system-relation semantics gated by explicit vector and matrix declarations.",
+  "dependencies": [{ "packId": "linear-algebra", "versionMajor": 1, "requiredCapabilities": ["semath:shape-analysis"] }],
+  "capabilities": { "provides": ["control-systems:law-relations", "semath:formula-recognition"], "requires": ["semath:shape-analysis"] },
+  "concepts": [
+    { "id": "state", "conceptKind": "entity", "title": "System state", "description": "A state vector summarizing the information needed for future evolution.", "parents": [], "references": ["linear-system-theory"] },
+    { "id": "control-input", "conceptKind": "entity", "title": "Control input", "description": "An externally selected input to a dynamical system.", "parents": [], "references": ["linear-system-theory"] },
+    { "id": "state-transition", "conceptKind": "relation", "title": "Discrete state transition", "description": "A discrete-time linear state update.", "parents": [], "references": ["linear-system-theory"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [
+    {
+      "id": "discrete-state-transition",
+      "title": "Discrete-time state equation",
+      "description": "The next state equals the autonomous state transition plus the control-input contribution.",
+      "roles": [
+        { "id": "next-state", "concept": "control-systems:state", "description": "State at the next discrete index." },
+        { "id": "state-matrix", "concept": "linear-algebra:linear-operator", "description": "State-transition matrix." },
+        { "id": "current-state", "concept": "control-systems:state", "description": "State at the current discrete index." },
+        { "id": "input-matrix", "concept": "linear-algebra:linear-operator", "description": "Map from control input to state increment." },
+        { "id": "control-input", "concept": "control-systems:control-input", "description": "Control input at the current discrete index." }
+      ],
+      "conditions": ["The matrices and vectors use compatible declared dimensions at the same discrete index."],
+      "references": ["linear-system-theory"]
+    }
+  ],
+  "activationRules": [
+    { "id": "control-vocabulary", "topic": "foundations", "patterns": ["control system", "state-space", "state transition", "control input"], "references": ["linear-system-theory"] }
+  ],
+  "roles": [],
+  "operators": [],
+  "patterns": [
+    {
+      "id": "discrete-state-transition",
+      "topic": "state-space",
+      "title": "Discrete-time state equation",
+      "description": "Linear discrete state update with explicitly declared vector and matrix shapes.",
+      "descriptionKey": "discrete-state-transition",
+      "maturity": "recognition",
+      "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*_\\s*\\{?([^{}]+)\\}?\\s*=\\s*([A-Za-z])\\s*([A-Za-z])\\s*_\\s*\\{?([^{}]+)\\}?\\s*\\+\\s*([A-Za-z])\\s*([A-Za-z])\\s*_\\s*\\{?([^{}]+)\\}?$" },
+      "parameters": [
+        { "id": "next-state", "constraint": { "kind": "vector", "dimensions": ["n"] } },
+        { "id": "next-index", "constraint": { "kind": "expression" } },
+        { "id": "state-matrix", "constraint": { "kind": "matrix", "dimensions": ["n", "n"] } },
+        { "id": "current-state", "constraint": { "kind": "vector", "dimensions": ["n"] } },
+        { "id": "current-index", "constraint": { "kind": "expression" } },
+        { "id": "input-matrix", "constraint": { "kind": "matrix", "dimensions": ["n", "m"] } },
+        { "id": "control-input", "constraint": { "kind": "vector", "dimensions": ["m"] } },
+        { "id": "input-index", "constraint": { "kind": "expression" } }
+      ],
+      "result": { "kind": "proposition", "refinements": ["state-transition"] },
+      "relation": { "law": "discrete-state-transition", "roleBindings": [{ "parameter": "next-state", "role": "next-state" }, { "parameter": "state-matrix", "role": "state-matrix" }, { "parameter": "current-state", "role": "current-state" }, { "parameter": "input-matrix", "role": "input-matrix" }, { "parameter": "control-input", "role": "control-input" }] },
+      "references": ["linear-system-theory"]
+    }
+  ],
+  "rewrites": [],
+  "references": [{ "id": "linear-system-theory", "title": "Linear System Theory and Design", "citation": "Chi-Tsong Chen, Linear System Theory and Design, 4th edition, Oxford University Press, 2013." }]
+}

@@ -378,7 +378,7 @@ fn role_type_conflict_diagnostic(
     })
 }
 
-fn roles_conflict(left: &str, right: &str) -> bool {
+pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
     if left == right {
         return false;
     }

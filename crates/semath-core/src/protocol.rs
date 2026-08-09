@@ -166,6 +166,11 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
+    SemanticContext {
+        #[serde(rename = "fileId")]
+        file_id: String,
+        offset: u32,
+    },
     Inspection {
         #[serde(rename = "fileId")]
         file_id: String,
@@ -232,6 +237,8 @@ pub struct SymbolInfo {
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ShapeInfo>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub quantities: Vec<QuantityInfo>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub roles: Vec<RoleInfo>,
     pub formulas: Vec<FormulaRecognition>,
     pub diagnostics: Vec<SemanticDiagnostic>,
@@ -261,6 +268,105 @@ pub struct DomainActivation {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct ConceptInfo {
+    pub concept_id: String,
+    pub label: String,
+    pub description: String,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum SemanticClaimStatus {
+    Certain,
+    Supported,
+    Speculative,
+    Conflicting,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticClaimInfo {
+    pub claim_id: String,
+    pub predicate: String,
+    pub value: String,
+    pub status: SemanticClaimStatus,
+    pub evidence: Vec<Evidence>,
+    pub conflicts: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct RelationRoleInfo {
+    pub role: String,
+    pub label: String,
+    pub symbol: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub concept_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct RelationInfo {
+    pub relation_id: String,
+    pub title: String,
+    pub description: String,
+    pub roles: Vec<RelationRoleInfo>,
+    pub conditions: Vec<String>,
+    pub evidence: Vec<Evidence>,
+    pub range: SourceRange,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticContextInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semantic_id: Option<SemanticSymbolId>,
+    pub concepts: Vec<ConceptInfo>,
+    pub claims: Vec<SemanticClaimInfo>,
+    pub relations: Vec<RelationInfo>,
+    pub quantities: Vec<QuantityInfo>,
+    pub truncated: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DimensionExponentInfo {
+    pub base: String,
+    pub numerator: i32,
+    pub denominator: u32,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PhysicalDimensionInfo {
+    pub exponents: Vec<DimensionExponentInfo>,
+    pub display: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct QuantityInfo {
+    pub symbol: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity_kind_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity_kind: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
+    pub dimension: PhysicalDimensionInfo,
+    pub display: String,
+    pub evidence: Evidence,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub derived_from: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct ShapeInfo {
     pub symbol: String,
     pub kind: String,
@@ -286,6 +392,8 @@ pub struct SemanticDiagnostic {
 #[serde(rename_all = "camelCase")]
 pub struct FormulaConstraint {
     pub kind: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub concepts: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub dimensions: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -357,6 +465,8 @@ pub struct FormulaRecognition {
     pub result: FormulaConstraint,
     pub conditions: Vec<FormulaConditionInfo>,
     pub evidence: Vec<Evidence>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relation: Option<RelationInfo>,
     pub rank: u32,
 }
 
@@ -411,6 +521,8 @@ pub struct InspectionInfo {
     pub equation: Option<EquationNode>,
     pub selection_path: Vec<EquationNodeSummary>,
     pub symbol: Option<SymbolInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semantic: Option<SemanticContextInfo>,
     pub references: Vec<Location>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub recognitions: Vec<FormulaRecognition>,
@@ -463,6 +575,8 @@ pub enum QueryValue {
         definitions: Vec<DefinitionInfo>,
         #[serde(skip_serializing_if = "Option::is_none")]
         shape: Option<ShapeInfo>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        quantity: Option<Box<QuantityInfo>>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         formulas: Vec<FormulaRecognition>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -501,6 +615,9 @@ pub enum QueryValue {
     DomainActivations {
         activations: Vec<DomainActivation>,
         truncated: bool,
+    },
+    SemanticContext {
+        context: SemanticContextInfo,
     },
     Inspection {
         inspection: Box<InspectionInfo>,

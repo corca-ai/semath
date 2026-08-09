@@ -4,6 +4,7 @@ import {
   loadPack,
   SEMATH_PACK_SCHEMA_VERSION,
   validatePack,
+  validatePackCatalog,
 } from "./index";
 
 describe("public pack contract", () => {
@@ -15,6 +16,10 @@ describe("public pack contract", () => {
       "calculus-analysis",
       "optimization-ml",
       "discrete-math",
+      "quantities-units",
+      "classical-mechanics",
+      "circuits",
+      "control-systems",
     ]);
     expect(packs.every((pack) => validatePack(pack).ok)).toBe(true);
     expect(
@@ -66,11 +71,39 @@ describe("public pack contract", () => {
     ).toEqual({
       errors: [
         {
-          message: "unsupported schema 3; expected 2",
+          message: "unsupported schema 4; expected 3",
           path: "schemaVersion",
         },
       ],
       ok: false,
     });
+  });
+
+  test("rejects unresolved cross-pack concepts and capability contracts", () => {
+    const packs = structuredClone(builtInPacks());
+    const mechanics = packs.find((pack) => pack.packId === "classical-mechanics");
+    if (!mechanics?.laws[0]?.roles[0]) throw new Error("expected mechanics law");
+    mechanics.laws[0].roles[0].concept = "quantities-units:unknown-force";
+    const unknownConcept = validatePackCatalog(packs);
+    expect(unknownConcept.ok).toBe(false);
+    if (!unknownConcept.ok) {
+      expect(unknownConcept.errors[0]?.path).toBe(
+        "packs[6].laws[0].roles[0].concept",
+      );
+    }
+
+    const missingDependency = structuredClone(builtInPacks());
+    const control = missingDependency.find(
+      (pack) => pack.packId === "control-systems",
+    );
+    if (!control) throw new Error("expected control pack");
+    control.dependencies = [];
+    const missingCapability = validatePackCatalog(missingDependency);
+    expect(missingCapability.ok).toBe(false);
+    if (!missingCapability.ok) {
+      expect(missingCapability.errors[0]?.path).toBe(
+        "packs[8].capabilities.requires",
+      );
+    }
   });
 });

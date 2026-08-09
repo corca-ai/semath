@@ -12,7 +12,8 @@ site and an exact expected result. Cases have one of three purposes:
 
 - `recognition`: a supported surface that must keep its exact pattern or prose
   definition result;
-- `refusal`: a close or malformed surface that must remain unrecognized;
+- `refusal`: a close or malformed surface that the field-specific pattern must
+  refuse; an explicitly listed, more general cross-pack recognition may remain;
 - `coverage`: a useful, currently unsupported concept that records the next
   semantic frontier without weakening the false-positive gate.
 

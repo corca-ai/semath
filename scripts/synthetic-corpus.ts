@@ -90,9 +90,8 @@ export function parseSyntheticDomainCorpus(
     if (purpose === "recognition" && expectedPatterns.length === 0) {
       throw new Error(`${path}: recognition requires an expected pattern`);
     }
-    if (purpose === "refusal" && expectedPatterns.length !== 0) {
-      throw new Error(`${path}: refusal cannot expect a pattern`);
-    }
+    // A domain-specific refusal may still be recognized by a more general pack.
+    // Exact result comparison below guarantees that the domain pattern remains absent.
     return {
       id,
       topic: nonEmptyString(item.topic, `${path}.topic`),
