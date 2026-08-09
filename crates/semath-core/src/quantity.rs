@@ -140,6 +140,7 @@ struct QuantityKindSpec {
     title: String,
     aliases: Vec<String>,
     dimension: Dimension,
+    default_unit: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -163,6 +164,7 @@ static QUANTITY_CATALOG: LazyLock<QuantityCatalog> = LazyLock::new(|| {
         for kind in &pack.quantity_kinds {
             let qualified_id = format!("{}:{}", pack.namespace, kind.id);
             let mut aliases = vec![kind.id.replace('-', " "), kind.title.to_lowercase()];
+            aliases.extend(kind.aliases.iter().map(|alias| alias.to_ascii_lowercase()));
             aliases.sort_by_key(|alias| std::cmp::Reverse(alias.len()));
             aliases.dedup();
             catalog.kinds.push(QuantityKindSpec {
@@ -170,6 +172,7 @@ static QUANTITY_CATALOG: LazyLock<QuantityCatalog> = LazyLock::new(|| {
                 title: kind.title.clone(),
                 aliases,
                 dimension: Dimension::from_pack(&kind.dimension),
+                default_unit: kind.default_unit.clone(),
             });
         }
         for unit in &pack.units {
@@ -235,20 +238,30 @@ impl QuantityFact {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct QuantityAnalysis {
+pub(crate) struct QuantityObservations {
     facts: Vec<QuantityFact>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     scopes: ScopeGraph,
 }
 
-impl QuantityAnalysis {
+impl QuantityObservations {
+    pub fn exported(&self) -> Vec<QuantityInfo> {
+        self.facts
+            .iter()
+            .filter(|fact| self.scopes.depth(fact.scope_id) == 0)
+            .map(QuantityFact::info)
+            .collect()
+    }
+
     pub fn at(&self, symbol: &str, offset: u32) -> (Vec<QuantityInfo>, bool) {
         let mut facts = self
             .facts
             .iter()
             .filter(|fact| {
                 fact.symbol == symbol
-                    && (fact.available_from <= offset || fact.symbol_range.contains(offset))
+                    && (self.scopes.depth(fact.scope_id) == 0
+                        || fact.available_from <= offset
+                        || fact.symbol_range.contains(offset))
                     && self.scopes.visible(fact.scope_id, offset)
             })
             .collect::<Vec<_>>();
@@ -276,43 +289,20 @@ impl QuantityAnalysis {
             .find(|diagnostic| diagnostic.code == code && diagnostic.range.contains(offset))
             .cloned()
     }
-
-    pub fn known_at(&self, offset: u32) -> BTreeMap<String, QuantityInfo> {
-        let mut symbols = self
-            .facts
-            .iter()
-            .filter(|fact| {
-                fact.available_from <= offset && self.scopes.visible(fact.scope_id, offset)
-            })
-            .map(|fact| fact.symbol.clone())
-            .collect::<Vec<_>>();
-        symbols.sort();
-        symbols.dedup();
-        symbols
-            .into_iter()
-            .filter_map(|symbol| {
-                self.at(&symbol, offset)
-                    .0
-                    .into_iter()
-                    .next()
-                    .map(|info| (symbol, info))
-            })
-            .collect()
-    }
 }
 
-pub(crate) fn analyze_quantities(
+pub(crate) fn observe_quantities(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     definitions: &[DefinitionInfo],
-) -> QuantityAnalysis {
+) -> QuantityObservations {
     let scopes = ScopeGraph::new(document);
     let mut facts = explicit_facts(definitions, &scopes);
     let mut diagnostics = explicit_diagnostics(&facts);
     propagate_formula_dimensions(document, parsed, &scopes, &mut facts, &mut diagnostics);
     facts.sort_by_key(|fact| fact.available_from);
     diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
-    QuantityAnalysis {
+    QuantityObservations {
         facts,
         diagnostics,
         scopes,
@@ -323,8 +313,16 @@ fn explicit_facts(definitions: &[DefinitionInfo], scopes: &ScopeGraph) -> Vec<Qu
     definitions
         .iter()
         .filter_map(|definition| {
-            let kind = find_quantity_kind(&definition.description);
+            let declared_kind = find_quantity_kind(&definition.description);
             let unit = find_unit(&definition.description);
+            let kind = declared_kind.or_else(|| {
+                unit.and_then(|unit| {
+                    QUANTITY_CATALOG
+                        .kinds
+                        .iter()
+                        .find(|kind| kind.default_unit.as_deref() == Some(unit.id.as_str()))
+                })
+            });
             let dimension = unit
                 .map(|unit| unit.dimension.clone())
                 .or_else(|| kind.map(|kind| kind.dimension.clone()))?;
@@ -537,7 +535,13 @@ fn known_facts<'a>(
 }
 
 fn find_quantity_kind(description: &str) -> Option<&'static QuantityKindSpec> {
-    let description = description.to_lowercase();
+    let mut semantic_description = description;
+    for separator in [" along ", " through ", " across "] {
+        if let Some((quantity, _)) = semantic_description.split_once(separator) {
+            semantic_description = quantity;
+        }
+    }
+    let description = semantic_description.to_lowercase();
     QUANTITY_CATALOG.kinds.iter().find(|kind| {
         kind.aliases
             .iter()
@@ -617,8 +621,8 @@ const fn gcd(mut left: u32, mut right: u32) -> u32 {
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{Dimension, Exponent, analyze_quantities};
-    use crate::parser::{math_regions, parse_regions};
+    use super::{Dimension, Exponent, observe_quantities};
+    use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
     #[test]
@@ -642,12 +646,13 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            math_regions: math_regions(content, DocumentLanguage::Latex),
+            math_regions: test_math_regions(content, DocumentLanguage::Latex),
+            macros: Vec::new(),
             includes: Vec::new(),
         };
         let parsed = parse_regions(&document.content, &document.math_regions);
-        let prose = crate::prose::analyze_prose(&document, &parsed);
-        let analysis = analyze_quantities(&document, &parsed, &prose.definitions);
+        let prose = crate::prose::observe_prose(&document, &parsed);
+        let analysis = observe_quantities(&document, &parsed, &prose.definitions);
         let force_offset = content.find("$F = m a$").unwrap() as u32 + 1;
         let claims = analysis.at("F", force_offset).0;
 

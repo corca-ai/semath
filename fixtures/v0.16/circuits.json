@@ -1,0 +1,3825 @@
+{
+  "schemaVersion": 1,
+  "domain": "circuits",
+  "cases": [
+    {
+      "id": "ohm-pos-basic-drop",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For the resistor branch, the constitutive relation is $V=IR$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "expectedRoles": {
+        "voltage": "V",
+        "current": "I",
+        "resistance": "R"
+      },
+      "variationTags": [
+        "conventional-notation",
+        "inline"
+      ]
+    },
+    {
+      "id": "ohm-pos-solve-current",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The branch current follows from \\[I=\\frac{V}{R}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I=\\frac{V}{R}"
+      },
+      "expectedRoles": {
+        "current": "I",
+        "voltage": "V",
+        "resistance": "R"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "display"
+      ]
+    },
+    {
+      "id": "ohm-pos-solve-resistance",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For a measured operating point, use $R=\\frac{V}{I}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "R=\\frac{V}{I}"
+      },
+      "expectedRoles": {
+        "resistance": "R",
+        "voltage": "V",
+        "current": "I"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "measurement"
+      ]
+    },
+    {
+      "id": "ohm-pos-source-subscripts",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The source resistor obeys \\[V_s=I_sR_s\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_s=I_sR_s"
+      },
+      "expectedRoles": {
+        "voltage": "V_s",
+        "current": "I_s",
+        "resistance": "R_s"
+      },
+      "variationTags": [
+        "subscripts",
+        "source-branch"
+      ]
+    },
+    {
+      "id": "ohm-pos-terminal-voltage",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Across terminals \\(a\\) and \\(b\\), the passive-sign relation is $V_{ab}=R_b I_{ab}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_{ab}=R_b I_{ab}"
+      },
+      "expectedRoles": {
+        "voltage": "V_{ab}",
+        "resistance": "R_b",
+        "current": "I_{ab}"
+      },
+      "variationTags": [
+        "subscripts",
+        "passive-sign-convention"
+      ]
+    },
+    {
+      "id": "ohm-pos-time-domain",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For an ideal time-invariant resistor, \\[v(t)=R\\,i(t)\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "v(t)=R\\,i(t)"
+      },
+      "expectedRoles": {
+        "voltage": "v(t)",
+        "resistance": "R",
+        "current": "i(t)"
+      },
+      "variationTags": [
+        "lowercase",
+        "time-domain"
+      ]
+    },
+    {
+      "id": "ohm-pos-time-domain-current",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Solving the same device law for current gives $i(t)=v(t)/R$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i(t)=v(t)/R"
+      },
+      "expectedRoles": {
+        "current": "i(t)",
+        "voltage": "v(t)",
+        "resistance": "R"
+      },
+      "variationTags": [
+        "lowercase",
+        "reordered-equality"
+      ]
+    },
+    {
+      "id": "ohm-pos-element-labels",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The labeled element satisfies \\[V_R=R\\,I_R\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_R=R\\,I_R"
+      },
+      "expectedRoles": {
+        "voltage": "V_R",
+        "resistance": "R",
+        "current": "I_R"
+      },
+      "variationTags": [
+        "subscripts",
+        "element-label"
+      ]
+    },
+    {
+      "id": "ohm-pos-delta-voltage",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let \\(\\Delta V\\) be the signed drop. Then $\\Delta V=I_\\ell R_\\ell$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\Delta V=I_\\ell R_\\ell"
+      },
+      "expectedRoles": {
+        "voltage": "\\Delta V",
+        "current": "I_\\ell",
+        "resistance": "R_\\ell"
+      },
+      "variationTags": [
+        "declaration-before",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "ohm-pos-emf-symbol",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Here \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; $E=J\\rho$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "E=J\\rho"
+      },
+      "expectedRoles": {
+        "voltage": "E",
+        "current": "J",
+        "resistance": "\\rho"
+      },
+      "variationTags": [
+        "multi-symbol-declaration",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "ohm-pos-european-voltage",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Using \\(U\\) for voltage, the resistor equation is \\[U=R I\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "U=R I"
+      },
+      "expectedRoles": {
+        "voltage": "U",
+        "resistance": "R",
+        "current": "I"
+      },
+      "variationTags": [
+        "alternative-symbols",
+        "declaration-before"
+      ]
+    },
+    {
+      "id": "ohm-pos-product-first",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The lab sheet presents the relation with the product first: \\[I R=V\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I R=V"
+      },
+      "expectedRoles": {
+        "current": "I",
+        "resistance": "R",
+        "voltage": "V"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "spacing"
+      ]
+    },
+    {
+      "id": "ohm-pos-grouped-product",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For clarity, the report groups the measured factors as $V=(I)(R)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=(I)(R)"
+      },
+      "expectedRoles": {
+        "voltage": "V",
+        "current": "I",
+        "resistance": "R"
+      },
+      "variationTags": [
+        "grouping",
+        "presentation"
+      ]
+    },
+    {
+      "id": "ohm-pos-parenthesized-law",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The asserted device law is \\[(V)=(R\\,I)\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(V)=(R\\,I)"
+      },
+      "expectedRoles": {
+        "voltage": "V",
+        "resistance": "R",
+        "current": "I"
+      },
+      "variationTags": [
+        "grouping",
+        "display"
+      ]
+    },
+    {
+      "id": "ohm-pos-declared-before",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses $V_d=I_dR_d$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_d=I_dR_d"
+      },
+      "expectedRoles": {
+        "voltage": "V_d",
+        "current": "I_d",
+        "resistance": "R_d"
+      },
+      "variationTags": [
+        "declaration-before",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "ohm-pos-declared-after",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The branch model is \\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "e_b=j_b r_b"
+      },
+      "expectedRoles": {
+        "voltage": "e_b",
+        "current": "j_b",
+        "resistance": "r_b"
+      },
+      "variationTags": [
+        "declaration-after",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "ohm-pos-sentence-interleaved",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With current \\(i_L\\) directed into the marked terminal, $v_L=R_L i_L$ gives the load voltage."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "v_L=R_L i_L"
+      },
+      "expectedRoles": {
+        "voltage": "v_L",
+        "resistance": "R_L",
+        "current": "i_L"
+      },
+      "variationTags": [
+        "english-context",
+        "passive-sign-convention"
+      ]
+    },
+    {
+      "id": "ohm-pos-units-in-prose",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Voltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is \\[V_m=I_mR_m\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_m=I_mR_m"
+      },
+      "expectedRoles": {
+        "voltage": "V_m",
+        "current": "I_m",
+        "resistance": "R_m"
+      },
+      "variationTags": [
+        "unit-context",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "ohm-pos-macro-single",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Using the project voltage alias, the component equation is $\\Vdrop=I R$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\Vdrop=I R"
+      },
+      "expectedRoles": {
+        "voltage": "\\Vdrop",
+        "current": "I",
+        "resistance": "R"
+      },
+      "variationTags": [
+        "transparent-macro",
+        "inline"
+      ],
+      "macros": [
+        {
+          "name": "\\Vdrop",
+          "definition": "V_d"
+        }
+      ]
+    },
+    {
+      "id": "ohm-pos-macro-all-roles",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The schematic notation states \\[\\Volt=\\Ampere\\,\\Ohmic\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\Volt=\\Ampere\\,\\Ohmic"
+      },
+      "expectedRoles": {
+        "voltage": "\\Volt",
+        "current": "\\Ampere",
+        "resistance": "\\Ohmic"
+      },
+      "variationTags": [
+        "transparent-macro",
+        "multiple-macros"
+      ],
+      "macros": [
+        {
+          "name": "\\Volt",
+          "definition": "V"
+        },
+        {
+          "name": "\\Ampere",
+          "definition": "I"
+        },
+        {
+          "name": "\\Ohmic",
+          "definition": "R"
+        }
+      ]
+    },
+    {
+      "id": "ohm-pos-reference-direction",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For the marked positive voltage terminal and entering current arrow, \\[v_+=r_p i_+\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "v_+=r_p i_+"
+      },
+      "expectedRoles": {
+        "voltage": "v_+",
+        "resistance": "r_p",
+        "current": "i_+"
+      },
+      "variationTags": [
+        "sign-convention",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "ohm-pos-load-subscript",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The load line uses $V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}"
+      },
+      "expectedRoles": {
+        "voltage": "V_{\\mathrm{load}}",
+        "current": "I_{\\mathrm{load}}",
+        "resistance": "R_{\\mathrm{load}}"
+      },
+      "variationTags": [
+        "descriptive-subscripts",
+        "inline"
+      ]
+    },
+    {
+      "id": "ohm-pos-sensor-branch",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For sensor branch \\(3\\), \\[v_3=i_3 r_3\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "v_3=i_3 r_3"
+      },
+      "expectedRoles": {
+        "voltage": "v_3",
+        "current": "i_3",
+        "resistance": "r_3"
+      },
+      "variationTags": [
+        "numeric-subscripts",
+        "lowercase"
+      ]
+    },
+    {
+      "id": "ohm-pos-resistance-left",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The inferred element value is $\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathcal{R}_x=V_x/I_x"
+      },
+      "expectedRoles": {
+        "resistance": "\\mathcal{R}_x",
+        "voltage": "V_x",
+        "current": "I_x"
+      },
+      "variationTags": [
+        "calligraphic-symbol",
+        "reordered-equality"
+      ]
+    },
+    {
+      "id": "ohm-pos-aligned-presentation",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The selected row of the derivation is \\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_o&=I_oR_o"
+      },
+      "expectedRoles": {
+        "voltage": "V_o",
+        "current": "I_o",
+        "resistance": "R_o"
+      },
+      "variationTags": [
+        "aligned",
+        "presentation"
+      ]
+    },
+    {
+      "id": "ohm-pos-boxed-presentation",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The final component model is highlighted as \\[\\boxed{V_c=R_c I_c}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_c=R_c I_c"
+      },
+      "expectedRoles": {
+        "voltage": "V_c",
+        "resistance": "R_c",
+        "current": "I_c"
+      },
+      "variationTags": [
+        "boxed",
+        "presentation"
+      ]
+    },
+    {
+      "id": "ohm-pos-ratio-grouping",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "After isolating current, the worksheet obtains \\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_x=\\left(\\frac{v_x}{r_x}\\right)"
+      },
+      "expectedRoles": {
+        "current": "i_x",
+        "voltage": "v_x",
+        "resistance": "r_x"
+      },
+      "variationTags": [
+        "grouping",
+        "reordered-equality"
+      ]
+    },
+    {
+      "id": "ohm-pos-multiline-declaration",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Voltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus \\[V_h=R_h I_h\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_h=R_h I_h"
+      },
+      "expectedRoles": {
+        "voltage": "V_h",
+        "resistance": "R_h",
+        "current": "I_h"
+      },
+      "variationTags": [
+        "multiline-prose",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "ohm-pos-multifile-declaration",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{symbols}\nThe resistor equation is \\[V_b=I_bR_b\\]."
+        },
+        {
+          "fileId": "symbols",
+          "path": "symbols.tex",
+          "content": "In this project \\(V_b\\) is voltage, \\(I_b\\) is current, and \\(R_b\\) is resistance."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_b=I_bR_b"
+      },
+      "expectedRoles": {
+        "voltage": "V_b",
+        "current": "I_b",
+        "resistance": "R_b"
+      },
+      "variationTags": [
+        "multi-file",
+        "declaration-separate-file"
+      ]
+    },
+    {
+      "id": "ohm-pos-multifile-macro",
+      "lawId": "ohm-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{notation}\nThe branch law is $\\BranchV=\\BranchI\\BranchR$."
+        },
+        {
+          "fileId": "notation",
+          "path": "notation.tex",
+          "content": "\\newcommand{\\BranchV}{V_z}\n\\newcommand{\\BranchI}{I_z}\n\\newcommand{\\BranchR}{R_z}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\BranchV=\\BranchI\\BranchR"
+      },
+      "expectedRoles": {
+        "voltage": "\\BranchV",
+        "current": "\\BranchI",
+        "resistance": "\\BranchR"
+      },
+      "variationTags": [
+        "multi-file",
+        "transparent-macro"
+      ],
+      "macros": [
+        {
+          "name": "\\BranchV",
+          "definition": "V_z"
+        },
+        {
+          "name": "\\BranchI",
+          "definition": "I_z"
+        },
+        {
+          "name": "\\BranchR",
+          "definition": "R_z"
+        }
+      ]
+    },
+    {
+      "id": "ohm-neg-sum-instead-product",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The proposed relation is $V=I+R$, which combines unlike roles additively."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=I+R"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "wrong-operator",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "ohm-neg-squared-resistance",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The nonlinear expression \\[V=IR^2\\] is not the ideal resistor law."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR^2"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "wrong-exponent",
+        "nonlinear"
+      ]
+    },
+    {
+      "id": "ohm-neg-inverted-current",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The draft claims $V=R/I$ for the branch."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=R/I"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "wrong-quotient",
+        "reordered-roles"
+      ]
+    },
+    {
+      "id": "ohm-neg-roles-swapped",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Here \\(R\\) is declared to be current, \\(I\\) resistance, and \\(V\\) voltage, followed by \\[V=IR\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "conflicting-declaration",
+        "role-swap"
+      ]
+    },
+    {
+      "id": "ohm-neg-negative-passive",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Current enters the positive-voltage terminal, yet the sheet asserts $V=-IR$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=-IR"
+      },
+      "refusalCategory": "wrong-sign-convention",
+      "variationTags": [
+        "sign-convention",
+        "wrong-sign"
+      ]
+    },
+    {
+      "id": "ohm-neg-conductance-form",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With \\(G\\) declared as conductance, the valid but different relation is \\[I=GV\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I=GV"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "conductance",
+        "related-law"
+      ]
+    },
+    {
+      "id": "ohm-neg-impedance-form",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For an AC impedance \\(Z\\), the phasors satisfy $\\tilde V=\\tilde I Z$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\tilde V=\\tilde I Z"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "impedance",
+        "phasor"
+      ]
+    },
+    {
+      "id": "ohm-neg-power-law",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The power identity \\[P=VI\\] is present, but no resistance law is asserted."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P=VI"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "related-law",
+        "power"
+      ]
+    },
+    {
+      "id": "ohm-neg-capacitor-charge",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The capacitor relation $V=Q/C$ concerns charge and capacitance."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=Q/C"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "related-law",
+        "capacitor"
+      ]
+    },
+    {
+      "id": "ohm-neg-voltage-sum",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The loop equation \\[V_1=V_2+V_3\\] relates only voltages."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V_1=V_2+V_3"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "kirchhoff-voltage",
+        "wrong-roles"
+      ]
+    },
+    {
+      "id": "ohm-neg-nonlinear-device",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The device is explicitly nonlinear and follows $V=kI^2$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=kI^2"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "nonlinear",
+        "device-scope"
+      ]
+    },
+    {
+      "id": "ohm-neg-differential-resistance",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Only the small-signal increments obey \\[dV=r_d\\,dI\\]; this does not establish a global static law."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "dV=r_d\\,dI"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "differential-law",
+        "local-scope"
+      ]
+    },
+    {
+      "id": "ohm-neg-approximate-fit",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The regression reports merely $V\\approx IR$ over the sampled range."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V\\approx IR"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "approximation",
+        "wrong-operator"
+      ]
+    },
+    {
+      "id": "ohm-neg-upper-bound",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "A safety constraint imposes \\[V\\leq IR\\] rather than an equality."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V\\leq IR"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "inequality",
+        "constraint"
+      ]
+    },
+    {
+      "id": "ohm-neg-wrong-unit-current",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The document declares \\(I\\) in volts and \\(V\\) in amperes, then writes $V=IR$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "unit-conflict",
+        "role-conflict"
+      ]
+    },
+    {
+      "id": "ohm-neg-negated-assertion",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The manual explicitly says that $V=IR$ does not apply to this diode."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "negation",
+        "device-scope"
+      ]
+    },
+    {
+      "id": "ohm-neg-hypothetical-only",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "If the unknown element were an ideal resistor, one could test \\[V=IR\\], but its type is not known."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "hypothetical",
+        "uncertain-scope"
+      ]
+    },
+    {
+      "id": "ohm-neg-function-ambiguity",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "In the control model, \\(I\\) names a function and the expression is $V=I(R)$, not a current-times-resistance product."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=I(R)"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "function-application",
+        "symbol-ambiguity"
+      ]
+    },
+    {
+      "id": "ohm-neg-opaque-alias",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Without any definition of the alias, the report contains $\\mysteryOhm{V}{I}{R}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mysteryOhm{V}{I}{R}"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "opaque-macro",
+        "missing-definition"
+      ]
+    },
+    {
+      "id": "ohm-neg-conflicting-models",
+      "lawId": "ohm-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Two incompatible candidates are listed: $V=IR$ for model A and \\(V=-IR\\) for model B, with no selected model."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "conflicting-formulas",
+        "unresolved-scope"
+      ]
+    },
+    {
+      "id": "kcl-pos-two-in-one-out",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "At node \\(n\\), the entering currents balance the leaving branch: $I_1+I_2=I_3$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2=I_3"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "I_1",
+        "incomingCurrent2": "I_2",
+        "outgoingCurrent": "I_3"
+      },
+      "variationTags": [
+        "conventional-notation",
+        "node-balance"
+      ]
+    },
+    {
+      "id": "kcl-pos-one-in-two-out",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The junction equation is \\[I_{\\mathrm{in}}=I_a+I_b\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_{\\mathrm{in}}=I_a+I_b"
+      },
+      "expectedRoles": {
+        "incomingCurrent": "I_{\\mathrm{in}}",
+        "outgoingCurrent1": "I_a",
+        "outgoingCurrent2": "I_b"
+      },
+      "variationTags": [
+        "descriptive-subscripts",
+        "reordered-equality"
+      ]
+    },
+    {
+      "id": "kcl-pos-signed-zero",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With entering currents positive, the node law is $I_a+I_b-I_c=0$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_a+I_b-I_c=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "I_a",
+        "branchCurrent2": "I_b",
+        "branchCurrent3": "I_c"
+      },
+      "variationTags": [
+        "signed-sum",
+        "sign-convention"
+      ]
+    },
+    {
+      "id": "kcl-pos-zero-left",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The same node balance is displayed as \\[0=I_p+I_q-I_r\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "0=I_p+I_q-I_r"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "I_p",
+        "branchCurrent2": "I_q",
+        "branchCurrent3": "I_r"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "signed-sum"
+      ]
+    },
+    {
+      "id": "kcl-pos-indexed-sum",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Using outward reference directions, KCL gives $\\sum_{k=1}^{m} I_k=0$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\sum_{k=1}^{m} I_k=0"
+      },
+      "expectedRoles": {
+        "branchCurrent": "I_k"
+      },
+      "variationTags": [
+        "summation",
+        "all-outward"
+      ]
+    },
+    {
+      "id": "kcl-pos-in-out-sums",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The aggregate statement is \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j"
+      },
+      "expectedRoles": {
+        "incomingCurrent": "i_j",
+        "outgoingCurrent": "i_j"
+      },
+      "variationTags": [
+        "summation",
+        "partitioned-branches"
+      ]
+    },
+    {
+      "id": "kcl-pos-node-subscripts",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "At node \\(A\\), the labeled branches satisfy $I_{A1}+I_{A2}=I_{A3}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_{A1}+I_{A2}=I_{A3}"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "I_{A1}",
+        "incomingCurrent2": "I_{A2}",
+        "outgoingCurrent": "I_{A3}"
+      },
+      "variationTags": [
+        "node-subscripts",
+        "inline"
+      ]
+    },
+    {
+      "id": "kcl-pos-lowercase-time",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Instantaneously, \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_1(t)+i_2(t)=i_3(t)"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "i_1(t)",
+        "incomingCurrent2": "i_2(t)",
+        "outgoingCurrent": "i_3(t)"
+      },
+      "variationTags": [
+        "lowercase",
+        "time-domain"
+      ]
+    },
+    {
+      "id": "kcl-pos-branch-names",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The source current splits according to $I_S=I_L+I_B$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_S=I_L+I_B"
+      },
+      "expectedRoles": {
+        "incomingCurrent": "I_S",
+        "outgoingCurrent1": "I_L",
+        "outgoingCurrent2": "I_B"
+      },
+      "variationTags": [
+        "branch-labels",
+        "current-split"
+      ]
+    },
+    {
+      "id": "kcl-pos-product-free-reorder",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The report writes the outgoing side first: \\[I_o+I_p=I_s\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_o+I_p=I_s"
+      },
+      "expectedRoles": {
+        "outgoingCurrent1": "I_o",
+        "outgoingCurrent2": "I_p",
+        "incomingCurrent": "I_s"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "current-split"
+      ]
+    },
+    {
+      "id": "kcl-pos-grouped-sides",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For presentation, the balance is $(I_1+I_2)=(I_3+I_4)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(I_1+I_2)=(I_3+I_4)"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "I_1",
+        "incomingCurrent2": "I_2",
+        "outgoingCurrent1": "I_3",
+        "outgoingCurrent2": "I_4"
+      },
+      "variationTags": [
+        "grouping",
+        "four-branch"
+      ]
+    },
+    {
+      "id": "kcl-pos-boxed-node-law",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The selected node equation is \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_a+i_b-i_c-i_d=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "i_a",
+        "branchCurrent2": "i_b",
+        "branchCurrent3": "i_c",
+        "branchCurrent4": "i_d"
+      },
+      "variationTags": [
+        "boxed",
+        "signed-sum"
+      ]
+    },
+    {
+      "id": "kcl-pos-declared-before",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then $j_1+j_2=j_3$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "j_1+j_2=j_3"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "j_1",
+        "incomingCurrent2": "j_2",
+        "outgoingCurrent": "j_3"
+      },
+      "variationTags": [
+        "declaration-before",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "kcl-pos-declared-after",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The junction obeys \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "a+b=c"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "a",
+        "incomingCurrent2": "b",
+        "outgoingCurrent": "c"
+      },
+      "variationTags": [
+        "declaration-after",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "kcl-pos-all-leaving",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "All four branch arrows point away from the node, so $i_a+i_b+i_c+i_d=0$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_a+i_b+i_c+i_d=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "i_a",
+        "branchCurrent2": "i_b",
+        "branchCurrent3": "i_c",
+        "branchCurrent4": "i_d"
+      },
+      "variationTags": [
+        "all-outward",
+        "sign-convention"
+      ]
+    },
+    {
+      "id": "kcl-pos-all-entering",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With every arrow defined toward the node, the signed currents satisfy \\[j_a+j_b+j_c=0\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "j_a+j_b+j_c=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "j_a",
+        "branchCurrent2": "j_b",
+        "branchCurrent3": "j_c"
+      },
+      "variationTags": [
+        "all-inward",
+        "sign-convention"
+      ]
+    },
+    {
+      "id": "kcl-pos-explicit-negative",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The measured negative branch value is retained in $I_1+(-I_2)+I_3=0$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+(-I_2)+I_3=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "I_1",
+        "branchCurrent2": "I_2",
+        "branchCurrent3": "I_3"
+      },
+      "variationTags": [
+        "grouping",
+        "signed-value"
+      ]
+    },
+    {
+      "id": "kcl-pos-four-way-split",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "At the distribution node, \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_{\\rm feed}=I_1+I_2+I_3"
+      },
+      "expectedRoles": {
+        "incomingCurrent": "I_{\\rm feed}",
+        "outgoingCurrent1": "I_1",
+        "outgoingCurrent2": "I_2",
+        "outgoingCurrent3": "I_3"
+      },
+      "variationTags": [
+        "four-branch",
+        "descriptive-subscript"
+      ]
+    },
+    {
+      "id": "kcl-pos-small-signal",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For the transistor terminal currents, the node equation is $i_e=i_b+i_c$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_e=i_b+i_c"
+      },
+      "expectedRoles": {
+        "incomingCurrent": "i_e",
+        "outgoingCurrent1": "i_b",
+        "outgoingCurrent2": "i_c"
+      },
+      "variationTags": [
+        "small-signal",
+        "device-terminal"
+      ]
+    },
+    {
+      "id": "kcl-pos-phasor-balance",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "At the AC node the phasor currents obey \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\tilde I_1+\\tilde I_2=\\tilde I_3"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "\\tilde I_1",
+        "incomingCurrent2": "\\tilde I_2",
+        "outgoingCurrent": "\\tilde I_3"
+      },
+      "variationTags": [
+        "phasor",
+        "node-balance"
+      ]
+    },
+    {
+      "id": "kcl-pos-aligned",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The derivation isolates the node row as \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_x+I_y-I_z&=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "I_x",
+        "branchCurrent2": "I_y",
+        "branchCurrent3": "I_z"
+      },
+      "variationTags": [
+        "aligned",
+        "presentation"
+      ]
+    },
+    {
+      "id": "kcl-pos-underbraced-groups",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The flow groups are shown as $\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "I_a",
+        "incomingCurrent2": "I_b",
+        "outgoingCurrent1": "I_c",
+        "outgoingCurrent2": "I_d"
+      },
+      "variationTags": [
+        "underbrace",
+        "presentation"
+      ]
+    },
+    {
+      "id": "kcl-pos-multi-symbol-prose",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Currents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives \\[p+q=r+s\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "p+q=r+s"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "p",
+        "incomingCurrent2": "q",
+        "outgoingCurrent1": "r",
+        "outgoingCurrent2": "s"
+      },
+      "variationTags": [
+        "multi-symbol-declaration",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "kcl-pos-unit-context",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Every branch quantity is measured in amperes, and the junction balance is $J_0-J_1-J_2=0$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "J_0-J_1-J_2=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "J_0",
+        "branchCurrent2": "J_1",
+        "branchCurrent3": "J_2"
+      },
+      "variationTags": [
+        "unit-context",
+        "signed-sum"
+      ]
+    },
+    {
+      "id": "kcl-pos-node-label-after",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The equation \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "k_1+k_2=k_3"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "k_1",
+        "incomingCurrent2": "k_2",
+        "outgoingCurrent": "k_3"
+      },
+      "variationTags": [
+        "declaration-after",
+        "node-scope"
+      ]
+    },
+    {
+      "id": "kcl-pos-comma-subscripts",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The two feeders satisfy $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "I_{\\mathrm{in},1}",
+        "incomingCurrent2": "I_{\\mathrm{in},2}",
+        "outgoingCurrent": "I_{\\mathrm{out}}"
+      },
+      "variationTags": [
+        "descriptive-subscripts",
+        "multiple-feeders"
+      ]
+    },
+    {
+      "id": "kcl-pos-reference-node",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Relative to reference node \\(n_0\\), \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_{n0,1}-i_{n0,2}+i_{n0,3}=0"
+      },
+      "expectedRoles": {
+        "branchCurrent1": "i_{n0,1}",
+        "branchCurrent2": "i_{n0,2}",
+        "branchCurrent3": "i_{n0,3}"
+      },
+      "variationTags": [
+        "node-scope",
+        "signed-sum"
+      ]
+    },
+    {
+      "id": "kcl-pos-macro-branches",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The aliased branch currents satisfy $\\InOne+\\InTwo=\\OutOne$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\InOne+\\InTwo=\\OutOne"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "\\InOne",
+        "incomingCurrent2": "\\InTwo",
+        "outgoingCurrent": "\\OutOne"
+      },
+      "variationTags": [
+        "transparent-macro",
+        "multiple-macros"
+      ],
+      "macros": [
+        {
+          "name": "\\InOne",
+          "definition": "I_1"
+        },
+        {
+          "name": "\\InTwo",
+          "definition": "I_2"
+        },
+        {
+          "name": "\\OutOne",
+          "definition": "I_3"
+        }
+      ]
+    },
+    {
+      "id": "kcl-pos-multifile-declaration",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{branches}\nAt node \\(q\\), \\[I_u+I_v=I_w\\]."
+        },
+        {
+          "fileId": "branches",
+          "path": "branches.tex",
+          "content": "Symbols \\(I_u,I_v\\) are entering currents and \\(I_w\\) is the outgoing current."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_u+I_v=I_w"
+      },
+      "expectedRoles": {
+        "incomingCurrent1": "I_u",
+        "incomingCurrent2": "I_v",
+        "outgoingCurrent": "I_w"
+      },
+      "variationTags": [
+        "multi-file",
+        "declaration-separate-file"
+      ]
+    },
+    {
+      "id": "kcl-pos-multifile-macro",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{node-macros}\nThe node law is $\\Feed=\\LoadA+\\LoadB$."
+        },
+        {
+          "fileId": "node-macros",
+          "path": "node-macros.tex",
+          "content": "\\newcommand{\\Feed}{I_f}\n\\newcommand{\\LoadA}{I_a}\n\\newcommand{\\LoadB}{I_b}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\Feed=\\LoadA+\\LoadB"
+      },
+      "expectedRoles": {
+        "incomingCurrent": "\\Feed",
+        "outgoingCurrent1": "\\LoadA",
+        "outgoingCurrent2": "\\LoadB"
+      },
+      "variationTags": [
+        "multi-file",
+        "transparent-macro"
+      ],
+      "macros": [
+        {
+          "name": "\\Feed",
+          "definition": "I_f"
+        },
+        {
+          "name": "\\LoadA",
+          "definition": "I_a"
+        },
+        {
+          "name": "\\LoadB",
+          "definition": "I_b"
+        }
+      ]
+    },
+    {
+      "id": "kcl-neg-voltage-loop",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The loop equation $\\sum_{k=1}^{3}V_k=0$ sums voltages, not node currents."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\sum_{k=1}^{3}V_k=0"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "kirchhoff-voltage",
+        "role-mismatch"
+      ]
+    },
+    {
+      "id": "kcl-neg-power-balance",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The expression \\[P_1+P_2-P_3=0\\] is a power balance."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_1+P_2-P_3=0"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "power",
+        "role-mismatch"
+      ]
+    },
+    {
+      "id": "kcl-neg-charge-balance",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The stored charges satisfy $Q_1+Q_2=Q_3$, without a current statement."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q_1+Q_2=Q_3"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "charge",
+        "role-mismatch"
+      ]
+    },
+    {
+      "id": "kcl-neg-nonzero-residual",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The measured node has an unexplained residual: \\[I_1+I_2-I_3=\\epsilon\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2-I_3=\\epsilon"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "nonzero-residual",
+        "measurement-error"
+      ]
+    },
+    {
+      "id": "kcl-neg-inequality",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "A current limit imposes $I_1+I_2\\leq I_{\\max}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2\\leq I_{\\max}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "inequality",
+        "constraint"
+      ]
+    },
+    {
+      "id": "kcl-neg-current-product",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The expression \\[I_1I_2=I_3\\] multiplies branch currents."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1I_2=I_3"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "product",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "kcl-neg-current-ratio",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The gain relation $I_o/I_i=\\beta$ is not a node conservation equation."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_o/I_i=\\beta"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "ratio",
+        "device-gain"
+      ]
+    },
+    {
+      "id": "kcl-neg-capacitor-current",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The identity \\[i=dq/dt\\] defines current from charge flow but does not balance a node."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=dq/dt"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "related-law",
+        "no-node-scope"
+      ]
+    },
+    {
+      "id": "kcl-neg-two-branch-ambiguity",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The isolated equality $I_1=I_2$ gives no node, directions, or conservation scope."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1=I_2"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "missing-node-scope",
+        "missing-directions"
+      ]
+    },
+    {
+      "id": "kcl-neg-negated-node-law",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Because charge accumulates in the modeled region, the text says $I_1+I_2=I_3$ must not be imposed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2=I_3"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "negation",
+        "accumulating-region"
+      ]
+    },
+    {
+      "id": "kcl-neg-hypothetical-node",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "If the connector were ideal, one might write \\[I_a+I_b=I_c\\], but leakage is unspecified."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_a+I_b=I_c"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "hypothetical",
+        "uncertain-scope"
+      ]
+    },
+    {
+      "id": "kcl-neg-wrong-sign-declared",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "All three arrows are declared entering the node, yet the report uses $I_1+I_2-I_3=0$ without assigning \\(I_3\\) a negative value."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2-I_3=0"
+      },
+      "refusalCategory": "wrong-sign-convention",
+      "variationTags": [
+        "sign-conflict",
+        "direction-declaration"
+      ]
+    },
+    {
+      "id": "kcl-neg-mixed-voltage-current",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Here \\(I_a\\) and \\(I_b\\) are currents but \\(V_c\\) is a voltage; \\[I_a+I_b=V_c\\] is dimensionally invalid."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_a+I_b=V_c"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "mixed-roles",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "kcl-neg-opaque-node-macro",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "No definition is provided for the assertion $\\mysteryNode{I_1}{I_2}{I_3}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mysteryNode{I_1}{I_2}{I_3}"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "opaque-macro",
+        "missing-definition"
+      ]
+    },
+    {
+      "id": "kcl-neg-two-node-collision",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The unscoped line $I_1+I_2=I_3+I_4$ combines labels from two different nodes according to the schematic."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2=I_3+I_4"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multiple-nodes",
+        "scope-conflict"
+      ]
+    },
+    {
+      "id": "kcl-neg-integrated-current",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The accumulated charge relation is \\[\\int_0^T I_1\\,dt=\\int_0^T I_2\\,dt\\], not an instantaneous node balance."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\int_0^T I_1\\,dt=\\int_0^T I_2\\,dt"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "integral",
+        "time-aggregate"
+      ]
+    },
+    {
+      "id": "kcl-neg-probability-normalization",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The symbols are probabilities, and $p_1+p_2+p_3=1$ normalizes outcomes."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "p_1+p_2+p_3=1"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "probability",
+        "role-ambiguity"
+      ]
+    },
+    {
+      "id": "kcl-neg-set-membership",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The constraint \\[(I_1,I_2)\\in\\mathcal{F}\\] only states feasible current pairs."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(I_1,I_2)\\in\\mathcal{F}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "set-membership",
+        "constraint"
+      ]
+    },
+    {
+      "id": "kcl-neg-unit-conflict",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The quantities are declared as \\(I_1=2\\,\\mathrm{A}\\), \\(I_2=3\\,\\mathrm{A}\\), and \\(I_3=5\\,\\mathrm{V}\\), followed by $I_1+I_2=I_3$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_1+I_2=I_3"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "unit-conflict",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "kcl-neg-conflicting-directions",
+      "lawId": "kirchhoff-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Two captions assign opposite directions to \\(I_b\\), so the candidate equation \\[I_a+I_b=I_c\\] has no unambiguous sign convention."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_a+I_b=I_c"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "conflicting-declarations",
+        "sign-ambiguity"
+      ]
+    },
+    {
+      "id": "cap-pos-basic-derivative",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For the ideal capacitor, the passive-sign relation is $i=C\\frac{dv}{dt}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\frac{dv}{dt}"
+      },
+      "expectedRoles": {
+        "current": "i",
+        "capacitance": "C",
+        "voltage": "v",
+        "time": "t"
+      },
+      "variationTags": [
+        "conventional-notation",
+        "passive-sign-convention"
+      ]
+    },
+    {
+      "id": "cap-pos-element-subscripts",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The labeled component obeys \\[I_C=C\\frac{dV_C}{dt}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_C=C\\frac{dV_C}{dt}"
+      },
+      "expectedRoles": {
+        "current": "I_C",
+        "capacitance": "C",
+        "voltage": "V_C",
+        "time": "t"
+      },
+      "variationTags": [
+        "subscripts",
+        "display"
+      ]
+    },
+    {
+      "id": "cap-pos-solve-capacitance",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "From a transient measurement, compute $C=\\frac{i}{dv/dt}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "C=\\frac{i}{dv/dt}"
+      },
+      "expectedRoles": {
+        "capacitance": "C",
+        "current": "i",
+        "voltage": "v",
+        "time": "t"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "measurement"
+      ]
+    },
+    {
+      "id": "cap-pos-solve-slope",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The voltage slope is \\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\frac{dv}{dt}=\\frac{i}{C}"
+      },
+      "expectedRoles": {
+        "voltage": "v",
+        "time": "t",
+        "current": "i",
+        "capacitance": "C"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "derivative-left"
+      ]
+    },
+    {
+      "id": "cap-pos-time-functions",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With explicit time dependence, $i(t)=C\\,\\frac{d v(t)}{dt}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i(t)=C\\,\\frac{d v(t)}{dt}"
+      },
+      "expectedRoles": {
+        "current": "i(t)",
+        "capacitance": "C",
+        "voltage": "v(t)",
+        "time": "t"
+      },
+      "variationTags": [
+        "time-domain",
+        "lowercase"
+      ]
+    },
+    {
+      "id": "cap-pos-dot-notation",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The same constitutive law in dot notation is \\[i(t)=C\\dot v(t)\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i(t)=C\\dot v(t)"
+      },
+      "expectedRoles": {
+        "current": "i(t)",
+        "capacitance": "C",
+        "voltage": "v(t)",
+        "time": "t"
+      },
+      "variationTags": [
+        "dot-derivative",
+        "time-domain"
+      ]
+    },
+    {
+      "id": "cap-pos-phasor-free-dot",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For the transient waveform, $I_c=C_c\\dot V_c$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_c=C_c\\dot V_c"
+      },
+      "expectedRoles": {
+        "current": "I_c",
+        "capacitance": "C_c",
+        "voltage": "V_c",
+        "time": "t"
+      },
+      "variationTags": [
+        "dot-derivative",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cap-pos-product-first",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The worksheet writes the derivative product first: \\[C\\,\\frac{dV}{dt}=I\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "C\\,\\frac{dV}{dt}=I"
+      },
+      "expectedRoles": {
+        "capacitance": "C",
+        "voltage": "V",
+        "time": "t",
+        "current": "I"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "spacing"
+      ]
+    },
+    {
+      "id": "cap-pos-grouped",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The constitutive equation is presented as $(i)=\\left(C\\,dv/dt\\right)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(i)=\\left(C\\,dv/dt\\right)"
+      },
+      "expectedRoles": {
+        "current": "i",
+        "capacitance": "C",
+        "voltage": "v",
+        "time": "t"
+      },
+      "variationTags": [
+        "grouping",
+        "presentation"
+      ]
+    },
+    {
+      "id": "cap-pos-terminal-pair",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Across terminals \\(a,b\\), \\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}"
+      },
+      "expectedRoles": {
+        "current": "i_{ab}",
+        "capacitance": "C_{ab}",
+        "voltage": "v_{ab}",
+        "time": "t"
+      },
+      "variationTags": [
+        "terminal-subscripts",
+        "passive-sign-convention"
+      ]
+    },
+    {
+      "id": "cap-pos-declared-before",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then $j=K\\,du/dt$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "j=K\\,du/dt"
+      },
+      "expectedRoles": {
+        "current": "j",
+        "capacitance": "K",
+        "voltage": "u",
+        "time": "t"
+      },
+      "variationTags": [
+        "declaration-before",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "cap-pos-declared-after",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The device follows \\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "a=B\\dot e"
+      },
+      "expectedRoles": {
+        "current": "a",
+        "capacitance": "B",
+        "voltage": "e",
+        "time": "t"
+      },
+      "variationTags": [
+        "declaration-after",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "cap-pos-multi-symbol-prose",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Current \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; $j_x=K_x\\frac{du_x}{dt}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "j_x=K_x\\frac{du_x}{dt}"
+      },
+      "expectedRoles": {
+        "current": "j_x",
+        "capacitance": "K_x",
+        "voltage": "u_x",
+        "time": "t"
+      },
+      "variationTags": [
+        "multi-symbol-declaration",
+        "sign-convention"
+      ]
+    },
+    {
+      "id": "cap-pos-macro-voltage",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Using the project voltage alias, the capacitor law is $i=C\\frac{d\\CapV}{dt}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\frac{d\\CapV}{dt}"
+      },
+      "expectedRoles": {
+        "current": "i",
+        "capacitance": "C",
+        "voltage": "\\CapV",
+        "time": "t"
+      },
+      "variationTags": [
+        "transparent-macro",
+        "derivative"
+      ],
+      "macros": [
+        {
+          "name": "\\CapV",
+          "definition": "v_c"
+        }
+      ]
+    },
+    {
+      "id": "cap-pos-macro-all-roles",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The aliased transient equation is \\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\CapI=\\CapC\\,\\dot{\\CapV}"
+      },
+      "expectedRoles": {
+        "current": "\\CapI",
+        "capacitance": "\\CapC",
+        "voltage": "\\CapV",
+        "time": "t"
+      },
+      "variationTags": [
+        "transparent-macro",
+        "multiple-macros"
+      ],
+      "macros": [
+        {
+          "name": "\\CapI",
+          "definition": "i_c"
+        },
+        {
+          "name": "\\CapC",
+          "definition": "C_c"
+        },
+        {
+          "name": "\\CapV",
+          "definition": "v_c"
+        }
+      ]
+    },
+    {
+      "id": "cap-pos-aligned",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The derivation highlights \\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_o&=C_o\\frac{dv_o}{dt}"
+      },
+      "expectedRoles": {
+        "current": "i_o",
+        "capacitance": "C_o",
+        "voltage": "v_o",
+        "time": "t"
+      },
+      "variationTags": [
+        "aligned",
+        "presentation"
+      ]
+    },
+    {
+      "id": "cap-pos-boxed",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The final capacitor model is \\[\\boxed{I_x=C_x\\dot V_x}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_x=C_x\\dot V_x"
+      },
+      "expectedRoles": {
+        "current": "I_x",
+        "capacitance": "C_x",
+        "voltage": "V_x",
+        "time": "t"
+      },
+      "variationTags": [
+        "boxed",
+        "dot-derivative"
+      ]
+    },
+    {
+      "id": "cap-pos-at-time-tau",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "At the sample instant, \\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}"
+      },
+      "expectedRoles": {
+        "current": "i(\\tau)",
+        "capacitance": "C",
+        "voltage": "v",
+        "time": "t"
+      },
+      "variationTags": [
+        "evaluation-point",
+        "grouping"
+      ]
+    },
+    {
+      "id": "cap-pos-european-voltage",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Using \\(u\\) for voltage, the element law is $i_c=C_c\\,du_c/dt$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_c=C_c\\,du_c/dt"
+      },
+      "expectedRoles": {
+        "current": "i_c",
+        "capacitance": "C_c",
+        "voltage": "u_c",
+        "time": "t"
+      },
+      "variationTags": [
+        "alternative-symbols",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cap-pos-current-j",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The current symbol \\(j(t)\\) is defined by \\[j(t)=C_s\\dot v_s(t)\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "j(t)=C_s\\dot v_s(t)"
+      },
+      "expectedRoles": {
+        "current": "j(t)",
+        "capacitance": "C_s",
+        "voltage": "v_s(t)",
+        "time": "t"
+      },
+      "variationTags": [
+        "alternative-symbols",
+        "dot-derivative"
+      ]
+    },
+    {
+      "id": "cap-pos-capacitance-k",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For capacitance \\(K_m\\), the law reads $i_m=K_m\\,v_m'$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_m=K_m\\,v_m'"
+      },
+      "expectedRoles": {
+        "current": "i_m",
+        "capacitance": "K_m",
+        "voltage": "v_m",
+        "time": "t"
+      },
+      "variationTags": [
+        "prime-derivative",
+        "alternative-symbols"
+      ]
+    },
+    {
+      "id": "cap-pos-descriptive-subscripts",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The storage element satisfies \\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}"
+      },
+      "expectedRoles": {
+        "current": "I_{\\mathrm{cap}}",
+        "capacitance": "C_{\\mathrm{cap}}",
+        "voltage": "V_{\\mathrm{cap}}",
+        "time": "t"
+      },
+      "variationTags": [
+        "descriptive-subscripts",
+        "display"
+      ]
+    },
+    {
+      "id": "cap-pos-opposite-reference",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Current \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so \\[i_{\\rm out}=-C\\,dv/dt\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_{\\rm out}=-C\\,dv/dt"
+      },
+      "expectedRoles": {
+        "current": "i_{\\rm out}",
+        "capacitance": "C",
+        "voltage": "v",
+        "time": "t"
+      },
+      "variationTags": [
+        "opposite-reference",
+        "valid-negative-sign"
+      ]
+    },
+    {
+      "id": "cap-pos-differential-operator",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With \\(D_t\\) denoting time differentiation, the model is $i=C D_t v$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C D_t v"
+      },
+      "expectedRoles": {
+        "current": "i",
+        "capacitance": "C",
+        "voltage": "v",
+        "time": "t"
+      },
+      "variationTags": [
+        "operator-notation",
+        "declaration-before"
+      ]
+    },
+    {
+      "id": "cap-pos-prime-voltage",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The prime denotes differentiation with respect to time in \\[i_q=C_q v_q'\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_q=C_q v_q'"
+      },
+      "expectedRoles": {
+        "current": "i_q",
+        "capacitance": "C_q",
+        "voltage": "v_q",
+        "time": "t"
+      },
+      "variationTags": [
+        "prime-derivative",
+        "declaration-before"
+      ]
+    },
+    {
+      "id": "cap-pos-units-context",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "With capacitance in farads and voltage slope in volts per second, $I_m=C_m\\,dV_m/dt$ yields amperes."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "I_m=C_m\\,dV_m/dt"
+      },
+      "expectedRoles": {
+        "current": "I_m",
+        "capacitance": "C_m",
+        "voltage": "V_m",
+        "time": "t"
+      },
+      "variationTags": [
+        "unit-context",
+        "dimensional-context"
+      ]
+    },
+    {
+      "id": "cap-pos-spaced-derivative",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The notation deliberately spaces the differential: \\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}"
+      },
+      "expectedRoles": {
+        "current": "i_z",
+        "capacitance": "C_z",
+        "voltage": "v_z",
+        "time": "t"
+      },
+      "variationTags": [
+        "spacing",
+        "roman-differential"
+      ]
+    },
+    {
+      "id": "cap-pos-parenthesized-slope",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The current relation is $i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i_n=C_n\\left(\\frac{dv_n}{dt}\\right)"
+      },
+      "expectedRoles": {
+        "current": "i_n",
+        "capacitance": "C_n",
+        "voltage": "v_n",
+        "time": "t"
+      },
+      "variationTags": [
+        "grouping",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cap-pos-multifile-declaration",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{cap-symbols}\nThe element obeys \\[j_f=K_f\\frac{du_f}{dt}\\]."
+        },
+        {
+          "fileId": "symbols",
+          "path": "cap-symbols.tex",
+          "content": "Here \\(j_f\\) is current, \\(K_f\\) capacitance, and \\(u_f\\) voltage."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "j_f=K_f\\frac{du_f}{dt}"
+      },
+      "expectedRoles": {
+        "current": "j_f",
+        "capacitance": "K_f",
+        "voltage": "u_f",
+        "time": "t"
+      },
+      "variationTags": [
+        "multi-file",
+        "declaration-separate-file"
+      ]
+    },
+    {
+      "id": "cap-pos-multifile-macro",
+      "lawId": "capacitor-current-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{cap-notation}\nThe transient law is $\\StoreI=\\StoreC\\dot{\\StoreV}$."
+        },
+        {
+          "fileId": "notation",
+          "path": "cap-notation.tex",
+          "content": "\\newcommand{\\StoreI}{i_s}\n\\newcommand{\\StoreC}{C_s}\n\\newcommand{\\StoreV}{v_s}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\StoreI=\\StoreC\\dot{\\StoreV}"
+      },
+      "expectedRoles": {
+        "current": "\\StoreI",
+        "capacitance": "\\StoreC",
+        "voltage": "\\StoreV",
+        "time": "t"
+      },
+      "variationTags": [
+        "multi-file",
+        "transparent-macro"
+      ],
+      "macros": [
+        {
+          "name": "\\StoreI",
+          "definition": "i_s"
+        },
+        {
+          "name": "\\StoreC",
+          "definition": "C_s"
+        },
+        {
+          "name": "\\StoreV",
+          "definition": "v_s"
+        }
+      ]
+    },
+    {
+      "id": "cap-neg-resistor-law",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The equation $i=V/R$ is a resistor current law, not a capacitor derivative law."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=V/R"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "related-law",
+        "resistor"
+      ]
+    },
+    {
+      "id": "cap-neg-inductor-law",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The display \\[v=L\\frac{di}{dt}\\] describes an inductor."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "v=L\\frac{di}{dt}"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "related-law",
+        "inductor"
+      ]
+    },
+    {
+      "id": "cap-neg-differentiate-current",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The draft incorrectly writes $i=C\\frac{di}{dt}$, differentiating current instead of voltage."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\frac{di}{dt}"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "wrong-derivative-variable",
+        "role-conflict"
+      ]
+    },
+    {
+      "id": "cap-neg-sum-operator",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The expression \\[i=C+\\frac{dv}{dt}\\] adds capacitance to a voltage slope."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C+\\frac{dv}{dt}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "addition",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "cap-neg-divide-by-capacitance",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The proposed model $i=\\frac{1}{C}\\frac{dv}{dt}$ uses reciprocal capacitance."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=\\frac{1}{C}\\frac{dv}{dt}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "wrong-factor",
+        "reciprocal"
+      ]
+    },
+    {
+      "id": "cap-neg-missing-derivative",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The static expression \\[i=Cv\\] omits time differentiation."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=Cv"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "missing-derivative",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "cap-neg-squared-slope",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The nonlinear candidate is $i=C(dv/dt)^2$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C(dv/dt)^2"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "wrong-exponent",
+        "nonlinear"
+      ]
+    },
+    {
+      "id": "cap-neg-wrong-passive-sign",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Current is declared entering the positive terminal, but the formula is \\[i=-C\\,dv/dt\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=-C\\,dv/dt"
+      },
+      "refusalCategory": "wrong-sign-convention",
+      "variationTags": [
+        "passive-sign",
+        "wrong-sign"
+      ]
+    },
+    {
+      "id": "cap-neg-wrong-active-sign",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Current is declared leaving the positive terminal, yet the document asserts $i=C\\,dv/dt$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\,dv/dt"
+      },
+      "refusalCategory": "wrong-sign-convention",
+      "variationTags": [
+        "opposite-reference",
+        "wrong-sign"
+      ]
+    },
+    {
+      "id": "cap-neg-capacitance-unit-conflict",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The symbol \\(C\\) is declared to be resistance in ohms, followed by \\[i=C\\,dv/dt\\]."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\,dv/dt"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "unit-conflict",
+        "role-conflict"
+      ]
+    },
+    {
+      "id": "cap-neg-negated-law",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For the nonlinear dielectric, the text explicitly says $i=C\\,dv/dt$ is not valid."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\,dv/dt"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "negation",
+        "device-scope"
+      ]
+    },
+    {
+      "id": "cap-neg-hypothetical-only",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "If the device capacitance were constant, one could use \\[i=C\\,dv/dt\\], but \\(C\\) is stated to vary."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\,dv/dt"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "hypothetical",
+        "time-varying-capacitance"
+      ]
+    },
+    {
+      "id": "cap-neg-opaque-cap-macro",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "No macro definition accompanies $\\mysteryCap{i}{C}{v}{t}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mysteryCap{i}{C}{v}{t}"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "opaque-macro",
+        "missing-definition"
+      ]
+    },
+    {
+      "id": "cap-neg-symbol-c-ambiguous",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Here \\(C\\) is explicitly the speed of light, so $i=C\\,dv/dt$ cannot be a capacitance law."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\,dv/dt"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "symbol-ambiguity",
+        "conflicting-declaration"
+      ]
+    },
+    {
+      "id": "cap-neg-space-derivative",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The field profile uses \\[i=C\\frac{dv}{dx}\\], a spatial derivative rather than a time derivative."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\frac{dv}{dx}"
+      },
+      "refusalCategory": "wrong-roles",
+      "variationTags": [
+        "wrong-independent-variable",
+        "spatial-derivative"
+      ]
+    },
+    {
+      "id": "cap-neg-finite-difference-only",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The numerical approximation $i\\approx C\\frac{v_{n+1}-v_n}{\\Delta t}$ is not asserted as an exact constitutive equation."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i\\approx C\\frac{v_{n+1}-v_n}{\\Delta t}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "approximation",
+        "finite-difference"
+      ]
+    },
+    {
+      "id": "cap-neg-integral-instead-derivative",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The candidate \\[i=C\\int_0^t v(\\tau)\\,d\\tau\\] integrates voltage instead of differentiating it."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\int_0^t v(\\tau)\\,d\\tau"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "integral",
+        "wrong-operator"
+      ]
+    },
+    {
+      "id": "cap-neg-charge-voltage-only",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The related identity $q=CV$ states charge versus voltage but not capacitor current."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "q=CV"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "related-law",
+        "charge-voltage"
+      ]
+    },
+    {
+      "id": "cap-neg-varying-capacitance",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The capacitance is \\(C(t)\\), yet the document drops the product derivative and claims \\[i=C(t)\\frac{dv}{dt}\\] without assuming \\(\\dot C=0\\)."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C(t)\\frac{dv}{dt}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "time-varying-capacitance",
+        "missing-term"
+      ]
+    },
+    {
+      "id": "cap-neg-conflicting-orientation",
+      "lawId": "capacitor-current-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Two diagrams assign opposite current arrows, so the isolated candidate $i=C\\,dv/dt$ has no resolvable sign convention."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=C\\,dv/dt"
+      },
+      "refusalCategory": "ambiguity",
+      "variationTags": [
+        "conflicting-declarations",
+        "sign-ambiguity"
+      ]
+    }
+  ]
+}

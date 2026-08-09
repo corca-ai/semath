@@ -1,11 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::scope::ScopeGraph;
-use crate::shape::{ExplicitShapeClaim, ShapeAnalysis};
+use crate::shape::{ExplicitShapeClaim, ShapeObservations};
 use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnostic, SourceRange};
 
 const MAX_ROLE_CLAIMS: usize = 8;
-const MAX_VISIBLE_ROLE_CLAIMS: usize = 64;
 const MAX_ROLE_DIAGNOSTICS: usize = 8;
 
 #[derive(Clone, Debug)]
@@ -30,21 +29,31 @@ struct DiagnosticEntry {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct ConsistencyAnalysis {
+pub(crate) struct RoleObservations {
     roles: Vec<ScopedRoleClaim>,
     entries: Vec<DiagnosticEntry>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     scopes: ScopeGraph,
 }
 
-impl ConsistencyAnalysis {
+impl RoleObservations {
+    pub fn exported(&self) -> Vec<RoleInfo> {
+        self.roles
+            .iter()
+            .filter(|claim| self.scopes.depth(claim.scope_id) == 0)
+            .map(|claim| claim.info.clone())
+            .collect()
+    }
+
     pub fn roles_at(&self, symbol: &str, offset: u32) -> (Vec<RoleInfo>, bool) {
         let mut roles = self
             .roles
             .iter()
             .filter(|claim| {
                 claim.info.symbol == symbol
-                    && (claim.available_from <= offset || claim.symbol_range.contains(offset))
+                    && (self.scopes.depth(claim.scope_id) == 0
+                        || claim.available_from <= offset
+                        || claim.symbol_range.contains(offset))
                     && self.scopes.visible(claim.scope_id, offset)
             })
             .collect::<Vec<_>>();
@@ -63,36 +72,6 @@ impl ConsistencyAnalysis {
                 .collect(),
             truncated,
         )
-    }
-
-    pub fn effective_roles_at(&self, offset: u32) -> Vec<RoleInfo> {
-        let mut roles = self
-            .roles
-            .iter()
-            .filter(|claim| {
-                claim.available_from <= offset && self.scopes.visible(claim.scope_id, offset)
-            })
-            .collect::<Vec<_>>();
-        roles.sort_by_key(|claim| {
-            (
-                std::cmp::Reverse(self.scopes.depth(claim.scope_id)),
-                std::cmp::Reverse(claim.available_from),
-                claim.info.symbol.clone(),
-                claim.info.role.clone(),
-            )
-        });
-        let mut selected_scopes = BTreeMap::<String, usize>::new();
-        roles
-            .into_iter()
-            .filter(|claim| {
-                *selected_scopes
-                    .entry(claim.info.symbol.clone())
-                    .or_insert(claim.scope_id)
-                    == claim.scope_id
-            })
-            .take(MAX_VISIBLE_ROLE_CLAIMS)
-            .map(|claim| claim.info.clone())
-            .collect()
     }
 
     pub fn diagnostics_for(&self, symbol: &str, offset: u32) -> (Vec<SemanticDiagnostic>, bool) {
@@ -124,11 +103,11 @@ impl ConsistencyAnalysis {
     }
 }
 
-pub(crate) fn analyze_consistency(
+pub(crate) fn observe_roles(
     document: &ProjectDocument,
     definitions: &[DefinitionInfo],
-    shapes: &ShapeAnalysis,
-) -> ConsistencyAnalysis {
+    shapes: &ShapeObservations,
+) -> RoleObservations {
     let scopes = ScopeGraph::new(document);
     let roles = definitions
         .iter()
@@ -187,7 +166,7 @@ pub(crate) fn analyze_consistency(
         .iter()
         .map(|entry| entry.diagnostic.clone())
         .collect();
-    ConsistencyAnalysis {
+    RoleObservations {
         roles,
         entries,
         diagnostics,
@@ -438,14 +417,14 @@ fn first_source_offset(evidence: &Evidence) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use super::analyze_consistency;
-    use crate::parser::{math_regions, parse_regions};
-    use crate::prose::analyze_prose;
-    use crate::shape::analyze_shapes;
+    use super::observe_roles;
+    use crate::parser::{parse_regions, test_math_regions};
+    use crate::prose::observe_prose;
+    use crate::shape::observe_shapes;
     use crate::{DocumentLanguage, ProjectDocument};
 
-    fn analyze(source: &str) -> super::ConsistencyAnalysis {
-        let regions = math_regions(source, DocumentLanguage::Latex);
+    fn analyze(source: &str) -> super::RoleObservations {
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             file_id: "main".into(),
             path: "main.tex".into(),
@@ -453,12 +432,13 @@ mod tests {
             content: source.into(),
             document_version: 1,
             math_regions: regions.clone(),
+            macros: Vec::new(),
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let prose = analyze_prose(&document, &parsed);
-        let shapes = analyze_shapes(&document, &parsed, &prose.shapes);
-        analyze_consistency(&document, &prose.definitions, &shapes)
+        let prose = observe_prose(&document, &parsed);
+        let shapes = observe_shapes(&document, &parsed, &prose.shapes);
+        observe_roles(&document, &prose.definitions, &shapes)
     }
 
     #[test]

@@ -1,9 +1,0 @@
-{
-  "abiVersion": "wasm-bindgen-0.2.100",
-  "protocolVersion": 1,
-  "ruleSetVersion": "semath-0.2.0",
-  "results": [
-    {"protocolVersion":1,"epoch":"parity:2","inventoryVersion":1,"documentVersion":1,"analysisGeneration":1,"value":{"kind":"renamePreparation","range":{"startOffset":35,"endOffset":36},"placeholder":"i","rejection":null}},
-    {"protocolVersion":1,"epoch":"parity:2","inventoryVersion":1,"documentVersion":1,"analysisGeneration":1,"value":{"kind":"editProposal","proposal":{"title":"Rename bound `i` to `j`","safety":"deterministic","evidence":[{"ruleId":"capture-avoiding-bound-variable-rename","kind":"syntax","strength":"hard","sourceRanges":[{"startOffset":26,"endOffset":27},{"startOffset":35,"endOffset":36}]}],"files":[{"fileId":"main","path":"main.tex","documentVersion":1,"edits":[{"range":{"startOffset":26,"endOffset":27},"expectedText":"i","replacementText":"j"},{"range":{"startOffset":35,"endOffset":36},"expectedText":"i","replacementText":"j"}]}]},"rejection":null}}
-  ]
-}

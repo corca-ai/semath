@@ -1,0 +1,4076 @@
+{
+  "schemaVersion": 1,
+  "domain": "mechanics",
+  "cases": [
+    {
+      "id": "newton-pos-01",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-01/main.md",
+          "content": "During the sled trial, let $F_{n01}$ denote net force, $m_{n01}$ inertial mass, and $a_{n01}$ acceleration. The translational balance is $F_{n01} = m_{n01} a_{n01}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n01} = m_{n01} a_{n01}"
+      },
+      "expectedRoles": {
+        "force": "F_{n01}",
+        "mass": "m_{n01}",
+        "acceleration": "a_{n01}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-02",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-02/main.tex",
+          "content": "For the elevator car, $F_{n02}$ is the applied net force, $m_{n02}$ is the mass, and $a_{n02}$ is acceleration. Thus \\[F_{n02} = m_{n02} \\cdot a_{n02}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n02} = m_{n02} \\cdot a_{n02}"
+      },
+      "expectedRoles": {
+        "force": "F_{n02}",
+        "mass": "m_{n02}",
+        "acceleration": "a_{n02}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "explicit-product",
+        "display-math",
+        "declarations-before"
+      ]
+    },
+    {
+      "id": "newton-pos-03",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-03/main.md",
+          "content": "In the cart free-body analysis, the balance is $m_{n03} a_{n03} = F_{n03}$. Here $F_{n03}$ denotes net force, $m_{n03}$ denotes mass, and $a_{n03}$ denotes acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "m_{n03} a_{n03} = F_{n03}"
+      },
+      "expectedRoles": {
+        "force": "F_{n03}",
+        "mass": "m_{n03}",
+        "acceleration": "a_{n03}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-04",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-04/main.tex",
+          "content": "For the probe's translation, let $F_{n04}$, $m_{n04}$, and $a_{n04}$ be the net force, mass, and acceleration, respectively. We retain the grouped form \\[F_{n04} = (m_{n04})(a_{n04})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n04} = (m_{n04})(a_{n04})"
+      },
+      "expectedRoles": {
+        "force": "F_{n04}",
+        "mass": "m_{n04}",
+        "acceleration": "a_{n04}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "multi-symbol-declaration",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-05",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-pos-05/quantities.md",
+          "content": "During the towing interval, the symbols $F_{n05}$, $m_{n05}$, and $a_{n05}$ denote net force, mass, and acceleration, respectively."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-pos-05/analysis.tex",
+          "content": "\\input{quantities.md}\nThe motion equation used in the calculation is \\[F_{n05}=m_{n05}a_{n05}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n05}=m_{n05}a_{n05}"
+      },
+      "expectedRoles": {
+        "force": "F_{n05}",
+        "mass": "m_{n05}",
+        "acceleration": "a_{n05}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "compact-product"
+      ]
+    },
+    {
+      "id": "newton-pos-06",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-pos-06/quantities.md",
+          "content": "For the puck on the air table, let $F_{n06}$ be net force, $m_{n06}$ mass, and $a_{n06}$ acceleration."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-pos-06/analysis.tex",
+          "content": "\\input{quantities.md}\nThe report invokes the project notation \\[\\newtonBalance{F_{n06}}{m_{n06}}{a_{n06}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\newtonBalance{F_{n06}}{m_{n06}}{a_{n06}}"
+      },
+      "expectedRoles": {
+        "force": "F_{n06}",
+        "mass": "m_{n06}",
+        "acceleration": "a_{n06}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\newtonBalance",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3"
+        }
+      ]
+    },
+    {
+      "id": "newton-pos-07",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-07/main.md",
+          "content": "In the vehicle model, let $F_{n07}$ be measured in newtons, $m_{n07}$ in kilograms, and $a_{n07}$ in metres per second squared. The recorded relation is \\[F_{n07}= m_{n07}\\,a_{n07}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n07}= m_{n07}\\,a_{n07}"
+      },
+      "expectedRoles": {
+        "force": "F_{n07}",
+        "mass": "m_{n07}",
+        "acceleration": "a_{n07}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "thin-space-product",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-08",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-08/main.tex",
+          "content": "For the suspended load, $\\mathbf{F}_{n08}$ is the net force vector, $m_{n08}$ is scalar mass, and $\\mathbf{a}_{n08}$ is the acceleration vector. Their relation is $\\mathbf{F}_{n08}=m_{n08}\\mathbf{a}_{n08}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{F}_{n08}=m_{n08}\\mathbf{a}_{n08}"
+      },
+      "expectedRoles": {
+        "force": "\\mathbf{F}_{n08}",
+        "mass": "m_{n08}",
+        "acceleration": "\\mathbf{a}_{n08}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "shape-explicit",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-09",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-09/main.md",
+          "content": "During the launch segment, let $F_{n09}$ stand for net force, $m_{n09}$ for mass, and $a_{n09}$ for acceleration. The same balance is presented as \\[(m_{n09}a_{n09})=F_{n09}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(m_{n09}a_{n09})=F_{n09}"
+      },
+      "expectedRoles": {
+        "force": "F_{n09}",
+        "mass": "m_{n09}",
+        "acceleration": "a_{n09}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "grouping",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-10",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-10/main.tex",
+          "content": "In the block experiment, the model uses \\[F_{n10}=(m_{n10} a_{n10})\\] Afterward, the notation table declares $F_{n10}$ as net force, $m_{n10}$ as mass, and $a_{n10}$ as acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n10}=(m_{n10} a_{n10})"
+      },
+      "expectedRoles": {
+        "force": "F_{n10}",
+        "mass": "m_{n10}",
+        "acceleration": "a_{n10}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-11",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-11/main.md",
+          "content": "During the sled trial, let $F_{n11}$ denote net force, $m_{n11}$ inertial mass, and $a_{n11}$ acceleration. The translational balance is $F_{n11} = m_{n11} a_{n11}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n11} = m_{n11} a_{n11}"
+      },
+      "expectedRoles": {
+        "force": "F_{n11}",
+        "mass": "m_{n11}",
+        "acceleration": "a_{n11}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-12",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-12/main.tex",
+          "content": "For the elevator car, $F_{n12}$ is the applied net force, $m_{n12}$ is the mass, and $a_{n12}$ is acceleration. Thus \\[F_{n12} = m_{n12} \\cdot a_{n12}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n12} = m_{n12} \\cdot a_{n12}"
+      },
+      "expectedRoles": {
+        "force": "F_{n12}",
+        "mass": "m_{n12}",
+        "acceleration": "a_{n12}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "explicit-product",
+        "display-math",
+        "declarations-before"
+      ]
+    },
+    {
+      "id": "newton-pos-13",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-13/main.md",
+          "content": "In the cart free-body analysis, the balance is $m_{n13} a_{n13} = F_{n13}$. Here $F_{n13}$ denotes net force, $m_{n13}$ denotes mass, and $a_{n13}$ denotes acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "m_{n13} a_{n13} = F_{n13}"
+      },
+      "expectedRoles": {
+        "force": "F_{n13}",
+        "mass": "m_{n13}",
+        "acceleration": "a_{n13}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-14",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-14/main.tex",
+          "content": "For the probe's translation, let $F_{n14}$, $m_{n14}$, and $a_{n14}$ be the net force, mass, and acceleration, respectively. We retain the grouped form \\[F_{n14} = (m_{n14})(a_{n14})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n14} = (m_{n14})(a_{n14})"
+      },
+      "expectedRoles": {
+        "force": "F_{n14}",
+        "mass": "m_{n14}",
+        "acceleration": "a_{n14}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "multi-symbol-declaration",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-15",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-pos-15/quantities.md",
+          "content": "During the towing interval, the symbols $F_{n15}$, $m_{n15}$, and $a_{n15}$ denote net force, mass, and acceleration, respectively."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-pos-15/analysis.tex",
+          "content": "\\input{quantities.md}\nThe motion equation used in the calculation is \\[F_{n15}=m_{n15}a_{n15}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n15}=m_{n15}a_{n15}"
+      },
+      "expectedRoles": {
+        "force": "F_{n15}",
+        "mass": "m_{n15}",
+        "acceleration": "a_{n15}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "compact-product"
+      ]
+    },
+    {
+      "id": "newton-pos-16",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-pos-16/quantities.md",
+          "content": "For the puck on the air table, let $F_{n16}$ be net force, $m_{n16}$ mass, and $a_{n16}$ acceleration."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-pos-16/analysis.tex",
+          "content": "\\input{quantities.md}\nThe report invokes the project notation \\[\\newtonBalance{F_{n16}}{m_{n16}}{a_{n16}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\newtonBalance{F_{n16}}{m_{n16}}{a_{n16}}"
+      },
+      "expectedRoles": {
+        "force": "F_{n16}",
+        "mass": "m_{n16}",
+        "acceleration": "a_{n16}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\newtonBalance",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3"
+        }
+      ]
+    },
+    {
+      "id": "newton-pos-17",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-17/main.md",
+          "content": "In the vehicle model, let $F_{n17}$ be measured in newtons, $m_{n17}$ in kilograms, and $a_{n17}$ in metres per second squared. The recorded relation is \\[F_{n17}= m_{n17}\\,a_{n17}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n17}= m_{n17}\\,a_{n17}"
+      },
+      "expectedRoles": {
+        "force": "F_{n17}",
+        "mass": "m_{n17}",
+        "acceleration": "a_{n17}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "thin-space-product",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-18",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-18/main.tex",
+          "content": "For the suspended load, $\\mathbf{F}_{n18}$ is the net force vector, $m_{n18}$ is scalar mass, and $\\mathbf{a}_{n18}$ is the acceleration vector. Their relation is $\\mathbf{F}_{n18}=m_{n18}\\mathbf{a}_{n18}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{F}_{n18}=m_{n18}\\mathbf{a}_{n18}"
+      },
+      "expectedRoles": {
+        "force": "\\mathbf{F}_{n18}",
+        "mass": "m_{n18}",
+        "acceleration": "\\mathbf{a}_{n18}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "shape-explicit",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-19",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-19/main.md",
+          "content": "During the launch segment, let $F_{n19}$ stand for net force, $m_{n19}$ for mass, and $a_{n19}$ for acceleration. The same balance is presented as \\[(m_{n19}a_{n19})=F_{n19}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(m_{n19}a_{n19})=F_{n19}"
+      },
+      "expectedRoles": {
+        "force": "F_{n19}",
+        "mass": "m_{n19}",
+        "acceleration": "a_{n19}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "grouping",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-20",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-20/main.tex",
+          "content": "In the block experiment, the model uses \\[F_{n20}=(m_{n20} a_{n20})\\] Afterward, the notation table declares $F_{n20}$ as net force, $m_{n20}$ as mass, and $a_{n20}$ as acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n20}=(m_{n20} a_{n20})"
+      },
+      "expectedRoles": {
+        "force": "F_{n20}",
+        "mass": "m_{n20}",
+        "acceleration": "a_{n20}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-21",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-21/main.md",
+          "content": "During the sled trial, let $F_{n21}$ denote net force, $m_{n21}$ inertial mass, and $a_{n21}$ acceleration. The translational balance is $F_{n21} = m_{n21} a_{n21}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n21} = m_{n21} a_{n21}"
+      },
+      "expectedRoles": {
+        "force": "F_{n21}",
+        "mass": "m_{n21}",
+        "acceleration": "a_{n21}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-22",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-22/main.tex",
+          "content": "For the elevator car, $F_{n22}$ is the applied net force, $m_{n22}$ is the mass, and $a_{n22}$ is acceleration. Thus \\[F_{n22} = m_{n22} \\cdot a_{n22}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n22} = m_{n22} \\cdot a_{n22}"
+      },
+      "expectedRoles": {
+        "force": "F_{n22}",
+        "mass": "m_{n22}",
+        "acceleration": "a_{n22}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "explicit-product",
+        "display-math",
+        "declarations-before"
+      ]
+    },
+    {
+      "id": "newton-pos-23",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-23/main.md",
+          "content": "In the cart free-body analysis, the balance is $m_{n23} a_{n23} = F_{n23}$. Here $F_{n23}$ denotes net force, $m_{n23}$ denotes mass, and $a_{n23}$ denotes acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "m_{n23} a_{n23} = F_{n23}"
+      },
+      "expectedRoles": {
+        "force": "F_{n23}",
+        "mass": "m_{n23}",
+        "acceleration": "a_{n23}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-24",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-24/main.tex",
+          "content": "For the probe's translation, let $F_{n24}$, $m_{n24}$, and $a_{n24}$ be the net force, mass, and acceleration, respectively. We retain the grouped form \\[F_{n24} = (m_{n24})(a_{n24})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n24} = (m_{n24})(a_{n24})"
+      },
+      "expectedRoles": {
+        "force": "F_{n24}",
+        "mass": "m_{n24}",
+        "acceleration": "a_{n24}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "multi-symbol-declaration",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-25",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-pos-25/quantities.md",
+          "content": "During the towing interval, the symbols $F_{n25}$, $m_{n25}$, and $a_{n25}$ denote net force, mass, and acceleration, respectively."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-pos-25/analysis.tex",
+          "content": "\\input{quantities.md}\nThe motion equation used in the calculation is \\[F_{n25}=m_{n25}a_{n25}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n25}=m_{n25}a_{n25}"
+      },
+      "expectedRoles": {
+        "force": "F_{n25}",
+        "mass": "m_{n25}",
+        "acceleration": "a_{n25}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "compact-product"
+      ]
+    },
+    {
+      "id": "newton-pos-26",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-pos-26/quantities.md",
+          "content": "For the puck on the air table, let $F_{n26}$ be net force, $m_{n26}$ mass, and $a_{n26}$ acceleration."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-pos-26/analysis.tex",
+          "content": "\\input{quantities.md}\nThe report invokes the project notation \\[\\newtonBalance{F_{n26}}{m_{n26}}{a_{n26}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\newtonBalance{F_{n26}}{m_{n26}}{a_{n26}}"
+      },
+      "expectedRoles": {
+        "force": "F_{n26}",
+        "mass": "m_{n26}",
+        "acceleration": "a_{n26}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\newtonBalance",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3"
+        }
+      ]
+    },
+    {
+      "id": "newton-pos-27",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-27/main.md",
+          "content": "In the vehicle model, let $F_{n27}$ be measured in newtons, $m_{n27}$ in kilograms, and $a_{n27}$ in metres per second squared. The recorded relation is \\[F_{n27}= m_{n27}\\,a_{n27}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n27}= m_{n27}\\,a_{n27}"
+      },
+      "expectedRoles": {
+        "force": "F_{n27}",
+        "mass": "m_{n27}",
+        "acceleration": "a_{n27}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "thin-space-product",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-28",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-28/main.tex",
+          "content": "For the suspended load, $\\mathbf{F}_{n28}$ is the net force vector, $m_{n28}$ is scalar mass, and $\\mathbf{a}_{n28}$ is the acceleration vector. Their relation is $\\mathbf{F}_{n28}=m_{n28}\\mathbf{a}_{n28}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{F}_{n28}=m_{n28}\\mathbf{a}_{n28}"
+      },
+      "expectedRoles": {
+        "force": "\\mathbf{F}_{n28}",
+        "mass": "m_{n28}",
+        "acceleration": "\\mathbf{a}_{n28}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "shape-explicit",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "newton-pos-29",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-29/main.md",
+          "content": "During the launch segment, let $F_{n29}$ stand for net force, $m_{n29}$ for mass, and $a_{n29}$ for acceleration. The same balance is presented as \\[(m_{n29}a_{n29})=F_{n29}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(m_{n29}a_{n29})=F_{n29}"
+      },
+      "expectedRoles": {
+        "force": "F_{n29}",
+        "mass": "m_{n29}",
+        "acceleration": "a_{n29}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "grouping",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-pos-30",
+      "lawId": "newton-second-law",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-pos-30/main.tex",
+          "content": "In the block experiment, the model uses \\[F_{n30}=(m_{n30} a_{n30})\\] Afterward, the notation table declares $F_{n30}$ as net force, $m_{n30}$ as mass, and $a_{n30}$ as acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{n30}=(m_{n30} a_{n30})"
+      },
+      "expectedRoles": {
+        "force": "F_{n30}",
+        "mass": "m_{n30}",
+        "acceleration": "a_{n30}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-01",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-01/main.md",
+          "content": "For the rolling cart's translational motion, let $K_{e01}$ denote kinetic energy, $m_{e01}$ mass, and $v_{e01}$ speed. The energy contribution is $K_{e01}=\\frac{1}{2}m_{e01}v_{e01}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e01}=\\frac{1}{2}m_{e01}v_{e01}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e01}",
+        "mass": "m_{e01}",
+        "speed": "v_{e01}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-02",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-02/main.tex",
+          "content": "At the timing gate, $K_{e02}$ is kinetic energy, $m_{e02}$ is mass, and $v_{e02}$ is speed. The definition is \\[K_{e02}=\\frac{1}{2}\\,m_{e02}\\cdot v_{e02}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e02}=\\frac{1}{2}\\,m_{e02}\\cdot v_{e02}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e02}",
+        "mass": "m_{e02}",
+        "speed": "v_{e02}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "explicit-product",
+        "display-math",
+        "declarations-before"
+      ]
+    },
+    {
+      "id": "kinetic-pos-03",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-03/main.md",
+          "content": "For the released glider, the ledger contains $\\frac{1}{2}m_{e03}v_{e03}^{2}=K_{e03}$. Here $K_{e03}$ denotes kinetic energy, $m_{e03}$ denotes mass, and $v_{e03}$ denotes speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\frac{1}{2}m_{e03}v_{e03}^{2}=K_{e03}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e03}",
+        "mass": "m_{e03}",
+        "speed": "v_{e03}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-04",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-04/main.tex",
+          "content": "In the particle ledger, let $K_{e04}$, $m_{e04}$, and $v_{e04}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation \\[K_{e04}=\\frac{m_{e04}(v_{e04}^{2})}{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e04}=\\frac{m_{e04}(v_{e04}^{2})}{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e04}",
+        "mass": "m_{e04}",
+        "speed": "v_{e04}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "fraction-presentation",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "kinetic-pos-05",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-pos-05/quantities.md",
+          "content": "At the bottom of the ramp, $K_{e05}$ denotes kinetic energy while $m_{e05}$ and $v_{e05}$ denote mass and speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-05/analysis.tex",
+          "content": "\\input{quantities.md}\nThe energy file records \\[K_{e05}=\\tfrac12m_{e05}v_{e05}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e05}=\\tfrac12m_{e05}v_{e05}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e05}",
+        "mass": "m_{e05}",
+        "speed": "v_{e05}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "declarations-before",
+        "compact-fraction"
+      ]
+    },
+    {
+      "id": "kinetic-pos-06",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-pos-06/quantities.md",
+          "content": "For the spacecraft payload, let $K_{e06}$ be kinetic energy, $m_{e06}$ mass, and $v_{e06}$ speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-06/analysis.tex",
+          "content": "\\input{quantities.md}\nThe project shorthand is invoked as \\[\\kineticTerm{K_{e06}}{m_{e06}}{v_{e06}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\kineticTerm{K_{e06}}{m_{e06}}{v_{e06}}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e06}",
+        "mass": "m_{e06}",
+        "speed": "v_{e06}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\kineticTerm",
+          "parameterCount": 3,
+          "body": "#1 = \\frac{1}{2} #2 #3^{2}"
+        }
+      ]
+    },
+    {
+      "id": "kinetic-pos-07",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-07/main.md",
+          "content": "During the coasting interval, $K_{e07}$ is measured in joules, $m_{e07}$ in kilograms, and $v_{e07}$ in metres per second. The definition gives \\[K_{e07}=\\frac12m_{e07}v_{e07}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e07}=\\frac12m_{e07}v_{e07}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e07}",
+        "mass": "m_{e07}",
+        "speed": "v_{e07}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "compact-fraction",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-08",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-08/main.tex",
+          "content": "For the laboratory bead, let $K_{e08}$ be scalar kinetic energy, $m_{e08}$ scalar mass, and $\\mathbf{v}_{e08}$ the velocity vector. Then $K_{e08}=\\frac12m_{e08}\\lVert \\mathbf{v}_{e08}\\rVert^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e08}=\\frac12m_{e08}\\lVert \\mathbf{v}_{e08}\\rVert^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e08}",
+        "mass": "m_{e08}",
+        "speed": "\\mathbf{v}_{e08}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "norm-squared",
+        "shape-explicit"
+      ]
+    },
+    {
+      "id": "kinetic-pos-09",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-09/main.md",
+          "content": "At the measured instant, let $K_{e09}$ denote kinetic energy, $m_{e09}$ mass, and $v_{e09}$ speed. An algebraically reordered statement is \\[2K_{e09}=m_{e09}v_{e09}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "2K_{e09}=m_{e09}v_{e09}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e09}",
+        "mass": "m_{e09}",
+        "speed": "v_{e09}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "scaled-equality",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-10",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-10/main.tex",
+          "content": "In the energy accounting, the calculation shows \\[K_{e10}=\\tfrac{1}{2}m_{e10}(v_{e10})^{2}\\] The following notation note identifies $K_{e10}$ as kinetic energy, $m_{e10}$ as mass, and $v_{e10}$ as speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e10}=\\tfrac{1}{2}m_{e10}(v_{e10})^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e10}",
+        "mass": "m_{e10}",
+        "speed": "v_{e10}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-11",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-11/main.md",
+          "content": "For the rolling cart's translational motion, let $K_{e11}$ denote kinetic energy, $m_{e11}$ mass, and $v_{e11}$ speed. The energy contribution is $K_{e11}=\\frac{1}{2}m_{e11}v_{e11}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e11}=\\frac{1}{2}m_{e11}v_{e11}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e11}",
+        "mass": "m_{e11}",
+        "speed": "v_{e11}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-12",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-12/main.tex",
+          "content": "At the timing gate, $K_{e12}$ is kinetic energy, $m_{e12}$ is mass, and $v_{e12}$ is speed. The definition is \\[K_{e12}=\\frac{1}{2}\\,m_{e12}\\cdot v_{e12}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e12}=\\frac{1}{2}\\,m_{e12}\\cdot v_{e12}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e12}",
+        "mass": "m_{e12}",
+        "speed": "v_{e12}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "explicit-product",
+        "display-math",
+        "declarations-before"
+      ]
+    },
+    {
+      "id": "kinetic-pos-13",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-13/main.md",
+          "content": "For the released glider, the ledger contains $\\frac{1}{2}m_{e13}v_{e13}^{2}=K_{e13}$. Here $K_{e13}$ denotes kinetic energy, $m_{e13}$ denotes mass, and $v_{e13}$ denotes speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\frac{1}{2}m_{e13}v_{e13}^{2}=K_{e13}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e13}",
+        "mass": "m_{e13}",
+        "speed": "v_{e13}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-14",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-14/main.tex",
+          "content": "In the particle ledger, let $K_{e14}$, $m_{e14}$, and $v_{e14}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation \\[K_{e14}=\\frac{m_{e14}(v_{e14}^{2})}{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e14}=\\frac{m_{e14}(v_{e14}^{2})}{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e14}",
+        "mass": "m_{e14}",
+        "speed": "v_{e14}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "fraction-presentation",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "kinetic-pos-15",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-pos-15/quantities.md",
+          "content": "At the bottom of the ramp, $K_{e15}$ denotes kinetic energy while $m_{e15}$ and $v_{e15}$ denote mass and speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-15/analysis.tex",
+          "content": "\\input{quantities.md}\nThe energy file records \\[K_{e15}=\\tfrac12m_{e15}v_{e15}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e15}=\\tfrac12m_{e15}v_{e15}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e15}",
+        "mass": "m_{e15}",
+        "speed": "v_{e15}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "declarations-before",
+        "compact-fraction"
+      ]
+    },
+    {
+      "id": "kinetic-pos-16",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-pos-16/quantities.md",
+          "content": "For the spacecraft payload, let $K_{e16}$ be kinetic energy, $m_{e16}$ mass, and $v_{e16}$ speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-16/analysis.tex",
+          "content": "\\input{quantities.md}\nThe project shorthand is invoked as \\[\\kineticTerm{K_{e16}}{m_{e16}}{v_{e16}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\kineticTerm{K_{e16}}{m_{e16}}{v_{e16}}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e16}",
+        "mass": "m_{e16}",
+        "speed": "v_{e16}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\kineticTerm",
+          "parameterCount": 3,
+          "body": "#1 = \\frac{1}{2} #2 #3^{2}"
+        }
+      ]
+    },
+    {
+      "id": "kinetic-pos-17",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-17/main.md",
+          "content": "During the coasting interval, $K_{e17}$ is measured in joules, $m_{e17}$ in kilograms, and $v_{e17}$ in metres per second. The definition gives \\[K_{e17}=\\frac12m_{e17}v_{e17}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e17}=\\frac12m_{e17}v_{e17}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e17}",
+        "mass": "m_{e17}",
+        "speed": "v_{e17}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "compact-fraction",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-18",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-18/main.tex",
+          "content": "For the laboratory bead, let $K_{e18}$ be scalar kinetic energy, $m_{e18}$ scalar mass, and $\\mathbf{v}_{e18}$ the velocity vector. Then $K_{e18}=\\frac12m_{e18}\\lVert \\mathbf{v}_{e18}\\rVert^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e18}=\\frac12m_{e18}\\lVert \\mathbf{v}_{e18}\\rVert^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e18}",
+        "mass": "m_{e18}",
+        "speed": "\\mathbf{v}_{e18}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "norm-squared",
+        "shape-explicit"
+      ]
+    },
+    {
+      "id": "kinetic-pos-19",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-19/main.md",
+          "content": "At the measured instant, let $K_{e19}$ denote kinetic energy, $m_{e19}$ mass, and $v_{e19}$ speed. An algebraically reordered statement is \\[2K_{e19}=m_{e19}v_{e19}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "2K_{e19}=m_{e19}v_{e19}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e19}",
+        "mass": "m_{e19}",
+        "speed": "v_{e19}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "scaled-equality",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-20",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-20/main.tex",
+          "content": "In the energy accounting, the calculation shows \\[K_{e20}=\\tfrac{1}{2}m_{e20}(v_{e20})^{2}\\] The following notation note identifies $K_{e20}$ as kinetic energy, $m_{e20}$ as mass, and $v_{e20}$ as speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e20}=\\tfrac{1}{2}m_{e20}(v_{e20})^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e20}",
+        "mass": "m_{e20}",
+        "speed": "v_{e20}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-21",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-21/main.md",
+          "content": "For the rolling cart's translational motion, let $K_{e21}$ denote kinetic energy, $m_{e21}$ mass, and $v_{e21}$ speed. The energy contribution is $K_{e21}=\\frac{1}{2}m_{e21}v_{e21}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e21}=\\frac{1}{2}m_{e21}v_{e21}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e21}",
+        "mass": "m_{e21}",
+        "speed": "v_{e21}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-symbol-declaration",
+        "declarations-before",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-22",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-22/main.tex",
+          "content": "At the timing gate, $K_{e22}$ is kinetic energy, $m_{e22}$ is mass, and $v_{e22}$ is speed. The definition is \\[K_{e22}=\\frac{1}{2}\\,m_{e22}\\cdot v_{e22}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e22}=\\frac{1}{2}\\,m_{e22}\\cdot v_{e22}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e22}",
+        "mass": "m_{e22}",
+        "speed": "v_{e22}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "explicit-product",
+        "display-math",
+        "declarations-before"
+      ]
+    },
+    {
+      "id": "kinetic-pos-23",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-23/main.md",
+          "content": "For the released glider, the ledger contains $\\frac{1}{2}m_{e23}v_{e23}^{2}=K_{e23}$. Here $K_{e23}$ denotes kinetic energy, $m_{e23}$ denotes mass, and $v_{e23}$ denotes speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\frac{1}{2}m_{e23}v_{e23}^{2}=K_{e23}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e23}",
+        "mass": "m_{e23}",
+        "speed": "v_{e23}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-24",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-24/main.tex",
+          "content": "In the particle ledger, let $K_{e24}$, $m_{e24}$, and $v_{e24}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation \\[K_{e24}=\\frac{m_{e24}(v_{e24}^{2})}{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e24}=\\frac{m_{e24}(v_{e24}^{2})}{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e24}",
+        "mass": "m_{e24}",
+        "speed": "v_{e24}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "fraction-presentation",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "kinetic-pos-25",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-pos-25/quantities.md",
+          "content": "At the bottom of the ramp, $K_{e25}$ denotes kinetic energy while $m_{e25}$ and $v_{e25}$ denote mass and speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-25/analysis.tex",
+          "content": "\\input{quantities.md}\nThe energy file records \\[K_{e25}=\\tfrac12m_{e25}v_{e25}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e25}=\\tfrac12m_{e25}v_{e25}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e25}",
+        "mass": "m_{e25}",
+        "speed": "v_{e25}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "declarations-before",
+        "compact-fraction"
+      ]
+    },
+    {
+      "id": "kinetic-pos-26",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-pos-26/quantities.md",
+          "content": "For the spacecraft payload, let $K_{e26}$ be kinetic energy, $m_{e26}$ mass, and $v_{e26}$ speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-26/analysis.tex",
+          "content": "\\input{quantities.md}\nThe project shorthand is invoked as \\[\\kineticTerm{K_{e26}}{m_{e26}}{v_{e26}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\kineticTerm{K_{e26}}{m_{e26}}{v_{e26}}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e26}",
+        "mass": "m_{e26}",
+        "speed": "v_{e26}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\kineticTerm",
+          "parameterCount": 3,
+          "body": "#1 = \\frac{1}{2} #2 #3^{2}"
+        }
+      ]
+    },
+    {
+      "id": "kinetic-pos-27",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-27/main.md",
+          "content": "During the coasting interval, $K_{e27}$ is measured in joules, $m_{e27}$ in kilograms, and $v_{e27}$ in metres per second. The definition gives \\[K_{e27}=\\frac12m_{e27}v_{e27}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e27}=\\frac12m_{e27}v_{e27}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e27}",
+        "mass": "m_{e27}",
+        "speed": "v_{e27}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "compact-fraction",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-28",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-28/main.tex",
+          "content": "For the laboratory bead, let $K_{e28}$ be scalar kinetic energy, $m_{e28}$ scalar mass, and $\\mathbf{v}_{e28}$ the velocity vector. Then $K_{e28}=\\frac12m_{e28}\\lVert \\mathbf{v}_{e28}\\rVert^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e28}=\\frac12m_{e28}\\lVert \\mathbf{v}_{e28}\\rVert^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e28}",
+        "mass": "m_{e28}",
+        "speed": "\\mathbf{v}_{e28}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "norm-squared",
+        "shape-explicit"
+      ]
+    },
+    {
+      "id": "kinetic-pos-29",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-29/main.md",
+          "content": "At the measured instant, let $K_{e29}$ denote kinetic energy, $m_{e29}$ mass, and $v_{e29}$ speed. An algebraically reordered statement is \\[2K_{e29}=m_{e29}v_{e29}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "2K_{e29}=m_{e29}v_{e29}^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e29}",
+        "mass": "m_{e29}",
+        "speed": "v_{e29}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "scaled-equality",
+        "display-math"
+      ]
+    },
+    {
+      "id": "kinetic-pos-30",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-pos-30/main.tex",
+          "content": "In the energy accounting, the calculation shows \\[K_{e30}=\\tfrac{1}{2}m_{e30}(v_{e30})^{2}\\] The following notation note identifies $K_{e30}$ as kinetic energy, $m_{e30}$ as mass, and $v_{e30}$ as speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{e30}=\\tfrac{1}{2}m_{e30}(v_{e30})^{2}"
+      },
+      "expectedRoles": {
+        "energy": "K_{e30}",
+        "mass": "m_{e30}",
+        "speed": "v_{e30}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-01",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-01/main.md",
+          "content": "At the winch cable, let $P_{p01}$ denote instantaneous power, $F_{p01}$ the collinear force, and $v_{p01}$ the velocity. The transfer rate is $P_{p01}=F_{p01}v_{p01}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p01}=F_{p01}v_{p01}"
+      },
+      "expectedRoles": {
+        "power": "P_{p01}",
+        "force": "F_{p01}",
+        "velocity": "v_{p01}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "one-dimensional",
+        "multi-symbol-declaration",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "power-pos-02",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-02/main.tex",
+          "content": "For the towing motor, $P_{p02}$ is mechanical power, $\\mathbf{F}_{p02}$ is force, and $\\mathbf{v}_{p02}$ is velocity. Therefore \\[P_{p02}=\\mathbf{F}_{p02}\\cdot\\mathbf{v}_{p02}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p02}=\\mathbf{F}_{p02}\\cdot\\mathbf{v}_{p02}"
+      },
+      "expectedRoles": {
+        "power": "P_{p02}",
+        "force": "\\mathbf{F}_{p02}",
+        "velocity": "\\mathbf{v}_{p02}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "dot-product",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-03",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-03/main.md",
+          "content": "At the contact point, the calculation uses $F_{p03}v_{p03}=P_{p03}$. Here $P_{p03}$ denotes power, $F_{p03}$ force along the motion, and $v_{p03}$ velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{p03}v_{p03}=P_{p03}"
+      },
+      "expectedRoles": {
+        "power": "P_{p03}",
+        "force": "F_{p03}",
+        "velocity": "v_{p03}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "one-dimensional"
+      ]
+    },
+    {
+      "id": "power-pos-04",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-04/main.tex",
+          "content": "During the lift, let $P_{p04}$, $F_{p04}$, and $v_{p04}$ be power, collinear force, and velocity, respectively. The grouped form is \\[P_{p04}=(F_{p04})(v_{p04})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p04}=(F_{p04})(v_{p04})"
+      },
+      "expectedRoles": {
+        "power": "P_{p04}",
+        "force": "F_{p04}",
+        "velocity": "v_{p04}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "multi-symbol-declaration",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-05",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-pos-05/quantities.md",
+          "content": "For the drive wheel, $P_{p05}$ denotes power, $\\vec{F}_{p05}$ force, and $\\vec{v}_{p05}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-pos-05/analysis.tex",
+          "content": "\\input{quantities.md}\nThe mechanical calculation records \\[P_{p05}=\\vec{F}_{p05}\\cdot\\vec{v}_{p05}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p05}=\\vec{F}_{p05}\\cdot\\vec{v}_{p05}"
+      },
+      "expectedRoles": {
+        "power": "P_{p05}",
+        "force": "\\vec{F}_{p05}",
+        "velocity": "\\vec{v}_{p05}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "vector-notation",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "power-pos-06",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-pos-06/quantities.md",
+          "content": "At the actuator, let $P_{p06}$ be power, $F_{p06}$ collinear force, and $v_{p06}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-pos-06/analysis.tex",
+          "content": "\\input{quantities.md}\nThe project shorthand appears as \\[\\mechanicalPower{P_{p06}}{F_{p06}}{v_{p06}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mechanicalPower{P_{p06}}{F_{p06}}{v_{p06}}"
+      },
+      "expectedRoles": {
+        "power": "P_{p06}",
+        "force": "F_{p06}",
+        "velocity": "v_{p06}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\mechanicalPower",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3"
+        }
+      ]
+    },
+    {
+      "id": "power-pos-07",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-07/main.md",
+          "content": "During steady translation, $P_{p07}$ is measured in watts, $F_{p07}$ in newtons, and $v_{p07}$ in metres per second along the force. Thus \\[P_{p07}=F_{p07}\\,v_{p07}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p07}=F_{p07}\\,v_{p07}"
+      },
+      "expectedRoles": {
+        "power": "P_{p07}",
+        "force": "F_{p07}",
+        "velocity": "v_{p07}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "one-dimensional",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-08",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-08/main.tex",
+          "content": "For the pulling rope, let $P_{p08}$ be scalar power, $\\mathbf{F}_{p08}$ the force vector, and $\\mathbf{v}_{p08}$ the velocity vector. Then $P_{p08}=\\left(\\mathbf{F}_{p08}\\right)\\cdot\\left(\\mathbf{v}_{p08}\\right)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p08}=\\left(\\mathbf{F}_{p08}\\right)\\cdot\\left(\\mathbf{v}_{p08}\\right)"
+      },
+      "expectedRoles": {
+        "power": "P_{p08}",
+        "force": "\\mathbf{F}_{p08}",
+        "velocity": "\\mathbf{v}_{p08}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "grouping",
+        "shape-explicit"
+      ]
+    },
+    {
+      "id": "power-pos-09",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-09/main.md",
+          "content": "At the measured instant, $P_{p09}$ denotes power while $\\mathbf{F}_{p09}$ and $\\mathbf{v}_{p09}$ denote force and velocity vectors. Commutativity gives \\[\\mathbf{v}_{p09}\\cdot\\mathbf{F}_{p09}=P_{p09}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{v}_{p09}\\cdot\\mathbf{F}_{p09}=P_{p09}"
+      },
+      "expectedRoles": {
+        "power": "P_{p09}",
+        "force": "\\mathbf{F}_{p09}",
+        "velocity": "\\mathbf{v}_{p09}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "reordered-operands",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "power-pos-10",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-10/main.tex",
+          "content": "In the mechanical audit, the report states \\[P_{p10}=(F_{p10}v_{p10})\\] After the display, it declares $P_{p10}$ as power, $F_{p10}$ as force parallel to motion, and $v_{p10}$ as velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p10}=(F_{p10}v_{p10})"
+      },
+      "expectedRoles": {
+        "power": "P_{p10}",
+        "force": "F_{p10}",
+        "velocity": "v_{p10}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-11",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-11/main.md",
+          "content": "At the winch cable, let $P_{p11}$ denote instantaneous power, $F_{p11}$ the collinear force, and $v_{p11}$ the velocity. The transfer rate is $P_{p11}=F_{p11}v_{p11}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p11}=F_{p11}v_{p11}"
+      },
+      "expectedRoles": {
+        "power": "P_{p11}",
+        "force": "F_{p11}",
+        "velocity": "v_{p11}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "one-dimensional",
+        "multi-symbol-declaration",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "power-pos-12",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-12/main.tex",
+          "content": "For the towing motor, $P_{p12}$ is mechanical power, $\\mathbf{F}_{p12}$ is force, and $\\mathbf{v}_{p12}$ is velocity. Therefore \\[P_{p12}=\\mathbf{F}_{p12}\\cdot\\mathbf{v}_{p12}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p12}=\\mathbf{F}_{p12}\\cdot\\mathbf{v}_{p12}"
+      },
+      "expectedRoles": {
+        "power": "P_{p12}",
+        "force": "\\mathbf{F}_{p12}",
+        "velocity": "\\mathbf{v}_{p12}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "dot-product",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-13",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-13/main.md",
+          "content": "At the contact point, the calculation uses $F_{p13}v_{p13}=P_{p13}$. Here $P_{p13}$ denotes power, $F_{p13}$ force along the motion, and $v_{p13}$ velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{p13}v_{p13}=P_{p13}"
+      },
+      "expectedRoles": {
+        "power": "P_{p13}",
+        "force": "F_{p13}",
+        "velocity": "v_{p13}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "one-dimensional"
+      ]
+    },
+    {
+      "id": "power-pos-14",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-14/main.tex",
+          "content": "During the lift, let $P_{p14}$, $F_{p14}$, and $v_{p14}$ be power, collinear force, and velocity, respectively. The grouped form is \\[P_{p14}=(F_{p14})(v_{p14})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p14}=(F_{p14})(v_{p14})"
+      },
+      "expectedRoles": {
+        "power": "P_{p14}",
+        "force": "F_{p14}",
+        "velocity": "v_{p14}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "multi-symbol-declaration",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-15",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-pos-15/quantities.md",
+          "content": "For the drive wheel, $P_{p15}$ denotes power, $\\vec{F}_{p15}$ force, and $\\vec{v}_{p15}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-pos-15/analysis.tex",
+          "content": "\\input{quantities.md}\nThe mechanical calculation records \\[P_{p15}=\\vec{F}_{p15}\\cdot\\vec{v}_{p15}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p15}=\\vec{F}_{p15}\\cdot\\vec{v}_{p15}"
+      },
+      "expectedRoles": {
+        "power": "P_{p15}",
+        "force": "\\vec{F}_{p15}",
+        "velocity": "\\vec{v}_{p15}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "vector-notation",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "power-pos-16",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-pos-16/quantities.md",
+          "content": "At the actuator, let $P_{p16}$ be power, $F_{p16}$ collinear force, and $v_{p16}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-pos-16/analysis.tex",
+          "content": "\\input{quantities.md}\nThe project shorthand appears as \\[\\mechanicalPower{P_{p16}}{F_{p16}}{v_{p16}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mechanicalPower{P_{p16}}{F_{p16}}{v_{p16}}"
+      },
+      "expectedRoles": {
+        "power": "P_{p16}",
+        "force": "F_{p16}",
+        "velocity": "v_{p16}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\mechanicalPower",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3"
+        }
+      ]
+    },
+    {
+      "id": "power-pos-17",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-17/main.md",
+          "content": "During steady translation, $P_{p17}$ is measured in watts, $F_{p17}$ in newtons, and $v_{p17}$ in metres per second along the force. Thus \\[P_{p17}=F_{p17}\\,v_{p17}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p17}=F_{p17}\\,v_{p17}"
+      },
+      "expectedRoles": {
+        "power": "P_{p17}",
+        "force": "F_{p17}",
+        "velocity": "v_{p17}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "one-dimensional",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-18",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-18/main.tex",
+          "content": "For the pulling rope, let $P_{p18}$ be scalar power, $\\mathbf{F}_{p18}$ the force vector, and $\\mathbf{v}_{p18}$ the velocity vector. Then $P_{p18}=\\left(\\mathbf{F}_{p18}\\right)\\cdot\\left(\\mathbf{v}_{p18}\\right)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p18}=\\left(\\mathbf{F}_{p18}\\right)\\cdot\\left(\\mathbf{v}_{p18}\\right)"
+      },
+      "expectedRoles": {
+        "power": "P_{p18}",
+        "force": "\\mathbf{F}_{p18}",
+        "velocity": "\\mathbf{v}_{p18}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "grouping",
+        "shape-explicit"
+      ]
+    },
+    {
+      "id": "power-pos-19",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-19/main.md",
+          "content": "At the measured instant, $P_{p19}$ denotes power while $\\mathbf{F}_{p19}$ and $\\mathbf{v}_{p19}$ denote force and velocity vectors. Commutativity gives \\[\\mathbf{v}_{p19}\\cdot\\mathbf{F}_{p19}=P_{p19}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{v}_{p19}\\cdot\\mathbf{F}_{p19}=P_{p19}"
+      },
+      "expectedRoles": {
+        "power": "P_{p19}",
+        "force": "\\mathbf{F}_{p19}",
+        "velocity": "\\mathbf{v}_{p19}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "reordered-operands",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "power-pos-20",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-20/main.tex",
+          "content": "In the mechanical audit, the report states \\[P_{p20}=(F_{p20}v_{p20})\\] After the display, it declares $P_{p20}$ as power, $F_{p20}$ as force parallel to motion, and $v_{p20}$ as velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p20}=(F_{p20}v_{p20})"
+      },
+      "expectedRoles": {
+        "power": "P_{p20}",
+        "force": "F_{p20}",
+        "velocity": "v_{p20}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-21",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-21/main.md",
+          "content": "At the winch cable, let $P_{p21}$ denote instantaneous power, $F_{p21}$ the collinear force, and $v_{p21}$ the velocity. The transfer rate is $P_{p21}=F_{p21}v_{p21}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p21}=F_{p21}v_{p21}"
+      },
+      "expectedRoles": {
+        "power": "P_{p21}",
+        "force": "F_{p21}",
+        "velocity": "v_{p21}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "one-dimensional",
+        "multi-symbol-declaration",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "power-pos-22",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-22/main.tex",
+          "content": "For the towing motor, $P_{p22}$ is mechanical power, $\\mathbf{F}_{p22}$ is force, and $\\mathbf{v}_{p22}$ is velocity. Therefore \\[P_{p22}=\\mathbf{F}_{p22}\\cdot\\mathbf{v}_{p22}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p22}=\\mathbf{F}_{p22}\\cdot\\mathbf{v}_{p22}"
+      },
+      "expectedRoles": {
+        "power": "P_{p22}",
+        "force": "\\mathbf{F}_{p22}",
+        "velocity": "\\mathbf{v}_{p22}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "dot-product",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-23",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-23/main.md",
+          "content": "At the contact point, the calculation uses $F_{p23}v_{p23}=P_{p23}$. Here $P_{p23}$ denotes power, $F_{p23}$ force along the motion, and $v_{p23}$ velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{p23}v_{p23}=P_{p23}"
+      },
+      "expectedRoles": {
+        "power": "P_{p23}",
+        "force": "F_{p23}",
+        "velocity": "v_{p23}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "declarations-after",
+        "one-dimensional"
+      ]
+    },
+    {
+      "id": "power-pos-24",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-24/main.tex",
+          "content": "During the lift, let $P_{p24}$, $F_{p24}$, and $v_{p24}$ be power, collinear force, and velocity, respectively. The grouped form is \\[P_{p24}=(F_{p24})(v_{p24})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p24}=(F_{p24})(v_{p24})"
+      },
+      "expectedRoles": {
+        "power": "P_{p24}",
+        "force": "F_{p24}",
+        "velocity": "v_{p24}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "multi-symbol-declaration",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-25",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-pos-25/quantities.md",
+          "content": "For the drive wheel, $P_{p25}$ denotes power, $\\vec{F}_{p25}$ force, and $\\vec{v}_{p25}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-pos-25/analysis.tex",
+          "content": "\\input{quantities.md}\nThe mechanical calculation records \\[P_{p25}=\\vec{F}_{p25}\\cdot\\vec{v}_{p25}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p25}=\\vec{F}_{p25}\\cdot\\vec{v}_{p25}"
+      },
+      "expectedRoles": {
+        "power": "P_{p25}",
+        "force": "\\vec{F}_{p25}",
+        "velocity": "\\vec{v}_{p25}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "vector-notation",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "power-pos-26",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-pos-26/quantities.md",
+          "content": "At the actuator, let $P_{p26}$ be power, $F_{p26}$ collinear force, and $v_{p26}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-pos-26/analysis.tex",
+          "content": "\\input{quantities.md}\nThe project shorthand appears as \\[\\mechanicalPower{P_{p26}}{F_{p26}}{v_{p26}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mechanicalPower{P_{p26}}{F_{p26}}{v_{p26}}"
+      },
+      "expectedRoles": {
+        "power": "P_{p26}",
+        "force": "F_{p26}",
+        "velocity": "v_{p26}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "multi-file",
+        "transparent-macro",
+        "declarations-before",
+        "display-math"
+      ],
+      "macros": [
+        {
+          "name": "\\mechanicalPower",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3"
+        }
+      ]
+    },
+    {
+      "id": "power-pos-27",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-27/main.md",
+          "content": "During steady translation, $P_{p27}$ is measured in watts, $F_{p27}$ in newtons, and $v_{p27}$ in metres per second along the force. Thus \\[P_{p27}=F_{p27}\\,v_{p27}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p27}=F_{p27}\\,v_{p27}"
+      },
+      "expectedRoles": {
+        "power": "P_{p27}",
+        "force": "F_{p27}",
+        "velocity": "v_{p27}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "unit-explicit",
+        "one-dimensional",
+        "display-math"
+      ]
+    },
+    {
+      "id": "power-pos-28",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-28/main.tex",
+          "content": "For the pulling rope, let $P_{p28}$ be scalar power, $\\mathbf{F}_{p28}$ the force vector, and $\\mathbf{v}_{p28}$ the velocity vector. Then $P_{p28}=\\left(\\mathbf{F}_{p28}\\right)\\cdot\\left(\\mathbf{v}_{p28}\\right)$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p28}=\\left(\\mathbf{F}_{p28}\\right)\\cdot\\left(\\mathbf{v}_{p28}\\right)"
+      },
+      "expectedRoles": {
+        "power": "P_{p28}",
+        "force": "\\mathbf{F}_{p28}",
+        "velocity": "\\mathbf{v}_{p28}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "vector-notation",
+        "grouping",
+        "shape-explicit"
+      ]
+    },
+    {
+      "id": "power-pos-29",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-29/main.md",
+          "content": "At the measured instant, $P_{p29}$ denotes power while $\\mathbf{F}_{p29}$ and $\\mathbf{v}_{p29}$ denote force and velocity vectors. Commutativity gives \\[\\mathbf{v}_{p29}\\cdot\\mathbf{F}_{p29}=P_{p29}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{v}_{p29}\\cdot\\mathbf{F}_{p29}=P_{p29}"
+      },
+      "expectedRoles": {
+        "power": "P_{p29}",
+        "force": "\\mathbf{F}_{p29}",
+        "velocity": "\\mathbf{v}_{p29}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "reordered-equality",
+        "reordered-operands",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "power-pos-30",
+      "lawId": "mechanical-power",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-pos-30/main.tex",
+          "content": "In the mechanical audit, the report states \\[P_{p30}=(F_{p30}v_{p30})\\] After the display, it declares $P_{p30}$ as power, $F_{p30}$ as force parallel to motion, and $v_{p30}$ as velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{p30}=(F_{p30}v_{p30})"
+      },
+      "expectedRoles": {
+        "power": "P_{p30}",
+        "force": "F_{p30}",
+        "velocity": "v_{p30}"
+      },
+      "variationTags": [
+        "symbol-renaming",
+        "grouping",
+        "declarations-after",
+        "display-math"
+      ]
+    },
+    {
+      "id": "newton-neg-01",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-01/main.md",
+          "content": "Let $F_{x01}$ be mass, $m_{x01}$ be net force, and $a_{x01}$ be acceleration. The proposed balance is $F_{x01}=m_{x01}a_{x01}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x01}=m_{x01}a_{x01}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "role-swap",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "newton-neg-02",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-02/main.md",
+          "content": "Let $F_{x02}$ be net force, $m_{x02}$ be elapsed time, and $a_{x02}$ be acceleration. The worksheet states $F_{x02}=m_{x02}a_{x02}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x02}=m_{x02}a_{x02}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-mass-role",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "newton-neg-03",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-03/main.md",
+          "content": "Let $F_{x03}$ denote net force, $m_{x03}$ mass, and $a_{x03}$ velocity. The candidate relation is $F_{x03}=m_{x03}a_{x03}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x03}=m_{x03}a_{x03}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-acceleration-role",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "newton-neg-04",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-04/main.md",
+          "content": "Let $F_{x04}$ be force, $m_{x04}$ mass, and $a_{x04}$ acceleration. A student writes $F_{x04}=m_{x04}+a_{x04}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x04}=m_{x04}+a_{x04}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "addition-instead-of-product"
+      ]
+    },
+    {
+      "id": "newton-neg-05",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-05/main.md",
+          "content": "For a cart, $F_{x05}$ is force, $m_{x05}$ mass, and $a_{x05}$ acceleration. The draft gives $F_{x05}=m_{x05}/a_{x05}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x05}=m_{x05}/a_{x05}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "division-instead-of-product"
+      ]
+    },
+    {
+      "id": "newton-neg-06",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-06/main.md",
+          "content": "Let $F_{x06}$, $m_{x06}$, and $a_{x06}$ denote force, mass, and acceleration. The proposed equation is $F_{x06}=m_{x06}a_{x06}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x06}=m_{x06}a_{x06}^{2}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "wrong-exponent",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "newton-neg-07",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-07/main.md",
+          "content": "Let $\\mathbf{F}_{x07}$ be force, $m_{x07}$ scalar mass, and $\\mathbf{a}_{x07}$ acceleration. The note uses $\\mathbf{F}_{x07}=m_{x07}\\times\\mathbf{a}_{x07}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{F}_{x07}=m_{x07}\\times\\mathbf{a}_{x07}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "cross-product",
+        "vector-notation"
+      ]
+    },
+    {
+      "id": "newton-neg-08",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-08/main.md",
+          "content": "Let $F_{x08}$ be force and $m_{x08}$ mass; $q_{x08}$ is an unspecified coefficient. The candidate law is $F_{x08}=m_{x08}q_{x08}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x08}=m_{x08}q_{x08}"
+      },
+      "refusalCategory": "missing-role",
+      "variationTags": [
+        "undeclared-acceleration",
+        "ambiguous-factor"
+      ]
+    },
+    {
+      "id": "newton-neg-09",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-09/main.md",
+          "content": "Let $F_{x09}$ be energy measured in joules, $m_{x09}$ mass in kilograms, and $a_{x09}$ acceleration. The line reads $F_{x09}=m_{x09}a_{x09}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x09}=m_{x09}a_{x09}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "force-has-energy-unit",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "newton-neg-10",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-10/main.md",
+          "content": "Let $F_{x10}$ be force in newtons, $m_{x10}$ a quantity measured in newtons, and $a_{x10}$ acceleration. The display is $F_{x10}=m_{x10}a_{x10}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x10}=m_{x10}a_{x10}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "mass-has-force-unit",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "newton-neg-11",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-11/main.md",
+          "content": "Let $F_{x11}$ be force in newtons, $m_{x11}$ mass in kilograms, and $a_{x11}$ speed in metres per second. The expression is $F_{x11}=m_{x11}a_{x11}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x11}=m_{x11}a_{x11}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "acceleration-has-speed-unit",
+        "unit-explicit"
+      ]
+    },
+    {
+      "id": "newton-neg-12",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-12/main.md",
+          "content": "Let $\\mathbf{F}_{x12}$ and $\\mathbf{a}_{x12}$ be vectors, and let $\\mathbf{m}_{x12}$ be a three-component mass vector. The model claims $\\mathbf{F}_{x12}=\\mathbf{m}_{x12}\\mathbf{a}_{x12}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{F}_{x12}=\\mathbf{m}_{x12}\\mathbf{a}_{x12}"
+      },
+      "refusalCategory": "wrong-shape",
+      "variationTags": [
+        "vector-mass",
+        "shape-mismatch"
+      ]
+    },
+    {
+      "id": "newton-neg-13",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-13/main.md",
+          "content": "Let $F_{x13}$ be scalar force, $m_{x13}$ scalar mass, and $A_{x13}$ an acceleration matrix. The proposed formula is $F_{x13}=m_{x13}A_{x13}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x13}=m_{x13}A_{x13}"
+      },
+      "refusalCategory": "wrong-shape",
+      "variationTags": [
+        "matrix-acceleration",
+        "scalar-result"
+      ]
+    },
+    {
+      "id": "newton-neg-14",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-14/main.md",
+          "content": "The notation table calls $F_{x14}$ both force and energy; $m_{x14}$ is mass and $a_{x14}$ acceleration. It then states $F_{x14}=m_{x14}a_{x14}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x14}=m_{x14}a_{x14}"
+      },
+      "refusalCategory": "ambiguous-role",
+      "variationTags": [
+        "conflicting-declarations",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "newton-neg-15",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-neg-15/quantities.md",
+          "content": "In Appendix A only, $F_{x15}$ meant force, $m_{x15}$ mass, and $a_{x15}$ acceleration; those local names are not imported."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-neg-15/analysis.tex",
+          "content": "The main analysis uses the otherwise undeclared symbols in \\[F_{x15}=m_{x15}a_{x15}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x15}=m_{x15}a_{x15}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multi-file",
+        "nonimported-declarations",
+        "scope-boundary"
+      ]
+    },
+    {
+      "id": "newton-neg-16",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-16/analysis.tex",
+          "content": "Before that experiment is included, the current report presents \\[F_{x16}=m_{x16}a_{x16}\\]"
+        },
+        {
+          "fileId": "quantities",
+          "path": "newton-neg-16/quantities.md",
+          "content": "The glossary entry for a different experiment defines $F_{x16}$ as force, $m_{x16}$ as mass, and $a_{x16}$ as acceleration."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x16}=m_{x16}a_{x16}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multi-file",
+        "forward-scope",
+        "declarations-after"
+      ]
+    },
+    {
+      "id": "newton-neg-17",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-17/main.md",
+          "content": "Let $F_{x17}$ be force, $m_{x17}$ mass, and $a_{x17}$ acceleration. The observation only says $F_{x17}\\propto m_{x17}a_{x17}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x17}\\propto m_{x17}a_{x17}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "proportionality-not-equality"
+      ]
+    },
+    {
+      "id": "newton-neg-18",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-18/main.md",
+          "content": "Let $F_{x18}$, $m_{x18}$, and $a_{x18}$ denote force, mass, and acceleration. The rejected model asserts $F_{x18}\\ne m_{x18}a_{x18}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x18}\\ne m_{x18}a_{x18}"
+      },
+      "refusalCategory": "negated-law",
+      "variationTags": [
+        "inequality",
+        "explicit-negation"
+      ]
+    },
+    {
+      "id": "newton-neg-19",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "newton-neg-19/quantities.md",
+          "content": "Let $F_{x19}$ be force, $m_{x19}$ mass, and $a_{x19}$ acceleration."
+        },
+        {
+          "fileId": "main",
+          "path": "newton-neg-19/analysis.tex",
+          "content": "The project macro is called as \\[\\badBalance{F_{x19}}{m_{x19}}{a_{x19}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\badBalance{F_{x19}}{m_{x19}}{a_{x19}}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "transparent-macro",
+        "multi-file",
+        "addition-in-macro"
+      ],
+      "macros": [
+        {
+          "name": "\\badBalance",
+          "parameterCount": 3,
+          "body": "#1 = #2 + #3"
+        }
+      ]
+    },
+    {
+      "id": "newton-neg-20",
+      "lawId": "newton-second-law",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "newton-neg-20/main.md",
+          "content": "Let $F_{x20}$ be the electric field symbol, $m_{x20}$ a material parameter, and $a_{x20}$ an area. Their constitutive relation is $F_{x20}=m_{x20}a_{x20}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{x20}=m_{x20}a_{x20}"
+      },
+      "refusalCategory": "domain-ambiguity",
+      "variationTags": [
+        "notation-collision",
+        "nonmechanical-context"
+      ]
+    },
+    {
+      "id": "kinetic-neg-01",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-01/main.md",
+          "content": "Let $K_{x01}$ be momentum, $m_{x01}$ mass, and $v_{x01}$ speed. The line states $K_{x01}=\\frac12m_{x01}v_{x01}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x01}=\\frac12m_{x01}v_{x01}^{2}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-energy-role",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "kinetic-neg-02",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-02/main.md",
+          "content": "Let $K_{x02}$ be kinetic energy, $m_{x02}$ elapsed time, and $v_{x02}$ speed. The expression is $K_{x02}=\\frac12m_{x02}v_{x02}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x02}=\\frac12m_{x02}v_{x02}^{2}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-mass-role",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "kinetic-neg-03",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-03/main.md",
+          "content": "Let $K_{x03}$ denote kinetic energy, $m_{x03}$ mass, and $v_{x03}$ acceleration. The candidate is $K_{x03}=\\frac12m_{x03}v_{x03}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x03}=\\frac12m_{x03}v_{x03}^{2}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-speed-role",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "kinetic-neg-04",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-04/main.md",
+          "content": "Let $K_{x04}$ be kinetic energy, $m_{x04}$ mass, and $v_{x04}$ speed. The draft omits a factor in $K_{x04}=m_{x04}v_{x04}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x04}=m_{x04}v_{x04}^{2}"
+      },
+      "refusalCategory": "wrong-coefficient",
+      "variationTags": [
+        "missing-one-half"
+      ]
+    },
+    {
+      "id": "kinetic-neg-05",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-05/main.md",
+          "content": "For the cart, $K_{x05}$ is kinetic energy, $m_{x05}$ mass, and $v_{x05}$ speed. A note claims $K_{x05}=2m_{x05}v_{x05}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x05}=2m_{x05}v_{x05}^{2}"
+      },
+      "refusalCategory": "wrong-coefficient",
+      "variationTags": [
+        "factor-two"
+      ]
+    },
+    {
+      "id": "kinetic-neg-06",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-06/main.md",
+          "content": "Let $K_{x06}$, $m_{x06}$, and $v_{x06}$ denote kinetic energy, mass, and speed. The proposed equation is $K_{x06}=\\frac12m_{x06}v_{x06}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x06}=\\frac12m_{x06}v_{x06}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "missing-square"
+      ]
+    },
+    {
+      "id": "kinetic-neg-07",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-07/main.md",
+          "content": "Let $K_{x07}$ be kinetic energy, $m_{x07}$ mass, and $v_{x07}$ speed. The worksheet gives $K_{x07}=\\frac12m_{x07}^{2}v_{x07}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x07}=\\frac12m_{x07}^{2}v_{x07}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "squared-mass",
+        "unsquared-speed"
+      ]
+    },
+    {
+      "id": "kinetic-neg-08",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-08/main.md",
+          "content": "Let $K_{x08}$ be kinetic energy, $m_{x08}$ mass, and $v_{x08}$ speed. The proposed fraction is $K_{x08}=\\frac{m_{x08}}{2v_{x08}^{2}}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x08}=\\frac{m_{x08}}{2v_{x08}^{2}}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "division-by-speed-squared"
+      ]
+    },
+    {
+      "id": "kinetic-neg-09",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-09/main.md",
+          "content": "Let $K_{x09}$ be a temperature in kelvin, $m_{x09}$ mass, and $v_{x09}$ speed. The notation collision yields $K_{x09}=\\frac12m_{x09}v_{x09}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x09}=\\frac12m_{x09}v_{x09}^{2}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "energy-has-temperature-unit",
+        "notation-collision"
+      ]
+    },
+    {
+      "id": "kinetic-neg-10",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-10/main.md",
+          "content": "Let $K_{x10}$ be energy in joules, $m_{x10}$ be measured in seconds, and $v_{x10}$ speed in metres per second. The line reads $K_{x10}=\\frac12m_{x10}v_{x10}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x10}=\\frac12m_{x10}v_{x10}^{2}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "mass-has-time-unit",
+        "unit-explicit"
+      ]
+    },
+    {
+      "id": "kinetic-neg-11",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-11/main.md",
+          "content": "Let $K_{x11}$ be energy in joules, $m_{x11}$ mass in kilograms, and $v_{x11}$ acceleration in metres per second squared. The display is $K_{x11}=\\frac12m_{x11}v_{x11}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x11}=\\frac12m_{x11}v_{x11}^{2}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "speed-has-acceleration-unit",
+        "unit-explicit"
+      ]
+    },
+    {
+      "id": "kinetic-neg-12",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-12/main.md",
+          "content": "Let $\\mathbf{K}_{x12}$ be a three-vector of energies, $m_{x12}$ scalar mass, and $v_{x12}$ scalar speed. The model claims $\\mathbf{K}_{x12}=\\frac12m_{x12}v_{x12}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{K}_{x12}=\\frac12m_{x12}v_{x12}^{2}"
+      },
+      "refusalCategory": "wrong-shape",
+      "variationTags": [
+        "vector-energy",
+        "scalar-definition"
+      ]
+    },
+    {
+      "id": "kinetic-neg-13",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-13/main.md",
+          "content": "Let $K_{x13}$ be scalar energy, $m_{x13}$ scalar mass, and $\\mathbf{v}_{x13}$ a velocity vector. The draft squares the vector directly in $K_{x13}=\\frac12m_{x13}\\mathbf{v}_{x13}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x13}=\\frac12m_{x13}\\mathbf{v}_{x13}^{2}"
+      },
+      "refusalCategory": "wrong-shape",
+      "variationTags": [
+        "vector-square-without-norm",
+        "shape-mismatch"
+      ]
+    },
+    {
+      "id": "kinetic-neg-14",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-14/main.md",
+          "content": "The notation table calls $K_{x14}$ both kinetic energy and stiffness; $m_{x14}$ is mass and $v_{x14}$ speed. It states $K_{x14}=\\frac12m_{x14}v_{x14}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x14}=\\frac12m_{x14}v_{x14}^{2}"
+      },
+      "refusalCategory": "ambiguous-role",
+      "variationTags": [
+        "conflicting-declarations",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "kinetic-neg-15",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-neg-15/quantities.md",
+          "content": "A closed appendix locally defines $K_{x15}$ as kinetic energy, $m_{x15}$ as mass, and $v_{x15}$ as speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-15/analysis.tex",
+          "content": "The main file has no imported definitions for the symbols in \\[K_{x15}=\\frac12m_{x15}v_{x15}^{2}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x15}=\\frac12m_{x15}v_{x15}^{2}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multi-file",
+        "nonimported-declarations",
+        "scope-boundary"
+      ]
+    },
+    {
+      "id": "kinetic-neg-16",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-16/analysis.tex",
+          "content": "Before that experiment begins, the current section displays \\[K_{x16}=\\frac12m_{x16}v_{x16}^{2}\\]"
+        },
+        {
+          "fileId": "quantities",
+          "path": "kinetic-neg-16/quantities.md",
+          "content": "A later experiment defines $K_{x16}$ as kinetic energy, $m_{x16}$ as mass, and $v_{x16}$ as speed."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x16}=\\frac12m_{x16}v_{x16}^{2}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multi-file",
+        "forward-scope",
+        "declarations-after"
+      ]
+    },
+    {
+      "id": "kinetic-neg-17",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-17/main.md",
+          "content": "Let $K_{x17}$ be kinetic energy, $m_{x17}$ mass, $g_{x17}$ gravitational acceleration, and $h_{x17}$ height. The expression $K_{x17}=m_{x17}g_{x17}h_{x17}$ is potential energy under the wrong label."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x17}=m_{x17}g_{x17}h_{x17}"
+      },
+      "refusalCategory": "wrong-law",
+      "variationTags": [
+        "potential-energy-form",
+        "mislabelled-energy"
+      ]
+    },
+    {
+      "id": "kinetic-neg-18",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-18/main.md",
+          "content": "Let $K_{x18}$, $m_{x18}$, and $v_{x18}$ denote kinetic energy, positive mass, and speed. The draft gives $K_{x18}=-\\frac12m_{x18}v_{x18}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x18}=-\\frac12m_{x18}v_{x18}^{2}"
+      },
+      "refusalCategory": "wrong-sign",
+      "variationTags": [
+        "negative-energy",
+        "wrong-coefficient"
+      ]
+    },
+    {
+      "id": "kinetic-neg-19",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "kinetic-neg-19/quantities.md",
+          "content": "Let $K_{x19}$ be kinetic energy, $m_{x19}$ mass, and $v_{x19}$ speed."
+        },
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-19/analysis.tex",
+          "content": "The shorthand is invoked as \\[\\badKinetic{K_{x19}}{m_{x19}}{v_{x19}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\badKinetic{K_{x19}}{m_{x19}}{v_{x19}}"
+      },
+      "refusalCategory": "wrong-coefficient",
+      "variationTags": [
+        "transparent-macro",
+        "multi-file",
+        "incorrect-macro-body"
+      ],
+      "macros": [
+        {
+          "name": "\\badKinetic",
+          "parameterCount": 3,
+          "body": "#1 = #2 #3^{2}"
+        }
+      ]
+    },
+    {
+      "id": "kinetic-neg-20",
+      "lawId": "kinetic-energy-definition",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "kinetic-neg-20/main.md",
+          "content": "Let $K_{x20}$ be a spring stiffness, $m_{x20}$ a mode number, and $v_{x20}$ a voltage. The circuit fit happens to read $K_{x20}=\\frac12m_{x20}v_{x20}^{2}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{x20}=\\frac12m_{x20}v_{x20}^{2}"
+      },
+      "refusalCategory": "domain-ambiguity",
+      "variationTags": [
+        "notation-collision",
+        "nonmechanical-context"
+      ]
+    },
+    {
+      "id": "power-neg-01",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-01/main.md",
+          "content": "Let $P_{x01}$ be pressure, $F_{x01}$ force, and $v_{x01}$ velocity. The line states $P_{x01}=F_{x01}v_{x01}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x01}=F_{x01}v_{x01}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-power-role",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "power-neg-02",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-02/main.md",
+          "content": "Let $P_{x02}$ be power, $F_{x02}$ area, and $v_{x02}$ velocity. The worksheet writes $P_{x02}=F_{x02}v_{x02}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x02}=F_{x02}v_{x02}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-force-role",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "power-neg-03",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-03/main.md",
+          "content": "Let $P_{x03}$ denote power, $F_{x03}$ force, and $v_{x03}$ acceleration. The candidate is $P_{x03}=F_{x03}v_{x03}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x03}=F_{x03}v_{x03}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "wrong-velocity-role",
+        "multi-symbol-declaration"
+      ]
+    },
+    {
+      "id": "power-neg-04",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-04/main.md",
+          "content": "Let $P_{x04}$ be power, $F_{x04}$ force, and $v_{x04}$ velocity. A student writes $P_{x04}=F_{x04}+v_{x04}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x04}=F_{x04}+v_{x04}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "addition-instead-of-product"
+      ]
+    },
+    {
+      "id": "power-neg-05",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-05/main.md",
+          "content": "For the winch, $P_{x05}$ is power, $F_{x05}$ force, and $v_{x05}$ velocity. The draft gives $P_{x05}=F_{x05}/v_{x05}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x05}=F_{x05}/v_{x05}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "division-instead-of-product"
+      ]
+    },
+    {
+      "id": "power-neg-06",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-06/main.md",
+          "content": "Let $\\mathbf{P}_{x06}$ be a claimed power vector, $\\mathbf{F}_{x06}$ force, and $\\mathbf{v}_{x06}$ velocity. The note uses $\\mathbf{P}_{x06}=\\mathbf{F}_{x06}\\times\\mathbf{v}_{x06}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{P}_{x06}=\\mathbf{F}_{x06}\\times\\mathbf{v}_{x06}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "cross-product",
+        "vector-result"
+      ]
+    },
+    {
+      "id": "power-neg-07",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-07/main.md",
+          "content": "Let $P_{x07}$ be power, $F_{x07}$ force, and $a_{x07}$ acceleration. The proposed relation is $P_{x07}=F_{x07}a_{x07}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x07}=F_{x07}a_{x07}"
+      },
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "acceleration-instead-of-velocity"
+      ]
+    },
+    {
+      "id": "power-neg-08",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-08/main.md",
+          "content": "Let $P_{x08}$ be power and $v_{x08}$ velocity; $q_{x08}$ is an unspecified load parameter. The candidate is $P_{x08}=q_{x08}v_{x08}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x08}=q_{x08}v_{x08}"
+      },
+      "refusalCategory": "missing-role",
+      "variationTags": [
+        "undeclared-force",
+        "ambiguous-factor"
+      ]
+    },
+    {
+      "id": "power-neg-09",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-09/main.md",
+          "content": "Let $P_{x09}$ be energy measured in joules, $F_{x09}$ force, and $v_{x09}$ velocity. The line reads $P_{x09}=F_{x09}v_{x09}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x09}=F_{x09}v_{x09}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "power-has-energy-unit",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "power-neg-10",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-10/main.md",
+          "content": "Let $P_{x10}$ be power in watts, $F_{x10}$ energy in joules, and $v_{x10}$ velocity in metres per second. The display is $P_{x10}=F_{x10}v_{x10}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x10}=F_{x10}v_{x10}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "force-has-energy-unit",
+        "unit-explicit"
+      ]
+    },
+    {
+      "id": "power-neg-11",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-11/main.md",
+          "content": "Let $P_{x11}$ be power in watts, $F_{x11}$ force in newtons, and $v_{x11}$ acceleration in metres per second squared. The expression is $P_{x11}=F_{x11}v_{x11}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x11}=F_{x11}v_{x11}"
+      },
+      "refusalCategory": "wrong-unit",
+      "variationTags": [
+        "velocity-has-acceleration-unit",
+        "unit-explicit"
+      ]
+    },
+    {
+      "id": "power-neg-12",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-12/main.md",
+          "content": "Let $\\mathbf{P}_{x12}$ be a three-vector, and let $\\mathbf{F}_{x12}$ and $\\mathbf{v}_{x12}$ be force and velocity vectors. The model claims $\\mathbf{P}_{x12}=\\mathbf{F}_{x12}\\cdot\\mathbf{v}_{x12}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf{P}_{x12}=\\mathbf{F}_{x12}\\cdot\\mathbf{v}_{x12}"
+      },
+      "refusalCategory": "wrong-shape",
+      "variationTags": [
+        "vector-power",
+        "scalar-dot-product"
+      ]
+    },
+    {
+      "id": "power-neg-13",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-13/main.md",
+          "content": "Let $P_{x13}$ be scalar power, while $F_{x13}$ and $v_{x13}$ are scalars for a one-dimensional model. The draft nevertheless writes $P_{x13}=F_{x13}\\cdot v_{x13}$ as a vector dot product."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x13}=F_{x13}\\cdot v_{x13}"
+      },
+      "refusalCategory": "wrong-shape",
+      "variationTags": [
+        "dot-product-of-scalars",
+        "shape-mismatch"
+      ]
+    },
+    {
+      "id": "power-neg-14",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-14/main.md",
+          "content": "The notation table calls $P_{x14}$ both power and probability; $F_{x14}$ is force and $v_{x14}$ velocity. It then states $P_{x14}=F_{x14}v_{x14}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x14}=F_{x14}v_{x14}"
+      },
+      "refusalCategory": "ambiguous-role",
+      "variationTags": [
+        "conflicting-declarations",
+        "exact-surface"
+      ]
+    },
+    {
+      "id": "power-neg-15",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-neg-15/quantities.md",
+          "content": "A detached appendix defines $P_{x15}$ as power, $F_{x15}$ as force, and $v_{x15}$ as velocity, but its scope is local."
+        },
+        {
+          "fileId": "main",
+          "path": "power-neg-15/analysis.tex",
+          "content": "The main analysis has no imported roles for \\[P_{x15}=F_{x15}v_{x15}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x15}=F_{x15}v_{x15}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multi-file",
+        "nonimported-declarations",
+        "scope-boundary"
+      ]
+    },
+    {
+      "id": "power-neg-16",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-16/analysis.tex",
+          "content": "Before the later test is introduced, the current file displays \\[P_{x16}=F_{x16}v_{x16}\\]"
+        },
+        {
+          "fileId": "quantities",
+          "path": "power-neg-16/quantities.md",
+          "content": "A later test defines $P_{x16}$ as power, $F_{x16}$ as force, and $v_{x16}$ as velocity."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x16}=F_{x16}v_{x16}"
+      },
+      "refusalCategory": "wrong-scope",
+      "variationTags": [
+        "multi-file",
+        "forward-scope",
+        "declarations-after"
+      ]
+    },
+    {
+      "id": "power-neg-17",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-17/main.md",
+          "content": "Let $P_{x17}$ be power, $\\tau_{x17}$ torque, and $\\omega_{x17}$ angular velocity. The rotational identity is $P_{x17}=\\tau_{x17}\\omega_{x17}$, not the requested force-velocity law."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x17}=\\tau_{x17}\\omega_{x17}"
+      },
+      "refusalCategory": "wrong-law",
+      "variationTags": [
+        "rotational-power",
+        "different-role-set"
+      ]
+    },
+    {
+      "id": "power-neg-18",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-18/main.md",
+          "content": "Let $P_{x18}$, $F_{x18}$, and $v_{x18}$ denote power, collinear force, and velocity. An efficiency bound gives $P_{x18}\\leq F_{x18}v_{x18}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x18}\\leq F_{x18}v_{x18}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "inequality-not-definition",
+        "efficiency-bound"
+      ]
+    },
+    {
+      "id": "power-neg-19",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "quantities",
+          "path": "power-neg-19/quantities.md",
+          "content": "Let $P_{x19}$ be power, $F_{x19}$ force, and $v_{x19}$ velocity."
+        },
+        {
+          "fileId": "main",
+          "path": "power-neg-19/analysis.tex",
+          "content": "The project shorthand is invoked as \\[\\badPower{P_{x19}}{F_{x19}}{v_{x19}}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\badPower{P_{x19}}{F_{x19}}{v_{x19}}"
+      },
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "transparent-macro",
+        "multi-file",
+        "division-in-macro"
+      ],
+      "macros": [
+        {
+          "name": "\\badPower",
+          "parameterCount": 3,
+          "body": "#1 = #2 / #3"
+        }
+      ]
+    },
+    {
+      "id": "power-neg-20",
+      "lawId": "mechanical-power",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "power-neg-20/main.md",
+          "content": "Let $P_{x20}$ be probability, $F_{x20}$ a frequency, and $v_{x20}$ a voltage. Their empirical fit is $P_{x20}=F_{x20}v_{x20}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{x20}=F_{x20}v_{x20}"
+      },
+      "refusalCategory": "domain-ambiguity",
+      "variationTags": [
+        "notation-collision",
+        "nonmechanical-context"
+      ]
+    }
+  ]
+}

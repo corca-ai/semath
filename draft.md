@@ -1,5 +1,9 @@
 # Semantic Math Analysis Library Proposal
 
+> **문서 상태:** 초기 설계와 이터레이션의 역사적 기록이다. 현재 아키텍처의
+> 기준은 [`docs/architecture.md`](docs/architecture.md), 현재 계획과 완료 조건의
+> 기준은 [GitHub issues](https://github.com/corca-ai/semath/issues)다.
+
 > **구현 상태 — v0.15 (2026-08-09):** 수학 5개 pack과 역학·회로·제어 pack의 의미 인식 범위를 넓히고, 486개 수식 및 180개 영어 선언 corpus를 분야·topic·capability별 독립 scorecard로 고정했다. CorTeX의 LaTeX provider는 wasmtex와 Semath 결과를 한 곳에서 합성하고 interactive parsing은 authoring Worker가 담당한다.
 
 ## 1. 개요

@@ -1,4 +1,6 @@
-use crate::{DocumentLanguage, EquationNode, MathRegion, SourceIndex, SourceRange};
+#[cfg(test)]
+use crate::DocumentLanguage;
+use crate::{EquationNode, MathRegion, SourceIndex, SourceRange};
 
 #[derive(Clone, Debug)]
 pub(crate) struct ParsedMath {
@@ -7,7 +9,8 @@ pub(crate) struct ParsedMath {
     pub symbols: Vec<(String, SourceRange)>,
 }
 
-pub(crate) fn math_regions(source: &str, language: DocumentLanguage) -> Vec<MathRegion> {
+#[cfg(test)]
+pub(crate) fn test_math_regions(source: &str, language: DocumentLanguage) -> Vec<MathRegion> {
     let index = SourceIndex::new(source);
     let bytes = source.as_bytes();
     let mut regions = Vec::new();
@@ -83,6 +86,7 @@ pub(crate) fn math_regions(source: &str, language: DocumentLanguage) -> Vec<Math
     regions
 }
 
+#[cfg(test)]
 fn escaped(bytes: &[u8], offset: usize) -> bool {
     let mut slashes = 0;
     let mut cursor = offset;
@@ -598,25 +602,15 @@ pub(crate) fn selection_path(node: &EquationNode, offset: u32, output: &mut Vec<
     }
 }
 
-pub(crate) fn deepest_node(node: &EquationNode, offset: u32) -> Option<&EquationNode> {
-    if !node.range.contains(offset) {
-        return None;
-    }
-    node.children
-        .iter()
-        .find_map(|child| deepest_node(child, offset))
-        .or(Some(node))
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{math_regions, parse_regions, selection_path};
+    use super::{parse_regions, selection_path, test_math_regions};
     use crate::DocumentLanguage;
 
     #[test]
     fn finds_markdown_math_but_not_fenced_code() {
         let source = "before $x_i$\n```\n$ignored$\n```\nafter \\[\\frac{1}{N}\\]";
-        let regions = math_regions(source, DocumentLanguage::Markdown);
+        let regions = test_math_regions(source, DocumentLanguage::Markdown);
         assert_eq!(regions.len(), 2);
         assert!(regions.iter().all(|region| region.closed));
     }
@@ -624,7 +618,7 @@ mod tests {
     #[test]
     fn builds_nested_selection_ranges() {
         let source = "$\\frac{1}{N}x_i$";
-        let regions = math_regions(source, DocumentLanguage::Latex);
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
         let parsed = parse_regions(source, &regions);
         let x = parsed[0]
             .symbols
@@ -647,7 +641,7 @@ mod tests {
             "\\begin{cases}x & x > 0 \\\\ -x & x \\le 0\\end{cases} + ",
             "\\left( y + 1 \\right)$",
         );
-        let parsed = parse_regions(source, &math_regions(source, DocumentLanguage::Latex));
+        let parsed = parse_regions(source, &test_math_regions(source, DocumentLanguage::Latex));
         let root = &parsed[0].root;
         let kinds = root
             .children

@@ -1,36 +1,24 @@
 # Semantic quality scorecards
 
-Semath does not use one blended “accuracy” number as a release decision. The
-v0.15 gates report exact behavior by field, domain, topic, and capability, then
-compare the underlying integer counters with the versioned budgets in
-`fixtures/v0.15/semantic-quality-budgets.json`.
-
-## Signals
+Semath does not use one blended accuracy number. The v0.16 corpus reports
+recall and precision for each law, plus authored refusals, role correctness,
+and source-linked evidence correctness.
 
 | Signal | Meaning | It does not mean |
 | --- | --- | --- |
-| Case accuracy | Cases whose complete result equals the checked expectation | General accuracy on unseen papers |
-| Recall | Expected labeled items that were returned | Coverage of all notation in a field |
-| Precision | Returned items that belong to the checked expectation | A probabilistic confidence estimate |
-| Refusal preservation | Near misses that retain their exact, usually empty, result | Unsupported input is mathematically invalid |
-| Holdout preservation | Unpromoted coverage targets remain unchanged | The target should never be supported |
-| Unexpected items | Extra patterns or definitions, including cross-pack collisions | Every false positive possible in real documents |
+| Recall | authored positive cases that establish the target law | coverage of all notation in a field |
+| Precision | target recognitions not present in authored negative cases | probabilistic confidence |
+| Role accuracy | every expected semantic role binds the intended symbol | the formula is universally valid |
+| Evidence integrity | conclusions retain nonempty source ranges | the evidence is sufficient outside its context |
+| Refusal preservation | negative cases do not establish the target law | the input is mathematically false |
 
-Formula and English-prose corpora are independently authored and de-duplicated.
-When a coverage target is promoted, its expectation changes but the remaining
-holdouts stay untouched. Per-domain minimums prevent a broad pack from hiding a
+The checked-in corpus is independently authored and is not generated during a
+test. Three architecture-proof domains contain 400 held-out cases; separate
+probability and linear-algebra blind-extension cases are added only after the
+generic runtime is frozen. A per-law gate prevents a broad domain from hiding a
 regression in a smaller one.
 
-Golden protocol fixtures separately enforce zero known false definitions,
-references, diagnostics, completions, rewrites, and renames. The same run checks
-native/WASM equality. Latency, retained memory, response size, cold start, and
-WASM size remain separate performance budgets because combining them with
-semantic correctness would make failures less actionable.
-
-## Changing a budget
-
-A budget change is a reviewed product decision, not an automatic consequence of
-a failing test. Add or correct labeled cases first, explain any threshold change
-in the pull request, and never reduce a minimum merely to make CI pass. Score
-classification, aggregation, and comparison are pure functions; process launch,
-file reads, and console reporting stay in the runner scripts.
+Native/WASM equality, incremental affected sets, latency, memory, and package
+integrity are separate gates so failures remain actionable. Threshold changes
+are reviewed product decisions: correct or add labeled cases first, and never
+lower a minimum solely to make CI pass.

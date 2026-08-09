@@ -193,8 +193,8 @@ mod tests {
     use serde::Deserialize;
 
     use super::analyze_hygiene;
-    use crate::parser::{math_regions, parse_regions};
-    use crate::prose::analyze_prose;
+    use crate::parser::{parse_regions, test_math_regions};
+    use crate::prose::observe_prose;
     use crate::{DocumentLanguage, ProjectDocument};
 
     #[derive(Deserialize)]
@@ -215,13 +215,13 @@ mod tests {
     #[test]
     fn matches_the_labeled_definition_hygiene_corpus() {
         let corpus: Corpus = serde_json::from_str(include_str!(
-            "../../../fixtures/v0.5/definition-hygiene-corpus.json"
+            "../../../fixtures/definition-hygiene-corpus.json"
         ))
         .unwrap();
         assert_eq!(corpus.false_positive_budget, 0);
 
         for case in corpus.cases {
-            let regions = math_regions(&case.content, DocumentLanguage::Markdown);
+            let regions = test_math_regions(&case.content, DocumentLanguage::Markdown);
             let document = ProjectDocument {
                 file_id: "main".into(),
                 path: "main.md".into(),
@@ -229,10 +229,11 @@ mod tests {
                 content: case.content.clone(),
                 document_version: 1,
                 math_regions: regions.clone(),
+                macros: Vec::new(),
                 includes: Vec::new(),
             };
             let parsed = parse_regions(&case.content, &regions);
-            let prose = analyze_prose(&document, &parsed);
+            let prose = observe_prose(&document, &parsed);
             let analysis = analyze_hygiene(&document, &parsed, &prose.definitions);
             let actual = analysis
                 .entries

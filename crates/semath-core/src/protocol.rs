@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub const PROTOCOL_VERSION: u32 = 1;
+pub const PROTOCOL_VERSION: u32 = 2;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -32,10 +32,56 @@ pub struct ProjectDocument {
     pub language: DocumentLanguage,
     pub content: String,
     pub document_version: u64,
-    #[serde(default)]
     pub math_regions: Vec<MathRegion>,
-    #[serde(default)]
+    pub macros: Vec<ProjectMacro>,
     pub includes: Vec<ProjectInclude>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMacro {
+    pub kind: ProjectMacroKind,
+    pub name: String,
+    pub source: ProjectSourceRef,
+    pub definitions: Vec<ProjectSourceRef>,
+    pub expansion: ProjectMacroExpansion,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum ProjectMacroKind {
+    Definition,
+    Call,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectSourceRef {
+    pub file_id: String,
+    pub path: String,
+    pub range: SourceRange,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMacroExpansion {
+    pub status: ProjectMacroExpansionStatus,
+    pub depth: u32,
+    pub editable: bool,
+    #[serde(default)]
+    pub surface: Option<String>,
+    #[serde(default)]
+    pub input_range: Option<SourceRange>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum ProjectMacroExpansionStatus {
+    NotApplicable,
+    Unresolved,
+    Expanded,
+    Cycle,
+    Truncated,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -99,17 +145,7 @@ pub enum Query {
         file_id: String,
         offset: u32,
     },
-    EquationTree {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    Hover {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    SymbolInfo {
+    SemanticView {
         #[serde(rename = "fileId")]
         file_id: String,
         offset: u32,
@@ -144,36 +180,6 @@ pub enum Query {
         #[serde(rename = "fileId")]
         file_id: String,
         code: String,
-        offset: u32,
-    },
-    FormulaRecognition {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    FormulaCompletion {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    FormulaRewrite {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    DomainEvidence {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    SemanticContext {
-        #[serde(rename = "fileId")]
-        file_id: String,
-        offset: u32,
-    },
-    Inspection {
-        #[serde(rename = "fileId")]
-        file_id: String,
         offset: u32,
     },
 }
@@ -240,7 +246,6 @@ pub struct SymbolInfo {
     pub quantities: Vec<QuantityInfo>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub roles: Vec<RoleInfo>,
-    pub formulas: Vec<FormulaRecognition>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub truncated: bool,
 }
@@ -390,7 +395,7 @@ pub struct SemanticDiagnostic {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct FormulaConstraint {
+pub struct SemanticConstraint {
     pub kind: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub concepts: Vec<String>,
@@ -402,48 +407,16 @@ pub struct FormulaConstraint {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct FormulaParameter {
-    pub id: String,
-    pub constraint: FormulaConstraint,
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    pub optional: bool,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct FormulaSideCondition {
-    pub kind: String,
-    pub left: String,
-    pub right: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct FormulaPattern {
-    pub schema_version: u32,
-    pub pack_id: String,
-    pub pack_version: String,
-    pub id: String,
-    pub title: String,
-    pub matcher: String,
-    pub parameters: Vec<FormulaParameter>,
-    pub result: FormulaConstraint,
-    pub side_conditions: Vec<FormulaSideCondition>,
-    pub generation_template: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct FormulaBinding {
+pub struct LawBinding {
     pub parameter: String,
     pub symbol: String,
-    pub constraint: FormulaConstraint,
+    pub constraint: SemanticConstraint,
     pub evidence: Evidence,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct FormulaConditionInfo {
+pub struct LawConditionInfo {
     pub kind: String,
     pub label: String,
     pub status: String,
@@ -451,8 +424,8 @@ pub struct FormulaConditionInfo {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct FormulaRecognition {
-    pub pattern_id: String,
+pub struct LawRecognition {
+    pub law_id: String,
     pub title: String,
     pub description: String,
     pub description_key: String,
@@ -461,33 +434,13 @@ pub struct FormulaRecognition {
     pub pack_id: String,
     pub pack_version: String,
     pub range: SourceRange,
-    pub bindings: Vec<FormulaBinding>,
-    pub result: FormulaConstraint,
-    pub conditions: Vec<FormulaConditionInfo>,
+    pub bindings: Vec<LawBinding>,
+    pub result: SemanticConstraint,
+    pub conditions: Vec<LawConditionInfo>,
     pub evidence: Vec<Evidence>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relation: Option<RelationInfo>,
     pub rank: u32,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct FormulaCompletion {
-    pub pattern_id: String,
-    pub title: String,
-    pub detail: String,
-    pub rank: u32,
-    pub proposal: SemanticEditProposal,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct FormulaRewrite {
-    pub rule_id: String,
-    pub title: String,
-    pub detail: String,
-    pub rank: u32,
-    pub proposal: SemanticEditProposal,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -501,14 +454,6 @@ pub struct EquationNode {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct EquationNodeSummary {
-    pub kind: String,
-    pub label: Option<String>,
-    pub range: SourceRange,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
 pub struct RenamePreparation {
     pub range: Option<SourceRange>,
     pub placeholder: Option<String>,
@@ -517,19 +462,16 @@ pub struct RenamePreparation {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct InspectionInfo {
-    pub equation: Option<EquationNode>,
-    pub selection_path: Vec<EquationNodeSummary>,
+pub struct SemanticViewInfo {
+    pub status: String,
+    pub summary: String,
     pub symbol: Option<SymbolInfo>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub semantic: Option<SemanticContextInfo>,
-    pub references: Vec<Location>,
+    pub context: SemanticContextInfo,
+    pub declarations: Vec<Location>,
     pub diagnostics: Vec<SemanticDiagnostic>,
-    pub recognitions: Vec<FormulaRecognition>,
     pub domains: Vec<DomainActivation>,
-    pub completions: Vec<FormulaCompletion>,
-    pub rewrites: Vec<FormulaRewrite>,
-    pub rename: RenamePreparation,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub refusal: Option<String>,
     pub truncated: bool,
 }
 
@@ -565,25 +507,8 @@ pub enum QueryValue {
     Selection {
         ranges: Vec<SourceRange>,
     },
-    EquationTree {
-        tree: Option<EquationNode>,
-    },
-    Hover {
-        symbol: Option<String>,
-        #[serde(rename = "equationKind")]
-        equation_kind: Option<String>,
-        definitions: Vec<DefinitionInfo>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        shape: Option<ShapeInfo>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        quantity: Option<Box<QuantityInfo>>,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        formulas: Vec<FormulaRecognition>,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        roles: Vec<RoleInfo>,
-    },
-    SymbolInfo {
-        info: Option<SymbolInfo>,
+    SemanticView {
+        view: Box<SemanticViewInfo>,
     },
     Locations {
         locations: Vec<Location>,
@@ -602,25 +527,6 @@ pub enum QueryValue {
     },
     DiagnosticExplanation {
         diagnostic: Option<SemanticDiagnostic>,
-    },
-    FormulaRecognitions {
-        recognitions: Vec<FormulaRecognition>,
-    },
-    FormulaCompletions {
-        completions: Vec<FormulaCompletion>,
-    },
-    FormulaRewrites {
-        rewrites: Vec<FormulaRewrite>,
-    },
-    DomainActivations {
-        activations: Vec<DomainActivation>,
-        truncated: bool,
-    },
-    SemanticContext {
-        context: SemanticContextInfo,
-    },
-    Inspection {
-        inspection: Box<InspectionInfo>,
     },
 }
 
@@ -643,6 +549,19 @@ pub struct UpdateResult {
     pub inventory_version: u64,
     pub analysis_generation: u64,
     pub changed_file_ids: Vec<String>,
+    pub analyzed_file_ids: Vec<String>,
+    pub stats: AnalysisStats,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalysisStats {
+    pub analyzed_documents: u32,
+    pub total_documents: u32,
+    pub recognized_laws: u32,
+    pub semantic_nodes: u32,
+    pub constraints: u32,
+    pub law_rules_visited: u32,
 }
 
 #[cfg(test)]

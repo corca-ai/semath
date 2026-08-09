@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import type { QueryEnvelope } from "../../protocol/src/index";
+import {
+  type QueryEnvelope,
+  SEMATH_PROTOCOL_VERSION,
+} from "../../protocol/src/index";
 import {
   advanceProjectFreshness,
   enqueueWork,
@@ -20,7 +23,7 @@ function query(
       documentVersion: 1,
       epoch: "test:1",
       inventoryVersion: 1,
-      protocolVersion: 1,
+      protocolVersion: SEMATH_PROTOCOL_VERSION,
       query: { fileId: "main", kind: "diagnostics" },
     } satisfies QueryEnvelope,
     id: generation,
@@ -41,7 +44,7 @@ describe("pure Worker host policy", () => {
           changes: [],
           epoch: "test:1",
           inventoryVersion: 2,
-          protocolVersion: 1,
+          protocolVersion: SEMATH_PROTOCOL_VERSION,
         },
         id: 3,
         kind: "change",
@@ -62,7 +65,7 @@ describe("pure Worker host policy", () => {
   });
 
   test("rejects stale inventories and cross-project work before it reaches WASM", () => {
-    const firstReset: WorkRequest = {
+    const firstReset: Extract<WorkRequest, { kind: "reset" }> = {
       id: 1,
       kind: "reset",
       snapshot: {
@@ -70,10 +73,10 @@ describe("pure Worker host policy", () => {
         epoch: "first:1",
         inventoryVersion: 4,
         projectId: "first",
-        protocolVersion: 1,
+        protocolVersion: SEMATH_PROTOCOL_VERSION,
       },
     };
-    const secondReset: WorkRequest = {
+    const secondReset: Extract<WorkRequest, { kind: "reset" }> = {
       ...firstReset,
       id: 2,
       snapshot: {

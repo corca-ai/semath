@@ -1,13 +1,18 @@
 # Compatibility and release policy
 
-| Semath | Protocol | Pack schema | wasmtex syntax | Host requirement |
-| --- | ---: | ---: | --- | --- |
-| 0.14.x | 1 | 3 | pinned in `package.json` | ES modules, WebAssembly, Worker where the host API is used |
+| Semath | Protocol | Pack schema | wasmtex syntax |
+| --- | ---: | ---: | ---: |
+| 0.16.x | 2 | 4 | 3 |
 
-The package pins the reviewed wasmtex revision used to derive syntax ranges. Consumers should treat that revision, the generated WASM declarations, and `SEMATH_PROTOCOL_VERSION` as one tested compatibility set.
+`package.json` pins the reviewed wasmtex commit. That commit, the generated
+WASM declarations, protocol version, and pack schema are one tested set.
 
-Before 1.0, a Semath minor release may make a breaking public change. Patch releases preserve protocol envelopes, exported TypeScript names, pack schema behavior, and generated WASM ABI. A breaking change increments the Semath minor version and, when wire or pack data changes incompatibly, also increments the corresponding protocol or pack schema version. Fields may be added compatibly only when older consumers can safely ignore them.
+Before 1.0, correctness and a concise architecture take precedence over public
+compatibility. A minor release may remove APIs and change host UI without a
+compatibility layer. It must increment the protocol or pack schema when the
+corresponding wire or data contract changes. Patch releases preserve the
+active contract.
 
-Deprecations remain documented for at least one minor release where a safe compatibility path is practical. Silent reinterpretation of an existing field, maturity tier, or edit authority is not compatible.
-
-Release WASM is built on a remote non-Apple-Silicon x86_64 Linux host. CI verifies the checked-in checksum, declarations, native/WASM parity, clean-package installation, public examples, and pack conformance before release.
+Release WASM is built on a separate x86_64 Linux host, not Apple Silicon. The
+release gate checks formatting, lint, unit tests, the held-out corpus,
+native/WASM parity, incremental performance, package installation, and docs.

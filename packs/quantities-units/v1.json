@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "packId": "quantities-units",
   "packVersion": "1.0.0",
   "packKind": "capability",
@@ -8,55 +8,822 @@
   "description": "Exact physical dimensions and a bounded SI unit catalog shared by scientific and engineering packs.",
   "dependencies": [],
   "capabilities": {
-    "provides": ["semath:dimensional-analysis", "semath:quantities"],
+    "provides": [
+      "semath:dimensional-analysis",
+      "semath:quantities"
+    ],
     "requires": []
   },
   "concepts": [
-    { "id": "quantity", "conceptKind": "quantity", "title": "Physical quantity", "description": "A measurable property with a quantity kind and physical dimension.", "parents": [], "references": ["si-brochure"] },
-    { "id": "unit", "conceptKind": "entity", "title": "Measurement unit", "description": "A named scale used to express a physical quantity.", "parents": [], "references": ["si-brochure"] }
+    {
+      "id": "quantity",
+      "conceptKind": "quantity",
+      "title": "Physical quantity",
+      "description": "A measurable property with a quantity kind and physical dimension.",
+      "parents": [],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "unit",
+      "conceptKind": "entity",
+      "title": "Measurement unit",
+      "description": "A named scale used to express a physical quantity.",
+      "parents": [],
+      "references": [
+        "si-brochure"
+      ]
+    }
   ],
   "quantityKinds": [
-    { "id": "length", "title": "Length", "description": "Spatial extent or displacement magnitude.", "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }], "defaultUnit": "quantities-units:metre", "references": ["si-brochure"] },
-    { "id": "duration", "title": "Duration", "description": "Elapsed time.", "dimension": [{ "base": "time", "numerator": 1, "denominator": 1 }], "defaultUnit": "quantities-units:second", "references": ["si-brochure"] },
-    { "id": "mass", "title": "Mass", "description": "Inertial mass.", "dimension": [{ "base": "mass", "numerator": 1, "denominator": 1 }], "defaultUnit": "quantities-units:kilogram", "references": ["si-brochure"] },
-    { "id": "velocity", "title": "Velocity", "description": "Rate of change of position with time.", "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -1, "denominator": 1 }], "defaultUnit": "quantities-units:metre-per-second", "references": ["si-brochure"] },
-    { "id": "acceleration", "title": "Acceleration", "description": "Rate of change of velocity with time.", "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "defaultUnit": "quantities-units:metre-per-second-squared", "references": ["si-brochure"] },
-    { "id": "force", "title": "Force", "description": "Mechanical interaction with mass-length-time dimension.", "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "defaultUnit": "quantities-units:newton", "references": ["si-brochure"] },
-    { "id": "momentum", "title": "Momentum", "description": "Linear momentum or impulse.", "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -1, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "energy", "title": "Energy", "description": "Mechanical work or stored energy.", "dimension": [{ "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "power", "title": "Power", "description": "Rate of energy transfer.", "dimension": [{ "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -3, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "stiffness", "title": "Stiffness", "description": "Force per displacement.", "dimension": [{ "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "damping-coefficient", "title": "Damping coefficient", "description": "Force per velocity.", "dimension": [{ "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -1, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "electric-charge", "title": "Electric charge", "description": "Time integral of electric current.", "dimension": [{ "base": "electric-current", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": 1, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "capacitance", "title": "Capacitance", "description": "Electric charge per voltage.", "dimension": [{ "base": "electric-current", "numerator": 2, "denominator": 1 }, { "base": "length", "numerator": -2, "denominator": 1 }, { "base": "mass", "numerator": -1, "denominator": 1 }, { "base": "time", "numerator": 4, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "inductance", "title": "Inductance", "description": "Voltage-time per electric current.", "dimension": [{ "base": "electric-current", "numerator": -2, "denominator": 1 }, { "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "references": ["si-brochure"] },
-    { "id": "electric-current", "title": "Electric current", "description": "Rate of flow of electric charge.", "dimension": [{ "base": "electric-current", "numerator": 1, "denominator": 1 }], "defaultUnit": "quantities-units:ampere", "references": ["si-brochure"] },
-    { "id": "voltage", "title": "Voltage", "description": "Electric potential difference.", "dimension": [{ "base": "electric-current", "numerator": -1, "denominator": 1 }, { "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -3, "denominator": 1 }], "defaultUnit": "quantities-units:volt", "references": ["si-brochure"] },
-    { "id": "resistance", "title": "Electrical resistance", "description": "Ratio of voltage to current.", "dimension": [{ "base": "electric-current", "numerator": -2, "denominator": 1 }, { "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -3, "denominator": 1 }], "defaultUnit": "quantities-units:ohm", "references": ["si-brochure"] },
-    { "id": "frequency", "title": "Frequency", "description": "Cycles per unit time.", "dimension": [{ "base": "time", "numerator": -1, "denominator": 1 }], "defaultUnit": "quantities-units:hertz", "references": ["si-brochure"] },
-    { "id": "temperature", "title": "Thermodynamic temperature", "description": "Thermodynamic temperature.", "dimension": [{ "base": "thermodynamic-temperature", "numerator": 1, "denominator": 1 }], "defaultUnit": "quantities-units:kelvin", "references": ["si-brochure"] },
-    { "id": "dimensionless", "title": "Dimensionless quantity", "description": "A quantity with no physical dimension.", "dimension": [], "references": ["si-brochure"] }
+    {
+      "id": "length",
+      "title": "Length",
+      "description": "Spatial extent or displacement magnitude.",
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:metre",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "area",
+      "title": "Area",
+      "description": "Two-dimensional spatial extent.",
+      "aliases": ["surface area", "cross-sectional area"],
+      "dimension": [
+        { "base": "length", "numerator": 2, "denominator": 1 }
+      ],
+      "references": ["si-brochure"]
+    },
+    {
+      "id": "duration",
+      "title": "Duration",
+      "description": "Elapsed time.",
+      "aliases": ["time", "time variable"],
+      "dimension": [
+        {
+          "base": "time",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:second",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "mass",
+      "title": "Mass",
+      "description": "Inertial mass.",
+      "aliases": ["inertial mass", "scalar mass"],
+      "dimension": [
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:kilogram",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "velocity",
+      "title": "Velocity",
+      "description": "Rate of change of position with time.",
+      "aliases": ["speed", "point velocity", "velocity vector"],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:metre-per-second",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "acceleration",
+      "title": "Acceleration",
+      "description": "Rate of change of velocity with time.",
+      "aliases": ["acceleration vector"],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:metre-per-second-squared",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "force",
+      "title": "Force",
+      "description": "Mechanical interaction with mass-length-time dimension.",
+      "aliases": ["net force", "applied force", "force vector"],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:newton",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "pressure",
+      "title": "Pressure",
+      "description": "Force per unit area.",
+      "aliases": ["mechanical pressure"],
+      "dimension": [
+        { "base": "length", "numerator": -1, "denominator": 1 },
+        { "base": "mass", "numerator": 1, "denominator": 1 },
+        { "base": "time", "numerator": -2, "denominator": 1 }
+      ],
+      "references": ["si-brochure"]
+    },
+    {
+      "id": "momentum",
+      "title": "Momentum",
+      "description": "Linear momentum or impulse.",
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "energy",
+      "title": "Energy",
+      "description": "Mechanical work or stored energy.",
+      "aliases": ["kinetic energy", "mechanical energy"],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "power",
+      "title": "Power",
+      "description": "Rate of energy transfer.",
+      "aliases": ["mechanical power", "instantaneous power"],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "stiffness",
+      "title": "Stiffness",
+      "description": "Force per displacement.",
+      "dimension": [
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "damping-coefficient",
+      "title": "Damping coefficient",
+      "description": "Force per velocity.",
+      "dimension": [
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "electric-charge",
+      "title": "Electric charge",
+      "description": "Time integral of electric current.",
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "capacitance",
+      "title": "Capacitance",
+      "description": "Electric charge per voltage.",
+      "aliases": ["capacitor capacitance"],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": -2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": -1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": 4,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "inductance",
+      "title": "Inductance",
+      "description": "Voltage-time per electric current.",
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": -2,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "electric-current",
+      "title": "Electric current",
+      "description": "Rate of flow of electric charge.",
+      "aliases": ["current", "branch current", "capacitor current"],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:ampere",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "voltage",
+      "title": "Voltage",
+      "description": "Electric potential difference.",
+      "aliases": ["voltage drop", "terminal voltage", "potential difference"],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": -1,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:volt",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "electric-field",
+      "title": "Electric field strength",
+      "description": "Force per charge or voltage per length.",
+      "aliases": ["electric field", "electric field symbol"],
+      "dimension": [
+        { "base": "electric-current", "numerator": -1, "denominator": 1 },
+        { "base": "length", "numerator": 1, "denominator": 1 },
+        { "base": "mass", "numerator": 1, "denominator": 1 },
+        { "base": "time", "numerator": -3, "denominator": 1 }
+      ],
+      "references": ["si-brochure"]
+    },
+    {
+      "id": "resistance",
+      "title": "Electrical resistance",
+      "description": "Ratio of voltage to current.",
+      "aliases": ["resistance", "resistor resistance"],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": -2,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:ohm",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "frequency",
+      "title": "Frequency",
+      "description": "Cycles per unit time.",
+      "dimension": [
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:hertz",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "temperature",
+      "title": "Thermodynamic temperature",
+      "description": "Thermodynamic temperature.",
+      "dimension": [
+        {
+          "base": "thermodynamic-temperature",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "defaultUnit": "quantities-units:kelvin",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "dimensionless",
+      "title": "Dimensionless quantity",
+      "description": "A quantity with no physical dimension.",
+      "aliases": ["probability", "scalar probability"],
+      "dimension": [],
+      "references": [
+        "si-brochure"
+      ]
+    }
   ],
   "units": [
-    { "id": "metre", "symbol": "m", "aliases": ["meter", "meters", "metre", "metres"], "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "second", "symbol": "s", "aliases": ["second", "seconds"], "dimension": [{ "base": "time", "numerator": 1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "kilogram", "symbol": "kg", "aliases": ["kilogram", "kilograms"], "dimension": [{ "base": "mass", "numerator": 1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "ampere", "symbol": "A", "aliases": ["ampere", "amperes", "amp"], "dimension": [{ "base": "electric-current", "numerator": 1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "kelvin", "symbol": "K", "aliases": ["kelvin"], "dimension": [{ "base": "thermodynamic-temperature", "numerator": 1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "metre-per-second", "symbol": "m/s", "aliases": ["meter per second", "meters per second", "metre per second", "metres per second"], "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "metre-per-second-squared", "symbol": "m/s^2", "aliases": ["meter per second squared", "meters per second squared", "metre per second squared", "metres per second squared"], "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "newton", "symbol": "N", "aliases": ["newton", "newtons"], "dimension": [{ "base": "length", "numerator": 1, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -2, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "volt", "symbol": "V", "aliases": ["volt", "volts"], "dimension": [{ "base": "electric-current", "numerator": -1, "denominator": 1 }, { "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -3, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "ohm", "symbol": "\\Omega", "aliases": ["ohm", "ohms", "Ω"], "dimension": [{ "base": "electric-current", "numerator": -2, "denominator": 1 }, { "base": "length", "numerator": 2, "denominator": 1 }, { "base": "mass", "numerator": 1, "denominator": 1 }, { "base": "time", "numerator": -3, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] },
-    { "id": "hertz", "symbol": "Hz", "aliases": ["hertz"], "dimension": [{ "base": "time", "numerator": -1, "denominator": 1 }], "scale": { "numerator": 1, "denominator": 1 }, "references": ["si-brochure"] }
+    {
+      "id": "metre",
+      "symbol": "m",
+      "aliases": [
+        "meter",
+        "meters",
+        "metre",
+        "metres"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "second",
+      "symbol": "s",
+      "aliases": [
+        "second",
+        "seconds"
+      ],
+      "dimension": [
+        {
+          "base": "time",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "kilogram",
+      "symbol": "kg",
+      "aliases": [
+        "kilogram",
+        "kilograms"
+      ],
+      "dimension": [
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "ampere",
+      "symbol": "A",
+      "aliases": [
+        "ampere",
+        "amperes",
+        "amp"
+      ],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "kelvin",
+      "symbol": "K",
+      "aliases": [
+        "kelvin"
+      ],
+      "dimension": [
+        {
+          "base": "thermodynamic-temperature",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "metre-per-second",
+      "symbol": "m/s",
+      "aliases": [
+        "meter per second",
+        "meters per second",
+        "metre per second",
+        "metres per second"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "metre-per-second-squared",
+      "symbol": "m/s^2",
+      "aliases": [
+        "meter per second squared",
+        "meters per second squared",
+        "metre per second squared",
+        "metres per second squared"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "newton",
+      "symbol": "N",
+      "aliases": [
+        "newton",
+        "newtons"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "volt",
+      "symbol": "V",
+      "aliases": [
+        "volt",
+        "volts"
+      ],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": -1,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "ohm",
+      "symbol": "\\Omega",
+      "aliases": [
+        "ohm",
+        "ohms",
+        "Ω"
+      ],
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": -2,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "hertz",
+      "symbol": "Hz",
+      "aliases": [
+        "hertz"
+      ],
+      "dimension": [
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "scale": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "references": [
+        "si-brochure"
+      ]
+    }
   ],
   "laws": [],
   "activationRules": [],
   "roles": [],
   "operators": [],
-  "patterns": [],
-  "rewrites": [],
   "references": [
-    { "id": "si-brochure", "title": "The International System of Units", "citation": "BIPM, The International System of Units (SI Brochure), 9th edition, 2019 with updates." }
+    {
+      "id": "si-brochure",
+      "title": "The International System of Units",
+      "citation": "BIPM, The International System of Units (SI Brochure), 9th edition, 2019 with updates."
+    }
   ]
 }

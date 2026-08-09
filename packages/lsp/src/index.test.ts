@@ -28,7 +28,6 @@ describe("SemathLspServer", () => {
     await server.handle({ id: 1, method: "initialize", params: {} });
 
     expect(response(messages, 1).capabilities).toMatchObject({
-      codeActionProvider: { codeActionKinds: ["refactor.rewrite"] },
       completionProvider: expect.any(Object),
       definitionProvider: true,
       hoverProvider: true,
@@ -39,7 +38,7 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
-  test("serves Semath selection, hover, inspection, and diagnostics over LSP", async () => {
+  test("serves selection, meaning-first semantic view, hover, and diagnostics", async () => {
     const { messages, server } = await setup();
     const uri = "file:///main.md";
     await server.handle({
@@ -65,7 +64,7 @@ describe("SemathLspServer", () => {
     });
     await server.handle({
       id: 4,
-      method: "semath/inspection",
+      method: "semath/semanticView",
       params: { position: { character: 5, line: 1 }, textDocument: { uri } },
     });
 
@@ -75,8 +74,8 @@ describe("SemathLspServer", () => {
     });
     expect(response(messages, 3).contents.value).toContain("the input");
     expect(response(messages, 4)).toMatchObject({
-      kind: "inspection",
-      inspection: { symbol: { symbol: "x" } },
+      kind: "semanticView",
+      view: { symbol: { symbol: "x" }, status: "partial" },
     });
     expect(
       messages.some(
@@ -272,7 +271,7 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
-  test("returns semantic rewrites as reviewable code actions", async () => {
+  test("returns recognized meaning with evidence and roles", async () => {
     const { messages, server } = await setup();
     const uri = "file:///probability.md";
     await server.handle({
@@ -281,9 +280,9 @@ describe("SemathLspServer", () => {
         textDocument: {
           languageId: "markdown",
           text: [
-            "Let $A$ denote an event of positive probability.",
-            "Let $B$ denote an event of positive probability.",
-            "$p = \\mathbb{P}(A \\mid B)$",
+            "Let $A$ be an event.",
+            "Let $B$ be an event.",
+            "$A \\cap B$",
           ].join("\n"),
           uri,
           version: 1,
@@ -292,25 +291,30 @@ describe("SemathLspServer", () => {
     });
     await server.handle({
       id: 52,
-      method: "textDocument/codeAction",
+      method: "semath/semanticView",
       params: {
-        range: {
-          end: { character: 10, line: 2 },
-          start: { character: 5, line: 2 },
-        },
+        position: { character: 2, line: 2 },
         textDocument: { uri },
       },
     });
 
-    expect(response(messages, 52)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          isPreferred: false,
-          kind: "refactor.rewrite",
-          title: "Expand the conditional-probability definition",
-        }),
-      ]),
-    );
+    expect(response(messages, 52)).toMatchObject({
+      kind: "semanticView",
+      view: {
+        context: {
+          relations: [
+            {
+              relationId: "probability:event-intersection",
+              roles: expect.arrayContaining([
+                expect.objectContaining({ role: "left", symbol: "A" }),
+                expect.objectContaining({ role: "right", symbol: "B" }),
+              ]),
+            },
+          ],
+        },
+        status: "established",
+      },
+    });
     server.dispose();
   });
 
@@ -410,7 +414,7 @@ describe("SemathLspServer", () => {
       });
       await server.handle({
         id: id + 1,
-        method: "semath/inspection",
+        method: "semath/semanticView",
         params: { position: { character: 40, line: 0 }, textDocument: { uri: uris[0] } },
       });
     }

@@ -1,17 +1,62 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "packId": "classical-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
   "namespace": "classical-mechanics",
   "title": "Classical mechanics",
   "description": "Evidence-gated mechanical quantities and law instances with explicit dimensional roles.",
-  "dependencies": [{ "packId": "quantities-units", "versionMajor": 1, "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"] }],
-  "capabilities": { "provides": ["classical-mechanics:law-relations", "semath:formula-recognition"], "requires": ["semath:dimensional-analysis", "semath:quantities"] },
+  "dependencies": [
+    {
+      "packId": "quantities-units",
+      "versionMajor": 1,
+      "requiredCapabilities": [
+        "semath:dimensional-analysis",
+        "semath:quantities"
+      ]
+    }
+  ],
+  "capabilities": {
+    "provides": [
+      "classical-mechanics:law-relations",
+      "semath:formula-recognition"
+    ],
+    "requires": [
+      "semath:dimensional-analysis",
+      "semath:quantities"
+    ]
+  },
   "concepts": [
-    { "id": "body", "conceptKind": "entity", "title": "Mechanical body", "description": "A body whose motion and interactions are described by the document.", "parents": [], "references": ["classical-mechanics"] },
-    { "id": "coordinate-frame", "conceptKind": "system", "title": "Coordinate frame", "description": "A frame relative to which vector components are expressed.", "parents": [], "references": ["classical-mechanics"] },
-    { "id": "newton-second-law", "conceptKind": "relation", "title": "Newton's second law", "description": "Net force equals mass times acceleration in an inertial frame.", "parents": [], "references": ["classical-mechanics"] }
+    {
+      "id": "body",
+      "conceptKind": "entity",
+      "title": "Mechanical body",
+      "description": "A body whose motion and interactions are described by the document.",
+      "parents": [],
+      "references": [
+        "classical-mechanics"
+      ]
+    },
+    {
+      "id": "coordinate-frame",
+      "conceptKind": "system",
+      "title": "Coordinate frame",
+      "description": "A frame relative to which vector components are expressed.",
+      "parents": [],
+      "references": [
+        "classical-mechanics"
+      ]
+    },
+    {
+      "id": "newton-second-law",
+      "conceptKind": "relation",
+      "title": "Newton's second law",
+      "description": "Net force equals mass times acceleration in an inertial frame.",
+      "parents": [],
+      "references": [
+        "classical-mechanics"
+      ]
+    }
   ],
   "quantityKinds": [],
   "units": [],
@@ -21,52 +66,140 @@
       "title": "Newton's second law",
       "description": "The net force on a body equals its inertial mass multiplied by its acceleration.",
       "roles": [
-        { "id": "net-force", "concept": "quantities-units:force", "description": "Net force acting on the body." },
-        { "id": "mass", "concept": "quantities-units:mass", "description": "Inertial mass of the body." },
-        { "id": "acceleration", "concept": "quantities-units:acceleration", "description": "Acceleration in the active inertial frame." }
+        {
+          "id": "net-force",
+          "concept": "quantities-units:force",
+          "description": "Net force acting on the body.",
+          "notation": ["F"]
+        },
+        {
+          "id": "mass",
+          "concept": "quantities-units:mass",
+          "description": "Inertial mass of the body.",
+          "shape": "scalar",
+          "notation": ["m"]
+        },
+        {
+          "id": "acceleration",
+          "concept": "quantities-units:acceleration",
+          "description": "Acceleration in the active inertial frame.",
+          "notation": ["a"]
+        }
       ],
-      "conditions": ["The quantities refer to one body in a common inertial frame."],
-      "references": ["classical-mechanics"]
+      "semanticForms": [
+        "net-force = mass acceleration",
+        "net-force = mass \\cdot acceleration"
+      ],
+      "conditions": [
+        "The quantities refer to one body in a common inertial frame."
+      ],
+      "references": [
+        "classical-mechanics"
+      ]
     },
-    { "id": "momentum-definition", "title": "Linear momentum", "description": "Linear momentum equals mass times velocity.", "roles": [{ "id": "momentum", "concept": "quantities-units:momentum", "description": "Linear momentum." }, { "id": "mass", "concept": "quantities-units:mass", "description": "Inertial mass." }, { "id": "velocity", "concept": "quantities-units:velocity", "description": "Body velocity." }], "conditions": ["All quantities describe the same body and frame."], "references": ["classical-mechanics"] },
-    { "id": "kinetic-energy-definition", "title": "Kinetic energy", "description": "Translational kinetic energy equals one half mass times speed squared.", "roles": [{ "id": "energy", "concept": "quantities-units:energy", "description": "Kinetic energy." }, { "id": "mass", "concept": "quantities-units:mass", "description": "Inertial mass." }, { "id": "velocity", "concept": "quantities-units:velocity", "description": "Body velocity." }], "conditions": ["The expression uses nonrelativistic translational motion."], "references": ["classical-mechanics"] },
-    { "id": "gravitational-potential-energy", "title": "Uniform-field potential energy", "description": "Potential energy near a uniform field equals mass times gravitational acceleration and height.", "roles": [{ "id": "energy", "concept": "quantities-units:energy", "description": "Potential energy." }, { "id": "mass", "concept": "quantities-units:mass", "description": "Mass." }, { "id": "acceleration", "concept": "quantities-units:acceleration", "description": "Uniform gravitational acceleration." }, { "id": "height", "concept": "quantities-units:length", "description": "Height relative to the reference." }], "conditions": ["The gravitational field is treated as uniform."], "references": ["classical-mechanics"] },
-    { "id": "hooke-law", "title": "Hooke's law", "description": "Spring restoring force equals negative stiffness times displacement.", "roles": [{ "id": "force", "concept": "quantities-units:force", "description": "Restoring force." }, { "id": "stiffness", "concept": "quantities-units:stiffness", "description": "Spring stiffness." }, { "id": "displacement", "concept": "quantities-units:length", "description": "Displacement from equilibrium." }], "conditions": ["The spring is in its calibrated linear regime."], "references": ["classical-mechanics"] },
-    { "id": "viscous-damping-law", "title": "Viscous damping", "description": "Damping force equals negative damping coefficient times velocity.", "roles": [{ "id": "force", "concept": "quantities-units:force", "description": "Damping force." }, { "id": "coefficient", "concept": "quantities-units:damping-coefficient", "description": "Viscous damping coefficient." }, { "id": "velocity", "concept": "quantities-units:velocity", "description": "Relative velocity." }], "conditions": ["The damping model is linear and viscous."], "references": ["classical-mechanics"] },
-    { "id": "mechanical-power", "title": "Mechanical power", "description": "Instantaneous power equals force dotted with velocity.", "roles": [{ "id": "power", "concept": "quantities-units:power", "description": "Instantaneous power." }, { "id": "force", "concept": "quantities-units:force", "description": "Applied force." }, { "id": "velocity", "concept": "quantities-units:velocity", "description": "Point velocity." }], "conditions": ["Force and velocity components use one coordinate frame."], "references": ["classical-mechanics"] },
-    { "id": "centripetal-acceleration", "title": "Centripetal acceleration", "description": "Centripetal acceleration magnitude equals speed squared divided by radius.", "roles": [{ "id": "acceleration", "concept": "quantities-units:acceleration", "description": "Centripetal acceleration." }, { "id": "velocity", "concept": "quantities-units:velocity", "description": "Tangential velocity." }, { "id": "radius", "concept": "quantities-units:length", "description": "Path radius." }], "conditions": ["The motion is locally circular."], "references": ["classical-mechanics"] }
+    {
+      "id": "kinetic-energy-definition",
+      "title": "Kinetic energy",
+      "description": "Translational kinetic energy equals one half mass times speed squared.",
+      "roles": [
+        {
+          "id": "energy",
+          "concept": "quantities-units:energy",
+          "description": "Kinetic energy.",
+          "shape": "scalar",
+          "notation": ["K", "E", "T"]
+        },
+        {
+          "id": "mass",
+          "concept": "quantities-units:mass",
+          "description": "Inertial mass.",
+          "shape": "scalar",
+          "notation": ["m"]
+        },
+        {
+          "id": "velocity",
+          "concept": "quantities-units:velocity",
+          "description": "Body velocity.",
+          "notation": ["v"]
+        }
+      ],
+      "semanticForms": [
+        "energy = \\frac{1}{2} mass velocity^2",
+        "energy = \\frac{1}{2} mass \\cdot velocity^2",
+        "energy = \\frac{1}{2} mass \\lVert velocity \\rVert^2"
+      ],
+      "conditions": [
+        "The expression uses nonrelativistic translational motion."
+      ],
+      "references": [
+        "classical-mechanics"
+      ]
+    },
+    {
+      "id": "mechanical-power",
+      "title": "Mechanical power",
+      "description": "Instantaneous power equals force dotted with velocity.",
+      "roles": [
+        {
+          "id": "power",
+          "concept": "quantities-units:power",
+          "description": "Instantaneous power.",
+          "shape": "scalar",
+          "notation": ["P"]
+        },
+        {
+          "id": "force",
+          "concept": "quantities-units:force",
+          "description": "Applied force.",
+          "notation": ["F"]
+        },
+        {
+          "id": "velocity",
+          "concept": "quantities-units:velocity",
+          "description": "Point velocity.",
+          "notation": ["v"]
+        }
+      ],
+      "semanticForms": [
+        "power = force \\cdot velocity",
+        "power = force velocity"
+      ],
+      "conditions": [
+        "Force and velocity components use one coordinate frame."
+      ],
+      "references": [
+        "classical-mechanics"
+      ]
+    }
   ],
   "activationRules": [
-    { "id": "mechanics-vocabulary", "topic": "foundations", "patterns": ["classical mechanics", "Newton's second law", "net force", "inertial frame"], "references": ["classical-mechanics"] }
+    {
+      "id": "mechanics-vocabulary",
+      "topic": "foundations",
+      "patterns": [
+          "classical mechanics",
+          "Newton's second law",
+          "net force",
+          "inertial frame",
+          "kinetic energy",
+          "mechanical power",
+          "instantaneous power",
+          "newtons",
+          "joules",
+          "watts"
+      ],
+      "references": [
+        "classical-mechanics"
+      ]
+    }
   ],
   "roles": [],
   "operators": [],
-  "patterns": [
+  "references": [
     {
-      "id": "newton-second-law",
-      "topic": "dynamics",
-      "title": "Newton's second law",
-      "description": "Net force equals mass times acceleration with all three quantities explicitly declared.",
-      "descriptionKey": "newton-second-law",
-      "maturity": "recognition",
-      "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*([A-Za-z])\\s*(?:\\\\cdot\\s*)?([A-Za-z])$" },
-      "parameters": [
-        { "id": "force", "constraint": { "kind": "expression", "concepts": ["quantities-units:force"] } },
-        { "id": "mass", "constraint": { "kind": "expression", "concepts": ["quantities-units:mass"] } },
-        { "id": "acceleration", "constraint": { "kind": "expression", "concepts": ["quantities-units:acceleration"] } }
-      ],
-      "result": { "kind": "proposition", "refinements": ["physical-law-instance"] },
-      "relation": { "law": "newton-second-law", "roleBindings": [{ "parameter": "force", "role": "net-force" }, { "parameter": "mass", "role": "mass" }, { "parameter": "acceleration", "role": "acceleration" }] },
-      "references": ["classical-mechanics"]
-    },
-    { "id": "linear-momentum", "topic": "momentum", "title": "Linear momentum", "description": "Momentum equals mass times velocity with explicit quantities.", "descriptionKey": "linear-momentum", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*([A-Za-z])\\s*([A-Za-z])$" }, "parameters": [{ "id": "momentum", "constraint": { "kind": "expression", "concepts": ["quantities-units:momentum"] } }, { "id": "mass", "constraint": { "kind": "expression", "concepts": ["quantities-units:mass"] } }, { "id": "velocity", "constraint": { "kind": "expression", "concepts": ["quantities-units:velocity"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "momentum-definition", "roleBindings": [{ "parameter": "momentum", "role": "momentum" }, { "parameter": "mass", "role": "mass" }, { "parameter": "velocity", "role": "velocity" }] }, "references": ["classical-mechanics"] },
-    { "id": "kinetic-energy", "topic": "energy", "title": "Kinetic energy", "description": "Kinetic energy with explicit energy, mass, and velocity quantities.", "descriptionKey": "kinetic-energy", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*\\\\frac\\s*\\{1\\}\\s*\\{2\\}\\s*([A-Za-z])\\s*([A-Za-z])\\s*\\^\\s*\\{?2\\}?$" }, "parameters": [{ "id": "energy", "constraint": { "kind": "expression", "concepts": ["quantities-units:energy"] } }, { "id": "mass", "constraint": { "kind": "expression", "concepts": ["quantities-units:mass"] } }, { "id": "velocity", "constraint": { "kind": "expression", "concepts": ["quantities-units:velocity"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "kinetic-energy-definition", "roleBindings": [{ "parameter": "energy", "role": "energy" }, { "parameter": "mass", "role": "mass" }, { "parameter": "velocity", "role": "velocity" }] }, "references": ["classical-mechanics"] },
-    { "id": "uniform-field-potential-energy", "topic": "energy", "title": "Uniform-field potential energy", "description": "Potential energy in a uniform gravitational field.", "descriptionKey": "uniform-field-potential-energy", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*([A-Za-z])\\s*([A-Za-z])\\s*([A-Za-z])$" }, "parameters": [{ "id": "energy", "constraint": { "kind": "expression", "concepts": ["quantities-units:energy"] } }, { "id": "mass", "constraint": { "kind": "expression", "concepts": ["quantities-units:mass"] } }, { "id": "acceleration", "constraint": { "kind": "expression", "concepts": ["quantities-units:acceleration"] } }, { "id": "height", "constraint": { "kind": "expression", "concepts": ["quantities-units:length"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "gravitational-potential-energy", "roleBindings": [{ "parameter": "energy", "role": "energy" }, { "parameter": "mass", "role": "mass" }, { "parameter": "acceleration", "role": "acceleration" }, { "parameter": "height", "role": "height" }] }, "references": ["classical-mechanics"] },
-    { "id": "hooke-law", "topic": "elasticity", "title": "Hooke's law", "description": "Linear spring restoring force with explicit quantities.", "descriptionKey": "hooke-law", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*-\\s*([A-Za-z])\\s*([A-Za-z])$" }, "parameters": [{ "id": "force", "constraint": { "kind": "expression", "concepts": ["quantities-units:force"] } }, { "id": "stiffness", "constraint": { "kind": "expression", "concepts": ["quantities-units:stiffness"] } }, { "id": "displacement", "constraint": { "kind": "expression", "concepts": ["quantities-units:length"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "hooke-law", "roleBindings": [{ "parameter": "force", "role": "force" }, { "parameter": "stiffness", "role": "stiffness" }, { "parameter": "displacement", "role": "displacement" }] }, "references": ["classical-mechanics"] },
-    { "id": "viscous-damping", "topic": "damping", "title": "Viscous damping", "description": "Linear viscous damping force with explicit quantities.", "descriptionKey": "viscous-damping", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*_\\s*\\{?[A-Za-z]\\}?\\s*=\\s*-\\s*([A-Za-z])\\s*([A-Za-z])$" }, "parameters": [{ "id": "force", "constraint": { "kind": "expression", "concepts": ["quantities-units:force"] } }, { "id": "coefficient", "constraint": { "kind": "expression", "concepts": ["quantities-units:damping-coefficient"] } }, { "id": "velocity", "constraint": { "kind": "expression", "concepts": ["quantities-units:velocity"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "viscous-damping-law", "roleBindings": [{ "parameter": "force", "role": "force" }, { "parameter": "coefficient", "role": "coefficient" }, { "parameter": "velocity", "role": "velocity" }] }, "references": ["classical-mechanics"] },
-    { "id": "mechanical-power", "topic": "power", "title": "Mechanical power", "description": "Instantaneous force-velocity power with explicit quantities.", "descriptionKey": "mechanical-power", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*=\\s*\\\\mathbf\\s*\\{([A-Za-z])\\}\\s*\\\\cdot\\s*\\\\mathbf\\s*\\{([A-Za-z])\\}$" }, "parameters": [{ "id": "power", "constraint": { "kind": "expression", "concepts": ["quantities-units:power"] } }, { "id": "force", "constraint": { "kind": "expression", "concepts": ["quantities-units:force"] } }, { "id": "velocity", "constraint": { "kind": "expression", "concepts": ["quantities-units:velocity"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "mechanical-power", "roleBindings": [{ "parameter": "power", "role": "power" }, { "parameter": "force", "role": "force" }, { "parameter": "velocity", "role": "velocity" }] }, "references": ["classical-mechanics"] },
-    { "id": "centripetal-acceleration", "topic": "circular-motion", "title": "Centripetal acceleration", "description": "Circular-motion acceleration with explicit quantities.", "descriptionKey": "centripetal-acceleration", "maturity": "recognition", "matcher": { "primitive": "regex-captures", "expression": "^([A-Za-z])\\s*_\\s*\\{?[A-Za-z]\\}?\\s*=\\s*([A-Za-z])\\s*\\^\\s*\\{?2\\}?\\s*/\\s*([A-Za-z])$" }, "parameters": [{ "id": "acceleration", "constraint": { "kind": "expression", "concepts": ["quantities-units:acceleration"] } }, { "id": "velocity", "constraint": { "kind": "expression", "concepts": ["quantities-units:velocity"] } }, { "id": "radius", "constraint": { "kind": "expression", "concepts": ["quantities-units:length"] } }], "result": { "kind": "proposition", "refinements": ["physical-law-instance"] }, "relation": { "law": "centripetal-acceleration", "roleBindings": [{ "parameter": "acceleration", "role": "acceleration" }, { "parameter": "velocity", "role": "velocity" }, { "parameter": "radius", "role": "radius" }] }, "references": ["classical-mechanics"] }
-  ],
-  "rewrites": [],
-  "references": [{ "id": "classical-mechanics", "title": "Classical Mechanics", "citation": "Herbert Goldstein, Charles Poole, and John Safko, Classical Mechanics, 3rd edition, Addison-Wesley, 2002." }]
+      "id": "classical-mechanics",
+      "title": "Classical Mechanics",
+      "citation": "Herbert Goldstein, Charles Poole, and John Safko, Classical Mechanics, 3rd edition, Addison-Wesley, 2002."
+    }
+  ]
 }

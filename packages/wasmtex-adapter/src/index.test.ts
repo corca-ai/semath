@@ -21,12 +21,19 @@ describe("wasmtex adapter", () => {
             includes: [
               {
                 path: "chapter",
-                source: { range: { endOffset: 4, startOffset: 1 } },
+                type: "input",
+                source: {
+                  fileId: "f1",
+                  path: "main.md",
+                  range: { endOffset: 4, startOffset: 1 },
+                },
               },
             ],
+            diagnostics: [],
+            macros: [],
             mathRegions: [region],
             path: "main.md",
-            schemaVersion: 2,
+            schemaVersion: 3,
           },
         },
       ],
@@ -38,6 +45,7 @@ describe("wasmtex adapter", () => {
     expect(snapshot.documents[0]?.includes).toEqual([
       { path: "chapter", sourceRange: { endOffset: 4, startOffset: 1 } },
     ]);
+    expect(snapshot.documents[0]?.macros).toEqual([]);
   });
 
   test("keeps only wasmtex-approved real-world math regions", () => {
@@ -69,5 +77,34 @@ describe("wasmtex adapter", () => {
       ),
     ).toEqual(["\\nabla f", "\\forall x \\in S, P(x)", "x + {"]);
     expect(regions.at(-1)?.closed).toBe(false);
+  });
+
+  test("preserves bounded macro provenance from the shared syntax snapshot", () => {
+    const content = "\\newcommand{\\vect}[1]{\\mathbf{#1}} $\\vect{x}$";
+    const syntax = new LatexSyntaxService().upsert({
+      fileId: "macros",
+      path: "main.tex",
+      content,
+      documentVersion: 1,
+      language: "latex",
+    });
+    const snapshot = createProjectSnapshot({
+      documents: [{ content, language: "latex", syntax }],
+      epoch: "macros:1",
+      inventoryVersion: 1,
+      projectId: "macros",
+    });
+
+    expect(snapshot.documents[0]?.macros).toEqual(syntax.macros);
+    expect(snapshot.documents[0]?.macros?.some((macro) => macro.kind === "call")).toBe(
+      true,
+    );
+    expect(
+      snapshot.documents[0]?.macros?.find(
+        (macro) => macro.kind === "call" && macro.name === "vect",
+      )?.expansion,
+    ).toMatchObject({
+        surface: "\\mathbf{x}",
+    });
   });
 });

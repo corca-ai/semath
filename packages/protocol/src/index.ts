@@ -1,4 +1,4 @@
-export const SEMATH_PROTOCOL_VERSION = 1 as const;
+export const SEMATH_PROTOCOL_VERSION = 2 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -19,13 +19,35 @@ export interface ProjectInclude {
   sourceRange: SourceRange;
 }
 
+export interface ProjectSourceRef {
+  fileId: string;
+  path: string;
+  range: SourceRange;
+}
+
+export interface ProjectMacro {
+  definitions: readonly ProjectSourceRef[];
+  expansion: {
+    depth: number;
+    editable: boolean;
+    inputRange?: SourceRange;
+    status:
+      "cycle" | "expanded" | "not-applicable" | "truncated" | "unresolved";
+    surface?: string;
+  };
+  kind: "call" | "definition";
+  name: string;
+  source: ProjectSourceRef;
+}
+
 export interface ProjectDocument {
   content: string;
   documentVersion: number;
   fileId: string;
   language: DocumentLanguage;
-  includes?: readonly ProjectInclude[];
-  mathRegions?: readonly MathRegion[];
+  includes: readonly ProjectInclude[];
+  macros: readonly ProjectMacro[];
+  mathRegions: readonly MathRegion[];
   path: string;
 }
 
@@ -53,9 +75,7 @@ export interface ChangeEnvelope {
 
 export type SemathQuery =
   | { fileId: string; kind: "selection"; offset: number }
-  | { fileId: string; kind: "equationTree"; offset: number }
-  | { fileId: string; kind: "hover"; offset: number }
-  | { fileId: string; kind: "symbolInfo"; offset: number }
+  | { fileId: string; kind: "semanticView"; offset: number }
   | { fileId: string; kind: "definition"; offset: number }
   | { fileId: string; kind: "references"; offset: number }
   | { fileId: string; kind: "prepareRename"; offset: number }
@@ -66,13 +86,7 @@ export type SemathQuery =
       fileId: string;
       kind: "explainDiagnostic";
       offset: number;
-    }
-  | { fileId: string; kind: "formulaRecognition"; offset: number }
-  | { fileId: string; kind: "formulaCompletion"; offset: number }
-  | { fileId: string; kind: "formulaRewrite"; offset: number }
-  | { fileId: string; kind: "domainEvidence"; offset: number }
-  | { fileId: string; kind: "semanticContext"; offset: number }
-  | { fileId: string; kind: "inspection"; offset: number };
+    };
 
 export interface QueryEnvelope {
   analysisGeneration: number;
@@ -81,19 +95,6 @@ export interface QueryEnvelope {
   inventoryVersion: number;
   protocolVersion: typeof SEMATH_PROTOCOL_VERSION;
   query: SemathQuery;
-}
-
-export interface EquationNode {
-  children: readonly EquationNode[];
-  kind: string;
-  label?: string;
-  range: SourceRange;
-}
-
-export interface EquationNodeSummary {
-  kind: string;
-  label?: string;
-  range: SourceRange;
 }
 
 export interface Location {
@@ -161,7 +162,6 @@ export interface QuantityInfo {
 export interface SymbolInfo {
   definitions: readonly DefinitionInfo[];
   diagnostics: readonly SemanticDiagnostic[];
-  formulas: readonly FormulaRecognition[];
   location: Location;
   quantities?: readonly QuantityInfo[];
   roles?: readonly RoleInfo[];
@@ -203,10 +203,7 @@ export interface ConceptInfo {
 }
 
 export type SemanticClaimStatus =
-  | "certain"
-  | "supported"
-  | "speculative"
-  | "conflicting";
+  "certain" | "supported" | "speculative" | "conflicting";
 
 export interface SemanticClaimInfo {
   claimId: string;
@@ -253,7 +250,7 @@ export interface SemanticDiagnostic {
   severity: "error" | "hint" | "warning";
 }
 
-export interface FormulaConstraint {
+export interface SemanticConstraint {
   concepts?: readonly string[];
   dimensions?: readonly string[];
   kind:
@@ -273,76 +270,35 @@ export interface FormulaConstraint {
   refinements?: readonly string[];
 }
 
-export interface FormulaParameter {
-  constraint: FormulaConstraint;
-  id: string;
-  optional?: boolean;
-}
-
-export interface FormulaSideCondition {
-  kind: string;
-  left: string;
-  right: string;
-}
-
-export interface FormulaPattern {
-  generationTemplate: string;
-  id: string;
-  matcher: string;
-  packId: string;
-  packVersion: string;
-  parameters: readonly FormulaParameter[];
-  result: FormulaConstraint;
-  schemaVersion: number;
-  sideConditions: readonly FormulaSideCondition[];
-  title: string;
-}
-
-export interface FormulaBinding {
-  constraint: FormulaConstraint;
+export interface LawBinding {
+  constraint: SemanticConstraint;
   evidence: Evidence;
   parameter: string;
   symbol: string;
 }
 
-export interface FormulaConditionInfo {
+export interface LawConditionInfo {
   kind: string;
   label: string;
   status: "missing" | "verified";
 }
 
-export interface FormulaRecognition {
-  bindings: readonly FormulaBinding[];
+export interface LawRecognition {
+  bindings: readonly LawBinding[];
   evidence: readonly Evidence[];
   /** Additive v0.11 metadata; absent in protocol-v1 results from older engines. */
-  conditions?: readonly FormulaConditionInfo[];
+  conditions?: readonly LawConditionInfo[];
   description?: string;
   descriptionKey?: string;
   maturity?: "completion" | "diagnostic" | "recognition" | "rewrite";
   packId: string;
   packVersion: string;
-  patternId: string;
+  lawId: string;
   range: SourceRange;
   rank: number;
   relation?: RelationInfo;
-  result: FormulaConstraint;
+  result: SemanticConstraint;
   status?: "condition-missing" | "recognized" | "verified";
-  title: string;
-}
-
-export interface FormulaCompletion {
-  detail: string;
-  patternId: string;
-  proposal: SemanticEditProposal;
-  rank: number;
-  title: string;
-}
-
-export interface FormulaRewrite {
-  detail: string;
-  proposal: SemanticEditProposal;
-  rank: number;
-  ruleId: string;
   title: string;
 }
 
@@ -352,17 +308,15 @@ export interface RenamePreparation {
   rejection?: string;
 }
 
-export interface InspectionInfo {
-  completions: readonly FormulaCompletion[];
+export interface SemanticViewInfo {
+  context: SemanticContextInfo;
+  declarations: readonly Location[];
   diagnostics: readonly SemanticDiagnostic[];
   domains: readonly DomainActivation[];
-  equation?: EquationNode;
-  recognitions: readonly FormulaRecognition[];
-  references: readonly Location[];
-  rename: RenamePreparation;
-  rewrites: readonly FormulaRewrite[];
-  selectionPath: readonly EquationNodeSummary[];
-  semantic?: SemanticContextInfo;
+  refusal?: string;
+  status:
+    "ambiguous" | "conflicting" | "established" | "partial" | "unsupported";
+  summary: string;
   symbol?: SymbolInfo;
   truncated: boolean;
 }
@@ -389,18 +343,7 @@ export interface SemanticEditProposal {
 
 export type QueryValue =
   | { kind: "selection"; ranges: readonly SourceRange[] }
-  | { kind: "equationTree"; tree?: EquationNode }
-  | {
-      definitions: readonly DefinitionInfo[];
-      equationKind?: string;
-      kind: "hover";
-      formulas?: readonly FormulaRecognition[];
-      roles?: readonly RoleInfo[];
-      quantity?: QuantityInfo;
-      shape?: ShapeInfo;
-      symbol?: string;
-    }
-  | { info?: SymbolInfo; kind: "symbolInfo" }
+  | { kind: "semanticView"; view: SemanticViewInfo }
   | { kind: "locations"; locations: readonly Location[] }
   | {
       kind: "renamePreparation";
@@ -417,26 +360,7 @@ export type QueryValue =
   | {
       diagnostic?: SemanticDiagnostic;
       kind: "diagnosticExplanation";
-    }
-  | {
-      kind: "formulaRecognitions";
-      recognitions: readonly FormulaRecognition[];
-    }
-  | {
-      completions: readonly FormulaCompletion[];
-      kind: "formulaCompletions";
-    }
-  | {
-      kind: "formulaRewrites";
-      rewrites: readonly FormulaRewrite[];
-    }
-  | {
-      activations: readonly DomainActivation[];
-      kind: "domainActivations";
-      truncated: boolean;
-    }
-  | { context: SemanticContextInfo; kind: "semanticContext" }
-  | { inspection: InspectionInfo; kind: "inspection" };
+    };
 
 export interface QueryResult {
   analysisGeneration: number;
@@ -445,6 +369,25 @@ export interface QueryResult {
   inventoryVersion: number;
   protocolVersion: typeof SEMATH_PROTOCOL_VERSION;
   value: QueryValue;
+}
+
+export interface AnalysisStats {
+  analyzedDocuments: number;
+  constraints: number;
+  lawRulesVisited: number;
+  recognizedLaws: number;
+  semanticNodes: number;
+  totalDocuments: number;
+}
+
+export interface UpdateResult {
+  analysisGeneration: number;
+  analyzedFileIds: readonly string[];
+  changedFileIds: readonly string[];
+  epoch: string;
+  inventoryVersion: number;
+  protocolVersion: typeof SEMATH_PROTOCOL_VERSION;
+  stats: AnalysisStats;
 }
 
 export type SemathWorkerPriority = "background" | "cursor" | "mutation";

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "domain": "probability-blind-extension",
+  "cases": [
+    {
+      "id": "event-intersection-basic",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event. Let $B$ be an event. $A \\cap B$"}],
+      "cursor":{"fileId":"main","needle":"A \\cap"},
+      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"A","right":"B"},
+      "variationTags":["basic","spaced","two-symbol","inline"]
+    },
+    {
+      "id": "event-intersection-reversed",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $B$ be an event. Let $A$ be an event. $B\\cap A$"}],
+      "cursor":{"fileId":"main","needle":"B\\cap"},
+      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"B","right":"A"},
+      "variationTags":["reordered","compact","plural-declaration","symbolic"]
+    },
+    {
+      "id": "event-intersection-grouped",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $E$ be an event. Let $F$ be an event. ${E} \\cap {F}$"}],
+      "cursor":{"fileId":"main","needle":"E} \\cap"},
+      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"E","right":"F"},
+      "variationTags":["grouped","separate-declarations","uppercase","brace-layout"]
+    },
+    {
+      "id": "event-intersection-styled",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $C$ be an event. Let $D$ be an event. $\\mathrm{C} \\cap \\mathrm{D}$"}],
+      "cursor":{"fileId":"main","needle":"C} \\cap"},
+      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"C","right":"D"},
+      "variationTags":["styled","roman","presentation-normalization","paired"]
+    },
+    {
+      "id": "event-intersection-parenthesized",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $U$ be an event. Let $V$ be an event. $\\left(U\\right) \\cap \\left(V\\right)$"}],
+      "cursor":{"fileId":"main","needle":"U\\right"},
+      "expectation":"established","lawId":"event-intersection","expectedRoles":{"left":"U","right":"V"},
+      "variationTags":["parenthesized","left-right","denote","layout"]
+    },
+    {
+      "id": "event-untyped-refusal",
+      "documents": [{"fileId":"main","path":"main.tex","content":"The symbols are otherwise undeclared. $A \\cap B$"}],
+      "cursor":{"fileId":"main","needle":"A \\cap"},
+      "expectation":"refused","lawId":"event-intersection","refusalCategory":"missing-event-types",
+      "variationTags":["negative","untyped","undeclared","safe-refusal"]
+    },
+    {
+      "id": "event-function-refusal",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let f and g be functions. $f \\cap g$"}],
+      "cursor":{"fileId":"main","needle":"f \\cap"},
+      "expectation":"refused","lawId":"event-intersection","refusalCategory":"wrong-roles",
+      "variationTags":["negative","functions","type-conflict","lowercase"]
+    },
+    {
+      "id": "event-union-refusal",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event. Let $B$ be an event. $A \\cup B$"}],
+      "cursor":{"fileId":"main","needle":"A \\cup"},
+      "expectation":"refused","lawId":"event-intersection","refusalCategory":"wrong-operator",
+      "variationTags":["negative","union","operator-change","events"]
+    },
+    {
+      "id": "event-single-operand-refusal",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event. $\\!A\\!$"}],
+      "cursor":{"fileId":"main","needle":"\\!A"},
+      "expectation":"refused","lawId":"event-intersection","refusalCategory":"missing-operand",
+      "variationTags":["negative","arity","single-symbol","incomplete"]
+    },
+    {
+      "id": "event-prose-negation-refusal",
+      "documents": [{"fileId":"main","path":"main.tex","content":"Let $A$ be an event and let $B$ be an event, but this law does not apply: $A \\cap B$."}],
+      "cursor":{"fileId":"main","needle":"A \\cap"},
+      "expectation":"refused","lawId":"event-intersection","refusalCategory":"negated-context",
+      "variationTags":["negative","negation","context","explicit-refusal"]
+    }
+  ]
+}

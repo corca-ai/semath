@@ -8,7 +8,8 @@ if [ "$system" != "Linux" ] || [ "$architecture" != "x86_64" ]; then
   exit 1
 fi
 
-cargo build --locked --release --target wasm32-unknown-unknown -p semath-wasm
+build_target_dir=$PWD/target
+CARGO_TARGET_DIR=$build_target_dir cargo build --locked --release --target wasm32-unknown-unknown -p semath-wasm
 mkdir -p lib/wasm
 wasm-bindgen \
   --target web \
@@ -16,7 +17,7 @@ wasm-bindgen \
   --remove-name-section \
   --remove-producers-section \
   --out-dir lib/wasm \
-  target/wasm32-unknown-unknown/release/semath_wasm.wasm
+  "$build_target_dir/wasm32-unknown-unknown/release/semath_wasm.wasm"
 
 (
   cd lib/wasm

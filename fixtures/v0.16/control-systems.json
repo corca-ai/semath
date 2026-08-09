@@ -1,0 +1,2689 @@
+{
+  "schemaVersion": 1,
+  "domain": "control-systems",
+  "cases": [
+    {
+      "id": "cs16-state-pos-001",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state01.tex",
+          "content": "Let $x$ be an $n$-dimensional state vector, $u$ an $m$-dimensional control vector, $A$ an $n$ by $n$ matrix, and $B$ an $n$ by $m$ matrix.\n\\[\\dot{x}=Ax+Bu\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x}=Ax+Bu"
+      },
+      "expectedRoles": {
+        "state": "x",
+        "state-matrix": "A",
+        "input-matrix": "B",
+        "control-input": "u"
+      },
+      "variationTags": [
+        "canonical",
+        "english-declarations",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-002",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state02.tex",
+          "content": "In a continuous state-space model, $z\\in\\mathbb R^p$, $v\\in\\mathbb R^r$, $F\\in\\mathbb R^{p\\times p}$, and $G\\in\\mathbb R^{p\\times r}$.\n$\\dot{z} = Fz + Gv$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{z} = Fz + Gv"
+      },
+      "expectedRoles": {
+        "state": "z",
+        "state-matrix": "F",
+        "input-matrix": "G",
+        "control-input": "v"
+      },
+      "variationTags": [
+        "state-space",
+        "membership-declarations",
+        "spacing"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-003",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state03.md",
+          "content": "Let $q$ denote the $d$-dimensional state and $w$ the $c$-dimensional input. Let $M$ and $N$ be $d$ by $d$ and $d$ by $c$ matrices, respectively.\n\n$$\\dot{q}=Mq+Nw$$"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{q}=Mq+Nw"
+      },
+      "expectedRoles": {
+        "state": "q",
+        "state-matrix": "M",
+        "input-matrix": "N",
+        "control-input": "w"
+      },
+      "variationTags": [
+        "markdown",
+        "multi-symbol-declaration",
+        "respectively"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-004",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state04.tex",
+          "content": "The vectors $s\\in\\mathbb R^n$ and $r\\in\\mathbb R^m$ are the state and control input. The matrices satisfy $K\\in\\mathbb R^{n\\times n}$ and $L\\in\\mathbb R^{n\\times m}$.\n\\[Ks+Lr=\\dot{s}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "Ks+Lr=\\dot{s}"
+      },
+      "expectedRoles": {
+        "state": "s",
+        "state-matrix": "K",
+        "input-matrix": "L",
+        "control-input": "r"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "role-prose",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-005",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state05.tex",
+          "content": "Let $y$ be an $a$-vector and $e$ a $b$-vector. Let $C$ be $a$ by $a$ and $D$ be $a$ by $b$.\n\\[\\dot{y}=(Cy)+(De)\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{y}=(Cy)+(De)"
+      },
+      "expectedRoles": {
+        "state": "y",
+        "state-matrix": "C",
+        "input-matrix": "D",
+        "control-input": "e"
+      },
+      "variationTags": [
+        "grouped-products",
+        "compact-declarations",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-006",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state06.tex",
+          "content": "For the control system, $\\xi$ is an $n$-dimensional state vector, $\\eta$ is an $m$-dimensional control input, $H$ is $n\\times n$, and $J$ is $n\\times m$.\n$\\dot{\\xi}=H\\xi+J\\eta$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\xi}=H\\xi+J\\eta"
+      },
+      "expectedRoles": {
+        "state": "\\xi",
+        "state-matrix": "H",
+        "input-matrix": "J",
+        "control-input": "\\eta"
+      },
+      "variationTags": [
+        "greek-symbols",
+        "control-vocabulary",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-007",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state07.tex",
+          "content": "Let $p\\in\\mathbb R^k$ and $c\\in\\mathbb R^j$. The state and input matrices are $R\\in\\mathbb R^{k\\times k}$ and $S\\in\\mathbb R^{k\\times j}$.\n\\[\\dot{p}=Rp+Sc\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{p}=Rp+Sc"
+      },
+      "expectedRoles": {
+        "state": "p",
+        "state-matrix": "R",
+        "input-matrix": "S",
+        "control-input": "c"
+      },
+      "variationTags": [
+        "membership-declarations",
+        "split-declarations",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-008",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state08.tex",
+          "content": "The bold symbols $\\mathbf X\\in\\mathbb R^n$ and $\\mathbf U\\in\\mathbb R^m$ are vectors; $\\mathbf F\\in\\mathbb R^{n\\times n}$ and $\\mathbf G\\in\\mathbb R^{n\\times m}$ are matrices.\n\\[\\dot{\\mathbf X}=\\mathbf F\\mathbf X+\\mathbf G\\mathbf U\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\mathbf X}=\\mathbf F\\mathbf X+\\mathbf G\\mathbf U"
+      },
+      "expectedRoles": {
+        "state": "\\mathbf X",
+        "state-matrix": "\\mathbf F",
+        "input-matrix": "\\mathbf G",
+        "control-input": "\\mathbf U"
+      },
+      "variationTags": [
+        "bold-notation",
+        "explicit-shapes",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-009",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state09.tex",
+          "content": "Let $\\chi\\in\\mathbb R^n$, $\\nu\\in\\mathbb R^m$, $K_0\\in\\mathbb R^{n\\times n}$, and $L_0\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\chi}=K_0\\chi+L_0\\nu\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\chi}=K_0\\chi+L_0\\nu"
+      },
+      "expectedRoles": {
+        "state": "\\chi",
+        "state-matrix": "K_0",
+        "input-matrix": "L_0",
+        "control-input": "\\nu"
+      },
+      "variationTags": [
+        "subscripted-matrices",
+        "greek-symbols",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-010",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state10.tex",
+          "content": "In continuous time, $\\zeta$ is a state in $\\mathbb R^n$ and $\\mu$ is an input in $\\mathbb R^m$. Matrices $A_c$ and $B_c$ have sizes $n\\times n$ and $n\\times m$.\n\\[\\frac{d\\zeta}{dt}=A_c\\zeta+B_c\\mu\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\frac{d\\zeta}{dt}=A_c\\zeta+B_c\\mu"
+      },
+      "expectedRoles": {
+        "state": "\\zeta",
+        "state-matrix": "A_c",
+        "input-matrix": "B_c",
+        "control-input": "\\mu"
+      },
+      "variationTags": [
+        "derivative-fraction",
+        "continuous-time",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-011",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state11.tex",
+          "content": "The state $h$ and input $j$ have dimensions $n$ and $m$. Let $A_1$ be $n$ by $n$ and $B_1$ be $n$ by $m$.\n\\[A_1h+B_1j=\\dot{h}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_1h+B_1j=\\dot{h}"
+      },
+      "expectedRoles": {
+        "state": "h",
+        "state-matrix": "A_1",
+        "input-matrix": "B_1",
+        "control-input": "j"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "subscripts",
+        "english-shapes"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-012",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state12.tex",
+          "content": "Let $r_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n\\[\\dot{r_1}=\\left(K_1r_1\\right)+\\left(L_1v_1\\right)\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{r_1}=\\left(K_1r_1\\right)+\\left(L_1v_1\\right)"
+      },
+      "expectedRoles": {
+        "state": "r_1",
+        "state-matrix": "K_1",
+        "input-matrix": "L_1",
+        "control-input": "v_1"
+      },
+      "variationTags": [
+        "left-right-grouping",
+        "subscripted-vectors",
+        "presentation"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-013",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state13.tex",
+          "content": "Take $\\omega\\in\\mathbb R^n$ as the state and $\\tau\\in\\mathbb R^m$ as the control. Here $E\\in\\mathbb R^{n\\times n}$ and $F\\in\\mathbb R^{n\\times m}$.\n$\\frac{d}{dt}\\omega=E\\omega+F\\tau$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\frac{d}{dt}\\omega=E\\omega+F\\tau"
+      },
+      "expectedRoles": {
+        "state": "\\omega",
+        "state-matrix": "E",
+        "input-matrix": "F",
+        "control-input": "\\tau"
+      },
+      "variationTags": [
+        "operator-derivative",
+        "greek-symbols",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-014",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state14.tex",
+          "content": "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n\\begin{align}\\dot{a}&=F_a a+G_a b\\end{align}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{a}&=F_a a+G_a b"
+      },
+      "expectedRoles": {
+        "state": "a",
+        "state-matrix": "F_a",
+        "input-matrix": "G_a",
+        "control-input": "b"
+      },
+      "variationTags": [
+        "align-environment",
+        "alignment-marker",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-015",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state15.tex",
+          "content": "The vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n\\begin{equation}\\dot{\\rho} = U\\rho + V\\sigma\\end{equation}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\rho} = U\\rho + V\\sigma"
+      },
+      "expectedRoles": {
+        "state": "\\rho",
+        "state-matrix": "U",
+        "input-matrix": "V",
+        "control-input": "\\sigma"
+      },
+      "variationTags": [
+        "equation-environment",
+        "greek-symbols",
+        "role-prose"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-016",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state16.tex",
+          "content": "Let $x_s$ and $u_s$ denote an $n$-dimensional state vector and an $m$-dimensional control vector, respectively. Let $A_s$ and $B_s$ denote an $n$ by $n$ state matrix and an $n$ by $m$ input matrix, respectively.\n\\[\\dot{x_s}=A_sx_s+B_su_s\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_s}=A_sx_s+B_su_s"
+      },
+      "expectedRoles": {
+        "state": "x_s",
+        "state-matrix": "A_s",
+        "input-matrix": "B_s",
+        "control-input": "u_s"
+      },
+      "variationTags": [
+        "multi-symbol-declaration",
+        "respectively",
+        "role-descriptions"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-017",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state17.tex",
+          "content": "The model is\n\\[\\dot{x_f}=A_fx_f+B_fu_f\\]\nwhere $x_f\\in\\mathbb R^n$, $u_f\\in\\mathbb R^m$, $A_f\\in\\mathbb R^{n\\times n}$, and $B_f\\in\\mathbb R^{n\\times m}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_f}=A_fx_f+B_fu_f"
+      },
+      "expectedRoles": {
+        "state": "x_f",
+        "state-matrix": "A_f",
+        "input-matrix": "B_f",
+        "control-input": "u_f"
+      },
+      "variationTags": [
+        "declarations-after-formula",
+        "where-clause",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-018",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state18.tex",
+          "content": "A realization obeys $\\dot{q_c}=M_cq_c+N_cw_c$. Here $q_c$ is an $r$-vector, $w_c$ is an $s$-vector, $M_c$ is $r$ by $r$, and $N_c$ is $r$ by $s$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{q_c}=M_cq_c+N_cw_c"
+      },
+      "expectedRoles": {
+        "state": "q_c",
+        "state-matrix": "M_c",
+        "input-matrix": "N_c",
+        "control-input": "w_c"
+      },
+      "variationTags": [
+        "declarations-after-formula",
+        "inline-math",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-019",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state19.tex",
+          "content": "\\newcommand{\\sv}{x_m}\\newcommand{\\uv}{u_m}\\newcommand{\\Am}{A_m}\\newcommand{\\Bm}{B_m}\nLet $x_m\\in\\mathbb R^n$, $u_m\\in\\mathbb R^m$, $A_m\\in\\mathbb R^{n\\times n}$, and $B_m\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\sv}=\\Am\\sv+\\Bm\\uv\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\sv}=\\Am\\sv+\\Bm\\uv"
+      },
+      "expectedRoles": {
+        "state": "x_m",
+        "state-matrix": "A_m",
+        "input-matrix": "B_m",
+        "control-input": "u_m"
+      },
+      "variationTags": [
+        "transparent-macros",
+        "macro-operands",
+        "explicit-shapes"
+      ],
+      "macros": [
+        {
+          "name": "\\sv",
+          "expansion": "x_m"
+        },
+        {
+          "name": "\\uv",
+          "expansion": "u_m"
+        },
+        {
+          "name": "\\Am",
+          "expansion": "A_m"
+        },
+        {
+          "name": "\\Bm",
+          "expansion": "B_m"
+        }
+      ]
+    },
+    {
+      "id": "cs16-state-pos-020",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state20.tex",
+          "content": "\\newcommand{\\SysA}{F_m}\\newcommand{\\SysB}{G_m}\nThe vectors $z_m\\in\\mathbb R^p$ and $v_m\\in\\mathbb R^r$ and matrices $F_m\\in\\mathbb R^{p\\times p}$ and $G_m\\in\\mathbb R^{p\\times r}$ define a state-space model.\n\\[\\dot{z_m}=\\SysA z_m+\\SysB v_m\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{z_m}=\\SysA z_m+\\SysB v_m"
+      },
+      "expectedRoles": {
+        "state": "z_m",
+        "state-matrix": "F_m",
+        "input-matrix": "G_m",
+        "control-input": "v_m"
+      },
+      "variationTags": [
+        "transparent-macros",
+        "matrix-macros",
+        "state-space"
+      ],
+      "macros": [
+        {
+          "name": "\\SysA",
+          "expansion": "F_m"
+        },
+        {
+          "name": "\\SysB",
+          "expansion": "G_m"
+        }
+      ]
+    },
+    {
+      "id": "cs16-state-pos-021",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main21.tex",
+          "content": "\\input{dims21}\nThe continuous model is \\[\\dot{x_{21}}=A_{21}x_{21}+B_{21}u_{21}\\]"
+        },
+        {
+          "fileId": "dims",
+          "path": "dims21.tex",
+          "content": "Let $x_{21}\\in\\mathbb R^n$, $u_{21}\\in\\mathbb R^m$, $A_{21}\\in\\mathbb R^{n\\times n}$, and $B_{21}\\in\\mathbb R^{n\\times m}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{21}}=A_{21}x_{21}+B_{21}u_{21}"
+      },
+      "expectedRoles": {
+        "state": "x_{21}",
+        "state-matrix": "A_{21}",
+        "input-matrix": "B_{21}",
+        "control-input": "u_{21}"
+      },
+      "variationTags": [
+        "multi-file",
+        "included-declarations",
+        "subscripted-notation"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-022",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main22.tex",
+          "content": "Let $z_{22}\\in\\mathbb R^p$, $v_{22}\\in\\mathbb R^r$, $F_{22}\\in\\mathbb R^{p\\times p}$, and $G_{22}\\in\\mathbb R^{p\\times r}$.\n\\input{model22}"
+        },
+        {
+          "fileId": "model",
+          "path": "model22.tex",
+          "content": "The plant dynamics are\n\\[\\dot{z_{22}}=F_{22}z_{22}+G_{22}v_{22}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "model",
+        "needle": "\\dot{z_{22}}=F_{22}z_{22}+G_{22}v_{22}"
+      },
+      "expectedRoles": {
+        "state": "z_{22}",
+        "state-matrix": "F_{22}",
+        "input-matrix": "G_{22}",
+        "control-input": "v_{22}"
+      },
+      "variationTags": [
+        "multi-file",
+        "formula-in-include",
+        "project-scope"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-023",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main23.tex",
+          "content": "\\input{defs23}\n\\input{dynamics23}"
+        },
+        {
+          "fileId": "defs",
+          "path": "defs23.tex",
+          "content": "Let $q_{23}$ and $w_{23}$ be vectors of dimensions $d$ and $c$. Let $M_{23}$ and $N_{23}$ have sizes $d\\times d$ and $d\\times c$."
+        },
+        {
+          "fileId": "dyn",
+          "path": "dynamics23.tex",
+          "content": "\\begin{equation}\\dot{q_{23}}=M_{23}q_{23}+N_{23}w_{23}\\end{equation}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "dyn",
+        "needle": "\\dot{q_{23}}=M_{23}q_{23}+N_{23}w_{23}"
+      },
+      "expectedRoles": {
+        "state": "q_{23}",
+        "state-matrix": "M_{23}",
+        "input-matrix": "N_{23}",
+        "control-input": "w_{23}"
+      },
+      "variationTags": [
+        "multi-file",
+        "multiple-includes",
+        "equation-environment"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-024",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state24.md",
+          "content": "# Plant model\n\nThe state $s_{24}\\in\\mathbb R^n$, input $r_{24}\\in\\mathbb R^m$, and matrices $K_{24}\\in\\mathbb R^{n\\times n}$ and $L_{24}\\in\\mathbb R^{n\\times m}$ satisfy\n\n$$\\dot{s_{24}}=K_{24}s_{24}+L_{24}r_{24}$$"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{s_{24}}=K_{24}s_{24}+L_{24}r_{24}"
+      },
+      "expectedRoles": {
+        "state": "s_{24}",
+        "state-matrix": "K_{24}",
+        "input-matrix": "L_{24}",
+        "control-input": "r_{24}"
+      },
+      "variationTags": [
+        "markdown",
+        "heading",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-025",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state25.tex",
+          "content": "Let $y_{25}\\in\\mathbb R^a$, $e_{25}\\in\\mathbb R^b$, $C_{25}\\in\\mathbb R^{a\\times a}$, and $D_{25}\\in\\mathbb R^{a\\times b}$.\n\\[\\displaystyle \\dot{y_{25}}=C_{25}y_{25}+D_{25}e_{25}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\displaystyle \\dot{y_{25}}=C_{25}y_{25}+D_{25}e_{25}"
+      },
+      "expectedRoles": {
+        "state": "y_{25}",
+        "state-matrix": "C_{25}",
+        "input-matrix": "D_{25}",
+        "control-input": "e_{25}"
+      },
+      "variationTags": [
+        "displaystyle",
+        "presentation-wrapper",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-026",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state26.tex",
+          "content": "Let $p_{26}$ be an $n$-state, $c_{26}$ an $m$-input, $R_{26}$ an $n\\times n$ matrix, and $S_{26}$ an $n\\times m$ matrix.\n\\[\\dot{p_{26}}=\\bigl(R_{26}p_{26}\\bigr)+\\bigl(S_{26}c_{26}\\bigr)\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{p_{26}}=\\bigl(R_{26}p_{26}\\bigr)+\\bigl(S_{26}c_{26}\\bigr)"
+      },
+      "expectedRoles": {
+        "state": "p_{26}",
+        "state-matrix": "R_{26}",
+        "input-matrix": "S_{26}",
+        "control-input": "c_{26}"
+      },
+      "variationTags": [
+        "bigl-bigr-grouping",
+        "english-shapes",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-027",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state27.tex",
+          "content": "The declarations $x_r\\in\\mathbb R^n$, $u_r\\in\\mathbb R^m$, $A_r\\in\\mathbb R^{n\\times n}$, and $B_r\\in\\mathbb R^{n\\times m}$ apply throughout.\n\\[\\dot{x_r} = A_r {x_r}+B_r {u_r}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_r} = A_r {x_r}+B_r {u_r}"
+      },
+      "expectedRoles": {
+        "state": "x_r",
+        "state-matrix": "A_r",
+        "input-matrix": "B_r",
+        "control-input": "u_r"
+      },
+      "variationTags": [
+        "brace-grouping",
+        "spacing",
+        "scope-prose"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-028",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state28.tex",
+          "content": "Let $z_r\\in\\mathbb R^p$, $v_r\\in\\mathbb R^r$, $F_r\\in\\mathbb R^{p\\times p}$, and $G_r\\in\\mathbb R^{p\\times r}$.\n\\[\\left(F_rz_r+G_rv_r\\right)=\\dot{z_r}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\left(F_rz_r+G_rv_r\\right)=\\dot{z_r}"
+      },
+      "expectedRoles": {
+        "state": "z_r",
+        "state-matrix": "F_r",
+        "input-matrix": "G_r",
+        "control-input": "v_r"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "whole-side-grouping",
+        "presentation"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-029",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state29.tex",
+          "content": "The state-space vectors are $\\boldsymbol{x}\\in\\mathbb R^n$ and $\\boldsymbol{u}\\in\\mathbb R^m$; its matrices are $\\boldsymbol{A}\\in\\mathbb R^{n\\times n}$ and $\\boldsymbol{B}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\boldsymbol{x}}=\\boldsymbol{A}\\boldsymbol{x}+\\boldsymbol{B}\\boldsymbol{u}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\boldsymbol{x}}=\\boldsymbol{A}\\boldsymbol{x}+\\boldsymbol{B}\\boldsymbol{u}"
+      },
+      "expectedRoles": {
+        "state": "\\boldsymbol{x}",
+        "state-matrix": "\\boldsymbol{A}",
+        "input-matrix": "\\boldsymbol{B}",
+        "control-input": "\\boldsymbol{u}"
+      },
+      "variationTags": [
+        "boldsymbol-notation",
+        "state-space",
+        "explicit-shapes"
+      ]
+    },
+    {
+      "id": "cs16-state-pos-030",
+      "lawId": "continuous-state-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state30.tex",
+          "content": "Let $\\theta\\in\\mathbb R^n$ be the state and $\\upsilon\\in\\mathbb R^m$ the input. Let $\\mathcal F\\in\\mathbb R^{n\\times n}$ and $\\mathcal G\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\theta}=\\mathcal F\\theta+\\mathcal G\\upsilon\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{\\theta}=\\mathcal F\\theta+\\mathcal G\\upsilon"
+      },
+      "expectedRoles": {
+        "state": "\\theta",
+        "state-matrix": "\\mathcal F",
+        "input-matrix": "\\mathcal G",
+        "control-input": "\\upsilon"
+      },
+      "variationTags": [
+        "calligraphic-matrices",
+        "greek-vectors",
+        "role-prose"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-001",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state31.tex",
+          "content": "Let $x_{31}$ be a scalar, $u_{31}\\in\\mathbb R^m$, $A_{31}\\in\\mathbb R^{n\\times n}$, and $B_{31}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{x_{31}}=A_{31}x_{31}+B_{31}u_{31}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{31}}=A_{31}x_{31}+B_{31}u_{31}"
+      },
+      "refusalCategory": "wrong-state-shape",
+      "variationTags": [
+        "hard-negative",
+        "scalar-state",
+        "shape"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-002",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state32.tex",
+          "content": "Let $x_{32}\\in\\mathbb R^n$ and $u_{32}\\in\\mathbb R^m$. Let $A_{32}$ be an $n$-dimensional vector and $B_{32}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{x_{32}}=A_{32}x_{32}+B_{32}u_{32}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{32}}=A_{32}x_{32}+B_{32}u_{32}"
+      },
+      "refusalCategory": "wrong-state-matrix-shape",
+      "variationTags": [
+        "hard-negative",
+        "vector-as-matrix",
+        "shape"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-003",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state33.tex",
+          "content": "Let $n\\ne m$. Let $x_{33}\\in\\mathbb R^n$, $u_{33}\\in\\mathbb R^m$, $A_{33}\\in\\mathbb R^{n\\times n}$, and $B_{33}\\in\\mathbb R^{n\\times n}$.\n\\[\\dot{x_{33}}=A_{33}x_{33}+B_{33}u_{33}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{33}}=A_{33}x_{33}+B_{33}u_{33}"
+      },
+      "refusalCategory": "input-matrix-dimension-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "distinct-dimensions",
+        "input-product"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-004",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state34.tex",
+          "content": "Let $n\\ne p$, $x_{34}\\in\\mathbb R^n$, $u_{34}\\in\\mathbb R^m$, $A_{34}\\in\\mathbb R^{p\\times p}$, and $B_{34}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{x_{34}}=A_{34}x_{34}+B_{34}u_{34}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{34}}=A_{34}x_{34}+B_{34}u_{34}"
+      },
+      "refusalCategory": "state-matrix-dimension-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "incompatible-product",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-005",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state35.tex",
+          "content": "Let $n\\ne p$, $x_{35}\\in\\mathbb R^n$, $u_{35}\\in\\mathbb R^m$, $A_{35}\\in\\mathbb R^{n\\times n}$, and $B_{35}\\in\\mathbb R^{p\\times m}$.\n\\[\\dot{x_{35}}=A_{35}x_{35}+B_{35}u_{35}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{35}}=A_{35}x_{35}+B_{35}u_{35}"
+      },
+      "refusalCategory": "sum-dimension-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "incompatible-sum",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-006",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state36.tex",
+          "content": "Let $x_{36}$ and $y_{36}$ be distinct $n$-dimensional states, $u_{36}\\in\\mathbb R^m$, $A_{36}\\in\\mathbb R^{n\\times n}$, and $B_{36}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{y_{36}}=A_{36}x_{36}+B_{36}u_{36}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{y_{36}}=A_{36}x_{36}+B_{36}u_{36}"
+      },
+      "refusalCategory": "derivative-state-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "symbol-identity",
+        "two-states"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-007",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state37.tex",
+          "content": "Let $x_{37}\\in\\mathbb R^n$, $u_{37}\\in\\mathbb R^m$, $A_{37}\\in\\mathbb R^{n\\times n}$, and $B_{37}\\in\\mathbb R^{n\\times m}$.\n\\[x_{37}=A_{37}x_{37}+B_{37}u_{37}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "x_{37}=A_{37}x_{37}+B_{37}u_{37}"
+      },
+      "refusalCategory": "missing-time-derivative",
+      "variationTags": [
+        "hard-negative",
+        "algebraic-equation",
+        "operator"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-008",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state38.tex",
+          "content": "Let $x_{38}\\in\\mathbb R^n$, $u_{38}\\in\\mathbb R^m$, $A_{38}\\in\\mathbb R^{n\\times n}$, and $B_{38}\\in\\mathbb R^{n\\times m}$.\n\\[\\ddot{x_{38}}=A_{38}x_{38}+B_{38}u_{38}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\ddot{x_{38}}=A_{38}x_{38}+B_{38}u_{38}"
+      },
+      "refusalCategory": "wrong-derivative-order",
+      "variationTags": [
+        "hard-negative",
+        "second-derivative",
+        "operator"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-009",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state39.tex",
+          "content": "Let $x_k\\in\\mathbb R^n$, $u_k\\in\\mathbb R^m$, $A_d\\in\\mathbb R^{n\\times n}$, and $B_d\\in\\mathbb R^{n\\times m}$.\n\\[x_{k+1}=A_dx_k+B_du_k\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "x_{k+1}=A_dx_k+B_du_k"
+      },
+      "refusalCategory": "discrete-time-update",
+      "variationTags": [
+        "hard-negative",
+        "discrete-time",
+        "wrong-law"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-010",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state40.tex",
+          "content": "Let $x_{40},u_{40}$ be compatible vectors and $A_{40},B_{40}$ compatible matrices. Here $\\odot$ is elementwise multiplication.\n\\[\\dot{x_{40}}=A_{40}\\odot x_{40}+B_{40}\\odot u_{40}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{40}}=A_{40}\\odot x_{40}+B_{40}\\odot u_{40}"
+      },
+      "refusalCategory": "wrong-product-operator",
+      "variationTags": [
+        "hard-negative",
+        "hadamard-product",
+        "operator"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-011",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state41.tex",
+          "content": "Let $x_{41}\\in\\mathbb R^n$ and use column-vector convention. Let $A_{41}\\in\\mathbb R^{n\\times n}$, $B_{41}\\in\\mathbb R^{n\\times m}$, and $u_{41}\\in\\mathbb R^m$.\n\\[\\dot{x_{41}}=x_{41}A_{41}+B_{41}u_{41}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{41}}=x_{41}A_{41}+B_{41}u_{41}"
+      },
+      "refusalCategory": "reversed-matrix-vector-order",
+      "variationTags": [
+        "hard-negative",
+        "column-vector",
+        "operator-order"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-012",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state42.tex",
+          "content": "Let $x_{42}\\in\\mathbb R^n$, $u_{42}\\in\\mathbb R^m$, $A_{42}\\in\\mathbb R^{n\\times n}$, and $B_{42}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{x_{42}}=A_{42}x_{42}+B_{42}(u_{42})^2\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{42}}=A_{42}x_{42}+B_{42}(u_{42})^2"
+      },
+      "refusalCategory": "nonlinear-input-term",
+      "variationTags": [
+        "hard-negative",
+        "nonlinear",
+        "squared-input"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-013",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state43.tex",
+          "content": "Let $x_{43}$ and $u_{43}$ be vectors in $\\mathbb R^n$ and let $A_{43}\\in\\mathbb R^{n\\times n}$.\n\\[\\dot{x_{43}}=A_{43}x_{43}+u_{43}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{43}}=A_{43}x_{43}+u_{43}"
+      },
+      "refusalCategory": "missing-input-matrix",
+      "variationTags": [
+        "hard-negative",
+        "missing-role",
+        "structure"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-014",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state44.tex",
+          "content": "Let $x_{44}\\in\\mathbb R^n$. Let $u_{44}\\in\\mathbb R^m$ and $v_{44}\\in\\mathbb R^r$ be independent controls, with $B_{44}\\in\\mathbb R^{n\\times m}$ and $C_{44}\\in\\mathbb R^{n\\times r}$; let $A_{44}\\in\\mathbb R^{n\\times n}$.\n\\[\\dot{x_{44}}=A_{44}x_{44}+B_{44}u_{44}+C_{44}v_{44}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{44}}=A_{44}x_{44}+B_{44}u_{44}+C_{44}v_{44}"
+      },
+      "refusalCategory": "ambiguous-control-pair",
+      "variationTags": [
+        "hard-negative",
+        "extra-term",
+        "role-ambiguity"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-015",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state45.tex",
+          "content": "Let $x_{45}\\in\\mathbb R^n$, $u_{45}\\in\\mathbb R^m$, $A_{45}\\in\\mathbb R^{n\\times n}$, and $B_{45}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{x_{45}}\\le A_{45}x_{45}+B_{45}u_{45}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{45}}\\le A_{45}x_{45}+B_{45}u_{45}"
+      },
+      "refusalCategory": "wrong-relational-operator",
+      "variationTags": [
+        "hard-negative",
+        "inequality",
+        "operator"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-016",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state46.tex",
+          "content": "A control system uses symbols $x_{46},u_{46},A_{46},B_{46}$, with no shape declarations.\n\\[\\dot{x_{46}}=A_{46}x_{46}+B_{46}u_{46}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{46}}=A_{46}x_{46}+B_{46}u_{46}"
+      },
+      "refusalCategory": "undeclared-shapes",
+      "variationTags": [
+        "hard-negative",
+        "missing-evidence",
+        "ambiguity"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-017",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main47.tex",
+          "content": "The standalone equation is\n\\[\\dot{x_{47}}=A_{47}x_{47}+B_{47}u_{47}\\]"
+        },
+        {
+          "fileId": "unused",
+          "path": "unrelated47.tex",
+          "content": "Let $x_{47}\\in\\mathbb R^n$, $u_{47}\\in\\mathbb R^m$, $A_{47}\\in\\mathbb R^{n\\times n}$, and $B_{47}\\in\\mathbb R^{n\\times m}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{47}}=A_{47}x_{47}+B_{47}u_{47}"
+      },
+      "refusalCategory": "out-of-scope-declarations",
+      "variationTags": [
+        "hard-negative",
+        "multi-file",
+        "scope",
+        "unreachable-file"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-018",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state48.tex",
+          "content": "Let $x_{48}$ be an $n$-dimensional vector. In the same scope, let $x_{48}$ be a scalar. Let $u_{48}\\in\\mathbb R^m$, $A_{48}\\in\\mathbb R^{n\\times n}$, and $B_{48}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{x_{48}}=A_{48}x_{48}+B_{48}u_{48}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{48}}=A_{48}x_{48}+B_{48}u_{48}"
+      },
+      "refusalCategory": "conflicting-state-shapes",
+      "variationTags": [
+        "hard-negative",
+        "conflicting-declarations",
+        "ambiguity"
+      ]
+    },
+    {
+      "id": "cs16-state-neg-019",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state49.tex",
+          "content": "\\newcommand{\\dyn}[1]{\\operatorname{mystery}(#1)}\nLet $x_{49}\\in\\mathbb R^n$, $u_{49}\\in\\mathbb R^m$, $A_{49}\\in\\mathbb R^{n\\times n}$, and $B_{49}\\in\\mathbb R^{n\\times m}$.\n\\[\\dyn{x_{49}}=A_{49}x_{49}+B_{49}u_{49}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dyn{x_{49}}=A_{49}x_{49}+B_{49}u_{49}"
+      },
+      "refusalCategory": "opaque-derivative-operator",
+      "variationTags": [
+        "hard-negative",
+        "macro",
+        "operator-ambiguity"
+      ],
+      "macros": [
+        {
+          "name": "\\dyn",
+          "parameters": 1,
+          "expansion": "\\operatorname{mystery}(#1)"
+        }
+      ]
+    },
+    {
+      "id": "cs16-state-neg-020",
+      "lawId": "continuous-state-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "state50.tex",
+          "content": "Let $n\\ne p$. Let $x_{50}\\in\\mathbb R^n$, $u_{50}\\in\\mathbb R^m$, $A_{50}\\in\\mathbb R^{n\\times n}$, and $B_{50}\\in\\mathbb R^{p\\times m}$.\n\\[\\dot{x_{50}}=(A_{50}x_{50})+(B_{50}u_{50})\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\dot{x_{50}}=(A_{50}x_{50})+(B_{50}u_{50})"
+      },
+      "refusalCategory": "grouped-incompatible-sum",
+      "variationTags": [
+        "hard-negative",
+        "grouping",
+        "dimension-mismatch"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-001",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap01.tex",
+          "content": "Let $A$, $P$, and $Q$ be real $n$ by $n$ matrices.\n\\[A^TP+PA=-Q\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A^TP+PA=-Q"
+      },
+      "expectedRoles": {
+        "state-matrix": "A",
+        "certificate": "P",
+        "forcing": "Q"
+      },
+      "variationTags": [
+        "canonical",
+        "english-declarations",
+        "transpose-T"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-002",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap02.tex",
+          "content": "For a continuous-time system, $F,X,R\\in\\mathbb R^{p\\times p}$.\n\\[F^\\top X+XF=-R\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F^\\top X+XF=-R"
+      },
+      "expectedRoles": {
+        "state-matrix": "F",
+        "certificate": "X",
+        "forcing": "R"
+      },
+      "variationTags": [
+        "top-transpose",
+        "membership-declaration",
+        "continuous-time"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-003",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap03.md",
+          "content": "Let $M$ be the system matrix, $H$ the Lyapunov certificate, and $S$ the forcing matrix; all are $d$ by $d$.\n\n$$M^{T}H+HM=-S$$"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "M^{T}H+HM=-S"
+      },
+      "expectedRoles": {
+        "state-matrix": "M",
+        "certificate": "H",
+        "forcing": "S"
+      },
+      "variationTags": [
+        "markdown",
+        "braced-transpose",
+        "role-prose"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-004",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap04.tex",
+          "content": "Let $K,Y,W\\in\\mathbb R^{n\\times n}$. The continuous Lyapunov relation is\n\\[-W=K^{\\top}Y+YK\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "-W=K^{\\top}Y+YK"
+      },
+      "expectedRoles": {
+        "state-matrix": "K",
+        "certificate": "Y",
+        "forcing": "W"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "top-transpose",
+        "display-math"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-005",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap05.tex",
+          "content": "The matrices $L,Z,N$ are square with common order $r$.\n\\[ZL+L^TZ=-N\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "ZL+L^TZ=-N"
+      },
+      "expectedRoles": {
+        "state-matrix": "L",
+        "certificate": "Z",
+        "forcing": "N"
+      },
+      "variationTags": [
+        "reordered-sum",
+        "transpose-T",
+        "common-dimension"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-006",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap06.tex",
+          "content": "Let $C$, $P_c$, and $Q_c$ be $n\\times n$ matrices.\n\\[\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c"
+      },
+      "expectedRoles": {
+        "state-matrix": "C",
+        "certificate": "P_c",
+        "forcing": "Q_c"
+      },
+      "variationTags": [
+        "left-right-grouping",
+        "subscripts",
+        "top-transpose"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-007",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap07.tex",
+          "content": "Let $D$, $X_d$, and $R_d$ be square matrices of size $m$.\n\\begin{align}D^\\top X_d+X_dD&=-R_d\\end{align}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "D^\\top X_d+X_dD&=-R_d"
+      },
+      "expectedRoles": {
+        "state-matrix": "D",
+        "certificate": "X_d",
+        "forcing": "R_d"
+      },
+      "variationTags": [
+        "align-environment",
+        "alignment-marker",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-008",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap08.tex",
+          "content": "Matrices $E,H_e,S_e\\in\\mathbb R^{k\\times k}$ are fixed.\n\\[E^{\\mathsf T}H_e+H_eE=-S_e\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "E^{\\mathsf T}H_e+H_eE=-S_e"
+      },
+      "expectedRoles": {
+        "state-matrix": "E",
+        "certificate": "H_e",
+        "forcing": "S_e"
+      },
+      "variationTags": [
+        "mathsf-transpose",
+        "subscripts",
+        "membership-declaration"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-009",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap09.tex",
+          "content": "Let $F_i$, $P_i$, and $Q_i$ be real square matrices with the same dimension.\n\\[F_i^{\\intercal}P_i+P_iF_i=-Q_i\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_i^{\\intercal}P_i+P_iF_i=-Q_i"
+      },
+      "expectedRoles": {
+        "state-matrix": "F_i",
+        "certificate": "P_i",
+        "forcing": "Q_i"
+      },
+      "variationTags": [
+        "intercal-transpose",
+        "subscripts",
+        "same-dimension"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-010",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap10.tex",
+          "content": "Under real-matrix convention, the prime denotes transpose. Let $G,J,T$ be $n$ by $n$ matrices.\n\\[G'J+JG=-T\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "G'J+JG=-T"
+      },
+      "expectedRoles": {
+        "state-matrix": "G",
+        "certificate": "J",
+        "forcing": "T"
+      },
+      "variationTags": [
+        "prime-transpose",
+        "operator-convention",
+        "english-declarations"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-011",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap11.tex",
+          "content": "Let $A_c,P_c,W_c\\in\\mathbb R^{n\\times n}$.\n\\[A_c^TP_c+P_cA_c=-(W_c)\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_c^TP_c+P_cA_c=-(W_c)"
+      },
+      "expectedRoles": {
+        "state-matrix": "A_c",
+        "certificate": "P_c",
+        "forcing": "W_c"
+      },
+      "variationTags": [
+        "grouped-negation",
+        "subscripts",
+        "transpose-T"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-012",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap12.tex",
+          "content": "Let $B,L_b,N_b$ be square matrices of common dimension.\n\\[0=B^TL_b+L_bB+N_b\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "0=B^TL_b+L_bB+N_b"
+      },
+      "expectedRoles": {
+        "state-matrix": "B",
+        "certificate": "L_b",
+        "forcing": "N_b"
+      },
+      "variationTags": [
+        "zero-form",
+        "reordered-equality",
+        "term-moved"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-013",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap13.tex",
+          "content": "The matrices $C,Y_c,Q_y$ are all $r\\times r$.\n\\[C^\\top Y_c+Y_cC+Q_y=0\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "C^\\top Y_c+Y_cC+Q_y=0"
+      },
+      "expectedRoles": {
+        "state-matrix": "C",
+        "certificate": "Y_c",
+        "forcing": "Q_y"
+      },
+      "variationTags": [
+        "zero-form",
+        "term-moved",
+        "top-transpose"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-014",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap14.tex",
+          "content": "Let $D,Z_d,R_z\\in\\mathbb R^{m\\times m}$.\n\\[R_z=-\\bigl(D^TZ_d+Z_dD\\bigr)\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "R_z=-\\bigl(D^TZ_d+Z_dD\\bigr)"
+      },
+      "expectedRoles": {
+        "state-matrix": "D",
+        "certificate": "Z_d",
+        "forcing": "R_z"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "grouped-negation",
+        "bigl-bigr"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-015",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap15.tex",
+          "content": "Let $E$, $H$, and $S$ denote the state matrix, Lyapunov matrix, and forcing matrix, respectively; each is $n$ by $n$.\n\\[E^TH+HE=-S\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "E^TH+HE=-S"
+      },
+      "expectedRoles": {
+        "state-matrix": "E",
+        "certificate": "H",
+        "forcing": "S"
+      },
+      "variationTags": [
+        "multi-symbol-declaration",
+        "respectively",
+        "role-descriptions"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-016",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap16.tex",
+          "content": "The certificate equation is\n\\[F_{16}^\\top P_{16}+P_{16}F_{16}=-Q_{16}\\]\nwhere $F_{16},P_{16},Q_{16}\\in\\mathbb R^{n\\times n}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_{16}^\\top P_{16}+P_{16}F_{16}=-Q_{16}"
+      },
+      "expectedRoles": {
+        "state-matrix": "F_{16}",
+        "certificate": "P_{16}",
+        "forcing": "Q_{16}"
+      },
+      "variationTags": [
+        "declarations-after-formula",
+        "where-clause",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-017",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap17.tex",
+          "content": "A stability calculation uses $-R_{17}=G_{17}^TX_{17}+X_{17}G_{17}$. Here $G_{17}$, $X_{17}$, and $R_{17}$ are square matrices of order $p$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "-R_{17}=G_{17}^TX_{17}+X_{17}G_{17}"
+      },
+      "expectedRoles": {
+        "state-matrix": "G_{17}",
+        "certificate": "X_{17}",
+        "forcing": "R_{17}"
+      },
+      "variationTags": [
+        "declarations-after-formula",
+        "reordered-equality",
+        "inline-math"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-018",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap18.tex",
+          "content": "\\newcommand{\\Aa}{A_m}\\newcommand{\\Pp}{P_m}\\newcommand{\\Qq}{Q_m}\nLet $A_m,P_m,Q_m\\in\\mathbb R^{n\\times n}$.\n\\[\\Aa^\\top\\Pp+\\Pp\\Aa=-\\Qq\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\Aa^\\top\\Pp+\\Pp\\Aa=-\\Qq"
+      },
+      "expectedRoles": {
+        "state-matrix": "A_m",
+        "certificate": "P_m",
+        "forcing": "Q_m"
+      },
+      "variationTags": [
+        "transparent-macros",
+        "operand-macros",
+        "top-transpose"
+      ],
+      "macros": [
+        {
+          "name": "\\Aa",
+          "expansion": "A_m"
+        },
+        {
+          "name": "\\Pp",
+          "expansion": "P_m"
+        },
+        {
+          "name": "\\Qq",
+          "expansion": "Q_m"
+        }
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-019",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap19.tex",
+          "content": "\\newcommand{\\tr}{^{\\mathsf T}}\nLet $F_m,X_m,R_m\\in\\mathbb R^{p\\times p}$.\n\\[F_m\\tr X_m+X_mF_m=-R_m\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_m\\tr X_m+X_mF_m=-R_m"
+      },
+      "expectedRoles": {
+        "state-matrix": "F_m",
+        "certificate": "X_m",
+        "forcing": "R_m"
+      },
+      "variationTags": [
+        "transparent-macros",
+        "transpose-macro",
+        "mathsf-transpose"
+      ],
+      "macros": [
+        {
+          "name": "\\tr",
+          "expansion": "^{\\mathsf T}"
+        }
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-020",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main20l.tex",
+          "content": "\\input{lyapdefs20}\n\\[A_{20}^TP_{20}+P_{20}A_{20}=-Q_{20}\\]"
+        },
+        {
+          "fileId": "defs",
+          "path": "lyapdefs20.tex",
+          "content": "Let $A_{20}$, $P_{20}$, and $Q_{20}$ be $n$ by $n$ matrices."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{20}^TP_{20}+P_{20}A_{20}=-Q_{20}"
+      },
+      "expectedRoles": {
+        "state-matrix": "A_{20}",
+        "certificate": "P_{20}",
+        "forcing": "Q_{20}"
+      },
+      "variationTags": [
+        "multi-file",
+        "included-declarations",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-021",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main21l.tex",
+          "content": "Let $F_{21},X_{21},R_{21}\\in\\mathbb R^{p\\times p}$.\n\\input{certificate21}"
+        },
+        {
+          "fileId": "cert",
+          "path": "certificate21.tex",
+          "content": "The Lyapunov identity is\n\\[F_{21}^\\top X_{21}+X_{21}F_{21}=-R_{21}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "cert",
+        "needle": "F_{21}^\\top X_{21}+X_{21}F_{21}=-R_{21}"
+      },
+      "expectedRoles": {
+        "state-matrix": "F_{21}",
+        "certificate": "X_{21}",
+        "forcing": "R_{21}"
+      },
+      "variationTags": [
+        "multi-file",
+        "formula-in-include",
+        "project-scope"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-022",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main22l.tex",
+          "content": "\\input{square22}\n\\input{relation22}"
+        },
+        {
+          "fileId": "defs",
+          "path": "square22.tex",
+          "content": "The matrices $M_{22}$, $H_{22}$, and $S_{22}$ are square with common order $d$."
+        },
+        {
+          "fileId": "rel",
+          "path": "relation22.tex",
+          "content": "\\begin{equation}M_{22}^{\\mathsf T}H_{22}+H_{22}M_{22}=-S_{22}\\end{equation}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "rel",
+        "needle": "M_{22}^{\\mathsf T}H_{22}+H_{22}M_{22}=-S_{22}"
+      },
+      "expectedRoles": {
+        "state-matrix": "M_{22}",
+        "certificate": "H_{22}",
+        "forcing": "S_{22}"
+      },
+      "variationTags": [
+        "multi-file",
+        "multiple-includes",
+        "mathsf-transpose"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-023",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap23.md",
+          "content": "# Stability certificate\n\nLet $K_{23},Y_{23},W_{23}\\in\\mathbb R^{n\\times n}$.\n\n$$K_{23}^{\\top}Y_{23}+Y_{23}K_{23}=-W_{23}$$"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "K_{23}^{\\top}Y_{23}+Y_{23}K_{23}=-W_{23}"
+      },
+      "expectedRoles": {
+        "state-matrix": "K_{23}",
+        "certificate": "Y_{23}",
+        "forcing": "W_{23}"
+      },
+      "variationTags": [
+        "markdown",
+        "heading",
+        "top-transpose"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-024",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap24.tex",
+          "content": "Let $L_{24},Z_{24},N_{24}$ be real square matrices of the same size.\n\\[\\left(L_{24}^\\top Z_{24}\\right)+\\left(Z_{24}L_{24}\\right)=-N_{24}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\left(L_{24}^\\top Z_{24}\\right)+\\left(Z_{24}L_{24}\\right)=-N_{24}"
+      },
+      "expectedRoles": {
+        "state-matrix": "L_{24}",
+        "certificate": "Z_{24}",
+        "forcing": "N_{24}"
+      },
+      "variationTags": [
+        "left-right-grouping",
+        "presentation",
+        "subscripts"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-025",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap25.tex",
+          "content": "The calligraphic matrices $\\mathcal A$, $\\mathcal P$, and $\\mathcal Q$ lie in $\\mathbb R^{n\\times n}$.\n\\[\\mathcal A^{\\top}\\mathcal P+\\mathcal P\\mathcal A=-\\mathcal Q\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathcal A^{\\top}\\mathcal P+\\mathcal P\\mathcal A=-\\mathcal Q"
+      },
+      "expectedRoles": {
+        "state-matrix": "\\mathcal A",
+        "certificate": "\\mathcal P",
+        "forcing": "\\mathcal Q"
+      },
+      "variationTags": [
+        "calligraphic-notation",
+        "top-transpose",
+        "membership-declaration"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-026",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap26.tex",
+          "content": "Let $\\mathbf A,\\mathbf P,\\mathbf Q\\in\\mathbb R^{r\\times r}$.\n\\[\\mathbf A^{\\mathsf T}\\mathbf P+\\mathbf P\\mathbf A=-\\mathbf Q\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathbf A^{\\mathsf T}\\mathbf P+\\mathbf P\\mathbf A=-\\mathbf Q"
+      },
+      "expectedRoles": {
+        "state-matrix": "\\mathbf A",
+        "certificate": "\\mathbf P",
+        "forcing": "\\mathbf Q"
+      },
+      "variationTags": [
+        "bold-notation",
+        "mathsf-transpose",
+        "explicit-shapes"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-027",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap27.tex",
+          "content": "Let $A_c^{(1)},P_c^{(1)},Q_c^{(1)}\\in\\mathbb R^{n\\times n}$.\n\\[(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}"
+      },
+      "expectedRoles": {
+        "state-matrix": "A_c^{(1)}",
+        "certificate": "P_c^{(1)}",
+        "forcing": "Q_c^{(1)}"
+      },
+      "variationTags": [
+        "indexed-symbols",
+        "grouped-transpose-base",
+        "transpose-T"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-028",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap28.tex",
+          "content": "Matrices $F_r$, $X_r$, and $R_r$ are all $p$ by $p$.\n\\[F_r ^ {\\top} X_r + X_r F_r = - R_r\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "F_r ^ {\\top} X_r + X_r F_r = - R_r"
+      },
+      "expectedRoles": {
+        "state-matrix": "F_r",
+        "certificate": "X_r",
+        "forcing": "R_r"
+      },
+      "variationTags": [
+        "heavy-spacing",
+        "top-transpose",
+        "presentation"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-029",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap29.tex",
+          "content": "Let $M_a,H_a,S_a\\in\\mathbb R^{d\\times d}$.\n\\begin{aligned}M_a^T H_a&+H_aM_a\\\\&=-S_a\\end{aligned}"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "M_a^T H_a&+H_aM_a\\\\&=-S_a"
+      },
+      "expectedRoles": {
+        "state-matrix": "M_a",
+        "certificate": "H_a",
+        "forcing": "S_a"
+      },
+      "variationTags": [
+        "aligned-line-break",
+        "presentation",
+        "transpose-T"
+      ]
+    },
+    {
+      "id": "cs16-lyap-pos-030",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "established",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap30.tex",
+          "content": "Let $K_b,Y_b,\\Omega_b$ be square matrices with common order $n$.\n\\[-\\Omega_b=\\bigl(K_b^{\\intercal}Y_b\\bigr)+\\bigl(Y_bK_b\\bigr)\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "-\\Omega_b=\\bigl(K_b^{\\intercal}Y_b\\bigr)+\\bigl(Y_bK_b\\bigr)"
+      },
+      "expectedRoles": {
+        "state-matrix": "K_b",
+        "certificate": "Y_b",
+        "forcing": "\\Omega_b"
+      },
+      "variationTags": [
+        "reordered-equality",
+        "intercal-transpose",
+        "grouped-products"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-001",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap31.tex",
+          "content": "Let $n\\ne m$, $A_{31}\\in\\mathbb R^{n\\times n}$, $P_{31}\\in\\mathbb R^{n\\times m}$, and $Q_{31}\\in\\mathbb R^{n\\times n}$.\n\\[A_{31}^TP_{31}+P_{31}A_{31}=-Q_{31}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{31}^TP_{31}+P_{31}A_{31}=-Q_{31}"
+      },
+      "refusalCategory": "nonsquare-certificate",
+      "variationTags": [
+        "hard-negative",
+        "shape",
+        "rectangular-matrix"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-002",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap32.tex",
+          "content": "Let $n\\ne m$, $A_{32}\\in\\mathbb R^{n\\times n}$, $P_{32}\\in\\mathbb R^{m\\times m}$, and $Q_{32}\\in\\mathbb R^{n\\times n}$.\n\\[A_{32}^TP_{32}+P_{32}A_{32}=-Q_{32}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{32}^TP_{32}+P_{32}A_{32}=-Q_{32}"
+      },
+      "refusalCategory": "certificate-dimension-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "incompatible-products",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-003",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap33.tex",
+          "content": "Let $n\\ne m$, $A_{33},P_{33}\\in\\mathbb R^{n\\times n}$ and $Q_{33}\\in\\mathbb R^{m\\times m}$.\n\\[A_{33}^{\\top}P_{33}+P_{33}A_{33}=-Q_{33}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{33}^{\\top}P_{33}+P_{33}A_{33}=-Q_{33}"
+      },
+      "refusalCategory": "forcing-dimension-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "incompatible-equality",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-004",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap34.tex",
+          "content": "Let $A_{34},P_{34},Q_{34}\\in\\mathbb R^{n\\times n}$.\n\\[A_{34}P_{34}+P_{34}A_{34}=-Q_{34}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{34}P_{34}+P_{34}A_{34}=-Q_{34}"
+      },
+      "refusalCategory": "missing-transpose",
+      "variationTags": [
+        "hard-negative",
+        "operator",
+        "near-miss"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-005",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap35.tex",
+          "content": "Let $A_{35},P_{35},Q_{35}\\in\\mathbb R^{n\\times n}$.\n\\[A_{35}^TP_{35}+P_{35}A_{35}^T=-Q_{35}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{35}^TP_{35}+P_{35}A_{35}^T=-Q_{35}"
+      },
+      "refusalCategory": "extra-transpose",
+      "variationTags": [
+        "hard-negative",
+        "operator-placement",
+        "near-miss"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-006",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap36.tex",
+          "content": "Let $A_{36},P_{36},Q_{36}\\in\\mathbb R^{n\\times n}$.\n\\[P_{36}^TA_{36}+A_{36}P_{36}=-Q_{36}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "P_{36}^TA_{36}+A_{36}P_{36}=-Q_{36}"
+      },
+      "refusalCategory": "transpose-on-certificate",
+      "variationTags": [
+        "hard-negative",
+        "wrong-operand",
+        "operator-placement"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-007",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap37.tex",
+          "content": "Let $A_{37},P_{37},Q_{37}\\in\\mathbb R^{n\\times n}$.\n\\[A_{37}^TP_{37}+P_{37}A_{37}=Q_{37}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{37}^TP_{37}+P_{37}A_{37}=Q_{37}"
+      },
+      "refusalCategory": "wrong-forcing-sign",
+      "variationTags": [
+        "hard-negative",
+        "sign",
+        "near-miss"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-008",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap38.tex",
+          "content": "Let $A_{38},P_{38},Q_{38}\\in\\mathbb R^{n\\times n}$.\n\\[A_{38}^TP_{38}A_{38}-P_{38}=-Q_{38}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{38}^TP_{38}A_{38}-P_{38}=-Q_{38}"
+      },
+      "refusalCategory": "discrete-lyapunov-equation",
+      "variationTags": [
+        "hard-negative",
+        "discrete-time",
+        "wrong-law"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-009",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap39.tex",
+          "content": "Let $A_{39},P_{39},Q_{39}\\in\\mathbb R^{n\\times n}$, $B_{39}\\in\\mathbb R^{n\\times m}$, and invertible $R_{39}\\in\\mathbb R^{m\\times m}$.\n\\[A_{39}^TP_{39}+P_{39}A_{39}-P_{39}B_{39}R_{39}^{-1}B_{39}^TP_{39}=-Q_{39}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{39}^TP_{39}+P_{39}A_{39}-P_{39}B_{39}R_{39}^{-1}B_{39}^TP_{39}=-Q_{39}"
+      },
+      "refusalCategory": "riccati-quadratic-term",
+      "variationTags": [
+        "hard-negative",
+        "algebraic-riccati",
+        "extra-term"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-010",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap40.tex",
+          "content": "Let $A_{40},P_{40},Q_{40}\\in\\mathbb R^{n\\times n}$.\n\\[A_{40}^TP_{40}+P_{40}A_{40}\\preceq-Q_{40}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{40}^TP_{40}+P_{40}A_{40}\\preceq-Q_{40}"
+      },
+      "refusalCategory": "matrix-inequality",
+      "variationTags": [
+        "hard-negative",
+        "wrong-relational-operator",
+        "stability-inequality"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-011",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap41.tex",
+          "content": "Let $A_{41},P_{41},Q_{41}$ be same-sized square matrices, and let $\\odot$ denote entrywise multiplication.\n\\[A_{41}^T\\odot P_{41}+P_{41}\\odot A_{41}=-Q_{41}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{41}^T\\odot P_{41}+P_{41}\\odot A_{41}=-Q_{41}"
+      },
+      "refusalCategory": "wrong-product-operator",
+      "variationTags": [
+        "hard-negative",
+        "hadamard-product",
+        "operator"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-012",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap42.tex",
+          "content": "Let $A_{42},P_{42},Q_{42}\\in\\mathbb R^{n\\times n}$.\n\\[A_{42}^TP_{42}-P_{42}A_{42}=-Q_{42}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{42}^TP_{42}-P_{42}A_{42}=-Q_{42}"
+      },
+      "refusalCategory": "wrong-sum-sign",
+      "variationTags": [
+        "hard-negative",
+        "commutator-like",
+        "sign"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-013",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap43.tex",
+          "content": "Let $A_{43},P_{43},Q_{43}\\in\\mathbb R^{n\\times n}$.\n\\[(A_{43}+P_{43})^T+(P_{43}+A_{43})=-Q_{43}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "(A_{43}+P_{43})^T+(P_{43}+A_{43})=-Q_{43}"
+      },
+      "refusalCategory": "wrong-transpose-structure",
+      "variationTags": [
+        "hard-negative",
+        "grouping",
+        "operator-scope"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-014",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap44.tex",
+          "content": "Let $A_{44},P_{44}\\in\\mathbb R^{n\\times n}$ and let $q_{44}\\in\\mathbb R^n$ be a forcing vector.\n\\[A_{44}^TP_{44}+P_{44}A_{44}=-q_{44}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{44}^TP_{44}+P_{44}A_{44}=-q_{44}"
+      },
+      "refusalCategory": "forcing-is-vector",
+      "variationTags": [
+        "hard-negative",
+        "wrong-shape",
+        "forcing-role"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-015",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap45.tex",
+          "content": "A stability discussion introduces $A_{45}$, $P_{45}$, and $Q_{45}$ without declaring their shapes.\n\\[A_{45}^TP_{45}+P_{45}A_{45}=-Q_{45}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{45}^TP_{45}+P_{45}A_{45}=-Q_{45}"
+      },
+      "refusalCategory": "undeclared-matrix-shapes",
+      "variationTags": [
+        "hard-negative",
+        "missing-evidence",
+        "ambiguity"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-016",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main46l.tex",
+          "content": "The isolated relation is\n\\[A_{46}^TP_{46}+P_{46}A_{46}=-Q_{46}\\]"
+        },
+        {
+          "fileId": "unused",
+          "path": "unrelated46l.tex",
+          "content": "Let $A_{46},P_{46},Q_{46}\\in\\mathbb R^{n\\times n}$."
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{46}^TP_{46}+P_{46}A_{46}=-Q_{46}"
+      },
+      "refusalCategory": "out-of-scope-declarations",
+      "variationTags": [
+        "hard-negative",
+        "multi-file",
+        "scope",
+        "unreachable-file"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-017",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap47.tex",
+          "content": "Let $A_{47},P_{47},Q_{47}\\in\\mathbb R^{n\\times n}$. In the same scope, let $P_{47}$ be an $n$-dimensional vector.\n\\[A_{47}^TP_{47}+P_{47}A_{47}=-Q_{47}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{47}^TP_{47}+P_{47}A_{47}=-Q_{47}"
+      },
+      "refusalCategory": "conflicting-certificate-shapes",
+      "variationTags": [
+        "hard-negative",
+        "conflicting-declarations",
+        "ambiguity"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-018",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap48.tex",
+          "content": "Let $A_{48},P_{48},Q_{48}\\in\\mathbb R^{n\\times n}$; no matrix $R_{48}$ is declared.\n\\[A_{48}^TP_{48}+P_{48}A_{48}=-R_{48}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{48}^TP_{48}+P_{48}A_{48}=-R_{48}"
+      },
+      "refusalCategory": "undeclared-forcing-symbol",
+      "variationTags": [
+        "hard-negative",
+        "symbol-mismatch",
+        "missing-role-evidence"
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-019",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap49.tex",
+          "content": "\\newcommand{\\adjoint}{\\operatorname{adj}}\nLet $A_{49},P_{49},Q_{49}\\in\\mathbb R^{n\\times n}$.\n\\[\\adjoint(A_{49})P_{49}+P_{49}A_{49}=-Q_{49}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\adjoint(A_{49})P_{49}+P_{49}A_{49}=-Q_{49}"
+      },
+      "refusalCategory": "opaque-adjoint-operator",
+      "variationTags": [
+        "hard-negative",
+        "macro",
+        "operator-ambiguity"
+      ],
+      "macros": [
+        {
+          "name": "\\adjoint",
+          "expansion": "\\operatorname{adj}"
+        }
+      ]
+    },
+    {
+      "id": "cs16-lyap-neg-020",
+      "lawId": "continuous-lyapunov-equation",
+      "expectation": "refused",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "lyap50.tex",
+          "content": "Let $n\\ne m$ and let $A_{50},P_{50},Q_{50}\\in\\mathbb R^{n\\times m}$ be rectangular matrices.\n\\[A_{50}^TP_{50}+P_{50}A_{50}=-Q_{50}\\]"
+        }
+      ],
+      "mainFileId": "main",
+      "cursor": {
+        "fileId": "main",
+        "needle": "A_{50}^TP_{50}+P_{50}A_{50}=-Q_{50}"
+      },
+      "refusalCategory": "rectangular-common-shape",
+      "variationTags": [
+        "hard-negative",
+        "wrong-shape",
+        "dimension-mismatch"
+      ]
+    }
+  ]
+}
