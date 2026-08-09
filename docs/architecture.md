@@ -37,6 +37,11 @@ the index owns definitions, roles, shapes, quantities, domains, and law
 recognitions. Queries project bounded views from that store instead of building
 parallel fact graphs.
 
+Included documents contribute the same namespaced role, shape, quantity, unit,
+dimension, and evidence records used locally. A per-document external type
+environment is derived from include order; facts never flow backwards across an
+include site or between disconnected components.
+
 Pure extractors derive fact stores from immutable documents. Project mutation,
 reverse-include invalidation, cancellation, and caching form the effectful
 shell. An edit reanalyzes only the changed document and its reverse include
@@ -46,9 +51,11 @@ closure; clean and incremental rebuilds must produce the same semantic result.
 
 Source spelling and layout remain in the structural representation. The
 canonical IR represents a small compositional vocabulary: symbols, numbers,
-relations, sums, products, fractions, powers, applications, derivatives, dot
-and cross products, sets, matrices, and other typed operators. Every node keeps
-source ranges and macro provenance.
+directional relations, sums, products, fractions, powers, multi-argument
+applications, composition, derivatives, dot and cross products, and explicit
+set union, intersection, and membership operators. Operator meaning is not
+encoded as a textbook law name. Every node keeps source ranges and macro
+provenance.
 
 Normalization is layered:
 
@@ -58,6 +65,11 @@ Normalization is layered:
 
 Unknown macros, unresolved roles, incompatible shapes, and contradictory prose
 remain uncertainty. They are never filled in by guesswork.
+
+Transparent macro surfaces supplied by wasmtex may contribute meaning in both
+formulas and prose declarations. Unresolved, cyclic, truncated, or otherwise
+opaque calls contribute no semantic tokens; a command name is not treated as
+its meaning.
 
 ## Domain packs
 
@@ -82,6 +94,10 @@ recognizer changes.
 Inference unifies canonical expressions with typed roles, then checks explicit
 shape, quantity, role, scope, and condition evidence. Candidate and result
 counts are capped. Conclusions preserve their derivation and source ranges.
+Runtime concepts always use the pack-qualified identity
+`<namespace>:<concept>`; display labels are derived views, never an alternate
+identity system. Longer pack vocabulary terms take precedence over embedded
+generic terms, while equal-specificity collisions remain unresolved.
 
 The public meaning states are `established`, `partial`, `ambiguous`,
 `conflicting`, and `unsupported`. Only deterministic results with verified side
@@ -91,7 +107,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 2 exposes selection, `semanticView`, definition, references, rename,
+Protocol 3 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView` is meaning-first: summary, roles, conditions,
 evidence, declarations, conflicts, and refusal are public; raw parser trees are
 not. Native, WASM, Worker, LSP, and CorTeX consume the same result model.

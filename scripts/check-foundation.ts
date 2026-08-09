@@ -104,11 +104,14 @@ const observations = planned.map((item, index): FoundationObservation => {
   ];
   const observation = {
     caseId: item.case.id,
+    conceptIds: [...new Set((view?.context.concepts ?? []).map((entry) => entry.conceptId))],
     diagnosticCodes: [...new Set((view?.diagnostics ?? []).map((entry) => entry.code))],
     dimensions: [...new Set(quantities.map((entry) => entry.dimension.display))],
     quantityKindIds: [...new Set(quantities.flatMap((entry) =>
       entry.quantityKindId ? [entry.quantityKindId] : [],
     ))],
+    relationIds: [...new Set((view?.context.relations ?? []).map((entry) => entry.relationId))],
+    ...(view ? { status: view.status } : {}),
     suiteId: item.suite.id,
     symbols: [...new Set(quantities.map((entry) => entry.symbol))],
     unitIds: [...new Set(quantities.flatMap((entry) => entry.unitId ? [entry.unitId] : []))],

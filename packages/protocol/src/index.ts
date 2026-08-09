@@ -1,4 +1,4 @@
-export const SEMATH_PROTOCOL_VERSION = 2 as const;
+export const SEMATH_PROTOCOL_VERSION = 3 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -172,16 +172,9 @@ export interface SymbolInfo {
 }
 
 export interface RoleInfo {
+  conceptId: string;
   description: string;
   evidence: Evidence;
-  role:
-    | "distribution"
-    | "event"
-    | "function"
-    | "index"
-    | "operator"
-    | "random-variable"
-    | "set";
   symbol: string;
 }
 
@@ -280,17 +273,16 @@ export interface LawBinding {
 export interface LawConditionInfo {
   kind: string;
   label: string;
-  status: "missing" | "verified";
+  status: "required";
 }
 
 export interface LawRecognition {
   bindings: readonly LawBinding[];
   evidence: readonly Evidence[];
-  /** Additive v0.11 metadata; absent in protocol-v1 results from older engines. */
-  conditions?: readonly LawConditionInfo[];
-  description?: string;
-  descriptionKey?: string;
-  maturity?: "completion" | "diagnostic" | "recognition" | "rewrite";
+  conditions: readonly LawConditionInfo[];
+  description: string;
+  descriptionKey: string;
+  maturity: "completion" | "diagnostic" | "recognition" | "rewrite";
   packId: string;
   packVersion: string;
   lawId: string;
@@ -298,7 +290,7 @@ export interface LawRecognition {
   rank: number;
   relation?: RelationInfo;
   result: SemanticConstraint;
-  status?: "condition-missing" | "recognized" | "verified";
+  status: "condition-missing" | "recognized" | "verified";
   title: string;
 }
 

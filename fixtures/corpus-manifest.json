@@ -305,16 +305,25 @@
       "packId": "quantities-units",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] },
-        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] },
         "law-recognition": { "maturity": "unsupported", "suiteIds": [] },
-        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] },
-        "project-macro": { "maturity": "unsupported", "suiteIds": [] },
-        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] }
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["scientific-kernel-foundation"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["quantities-foundation", "scientific-kernel-foundation"] }
       }
     }
   ],
   "foundationSuites": [
+    {
+      "id": "scientific-kernel-foundation",
+      "packId": "quantities-units",
+      "capability": "scientific-kernel",
+      "path": "foundation/scientific-kernel.json",
+      "tier": "evaluated",
+      "minimumCases": 16,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"]
+    },
     {
       "id": "quantities-foundation",
       "packId": "quantities-units",

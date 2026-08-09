@@ -21,7 +21,7 @@ the summary is only a compact view and never replaces the detailed contract.
 | Calculus and analysis | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
 | Discrete mathematics | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 2 / 180 |
 | Optimization and ML | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
-| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, explanation | — | laws, project/macro | 0 / 46 foundation |
+| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 62 foundation |
 
 The seven capabilities are concept vocabulary, English declarations and roles,
 shape/quantity/unit typing, law recognition, diagnostic refusal,

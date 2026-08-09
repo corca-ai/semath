@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "domain": "scientific-kernel-foundation",
+  "cases": [
+    {
+      "id": "event-union-explicit-operator",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $A$ and $B$ denote events. $A\\cup B$" }],
+      "cursor": { "fileId": "main", "needle": "\\cup", "edge": "after" },
+      "expectation": { "status": "established", "relationId": "probability:event-union" },
+      "variationTags": ["operator-change", "membership-declarations", "typed"]
+    },
+    {
+      "id": "event-union-commuted",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "Let $E$ and $F$ denote events. The union is $F \\cup E$." }],
+      "cursor": { "fileId": "main", "needle": "\\cup", "edge": "before" },
+      "expectation": { "status": "established", "relationId": "probability:event-union" },
+      "variationTags": ["english-declarations", "presentation-normalization", "reordered-roles"]
+    },
+    {
+      "id": "event-union-refuses-set-collision",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $A$ and $B$ be ordinary sets, not events. $A\\cup B$" }],
+      "cursor": { "fileId": "main", "needle": "\\cup", "edge": "after" },
+      "expectation": { "excludedRelationId": "probability:event-union" },
+      "variationTags": ["hard-negative", "role-conflict", "safe-refusal"]
+    },
+    {
+      "id": "matrix-application-typed",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $A$ be an m by n matrix, $x$ an n-dimensional vector, and $y$ an m-dimensional vector. $y=A(x)$" }],
+      "cursor": { "fileId": "main", "needle": "A(x)", "edge": "after" },
+      "expectation": { "status": "established", "relationId": "linear-algebra:matrix-vector-product" },
+      "variationTags": ["explicit-shapes", "parenthesized", "typed"]
+    },
+    {
+      "id": "function-call-refuses-current-guess",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $V$ be voltage, $I$ a function, and $R$ resistance. $V=I(R)$" }],
+      "cursor": { "fileId": "main", "needle": "I(R)", "edge": "before" },
+      "expectation": { "excludedRelationId": "circuits:ohm-law" },
+      "variationTags": ["notation-collision", "role-conflict", "safe-refusal"]
+    },
+    {
+      "id": "namespaced-concept-identity",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "Let $J$ be an objective function. The value is $J$." }],
+      "cursor": { "fileId": "main", "needle": "value is $J", "edge": "after" },
+      "expectation": { "conceptId": "optimization-ml:objective-function" },
+      "variationTags": ["english-declarations", "role-descriptions", "typed"]
+    },
+    {
+      "id": "project-role-export",
+      "documents": [
+        { "fileId": "main", "path": "main.tex", "content": "\\input{types}\n$V=RI$" },
+        { "fileId": "types", "path": "types.tex", "content": "Let $V$ be voltage, $R$ resistance, and $I$ electric current." }
+      ],
+      "cursor": { "fileId": "main", "needle": "V=RI", "edge": "before" },
+      "expectation": { "status": "established", "relationId": "circuits:ohm-law" },
+      "variationTags": ["included-declarations", "multi-file", "project-scope"]
+    },
+    {
+      "id": "project-role-refuses-backflow",
+      "documents": [
+        { "fileId": "main", "path": "main.tex", "content": "$V=RI$\n\\input{types}" },
+        { "fileId": "types", "path": "types.tex", "content": "Let $V$ be voltage, $R$ resistance, and $I$ electric current." }
+      ],
+      "cursor": { "fileId": "main", "needle": "V=RI", "edge": "before" },
+      "expectation": { "excludedConceptId": "quantities-units:voltage" },
+      "variationTags": ["forward-scope", "safe-refusal", "scope-boundary"]
+    },
+    {
+      "id": "transparent-prose-quantity-macro",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "\\newcommand{\\velocity}{velocity}\nLet $v$ be \\velocity. The value is $v$." }],
+      "cursor": { "fileId": "main", "needle": "value is $v", "edge": "after" },
+      "expectation": { "quantityKindId": "quantities-units:velocity", "symbol": "v" },
+      "variationTags": ["transparent-macro", "role-prose", "unit-context"]
+    },
+    {
+      "id": "opaque-prose-quantity-macro-refuses",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $v$ be \\unknownvelocity. The value is $v$." }],
+      "cursor": { "fileId": "main", "needle": "value is $v", "edge": "after" },
+      "expectation": { "excludedQuantityKindId": "quantities-units:velocity" },
+      "variationTags": ["opaque-macro", "safe-refusal", "unresolved-scope"]
+    },
+    {
+      "id": "membership-declared-state-equation",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n\\begin{align}\\dot{a}&=F_a a+G_a b\\end{align}" }],
+      "cursor": { "fileId": "main", "needle": "\\dot{a}&=F_a a+G_a b", "edge": "after" },
+      "expectation": { "relationId": "control-systems:continuous-state-equation" },
+      "variationTags": ["alignment-marker", "membership-declarations", "subscripts"]
+    },
+    {
+      "id": "unit-declared-mechanical-power",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "During steady translation, $P$ is measured in watts, $F$ in newtons, and $v$ in metres per second along the force. Thus \\[P=F\\,v\\]" }],
+      "cursor": { "fileId": "main", "needle": "P=F\\,v", "edge": "before" },
+      "expectation": { "relationId": "classical-mechanics:mechanical-power" },
+      "variationTags": ["one-dimensional", "unit-explicit", "role-prose"]
+    },
+    {
+      "id": "grouped-kinetic-energy",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The calculation shows \\[K=\\tfrac{1}{2}m(v)^{2}\\] The notation note identifies $K$ as kinetic energy, $m$ as mass, and $v$ as speed." }],
+      "cursor": { "fileId": "main", "needle": "K=\\tfrac{1}{2}m(v)^{2}", "edge": "after" },
+      "expectation": { "relationId": "classical-mechanics:kinetic-energy-definition" },
+      "variationTags": ["declarations-after", "grouping", "presentation-normalization"]
+    },
+    {
+      "id": "time-domain-application",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "For an ideal time-invariant resistor, \\[v(t)=R\\,i(t)\\]." }],
+      "cursor": { "fileId": "main", "needle": "v(t)=R\\,i(t)", "edge": "after" },
+      "expectation": { "relationId": "circuits:ohm-law" },
+      "variationTags": ["function-application", "lowercase", "time-domain"]
+    },
+    {
+      "id": "greek-state-equation",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n\\begin{equation}\\dot{\\rho}=U\\rho+V\\sigma\\end{equation}" }],
+      "cursor": { "fileId": "main", "needle": "\\dot{\\rho}=U\\rho+V\\sigma", "edge": "before" },
+      "expectation": { "relationId": "control-systems:continuous-state-equation" },
+      "variationTags": ["greek-symbols", "membership-declarations", "role-prose"]
+    },
+    {
+      "id": "vector-norm-kinetic-energy",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $K$ be scalar kinetic energy, $m$ scalar mass, and $\\mathbf{v}$ the velocity vector. Then $K=\\frac12m\\lVert \\mathbf{v}\\rVert^{2}$." }],
+      "cursor": { "fileId": "main", "needle": "K=\\frac12m\\lVert \\mathbf{v}\\rVert^{2}", "edge": "after" },
+      "expectation": { "relationId": "classical-mechanics:kinetic-energy-definition" },
+      "variationTags": ["norm-squared", "shape-explicit", "vector-notation"]
+    }
+  ]
+}

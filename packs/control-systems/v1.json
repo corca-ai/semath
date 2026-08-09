@@ -184,7 +184,10 @@
         "control system",
         "state-space",
         "state transition",
-        "control input"
+        "control input",
+        "state vector",
+        "system matrix",
+        "system matrices"
       ],
       "references": [
         "linear-system-theory"

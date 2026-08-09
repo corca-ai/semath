@@ -16,7 +16,7 @@ const mathRegions = [...content.matchAll(/\$([^$]+)\$/g)].map((match) => ({
   },
 }));
 engine.reset({
-  protocolVersion: 2,
+  protocolVersion: 3,
   epoch,
   inventoryVersion: 1,
   projectId: "example",
@@ -35,7 +35,7 @@ engine.reset({
   ],
 });
 const result = engine.query({
-  protocolVersion: 2,
+  protocolVersion: 3,
   epoch,
   inventoryVersion: 1,
   documentVersion: 1,

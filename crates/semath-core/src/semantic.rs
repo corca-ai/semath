@@ -109,12 +109,12 @@ impl SemanticClaims {
         for observation in &self.observations {
             match observation {
                 SemanticObservation::Role(role) => {
-                    let concept_id = format!("semath:{}", role.role);
+                    let concept_id = role.concept_id.clone();
                     concepts
                         .entry(concept_id.clone())
                         .or_insert_with(|| ConceptInfo {
                             concept_id,
-                            label: role_label(&role.role),
+                            label: role_label(&role.concept_id),
                             description: role.description.clone(),
                             evidence: role.evidence.clone(),
                         });
@@ -216,19 +216,31 @@ impl SemanticFactStore {
         symbol: Option<String>,
         semantic_id: Option<SemanticSymbolId>,
         offset: u32,
+        external: Option<&ExternalTypeEnvironment>,
     ) -> SemanticContextInfo {
-        let roles = symbol
+        let mut roles = symbol
             .as_deref()
             .map(|name| self.roles.roles_at(name, offset).0)
             .unwrap_or_default();
-        let shapes = symbol
+        let mut shapes = symbol
             .as_deref()
             .map(|name| self.shapes.claims_at(name, offset).0)
             .unwrap_or_default();
-        let quantities = symbol
+        let mut quantities = symbol
             .as_deref()
             .map(|name| self.quantities.at(name, offset).0)
             .unwrap_or_default();
+        if let (Some(name), Some(external)) = (symbol.as_deref(), external) {
+            roles.extend(external.roles_at(offset, name));
+            shapes.extend(external.shapes_at(offset, name));
+            quantities.extend(external.quantities_at(offset, name));
+            roles.sort_by(|left, right| left.concept_id.cmp(&right.concept_id));
+            roles.dedup();
+            shapes.sort_by(|left, right| left.kind.cmp(&right.kind));
+            shapes.dedup();
+            quantities.sort_by(|left, right| left.display.cmp(&right.display));
+            quantities.dedup();
+        }
         let formulas = self.laws.at(offset);
         let relations = formulas
             .iter()
@@ -263,7 +275,7 @@ fn claim_from_observation(observation: &SemanticObservation) -> SemanticClaimInf
         ),
         SemanticObservation::Role(role) => (
             "concept",
-            format!("semath:{}", role.role),
+            role.concept_id.clone(),
             vec![role.evidence.clone()],
         ),
         SemanticObservation::Shape(shape) => {
@@ -341,11 +353,14 @@ fn mark_concept_conflicts(claims: &mut [SemanticClaimInfo]) {
 }
 
 fn concept_role(concept_id: &str) -> Option<&str> {
-    concept_id.strip_prefix("semath:")
+    concept_id.split(':').next_back()
 }
 
 fn role_label(role: &str) -> String {
-    role.split('-')
+    role.split(':')
+        .next_back()
+        .unwrap_or(role)
+        .split('-')
         .map(|part| {
             let mut characters = part.chars();
             characters.next().map_or_else(String::new, |first| {
@@ -364,7 +379,7 @@ mod tests {
     fn role(role: &str, start: u32) -> RoleInfo {
         RoleInfo {
             symbol: "x".into(),
-            role: role.into(),
+            concept_id: format!("test:{role}"),
             description: format!("an explicit {role}"),
             evidence: Evidence {
                 rule_id: format!("test/{role}"),
@@ -390,7 +405,7 @@ mod tests {
         )
         .context(Some("x".into()), None);
 
-        assert_eq!(context.concepts[0].concept_id, "semath:state-vector");
+        assert_eq!(context.concepts[0].concept_id, "test:state-vector");
         assert_eq!(context.concepts[0].label, "State Vector");
         assert_eq!(context.claims[0].status, SemanticClaimStatus::Certain);
     }
