@@ -13,25 +13,45 @@ static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, bool)>> = LazyLock::n
     let mut terms = built_in_packs()
         .iter()
         .flat_map(|pack| {
-            let vocabulary = pack.roles.iter().chain(&pack.operators).map(|entry| {
-                (
-                    entry.id.as_str(),
-                    format!("{}:{}", pack.namespace, entry.id),
-                    false,
-                )
-            });
-            let law_roles = pack.laws.iter().flat_map(|law| {
-                law.roles.iter().filter_map(|role| {
-                    let concept = role.concept.split(':').next_back()?;
-                    Some((concept, role.concept.clone(), true))
+            let mut entries = pack
+                .roles
+                .iter()
+                .chain(&pack.operators)
+                .map(|entry| {
+                    (
+                        entry.id.clone(),
+                        format!("{}:{}", pack.namespace, entry.id),
+                        false,
+                    )
                 })
-            });
-            vocabulary.chain(law_roles)
+                .collect::<Vec<_>>();
+            for concept in &pack.concepts {
+                let concept_id = format!("{}:{}", pack.namespace, concept.id);
+                entries.extend(
+                    concept
+                        .aliases
+                        .iter()
+                        .cloned()
+                        .map(|alias| (alias, concept_id.clone(), true)),
+                );
+            }
+            for law in &pack.laws {
+                for role in &law.roles {
+                    if let Some(concept) = role.concept.split(':').next_back() {
+                        entries.push((concept.into(), role.concept.clone(), true));
+                    }
+                }
+            }
+            entries
         })
-        .filter(|(role, _, _)| !matches!(*role, "matrix" | "scalar" | "tensor" | "vector"))
+        .filter(|(role, _, _)| !matches!(role.as_str(), "matrix" | "scalar" | "tensor" | "vector"))
         .map(|(role, concept_id, law_backed)| {
             (
-                role.split('-').map(str::to_owned).collect::<Vec<_>>(),
+                role.to_ascii_lowercase()
+                    .replace('-', " ")
+                    .split_whitespace()
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>(),
                 concept_id,
                 law_backed,
             )
@@ -245,7 +265,7 @@ fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<Scoped
 }
 
 fn classify_role(description: &str) -> Option<String> {
-    let semantic_description = [" along ", " through ", " across "]
+    let semantic_description = [" along ", " through ", " across ", " normal to "]
         .iter()
         .find_map(|separator| description.split_once(separator).map(|(head, _)| head))
         .unwrap_or(description);
@@ -582,7 +602,7 @@ mod tests {
         let source = "Let $A$ denote a linear operator.\n$A$ is a function.\nLet $p$ denote a probability distribution.\n$p \\in \\mathbb{R}^{n}$\nLet $x$ denote an input.\n$x$ is an output.";
         let analysis = analyze(source);
         assert!(analysis.diagnostics.is_empty());
-        assert_eq!(analysis.roles.len(), 3);
+        assert_eq!(analysis.roles.len(), 4);
     }
 
     #[test]

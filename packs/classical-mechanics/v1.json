@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "packId": "classical-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -170,6 +170,24 @@
       "references": [
         "classical-mechanics"
       ]
+    },
+    {
+      "id": "linear-momentum-definition",
+      "title": "Linear momentum",
+      "description": "Linear momentum equals inertial mass multiplied by velocity.",
+      "roles": [
+        { "id": "momentum", "concept": "quantities-units:momentum", "description": "Linear momentum.", "notation": ["p"] },
+        { "id": "mass", "concept": "quantities-units:mass", "description": "Inertial mass.", "shape": "scalar", "notation": ["m"] },
+        { "id": "velocity", "concept": "quantities-units:velocity", "description": "Velocity in the active frame.", "notation": ["v"] }
+      ],
+      "semanticForms": [
+        "momentum = mass velocity",
+        "momentum = mass \\cdot velocity"
+      ],
+      "conditions": [
+        "Mass and velocity refer to one body in one nonrelativistic frame."
+      ],
+      "references": ["classical-mechanics"]
     }
   ],
   "activationRules": [
@@ -184,6 +202,7 @@
           "kinetic energy",
           "mechanical power",
           "instantaneous power",
+          "linear momentum",
           "newtons",
           "joules",
           "watts"

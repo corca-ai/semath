@@ -1,0 +1,578 @@
+{
+  "cases": [
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "a = b c"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-output",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "cross-field-1",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Let $a$ denote pressure scalar, $b$ denote mass scalar, and $c$ denote velocity scalar.\n\n$a = b c$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-01",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "d = e f"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-input",
+        "projectTopology": "appendix-file",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "cross-field-2",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "\\input{roles}\n\\[d = e f\\]",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "Suppose $d$ is cyclic frequency scalar, $e$ is electric charge scalar, and $f$ is electric field vector.",
+          "fileId": "roles",
+          "path": "appendices/roles.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-02",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g = h i"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "cross-domain-role",
+        "projectTopology": "context-file",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "cross-field-3",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "We write $g$ for electric potential energy scalar. We write $h$ for volumetric flow rate scalar. We write $i$ for electric potential scalar.\n\n\\begin{equation}g = h i\\end{equation}",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "This supporting file intentionally contributes no declarations.",
+          "fileId": "context-3",
+          "path": "context-3.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-03",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "j = k l"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "dimension-collision",
+        "projectTopology": "definitions-file",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "cross-field-4",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "\\input{roles}\n$ {j = k l} $",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "Let $j$, $k$, and $l$ denote pressure scalar, terminal voltage scalar, and electric current scalar, respectively.",
+          "fileId": "roles",
+          "path": "definitions.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-04",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "m = n o p"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "shape-collision",
+        "projectTopology": "nested-section",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "cross-field-5",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Let $m$ denote electric charge scalar, $n$ denote mass scalar, $o$ denote specific heat capacity scalar, and $p$ denote temperature change scalar.\n\n$m = n o p$",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "This supporting file intentionally contributes no declarations.",
+          "fileId": "context-5",
+          "path": "sections/context-5.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-05",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "q = r s t"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "cross-field-6",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "Suppose $q$ is terminal voltage scalar, $r$ is fluid density scalar, $s$ is cross-sectional area scalar, and $t$ is velocity scalar.\n\n\\[q = r s t\\]",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-06",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u = v w x"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "missing-term",
+        "projectTopology": "appendix-file",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "cross-field-7",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "\\input{roles}\n\\begin{equation}u = v w x\\end{equation}",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "We write $u$ for hydrostatic pressure scalar. We write $v$ for fluid density scalar. We write $w$ for gravitational acceleration scalar. We write $x$ for time variable.",
+          "fileId": "roles",
+          "path": "appendices/roles.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-07",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "y = z / a"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-constant",
+        "projectTopology": "context-file",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "cross-field-8",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Let $y$, $z$, and $a$ denote heat-transfer rate scalar, thermal conductivity scalar, and wall thickness scalar, respectively.\n\n$ {y = z / a} $",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "This supporting file intentionally contributes no declarations.",
+          "fileId": "context-8",
+          "path": "context-8.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-08",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "b = c - d"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-output",
+        "projectTopology": "definitions-file",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "cross-field-9",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "\\input{roles}\n$b = c - d$",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "Let $b$ denote terminal voltage scalar, $c$ denote heat added to the system scalar, and $d$ denote work done by the system scalar.",
+          "fileId": "roles",
+          "path": "definitions.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-09",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "e = 2 f g"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-input",
+        "projectTopology": "nested-section",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "cross-field-10",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "Suppose $e$ is angular frequency scalar, $f$ is fluid density scalar, and $g$ is cyclic frequency scalar.\n\n\\[e = 2 f g\\]",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "This supporting file intentionally contributes no declarations.",
+          "fileId": "context-10",
+          "path": "sections/context-10.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-10",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "h = 1 / i"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "cross-domain-role",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "cross-field-11",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "We write $h$ for electric current scalar. We write $i$ for signal period scalar.\n\n\\begin{equation}h = 1 / i\\end{equation}",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-11",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "j = k l"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "dimension-collision",
+        "projectTopology": "appendix-file",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "cross-field-12",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "\\input{roles}\n$ {j = k l} $",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "Let $j$, $k$, and $l$ denote wave propagation speed scalar, cyclic frequency scalar, and time variable, respectively.",
+          "fileId": "roles",
+          "path": "appendices/roles.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-12",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "m = n \\frac{d o}{d p}"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "shape-collision",
+        "projectTopology": "context-file",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "cross-field-13",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Let $m$ denote terminal voltage scalar, $n$ denote capacitance scalar, $o$ denote electric current scalar, and $p$ denote time variable.\n\n$m = n \\frac{d o}{d p}$",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "This supporting file intentionally contributes no declarations.",
+          "fileId": "context-13",
+          "path": "context-13.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-13",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "q = R s + S t"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "definitions-file",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "cross-field-14",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "\\input{roles}\n\\[q = R s + S t\\]",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "Suppose $q$ is force vector, $R$ is output matrix, $s$ is state vector, $S$ is feedthrough matrix, and $t$ is control input vector.",
+          "fileId": "roles",
+          "path": "definitions.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-14",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u = \\frac{1}{2} v w^2"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "missing-term",
+        "projectTopology": "nested-section",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "cross-field-15",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "We write $u$ for capacitance scalar. We write $v$ for mass scalar. We write $w$ for velocity scalar.\n\n\\begin{equation}u = \\frac{1}{2} v w^2\\end{equation}",
+          "fileId": "main",
+          "path": "main.tex"
+        },
+        {
+          "content": "This supporting file intentionally contributes no declarations.",
+          "fileId": "context-15",
+          "path": "sections/context-15.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-15",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "main",
+        "needle": "x = y z"
+      },
+      "diversity": {
+        "batch": "engineering-cross-field",
+        "mutationFamily": "wrong-constant",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "cross-field-16",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Let $x$, $y$, and $z$ denote internal-energy change scalar, inductance scalar, and electric current scalar, respectively.\n\n$ {x = y z} $",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": "refused",
+      "id": "engineering-cross-field-16",
+      "refusalCategory": "cross-field-role-collision",
+      "variationTags": [
+        "hard-negative",
+        "safe-refusal",
+        "role-conflict",
+        "shape-explicit",
+        "conventional-notation"
+      ]
+    }
+  ],
+  "domain": "engineering-cross-field",
+  "schemaVersion": 2
+}

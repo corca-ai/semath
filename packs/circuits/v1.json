@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "packId": "circuits",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -164,6 +164,23 @@
       "references": [
         "engineering-circuits"
       ]
+    },
+    {
+      "id": "inductor-voltage-law",
+      "title": "Inductor voltage law",
+      "description": "Inductor voltage equals inductance times the current derivative.",
+      "roles": [
+        { "id": "voltage", "concept": "quantities-units:voltage", "description": "Inductor terminal voltage.", "notation": ["V", "v", "u"] },
+        { "id": "inductance", "concept": "quantities-units:inductance", "description": "Inductance.", "shape": "scalar", "notation": ["L"] },
+        { "id": "current", "concept": "quantities-units:electric-current", "description": "Inductor current.", "notation": ["I", "i", "j"] },
+        { "id": "time", "concept": "quantities-units:duration", "description": "Time variable.", "notation": ["t", "tau"] }
+      ],
+      "semanticForms": [
+        "voltage = inductance \\frac{d current}{d time}",
+        "voltage = -inductance \\frac{d current}{d time}"
+      ],
+      "conditions": ["The voltage and current reference directions use one stated sign convention."],
+      "references": ["engineering-circuits"]
     }
   ],
   "activationRules": [
@@ -180,6 +197,8 @@
           "node balance",
           "capacitor",
           "capacitance",
+          "inductor",
+          "inductance",
           "farads",
           "passive-sign"
       ],

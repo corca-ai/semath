@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 5,
+  "packId": "fluid-mechanics",
+  "packVersion": "1.0.0",
+  "packKind": "field",
+  "namespace": "fluid-mechanics",
+  "title": "Fluid mechanics",
+  "description": "Evidence-gated incompressible flow-rate and hydrostatic relations.",
+  "dependencies": [{
+    "packId": "quantities-units",
+    "versionMajor": 1,
+    "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"]
+  }],
+  "capabilities": {
+    "provides": ["fluid-mechanics:law-relations", "semath:formula-recognition"],
+    "requires": ["semath:dimensional-analysis", "semath:quantities"]
+  },
+  "concepts": [
+    { "id": "flow-section", "conceptKind": "entity", "title": "Flow section", "description": "A cross-section normal to a stated mean flow velocity.", "parents": [], "references": ["fluid-mechanics"] },
+    { "id": "incompressible-flow", "conceptKind": "system", "title": "Incompressible flow", "description": "A flow modeled with constant density.", "parents": [], "references": ["fluid-mechanics"] },
+    { "id": "hydrostatic-state", "conceptKind": "system", "title": "Hydrostatic state", "description": "A fluid at rest in a stated gravitational field.", "parents": [], "references": ["fluid-mechanics"] }
+  ],
+  "quantityKinds": [],
+  "units": [],
+  "laws": [
+    {
+      "id": "volumetric-flow-rate",
+      "title": "Volumetric flow rate",
+      "description": "Uniform volumetric flow rate equals area times mean normal velocity.",
+      "roles": [
+        { "id": "flow-rate", "concept": "quantities-units:volumetric-flow-rate", "description": "Volumetric flow rate.", "shape": "scalar", "notation": ["Q", "q"] },
+        { "id": "area", "concept": "quantities-units:area", "description": "Flow cross-sectional area.", "shape": "scalar", "notation": ["A"] },
+        { "id": "velocity", "concept": "quantities-units:velocity", "description": "Mean normal flow velocity.", "shape": "scalar", "notation": ["v", "V", "u"] }
+      ],
+      "semanticForms": ["flow-rate = area velocity", "flow-rate = area \\cdot velocity"],
+      "conditions": ["Velocity is the area-mean component normal to the stated cross-section."],
+      "references": ["fluid-mechanics"]
+    },
+    {
+      "id": "mass-flow-rate",
+      "title": "Mass flow rate",
+      "description": "Uniform mass flow rate equals density times area times mean normal velocity.",
+      "roles": [
+        { "id": "mass-flow-rate", "concept": "quantities-units:mass-flow-rate", "description": "Mass flow rate.", "shape": "scalar", "notation": ["m", "M"] },
+        { "id": "density", "concept": "quantities-units:density", "description": "Fluid density.", "shape": "scalar", "notation": ["rho", "d"] },
+        { "id": "area", "concept": "quantities-units:area", "description": "Flow cross-sectional area.", "shape": "scalar", "notation": ["A"] },
+        { "id": "velocity", "concept": "quantities-units:velocity", "description": "Mean normal flow velocity.", "shape": "scalar", "notation": ["v", "V", "u"] }
+      ],
+      "semanticForms": ["mass-flow-rate = density area velocity"],
+      "conditions": ["Density and mean normal velocity are uniform over the stated section."],
+      "references": ["fluid-mechanics"]
+    },
+    {
+      "id": "hydrostatic-pressure",
+      "title": "Hydrostatic pressure difference",
+      "description": "Hydrostatic pressure difference equals density times gravitational acceleration times height difference.",
+      "roles": [
+        { "id": "pressure", "concept": "quantities-units:pressure", "description": "Hydrostatic pressure difference.", "shape": "scalar", "notation": ["p", "P"] },
+        { "id": "density", "concept": "quantities-units:density", "description": "Constant fluid density.", "shape": "scalar", "notation": ["rho", "d"] },
+        { "id": "acceleration", "concept": "quantities-units:acceleration", "description": "Gravitational acceleration magnitude.", "shape": "scalar", "notation": ["g", "a"] },
+        { "id": "height", "concept": "quantities-units:length", "description": "Signed height or depth difference.", "shape": "scalar", "notation": ["h", "z"] }
+      ],
+      "semanticForms": ["pressure = density acceleration height"],
+      "conditions": ["The fluid is at rest, density is constant, and the stated vertical sign convention is used."],
+      "references": ["fluid-mechanics"]
+    }
+  ],
+  "activationRules": [{
+    "id": "fluid-vocabulary",
+    "topic": "foundations",
+    "patterns": ["fluid mechanics", "incompressible flow", "flow section", "volumetric flow", "mass flow", "fluid density", "hydrostatic", "pressure head"],
+    "references": ["fluid-mechanics"]
+  }],
+  "roles": [],
+  "operators": [],
+  "references": [{ "id": "fluid-mechanics", "title": "Fluid Mechanics", "citation": "Frank M. White, Fluid Mechanics, 8th edition, McGraw-Hill, 2016." }]
+}

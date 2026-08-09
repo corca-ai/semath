@@ -6,20 +6,22 @@ holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 1,890 authored law cases cover 17 laws in nine packs, including 48 positive
+- 3,050 authored law cases cover 32 laws in twelve packs, including 48 positive
   and 32 refusal diversity cases for every promoted law.
-- 157 deterministic metamorphic cases preserve results under irrelevant prose,
+- 249 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
 - All law families currently score 100% for recall, precision, role binding,
   source-linked evidence, and refusal preservation.
-- The quantities/units foundation passes 46 of 46 non-law cases for quantity,
+- The quantities/units foundation passes 52 of 52 non-law cases for quantity,
   unit, dimension, propagation diagnostics, notation, prose, and role evidence.
-- The shared scientific-kernel foundation passes 16 of 16 positive and refusal
-  cases across explicit operators, typed application, namespaced concepts,
-  include order, and transparent or opaque prose macros.
-- Linear algebra and probability meet evaluated policy. Calculus, discrete
-  mathematics, and optimization have useful probe families but do not claim
-  field-wide coverage from one or two law families.
+- The shared scientific-kernel and scientific-prose foundations pass 50 of 50
+  positive and refusal cases across explicit operators, typed application,
+  namespaced concepts, include order, and transparent or opaque prose macros.
+- Mechanics, circuits, control, signals and systems, linear algebra, and
+  probability meet evaluated policy. Electromagnetism, thermodynamics/heat
+  transfer, and fluid mechanics have useful three-law probe verticals.
+  Calculus, discrete mathematics, and optimization have useful probe families,
+  but none of these probe packs claims field-wide coverage.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -38,6 +40,8 @@ field completeness.
 | Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 4 and the core use pack-qualified concept identities without a legacy role field |
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
+| Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |
+| Pack vocabulary | Natural concept paraphrases required runtime vocabulary edits | Schema 5 adds reviewed concept aliases consumed by the generic classifier |
 
 ## Remaining measured gaps
 
@@ -45,7 +49,7 @@ field completeness.
 | --- | --- | --- |
 | Generic IR | Indexed families, partial derivatives, gradients, integrals, and operator result typing do not yet share a complete constraint path | Calculus, optimization, linear algebra, and control systems |
 | Constraints | Side conditions are reported but not uniformly represented as reusable typed constraints over independent variables, domains, shapes, and assumptions | Matrix products, derivatives, optimization updates, and engineering laws |
-| Coverage | Probe packs demonstrate runtime viability, not broad field recognition | Calculus, discrete mathematics, and optimization/ML |
+| Coverage | Probe packs demonstrate coherent vertical slices, not broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by

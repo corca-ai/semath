@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath 0.17 compiles schema-4 JSON packs into one bounded Rust semantic
+Semath 0.17 compiles schema-5 JSON packs into one bounded Rust semantic
 runtime. Packs contain concepts, roles, laws, semantic forms, conditions,
 quantities, units, activation evidence, and references. They contain no
 executable code.
@@ -13,15 +13,19 @@ the summary is only a compact view and never replaces the detailed contract.
 
 | Pack | Summary | Evaluated capabilities | Probe capabilities | Unsupported | Laws / authored cases |
 | --- | --- | --- | --- | --- | ---: |
-| Circuits | evaluated | all seven | — | — | 3 / 390 |
-| Classical mechanics | evaluated | all seven | — | — | 3 / 390 |
-| Control systems | evaluated | all seven | — | — | 2 / 260 |
+| Circuits | evaluated | all seven | — | — | 4 / 470 |
+| Classical mechanics | evaluated | all seven | — | — | 4 / 470 |
+| Control systems | evaluated | all seven | — | — | 3 / 340 |
+| Signals and systems | evaluated | all seven | — | — | 3 / 240 |
 | Linear algebra | evaluated | all seven | — | — | 3 / 270 |
 | Probability | evaluated | all seven | — | — | 2 / 180 |
+| Electromagnetism | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 3 / 240 |
+| Thermodynamics and heat transfer | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 3 / 240 |
+| Fluid mechanics | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 3 / 240 |
 | Calculus and analysis | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
 | Discrete mathematics | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 2 / 180 |
 | Optimization and ML | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
-| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 96 foundation |
+| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 102 foundation |
 
 The seven capabilities are concept vocabulary, English declarations and roles,
 shape/quantity/unit typing, law recognition, diagnostic refusal,
@@ -41,9 +45,10 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 4`, stable identity and SemVer, dependencies,
-concepts, and typed laws. A law supplies canonical semantic forms and roles
-with optional concept, shape, quantity, notation, and variadic constraints.
+Each pack declares `schemaVersion: 5`, stable identity and SemVer, dependencies,
+concepts, and typed laws. Concepts may declare reviewed English aliases. A law
+supplies canonical semantic forms and roles with a required semantic concept
+and optional orthogonal quantity, shape, notation, and variadic constraints.
 
 The Rust compiler rejects unknown fields, duplicate identities, dependency
 cycles, missing or wrong-kind targets, invalid capability edges, inconsistent
@@ -78,7 +83,7 @@ automatic; no Rust registry or recognizer branch is edited. Then use
 reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of editable positive and refusal seeds,
-not evidence of maturity by itself. The checked-in schema-4 pack files and the
+not evidence of maturity by itself. The checked-in schema-5 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance, foundation, and corpus evaluation.

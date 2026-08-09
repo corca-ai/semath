@@ -81,10 +81,10 @@ its meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 4 describes namespaced concepts, typed law roles, semantic forms,
-conditions, activation evidence, quantities, units, and references. The generic
-unifier applies every compiled law; selecting a pack or law in orchestration
-code is forbidden.
+Schema 5 describes namespaced concepts and reviewed English aliases, typed law
+roles, semantic forms, conditions, activation evidence, quantities, units, and
+references. The generic unifier applies every compiled law; selecting a pack or
+law in orchestration code is forbidden.
 
 Pack compilation rejects unknown fields, unresolved or wrong-kind concepts,
 invalid dependencies, cycles, and inconsistent dimensions. A build-generated,
@@ -110,6 +110,9 @@ recognizer changes.
 Inference unifies canonical expressions with typed roles, then checks explicit
 shape, quantity, role, scope, and condition evidence. Candidate and result
 counts are capped. Conclusions preserve their derivation and source ranges.
+Every law role has a semantic concept and may additionally constrain a physical
+quantity. These are orthogonal: a calculus variable can carry a duration, while
+two different physical quantities remain incompatible.
 Runtime concepts always use the pack-qualified identity
 `<namespace>:<concept>`; display labels are derived views, never an alternate
 identity system. Longer pack vocabulary terms take precedence over embedded

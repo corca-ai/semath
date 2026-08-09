@@ -50,7 +50,7 @@ export interface AuthoringPack {
 
 export interface AuthoringLaw {
   id: string;
-  roles: readonly { id: string; shape?: string }[];
+  roles: readonly { description?: string; id: string; shape?: string }[];
   semanticForms: readonly string[];
   title: string;
 }
@@ -80,7 +80,12 @@ export interface ScorecardComparison {
 
 export function projectValidatedPack(value: unknown): AuthoringPack {
   const pack = value as {
-    laws: { id: string; roles: { id: string; shape?: string }[]; semanticForms: string[]; title: string }[];
+    laws: {
+      id: string;
+      roles: { description?: string; id: string; shape?: string }[];
+      semanticForms: string[];
+      title: string;
+    }[];
     packId: string;
     title: string;
   };
@@ -89,6 +94,7 @@ export function projectValidatedPack(value: unknown): AuthoringPack {
       id: law.id,
       roles: law.roles.map((role) => ({
         id: role.id,
+        ...(role.description ? { description: role.description } : {}),
         ...(role.shape ? { shape: role.shape } : {}),
       })),
       semanticForms: [...law.semanticForms],
@@ -313,7 +319,7 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
       category: "missing-role",
       mutate: (_formula: string, values: string[]) => `${values[0]}_{probe}=0`,
     },
-    { category: "role-swap", mutate: swapFirstTwo },
+    { category: "role-swap", mutate: (formula: string) => formula },
     { category: "shape-mismatch", mutate: (formula: string) => formula },
   ] as const;
   const refusals = negativeMutations.map((mutation, index) => {
@@ -321,10 +327,14 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
     const bindings = bindSymbols(law, symbols);
     const formula = renderFormula(law.semanticForms[0]!, bindings);
     const mutated = mutation.mutate(formula, [...bindings.values()]);
-    const shapeConflict = mutation.category === "shape-mismatch"
-      ? ` The symbol $${symbols[0]}$ is explicitly a ${incompatibleShape(law.roles[0]?.shape)}.`
-      : "";
-    const prose = `${declaration(law, bindings, index)}${shapeConflict}`;
+    const declarationBindings = mutation.category === "role-swap"
+      ? conflictFirstTwoBindings(bindings)
+      : bindings;
+    const shapedRole = law.roles.find((role) => role.shape);
+    const shapeOverrides = mutation.category === "shape-mismatch" && shapedRole
+      ? new Map([[shapedRole.id, incompatibleShape(shapedRole.shape)]])
+      : undefined;
+    const prose = declaration(law, declarationBindings, index, shapeOverrides);
     const twoDocument = (index + 5) % 3 === 0;
     return {
       cursor: { edge: index % 2 ? "after" : "before", fileId: "main", needle: mutated },
@@ -426,17 +436,31 @@ function declaration(
   law: AuthoringLaw,
   bindings: ReadonlyMap<string, string>,
   index: number,
+  shapeOverrides?: ReadonlyMap<string, string>,
 ): string {
-  const entries = [...bindings].map(
-    ([role, symbol]) => `$${symbol}$ ${role.replaceAll("-", " ")}`,
-  );
-  const joined = englishList(entries);
+  const entries = [...bindings].map(([roleId, symbol]) => {
+    const role = law.roles.find((candidate) => candidate.id === roleId);
+    const words = (role?.description ?? roleId.replaceAll("-", " "))
+      .trim()
+      .replace(/[.!?]+$/u, "")
+      .toLocaleLowerCase("en-US");
+    const shape = shapeOverrides?.get(roleId) ?? role?.shape;
+    const description = shape && !words.includes(shape)
+      ? `${words} ${shape}`
+      : words;
+    return { description, symbol: `$${symbol}$` };
+  });
+  const clauses = entries.map(({ description, symbol }) => `${symbol} denotes ${description}`);
+  const letClauses = entries.map(({ description, symbol }) => `${symbol} denote ${description}`);
+  const predicates = entries.map(({ description, symbol }) => `${symbol} is ${description}`);
+  const symbols = englishList(entries.map((entry) => entry.symbol));
+  const descriptions = englishList(entries.map((entry) => entry.description));
   const variants = [
-    `Let ${joined} denote the roles in ${law.title}.`,
-    `In this model, ${joined} are used, respectively.`,
-    `Suppose that ${joined} have their stated meanings.`,
-    `Write ${joined}; each declaration is local to this relation.`,
-    `Here ${joined}, with all roles explicitly declared.`,
+    `For ${law.title}, let ${englishList(letClauses)}.`,
+    `In ${law.title}, let ${symbols} denote ${descriptions}, respectively.`,
+    `For ${law.title}, suppose ${englishList(predicates)}.`,
+    `${entries.map(({ description, symbol }) => `We write ${symbol} for ${description}.`).join(" ")} This notation is used in ${law.title}.`,
+    `For ${law.title}, here ${englishList(clauses)}.`,
   ];
   return variants[index % variants.length]!;
 }
@@ -461,13 +485,13 @@ function wrongOperator(formula: string): string {
   return `${formula}+z`;
 }
 
-function swapFirstTwo(formula: string, values: string[]): string {
-  const [first, second] = values;
-  if (!first || !second) return `${formula}+z`;
-  return formula
-    .replaceAll(first, "__SEMATH_SWAP__")
-    .replaceAll(second, first)
-    .replaceAll("__SEMATH_SWAP__", second);
+function conflictFirstTwoBindings(
+  bindings: ReadonlyMap<string, string>,
+): ReadonlyMap<string, string> {
+  const entries = [...bindings];
+  if (entries.length < 2) return bindings;
+  entries[0]![1] = entries[1]![1];
+  return new Map(entries);
 }
 
 function incompatibleShape(shape: string | undefined): string {

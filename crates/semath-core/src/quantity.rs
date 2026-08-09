@@ -575,17 +575,35 @@ fn known_facts<'a>(
 
 fn find_quantity_kind(description: &str) -> Option<&'static QuantityKindSpec> {
     let mut semantic_description = description;
-    for separator in [" along ", " through ", " across "] {
+    for separator in [" along ", " through ", " across ", " normal to "] {
         if let Some((quantity, _)) = semantic_description.split_once(separator) {
             semantic_description = quantity;
         }
     }
-    let description = semantic_description.to_lowercase();
-    QUANTITY_CATALOG.kinds.iter().find(|kind| {
-        kind.aliases
+    let description = semantic_description.to_lowercase().replace('-', " ");
+    let mut best = None;
+    let mut best_length = 0;
+    let mut ambiguous = false;
+    for kind in &QUANTITY_CATALOG.kinds {
+        let matched_length = kind
+            .aliases
             .iter()
-            .any(|alias| contains_term(&description, alias))
-    })
+            .filter(|alias| contains_term(&description, alias))
+            .map(String::len)
+            .max()
+            .unwrap_or_default();
+        if matched_length > best_length {
+            best = Some(kind);
+            best_length = matched_length;
+            ambiguous = false;
+        } else if matched_length != 0
+            && matched_length == best_length
+            && best.is_some_and(|selected: &QuantityKindSpec| selected.id != kind.id)
+        {
+            ambiguous = true;
+        }
+    }
+    (!ambiguous).then_some(best).flatten()
 }
 
 fn find_unit(description: &str) -> Option<&'static UnitSpec> {
@@ -660,7 +678,7 @@ const fn gcd(mut left: u32, mut right: u32) -> u32 {
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{Dimension, Exponent, observe_quantities};
+    use super::{Dimension, Exponent, find_quantity_kind, observe_quantities};
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{
         DocumentLanguage, ProjectDocument, ProjectMacro, ProjectMacroExpansion,
@@ -677,6 +695,34 @@ mod tests {
 
         assert_eq!(velocity.multiply(&duration).info().display, "length");
         assert_eq!(Exponent::new(2, 4), Exponent::new(1, 2));
+    }
+
+    #[test]
+    fn selects_the_longest_matching_quantity_term_across_packs() {
+        assert_eq!(
+            find_quantity_kind("specific heat scalar").map(|kind| kind.id.as_str()),
+            Some("quantities-units:specific-heat-capacity")
+        );
+        assert_eq!(
+            find_quantity_kind("heat transfer scalar").map(|kind| kind.id.as_str()),
+            Some("quantities-units:energy")
+        );
+        assert_eq!(
+            find_quantity_kind("wave propagation speed").map(|kind| kind.id.as_str()),
+            Some("quantities-units:velocity")
+        );
+        assert_eq!(
+            find_quantity_kind("cyclic frequency scalar").map(|kind| kind.id.as_str()),
+            Some("quantities-units:frequency")
+        );
+        assert_eq!(
+            find_quantity_kind("wavelength scalar").map(|kind| kind.id.as_str()),
+            Some("quantities-units:length")
+        );
+        assert_eq!(
+            find_quantity_kind("time variable").map(|kind| kind.id.as_str()),
+            Some("quantities-units:duration")
+        );
     }
 
     #[test]

@@ -239,6 +239,7 @@ fn template_concept(id: &str, title: &str, reference: &str) -> PackConcept {
         concept_kind: "entity".into(),
         title: title.into(),
         description: format!("The {title} role in the domain relation."),
+        aliases: Vec::new(),
         parents: Vec::new(),
         references: vec![reference.into()],
     }
@@ -248,6 +249,7 @@ fn template_role(pack_id: &str, id: &str, description: &str) -> PackLawRole {
     PackLawRole {
         id: id.into(),
         concept: format!("{pack_id}:{id}"),
+        quantity: None,
         description: description.into(),
         shape: Some("scalar".into()),
         notation: Vec::new(),
