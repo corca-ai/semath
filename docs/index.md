@@ -31,6 +31,8 @@ artifacts.
   Worker, or language-server boundaries.
 - [Domain packs](domain-packs.md) — understand and author concepts, typed laws,
   quantities, and pack dependencies.
+- [Pack maturity report](pack-maturity.md) — inspect dated benchmark evidence,
+  resolved defects, and measured gaps without confusing them with rollout state.
 - [Compatibility and release policy](compatibility.md) — change schemas,
   protocols, packages, and release artifacts safely.
 

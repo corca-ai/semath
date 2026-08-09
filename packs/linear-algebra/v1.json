@@ -82,6 +82,31 @@
       "references": [
         "matrix-computations"
       ]
+    },
+    {
+      "id": "matrix-matrix-product",
+      "title": "Matrix product",
+      "description": "A matrix product maps compatible inner dimensions to the outer row and column dimensions.",
+      "semanticForms": ["result = left right"],
+      "roles": [
+        { "id": "result", "concept": "linear-algebra:linear-operator", "description": "Product matrix.", "shape": "matrix" },
+        { "id": "left", "concept": "linear-algebra:linear-operator", "description": "Left matrix factor.", "shape": "matrix" },
+        { "id": "right", "concept": "linear-algebra:linear-operator", "description": "Right matrix factor.", "shape": "matrix" }
+      ],
+      "conditions": ["The left column dimension equals the right row dimension."],
+      "references": ["matrix-computations"]
+    },
+    {
+      "id": "matrix-transpose-definition",
+      "title": "Matrix transpose",
+      "description": "The transpose exchanges the row and column axes of a matrix.",
+      "semanticForms": ["result = operator^T"],
+      "roles": [
+        { "id": "result", "concept": "linear-algebra:linear-operator", "description": "Transposed matrix.", "shape": "matrix" },
+        { "id": "operator", "concept": "linear-algebra:linear-operator", "description": "Original matrix.", "shape": "matrix" }
+      ],
+      "conditions": ["Both symbols refer to matrices over the same scalar field."],
+      "references": ["matrix-computations"]
     }
   ],
   "activationRules": [

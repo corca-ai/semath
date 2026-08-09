@@ -45,7 +45,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\nA presentation-only symbol follows: \\[q_{202}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 2: this appendix file file is intentionally outside the formula's declaration scope.\nWe write $x_{102}$ for the input and $y_{102}$ for the output.",
@@ -73,7 +73,8 @@
         "synthetic-authored",
         "prose-we-write",
         "topology-appendix-file",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "cursor-boundaries",
@@ -90,7 +91,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (3). [define as]\n\\begin{equation}q_{203}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 3: this context file file is intentionally outside the formula's declaration scope.\nDefine $x_{103}$ as the sample and $y_{103}$ as the estimate.",
@@ -135,7 +136,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\n\\[\\begin{aligned}q_{204}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 4: this nested section file is intentionally outside the formula's declaration scope.\nThe local output is represented by $y_{104}$ after the formula.",
@@ -225,7 +226,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA styled symbol is $\\mathbf{q}_{206}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         }
       ],
       "cursor": {
@@ -264,7 +265,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\nAn indexed symbol is $q_{207}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 7: this appendix file file is intentionally outside the formula's declaration scope.\n$x_{107}$ denotes the source. $y_{107}$ denotes the target. $z_{107}$ denotes the residual.",
@@ -309,7 +310,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\newcommand{\\syntheticprobe}{q_{208}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         },
         {
           "content": "Supporting note 8: this context file file is intentionally outside the formula's declaration scope.\nHere $x_{108}$ denotes the input, where $y_{108}$ represents the output.",
@@ -354,7 +355,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol is $q_{209}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 9: this nested section file is intentionally outside the formula's declaration scope.\nGiven $x_{109}$ as the input, take $y_{109}$ to represent the output.",
@@ -399,7 +400,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol follows: \\[q_{210}\\]\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         },
         {
           "content": "Supporting note 10: this definitions file file is intentionally outside the formula's declaration scope.\n$x_{110}$ denotes the source. $y_{110}$ denotes the target. $z_{110}$ denotes the residual.",
@@ -444,7 +445,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\n\\begin{equation}q_{211}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         }
       ],
       "cursor": {
@@ -483,7 +484,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\[\\begin{aligned}q_{212}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 12: this nested section file is intentionally outside the formula's declaration scope.\nSuppose that $x_{112}$ is the observed input and $y_{112}$ is the predicted output.",
@@ -511,7 +512,8 @@
         "synthetic-authored",
         "prose-suppose-that",
         "topology-nested-section",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "semantic-mutations",
@@ -528,7 +530,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nA grouped symbol is $ {q_{213}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 13: this definitions file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{113}$) is fixed locally.",
@@ -612,7 +614,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nAn indexed symbol is $q_{215}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 15: this appendix file file is intentionally outside the formula's declaration scope.\nSuppose that $x_{115}$ is the observed input and $y_{115}$ is the predicted output.",
@@ -657,7 +659,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\n\\newcommand{\\syntheticprobe}{q_{216}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 16: this context file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{116}$) is fixed locally.",
@@ -702,7 +704,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 17. [let series]\nA presentation-only symbol is $q_{217}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 17: this nested section file is intentionally outside the formula's declaration scope.\nLet $x_{117}$, $y_{117}$, and $z_{117}$ denote the local input, state, and output, respectively.",
@@ -747,7 +749,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\nA presentation-only symbol follows: \\[q_{218}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 18: this definitions file file is intentionally outside the formula's declaration scope.\nThe local input and output are denoted by $x_{118}$ and $y_{118}$, respectively.",
@@ -792,7 +794,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\n\\begin{equation}q_{219}\\end{equation}\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         }
       ],
       "cursor": {
@@ -831,7 +833,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\n\\[\\begin{aligned}q_{220}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 20: this appendix file file is intentionally outside the formula's declaration scope.\nLet $x_{120}$ and $y_{120}$ denote the local input and output, respectively.",
@@ -876,7 +878,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA grouped symbol is $ {q_{221}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         },
         {
           "content": "Supporting note 21: this context file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{121}$ and $y_{121}$ represent the source and target, in that order.",
@@ -921,7 +923,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\nA styled symbol is $\\mathbf{q}_{222}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 22: this nested section file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{122}$ stands for the independent variable.",
@@ -949,7 +951,8 @@
         "synthetic-authored",
         "prose-throughout-section",
         "topology-nested-section",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "roles-and-constraints",
@@ -1011,7 +1014,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\n\\newcommand{\\syntheticprobe}{q_{224}}A macro-expanded symbol is $\\syntheticprobe$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 24: this context file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{124}$ and $y_{124}$ represent the source and target, in that order.",
@@ -1056,7 +1059,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA presentation-only symbol is $q_{225}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         },
         {
           "content": "Supporting note 25: this nested section file is intentionally outside the formula's declaration scope.\nIn this model, $x_{125}$, $y_{125}$, and $z_{125}$ mean the sample, estimate, and error, respectively.",
@@ -1101,7 +1104,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA presentation-only symbol follows: \\[q_{226}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 26: this definitions file file is intentionally outside the formula's declaration scope.\nLet $x_{126}$ be the local input.",
@@ -1146,7 +1149,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\begin{equation}q_{227}\\end{equation}\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         }
       ],
       "cursor": {
@@ -1185,7 +1188,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\[\\begin{aligned}q_{228}\\end{aligned}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 28: this appendix file file is intentionally outside the formula's declaration scope.\nDefine $x_{128}$ as the sample and $y_{128}$ as the estimate.",
@@ -1230,7 +1233,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA grouped symbol is $ {q_{229}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 29: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{129}$ be the local input.",
@@ -1275,7 +1278,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA styled symbol is $\\mathbf{q}_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 30: this nested section file is intentionally outside the formula's declaration scope.\nWe write $x_{130}$ for the input and $y_{130}$ for the output.",
@@ -1320,7 +1323,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nAn indexed symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 31: this definitions file file is intentionally outside the formula's declaration scope.\nDefine $x_{131}$ as the sample and $y_{131}$ as the estimate.",
@@ -1387,7 +1390,8 @@
         "grouping",
         "synthetic-authored",
         "prose-declaration-after",
-        "topology-single-document"
+        "topology-single-document",
+        "macro"
       ],
       "diversity": {
         "batch": "macro-provenance",
@@ -1404,7 +1408,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nA presentation-only symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 33: this appendix file file is intentionally outside the formula's declaration scope.\nHere $x_{133}$ denotes the input, where $y_{133}$ represents the output.",
@@ -1449,7 +1453,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA presentation-only symbol follows: \\[q_{234}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 34: this definitions file file is intentionally outside the formula's declaration scope.\nGiven $x_{134}$ as the input, take $y_{134}$ to represent the output.",
@@ -1494,7 +1498,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\n\\begin{equation}q_{235}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         }
       ],
       "cursor": {
@@ -1533,7 +1537,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\n\\[\\begin{aligned}q_{236}\\end{aligned}\\]\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         },
         {
           "content": "Supporting note 36: this appendix file file is intentionally outside the formula's declaration scope.\nHere $x_{136}$ denotes the input, where $y_{136}$ represents the output.",
@@ -1578,7 +1582,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\nA grouped symbol is $ {q_{237}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 37: this context file file is intentionally outside the formula's declaration scope.\nGiven $x_{137}$ as the input, take $y_{137}$ to represent the output.",
@@ -1623,7 +1627,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\nA styled symbol is $\\mathbf{q}_{238}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         },
         {
           "content": "Supporting note 38: this nested section file is intentionally outside the formula's declaration scope.\n$x_{138}$ denotes the source. $y_{138}$ denotes the target. $z_{138}$ denotes the residual.",
@@ -1668,7 +1672,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nAn indexed symbol is $q_{239}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 39: this definitions file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{139}$, $y_{139}$, and $z_{139}$ stand for the datum, estimate, and residual, respectively.",
@@ -1713,7 +1717,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{240}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
         }
       ],
       "cursor": {
@@ -1797,7 +1801,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\nA presentation-only symbol follows: \\[q_{242}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 42: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{142}$, $y_{142}$, and $z_{142}$ denote the local input, state, and output, respectively.",
@@ -1825,7 +1829,8 @@
         "synthetic-authored",
         "prose-let-series",
         "topology-context-file",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "project-scope",
@@ -1842,7 +1847,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\n\\begin{equation}q_{243}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 43: this nested section file is intentionally outside the formula's declaration scope.\nSuppose that $x_{143}$ is the observed input and $y_{143}$ is the predicted output.",
@@ -1887,7 +1892,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\n\\[\\begin{aligned}q_{244}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 44: this definitions file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{144}$) is fixed locally.",
@@ -1977,7 +1982,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA styled symbol is $\\mathbf{q}_{246}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
         },
         {
           "content": "Supporting note 46: this nested section file is intentionally outside the formula's declaration scope.\nThe local input and output are denoted by $x_{146}$ and $y_{146}$, respectively.",
@@ -2022,7 +2027,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\nAn indexed symbol is $q_{247}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
         },
         {
           "content": "Supporting note 47: this definitions file file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{147}$ stands for the independent variable.",
@@ -2067,7 +2072,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\newcommand{\\syntheticprobe}{q_{248}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
         }
       ],
       "cursor": {
@@ -2106,7 +2111,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol is $q_{249}$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 49: this appendix file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{149}$ and $y_{149}$ represent the source and target, in that order.",
@@ -2147,7 +2152,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 50. [throughout section]\nA presentation-only symbol follows: \\[q_{250}\\]\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
+          "content": "For comparison, inspect the displayed expression numbered 50. [throughout section]\nA presentation-only symbol is $q_{250}$.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
         },
         {
           "content": "Supporting note 50: this context file file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{150}$ stands for the independent variable.",
@@ -2188,7 +2193,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (51). [let paired]\n\\begin{equation}q_{251}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
+          "content": "The next formula is presented without an assumed named law (51). [let paired]\nA presentation-only symbol is $q_{251}$.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
         },
         {
           "content": "Supporting note 51: this nested section file is intentionally outside the formula's declaration scope.\nLet $x_{151}$ and $y_{151}$ denote the local input and output, respectively.",
@@ -2229,7 +2234,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (52). [symbol list]\n\\[\\begin{aligned}q_{252}\\end{aligned}\\]\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
+          "content": "In this local discussion, only the explicit statement below is available (52). [symbol list]\n\\newcommand{\\syntheticprobe}{q_{252}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
         },
         {
           "content": "Supporting note 52: this definitions file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{152}$ and $y_{152}$ represent the source and target, in that order.",
@@ -2253,7 +2258,8 @@
         "synthetic-authored",
         "prose-symbol-list",
         "topology-definitions-file",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "math-presentation",
@@ -2270,7 +2276,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 53. [in this model]\nA grouped symbol is $ {q_{253}} $.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
+          "content": "Suppose the notation is local to this calculation, case 53. [in this model]\nAn indexed symbol is $q_{253}$.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
         }
       ],
       "cursor": {
@@ -2346,7 +2352,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 55. [we write]\nAn indexed symbol is $q_{255}$.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
+          "content": "As a deliberately unsupported instance, examine relation 55. [we write]\nA grouped symbol is $ {q_{255}} $.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
         },
         {
           "content": "Supporting note 55: this context file file is intentionally outside the formula's declaration scope.\nWe write $x_{155}$ for the input and $y_{155}$ for the output.",
@@ -2387,7 +2393,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (56). [define as]\n\\newcommand{\\syntheticprobe}{q_{256}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
+          "content": "No domain interpretation is asserted for the following formula (56). [define as]\nA grouped symbol is $ {q_{256}} $.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
         }
       ],
       "cursor": {
@@ -2422,7 +2428,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 57. [let singular]\nA presentation-only symbol is $q_{257}$.\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
+          "content": "Consider the following independently stated relation in example 57. [let singular]\n\\[\\begin{aligned}q_{257}\\end{aligned}\\]\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
         },
         {
           "content": "Supporting note 57: this appendix file file is intentionally outside the formula's declaration scope.\nLet $x_{157}$ be the local input.",
@@ -2463,7 +2469,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 58. [we write]\nA presentation-only symbol follows: \\[q_{258}\\]\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
+          "content": "For comparison, inspect the displayed expression numbered 58. [we write]\n\\begin{equation}q_{258}\\end{equation}\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
         },
         {
           "content": "Supporting note 58: this context file file is intentionally outside the formula's declaration scope.\nWe write $x_{158}$ for the input and $y_{158}$ for the output.",
@@ -2504,7 +2510,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (59). [define as]\n\\begin{equation}q_{259}\\end{equation}\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
+          "content": "The next formula is presented without an assumed named law (59). [define as]\nA presentation-only symbol follows: \\[q_{259}\\]\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
         },
         {
           "content": "Supporting note 59: this nested section file is intentionally outside the formula's declaration scope.\nDefine $x_{159}$ as the sample and $y_{159}$ as the estimate.",
@@ -2545,7 +2551,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\n\\[\\begin{aligned}q_{260}\\end{aligned}\\]\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 60: this definitions file file is intentionally outside the formula's declaration scope.\nThe local output is represented by $y_{160}$ after the formula.",
@@ -2586,7 +2592,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 61. [where clause]\nA grouped symbol is $ {q_{261}} $.\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
+          "content": "Suppose the notation is local to this calculation, case 61. [where clause]\nA presentation-only symbol is $q_{261}$.\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
         }
       ],
       "cursor": {
@@ -2621,7 +2627,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\nA styled symbol is $\\mathbf{q}_{262}$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 62: this appendix file file is intentionally outside the formula's declaration scope.\nGiven $x_{162}$ as the input, take $y_{162}$ to represent the output.",
@@ -2645,7 +2651,8 @@
         "synthetic-authored",
         "prose-given-that",
         "topology-appendix-file",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "english-paraphrases",
@@ -2703,7 +2710,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\n\\newcommand{\\syntheticprobe}{q_{264}}A macro-expanded symbol is $\\syntheticprobe$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 64: this nested section file is intentionally outside the formula's declaration scope.\nHere $x_{164}$ denotes the input, where $y_{164}$ represents the output.",
@@ -2744,7 +2751,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 65. [given that]\nA presentation-only symbol is $q_{265}$.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
+          "content": "Consider the following independently stated relation in example 65. [given that]\nA grouped symbol is $ {q_{265}} $.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
         },
         {
           "content": "Supporting note 65: this definitions file file is intentionally outside the formula's declaration scope.\nGiven $x_{165}$ as the input, take $y_{165}$ to represent the output.",
@@ -2785,7 +2792,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 66. [separate sentences]\nA presentation-only symbol follows: \\[q_{266}\\]\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
+          "content": "For comparison, inspect the displayed expression numbered 66. [separate sentences]\nA grouped symbol is $ {q_{266}} $.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
         }
       ],
       "cursor": {
@@ -2820,7 +2827,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (67). [respectively]\n\\begin{equation}q_{267}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
+          "content": "The next formula is presented without an assumed named law (67). [respectively]\n\\[\\begin{aligned}q_{267}\\end{aligned}\\]\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
         },
         {
           "content": "Supporting note 67: this nested section file is intentionally outside the formula's declaration scope.\nThe symbols $x_{167}$, $y_{167}$, and $z_{167}$ stand for the datum, estimate, and residual, respectively.",
@@ -2861,7 +2868,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (68). [suppose that]\n\\[\\begin{aligned}q_{268}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
+          "content": "In this local discussion, only the explicit statement below is available (68). [suppose that]\n\\begin{equation}q_{268}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
         },
         {
           "content": "Supporting note 68: this definitions file file is intentionally outside the formula's declaration scope.\nSuppose that $x_{168}$ is the observed input and $y_{168}$ is the predicted output.",
@@ -2902,7 +2909,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 69. [compact parenthetical]\nA grouped symbol is $ {q_{269}} $.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
+          "content": "Suppose the notation is local to this calculation, case 69. [compact parenthetical]\nA presentation-only symbol follows: \\[q_{269}\\]\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
         }
       ],
       "cursor": {
@@ -2937,7 +2944,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (70). [let series]\nA styled symbol is $\\mathbf{q}_{270}$.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
+          "content": "The symbols below have no meaning beyond this standalone example (70). [let series]\nA presentation-only symbol is $q_{270}$.\n\nAs a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=xM$"
         },
         {
           "content": "Supporting note 70: this appendix file file is intentionally outside the formula's declaration scope.\nLet $x_{170}$, $y_{170}$, and $z_{170}$ denote the local input, state, and output, respectively.",
@@ -2978,7 +2985,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 71. [suppose that]\nAn indexed symbol is $q_{271}$.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
+          "content": "As a deliberately unsupported instance, examine relation 71. [suppose that]\nA presentation-only symbol is $q_{271}$.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
         },
         {
           "content": "Supporting note 71: this context file file is intentionally outside the formula's declaration scope.\nSuppose that $x_{171}$ is the observed input and $y_{171}$ is the predicted output.",
@@ -3043,7 +3050,8 @@
         "synthetic-authored",
         "prose-compact-parenthetical",
         "topology-nested-section",
-        "multi-file"
+        "multi-file",
+        "macro"
       ],
       "diversity": {
         "batch": "declaration-cardinality",
@@ -3060,7 +3068,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 73. [let series]\nA presentation-only symbol is $q_{273}$.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
+          "content": "Consider the following independently stated relation in example 73. [let series]\nAn indexed symbol is $q_{273}$.\n\nConsider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $M$ be a matrix. Let $x$ and $y$ be vectors. $y=M+x$"
         },
         {
           "content": "Supporting note 73: this definitions file file is intentionally outside the formula's declaration scope.\nLet $x_{173}$, $y_{173}$, and $z_{173}$ denote the local input, state, and output, respectively.",
@@ -3101,7 +3109,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 74. [role first]\nA presentation-only symbol follows: \\[q_{274}\\]\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
+          "content": "For comparison, inspect the displayed expression numbered 74. [role first]\nA styled symbol is $\\mathbf{q}_{274}$.\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
         }
       ],
       "cursor": {
@@ -3136,7 +3144,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\n\\begin{equation}q_{275}\\end{equation}\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 75: this appendix file file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{175}$ stands for the independent variable.",
@@ -3177,7 +3185,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (76). [let paired]\n\\[\\begin{aligned}q_{276}\\end{aligned}\\]\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
+          "content": "In this local discussion, only the explicit statement below is available (76). [let paired]\nA grouped symbol is $ {q_{276}} $.\n\nThe symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nNo matrix or vector shapes are declared. $y=Mx$"
         },
         {
           "content": "Supporting note 76: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{176}$ and $y_{176}$ denote the local input and output, respectively.",
@@ -3218,7 +3226,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\nA grouped symbol is $ {q_{277}} $.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 77: this nested section file is intentionally outside the formula's declaration scope.\nThe symbols $x_{177}$ and $y_{177}$ represent the source and target, in that order.",
@@ -3259,7 +3267,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (78). [throughout section]\nA styled symbol is $\\mathbf{q}_{278}$.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
+          "content": "The symbols below have no meaning beyond this standalone example (78). [throughout section]\n\\begin{equation}q_{278}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
         },
         {
           "content": "Supporting note 78: this appendix file file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{178}$ stands for the independent variable.",
@@ -3300,7 +3308,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nAn indexed symbol is $q_{279}$.\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nNo domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet A, B, and C be matrices. $C=AB$"
         },
         {
           "content": "Supporting note 79: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{179}$ and $y_{179}$ denote the local input and output, respectively.",
@@ -3341,7 +3349,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (80). [symbol list]\n\\newcommand{\\syntheticprobe}{q_{280}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
+          "content": "No domain interpretation is asserted for the following formula (80). [symbol list]\nA presentation-only symbol is $q_{280}$.\n\nFor comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $M$ be a matrix and $x$ and $y$ be vectors, but this law does not apply: $y=Mx$."
         },
         {
           "content": "Supporting note 80: this nested section file is intentionally outside the formula's declaration scope.\nThe symbols $x_{180}$ and $y_{180}$ represent the source and target, in that order.",

@@ -1,0 +1,336 @@
+{
+  "cases": [
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A\\cup B",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-singular",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ and $B$ denote events. $A\\cup B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "A",
+        "right": "B"
+      },
+      "id": "event-union-basic",
+      "lawId": "event-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "E \\cup F",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-paired",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $E$ be an event and $F$ another event. $E \\cup F$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "E",
+        "right": "F"
+      },
+      "id": "event-union-spaced",
+      "lawId": "event-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "{G}\\cup{H}",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-03",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "let-series",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "equation-environment"
+      },
+      "documents": [
+        {
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $G$ and $H$ represent events. ${G}\\cup{H}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "G",
+        "right": "H"
+      },
+      "id": "event-union-grouped",
+      "lawId": "event-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "V\\cup U",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-04",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "respectively",
+        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "syntaxStructure": "aligned-environment"
+      },
+      "documents": [
+        {
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $U$ and $V$ be events. The event union is $V\\cup U$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "V",
+        "right": "U"
+      },
+      "id": "event-union-reversed",
+      "lawId": "event-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\mathrm{C}\\cup\\mathrm{D}",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-05",
+        "mutationFamily": "affirmative",
+        "projectTopology": "single-document",
+        "proseFamily": "where-clause",
+        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "syntaxStructure": "grouped-expression"
+      },
+      "documents": [
+        {
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ denote events. $\\mathrm{C}\\cup\\mathrm{D}$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "established",
+      "expectedRoles": {
+        "left": "C",
+        "right": "D"
+      },
+      "id": "event-union-styled",
+      "lawId": "event-union",
+      "variationTags": [
+        "conventional-notation",
+        "english-declarations",
+        "role-prose",
+        "shape-explicit"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A\\cap B",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-06",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "we-write",
+        "semanticSkeleton": "wrong-operator-symbol-symbol-symbol",
+        "syntaxStructure": "styled-symbols"
+      },
+      "documents": [
+        {
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nLet $A$ and $B$ be events. $A\\cap B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "event-union-intersection",
+      "lawId": "event-union",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A+B",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-07",
+        "mutationFamily": "wrong-operator",
+        "projectTopology": "single-document",
+        "proseFamily": "symbol-list",
+        "semanticSkeleton": "wrong-operator-symbol-symbol",
+        "syntaxStructure": "indexed-instance"
+      },
+      "documents": [
+        {
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $A$ and $B$ be events. $A+B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "event-union-addition",
+      "lawId": "event-union",
+      "refusalCategory": "wrong-operator",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A\\cup B",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-08",
+        "mutationFamily": "wrong-role",
+        "projectTopology": "single-document",
+        "proseFamily": "role-first",
+        "semanticSkeleton": "wrong-role-symbol-symbol-symbol",
+        "syntaxStructure": "macro-expanded"
+      },
+      "documents": [
+        {
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $A$ and $B$ be ordinary sets, not events. $A\\cup B$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "event-union-set-collision",
+      "lawId": "event-union",
+      "refusalCategory": "wrong-role",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "wrong-role"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q\\cup R",
+        "edge": "before"
+      },
+      "diversity": {
+        "batch": "baseline-01",
+        "mutationFamily": "missing-role-evidence",
+        "projectTopology": "single-document",
+        "proseFamily": "suppose-that",
+        "semanticSkeleton": "missing-role-evidence-symbol-symbol-symbol",
+        "syntaxStructure": "inline-math"
+      },
+      "documents": [
+        {
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nThe operands are undeclared in $Q\\cup R$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "event-union-missing-role",
+      "lawId": "event-union",
+      "refusalCategory": "missing-role-evidence",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "missing-role-evidence"
+      ]
+    },
+    {
+      "cursor": {
+        "fileId": "main",
+        "needle": "A\\cup x",
+        "edge": "after"
+      },
+      "diversity": {
+        "batch": "baseline-02",
+        "mutationFamily": "role-mismatch",
+        "projectTopology": "single-document",
+        "proseFamily": "given-that",
+        "semanticSkeleton": "role-mismatch-symbol-symbol-symbol",
+        "syntaxStructure": "display-math"
+      },
+      "documents": [
+        {
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nLet $A$ be an event while $x$ is a scalar. $A\\cup x$",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": "refused",
+      "id": "event-union-single-event",
+      "lawId": "event-union",
+      "refusalCategory": "role-mismatch",
+      "variationTags": [
+        "hard-negative",
+        "role-prose",
+        "role-mismatch"
+      ]
+    }
+  ],
+  "domain": "probability-union-probe",
+  "schemaVersion": 2
+}

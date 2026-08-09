@@ -1,11 +1,31 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::LazyLock;
 
+use crate::pack::built_in_packs;
 use crate::scope::ScopeGraph;
 use crate::shape::{ExplicitShapeClaim, ShapeObservations};
 use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnostic, SourceRange};
 
 const MAX_ROLE_CLAIMS: usize = 8;
 const MAX_ROLE_DIAGNOSTICS: usize = 8;
+
+static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String)>> = LazyLock::new(|| {
+    let mut terms = built_in_packs()
+        .iter()
+        .flat_map(|pack| pack.laws.iter())
+        .flat_map(|law| law.roles.iter())
+        .filter_map(|role| role.concept.split(':').next_back())
+        .map(|role| {
+            (
+                role.split('-').map(str::to_owned).collect::<Vec<_>>(),
+                role.to_owned(),
+            )
+        })
+        .collect::<Vec<_>>();
+    terms.sort_by(|left, right| right.0.len().cmp(&left.0.len()).then(left.1.cmp(&right.1)));
+    terms.dedup();
+    terms
+});
 
 #[derive(Clone, Debug)]
 struct ScopedRoleClaim {
@@ -187,7 +207,7 @@ fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<Scoped
     Some(ScopedRoleClaim {
         info: RoleInfo {
             symbol: definition.symbol.clone(),
-            role: role.into(),
+            role: role.clone(),
             description: definition.description.clone(),
             evidence: Evidence {
                 rule_id: format!("{}/role-{role}", definition.evidence.rule_id),
@@ -202,7 +222,7 @@ fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<Scoped
     })
 }
 
-fn classify_role(description: &str) -> Option<&'static str> {
+fn classify_role(description: &str) -> Option<String> {
     let normalized = description
         .to_ascii_lowercase()
         .replace('-', " ")
@@ -219,28 +239,54 @@ fn classify_role(description: &str) -> Option<&'static str> {
         .find(|word| !matches!(*word, "a" | "an" | "the"));
     let last = words.last().copied();
 
-    if normalized.contains("random variable") {
-        Some("random-variable")
-    } else if words.contains(&"event") {
-        Some("event")
-    } else if normalized.contains("probability distribution") || last == Some("distribution") {
-        Some("distribution")
-    } else if matches!(first, Some("set" | "space" | "domain" | "codomain"))
-        || matches!(last, Some("set" | "space" | "domain" | "codomain"))
-    {
-        Some("set")
-    } else if first == Some("index") || last == Some("index") {
-        Some("index")
-    } else if words.contains(&"operator") {
-        Some("operator")
-    } else if words
+    if let Some(role) = PACK_ROLE_TERMS
         .iter()
-        .any(|word| matches!(*word, "function" | "map" | "mapping"))
+        .find(|(term, _)| contains_term(&words, term))
+        .map(|(_, role)| role.clone())
     {
-        Some("function")
+        Some(role)
+    } else if contains_singular_or_plural(&words, "event") {
+        Some("event".into())
+    } else if normalized.contains("probability distribution") || last == Some("distribution") {
+        Some("distribution".into())
+    } else if ["set", "space", "domain", "codomain"]
+        .iter()
+        .any(|role| first.is_some_and(|word| singular_or_plural(word, role)))
+        || ["set", "space", "domain", "codomain"]
+            .iter()
+            .any(|role| last.is_some_and(|word| singular_or_plural(word, role)))
+    {
+        Some("set".into())
+    } else if first == Some("index") || last == Some("index") {
+        Some("index".into())
+    } else if contains_singular_or_plural(&words, "operator") {
+        Some("operator".into())
+    } else if words.iter().any(|word| {
+        ["function", "map", "mapping"]
+            .iter()
+            .any(|role| singular_or_plural(word, role))
+    }) {
+        Some("function".into())
     } else {
         None
     }
+}
+
+fn contains_term(words: &[&str], term: &[String]) -> bool {
+    words.windows(term.len()).any(|window| {
+        window
+            .iter()
+            .zip(term)
+            .all(|(word, expected)| singular_or_plural(word, expected))
+    })
+}
+
+fn contains_singular_or_plural(words: &[&str], singular: &str) -> bool {
+    words.iter().any(|word| singular_or_plural(word, singular))
+}
+
+fn singular_or_plural(word: &str, singular: &str) -> bool {
+    word == singular || word.strip_suffix('s') == Some(singular)
 }
 
 fn role_conflict_diagnostic(
@@ -365,6 +411,8 @@ pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
         (left, right),
         ("function", "operator")
             | ("operator", "function")
+            | ("function", "linear-operator")
+            | ("linear-operator", "function")
             | ("function", "random-variable")
             | ("random-variable", "function")
             | ("function", "distribution")
@@ -481,5 +529,19 @@ mod tests {
         let analysis = analyze(source);
         assert!(analysis.diagnostics.is_empty());
         assert_eq!(analysis.roles.len(), 3);
+    }
+
+    #[test]
+    fn classifies_law_roles_from_pack_concepts_in_singular_and_plural_prose() {
+        let source = "Let $x$ and $y$ be iterates. Let $g$ be a gradient. Let $a$ be a step size.";
+        let roles = analyze(source).exported();
+        let classified = roles
+            .iter()
+            .map(|role| (role.symbol.as_str(), role.role.as_str()))
+            .collect::<Vec<_>>();
+        assert!(classified.contains(&("x", "iterate")));
+        assert!(classified.contains(&("y", "iterate")));
+        assert!(classified.contains(&("g", "gradient")));
+        assert!(classified.contains(&("a", "step-size")));
     }
 }

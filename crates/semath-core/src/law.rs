@@ -1579,6 +1579,42 @@ mod tests {
         assert_eq!(recognized_laws(source), ["event-intersection"]);
     }
 
+    #[test]
+    fn promotion_laws_use_only_the_generic_compiled_runtime() {
+        for (source, expected) in [
+            (
+                "For this matrix product, let $A$ be an m by n matrix. Let $B$ be an n by p matrix. Let $C$ be an m by p matrix. $C=AB$",
+                "matrix-matrix-product",
+            ),
+            (
+                "Let $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+                "matrix-transpose-definition",
+            ),
+            (
+                "This example states an event union. Let $A$ and $B$ denote events. $A\\cup B$",
+                "event-union",
+            ),
+            (
+                "This example states a first derivative. Let $f$ be a function of $x$, and let $g$ denote its first derivative. $g=\\frac{d f}{d x}$",
+                "first-derivative-relation",
+            ),
+            (
+                "This example states a set intersection. Let $S$ and $T$ be sets. $S\\cap T$",
+                "set-intersection",
+            ),
+            (
+                "This example states a set union. Let $S$ and $T$ be sets. $S\\cup T$",
+                "set-union",
+            ),
+            (
+                "This example states a gradient descent update. In a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+                "gradient-descent-update",
+            ),
+        ] {
+            assert_eq!(recognized_laws(source), [expected], "{source}");
+        }
+    }
+
     fn recognized_laws(source: &str) -> Vec<String> {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {

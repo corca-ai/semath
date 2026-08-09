@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "thresholds": {
     "lawRecall": 95,
     "lawPrecision": 99,
@@ -207,48 +207,122 @@
   "packs": [
     {
       "packId": "calculus-analysis",
-      "tier": "vocabulary-only",
-      "corpusSuiteIds": []
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "law-recognition": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "project-macro": { "maturity": "probe", "suiteIds": ["calculus-diversity"] },
+        "navigation-explanation": { "maturity": "probe", "suiteIds": ["calculus-diversity"] }
+      }
     },
     {
       "packId": "circuits",
-      "tier": "evaluated",
-      "corpusSuiteIds": ["circuits", "circuits-diversity"]
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["circuits", "circuits-diversity"] }
+      }
     },
     {
       "packId": "classical-mechanics",
-      "tier": "evaluated",
-      "corpusSuiteIds": ["mechanics", "mechanics-diversity"]
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["mechanics", "mechanics-diversity"] }
+      }
     },
     {
       "packId": "control-systems",
-      "tier": "evaluated",
-      "corpusSuiteIds": ["control-systems", "control-systems-diversity"]
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["control-systems", "control-systems-diversity"] }
+      }
     },
     {
       "packId": "discrete-math",
-      "tier": "vocabulary-only",
-      "corpusSuiteIds": []
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "law-recognition": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "project-macro": { "maturity": "probe", "suiteIds": ["discrete-diversity"] },
+        "navigation-explanation": { "maturity": "probe", "suiteIds": ["discrete-diversity"] }
+      }
     },
     {
       "packId": "linear-algebra",
-      "tier": "probe",
-      "corpusSuiteIds": ["linear-algebra-probe", "linear-algebra-diversity"]
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["linear-algebra-probe", "linear-algebra-diversity", "linear-products-probe", "linear-products-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["linear-algebra-diversity", "linear-products-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["linear-algebra-probe", "linear-algebra-diversity", "linear-products-probe", "linear-products-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["linear-algebra-probe", "linear-algebra-diversity", "linear-products-probe", "linear-products-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["linear-algebra-diversity", "linear-products-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["linear-algebra-diversity", "linear-products-diversity"] }
+      }
     },
     {
       "packId": "optimization-ml",
-      "tier": "vocabulary-only",
-      "corpusSuiteIds": []
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "law-recognition": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "project-macro": { "maturity": "probe", "suiteIds": ["optimization-diversity"] },
+        "navigation-explanation": { "maturity": "probe", "suiteIds": ["optimization-diversity"] }
+      }
     },
     {
       "packId": "probability",
-      "tier": "probe",
-      "corpusSuiteIds": ["probability-probe", "probability-diversity"]
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["probability-probe", "probability-diversity", "probability-union-probe", "probability-union-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["probability-diversity", "probability-union-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["probability-probe", "probability-diversity", "probability-union-probe", "probability-union-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["probability-probe", "probability-diversity", "probability-union-probe", "probability-union-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["probability-diversity", "probability-union-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["probability-diversity", "probability-union-diversity"] }
+      }
     },
     {
       "packId": "quantities-units",
-      "tier": "vocabulary-only",
-      "corpusSuiteIds": []
+      "capabilities": {
+        "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] },
+        "law-recognition": { "maturity": "unsupported", "suiteIds": [] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] },
+        "project-macro": { "maturity": "unsupported", "suiteIds": [] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["quantities-foundation"] }
+      }
+    }
+  ],
+  "foundationSuites": [
+    {
+      "id": "quantities-foundation",
+      "packId": "quantities-units",
+      "capability": "shape-quantity-unit",
+      "path": "foundation/quantities-units.json",
+      "tier": "evaluated",
+      "minimumCases": 46,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "semantic-mutation"]
     }
   ],
   "suites": [
@@ -393,10 +467,10 @@
       "kind": "law",
       "packId": "linear-algebra",
       "path": "corpus/linear-algebra-diversity.json",
-      "tier": "probe",
+      "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,
-      "requiredDimensions": ["notation", "prose", "roles", "project-context", "semantic-mutation"],
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
       "requiredDiversity": {
         "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
         "maximumProfileShare": 0.05
@@ -407,10 +481,10 @@
       "kind": "law",
       "packId": "probability",
       "path": "corpus/probability-diversity.json",
-      "tier": "probe",
+      "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,
-      "requiredDimensions": ["notation", "prose", "roles", "project-context", "semantic-mutation"],
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
       "requiredDiversity": {
         "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
         "maximumProfileShare": 0.05
@@ -425,6 +499,146 @@
       "requiredDiversity": {
         "minimumDistinct": { "semanticSkeleton": 10, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
         "maximumProfileShare": 0.1
+      }
+    },
+    {
+      "id": "linear-products-probe",
+      "kind": "law",
+      "packId": "linear-algebra",
+      "path": "corpus/linear-products-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "linear-products-diversity",
+      "kind": "law",
+      "packId": "linear-algebra",
+      "path": "corpus/linear-products-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "probability-union-probe",
+      "kind": "law",
+      "packId": "probability",
+      "path": "corpus/probability-union-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "probability-union-diversity",
+      "kind": "law",
+      "packId": "probability",
+      "path": "corpus/probability-union-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "calculus-probe",
+      "kind": "law",
+      "packId": "calculus-analysis",
+      "path": "corpus/calculus-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "calculus-diversity",
+      "kind": "law",
+      "packId": "calculus-analysis",
+      "path": "corpus/calculus-diversity.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "discrete-probe",
+      "kind": "law",
+      "packId": "discrete-math",
+      "path": "corpus/discrete-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "discrete-diversity",
+      "kind": "law",
+      "packId": "discrete-math",
+      "path": "corpus/discrete-diversity.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "optimization-probe",
+      "kind": "law",
+      "packId": "optimization-ml",
+      "path": "corpus/optimization-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": ["notation", "roles", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 2, "proseFamily": 2, "projectTopology": 1, "mutationFamily": 3 },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "optimization-diversity",
+      "kind": "law",
+      "packId": "optimization-ml",
+      "path": "corpus/optimization-diversity.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
+      "requiredDiversity": {
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
       }
     }
   ]

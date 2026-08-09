@@ -178,6 +178,23 @@ console.log(
 );
 
 if (process.env.SEMATH_CORPUS_REPORT) {
+  for (const [index, observation] of observations.entries()) {
+    const item = planned[index];
+    if (!item) throw new Error(`missing planned corpus case at index ${index}`);
+    const expected = "lawId" in item.case ? item.case.lawId : undefined;
+    const targetObserved = expected
+      ? observation.establishedLawIds.includes(expected)
+      : false;
+    if (
+      expected &&
+      ((item.case.expectation === "established" && !targetObserved) ||
+        (item.case.expectation === "refused" && targetObserved))
+    ) {
+      console.error(
+        `case ${item.suiteId}/${item.case.id}: expected=${item.case.expectation}:${expected} observed=${observation.establishedLawIds.join(",") || "none"}`,
+      );
+    }
+  }
   for (const variation of scorecard.variations) {
     console.error(
       `variation ${variation.tag}: pass=${format(variation.percent)} cases=${variation.cases}`,

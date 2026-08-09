@@ -57,8 +57,9 @@ describe("observation helpers", () => {
 });
 
 function manifestValue() {
+  const unsupported = { maturity: "unsupported", suiteIds: [] };
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     thresholds: {
       evidenceIntegrity: 100,
       lawPrecision: 99,
@@ -80,16 +81,31 @@ function manifestValue() {
     },
     packs: [
       {
-        corpusSuiteIds: ["mechanics"],
+        capabilities: {
+          "concept-vocabulary": { maturity: "evaluated", suiteIds: [] },
+          "declarations-roles": unsupported,
+          "shape-quantity-unit": unsupported,
+          "law-recognition": { maturity: "evaluated", suiteIds: ["mechanics"] },
+          "diagnostics-refusal": unsupported,
+          "project-macro": unsupported,
+          "navigation-explanation": unsupported,
+        },
         packId: "classical-mechanics",
-        tier: "evaluated",
       },
       {
-        corpusSuiteIds: [],
+        capabilities: {
+          "concept-vocabulary": { maturity: "evaluated", suiteIds: [] },
+          "declarations-roles": unsupported,
+          "shape-quantity-unit": unsupported,
+          "law-recognition": unsupported,
+          "diagnostics-refusal": unsupported,
+          "project-macro": unsupported,
+          "navigation-explanation": unsupported,
+        },
         packId: "quantities-units",
-        tier: "vocabulary-only",
       },
     ],
+    foundationSuites: [],
     suites: [
       {
         id: "mechanics",
@@ -197,16 +213,16 @@ function passingMetamorphicObservations(
 }
 
 describe("quality manifest", () => {
-  test("parses one explicit owner for suites, dimensions, tiers, and thresholds", () => {
+  test("parses capability maturity, suite ownership, dimensions, and thresholds", () => {
     const manifest = parseQualityManifest(manifestValue());
     expect(manifest.suites[0]).toMatchObject({
       id: "mechanics",
       packId: "classical-mechanics",
       tier: "evaluated",
     });
-    expect(manifest.packs.map((pack) => pack.tier)).toEqual([
+    expect(manifest.packs.map((pack) => pack.capabilities["law-recognition"].maturity)).toEqual([
       "evaluated",
-      "vocabulary-only",
+      "unsupported",
     ]);
   });
 
@@ -453,31 +469,33 @@ describe("pack conformance", () => {
     const report = checkPackConformance(
       manifest,
       [
-        { lawIds: ["newton-second-law"], packId: "classical-mechanics" },
-        { lawIds: [], packId: "quantities-units" },
+        catalogEntry("classical-mechanics", ["newton-second-law"]),
+        catalogEntry("quantities-units", []),
       ],
       new Map([["mechanics", corpus(cases)]]),
     );
     expect(report.failures).toEqual([]);
     expect(report.packs).toMatchObject([
-      { authoredCases: 50, coveredLaws: 1, laws: 1, tier: "evaluated" },
-      { authoredCases: 0, coveredLaws: 0, laws: 0, tier: "vocabulary-only" },
+      { authoredCases: 50, coveredLaws: 1, laws: 1, summary: "evaluated" },
+      { authoredCases: 0, coveredLaws: 0, laws: 0, summary: "vocabulary-only" },
     ]);
   });
 
-  test("reports unowned laws, dishonest tiers, and unknown corpus targets", () => {
+  test("reports unowned laws, dishonest capabilities, and unknown corpus targets", () => {
     const value = manifestValue();
-    value.packs[1]!.tier = "probe";
-    value.packs[1]!.corpusSuiteIds = ["mechanics"];
+    value.packs[1]!.capabilities["law-recognition"] = {
+      maturity: "probe",
+      suiteIds: ["mechanics"],
+    };
     const manifest = parseQualityManifest(value);
     const report = checkPackConformance(
       manifest,
       [
-        {
-          lawIds: ["newton-second-law", "kinetic-energy-definition"],
-          packId: "classical-mechanics",
-        },
-        { lawIds: [], packId: "quantities-units" },
+        catalogEntry("classical-mechanics", [
+          "newton-second-law",
+          "kinetic-energy-definition",
+        ]),
+        catalogEntry("quantities-units", []),
       ],
       new Map([["mechanics", corpus([corpusCase({ lawId: "unknown-law" })])]]),
     );
@@ -486,7 +504,7 @@ describe("pack conformance", () => {
         "classical-mechanics/newton-second-law: no corpus coverage",
         "classical-mechanics/kinetic-energy-definition: no corpus coverage",
         "mechanics: corpus targets unknown law unknown-law",
-        "quantities-units: probe pack contains no laws",
+        "quantities-units: probe law capability contains no laws",
       ]),
     );
   });
@@ -501,6 +519,28 @@ describe("pack conformance", () => {
         },
         "circuits.json",
       ),
-    ).toEqual({ lawIds: ["ohm-law"], packId: "circuits" });
+    ).toEqual({
+      activationRules: 0,
+      concepts: 0,
+      lawIds: ["ohm-law"],
+      operators: 0,
+      packId: "circuits",
+      quantityKinds: 0,
+      roles: 0,
+      units: 0,
+    });
   });
 });
+
+function catalogEntry(packId: string, lawIds: readonly string[]) {
+  return {
+    activationRules: 1,
+    concepts: 1,
+    lawIds,
+    operators: 0,
+    packId,
+    quantityKinds: 0,
+    roles: 0,
+    units: 0,
+  };
+}

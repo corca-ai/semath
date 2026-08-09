@@ -47,7 +47,32 @@
   ],
   "quantityKinds": [],
   "units": [],
-  "laws": [],
+  "laws": [
+    {
+      "id": "set-intersection",
+      "title": "Set intersection",
+      "description": "The intersection contains elements belonging to both sets.",
+      "semanticForms": ["left \\cap right"],
+      "roles": [
+        { "id": "left", "concept": "discrete-math:set", "description": "Left set." },
+        { "id": "right", "concept": "discrete-math:set", "description": "Right set." }
+      ],
+      "conditions": ["Both operands are sets in the active universe."],
+      "references": ["concrete-mathematics"]
+    },
+    {
+      "id": "set-union",
+      "title": "Set union",
+      "description": "The union contains elements belonging to either set.",
+      "semanticForms": ["left \\cup right"],
+      "roles": [
+        { "id": "left", "concept": "discrete-math:set", "description": "Left set." },
+        { "id": "right", "concept": "discrete-math:set", "description": "Right set." }
+      ],
+      "conditions": ["Both operands are sets in the active universe."],
+      "references": ["concrete-mathematics"]
+    }
+  ],
   "activationRules": [
     {
       "id": "vocabulary",
