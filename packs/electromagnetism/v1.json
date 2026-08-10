@@ -32,6 +32,7 @@
       "conceptKind": "entity",
       "title": "Charged particle",
       "description": "A body carrying electric charge.",
+      "aliases": ["charged body", "point charge", "test charge"],
       "parents": [],
       "references": [
         "electrodynamics"
@@ -42,6 +43,7 @@
       "conceptKind": "system",
       "title": "Electrostatic field",
       "description": "An electric field in an explicitly electrostatic regime.",
+      "aliases": ["electrostatic regime", "static-field regime"],
       "parents": [],
       "references": [
         "electrodynamics"
@@ -52,6 +54,7 @@
       "conceptKind": "relation",
       "title": "Electric power transfer",
       "description": "Power associated with a voltage and current reference pair.",
+      "aliases": ["electrical power relation", "voltage-current power transfer"],
       "parents": [],
       "references": [
         "electrodynamics"

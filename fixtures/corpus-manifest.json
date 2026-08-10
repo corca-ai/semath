@@ -209,12 +209,12 @@
       "packId": "calculus-analysis",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
-        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
-        "law-recognition": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
-        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["calculus-probe", "calculus-diversity"] },
-        "project-macro": { "maturity": "probe", "suiteIds": ["calculus-diversity"] },
-        "navigation-explanation": { "maturity": "probe", "suiteIds": ["calculus-diversity"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["calculus-probe", "calculus-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["calculus-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["calculus-diversity"] }
       }
     },
     {
@@ -257,12 +257,12 @@
       "packId": "discrete-math",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
-        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
-        "law-recognition": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
-        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["discrete-probe", "discrete-diversity"] },
-        "project-macro": { "maturity": "probe", "suiteIds": ["discrete-diversity"] },
-        "navigation-explanation": { "maturity": "probe", "suiteIds": ["discrete-diversity"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["discrete-probe", "discrete-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["discrete-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["discrete-diversity"] }
       }
     },
     {
@@ -281,12 +281,12 @@
       "packId": "optimization-ml",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
-        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
-        "law-recognition": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
-        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["optimization-probe", "optimization-diversity"] },
-        "project-macro": { "maturity": "probe", "suiteIds": ["optimization-diversity"] },
-        "navigation-explanation": { "maturity": "probe", "suiteIds": ["optimization-diversity"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["optimization-probe", "optimization-diversity"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["optimization-diversity"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["optimization-diversity"] }
       }
     },
     {
@@ -317,36 +317,36 @@
       "packId": "electromagnetism",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
-        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
-        "law-recognition": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
-        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
-        "project-macro": { "maturity": "probe", "suiteIds": ["electromagnetism"] },
-        "navigation-explanation": { "maturity": "probe", "suiteIds": ["electromagnetism"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["electromagnetism"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["electromagnetism"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["electromagnetism"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["electromagnetism"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["electromagnetism"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["electromagnetism"] }
       }
     },
     {
       "packId": "thermodynamics-heat-transfer",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
-        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
-        "law-recognition": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
-        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
-        "project-macro": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] },
-        "navigation-explanation": { "maturity": "probe", "suiteIds": ["thermodynamics-heat-transfer"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["thermodynamics-heat-transfer"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["thermodynamics-heat-transfer"] }
       }
     },
     {
       "packId": "fluid-mechanics",
       "capabilities": {
         "concept-vocabulary": { "maturity": "evaluated", "suiteIds": [] },
-        "declarations-roles": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
-        "shape-quantity-unit": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
-        "law-recognition": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
-        "diagnostics-refusal": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
-        "project-macro": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] },
-        "navigation-explanation": { "maturity": "probe", "suiteIds": ["fluid-mechanics"] }
+        "declarations-roles": { "maturity": "evaluated", "suiteIds": ["fluid-mechanics"] },
+        "shape-quantity-unit": { "maturity": "evaluated", "suiteIds": ["fluid-mechanics"] },
+        "law-recognition": { "maturity": "evaluated", "suiteIds": ["fluid-mechanics"] },
+        "diagnostics-refusal": { "maturity": "evaluated", "suiteIds": ["fluid-mechanics"] },
+        "project-macro": { "maturity": "evaluated", "suiteIds": ["fluid-mechanics"] },
+        "navigation-explanation": { "maturity": "evaluated", "suiteIds": ["fluid-mechanics"] }
       }
     },
     {
@@ -453,13 +453,13 @@
       "kind": "law",
       "packId": "electromagnetism",
       "path": "corpus/electromagnetism.json",
-      "tier": "probe",
-      "minimumPositiveCasesPerLaw": 5,
-      "minimumRefusalCasesPerLaw": 5,
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
       "requiredDiversity": {
-        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 4, "proseFamily": 8, "projectTopology": 3, "mutationFamily": 5 },
-        "maximumProfileShare": 0.1
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
       }
     },
     {
@@ -467,13 +467,13 @@
       "kind": "law",
       "packId": "thermodynamics-heat-transfer",
       "path": "corpus/thermodynamics-heat-transfer.json",
-      "tier": "probe",
-      "minimumPositiveCasesPerLaw": 5,
-      "minimumRefusalCasesPerLaw": 5,
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
       "requiredDiversity": {
-        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 4, "proseFamily": 8, "projectTopology": 3, "mutationFamily": 5 },
-        "maximumProfileShare": 0.1
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
       }
     },
     {
@@ -481,13 +481,13 @@
       "kind": "law",
       "packId": "fluid-mechanics",
       "path": "corpus/fluid-mechanics.json",
-      "tier": "probe",
-      "minimumPositiveCasesPerLaw": 5,
-      "minimumRefusalCasesPerLaw": 5,
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
       "requiredDiversity": {
-        "minimumDistinct": { "semanticSkeleton": 3, "syntaxStructure": 4, "proseFamily": 8, "projectTopology": 3, "mutationFamily": 5 },
-        "maximumProfileShare": 0.1
+        "minimumDistinct": { "semanticSkeleton": 6, "syntaxStructure": 8, "proseFamily": 16, "projectTopology": 5, "mutationFamily": 8 },
+        "maximumProfileShare": 0.05
       }
     },
     {
@@ -751,7 +751,7 @@
       "kind": "law",
       "packId": "calculus-analysis",
       "path": "corpus/calculus-diversity.json",
-      "tier": "probe",
+      "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
@@ -779,7 +779,7 @@
       "kind": "law",
       "packId": "discrete-math",
       "path": "corpus/discrete-diversity.json",
-      "tier": "probe",
+      "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],
@@ -807,7 +807,7 @@
       "kind": "law",
       "packId": "optimization-ml",
       "path": "corpus/optimization-diversity.json",
-      "tier": "probe",
+      "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,
       "requiredDimensions": ["notation", "prose", "roles", "constraints", "project-context", "macro-provenance", "semantic-mutation"],

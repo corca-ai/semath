@@ -23,10 +23,11 @@ import {
   semanticallyEditPerformanceDocument,
   type PerformanceFixtureDocument,
 } from "./performance-fixtures";
+import { shouldEnforceTiming } from "./performance-budget-policy";
 
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
 const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";
-const TIMING_GATE = STABLE_HOST_GATE || DOCUMENT_COUNT < 500;
+const TIMING_GATE = shouldEnforceTiming(process.env, DOCUMENT_COUNT);
 const DELTA_RUNS = positiveInteger(
   "SEMATH_BUDGET_DELTA_RUNS",
   DOCUMENT_COUNT >= 500 ? 10 : 30,

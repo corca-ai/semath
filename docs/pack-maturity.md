@@ -1,12 +1,12 @@
 # Pack maturity report
 
-This is measured repository state on 2026-08-09, not live production telemetry
+This is measured repository state on 2026-08-10, not live production telemetry
 and not a future plan. The [quality manifest](../fixtures/corpus-manifest.json)
 holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 3,050 authored law cases cover 32 laws in twelve packs, including 48 positive
+- 3,106 authored law cases cover 32 laws in twelve packs, including 48 positive
   and 32 refusal diversity cases for every promoted law.
 - 249 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
@@ -14,14 +14,15 @@ holds approved support policy; GitHub issues hold planned work.
   source-linked evidence, and refusal preservation.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
   unit, dimension, propagation diagnostics, notation, prose, and role evidence.
-- The shared scientific-kernel and scientific-prose foundations pass 50 of 50
+- The shared scientific-kernel and scientific-prose foundations pass 66 of 66
   positive and refusal cases across explicit operators, typed application,
   namespaced concepts, include order, and transparent or opaque prose macros.
-- Mechanics, circuits, control, signals and systems, linear algebra, and
-  probability meet evaluated policy. Electromagnetism, thermodynamics/heat
-  transfer, and fluid mechanics have useful three-law probe verticals.
-  Calculus, discrete mathematics, and optimization have useful probe families,
-  but none of these probe packs claims field-wide coverage.
+- Every formula pack meets evaluated policy for its declared vertical.
+  Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus,
+  discrete mathematics, and optimization remain deliberately narrow slices;
+  evaluated capability evidence is not a field-completeness claim.
+- The independent frozen challenge passes 24 of 24 cases across binding,
+  constraints, packs, presentation, resolution, and syntax.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -49,7 +50,7 @@ field completeness.
 
 | Category | Current limitation | Affected evidence |
 | --- | --- | --- |
-| Coverage | Probe packs demonstrate coherent vertical slices, not broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
+| Coverage | Evaluated vertical slices do not yet provide broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by

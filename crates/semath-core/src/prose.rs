@@ -60,6 +60,16 @@ static COORDINATED_SHARED_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s+(?:denote|represent|stand\s+for|to\s+be|be|are)\s+([^,.;\n]+)[,.;]")
         .unwrap()
 });
+static FRONTED_SHARED_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:^|[.!?]\s*|\n\s*)((?:the\s+)?[a-z][a-z-]*(?:\s+[a-z][a-z-]*){0,3})\s*$")
+        .unwrap()
+});
+static FRONTED_SHARED_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?i)^\s+(?:belong(?:s)?\s+to|are\s+(?:in|on|defined\s+(?:in|on)|drawn\s+from|measured\s+in)|share)\b[^.;\n]*[.;]",
+    )
+    .unwrap()
+});
 static CONTEXTUAL_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
         r"(?i)(?:^|[.!?]\s*|\n\s*)(?:here|throughout,?|with|given|suppose|assume|subject\s+to)\s*$",
@@ -834,6 +844,22 @@ fn coordinated_group(
     let after_end = bounded_end(source, last_end, 360);
     let before = &source[before_start..first_start];
     let after = &source[last_end..after_end];
+    if let Some((description, prefix_start, suffix_end)) = fronted_shared_description(before, after)
+    {
+        let mut definitions = Vec::with_capacity(group.len());
+        for math in group {
+            let (symbol, range) = primary_symbol(document, math)?;
+            definitions.push(CoordinatedDefinition {
+                symbol,
+                range,
+                description: description.into(),
+                rule_id: "english-fronted-shared-definition",
+                statement_start: before_start + prefix_start,
+                statement_end: last_end + suffix_end,
+            });
+        }
+        return Some(definitions);
+    }
     let (lead, prefix_start) = coordination_lead(before)?;
     let (descriptions, rule_id, suffix_end) = coordinated_descriptions(lead, after, group.len())?;
     let statement_start = before_start + prefix_start;
@@ -852,6 +878,21 @@ fn coordinated_group(
         });
     }
     Some(definitions)
+}
+
+fn fronted_shared_description<'a>(before: &'a str, after: &str) -> Option<(&'a str, usize, usize)> {
+    let prefix = FRONTED_SHARED_PREFIX.captures(before)?;
+    let description = prefix.get(1)?.as_str().trim();
+    let final_word = description
+        .split_whitespace()
+        .next_back()?
+        .trim_end_matches('-')
+        .to_ascii_lowercase();
+    if !final_word.ends_with('s') || !shared_description_is_unambiguous(description) {
+        return None;
+    }
+    let suffix = FRONTED_SHARED_SUFFIX.find(after)?;
+    Some((description, prefix.get(1)?.start(), suffix.end()))
 }
 
 fn valid_symbol_separators(source: &str, starts: &[usize], ends: &[usize]) -> bool {
@@ -1273,6 +1314,28 @@ mod tests {
             .collect::<Vec<_>>();
         assert!(definitions.contains(&("x", "n-dimensional iterates")));
         assert!(definitions.contains(&("y", "n-dimensional iterates")));
+    }
+
+    #[test]
+    fn maps_fronted_plural_types_without_domain_specific_grammar() {
+        let analysis = analyze(
+            "Events $C$ and $D$ belong to one probability space. Sets $S$ and $T$ are defined on a common universe. Vectors $u$ and $v$ share one coordinate frame.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        for expected in [
+            ("C", "Events"),
+            ("D", "Events"),
+            ("S", "Sets"),
+            ("T", "Sets"),
+            ("u", "Vectors"),
+            ("v", "Vectors"),
+        ] {
+            assert!(definitions.contains(&expected), "{definitions:?}");
+        }
     }
 
     #[test]

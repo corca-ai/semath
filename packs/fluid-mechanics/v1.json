@@ -32,6 +32,7 @@
       "conceptKind": "entity",
       "title": "Flow section",
       "description": "A cross-section normal to a stated mean flow velocity.",
+      "aliases": ["flow cross-section", "cross-sectional flow area"],
       "parents": [],
       "references": [
         "fluid-mechanics"
@@ -42,6 +43,7 @@
       "conceptKind": "system",
       "title": "Incompressible flow",
       "description": "A flow modeled with constant density.",
+      "aliases": ["constant-density flow", "incompressible fluid flow"],
       "parents": [],
       "references": [
         "fluid-mechanics"
@@ -52,6 +54,7 @@
       "conceptKind": "system",
       "title": "Hydrostatic state",
       "description": "A fluid at rest in a stated gravitational field.",
+      "aliases": ["hydrostatic equilibrium", "fluid at rest"],
       "parents": [],
       "references": [
         "fluid-mechanics"

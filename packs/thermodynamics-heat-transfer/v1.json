@@ -32,6 +32,7 @@
       "conceptKind": "system",
       "title": "Closed thermodynamic system",
       "description": "A system with no mass transfer across its boundary.",
+      "aliases": ["closed system", "control mass"],
       "parents": [],
       "references": [
         "thermodynamics"
@@ -42,6 +43,7 @@
       "conceptKind": "relation",
       "title": "Sensible heating",
       "description": "Heating represented by mass, specific heat, and temperature change.",
+      "aliases": ["sensible heat process", "sensible temperature change"],
       "parents": [],
       "references": [
         "heat-transfer"
@@ -52,6 +54,7 @@
       "conceptKind": "system",
       "title": "Plane-wall conduction",
       "description": "One-dimensional steady conduction through a plane wall.",
+      "aliases": ["plane wall", "one-dimensional wall conduction"],
       "parents": [],
       "references": [
         "heat-transfer"

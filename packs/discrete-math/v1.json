@@ -19,6 +19,7 @@
       "conceptKind": "entity",
       "title": "Set",
       "description": "A collection declared by the document.",
+      "aliases": ["finite set", "vertex set", "edge set"],
       "parents": [],
       "references": [
         "concrete-mathematics"
@@ -29,6 +30,7 @@
       "conceptKind": "entity",
       "title": "Graph",
       "description": "A graph with declared vertices and edges.",
+      "aliases": ["directed graph", "undirected graph", "simple graph"],
       "parents": [],
       "references": [
         "graph-theory"
@@ -39,6 +41,7 @@
       "conceptKind": "operator",
       "title": "Cardinality",
       "description": "The size of a finite set.",
+      "aliases": ["set cardinality", "set size", "number of elements"],
       "parents": [],
       "references": [
         "concrete-mathematics"
