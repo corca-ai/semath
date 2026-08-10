@@ -31,6 +31,14 @@ cross-pack, and cross-field collision cases. Separate foundation suites contain
 scientific prose. The prose suite reports association, classification,
 assumption, evidence, refusal, and scope independently instead of blending them
 into one recognition number.
+
+The frozen recognition challenge is separate from those development and
+diversity fixtures. Its cases are manually authored and grouped by the layer
+that owns a failure: syntax, binding, constraint, pack, resolution, or
+presentation. Association, structure, constraint, recognition, evidence,
+refusal, scope, and navigation remain separate metrics. Default CI validates
+the challenge schema and coverage matrix through pure tests but does not execute
+the engine over the holdout.
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
@@ -48,6 +56,8 @@ machine-readable artifact with:
 
 ```sh
 bun run quality
+bun run challenge
+bun run challenge:report
 bun run corpus
 bun run corpus:generate:check
 bun run foundation
@@ -55,6 +65,7 @@ bun run foundation:generate:check
 bun run scorecard
 ```
 
+`bun run challenge:report` writes `.artifacts/recognition-challenge.json`, and
 `bun run scorecard` writes `.artifacts/semantic-scorecard.json`. The same
 complete gate is available through the manually dispatched `semantic-quality`
 GitHub workflow. Generated scorecards and metamorphic fixtures are not

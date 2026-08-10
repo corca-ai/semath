@@ -33,6 +33,9 @@
     "budget:report": "SEMATH_BUDGET_REPORT=.artifacts/performance-budget.json bun scripts/check-budget.ts",
     "budget:scale": "SEMATH_BUDGET_DOCUMENTS=500 SEMATH_BUDGET_DELTA_RUNS=10 bun scripts/check-budget.ts",
     "budget:stable": "SEMATH_BUDGET_STABLE=1 bun scripts/check-budget.ts && SEMATH_BUDGET_STABLE=1 SEMATH_BUDGET_DOCUMENTS=500 SEMATH_BUDGET_DELTA_RUNS=10 bun scripts/check-budget.ts",
+    "challenge": "bun scripts/check-challenge.ts",
+    "challenge:baseline": "SEMATH_CHALLENGE_ALLOW_FAILURES=1 SEMATH_CHALLENGE_REPORT=.artifacts/recognition-challenge.json bun scripts/check-challenge.ts",
+    "challenge:report": "SEMATH_CHALLENGE_REPORT=.artifacts/recognition-challenge.json bun scripts/check-challenge.ts",
     "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run parity && bun run budget && bun run package:smoke",
     "corpus": "bun scripts/check-corpus.ts",
     "corpus:generate": "bun scripts/generate-synthetic-corpus.ts",
@@ -48,7 +51,7 @@
     "pack:conformance": "bun scripts/check-pack-conformance.ts",
     "parity": "bun scripts/check-parity.mjs",
     "scorecard": "SEMATH_SCORECARD_PATH=.artifacts/semantic-scorecard.json bun scripts/check-corpus.ts",
-    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run corpus && bun run foundation && bun run parity && bun run budget:stable && bun run package:smoke",
+    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run corpus && bun run foundation && bun run parity && bun run budget:stable && bun run package:smoke",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit",
     "verify": "bun run check"
