@@ -57,5 +57,8 @@ generation and integrity checks reject stale output, normalized duplicates,
 duplicate semantic/syntax/prose/tag profiles, malformed delimiters, invalid
 environment nesting, ambiguous cursors, and leaked fixture identities.
 
-Native/WASM parity, incremental latency and memory, package integrity, and
-documentation are separate gates so failures remain actionable.
+Native/WASM parity, full-path incremental latency and memory, package integrity,
+and documentation are separate gates so failures remain actionable. The normal
+performance gate covers 61 documents and the scale gate covers 501; both include
+wasmtex syntax updates, adapter and Worker-host overhead, WASM analysis, cursor
+queries, transfer bytes, and affected-document counts.
