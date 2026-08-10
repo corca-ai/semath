@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 4 as const;
+export const SEMATH_PROTOCOL_VERSION = 5 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 4 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -285,9 +285,20 @@ export interface LawBinding {
 }
 
 export interface LawConditionInfo {
-  kind: string;
+  conditionId: string;
+  evidence: readonly Evidence[];
+  kind:
+    | "assumption"
+    | "differentiable"
+    | "domain-membership"
+    | "positive"
+    | "same-context"
+    | "shape-compatible"
+    | "sign-convention"
+    | "uniform";
   label: string;
-  status: "required";
+  status: "conflicting" | "required" | "unsupported" | "verified";
+  subjects: readonly string[];
 }
 
 export interface LawRecognition {

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "probability",
   "packVersion": "1.2.0",
   "packKind": "field",
@@ -69,7 +69,15 @@
         }
       ],
       "conditions": [
-        "Both operands are events in a common probability space."
+        {
+          "id": "common-probability-space",
+          "kind": "domain-membership",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "Both operands are events in a common probability space."
+        }
       ],
       "references": [
         "probability-theory"
@@ -79,13 +87,35 @@
       "id": "event-union",
       "title": "Event union",
       "description": "The union contains outcomes belonging to either event.",
-      "semanticForms": ["left \\cup right"],
-      "roles": [
-        { "id": "left", "concept": "probability:event", "description": "Left event." },
-        { "id": "right", "concept": "probability:event", "description": "Right event." }
+      "semanticForms": [
+        "left \\cup right"
       ],
-      "conditions": ["Both operands are events in a common probability space."],
-      "references": ["probability-theory"]
+      "roles": [
+        {
+          "id": "left",
+          "concept": "probability:event",
+          "description": "Left event."
+        },
+        {
+          "id": "right",
+          "concept": "probability:event",
+          "description": "Right event."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-probability-space",
+          "kind": "domain-membership",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "Both operands are events in a common probability space."
+        }
+      ],
+      "references": [
+        "probability-theory"
+      ]
     }
   ],
   "activationRules": [

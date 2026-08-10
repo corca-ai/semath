@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "quantities-units",
   "packVersion": "1.0.0",
   "packKind": "capability",
@@ -41,7 +41,15 @@
       "id": "length",
       "title": "Length",
       "description": "Spatial extent or displacement magnitude.",
-      "aliases": ["wavelength", "wave length", "height", "depth", "height difference", "depth difference", "wall thickness"],
+      "aliases": [
+        "wavelength",
+        "wave length",
+        "height",
+        "depth",
+        "height difference",
+        "depth difference",
+        "wall thickness"
+      ],
       "dimension": [
         {
           "base": "length",
@@ -58,17 +66,32 @@
       "id": "area",
       "title": "Area",
       "description": "Two-dimensional spatial extent.",
-      "aliases": ["surface area", "cross-sectional area"],
-      "dimension": [
-        { "base": "length", "numerator": 2, "denominator": 1 }
+      "aliases": [
+        "surface area",
+        "cross-sectional area"
       ],
-      "references": ["si-brochure"]
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
     },
     {
       "id": "duration",
       "title": "Duration",
       "description": "Elapsed time.",
-      "aliases": ["time", "time variable", "period", "sampling period", "signal period"],
+      "aliases": [
+        "time",
+        "time variable",
+        "period",
+        "sampling period",
+        "signal period"
+      ],
       "dimension": [
         {
           "base": "time",
@@ -85,7 +108,10 @@
       "id": "mass",
       "title": "Mass",
       "description": "Inertial mass.",
-      "aliases": ["inertial mass", "scalar mass"],
+      "aliases": [
+        "inertial mass",
+        "scalar mass"
+      ],
       "dimension": [
         {
           "base": "mass",
@@ -102,7 +128,14 @@
       "id": "velocity",
       "title": "Velocity",
       "description": "Rate of change of position with time.",
-      "aliases": ["speed", "point velocity", "velocity vector", "wave speed", "propagation speed", "mean normal velocity"],
+      "aliases": [
+        "speed",
+        "point velocity",
+        "velocity vector",
+        "wave speed",
+        "propagation speed",
+        "mean normal velocity"
+      ],
       "dimension": [
         {
           "base": "length",
@@ -124,7 +157,9 @@
       "id": "acceleration",
       "title": "Acceleration",
       "description": "Rate of change of velocity with time.",
-      "aliases": ["acceleration vector"],
+      "aliases": [
+        "acceleration vector"
+      ],
       "dimension": [
         {
           "base": "length",
@@ -146,7 +181,11 @@
       "id": "force",
       "title": "Force",
       "description": "Mechanical interaction with mass-length-time dimension.",
-      "aliases": ["net force", "applied force", "force vector"],
+      "aliases": [
+        "net force",
+        "applied force",
+        "force vector"
+      ],
       "dimension": [
         {
           "base": "length",
@@ -173,13 +212,29 @@
       "id": "pressure",
       "title": "Pressure",
       "description": "Force per unit area.",
-      "aliases": ["mechanical pressure"],
-      "dimension": [
-        { "base": "length", "numerator": -1, "denominator": 1 },
-        { "base": "mass", "numerator": 1, "denominator": 1 },
-        { "base": "time", "numerator": -2, "denominator": 1 }
+      "aliases": [
+        "mechanical pressure"
       ],
-      "references": ["si-brochure"]
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": -1,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
     },
     {
       "id": "momentum",
@@ -210,7 +265,17 @@
       "id": "energy",
       "title": "Energy",
       "description": "Mechanical work or stored energy.",
-      "aliases": ["kinetic energy", "mechanical energy", "electric potential energy", "heat", "sensible heat", "work", "system work", "internal energy change", "boundary work"],
+      "aliases": [
+        "kinetic energy",
+        "mechanical energy",
+        "electric potential energy",
+        "heat",
+        "sensible heat",
+        "work",
+        "system work",
+        "internal energy change",
+        "boundary work"
+      ],
       "dimension": [
         {
           "base": "length",
@@ -236,7 +301,12 @@
       "id": "power",
       "title": "Power",
       "description": "Rate of energy transfer.",
-      "aliases": ["mechanical power", "instantaneous power", "electric power", "heat transfer rate"],
+      "aliases": [
+        "mechanical power",
+        "instantaneous power",
+        "electric power",
+        "heat transfer rate"
+      ],
       "dimension": [
         {
           "base": "length",
@@ -322,7 +392,9 @@
       "id": "capacitance",
       "title": "Capacitance",
       "description": "Electric charge per voltage.",
-      "aliases": ["capacitor capacitance"],
+      "aliases": [
+        "capacitor capacitance"
+      ],
       "dimension": [
         {
           "base": "electric-current",
@@ -383,7 +455,11 @@
       "id": "electric-current",
       "title": "Electric current",
       "description": "Rate of flow of electric charge.",
-      "aliases": ["current", "branch current", "capacitor current"],
+      "aliases": [
+        "current",
+        "branch current",
+        "capacitor current"
+      ],
       "dimension": [
         {
           "base": "electric-current",
@@ -400,7 +476,12 @@
       "id": "voltage",
       "title": "Voltage",
       "description": "Electric potential difference.",
-      "aliases": ["voltage drop", "terminal voltage", "potential difference", "electric potential"],
+      "aliases": [
+        "voltage drop",
+        "terminal voltage",
+        "potential difference",
+        "electric potential"
+      ],
       "dimension": [
         {
           "base": "electric-current",
@@ -432,20 +513,44 @@
       "id": "electric-field",
       "title": "Electric field strength",
       "description": "Force per charge or voltage per length.",
-      "aliases": ["electric field", "electric field symbol"],
-      "dimension": [
-        { "base": "electric-current", "numerator": -1, "denominator": 1 },
-        { "base": "length", "numerator": 1, "denominator": 1 },
-        { "base": "mass", "numerator": 1, "denominator": 1 },
-        { "base": "time", "numerator": -3, "denominator": 1 }
+      "aliases": [
+        "electric field",
+        "electric field symbol"
       ],
-      "references": ["si-brochure"]
+      "dimension": [
+        {
+          "base": "electric-current",
+          "numerator": -1,
+          "denominator": 1
+        },
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
     },
     {
       "id": "resistance",
       "title": "Electrical resistance",
       "description": "Ratio of voltage to current.",
-      "aliases": ["resistance", "resistor resistance"],
+      "aliases": [
+        "resistance",
+        "resistor resistance"
+      ],
       "dimension": [
         {
           "base": "electric-current",
@@ -477,7 +582,12 @@
       "id": "frequency",
       "title": "Frequency",
       "description": "Cycles per unit time.",
-      "aliases": ["cyclic frequency", "angular frequency", "sampling frequency", "wave frequency"],
+      "aliases": [
+        "cyclic frequency",
+        "angular frequency",
+        "sampling frequency",
+        "wave frequency"
+      ],
       "dimension": [
         {
           "base": "time",
@@ -490,11 +600,14 @@
         "si-brochure"
       ]
     },
-  {
-    "id": "temperature",
+    {
+      "id": "temperature",
       "title": "Thermodynamic temperature",
       "description": "Thermodynamic temperature.",
-      "aliases": ["temperature change", "temperature difference"],
+      "aliases": [
+        "temperature change",
+        "temperature difference"
+      ],
       "dimension": [
         {
           "base": "thermodynamic-temperature",
@@ -503,83 +616,175 @@
         }
       ],
       "defaultUnit": "quantities-units:kelvin",
-    "references": [
-      "si-brochure"
-    ]
-  },
-  {
-    "id": "density",
-    "title": "Mass density",
-    "description": "Mass per unit volume.",
-    "aliases": ["density", "fluid density", "mass density"],
-    "dimension": [
-      { "base": "length", "numerator": -3, "denominator": 1 },
-      { "base": "mass", "numerator": 1, "denominator": 1 }
-    ],
-    "references": ["si-brochure"]
-  },
-  {
-    "id": "specific-heat-capacity",
-    "title": "Specific heat capacity",
-    "description": "Heat capacity per unit mass.",
-    "aliases": ["specific heat", "specific heat capacity"],
-    "dimension": [
-      { "base": "length", "numerator": 2, "denominator": 1 },
-      { "base": "time", "numerator": -2, "denominator": 1 },
-      { "base": "thermodynamic-temperature", "numerator": -1, "denominator": 1 }
-    ],
-    "references": ["si-brochure"]
-  },
-  {
-    "id": "thermal-conductivity",
-    "title": "Thermal conductivity",
-    "description": "Heat-transfer rate per length and temperature difference.",
-    "aliases": ["thermal conductivity"],
-    "dimension": [
-      { "base": "length", "numerator": 1, "denominator": 1 },
-      { "base": "mass", "numerator": 1, "denominator": 1 },
-      { "base": "time", "numerator": -3, "denominator": 1 },
-      { "base": "thermodynamic-temperature", "numerator": -1, "denominator": 1 }
-    ],
-    "references": ["si-brochure"]
-  },
-  {
-    "id": "volume",
-    "title": "Volume",
-    "description": "Three-dimensional spatial extent.",
-    "aliases": ["control volume", "fluid volume"],
-    "dimension": [
-      { "base": "length", "numerator": 3, "denominator": 1 }
-    ],
-    "references": ["si-brochure"]
-  },
-  {
-    "id": "mass-flow-rate",
-    "title": "Mass flow rate",
-    "description": "Mass transported per unit time.",
-    "aliases": ["mass flow", "mass flow rate"],
-    "dimension": [
-      { "base": "mass", "numerator": 1, "denominator": 1 },
-      { "base": "time", "numerator": -1, "denominator": 1 }
-    ],
-    "references": ["si-brochure"]
-  },
-  {
-    "id": "volumetric-flow-rate",
-    "title": "Volumetric flow rate",
-    "description": "Volume transported per unit time.",
-    "aliases": ["volume flow", "volumetric flow", "volumetric flow rate"],
-    "dimension": [
-      { "base": "length", "numerator": 3, "denominator": 1 },
-      { "base": "time", "numerator": -1, "denominator": 1 }
-    ],
-    "references": ["si-brochure"]
-  },
-  {
-    "id": "dimensionless",
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "density",
+      "title": "Mass density",
+      "description": "Mass per unit volume.",
+      "aliases": [
+        "density",
+        "fluid density",
+        "mass density"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": -3,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "specific-heat-capacity",
+      "title": "Specific heat capacity",
+      "description": "Heat capacity per unit mass.",
+      "aliases": [
+        "specific heat",
+        "specific heat capacity"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -2,
+          "denominator": 1
+        },
+        {
+          "base": "thermodynamic-temperature",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "thermal-conductivity",
+      "title": "Thermal conductivity",
+      "description": "Heat-transfer rate per length and temperature difference.",
+      "aliases": [
+        "thermal conductivity"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -3,
+          "denominator": 1
+        },
+        {
+          "base": "thermodynamic-temperature",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "volume",
+      "title": "Volume",
+      "description": "Three-dimensional spatial extent.",
+      "aliases": [
+        "control volume",
+        "fluid volume"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 3,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "mass-flow-rate",
+      "title": "Mass flow rate",
+      "description": "Mass transported per unit time.",
+      "aliases": [
+        "mass flow",
+        "mass flow rate"
+      ],
+      "dimension": [
+        {
+          "base": "mass",
+          "numerator": 1,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "volumetric-flow-rate",
+      "title": "Volumetric flow rate",
+      "description": "Volume transported per unit time.",
+      "aliases": [
+        "volume flow",
+        "volumetric flow",
+        "volumetric flow rate"
+      ],
+      "dimension": [
+        {
+          "base": "length",
+          "numerator": 3,
+          "denominator": 1
+        },
+        {
+          "base": "time",
+          "numerator": -1,
+          "denominator": 1
+        }
+      ],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "dimensionless",
       "title": "Dimensionless quantity",
       "description": "A quantity with no physical dimension.",
-      "aliases": ["probability", "scalar probability", "pi", "circle constant"],
+      "aliases": [
+        "probability",
+        "scalar probability",
+        "pi",
+        "circle constant"
+      ],
       "dimension": [],
       "references": [
         "si-brochure"

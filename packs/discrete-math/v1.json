@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "discrete-math",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -52,25 +52,69 @@
       "id": "set-intersection",
       "title": "Set intersection",
       "description": "The intersection contains elements belonging to both sets.",
-      "semanticForms": ["left \\cap right"],
-      "roles": [
-        { "id": "left", "concept": "discrete-math:set", "description": "Left set." },
-        { "id": "right", "concept": "discrete-math:set", "description": "Right set." }
+      "semanticForms": [
+        "left \\cap right"
       ],
-      "conditions": ["Both operands are sets in the active universe."],
-      "references": ["concrete-mathematics"]
+      "roles": [
+        {
+          "id": "left",
+          "concept": "discrete-math:set",
+          "description": "Left set."
+        },
+        {
+          "id": "right",
+          "concept": "discrete-math:set",
+          "description": "Right set."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-set-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "Both operands are sets in the active universe."
+        }
+      ],
+      "references": [
+        "concrete-mathematics"
+      ]
     },
     {
       "id": "set-union",
       "title": "Set union",
       "description": "The union contains elements belonging to either set.",
-      "semanticForms": ["left \\cup right"],
-      "roles": [
-        { "id": "left", "concept": "discrete-math:set", "description": "Left set." },
-        { "id": "right", "concept": "discrete-math:set", "description": "Right set." }
+      "semanticForms": [
+        "left \\cup right"
       ],
-      "conditions": ["Both operands are sets in the active universe."],
-      "references": ["concrete-mathematics"]
+      "roles": [
+        {
+          "id": "left",
+          "concept": "discrete-math:set",
+          "description": "Left set."
+        },
+        {
+          "id": "right",
+          "concept": "discrete-math:set",
+          "description": "Right set."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-set-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "Both operands are sets in the active universe."
+        }
+      ],
+      "references": [
+        "concrete-mathematics"
+      ]
     }
   ],
   "activationRules": [

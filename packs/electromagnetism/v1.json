@@ -1,24 +1,62 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "electromagnetism",
   "packVersion": "1.0.0",
   "packKind": "field",
   "namespace": "electromagnetism",
   "title": "Electromagnetism",
   "description": "Evidence-gated electric force, potential energy, and power relations.",
-  "dependencies": [{
-    "packId": "quantities-units",
-    "versionMajor": 1,
-    "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"]
-  }],
+  "dependencies": [
+    {
+      "packId": "quantities-units",
+      "versionMajor": 1,
+      "requiredCapabilities": [
+        "semath:dimensional-analysis",
+        "semath:quantities"
+      ]
+    }
+  ],
   "capabilities": {
-    "provides": ["electromagnetism:law-relations", "semath:formula-recognition"],
-    "requires": ["semath:dimensional-analysis", "semath:quantities"]
+    "provides": [
+      "electromagnetism:law-relations",
+      "semath:formula-recognition"
+    ],
+    "requires": [
+      "semath:dimensional-analysis",
+      "semath:quantities"
+    ]
   },
   "concepts": [
-    { "id": "charged-particle", "conceptKind": "entity", "title": "Charged particle", "description": "A body carrying electric charge.", "parents": [], "references": ["electrodynamics"] },
-    { "id": "electrostatic-field", "conceptKind": "system", "title": "Electrostatic field", "description": "An electric field in an explicitly electrostatic regime.", "parents": [], "references": ["electrodynamics"] },
-    { "id": "electric-power-transfer", "conceptKind": "relation", "title": "Electric power transfer", "description": "Power associated with a voltage and current reference pair.", "parents": [], "references": ["electrodynamics"] }
+    {
+      "id": "charged-particle",
+      "conceptKind": "entity",
+      "title": "Charged particle",
+      "description": "A body carrying electric charge.",
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "electrostatic-field",
+      "conceptKind": "system",
+      "title": "Electrostatic field",
+      "description": "An electric field in an explicitly electrostatic regime.",
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "electric-power-transfer",
+      "conceptKind": "relation",
+      "title": "Electric power transfer",
+      "description": "Power associated with a voltage and current reference pair.",
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    }
   ],
   "quantityKinds": [],
   "units": [],
@@ -28,48 +66,190 @@
       "title": "Electric force",
       "description": "Electric force equals charge multiplied by electric field.",
       "roles": [
-        { "id": "force", "concept": "quantities-units:force", "description": "Electric force on the charge.", "notation": ["F"] },
-        { "id": "charge", "concept": "quantities-units:electric-charge", "description": "Electric charge.", "shape": "scalar", "notation": ["q", "Q"] },
-        { "id": "electric-field", "concept": "quantities-units:electric-field", "description": "Electric field at the charge.", "notation": ["E"] }
+        {
+          "id": "force",
+          "concept": "quantities-units:force",
+          "description": "Electric force on the charge.",
+          "notation": [
+            "F"
+          ]
+        },
+        {
+          "id": "charge",
+          "concept": "quantities-units:electric-charge",
+          "description": "Electric charge.",
+          "shape": "scalar",
+          "notation": [
+            "q",
+            "Q"
+          ]
+        },
+        {
+          "id": "electric-field",
+          "concept": "quantities-units:electric-field",
+          "description": "Electric field at the charge.",
+          "notation": [
+            "E"
+          ]
+        }
       ],
-      "semanticForms": ["force = charge electric-field", "force = charge \\cdot electric-field"],
-      "conditions": ["The field is evaluated at the charged body and magnetic-force terms are outside this relation."],
-      "references": ["electrodynamics"]
+      "semanticForms": [
+        "force = charge electric-field",
+        "force = charge \\cdot electric-field"
+      ],
+      "conditions": [
+        {
+          "id": "electrostatic-regime",
+          "kind": "assumption",
+          "subjects": [
+            "force",
+            "charge",
+            "electric-field"
+          ],
+          "label": "The field is evaluated at the charged body and magnetic-force terms are outside this relation."
+        }
+      ],
+      "references": [
+        "electrodynamics"
+      ]
     },
     {
       "id": "electric-potential-energy",
       "title": "Electric potential energy",
       "description": "Potential energy equals charge multiplied by electric potential.",
       "roles": [
-        { "id": "energy", "concept": "quantities-units:energy", "description": "Electric potential energy.", "shape": "scalar", "notation": ["U", "W"] },
-        { "id": "charge", "concept": "quantities-units:electric-charge", "description": "Electric charge.", "shape": "scalar", "notation": ["q", "Q"] },
-        { "id": "voltage", "concept": "quantities-units:voltage", "description": "Electric potential relative to the stated reference.", "shape": "scalar", "notation": ["V", "phi"] }
+        {
+          "id": "energy",
+          "concept": "quantities-units:energy",
+          "description": "Electric potential energy.",
+          "shape": "scalar",
+          "notation": [
+            "U",
+            "W"
+          ]
+        },
+        {
+          "id": "charge",
+          "concept": "quantities-units:electric-charge",
+          "description": "Electric charge.",
+          "shape": "scalar",
+          "notation": [
+            "q",
+            "Q"
+          ]
+        },
+        {
+          "id": "voltage",
+          "concept": "quantities-units:voltage",
+          "description": "Electric potential relative to the stated reference.",
+          "shape": "scalar",
+          "notation": [
+            "V",
+            "phi"
+          ]
+        }
       ],
-      "semanticForms": ["energy = charge voltage", "energy = charge \\cdot voltage"],
-      "conditions": ["Charge and potential use the same reference and the electrostatic regime is explicit."],
-      "references": ["electrodynamics"]
+      "semanticForms": [
+        "energy = charge voltage",
+        "energy = charge \\cdot voltage"
+      ],
+      "conditions": [
+        {
+          "id": "common-potential-reference",
+          "kind": "same-context",
+          "subjects": [
+            "energy",
+            "charge",
+            "voltage"
+          ],
+          "label": "Charge and potential use the same reference and the electrostatic regime is explicit."
+        }
+      ],
+      "references": [
+        "electrodynamics"
+      ]
     },
     {
       "id": "electric-power-law",
       "title": "Electric power",
       "description": "Instantaneous electric power equals voltage multiplied by current.",
       "roles": [
-        { "id": "power", "concept": "quantities-units:power", "description": "Instantaneous electric power.", "shape": "scalar", "notation": ["P", "p"] },
-        { "id": "voltage", "concept": "quantities-units:voltage", "description": "Terminal voltage.", "shape": "scalar", "notation": ["V", "v"] },
-        { "id": "current", "concept": "quantities-units:electric-current", "description": "Terminal current.", "shape": "scalar", "notation": ["I", "i"] }
+        {
+          "id": "power",
+          "concept": "quantities-units:power",
+          "description": "Instantaneous electric power.",
+          "shape": "scalar",
+          "notation": [
+            "P",
+            "p"
+          ]
+        },
+        {
+          "id": "voltage",
+          "concept": "quantities-units:voltage",
+          "description": "Terminal voltage.",
+          "shape": "scalar",
+          "notation": [
+            "V",
+            "v"
+          ]
+        },
+        {
+          "id": "current",
+          "concept": "quantities-units:electric-current",
+          "description": "Terminal current.",
+          "shape": "scalar",
+          "notation": [
+            "I",
+            "i"
+          ]
+        }
       ],
-      "semanticForms": ["power = voltage current", "power = voltage \\cdot current"],
-      "conditions": ["Voltage and current reference directions use one explicitly stated sign convention."],
-      "references": ["electrodynamics"]
+      "semanticForms": [
+        "power = voltage current",
+        "power = voltage \\cdot current"
+      ],
+      "conditions": [
+        {
+          "id": "consistent-references",
+          "kind": "sign-convention",
+          "subjects": [
+            "voltage",
+            "current"
+          ],
+          "label": "Voltage and current reference directions use one explicitly stated sign convention."
+        }
+      ],
+      "references": [
+        "electrodynamics"
+      ]
     }
   ],
-  "activationRules": [{
-    "id": "electromagnetism-vocabulary",
-    "topic": "foundations",
-    "patterns": ["electromagnetism", "electrostatic", "charged particle", "electric field", "electric force", "electric potential energy", "electric power"],
-    "references": ["electrodynamics"]
-  }],
+  "activationRules": [
+    {
+      "id": "electromagnetism-vocabulary",
+      "topic": "foundations",
+      "patterns": [
+        "electromagnetism",
+        "electrostatic",
+        "charged particle",
+        "electric field",
+        "electric force",
+        "electric potential energy",
+        "electric power"
+      ],
+      "references": [
+        "electrodynamics"
+      ]
+    }
+  ],
   "roles": [],
   "operators": [],
-  "references": [{ "id": "electrodynamics", "title": "Introduction to Electrodynamics", "citation": "David J. Griffiths, Introduction to Electrodynamics, 4th edition, Cambridge University Press, 2017." }]
+  "references": [
+    {
+      "id": "electrodynamics",
+      "title": "Introduction to Electrodynamics",
+      "citation": "David J. Griffiths, Introduction to Electrodynamics, 4th edition, Cambridge University Press, 2017."
+    }
+  ]
 }
