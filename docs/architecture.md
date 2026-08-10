@@ -35,9 +35,9 @@ ambiguous expansions are refused.
 
 `ProjectSemanticIndex` is the sole persistent owner of semantic facts. Parsed
 documents retain source, structural syntax, scopes, and hygiene state, while
-the index owns definitions, roles, shapes, quantities, domains, and law
-recognitions. Queries project bounded views from that store instead of building
-parallel fact graphs.
+the index owns definitions, roles, shapes, quantities, structural candidates,
+domains, and law recognitions. Queries project bounded views from that store
+instead of building parallel fact graphs.
 
 The index has exactly two authoritative identities: a revision-qualified
 `SourceOccurrenceId` for real source spans and a scoped `EntityId` anchored to
@@ -46,6 +46,14 @@ Typed claims retain explicit polarity, modality, source provenance, extraction
 rule version, and strictly increasing derivation tiers. Alias resolution is
 scope- and source-order-aware and retracts with its evidence; strings are never
 permanently unioned.
+
+Structural ambiguity is represented as bounded candidate claims attached to a
+real source occurrence. Candidate construction reads only the wasmtex CST and
+is deterministic; it does not assign conventional meaning. Typed claims on the
+resolved entity provide supporting or rejecting evidence through an
+entity-keyed index. Thus `\operatorname{acc}(B_m)` can carry application and
+juxtaposition possibilities without wasmtex or a command switch declaring the
+answer, while decorated and styled forms remain distinct from their nucleus.
 
 Included documents contribute the same namespaced role, shape, quantity, unit,
 dimension, and evidence records used locally. A per-document external type

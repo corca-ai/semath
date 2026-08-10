@@ -218,6 +218,56 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("ranks named-call candidates only from source-linked type evidence", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///candidates.md";
+    const content = [
+      "Let $\\operatorname{acc}$ denote an accuracy metric.",
+      "$\\operatorname{acc}(B_m)$ and $\\operatorname{conf}(B_m)$.",
+    ].join("\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+      },
+    });
+    for (const [id, needle] of [
+      [181, "\\operatorname{acc}(B_m)"],
+      [182, "\\operatorname{conf}(B_m)"],
+    ] as const) {
+      await server.handle({
+        id,
+        method: "semath/semanticView",
+        params: {
+          position: positionAt(content, content.lastIndexOf(needle) + 15),
+          textDocument: { uri },
+        },
+      });
+    }
+
+    expect(response(messages, 181).view.context.candidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          family: "application",
+          interpretation: "application",
+          status: "supported",
+        }),
+        expect.objectContaining({
+          family: "juxtaposition",
+          interpretation: "multiplication",
+          status: "unresolved",
+        }),
+      ]),
+    );
+    expect(response(messages, 182).view.context.candidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ family: "application", status: "unresolved" }),
+        expect.objectContaining({ family: "juxtaposition", status: "unresolved" }),
+      ]),
+    );
+    server.dispose();
+  });
+
   test("falls back to wasmtex for cross-file LaTeX navigation", async () => {
     const { messages, server } = await setup();
     await server.handle({

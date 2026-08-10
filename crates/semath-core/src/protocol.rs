@@ -549,6 +549,27 @@ pub struct SemanticClaimInfo {
     pub conflicts: Vec<String>,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum SemanticCandidateStatus {
+    Conflicting,
+    Rejected,
+    Supported,
+    Unresolved,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticCandidateInfo {
+    pub candidate_id: String,
+    pub family: String,
+    pub interpretation: String,
+    pub status: SemanticCandidateStatus,
+    pub range: SourceRange,
+    pub supporting_claim_ids: Vec<String>,
+    pub rejecting_claim_ids: Vec<String>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct RelationRoleInfo {
@@ -582,6 +603,7 @@ pub struct SemanticContextInfo {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub assumptions: Vec<AssumptionInfo>,
     pub claims: Vec<SemanticClaimInfo>,
+    pub candidates: Vec<SemanticCandidateInfo>,
     pub relations: Vec<RelationInfo>,
     pub quantities: Vec<QuantityInfo>,
     pub truncated: bool,
@@ -819,6 +841,7 @@ pub struct AnalysisStats {
     pub semantic_evidence: u32,
     pub semantic_dependency_edges: u32,
     pub invalidated_semantic_claims: u32,
+    pub semantic_candidates: u32,
 }
 
 #[cfg(test)]

@@ -6,8 +6,10 @@ use crate::SourceRange;
 
 const MAX_DOCUMENT_OCCURRENCES: usize = 100_000;
 const MAX_DOCUMENT_CLAIMS: usize = 50_000;
+const MAX_DOCUMENT_CANDIDATES: usize = 50_000;
 const MAX_DERIVATION_DEPTH: u8 = 8;
 const MAX_RESOLUTION_CANDIDATES: usize = 32;
+const MAX_CANDIDATE_EVIDENCE: usize = 32;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
@@ -88,6 +90,35 @@ pub struct EvidenceId(pub String);
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ClaimId(pub String);
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+pub struct CandidateId(pub String);
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "kebab-case")]
+pub enum CandidateFamily {
+    Application,
+    Binder,
+    Bracketed,
+    Decoration,
+    Differential,
+    Juxtaposition,
+    Operator,
+    Script,
+    Style,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SemanticCandidateClaim {
+    pub id: CandidateId,
+    pub occurrence_id: SourceOccurrenceId,
+    pub family: CandidateFamily,
+    pub interpretation: String,
+    pub range: SourceRange,
+    pub supporting_claims: Vec<ClaimId>,
+    pub rejecting_claims: Vec<ClaimId>,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "kebab-case")]
@@ -186,6 +217,8 @@ pub struct DocumentSemanticFacts {
     pub mentions: Vec<Mention>,
     pub evidence: Vec<EvidenceRecord>,
     pub claims: Vec<Claim>,
+    #[serde(default)]
+    pub candidates: Vec<SemanticCandidateClaim>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -224,6 +257,7 @@ pub struct SemanticIndexStats {
     pub evidence: u32,
     pub dependency_edges: u32,
     pub invalidated_claims: u32,
+    pub candidates: u32,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -234,8 +268,10 @@ pub struct ProjectSemanticIndex {
     mentions: BTreeMap<SourceOccurrenceId, Mention>,
     evidence: BTreeMap<EvidenceId, EvidenceRecord>,
     claims: BTreeMap<ClaimId, Claim>,
+    candidates: BTreeMap<SourceOccurrenceId, Vec<SemanticCandidateClaim>>,
     dependents: BTreeMap<ClaimId, BTreeSet<ClaimId>>,
     binding_claims: BTreeMap<String, BTreeSet<ClaimId>>,
+    claims_by_entity: BTreeMap<EntityId, BTreeSet<ClaimId>>,
     invalidated_claims: u32,
 }
 
@@ -374,6 +410,7 @@ impl ProjectSemanticIndex {
             evidence: self.evidence.len() as u32,
             dependency_edges: self.dependents.values().map(BTreeSet::len).sum::<usize>() as u32,
             invalidated_claims: self.invalidated_claims,
+            candidates: self.candidates.values().map(Vec::len).sum::<usize>() as u32,
         }
     }
 
@@ -393,12 +430,76 @@ impl ProjectSemanticIndex {
         self.evidence.get(id)
     }
 
+    pub fn candidates_for(
+        &self,
+        occurrence_id: &SourceOccurrenceId,
+    ) -> Vec<SemanticCandidateClaim> {
+        let entities = self
+            .resolve(occurrence_id)
+            .candidates
+            .into_iter()
+            .filter(|candidate| !candidate.supporting_claims.is_empty())
+            .map(|candidate| candidate.entity_id)
+            .collect::<BTreeSet<_>>();
+        let mut candidates = self
+            .candidates
+            .get(occurrence_id)
+            .into_iter()
+            .flatten()
+            .cloned()
+            .collect::<Vec<_>>();
+        for candidate in &mut candidates {
+            for entity in &entities {
+                for claim_id in self
+                    .claims_by_entity
+                    .get(entity)
+                    .into_iter()
+                    .flatten()
+                    .take(MAX_CANDIDATE_EVIDENCE)
+                {
+                    let claim = &self.claims[claim_id];
+                    if !candidate_claim_matches(candidate, claim) {
+                        continue;
+                    }
+                    let evidence = &self.evidence[&claim.evidence_id];
+                    if evidence.modality != EvidenceModality::Asserted {
+                        continue;
+                    }
+                    match evidence.polarity {
+                        EvidencePolarity::Positive => {
+                            candidate.supporting_claims.push(claim.id.clone())
+                        }
+                        EvidencePolarity::Negative => {
+                            candidate.rejecting_claims.push(claim.id.clone())
+                        }
+                    }
+                }
+            }
+            candidate.supporting_claims.sort();
+            candidate.supporting_claims.dedup();
+            candidate.rejecting_claims.sort();
+            candidate.rejecting_claims.dedup();
+        }
+        candidates.sort_by_key(|candidate| {
+            (
+                candidate.supporting_claims.is_empty(),
+                !candidate.rejecting_claims.is_empty(),
+                candidate.family,
+                candidate.interpretation.clone(),
+            )
+        });
+        candidates
+    }
+
     fn validate_and_insert(&mut self, facts: DocumentSemanticFacts) -> Result<(), String> {
         if facts.occurrences.len() > MAX_DOCUMENT_OCCURRENCES {
             return Err("document occurrence cap exceeded".to_owned());
         }
         if facts.claims.len() > MAX_DOCUMENT_CLAIMS {
             return Err("document claim cap exceeded".to_owned());
+        }
+        if facts.candidates.len() > MAX_DOCUMENT_CANDIDATES {
+            return Err("document candidate cap exceeded".to_owned());
         }
         let mut occurrence_ids = BTreeSet::new();
         for occurrence in &facts.occurrences {
@@ -576,6 +677,41 @@ impl ProjectSemanticIndex {
                 }
             }
         }
+        let known_claims = self
+            .claims
+            .keys()
+            .chain(new_claims.keys())
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        let mut candidate_ids = BTreeSet::new();
+        for candidate in &facts.candidates {
+            if !candidate_ids.insert(candidate.id.clone()) {
+                return Err("duplicate semantic candidate identity".to_owned());
+            }
+            let occurrence = self.occurrences.get(&candidate.occurrence_id).or_else(|| {
+                facts
+                    .occurrences
+                    .iter()
+                    .find(|item| item.id == candidate.occurrence_id)
+            });
+            if candidate.occurrence_id.file_id != facts.file_id
+                || occurrence.is_none()
+                || candidate.range.start_offset >= candidate.range.end_offset
+                || candidate.range.end_offset > facts.source_utf16_length
+                || occurrence.is_some_and(|source| {
+                    candidate.range.start_offset < source.range.start_offset
+                        || candidate.range.end_offset > source.range.end_offset
+                })
+                || candidate.interpretation.trim().is_empty()
+                || candidate
+                    .supporting_claims
+                    .iter()
+                    .chain(&candidate.rejecting_claims)
+                    .any(|claim| !known_claims.contains(claim))
+            {
+                return Err("semantic candidate has an invalid source or claim".to_owned());
+            }
+        }
         self.document_versions
             .insert(facts.file_id, facts.document_version);
         self.occurrences.extend(
@@ -599,6 +735,12 @@ impl ProjectSemanticIndex {
         );
         self.claims
             .extend(facts.claims.into_iter().map(|item| (item.id.clone(), item)));
+        for candidate in facts.candidates {
+            self.candidates
+                .entry(candidate.occurrence_id.clone())
+                .or_default()
+                .push(candidate);
+        }
         Ok(())
     }
 
@@ -625,6 +767,8 @@ impl ProjectSemanticIndex {
         }
         self.invalidated_claims = self.invalidated_claims.saturating_add(removed.len() as u32);
         self.claims.retain(|id, _| !removed.contains(id));
+        self.candidates
+            .retain(|occurrence, _| occurrence.file_id != file_id);
         self.evidence.retain(|_, evidence| {
             evidence.source.file_id != file_id
                 && evidence
@@ -641,7 +785,12 @@ impl ProjectSemanticIndex {
     fn rebuild_indexes(&mut self) {
         self.dependents.clear();
         self.binding_claims.clear();
+        self.claims_by_entity.clear();
         for claim in self.claims.values() {
+            self.claims_by_entity
+                .entry(claim.subject.clone())
+                .or_default()
+                .insert(claim.id.clone());
             if let Some(evidence) = self.evidence.get(&claim.evidence_id) {
                 for parent in &evidence.parent_claims {
                     self.dependents
@@ -664,6 +813,35 @@ impl ProjectSemanticIndex {
                     .or_default()
                     .insert(claim.id.clone());
             }
+        }
+    }
+}
+
+fn candidate_claim_matches(candidate: &SemanticCandidateClaim, claim: &Claim) -> bool {
+    let ClaimObject::Text(value) = &claim.object else {
+        return false;
+    };
+    let normalized = value.trim().to_ascii_lowercase().replace(['_', ' '], "-");
+    if normalized == candidate.interpretation {
+        return true;
+    }
+    match candidate.family {
+        CandidateFamily::Application => matches!(
+            normalized.as_str(),
+            "function" | "operator" | "map" | "application" | "metric"
+        ),
+        CandidateFamily::Binder => matches!(normalized.as_str(), "binder" | "bound-variable"),
+        CandidateFamily::Differential => {
+            matches!(
+                normalized.as_str(),
+                "differential" | "derivative" | "gradient"
+            )
+        }
+        CandidateFamily::Decoration => normalized == candidate.interpretation,
+        CandidateFamily::Style => normalized == candidate.interpretation,
+        CandidateFamily::Script => normalized == candidate.interpretation,
+        CandidateFamily::Bracketed | CandidateFamily::Juxtaposition | CandidateFamily::Operator => {
+            normalized == candidate.interpretation
         }
     }
 }
@@ -822,6 +1000,7 @@ mod tests {
                 .collect(),
             evidence,
             claims,
+            candidates: Vec::new(),
         }
     }
 
@@ -1324,5 +1503,71 @@ mod tests {
                 .windows(2)
                 .all(|pair| pair[0].entity_id < pair[1].entity_id)
         );
+    }
+
+    #[test]
+    fn structural_candidates_rank_only_from_asserted_typed_claims() {
+        let notation = vec![NotationComponent::NamedSurface {
+            value: "ECE".into(),
+        }];
+        let declaration = occurrence("metric.tex", 1, 1, 0, 1, &[], "ECE", notation.clone());
+        let usage = occurrence("metric.tex", 1, 2, 20, 20, &[], "ECE", notation);
+        let metric = entity(&declaration, "metric");
+        let mut document = facts(
+            "metric.tex",
+            1,
+            vec![declaration.clone(), usage.clone()],
+            vec![metric.clone()],
+            vec![usage.id.clone()],
+            vec![
+                evidence(
+                    "definition-evidence",
+                    &declaration,
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
+                ),
+                evidence(
+                    "type-evidence",
+                    &declaration,
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
+                ),
+            ],
+            vec![
+                claim(
+                    "definition",
+                    &metric,
+                    ClaimPredicate::Defines,
+                    ClaimObject::Occurrence(declaration.id.clone()),
+                    "definition-evidence",
+                ),
+                claim(
+                    "metric-type",
+                    &metric,
+                    ClaimPredicate::HasType,
+                    ClaimObject::Text("metric".into()),
+                    "type-evidence",
+                ),
+            ],
+        );
+        document.candidates = vec![SemanticCandidateClaim {
+            id: CandidateId("application-candidate".into()),
+            occurrence_id: usage.id.clone(),
+            family: CandidateFamily::Application,
+            interpretation: "application".into(),
+            range: usage.range.clone(),
+            supporting_claims: Vec::new(),
+            rejecting_claims: Vec::new(),
+        }];
+        let mut index = ProjectSemanticIndex::default();
+        index.replace_document(document).unwrap();
+
+        let candidates = index.candidates_for(&usage.id);
+        assert_eq!(candidates.len(), 1);
+        assert_eq!(
+            candidates[0].supporting_claims,
+            [ClaimId("metric-type".into())]
+        );
+        assert!(candidates[0].rejecting_claims.is_empty());
     }
 }
