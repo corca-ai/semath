@@ -31,6 +31,7 @@ export interface ChallengeExpectation {
   readonly definitionDescription?: string;
   readonly definitionRuleId?: string;
   readonly excludedConceptId?: string;
+  readonly excludedCandidateFamily?: string;
   readonly excludedDefinitionSymbol?: string;
   readonly excludedRelationId?: string;
   readonly relationId?: string;
@@ -57,7 +58,7 @@ export interface ChallengeCase {
 
 export interface ChallengeCorpus {
   readonly cases: readonly ChallengeCase[];
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
 }
 
 export interface ChallengeObservation {
@@ -87,15 +88,42 @@ export interface ChallengeScorecard {
   readonly metrics: Readonly<Record<ChallengeMetric, { passed: number; total: number }>>;
   readonly outcomes: Readonly<Record<ChallengeOutcome, { passed: number; total: number }>>;
   readonly passed: number;
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
+}
+
+export interface DevelopmentFixtureCase {
+  readonly documents: readonly CorpusDocument[];
+  readonly id: string;
+}
+
+export function findChallengeFixtureLeaks(
+  challenge: readonly ChallengeCase[],
+  development: readonly DevelopmentFixtureCase[],
+): readonly string[] {
+  const developmentIds = new Set(development.map((item) => item.id));
+  const developmentSources = new Set(
+    development.flatMap((item) =>
+      item.documents.map((document) => normalizedSource(document.content)),
+    ),
+  );
+  const leaks = new Set<string>();
+  for (const item of challenge) {
+    if (developmentIds.has(item.id)) leaks.add(`${item.id}: duplicate fixture id`);
+    for (const document of item.documents) {
+      if (developmentSources.has(normalizedSource(document.content))) {
+        leaks.add(`${item.id}: duplicate fixture source`);
+      }
+    }
+  }
+  return [...leaks].sort();
 }
 
 export function parseChallengeCorpus(value: unknown): ChallengeCorpus {
   const root = record(value, "challenge");
   exact(root, ["schemaVersion", "cases"], "challenge");
-  if (root.schemaVersion !== 1) throw new Error("challenge.schemaVersion: must be 1");
-  if (!Array.isArray(root.cases) || root.cases.length < 24) {
-    throw new Error("challenge.cases: must contain at least 24 frozen cases");
+  if (root.schemaVersion !== 2) throw new Error("challenge.schemaVersion: must be 2");
+  if (!Array.isArray(root.cases) || root.cases.length < 48) {
+    throw new Error("challenge.cases: must contain at least 48 frozen cases");
   }
   const cases = root.cases.map((item, index) => parseCase(item, `challenge.cases[${index}]`));
   unique(cases.map((item) => item.id), "challenge.cases.id");
@@ -111,7 +139,8 @@ export function parseChallengeCorpus(value: unknown): ChallengeCorpus {
       throw new Error(`challenge.cases: missing metric ${metric}`);
     }
   }
-  return { cases, schemaVersion: 1 };
+  validateBoundaryPairs(cases);
+  return { cases, schemaVersion: 2 };
 }
 
 export function scoreChallenge(
@@ -144,6 +173,12 @@ export function scoreChallenge(
         : undefined,
       expected.conceptId && !observation.conceptIds.includes(expected.conceptId)
         ? `concept ${expected.conceptId}`
+        : undefined,
+      expected.excludedCandidateFamily &&
+      observation.candidates.some(
+        (candidate) => candidate.family === expected.excludedCandidateFamily,
+      )
+        ? `excluded candidate ${expected.excludedCandidateFamily}`
         : undefined,
       expected.definitionDescription &&
       !observation.definitions.some(
@@ -209,7 +244,7 @@ export function scoreChallenge(
       (item) => item.outcome,
     ),
     passed: passed.size,
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 }
 
@@ -250,6 +285,7 @@ function parseCase(value: unknown, path: string): ChallengeCase {
     "candidateFamily",
     "candidateInterpretation",
     "conceptId",
+    "excludedCandidateFamily",
     "definitionDescription",
     "definitionRuleId",
     "excludedConceptId",
@@ -287,6 +323,32 @@ function parseCase(value: unknown, path: string): ChallengeCase {
     owner: oneOf(item.owner, CHALLENGE_LAYERS, `${path}.owner`),
     variationTags: stringList(item.variationTags, `${path}.variationTags`),
   };
+}
+
+function validateBoundaryPairs(cases: readonly ChallengeCase[]): void {
+  const pairs = new Map<string, Set<ChallengeOutcome>>();
+  for (const item of cases) {
+    for (const tag of item.variationTags) {
+      if (!tag.startsWith("boundary-pair:")) continue;
+      const pair = tag.slice("boundary-pair:".length);
+      if (!pair) throw new Error(`${item.id}: boundary pair must have an id`);
+      const outcomes = pairs.get(pair) ?? new Set<ChallengeOutcome>();
+      outcomes.add(item.outcome);
+      pairs.set(pair, outcomes);
+    }
+  }
+  if (pairs.size < 12) {
+    throw new Error("challenge.cases: must contain at least 12 semantic boundary pairs");
+  }
+  for (const [pair, outcomes] of pairs) {
+    if (!outcomes.has("positive") || !outcomes.has("refusal")) {
+      throw new Error(`challenge.cases: incomplete boundary pair ${pair}`);
+    }
+  }
+}
+
+function normalizedSource(source: string): string {
+  return source.replace(/\s+/gu, " ").trim();
 }
 
 function tally<

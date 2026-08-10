@@ -21,8 +21,10 @@ holds approved support policy; GitHub issues hold planned work.
   Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus,
   discrete mathematics, and optimization remain deliberately narrow slices;
   evaluated capability evidence is not a field-completeness claim.
-- The independent frozen challenge passes 24 of 24 cases across binding,
-  constraints, packs, presentation, resolution, and syntax.
+- The independent frozen challenge v2 contains 48 cases across binding,
+  constraints, packs, presentation, resolution, and syntax. Its initial
+  hard-cutover baseline passes 41 of 48; the seven exposed gaps are assigned to
+  issues #189 and #191 rather than hidden by fixture or threshold changes.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.

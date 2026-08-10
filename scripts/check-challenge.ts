@@ -9,12 +9,12 @@ import { runSemanticEvaluation } from "./semantic-evaluation-runner";
 const corpus = parseChallengeCorpus(
   JSON.parse(
     await readFile(
-      new URL("../fixtures/challenge/recognition-v1.json", import.meta.url),
+      new URL("../fixtures/challenge/recognition-v2.json", import.meta.url),
       "utf8",
     ),
   ),
 );
-const results = runSemanticEvaluation(corpus.cases, "recognition-challenge-v1");
+const results = runSemanticEvaluation(corpus.cases, "recognition-challenge-v2");
 const debugIds = new Set(process.env.SEMATH_CHALLENGE_DEBUG?.split(",") ?? []);
 const observations = corpus.cases.map((item, index): ChallengeObservation => {
   const result = results[index];
