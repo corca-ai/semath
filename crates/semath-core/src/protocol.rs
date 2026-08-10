@@ -276,6 +276,36 @@ pub struct ProjectMacroExpansion {
     pub surface: Option<String>,
     #[serde(default)]
     pub input_range: Option<SourceRange>,
+    #[serde(default)]
+    pub notation: Option<GeneratedNotationTree>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneratedNotationTree {
+    pub nodes: Vec<GeneratedNotationNode>,
+    pub root: u32,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneratedNotationNode {
+    pub kind: NotationNodeKind,
+    pub children: Vec<u32>,
+    pub state: SyntaxState,
+    pub name: Option<String>,
+    pub text: Option<String>,
+    #[serde(default)]
+    pub arguments: Vec<GeneratedNotationArgument>,
+    pub math_class: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneratedNotationArgument {
+    pub node: u32,
+    pub role: String,
+    pub syntax: String,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]

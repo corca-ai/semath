@@ -802,6 +802,7 @@ mod tests {
                         start_offset: call_start,
                         end_offset: call_end,
                     }),
+                    notation: None,
                 },
             }],
             includes: Vec::new(),

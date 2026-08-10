@@ -26,8 +26,10 @@ present and act on the result.
 Semath accepts wasmtex syntax-contract v4. Math regions, includes, project
 macros, call-site ranges, expansion provenance, and ambiguity are supplied once
 at this boundary. Semath does not rescan TeX to construct a competing syntax
-model. Direct, one-level, and bounded composed macro expansions lower through
-the same canonical path; opaque or ambiguous expansions are refused.
+model. Direct syntax, shallow call-site shapes, and range-free generated
+notation for bounded composite macro expansions lower through the same
+canonical path. Semath never parses the expansion surface string; opaque or
+ambiguous expansions are refused.
 
 ## Project semantic index
 
@@ -81,10 +83,11 @@ Normalization is layered:
 Unknown macros, unresolved roles, incompatible shapes, and contradictory prose
 remain uncertainty. They are never filled in by guesswork.
 
-Transparent macro surfaces supplied by wasmtex may contribute meaning in both
-formulas and prose declarations. Unresolved, cyclic, truncated, or otherwise
-opaque calls contribute no semantic tokens; a command name is not treated as
-its meaning.
+Transparent macro structure supplied by wasmtex may contribute meaning in both
+formulas and prose declarations. Generated nodes inherit only the real call
+and definition provenance and are never editable locations. Unresolved,
+cyclic, truncated, or otherwise opaque calls contribute no semantic tokens; a
+command name is not treated as its meaning.
 
 ## Domain packs
 

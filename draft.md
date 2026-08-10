@@ -132,11 +132,13 @@ interface LatexSyntaxService {
 }
 
 interface LatexFileSyntax {
-  schemaVersion: 2;
+  schemaVersion: 4;
   fileId: string;
   path: string;
   documentVersion: number;
-  mathRegions: readonly LatexMathRegion[];
+  nodes: readonly LatexNotationNode[];
+  mathRoots: readonly LatexMathRoot[];
+  visibleProse: readonly LatexVisibleProseSpan[];
   macros: readonly LatexMacroEvent[];
   includes: readonly LatexInclude[];
   diagnostics: readonly LatexSyntaxDiagnostic[];
@@ -147,7 +149,7 @@ interface LatexFileSyntax {
 
 * range는 원문 기준 UTF-16 half-open offset이다.
 * unfinished LaTeX에서도 부분 결과를 반환한다.
-* macro event는 definition/call range, bounded expansion 상태, cycle/truncation과 synthetic occurrence의 editability를 보존한다.
+* macro event는 definition/call range, bounded expansion 상태, cycle/truncation과 synthetic occurrence의 editability를 보존한다. 복합 정적 확장은 source range가 없는 generated-notation tree로 전달되며, 편집·탐색은 event의 실제 call/definition range만 사용한다.
 * stable `fileId`와 mutable path를 구분한다.
 * schema version으로 wasmtex와 Semath의 독립 release를 허용한다.
 

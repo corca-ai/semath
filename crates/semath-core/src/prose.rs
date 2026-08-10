@@ -1074,6 +1074,18 @@ fn visible_prose_source(document: &ProjectDocument) -> Cow<'_, str> {
         let end = index.byte_for_utf16(span.range.end_offset);
         visible[start..end].fill(true);
     }
+    // Inline math is part of a scientific sentence. Preserve its source-sized
+    // surface so clauses such as "real $n$ by $n$ matrices" keep the symbols
+    // that carry their dimensions. wasmtex has already established these
+    // ranges as math, so this does not make comments or control prose visible.
+    for root in &document.math_roots {
+        if root.delimiter != "$" && root.delimiter != "\\(" {
+            continue;
+        }
+        let start = index.byte_for_utf16(root.content_range.start_offset);
+        let end = index.byte_for_utf16(root.content_range.end_offset);
+        visible[start..end].fill(true);
+    }
     for root in &document.math_roots {
         let start = index.byte_for_utf16(root.full_range.start_offset);
         let end = index.byte_for_utf16(root.full_range.end_offset);

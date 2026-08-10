@@ -168,6 +168,7 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
                 start_offset: invocation_start,
                 end_offset: invocation_end,
             }),
+            notation: None,
         },
     });
     let mut project = snapshot(content);

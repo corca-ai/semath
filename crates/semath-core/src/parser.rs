@@ -1,8 +1,8 @@
 #[cfg(test)]
 use crate::{DocumentLanguage, SourceIndex};
 use crate::{
-    EquationNode, MathRegion, MathRootState, NotationNode, NotationNodeKind, ProjectDocument,
-    SourceRange, WASMTEX_SYNTAX_SCHEMA_VERSION,
+    EquationNode, GeneratedNotationTree, MathRegion, MathRootState, NotationNode, NotationNodeKind,
+    ProjectDocument, SourceRange, WASMTEX_SYNTAX_SCHEMA_VERSION,
 };
 
 #[derive(Clone, Debug)]
@@ -136,6 +136,68 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
         .any(|span| !valid_range(&span.range))
     {
         return Err("visible prose span has an invalid range".to_owned());
+    }
+    let mut generated_nodes = 0usize;
+    for (event, tree) in document
+        .macros
+        .iter()
+        .filter_map(|event| event.expansion.notation.as_ref().map(|tree| (event, tree)))
+    {
+        generated_nodes = generated_nodes.saturating_add(tree.nodes.len());
+        if generated_nodes > 100_000 {
+            return Err("generated notation exceeds the Semath ingestion cap".to_owned());
+        }
+        validate_generated_tree(tree).map_err(|reason| {
+            format!(
+                "macro {} has invalid generated notation: {reason}",
+                event.name
+            )
+        })?;
+    }
+    Ok(())
+}
+
+fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static str> {
+    if tree.nodes.is_empty() || tree.nodes.len() > 10_000 {
+        return Err("node count is outside the per-expansion cap");
+    }
+    if tree.root as usize >= tree.nodes.len() {
+        return Err("root does not exist");
+    }
+    for node in &tree.nodes {
+        if node
+            .children
+            .iter()
+            .chain(node.arguments.iter().map(|argument| &argument.node))
+            .any(|child| *child as usize >= tree.nodes.len())
+        {
+            return Err("child does not exist");
+        }
+    }
+    let mut active = vec![false; tree.nodes.len()];
+    let mut visited = vec![false; tree.nodes.len()];
+    let mut stack = vec![(tree.root, false, 0usize)];
+    while let Some((node_id, leaving, depth)) = stack.pop() {
+        let index = node_id as usize;
+        if leaving {
+            active[index] = false;
+            visited[index] = true;
+            continue;
+        }
+        if active[index] {
+            return Err("tree contains a cycle");
+        }
+        if visited[index] {
+            continue;
+        }
+        if depth > 128 {
+            return Err("tree exceeds the nesting cap");
+        }
+        active[index] = true;
+        stack.push((node_id, true, depth));
+        for child in tree.nodes[index].children.iter().rev() {
+            stack.push((*child, false, depth + 1));
+        }
     }
     Ok(())
 }
@@ -854,8 +916,30 @@ pub(crate) fn selection_path(node: &EquationNode, offset: u32, output: &mut Vec<
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_regions, parse_snapshot, selection_path, test_math_regions};
-    use crate::{DocumentLanguage, ProjectDocument};
+    use super::{
+        parse_regions, parse_snapshot, selection_path, test_math_regions, validate_generated_tree,
+    };
+    use crate::{
+        DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, NotationNodeKind,
+        ProjectDocument, SyntaxState,
+    };
+
+    #[test]
+    fn rejects_cyclic_generated_macro_notation() {
+        let tree = GeneratedNotationTree {
+            root: 0,
+            nodes: vec![GeneratedNotationNode {
+                kind: NotationNodeKind::Sequence,
+                children: vec![0],
+                state: SyntaxState::Complete,
+                name: None,
+                text: None,
+                arguments: Vec::new(),
+                math_class: None,
+            }],
+        };
+        assert_eq!(validate_generated_tree(&tree), Err("tree contains a cycle"));
+    }
 
     #[test]
     fn finds_markdown_math_but_not_fenced_code() {

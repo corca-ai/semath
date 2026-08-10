@@ -1,4 +1,7 @@
-use crate::{NotationNodeKind, ProjectDocument, SourceRange};
+use crate::{
+    GeneratedNotationNode, GeneratedNotationTree, NotationNodeKind, ProjectDocument,
+    ProjectMacroKind, SourceRange,
+};
 #[cfg(test)]
 use crate::{ProjectMacroExpansionStatus, SourceIndex};
 
@@ -80,17 +83,86 @@ fn snapshot_tokens(document: &ProjectDocument, range: &SourceRange) -> Vec<Token
         root.content_range.start_offset <= range.start_offset
             && range.end_offset <= root.content_range.end_offset
     }) {
-        emit_snapshot_node(document, root.node, &mut tokens);
+        emit_notation_node(&NotationArena::Source(document), root.node, &mut tokens);
     }
     coalesce_numbers(tokens)
 }
 
-fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec<Token>) {
-    let Some(node) = document.nodes.get(node_id as usize) else {
+enum NotationArena<'a> {
+    Source(&'a ProjectDocument),
+    Generated {
+        tree: &'a GeneratedNotationTree,
+        range: &'a SourceRange,
+        provenance: &'a [SourceRange],
+    },
+}
+
+enum ArenaNode<'a> {
+    Source(&'a crate::NotationNode),
+    Generated(&'a GeneratedNotationNode),
+}
+
+impl ArenaNode<'_> {
+    fn kind(&self) -> NotationNodeKind {
+        match self {
+            Self::Source(node) => node.kind,
+            Self::Generated(node) => node.kind,
+        }
+    }
+
+    fn children(&self) -> &[u32] {
+        match self {
+            Self::Source(node) => &node.children,
+            Self::Generated(node) => &node.children,
+        }
+    }
+
+    fn name(&self) -> Option<&str> {
+        match self {
+            Self::Source(node) => node.name.as_deref(),
+            Self::Generated(node) => node.name.as_deref(),
+        }
+    }
+
+    fn text(&self) -> Option<&str> {
+        match self {
+            Self::Source(node) => node.text.as_deref(),
+            Self::Generated(node) => node.text.as_deref(),
+        }
+    }
+}
+
+impl<'a> NotationArena<'a> {
+    fn node(&self, node_id: u32) -> Option<ArenaNode<'a>> {
+        match self {
+            Self::Source(document) => document.nodes.get(node_id as usize).map(ArenaNode::Source),
+            Self::Generated { tree, .. } => {
+                tree.nodes.get(node_id as usize).map(ArenaNode::Generated)
+            }
+        }
+    }
+
+    fn token_context(&self, node: &ArenaNode<'_>) -> (SourceRange, Vec<SourceRange>) {
+        match (self, node) {
+            (Self::Source(_), ArenaNode::Source(node)) => {
+                (node.ranges.full.clone(), syntax_provenance(node))
+            }
+            (
+                Self::Generated {
+                    range, provenance, ..
+                },
+                ArenaNode::Generated(_),
+            ) => ((*range).clone(), provenance.to_vec()),
+            _ => unreachable!("arena and node kinds always agree"),
+        }
+    }
+}
+
+fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<Token>) {
+    let Some(node) = arena.node(node_id) else {
         return;
     };
-    let range = node.ranges.full.clone();
-    let provenance = syntax_provenance(node);
+    let (range, provenance) = arena.token_context(&node);
     let push = |tokens: &mut Vec<Token>, kind: TokenKind| {
         tokens.push(Token {
             kind,
@@ -98,90 +170,115 @@ fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec
             provenance: provenance.clone(),
         });
     };
-    match node.kind {
+    let emit_children = |tokens: &mut Vec<Token>| {
+        for child in node.children() {
+            emit_notation_node(arena, *child, tokens);
+        }
+    };
+
+    match node.kind() {
         NotationNodeKind::Token => {
-            let text = node.text.as_deref().unwrap_or_default();
-            if text.chars().all(|character| character.is_whitespace()) {
-                return;
+            if let Some(kind) = semantic_token_kind(node.text().unwrap_or_default()) {
+                push(tokens, kind);
             }
-            let kind = if text
-                .chars()
-                .all(|character| character.is_ascii_digit() || character == '.')
-                && text.chars().any(|character| character.is_ascii_digit())
-            {
-                TokenKind::Number(text.to_owned())
-            } else if text.chars().count() == 1 {
-                match text.chars().next().unwrap() {
-                    '{' | '(' | '[' => TokenKind::Open(text.chars().next().unwrap()),
-                    '}' | ')' | ']' => TokenKind::Close(text.chars().next().unwrap()),
-                    character if "+-=<>*/|,:'&".contains(character) => {
-                        TokenKind::Operator(character)
-                    }
-                    _ => TokenKind::Identifier(text.to_owned()),
-                }
-            } else {
-                TokenKind::Identifier(text.to_owned())
-            };
-            push(tokens, kind);
         }
         NotationNodeKind::NamedOperator => push(
             tokens,
-            TokenKind::Identifier(node.name.clone().unwrap_or_default()),
+            TokenKind::Identifier(node.name().unwrap_or_default().to_owned()),
         ),
         NotationNodeKind::Group => {
             push(tokens, TokenKind::Open('{'));
-            for child in &node.children {
-                emit_snapshot_node(document, *child, tokens);
-            }
+            emit_children(tokens);
             push(tokens, TokenKind::Close('}'));
         }
         NotationNodeKind::Script => {
-            if let Some(base) = node.children.first() {
-                emit_snapshot_node(document, *base, tokens);
+            if let (NotationArena::Source(document), ArenaNode::Source(source)) = (arena, &node)
+                && source.name.as_deref() == Some("subscript")
+                && source
+                    .children
+                    .first()
+                    .and_then(|child| document.nodes.get(*child as usize))
+                    .is_some_and(|node| is_evaluation_delimiter(document, node))
+            {
+                return;
+            }
+            if let Some(base) = node.children().first() {
+                emit_notation_node(arena, *base, tokens);
+            }
+            if node.name() == Some("prime") {
+                push(tokens, TokenKind::Operator('\''));
+                return;
             }
             push(
                 tokens,
-                TokenKind::Operator(if node.name.as_deref() == Some("superscript") {
+                TokenKind::Operator(if node.name() == Some("superscript") {
                     '^'
                 } else {
                     '_'
                 }),
             );
-            if let Some(script) = node.children.get(1) {
-                emit_snapshot_node(document, *script, tokens);
+            if let Some(script) = node.children().get(1) {
+                emit_notation_node(arena, *script, tokens);
             }
         }
         NotationNodeKind::Modifier => {
-            if matches!(node.name.as_deref(), Some("dot" | "ddot")) {
+            if matches!(node.name(), Some("dot" | "ddot")) {
                 push(
                     tokens,
-                    TokenKind::Command(node.name.clone().unwrap_or_default()),
+                    TokenKind::Command(node.name().unwrap_or_default().to_owned()),
                 );
             }
-            for child in &node.children {
-                emit_snapshot_node(document, *child, tokens);
-            }
+            emit_children(tokens);
         }
-        NotationNodeKind::Style => {
-            for child in &node.children {
-                emit_snapshot_node(document, *child, tokens);
-            }
-        }
+        NotationNodeKind::Style => emit_children(tokens),
         NotationNodeKind::Command => {
-            if is_spacing_command(node.name.as_deref()) {
+            if let (NotationArena::Source(document), ArenaNode::Source(source)) = (arena, &node)
+                && let Some((tree, call_range, provenance)) =
+                    composite_macro_notation(document, source)
+            {
+                emit_notation_node(
+                    &NotationArena::Generated {
+                        tree,
+                        range: call_range,
+                        provenance: &provenance,
+                    },
+                    tree.root,
+                    tokens,
+                );
+                return;
+            }
+            if is_ignorable_command(node.name()) {
                 return;
             }
             push(
                 tokens,
-                TokenKind::Command(node.name.clone().unwrap_or_default()),
+                TokenKind::Command(node.name().unwrap_or_default().to_owned()),
             );
-            for child in &node.children {
-                emit_snapshot_node(document, *child, tokens);
-            }
+            emit_children(tokens);
+        }
+        NotationNodeKind::Error
+            if matches!(arena, NotationArena::Generated { .. })
+                && matches!(node.name(), Some("superscript" | "subscript")) =>
+        {
+            push(
+                tokens,
+                TokenKind::Operator(if node.name() == Some("superscript") {
+                    '^'
+                } else {
+                    '_'
+                }),
+            );
+            emit_children(tokens);
         }
         NotationNodeKind::Opaque | NotationNodeKind::Error => {}
         NotationNodeKind::Delimiter => {
-            let delimiters = match node.name.as_deref() {
+            if let (NotationArena::Source(document), ArenaNode::Source(source)) = (arena, &node)
+                && matches!(source.name.as_deref(), Some("left" | "right"))
+            {
+                emit_sized_delimiter(document, source, tokens);
+                return;
+            }
+            let delimiters = match node.name() {
                 Some("()") => Some(('(', ')')),
                 Some("[]") => Some(('[', ']')),
                 Some("{}") => Some(('{', '}')),
@@ -190,24 +287,110 @@ fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec
             if let Some((open, _)) = delimiters {
                 push(tokens, TokenKind::Open(open));
             }
-            for child in &node.children {
-                emit_snapshot_node(document, *child, tokens);
-            }
+            emit_children(tokens);
             if let Some((_, close)) = delimiters {
                 push(tokens, TokenKind::Close(close));
             }
         }
         NotationNodeKind::Sequence
         | NotationNodeKind::Alignment
-        | NotationNodeKind::Environment => {
-            for child in &node.children {
-                emit_snapshot_node(document, *child, tokens);
-            }
-        }
+        | NotationNodeKind::Environment => emit_children(tokens),
     }
 }
 
-fn is_spacing_command(name: Option<&str>) -> bool {
+fn semantic_token_kind(text: &str) -> Option<TokenKind> {
+    if text.chars().all(char::is_whitespace) {
+        return None;
+    }
+    if text
+        .chars()
+        .all(|character| character.is_ascii_digit() || character == '.')
+        && text.chars().any(|character| character.is_ascii_digit())
+    {
+        return Some(TokenKind::Number(text.to_owned()));
+    }
+    Some(if text.chars().count() == 1 {
+        match text.chars().next().unwrap() {
+            '{' | '(' | '[' => TokenKind::Open(text.chars().next().unwrap()),
+            '}' | ')' | ']' => TokenKind::Close(text.chars().next().unwrap()),
+            character if "+-=<>*/|,:'&".contains(character) => TokenKind::Operator(character),
+            _ => TokenKind::Identifier(text.to_owned()),
+        }
+    } else {
+        TokenKind::Identifier(text.to_owned())
+    })
+}
+
+fn composite_macro_notation<'a>(
+    document: &'a ProjectDocument,
+    node: &crate::NotationNode,
+) -> Option<(&'a GeneratedNotationTree, &'a SourceRange, Vec<SourceRange>)> {
+    let command_start = node.ranges.command.as_ref()?.start_offset;
+    let event = document.macros.iter().find(|event| {
+        event.kind == ProjectMacroKind::Call
+            && event
+                .expansion
+                .input_range
+                .as_ref()
+                .is_some_and(|range| range.start_offset == command_start)
+    })?;
+    let notation = event.expansion.notation.as_ref()?;
+    let call_range = event.expansion.input_range.as_ref()?;
+    let mut provenance = vec![event.source.range.clone()];
+    provenance.extend(
+        event
+            .definitions
+            .iter()
+            .map(|definition| definition.range.clone()),
+    );
+    provenance.sort_by_key(|range| (range.start_offset, range.end_offset));
+    provenance.dedup();
+    Some((notation, call_range, provenance))
+}
+
+fn is_evaluation_delimiter(document: &ProjectDocument, node: &crate::NotationNode) -> bool {
+    node.kind == NotationNodeKind::Delimiter
+        && node.name.as_deref() == Some("right")
+        && node.children.iter().any(|child| {
+            document
+                .nodes
+                .get(*child as usize)
+                .and_then(|child| child.text.as_deref())
+                .is_some_and(|text| matches!(text, "." | "|"))
+        })
+}
+
+fn emit_sized_delimiter(
+    document: &ProjectDocument,
+    node: &crate::NotationNode,
+    tokens: &mut Vec<Token>,
+) {
+    let Some(text) = node.children.iter().find_map(|child| {
+        document
+            .nodes
+            .get(*child as usize)
+            .and_then(|child| child.text.as_deref())
+    }) else {
+        return;
+    };
+    let kind = match (node.name.as_deref(), text) {
+        (_, "." | "|") => return,
+        (Some("left"), "(") => TokenKind::Open('('),
+        (Some("left"), "[") => TokenKind::Open('['),
+        (Some("left"), "{") => TokenKind::Open('{'),
+        (Some("right"), ")") => TokenKind::Close(')'),
+        (Some("right"), "]") => TokenKind::Close(']'),
+        (Some("right"), "}") => TokenKind::Close('}'),
+        _ => return,
+    };
+    tokens.push(Token {
+        kind,
+        range: node.ranges.full.clone(),
+        provenance: syntax_provenance(node),
+    });
+}
+
+fn is_ignorable_command(name: Option<&str>) -> bool {
     matches!(
         name,
         Some(
@@ -222,6 +405,17 @@ fn is_spacing_command(name: Option<&str>) -> bool {
                 | "medspace"
                 | "thickspace"
                 | "negthinspace"
+                | "big"
+                | "Big"
+                | "bigl"
+                | "bigr"
+                | "Bigl"
+                | "Bigr"
+                | "displaystyle"
+                | "textstyle"
+                | "scriptstyle"
+                | "scriptscriptstyle"
+                | "rm"
         )
     )
 }
@@ -1397,6 +1591,62 @@ mod tests {
         assert_eq!(
             render_canonical(&expression),
             "relation(equals,apply(v,symbol(t)),product(symbol(R),apply(i,symbol(t))))"
+        );
+    }
+
+    #[test]
+    fn snapshot_lowering_consumes_composite_macro_notation_without_parsing_surface_tex() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 4,
+            "fileId": "main",
+            "path": "main.tex",
+            "language": "latex",
+            "content": "\\law",
+            "documentVersion": 1,
+            "nodes": [
+                {"kind":"command","parent":1,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":4},"command":{"startOffset":0,"endOffset":4}},"state":"opaque","name":"law"},
+                {"kind":"sequence","parent":null,"children":[0],"ranges":{"full":{"startOffset":0,"endOffset":4}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":1,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":4},"contentRange":{"startOffset":0,"endOffset":4},"state":"complete"}],
+            "visibleProse": [],
+            "scopes": [{"kind":"document","parent":null,"range":{"startOffset":0,"endOffset":4},"state":"complete"}],
+            "declarations": [],
+            "macros": [{
+                "kind":"call",
+                "name":"law",
+                "source":{"fileId":"main","path":"main.tex","range":{"startOffset":0,"endOffset":4}},
+                "definitions":[],
+                "expansion":{
+                    "status":"expanded",
+                    "depth":0,
+                    "editable":false,
+                    "surface":"ignored by Semath",
+                    "inputRange":{"startOffset":0,"endOffset":4},
+                    "notation":{
+                        "nodes":[
+                            {"kind":"token","children":[],"state":"complete","text":"K"},
+                            {"kind":"token","children":[],"state":"complete","text":"="},
+                            {"kind":"token","children":[],"state":"complete","text":"m"},
+                            {"kind":"token","children":[],"state":"complete","text":"v"},
+                            {"kind":"sequence","children":[0,1,2,3],"state":"complete"}
+                        ],
+                        "root":4
+                    }
+                }
+            }],
+            "includes": []
+        }))
+        .unwrap();
+        let expression = lower_document_region(
+            &document,
+            &SourceRange {
+                start_offset: 0,
+                end_offset: 4,
+            },
+        );
+        assert_eq!(
+            render_canonical(&expression),
+            "relation(equals,symbol(K),product(symbol(m),symbol(v)))"
         );
     }
 }

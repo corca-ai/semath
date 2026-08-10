@@ -52,7 +52,7 @@
     "verify": "bun run check"
   },
   "dependencies": {
-    "wasmtex": "github:corca-ai/wasmtex#9153a7b92e27fd9810ca9cf32d28af7a0664ff5c"
+    "wasmtex": "github:corca-ai/wasmtex#bdb12bf46c34e35f640d222589d33f323f509513"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",
