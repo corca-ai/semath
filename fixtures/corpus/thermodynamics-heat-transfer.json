@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,13 +26,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-01",
+      "id": "synthetic-closed-system-first-law-recognized-01",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -56,7 +56,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -71,13 +71,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-02",
+      "id": "synthetic-closed-system-first-law-recognized-02",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -102,7 +102,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -117,13 +117,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-03",
+      "id": "synthetic-closed-system-first-law-recognized-03",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -147,7 +147,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -162,13 +162,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-04",
+      "id": "synthetic-closed-system-first-law-recognized-04",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -192,7 +192,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -207,13 +207,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-05",
+      "id": "synthetic-closed-system-first-law-recognized-05",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -237,7 +237,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -247,13 +247,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-06",
+      "id": "synthetic-closed-system-first-law-recognized-06",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -276,7 +276,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -291,13 +291,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-07",
+      "id": "synthetic-closed-system-first-law-recognized-07",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -321,7 +321,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -336,13 +336,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-08",
+      "id": "synthetic-closed-system-first-law-recognized-08",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -366,7 +366,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -386,13 +386,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-09",
+      "id": "synthetic-closed-system-first-law-recognized-09",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -417,7 +417,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -432,13 +432,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-10",
+      "id": "synthetic-closed-system-first-law-recognized-10",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -462,7 +462,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -477,13 +477,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-11",
+      "id": "synthetic-closed-system-first-law-recognized-11",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -507,7 +507,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -527,13 +527,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-12",
+      "id": "synthetic-closed-system-first-law-recognized-12",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -559,7 +559,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -579,13 +579,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-13",
+      "id": "synthetic-closed-system-first-law-recognized-13",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -610,7 +610,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -625,13 +625,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-14",
+      "id": "synthetic-closed-system-first-law-recognized-14",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -655,7 +655,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -670,13 +670,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-15",
+      "id": "synthetic-closed-system-first-law-recognized-15",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -700,7 +700,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -720,13 +720,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-16",
+      "id": "synthetic-closed-system-first-law-recognized-16",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -751,7 +751,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -766,13 +766,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-17",
+      "id": "synthetic-closed-system-first-law-recognized-17",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -796,7 +796,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -811,13 +811,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-18",
+      "id": "synthetic-closed-system-first-law-recognized-18",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -841,7 +841,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -851,13 +851,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-19",
+      "id": "synthetic-closed-system-first-law-recognized-19",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -880,7 +880,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -895,13 +895,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-20",
+      "id": "synthetic-closed-system-first-law-recognized-20",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -925,7 +925,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -940,13 +940,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-21",
+      "id": "synthetic-closed-system-first-law-recognized-21",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -970,7 +970,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -985,13 +985,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-22",
+      "id": "synthetic-closed-system-first-law-recognized-22",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1016,7 +1016,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1031,13 +1031,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-23",
+      "id": "synthetic-closed-system-first-law-recognized-23",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -1061,7 +1061,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1081,13 +1081,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-24",
+      "id": "synthetic-closed-system-first-law-recognized-24",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1112,7 +1112,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1127,13 +1127,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-25",
+      "id": "synthetic-closed-system-first-law-recognized-25",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -1157,7 +1157,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1177,13 +1177,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-26",
+      "id": "synthetic-closed-system-first-law-recognized-26",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1208,7 +1208,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1223,13 +1223,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-27",
+      "id": "synthetic-closed-system-first-law-recognized-27",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1253,7 +1253,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1273,13 +1273,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-28",
+      "id": "synthetic-closed-system-first-law-recognized-28",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1304,7 +1304,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1324,13 +1324,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-29",
+      "id": "synthetic-closed-system-first-law-recognized-29",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1355,7 +1355,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1370,13 +1370,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-30",
+      "id": "synthetic-closed-system-first-law-recognized-30",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1400,7 +1400,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1420,13 +1420,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-31",
+      "id": "synthetic-closed-system-first-law-recognized-31",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1451,7 +1451,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1461,13 +1461,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-32",
+      "id": "synthetic-closed-system-first-law-recognized-32",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1491,7 +1491,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1506,13 +1506,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-33",
+      "id": "synthetic-closed-system-first-law-recognized-33",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1536,7 +1536,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1551,13 +1551,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-34",
+      "id": "synthetic-closed-system-first-law-recognized-34",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1581,7 +1581,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1591,13 +1591,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-35",
+      "id": "synthetic-closed-system-first-law-recognized-35",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1620,7 +1620,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1635,13 +1635,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-36",
+      "id": "synthetic-closed-system-first-law-recognized-36",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -1665,7 +1665,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1680,13 +1680,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-37",
+      "id": "synthetic-closed-system-first-law-recognized-37",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -1710,7 +1710,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1725,13 +1725,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-38",
+      "id": "synthetic-closed-system-first-law-recognized-38",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -1755,7 +1755,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1775,13 +1775,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-39",
+      "id": "synthetic-closed-system-first-law-recognized-39",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1806,7 +1806,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1816,13 +1816,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "q",
         "heat-transfer": "k",
         "work": "u"
       },
-      "id": "synthetic-closed-system-first-law-established-40",
+      "id": "synthetic-closed-system-first-law-recognized-40",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "display-notation",
@@ -1845,7 +1845,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1865,13 +1865,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-41",
+      "id": "synthetic-closed-system-first-law-recognized-41",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1896,7 +1896,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1916,13 +1916,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-42",
+      "id": "synthetic-closed-system-first-law-recognized-42",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1948,7 +1948,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1968,13 +1968,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "v",
         "heat-transfer": "h",
         "work": "g"
       },
-      "id": "synthetic-closed-system-first-law-established-43",
+      "id": "synthetic-closed-system-first-law-recognized-43",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1999,7 +1999,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2019,13 +2019,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-44",
+      "id": "synthetic-closed-system-first-law-recognized-44",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2050,7 +2050,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2065,13 +2065,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-45",
+      "id": "synthetic-closed-system-first-law-recognized-45",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -2095,7 +2095,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2115,13 +2115,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "y",
         "heat-transfer": "c",
         "work": "x"
       },
-      "id": "synthetic-closed-system-first-law-established-46",
+      "id": "synthetic-closed-system-first-law-recognized-46",
       "lawId": "closed-system-first-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2146,7 +2146,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2161,13 +2161,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "r",
         "heat-transfer": "a",
         "work": "b"
       },
-      "id": "synthetic-closed-system-first-law-established-47",
+      "id": "synthetic-closed-system-first-law-recognized-47",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -2191,7 +2191,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2201,13 +2201,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "internal-energy-change": "o",
         "heat-transfer": "m",
         "work": "i"
       },
-      "id": "synthetic-closed-system-first-law-established-48",
+      "id": "synthetic-closed-system-first-law-recognized-48",
       "lawId": "closed-system-first-law",
       "variationTags": [
         "conventional-notation",
@@ -3561,7 +3561,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -3576,7 +3576,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -3584,7 +3584,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-01",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-01",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -3608,7 +3608,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -3623,7 +3623,7 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -3631,7 +3631,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-02",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-02",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -3656,7 +3656,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -3671,7 +3671,7 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -3679,7 +3679,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-03",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-03",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -3703,7 +3703,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -3718,7 +3718,7 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -3726,7 +3726,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-04",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-04",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -3750,7 +3750,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3765,7 +3765,7 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -3773,7 +3773,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-05",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-05",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -3797,7 +3797,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3807,7 +3807,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -3815,7 +3815,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-06",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-06",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -3838,7 +3838,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -3853,7 +3853,7 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -3861,7 +3861,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-07",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-07",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -3885,7 +3885,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -3900,7 +3900,7 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -3908,7 +3908,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-08",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-08",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -3932,7 +3932,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -3952,7 +3952,7 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -3960,7 +3960,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-09",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-09",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -3985,7 +3985,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4000,7 +4000,7 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -4008,7 +4008,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-10",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-10",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -4032,7 +4032,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4047,7 +4047,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -4055,7 +4055,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-11",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-11",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4079,7 +4079,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4099,7 +4099,7 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -4107,7 +4107,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-12",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-12",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4133,7 +4133,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4153,7 +4153,7 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -4161,7 +4161,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-13",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-13",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4186,7 +4186,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4201,7 +4201,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -4209,7 +4209,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-14",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-14",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4233,7 +4233,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4248,7 +4248,7 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -4256,7 +4256,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-15",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-15",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -4280,7 +4280,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4300,7 +4300,7 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -4308,7 +4308,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-16",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-16",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4333,7 +4333,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4348,7 +4348,7 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -4356,7 +4356,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-17",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-17",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -4380,7 +4380,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4395,7 +4395,7 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -4403,7 +4403,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-18",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-18",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -4427,7 +4427,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4437,7 +4437,7 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -4445,7 +4445,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-19",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-19",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -4468,7 +4468,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4483,7 +4483,7 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -4491,7 +4491,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-20",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-20",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -4515,7 +4515,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4530,7 +4530,7 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -4538,7 +4538,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-21",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-21",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -4562,7 +4562,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4577,7 +4577,7 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -4585,7 +4585,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-22",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-22",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -4610,7 +4610,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4625,7 +4625,7 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -4633,7 +4633,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-23",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-23",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -4657,7 +4657,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4677,7 +4677,7 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -4685,7 +4685,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-24",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-24",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4710,7 +4710,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4725,7 +4725,7 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -4733,7 +4733,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-25",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-25",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -4757,7 +4757,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4777,7 +4777,7 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -4785,7 +4785,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-26",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-26",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4810,7 +4810,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4825,7 +4825,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -4833,7 +4833,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-27",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-27",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4857,7 +4857,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4877,7 +4877,7 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -4885,7 +4885,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-28",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-28",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4910,7 +4910,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4930,7 +4930,7 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -4938,7 +4938,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-29",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-29",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4963,7 +4963,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4978,7 +4978,7 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -4986,7 +4986,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-30",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-30",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5010,7 +5010,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5030,7 +5030,7 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -5038,7 +5038,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-31",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-31",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5063,7 +5063,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5073,7 +5073,7 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -5081,7 +5081,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-32",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-32",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5105,7 +5105,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5120,7 +5120,7 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -5128,7 +5128,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-33",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-33",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5152,7 +5152,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5167,7 +5167,7 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -5175,7 +5175,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-34",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-34",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5199,7 +5199,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5209,7 +5209,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -5217,7 +5217,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-35",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-35",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5240,7 +5240,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5255,7 +5255,7 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -5263,7 +5263,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-36",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-36",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -5287,7 +5287,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5302,7 +5302,7 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -5310,7 +5310,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-37",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-37",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5334,7 +5334,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5349,7 +5349,7 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -5357,7 +5357,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-38",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-38",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -5381,7 +5381,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -5401,7 +5401,7 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -5409,7 +5409,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-39",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-39",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5434,7 +5434,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5444,7 +5444,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "q",
         "conductivity": "k",
@@ -5452,7 +5452,7 @@
         "temperature-change": "s",
         "length": "w"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-40",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-40",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "display-notation",
@@ -5475,7 +5475,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5495,7 +5495,7 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -5503,7 +5503,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-41",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-41",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5528,7 +5528,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5548,7 +5548,7 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -5556,7 +5556,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-42",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-42",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5582,7 +5582,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5602,7 +5602,7 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "v",
         "conductivity": "h",
@@ -5610,7 +5610,7 @@
         "temperature-change": "j",
         "length": "d"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-43",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-43",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5635,7 +5635,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5655,7 +5655,7 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -5663,7 +5663,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-44",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-44",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5688,7 +5688,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5703,7 +5703,7 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -5711,7 +5711,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-45",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-45",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5735,7 +5735,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5755,7 +5755,7 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "y",
         "conductivity": "c",
@@ -5763,7 +5763,7 @@
         "temperature-change": "t",
         "length": "z"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-46",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-46",
       "lawId": "plane-wall-conduction-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5788,7 +5788,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5803,7 +5803,7 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "r",
         "conductivity": "a",
@@ -5811,7 +5811,7 @@
         "temperature-change": "n",
         "length": "p"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-47",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-47",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -5835,7 +5835,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5845,7 +5845,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer-rate": "o",
         "conductivity": "m",
@@ -5853,7 +5853,7 @@
         "temperature-change": "e",
         "length": "f"
       },
-      "id": "synthetic-plane-wall-conduction-rate-established-48",
+      "id": "synthetic-plane-wall-conduction-rate-recognized-48",
       "lawId": "plane-wall-conduction-rate",
       "variationTags": [
         "conventional-notation",
@@ -7207,7 +7207,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7222,14 +7222,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-01",
+      "id": "synthetic-sensible-heat-relation-recognized-01",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7253,7 +7253,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7268,14 +7268,14 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-02",
+      "id": "synthetic-sensible-heat-relation-recognized-02",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -7300,7 +7300,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7315,14 +7315,14 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-03",
+      "id": "synthetic-sensible-heat-relation-recognized-03",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -7346,7 +7346,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7361,14 +7361,14 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-04",
+      "id": "synthetic-sensible-heat-relation-recognized-04",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -7392,7 +7392,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7407,14 +7407,14 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-05",
+      "id": "synthetic-sensible-heat-relation-recognized-05",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -7438,7 +7438,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7448,14 +7448,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-06",
+      "id": "synthetic-sensible-heat-relation-recognized-06",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -7478,7 +7478,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7493,14 +7493,14 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-07",
+      "id": "synthetic-sensible-heat-relation-recognized-07",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -7524,7 +7524,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -7539,14 +7539,14 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-08",
+      "id": "synthetic-sensible-heat-relation-recognized-08",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -7570,7 +7570,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -7590,14 +7590,14 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-09",
+      "id": "synthetic-sensible-heat-relation-recognized-09",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7622,7 +7622,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7637,14 +7637,14 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-10",
+      "id": "synthetic-sensible-heat-relation-recognized-10",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -7668,7 +7668,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7683,14 +7683,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-11",
+      "id": "synthetic-sensible-heat-relation-recognized-11",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7714,7 +7714,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7734,14 +7734,14 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-12",
+      "id": "synthetic-sensible-heat-relation-recognized-12",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7767,7 +7767,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7787,14 +7787,14 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-13",
+      "id": "synthetic-sensible-heat-relation-recognized-13",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7819,7 +7819,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7834,14 +7834,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-14",
+      "id": "synthetic-sensible-heat-relation-recognized-14",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7865,7 +7865,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7880,14 +7880,14 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-15",
+      "id": "synthetic-sensible-heat-relation-recognized-15",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -7911,7 +7911,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7931,14 +7931,14 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-16",
+      "id": "synthetic-sensible-heat-relation-recognized-16",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7963,7 +7963,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7978,14 +7978,14 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-17",
+      "id": "synthetic-sensible-heat-relation-recognized-17",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8009,7 +8009,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8024,14 +8024,14 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-18",
+      "id": "synthetic-sensible-heat-relation-recognized-18",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8055,7 +8055,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8065,14 +8065,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-19",
+      "id": "synthetic-sensible-heat-relation-recognized-19",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8095,7 +8095,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8110,14 +8110,14 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-20",
+      "id": "synthetic-sensible-heat-relation-recognized-20",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8141,7 +8141,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8156,14 +8156,14 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-21",
+      "id": "synthetic-sensible-heat-relation-recognized-21",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -8187,7 +8187,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8202,14 +8202,14 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-22",
+      "id": "synthetic-sensible-heat-relation-recognized-22",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8234,7 +8234,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8249,14 +8249,14 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-23",
+      "id": "synthetic-sensible-heat-relation-recognized-23",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -8280,7 +8280,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8300,14 +8300,14 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-24",
+      "id": "synthetic-sensible-heat-relation-recognized-24",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8332,7 +8332,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8347,14 +8347,14 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-25",
+      "id": "synthetic-sensible-heat-relation-recognized-25",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -8378,7 +8378,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8398,14 +8398,14 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-26",
+      "id": "synthetic-sensible-heat-relation-recognized-26",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8430,7 +8430,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8445,14 +8445,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-27",
+      "id": "synthetic-sensible-heat-relation-recognized-27",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8476,7 +8476,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8496,14 +8496,14 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-28",
+      "id": "synthetic-sensible-heat-relation-recognized-28",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8528,7 +8528,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8548,14 +8548,14 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-29",
+      "id": "synthetic-sensible-heat-relation-recognized-29",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8580,7 +8580,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8595,14 +8595,14 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-30",
+      "id": "synthetic-sensible-heat-relation-recognized-30",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8626,7 +8626,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8646,14 +8646,14 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-31",
+      "id": "synthetic-sensible-heat-relation-recognized-31",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8678,7 +8678,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8688,14 +8688,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-32",
+      "id": "synthetic-sensible-heat-relation-recognized-32",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8719,7 +8719,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8734,14 +8734,14 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-33",
+      "id": "synthetic-sensible-heat-relation-recognized-33",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8765,7 +8765,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8780,14 +8780,14 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-34",
+      "id": "synthetic-sensible-heat-relation-recognized-34",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8811,7 +8811,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8821,14 +8821,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-35",
+      "id": "synthetic-sensible-heat-relation-recognized-35",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8851,7 +8851,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8866,14 +8866,14 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-36",
+      "id": "synthetic-sensible-heat-relation-recognized-36",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -8897,7 +8897,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8912,14 +8912,14 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-37",
+      "id": "synthetic-sensible-heat-relation-recognized-37",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -8943,7 +8943,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8958,14 +8958,14 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-38",
+      "id": "synthetic-sensible-heat-relation-recognized-38",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -8989,7 +8989,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -9009,14 +9009,14 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-39",
+      "id": "synthetic-sensible-heat-relation-recognized-39",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9041,7 +9041,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -9051,14 +9051,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "q",
         "mass": "k",
         "specific-heat": "u",
         "temperature-change": "s"
       },
-      "id": "synthetic-sensible-heat-relation-established-40",
+      "id": "synthetic-sensible-heat-relation-recognized-40",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "display-notation",
@@ -9081,7 +9081,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -9101,14 +9101,14 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-41",
+      "id": "synthetic-sensible-heat-relation-recognized-41",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9133,7 +9133,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -9153,14 +9153,14 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-42",
+      "id": "synthetic-sensible-heat-relation-recognized-42",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9186,7 +9186,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -9206,14 +9206,14 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "v",
         "mass": "h",
         "specific-heat": "g",
         "temperature-change": "j"
       },
-      "id": "synthetic-sensible-heat-relation-established-43",
+      "id": "synthetic-sensible-heat-relation-recognized-43",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9238,7 +9238,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -9258,14 +9258,14 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-44",
+      "id": "synthetic-sensible-heat-relation-recognized-44",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9290,7 +9290,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9305,14 +9305,14 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-45",
+      "id": "synthetic-sensible-heat-relation-recognized-45",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -9336,7 +9336,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9356,14 +9356,14 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "y",
         "mass": "c",
         "specific-heat": "x",
         "temperature-change": "t"
       },
-      "id": "synthetic-sensible-heat-relation-established-46",
+      "id": "synthetic-sensible-heat-relation-recognized-46",
       "lawId": "sensible-heat-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9388,7 +9388,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -9403,14 +9403,14 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "r",
         "mass": "a",
         "specific-heat": "b",
         "temperature-change": "n"
       },
-      "id": "synthetic-sensible-heat-relation-established-47",
+      "id": "synthetic-sensible-heat-relation-recognized-47",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",
@@ -9434,7 +9434,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -9444,14 +9444,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "heat-transfer": "o",
         "mass": "m",
         "specific-heat": "i",
         "temperature-change": "e"
       },
-      "id": "synthetic-sensible-heat-relation-established-48",
+      "id": "synthetic-sensible-heat-relation-recognized-48",
       "lawId": "sensible-heat-relation",
       "variationTags": [
         "conventional-notation",

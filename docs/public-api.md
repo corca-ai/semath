@@ -48,6 +48,12 @@ of the occurrence and never become flat string identities. Definitions and
 references resolve through the project semantic index, not a project-wide
 symbol scan.
 
+Selection identity is lowered before the syntax arena is compacted. Composite
+notation retains its exact identity range, and callable occurrences retain only
+the exact end of a complete following argument. Cursor queries therefore do
+not rescan TeX, retain the frontend tree, or snap a callable across unrelated
+trailing syntax.
+
 Project documents contain the complete wasmtex syntax schema 4 snapshot. The
 adapter validates the schema and forwards the arena, roots, visible prose,
 scopes, declarations, and provenance without reconstructing or selectively

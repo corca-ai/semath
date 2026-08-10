@@ -312,7 +312,7 @@
       "owner": "constraint",
       "metric": "evidence",
       "outcome": "positive",
-      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $i$ be electric current, $C$ capacitance, and $v$ voltage. Under the passive sign convention, $i=C\\frac{dv}{dt}$." }],
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Under the passive sign convention, $i=C\\frac{dv}{dt}$." }],
       "cursor": { "fileId": "main", "needle": "i=C", "edge": "after" },
       "expectation": { "relationId": "circuits:capacitor-current-law" },
       "variationTags": ["condition", "sign-convention", "boundary-pair:asserted-negated-condition"]
@@ -322,7 +322,7 @@
       "owner": "constraint",
       "metric": "refusal",
       "outcome": "refusal",
-      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $i$ be electric current, $C$ capacitance, and $v$ voltage. Without adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$." }],
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Without adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$." }],
       "cursor": { "fileId": "main", "needle": "i=C", "edge": "before" },
       "expectation": { "excludedRelationId": "circuits:capacitor-current-law" },
       "variationTags": ["condition", "negated", "boundary-pair:asserted-negated-condition"]
@@ -459,7 +459,7 @@
       "metric": "structure",
       "outcome": "positive",
       "documents": [{ "fileId": "main", "path": "main.tex", "content": "The curvature term is $\\frac{\\partial^2 f}{\\partial x^2}$." }],
-      "cursor": { "fileId": "main", "needle": "\\partial^2 f", "edge": "after" },
+      "cursor": { "fileId": "main", "needle": "\\partial^2", "edge": "after" },
       "expectation": { "candidateFamily": "differential", "candidateInterpretation": "derivative" },
       "variationTags": ["partial-derivative", "higher-order", "boundary-pair:structural-opaque-derivative"]
     },
@@ -490,7 +490,7 @@
       "outcome": "refusal",
       "documents": [{ "fileId": "main", "path": "main.tex", "content": "The incomplete edit is $\\sum_{i=1 a_i$." }],
       "cursor": { "fileId": "main", "needle": "\\sum", "edge": "before" },
-      "expectation": { "excludedCandidateFamily": "binder" },
+      "expectation": { "candidateFamily": "binder", "candidateInterpretation": "binder" },
       "variationTags": ["malformed-recovery", "safe-refusal", "boundary-pair:complete-malformed-binder"]
     }
   ]

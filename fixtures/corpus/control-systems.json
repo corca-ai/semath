@@ -5,12 +5,12 @@
     {
       "id": "cs16-state-pos-001",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state01.tex",
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $x$ be an $n$-dimensional state vector, $u$ an $m$-dimensional control vector, $A$ an $n$ by $n$ matrix, and $B$ an $n$ by $m$ matrix.\n\\[\\dot{x}=Ax+Bu\\]"
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $x$ be an $n$-dimensional state vector, $u$ an $m$-dimensional control vector, $A$ an $n$ by $n$ matrix, and $B$ an $n$ by $m$ matrix.\n% semath-recognition-evidence:start\nLet $x$ denote state vector, $A$ denote state matrix, $B$ denote input matrix, and $u$ denote control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{x}=Ax+Bu\\]"
         }
       ],
       "mainFileId": "main",
@@ -35,19 +35,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-state-pos-002",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state02.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nIn a continuous state-space model, $z\\in\\mathbb R^p$, $v\\in\\mathbb R^r$, $F\\in\\mathbb R^{p\\times p}$, and $G\\in\\mathbb R^{p\\times r}$.\n$\\dot{z} = Fz + Gv$."
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nIn a continuous state-space model, $z\\in\\mathbb R^p$, $v\\in\\mathbb R^r$, $F\\in\\mathbb R^{p\\times p}$, and $G\\in\\mathbb R^{p\\times r}$.\n% semath-recognition-evidence:start\nLet $z$, $F$, $G$, and $v$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n% semath-recognition-evidence:end\n$\\dot{z} = Fz + Gv$."
         }
       ],
       "mainFileId": "main",
@@ -72,19 +72,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-state-pos-003",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state03.md",
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $q$ denote the $d$-dimensional state and $w$ the $c$-dimensional input. Let $M$ and $N$ be $d$ by $d$ and $d$ by $c$ matrices, respectively.\n\n$$\\dot{q}=Mq+Nw$$"
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $q$ denote the $d$-dimensional state and $w$ the $c$-dimensional input. Let $M$ and $N$ be $d$ by $d$ and $d$ by $c$ matrices, respectively.\n\n% semath-recognition-evidence:start\nWe write $q$ for state vector. We write $M$ for state matrix. We write $N$ for input matrix. We write $w$ for control input vector.\n% semath-recognition-evidence:end\n$$\\dot{q}=Mq+Nw$$"
         }
       ],
       "mainFileId": "main",
@@ -109,19 +109,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-state-pos-004",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state04.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe vectors $s\\in\\mathbb R^n$ and $r\\in\\mathbb R^m$ are the state and control input. The matrices satisfy $K\\in\\mathbb R^{n\\times n}$ and $L\\in\\mathbb R^{n\\times m}$.\n\\[Ks+Lr=\\dot{s}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe vectors $s\\in\\mathbb R^n$ and $r\\in\\mathbb R^m$ are the state and control input. The matrices satisfy $K\\in\\mathbb R^{n\\times n}$ and $L\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\n$s$ denotes state vector. $K$ denotes state matrix. $L$ denotes input matrix. $r$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[Ks+Lr=\\dot{s}\\]"
         }
       ],
       "mainFileId": "main",
@@ -146,19 +146,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-state-pos-005",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state05.tex",
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $y$ be an $a$-vector and $e$ a $b$-vector. Let $C$ be $a$ by $a$ and $D$ be $a$ by $b$.\n\\[\\dot{y}=(Cy)+(De)\\]"
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $y$ be an $a$-vector and $e$ a $b$-vector. Let $C$ be $a$ by $a$ and $D$ be $a$ by $b$.\n% semath-recognition-evidence:start\nHere $y$ denotes state vector, $C$ denotes state matrix, $D$ denotes input matrix, and $e$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{y}=(Cy)+(De)\\]"
         }
       ],
       "mainFileId": "main",
@@ -183,19 +183,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-state-pos-006",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state06.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor the control system, $\\xi$ is an $n$-dimensional state vector, $\\eta$ is an $m$-dimensional control input, $H$ is $n\\times n$, and $J$ is $n\\times m$.\n$\\dot{\\xi}=H\\xi+J\\eta$."
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor the control system, $\\xi$ is an $n$-dimensional state vector, $\\eta$ is an $m$-dimensional control input, $H$ is $n\\times n$, and $J$ is $n\\times m$.\n% semath-recognition-evidence:start\nLet $\\xi$ denote state vector, $H$ denote state matrix, $J$ denote input matrix, and $\\eta$ denote control input vector.\n% semath-recognition-evidence:end\n$\\dot{\\xi}=H\\xi+J\\eta$."
         }
       ],
       "mainFileId": "main",
@@ -220,19 +220,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-state-pos-007",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state07.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $p\\in\\mathbb R^k$ and $c\\in\\mathbb R^j$. The state and input matrices are $R\\in\\mathbb R^{k\\times k}$ and $S\\in\\mathbb R^{k\\times j}$.\n\\[\\dot{p}=Rp+Sc\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nLet $p\\in\\mathbb R^k$ and $c\\in\\mathbb R^j$. The state and input matrices are $R\\in\\mathbb R^{k\\times k}$ and $S\\in\\mathbb R^{k\\times j}$.\n% semath-recognition-evidence:start\nLet $p$, $R$, $S$, and $c$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n% semath-recognition-evidence:end\n\\[\\dot{p}=Rp+Sc\\]"
         }
       ],
       "mainFileId": "main",
@@ -257,19 +257,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-state-pos-008",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state08.tex",
-          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe bold symbols $\\mathbf X\\in\\mathbb R^n$ and $\\mathbf U\\in\\mathbb R^m$ are vectors; $\\mathbf F\\in\\mathbb R^{n\\times n}$ and $\\mathbf G\\in\\mathbb R^{n\\times m}$ are matrices.\n\\[\\dot{\\mathbf X}=\\mathbf F\\mathbf X+\\mathbf G\\mathbf U\\]"
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe bold symbols $\\mathbf X\\in\\mathbb R^n$ and $\\mathbf U\\in\\mathbb R^m$ are vectors; $\\mathbf F\\in\\mathbb R^{n\\times n}$ and $\\mathbf G\\in\\mathbb R^{n\\times m}$ are matrices.\n% semath-recognition-evidence:start\nWe write $\\mathbf X$ for state vector. We write $\\mathbf F$ for state matrix. We write $\\mathbf G$ for input matrix. We write $\\mathbf U$ for control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{\\mathbf X}=\\mathbf F\\mathbf X+\\mathbf G\\mathbf U\\]"
         }
       ],
       "mainFileId": "main",
@@ -294,19 +294,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cs16-state-pos-009",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state09.tex",
-          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $\\chi\\in\\mathbb R^n$, $\\nu\\in\\mathbb R^m$, $K_0\\in\\mathbb R^{n\\times n}$, and $L_0\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\chi}=K_0\\chi+L_0\\nu\\]"
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet $\\chi\\in\\mathbb R^n$, $\\nu\\in\\mathbb R^m$, $K_0\\in\\mathbb R^{n\\times n}$, and $L_0\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\n$\\chi$ denotes state vector. $K_0$ denotes state matrix. $L_0$ denotes input matrix. $\\nu$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{\\chi}=K_0\\chi+L_0\\nu\\]"
         }
       ],
       "mainFileId": "main",
@@ -331,19 +331,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-state-pos-010",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state10.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nIn continuous time, $\\zeta$ is a state in $\\mathbb R^n$ and $\\mu$ is an input in $\\mathbb R^m$. Matrices $A_c$ and $B_c$ have sizes $n\\times n$ and $n\\times m$.\n\\[\\frac{d\\zeta}{dt}=A_c\\zeta+B_c\\mu\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nIn continuous time, $\\zeta$ is a state in $\\mathbb R^n$ and $\\mu$ is an input in $\\mathbb R^m$. Matrices $A_c$ and $B_c$ have sizes $n\\times n$ and $n\\times m$.\n% semath-recognition-evidence:start\nHere $\\zeta$ denotes state vector, $A_c$ denotes state matrix, $B_c$ denotes input matrix, and $\\mu$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\frac{d\\zeta}{dt}=A_c\\zeta+B_c\\mu\\]"
         }
       ],
       "mainFileId": "main",
@@ -368,19 +368,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-state-pos-011",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state11.tex",
-          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nThe state $h$ and input $j$ have dimensions $n$ and $m$. Let $A_1$ be $n$ by $n$ and $B_1$ be $n$ by $m$.\n\\[A_1h+B_1j=\\dot{h}\\]"
+          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nThe state $h$ and input $j$ have dimensions $n$ and $m$. Let $A_1$ be $n$ by $n$ and $B_1$ be $n$ by $m$.\n% semath-recognition-evidence:start\nLet $h$ denote state vector, $A_1$ denote state matrix, $B_1$ denote input matrix, and $j$ denote control input vector.\n% semath-recognition-evidence:end\n\\[A_1h+B_1j=\\dot{h}\\]"
         }
       ],
       "mainFileId": "main",
@@ -405,19 +405,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-state-pos-012",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state12.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $s_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n\\[\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $s_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n% semath-recognition-evidence:start\nLet $s_1$, $K_1$, $L_1$, and $v_1$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n% semath-recognition-evidence:end\n\\[\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)\\]"
         }
       ],
       "mainFileId": "main",
@@ -442,19 +442,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-state-pos-013",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state13.tex",
-          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nTake $\\omega\\in\\mathbb R^n$ as the state and $\\tau\\in\\mathbb R^m$ as the control. Here $E\\in\\mathbb R^{n\\times n}$ and $F\\in\\mathbb R^{n\\times m}$.\n$\\frac{d}{dt}\\omega=E\\omega+F\\tau$."
+          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nTake $\\omega\\in\\mathbb R^n$ as the state and $\\tau\\in\\mathbb R^m$ as the control. Here $E\\in\\mathbb R^{n\\times n}$ and $F\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\nWe write $\\omega$ for state vector. We write $E$ for state matrix. We write $F$ for input matrix. We write $\\tau$ for control input vector.\n% semath-recognition-evidence:end\n$\\frac{d}{dt}\\omega=E\\omega+F\\tau$."
         }
       ],
       "mainFileId": "main",
@@ -479,19 +479,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-state-pos-014",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state14.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n\\begin{align}\\dot{a}&=F_a a+G_a b\\end{align}"
+          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\n$a$ denotes state vector. $F_a$ denotes state matrix. $G_a$ denotes input matrix. $b$ denotes control input vector.\n% semath-recognition-evidence:end\n\\begin{align}\\dot{a}&=F_a a+G_a b\\end{align}"
         }
       ],
       "mainFileId": "main",
@@ -516,19 +516,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-state-pos-015",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state15.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nThe vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n\\begin{equation}\\dot{\\rho} = U\\rho + V\\sigma\\end{equation}"
+          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nThe vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n% semath-recognition-evidence:start\nHere $\\rho$ denotes state vector, $U$ denotes state matrix, $V$ denotes input matrix, and $\\sigma$ denotes control input vector.\n% semath-recognition-evidence:end\n\\begin{equation}\\dot{\\rho} = U\\rho + V\\sigma\\end{equation}"
         }
       ],
       "mainFileId": "main",
@@ -553,19 +553,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-state-pos-016",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state16.tex",
-          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $x_s$ and $u_s$ denote an $n$-dimensional state vector and an $m$-dimensional control vector, respectively. Let $A_s$ and $B_s$ denote an $n$ by $n$ state matrix and an $n$ by $m$ input matrix, respectively.\n\\[\\dot{x_s}=A_sx_s+B_su_s\\]"
+          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $x_s$ and $u_s$ denote an $n$-dimensional state vector and an $m$-dimensional control vector, respectively. Let $A_s$ and $B_s$ denote an $n$ by $n$ state matrix and an $n$ by $m$ input matrix, respectively.\n% semath-recognition-evidence:start\nLet $x_s$ denote state vector, $A_s$ denote state matrix, $B_s$ denote input matrix, and $u_s$ denote control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{x_s}=A_sx_s+B_su_s\\]"
         }
       ],
       "mainFileId": "main",
@@ -590,19 +590,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cs16-state-pos-017",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state17.tex",
-          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nThe model is\n\\[\\dot{x_f}=A_fx_f+B_fu_f\\]\nwhere $x_f\\in\\mathbb R^n$, $u_f\\in\\mathbb R^m$, $A_f\\in\\mathbb R^{n\\times n}$, and $B_f\\in\\mathbb R^{n\\times m}$."
+          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nThe model is\n% semath-recognition-evidence:start\nLet $x_f$, $A_f$, $B_f$, and $u_f$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n% semath-recognition-evidence:end\n\\[\\dot{x_f}=A_fx_f+B_fu_f\\]\nwhere $x_f\\in\\mathbb R^n$, $u_f\\in\\mathbb R^m$, $A_f\\in\\mathbb R^{n\\times n}$, and $B_f\\in\\mathbb R^{n\\times m}$."
         }
       ],
       "mainFileId": "main",
@@ -627,19 +627,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-state-pos-018",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state18.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nA realization obeys $\\dot{q_c}=M_cq_c+N_cw_c$. Here $q_c$ is an $r$-vector, $w_c$ is an $s$-vector, $M_c$ is $r$ by $r$, and $N_c$ is $r$ by $s$."
+          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nA realization obeys % semath-recognition-evidence:start\nWe write $q_c$ for state vector. We write $M_c$ for state matrix. We write $N_c$ for input matrix. We write $w_c$ for control input vector.\n% semath-recognition-evidence:end\n$\\dot{q_c}=M_cq_c+N_cw_c$. Here $q_c$ is an $r$-vector, $w_c$ is an $s$-vector, $M_c$ is $r$ by $r$, and $N_c$ is $r$ by $s$."
         }
       ],
       "mainFileId": "main",
@@ -664,19 +664,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-state-pos-019",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state19.tex",
-          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\n\\newcommand{\\sv}{x_m}\\newcommand{\\uv}{u_m}\\newcommand{\\Am}{A_m}\\newcommand{\\Bm}{B_m}\nLet $x_m\\in\\mathbb R^n$, $u_m\\in\\mathbb R^m$, $A_m\\in\\mathbb R^{n\\times n}$, and $B_m\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\sv}=\\Am\\sv+\\Bm\\uv\\]"
+          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\n\\newcommand{\\sv}{x_m}\\newcommand{\\uv}{u_m}\\newcommand{\\Am}{A_m}\\newcommand{\\Bm}{B_m}\nLet $x_m\\in\\mathbb R^n$, $u_m\\in\\mathbb R^m$, $A_m\\in\\mathbb R^{n\\times n}$, and $B_m\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\n$x_m$ denotes state vector. $A_m$ denotes state matrix. $B_m$ denotes input matrix. $u_m$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{\\sv}=\\Am\\sv+\\Bm\\uv\\]"
         }
       ],
       "mainFileId": "main",
@@ -719,19 +719,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-state-pos-020",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state20.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\n\\newcommand{\\SysA}{F_m}\\newcommand{\\SysB}{G_m}\nThe vectors $z_m\\in\\mathbb R^p$ and $v_m\\in\\mathbb R^r$ and matrices $F_m\\in\\mathbb R^{p\\times p}$ and $G_m\\in\\mathbb R^{p\\times r}$ define a state-space model.\n\\[\\dot{z_m}=\\SysA z_m+\\SysB v_m\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\n\\newcommand{\\SysA}{F_m}\\newcommand{\\SysB}{G_m}\nThe vectors $z_m\\in\\mathbb R^p$ and $v_m\\in\\mathbb R^r$ and matrices $F_m\\in\\mathbb R^{p\\times p}$ and $G_m\\in\\mathbb R^{p\\times r}$ define a state-space model.\n% semath-recognition-evidence:start\nHere $z_m$ denotes state vector, $F_m$ denotes state matrix, $G_m$ denotes input matrix, and $v_m$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{z_m}=\\SysA z_m+\\SysB v_m\\]"
         }
       ],
       "mainFileId": "main",
@@ -766,19 +766,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-state-pos-021",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main21.tex",
-          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\n\\input{dims21}\nThe continuous model is \\[\\dot{x_{21}}=A_{21}x_{21}+B_{21}u_{21}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\n\\input{dims21}\nThe continuous model is % semath-recognition-evidence:start\nLet $x_{21}$ denote state vector, $A_{21}$ denote state matrix, $B_{21}$ denote input matrix, and $u_{21}$ denote control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{x_{21}}=A_{21}x_{21}+B_{21}u_{21}\\]"
         },
         {
           "fileId": "dims",
@@ -808,14 +808,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-state-pos-022",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
@@ -825,7 +825,7 @@
         {
           "fileId": "model",
           "path": "model22.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe plant dynamics are\n\\[\\dot{z_{22}}=F_{22}z_{22}+G_{22}v_{22}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe plant dynamics are\n% semath-recognition-evidence:start\nLet $z_{22}$, $F_{22}$, $G_{22}$, and $v_{22}$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n% semath-recognition-evidence:end\n\\[\\dot{z_{22}}=F_{22}z_{22}+G_{22}v_{22}\\]"
         }
       ],
       "mainFileId": "main",
@@ -850,14 +850,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-state-pos-023",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
@@ -872,7 +872,7 @@
         {
           "fileId": "dyn",
           "path": "dynamics23.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\n\\begin{equation}\\dot{q_{23}}=M_{23}q_{23}+N_{23}w_{23}\\end{equation}"
+          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\n% semath-recognition-evidence:start\nWe write $q_{23}$ for state vector. We write $M_{23}$ for state matrix. We write $N_{23}$ for input matrix. We write $w_{23}$ for control input vector.\n% semath-recognition-evidence:end\n\\begin{equation}\\dot{q_{23}}=M_{23}q_{23}+N_{23}w_{23}\\end{equation}"
         }
       ],
       "mainFileId": "main",
@@ -897,19 +897,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-state-pos-024",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state24.md",
-          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\n# Plant model\n\nThe state $s_{24}\\in\\mathbb R^n$, input $r_{24}\\in\\mathbb R^m$, and matrices $K_{24}\\in\\mathbb R^{n\\times n}$ and $L_{24}\\in\\mathbb R^{n\\times m}$ satisfy\n\n$$\\dot{s_{24}}=K_{24}s_{24}+L_{24}r_{24}$$"
+          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\n# Plant model\n\nThe state $s_{24}\\in\\mathbb R^n$, input $r_{24}\\in\\mathbb R^m$, and matrices $K_{24}\\in\\mathbb R^{n\\times n}$ and $L_{24}\\in\\mathbb R^{n\\times m}$ satisfy\n\n% semath-recognition-evidence:start\n$s_{24}$ denotes state vector. $K_{24}$ denotes state matrix. $L_{24}$ denotes input matrix. $r_{24}$ denotes control input vector.\n% semath-recognition-evidence:end\n$$\\dot{s_{24}}=K_{24}s_{24}+L_{24}r_{24}$$"
         }
       ],
       "mainFileId": "main",
@@ -934,19 +934,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cs16-state-pos-025",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state25.tex",
-          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nLet $y_{25}\\in\\mathbb R^a$, $e_{25}\\in\\mathbb R^b$, $C_{25}\\in\\mathbb R^{a\\times a}$, and $D_{25}\\in\\mathbb R^{a\\times b}$.\n\\[\\displaystyle \\dot{y_{25}}=C_{25}y_{25}+D_{25}e_{25}\\]"
+          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nLet $y_{25}\\in\\mathbb R^a$, $e_{25}\\in\\mathbb R^b$, $C_{25}\\in\\mathbb R^{a\\times a}$, and $D_{25}\\in\\mathbb R^{a\\times b}$.\n% semath-recognition-evidence:start\nHere $y_{25}$ denotes state vector, $C_{25}$ denotes state matrix, $D_{25}$ denotes input matrix, and $e_{25}$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\displaystyle \\dot{y_{25}}=C_{25}y_{25}+D_{25}e_{25}\\]"
         }
       ],
       "mainFileId": "main",
@@ -971,19 +971,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-state-pos-026",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state26.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nLet $p_{26}$ be an $n$-state, $c_{26}$ an $m$-input, $R_{26}$ an $n\\times n$ matrix, and $S_{26}$ an $n\\times m$ matrix.\n\\[\\dot{p_{26}}=\\bigl(R_{26}p_{26}\\bigr)+\\bigl(S_{26}c_{26}\\bigr)\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nLet $p_{26}$ be an $n$-state, $c_{26}$ an $m$-input, $R_{26}$ an $n\\times n$ matrix, and $S_{26}$ an $n\\times m$ matrix.\n% semath-recognition-evidence:start\nLet $p_{26}$ denote state vector, $R_{26}$ denote state matrix, $S_{26}$ denote input matrix, and $c_{26}$ denote control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{p_{26}}=\\bigl(R_{26}p_{26}\\bigr)+\\bigl(S_{26}c_{26}\\bigr)\\]"
         }
       ],
       "mainFileId": "main",
@@ -1008,19 +1008,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-state-pos-027",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state27.tex",
-          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nThe declarations $x_r\\in\\mathbb R^n$, $u_r\\in\\mathbb R^m$, $A_r\\in\\mathbb R^{n\\times n}$, and $B_r\\in\\mathbb R^{n\\times m}$ apply throughout.\n\\[\\dot{x_r} = A_r {x_r}+B_r {u_r}\\]"
+          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nThe declarations $x_r\\in\\mathbb R^n$, $u_r\\in\\mathbb R^m$, $A_r\\in\\mathbb R^{n\\times n}$, and $B_r\\in\\mathbb R^{n\\times m}$ apply throughout.\n% semath-recognition-evidence:start\nLet $x_r$, $A_r$, $B_r$, and $u_r$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n% semath-recognition-evidence:end\n\\[\\dot{x_r} = A_r {x_r}+B_r {u_r}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1045,19 +1045,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-state-pos-028",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state28.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nLet $z_r\\in\\mathbb R^p$, $v_r\\in\\mathbb R^r$, $F_r\\in\\mathbb R^{p\\times p}$, and $G_r\\in\\mathbb R^{p\\times r}$.\n\\[\\left(F_rz_r+G_rv_r\\right)=\\dot{z_r}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nLet $z_r\\in\\mathbb R^p$, $v_r\\in\\mathbb R^r$, $F_r\\in\\mathbb R^{p\\times p}$, and $G_r\\in\\mathbb R^{p\\times r}$.\n% semath-recognition-evidence:start\nWe write $z_r$ for state vector. We write $F_r$ for state matrix. We write $G_r$ for input matrix. We write $v_r$ for control input vector.\n% semath-recognition-evidence:end\n\\[\\left(F_rz_r+G_rv_r\\right)=\\dot{z_r}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1082,19 +1082,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-state-pos-029",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state29.tex",
-          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\nThe state-space vectors are $\\boldsymbol{x}\\in\\mathbb R^n$ and $\\boldsymbol{u}\\in\\mathbb R^m$; its matrices are $\\boldsymbol{A}\\in\\mathbb R^{n\\times n}$ and $\\boldsymbol{B}\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\boldsymbol{x}}=\\boldsymbol{A}\\boldsymbol{x}+\\boldsymbol{B}\\boldsymbol{u}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\nThe state-space vectors are $\\boldsymbol{x}\\in\\mathbb R^n$ and $\\boldsymbol{u}\\in\\mathbb R^m$; its matrices are $\\boldsymbol{A}\\in\\mathbb R^{n\\times n}$ and $\\boldsymbol{B}\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\n$\\boldsymbol{x}$ denotes state vector. $\\boldsymbol{A}$ denotes state matrix. $\\boldsymbol{B}$ denotes input matrix. $\\boldsymbol{u}$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{\\boldsymbol{x}}=\\boldsymbol{A}\\boldsymbol{x}+\\boldsymbol{B}\\boldsymbol{u}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1119,19 +1119,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-state-pos-030",
       "lawId": "continuous-state-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "state30.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\nLet $\\theta\\in\\mathbb R^n$ be the state and $\\upsilon\\in\\mathbb R^m$ the input. Let $\\mathcal F\\in\\mathbb R^{n\\times n}$ and $\\mathcal G\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{\\theta}=\\mathcal F\\theta+\\mathcal G\\upsilon\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\nLet $\\theta\\in\\mathbb R^n$ be the state and $\\upsilon\\in\\mathbb R^m$ the input. Let $\\mathcal F\\in\\mathbb R^{n\\times n}$ and $\\mathcal G\\in\\mathbb R^{n\\times m}$.\n% semath-recognition-evidence:start\nHere $\\theta$ denotes state vector, $\\mathcal F$ denotes state matrix, $\\mathcal G$ denotes input matrix, and $\\upsilon$ denotes control input vector.\n% semath-recognition-evidence:end\n\\[\\dot{\\theta}=\\mathcal F\\theta+\\mathcal G\\upsilon\\]"
         }
       ],
       "mainFileId": "main",
@@ -1156,7 +1156,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
@@ -1816,12 +1816,12 @@
     {
       "id": "cs16-lyap-pos-001",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap01.tex",
-          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nLet $A$, $P$, and $Q$ be real $n$ by $n$ matrices.\n\\[A^TP+PA=-Q\\]"
+          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nLet $A$, $P$, and $Q$ be real $n$ by $n$ matrices.\n% semath-recognition-evidence:start\nLet $A$ denote state matrix, $P$ denote lyapunov certificate matrix, and $Q$ denote forcing matrix.\n% semath-recognition-evidence:end\n\\[A^TP+PA=-Q\\]"
         }
       ],
       "mainFileId": "main",
@@ -1845,19 +1845,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-002",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap02.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nFor a continuous-time system, $F,X,R\\in\\mathbb R^{p\\times p}$.\n\\[F^\\top X+XF=-R\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nFor a continuous-time system, $F,X,R\\in\\mathbb R^{p\\times p}$.\n% semath-recognition-evidence:start\nLet $F$, $X$, and $R$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n\\[F^\\top X+XF=-R\\]"
         }
       ],
       "mainFileId": "main",
@@ -1881,19 +1881,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-003",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap03.md",
-          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nLet $M$ be the system matrix, $H$ the Lyapunov certificate, and $S$ the forcing matrix; all are $d$ by $d$.\n\n$$M^{T}H+HM=-S$$"
+          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nLet $M$ be the system matrix, $H$ the Lyapunov certificate, and $S$ the forcing matrix; all are $d$ by $d$.\n\n% semath-recognition-evidence:start\nWe write $M$ for state matrix. We write $H$ for lyapunov certificate matrix. We write $S$ for forcing matrix.\n% semath-recognition-evidence:end\n$$M^{T}H+HM=-S$$"
         }
       ],
       "mainFileId": "main",
@@ -1917,19 +1917,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-lyap-pos-004",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap04.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nLet $K,Y,W\\in\\mathbb R^{n\\times n}$. The continuous Lyapunov relation is\n\\[-W=K^{\\top}Y+YK\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nLet $K,Y,W\\in\\mathbb R^{n\\times n}$. The continuous Lyapunov relation is\n% semath-recognition-evidence:start\n$K$ denotes state matrix. $Y$ denotes lyapunov certificate matrix. $W$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[-W=K^{\\top}Y+YK\\]"
         }
       ],
       "mainFileId": "main",
@@ -1953,19 +1953,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-lyap-pos-005",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap05.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nThe matrices $L,Z,N$ are square with common order $r$.\n\\[ZL+L^TZ=-N\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nThe matrices $L,Z,N$ are square with common order $r$.\n% semath-recognition-evidence:start\nHere $L$ denotes state matrix, $Z$ denotes lyapunov certificate matrix, and $N$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[ZL+L^TZ=-N\\]"
         }
       ],
       "mainFileId": "main",
@@ -1989,19 +1989,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-lyap-pos-006",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap06.tex",
-          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $C$, $P_c$, and $Q_c$ be $n\\times n$ matrices.\n\\[\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c\\]"
+          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $C$, $P_c$, and $Q_c$ be $n\\times n$ matrices.\n% semath-recognition-evidence:start\nLet $C$ denote state matrix, $P_c$ denote lyapunov certificate matrix, and $Q_c$ denote forcing matrix.\n% semath-recognition-evidence:end\n\\[\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c\\]"
         }
       ],
       "mainFileId": "main",
@@ -2025,19 +2025,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cs16-lyap-pos-007",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap07.tex",
-          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nLet $D$, $X_d$, and $R_d$ be square matrices of size $m$.\n\\begin{align}D^\\top X_d+X_dD&=-R_d\\end{align}"
+          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nLet $D$, $X_d$, and $R_d$ be square matrices of size $m$.\n% semath-recognition-evidence:start\nLet $D$, $X_d$, and $R_d$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n\\begin{align}D^\\top X_d+X_dD&=-R_d\\end{align}"
         }
       ],
       "mainFileId": "main",
@@ -2061,19 +2061,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-lyap-pos-008",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap08.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nMatrices $E,H_e,S_e\\in\\mathbb R^{k\\times k}$ are fixed.\n\\[E^{\\mathsf T}H_e+H_eE=-S_e\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nMatrices $E,H_e,S_e\\in\\mathbb R^{k\\times k}$ are fixed.\n% semath-recognition-evidence:start\nWe write $E$ for state matrix. We write $H_e$ for lyapunov certificate matrix. We write $S_e$ for forcing matrix.\n% semath-recognition-evidence:end\n\\[E^{\\mathsf T}H_e+H_eE=-S_e\\]"
         }
       ],
       "mainFileId": "main",
@@ -2097,19 +2097,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-lyap-pos-009",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap09.tex",
-          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nLet $F_i$, $P_i$, and $Q_i$ be real square matrices with the same dimension.\n\\[F_i^{\\intercal}P_i+P_iF_i=-Q_i\\]"
+          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nLet $F_i$, $P_i$, and $Q_i$ be real square matrices with the same dimension.\n% semath-recognition-evidence:start\n$F_i$ denotes state matrix. $P_i$ denotes lyapunov certificate matrix. $Q_i$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[F_i^{\\intercal}P_i+P_iF_i=-Q_i\\]"
         }
       ],
       "mainFileId": "main",
@@ -2133,19 +2133,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-010",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap10.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nUnder real-matrix convention, the prime denotes transpose. Let $G,J,T$ be $n$ by $n$ matrices.\n\\[G'J+JG=-T\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nUnder real-matrix convention, the prime denotes transpose. Let $G,J,T$ be $n$ by $n$ matrices.\n% semath-recognition-evidence:start\nHere $G$ denotes state matrix, $J$ denotes lyapunov certificate matrix, and $T$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[G'J+JG=-T\\]"
         }
       ],
       "mainFileId": "main",
@@ -2169,19 +2169,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-011",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap11.tex",
-          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nLet $A_c,P_c,W_c\\in\\mathbb R^{n\\times n}$.\n\\[A_c^TP_c+P_cA_c=-(W_c)\\]"
+          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nLet $A_c,P_c,W_c\\in\\mathbb R^{n\\times n}$.\n% semath-recognition-evidence:start\nLet $A_c$ denote state matrix, $P_c$ denote lyapunov certificate matrix, and $W_c$ denote forcing matrix.\n% semath-recognition-evidence:end\n\\[A_c^TP_c+P_cA_c=-(W_c)\\]"
         }
       ],
       "mainFileId": "main",
@@ -2205,25 +2205,25 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-lyap-pos-012",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap12.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nLet $B,L_b,N_b$ be square matrices of common dimension.\n\\[0=B^TL_b+L_bB+N_b\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nLet $B,L_b,N_b$ be square matrices of common dimension.\n% semath-recognition-evidence:start\nLet $B$, $L_b$, and $N_b$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n\\[0=B^\\top L_b+L_bB+N_b\\]"
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "0=B^TL_b+L_bB+N_b",
+        "needle": "0=B^\\top L_b+L_bB+N_b",
         "edge": "after"
       },
       "expectedRoles": {
@@ -2241,19 +2241,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-number-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-number-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-lyap-pos-013",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap13.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nThe matrices $C,Y_c,Q_y$ are all $r\\times r$.\n\\[C^\\top Y_c+Y_cC+Q_y=0\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nThe matrices $C,Y_c,Q_y$ are all $r\\times r$.\n% semath-recognition-evidence:start\nWe write $C$ for state matrix. We write $Y_c$ for lyapunov certificate matrix. We write $Q_y$ for forcing matrix.\n% semath-recognition-evidence:end\n\\[C^\\top Y_c+Y_cC+Q_y=0\\]"
         }
       ],
       "mainFileId": "main",
@@ -2277,19 +2277,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-lyap-pos-014",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap14.tex",
-          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $D,Z_d,R_z\\in\\mathbb R^{m\\times m}$.\n\\[R_z=-\\bigl(D^TZ_d+Z_dD\\bigr)\\]"
+          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $D,Z_d,R_z\\in\\mathbb R^{m\\times m}$.\n% semath-recognition-evidence:start\n$D$ denotes state matrix. $Z_d$ denotes lyapunov certificate matrix. $R_z$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[R_z=-\\bigl(D^TZ_d+Z_dD\\bigr)\\]"
         }
       ],
       "mainFileId": "main",
@@ -2313,19 +2313,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cs16-lyap-pos-015",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap15.tex",
-          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nLet $E$, $H$, and $S$ denote the state matrix, Lyapunov matrix, and forcing matrix, respectively; each is $n$ by $n$.\n\\[E^TH+HE=-S\\]"
+          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nLet $E$, $H$, and $S$ denote the state matrix, Lyapunov matrix, and forcing matrix, respectively; each is $n$ by $n$.\n% semath-recognition-evidence:start\nHere $E$ denotes state matrix, $H$ denotes lyapunov certificate matrix, and $S$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[E^TH+HE=-S\\]"
         }
       ],
       "mainFileId": "main",
@@ -2349,19 +2349,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-lyap-pos-016",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap16.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nThe certificate equation is\n\\[F_{16}^\\top P_{16}+P_{16}F_{16}=-Q_{16}\\]\nwhere $F_{16},P_{16},Q_{16}\\in\\mathbb R^{n\\times n}$."
+          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nThe certificate equation is\n% semath-recognition-evidence:start\nLet $F_{16}$ denote state matrix, $P_{16}$ denote lyapunov certificate matrix, and $Q_{16}$ denote forcing matrix.\n% semath-recognition-evidence:end\n\\[F_{16}^\\top P_{16}+P_{16}F_{16}=-Q_{16}\\]\nwhere $F_{16},P_{16},Q_{16}\\in\\mathbb R^{n\\times n}$."
         }
       ],
       "mainFileId": "main",
@@ -2385,19 +2385,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol-number-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-lyap-pos-017",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap17.tex",
-          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nA stability calculation uses $-R_{17}=G_{17}^TX_{17}+X_{17}G_{17}$. Here $G_{17}$, $X_{17}$, and $R_{17}$ are square matrices of order $p$."
+          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nA stability calculation uses % semath-recognition-evidence:start\nLet $G_{17}$, $X_{17}$, and $R_{17}$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n$-R_{17}=G_{17}^TX_{17}+X_{17}G_{17}$. Here $G_{17}$, $X_{17}$, and $R_{17}$ are square matrices of order $p$."
         }
       ],
       "mainFileId": "main",
@@ -2421,19 +2421,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-018",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap18.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\n\\newcommand{\\Aa}{A_m}\\newcommand{\\Pp}{P_m}\\newcommand{\\Qq}{Q_m}\nLet $A_m,P_m,Q_m\\in\\mathbb R^{n\\times n}$.\n\\[\\Aa^\\top\\Pp+\\Pp\\Aa=-\\Qq\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\n\\newcommand{\\Aa}{A_m}\\newcommand{\\Pp}{P_m}\\newcommand{\\Qq}{Q_m}\nLet $A_m,P_m,Q_m\\in\\mathbb R^{n\\times n}$.\n% semath-recognition-evidence:start\nWe write $A_m$ for state matrix. We write $P_m$ for lyapunov certificate matrix. We write $Q_m$ for forcing matrix.\n% semath-recognition-evidence:end\n\\[\\Aa^\\top\\Pp+\\Pp\\Aa=-\\Qq\\]"
         }
       ],
       "mainFileId": "main",
@@ -2471,19 +2471,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-019",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap19.tex",
-          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\n\\newcommand{\\tr}{^{\\mathsf T}}\nLet $F_m,X_m,R_m\\in\\mathbb R^{p\\times p}$.\n\\[F_m\\tr X_m+X_mF_m=-R_m\\]"
+          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\n\\newcommand{\\tr}{^{\\mathsf T}}\nLet $F_m,X_m,R_m\\in\\mathbb R^{p\\times p}$.\n% semath-recognition-evidence:start\n$F_m$ denotes state matrix. $X_m$ denotes lyapunov certificate matrix. $R_m$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[F_m\\tr X_m+X_mF_m=-R_m\\]"
         }
       ],
       "mainFileId": "main",
@@ -2513,19 +2513,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-lyap-pos-020",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main20l.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\n\\input{lyapdefs20}\n\\[A_{20}^TP_{20}+P_{20}A_{20}=-Q_{20}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\n\\input{lyapdefs20}\n% semath-recognition-evidence:start\nHere $A_{20}$ denotes state matrix, $P_{20}$ denotes lyapunov certificate matrix, and $Q_{20}$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[A_{20}^TP_{20}+P_{20}A_{20}=-Q_{20}\\]"
         },
         {
           "fileId": "defs",
@@ -2554,14 +2554,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-lyap-pos-021",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
@@ -2571,7 +2571,7 @@
         {
           "fileId": "cert",
           "path": "certificate21.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe Lyapunov identity is\n\\[F_{21}^\\top X_{21}+X_{21}F_{21}=-R_{21}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe Lyapunov identity is\n% semath-recognition-evidence:start\nLet $F_{21}$ denote state matrix, $X_{21}$ denote lyapunov certificate matrix, and $R_{21}$ denote forcing matrix.\n% semath-recognition-evidence:end\n\\[F_{21}^\\top X_{21}+X_{21}F_{21}=-R_{21}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2595,14 +2595,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-lyap-pos-022",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
@@ -2617,7 +2617,7 @@
         {
           "fileId": "rel",
           "path": "relation22.tex",
-          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\begin{equation}M_{22}^{\\mathsf T}H_{22}+H_{22}M_{22}=-S_{22}\\end{equation}"
+          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\n% semath-recognition-evidence:start\nLet $M_{22}$, $H_{22}$, and $S_{22}$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n\\begin{equation}M_{22}^{\\mathsf T}H_{22}+H_{22}M_{22}=-S_{22}\\end{equation}"
         }
       ],
       "mainFileId": "main",
@@ -2641,19 +2641,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol-symbol-number",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cs16-lyap-pos-023",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap23.md",
-          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\n# Stability certificate\n\nLet $K_{23},Y_{23},W_{23}\\in\\mathbb R^{n\\times n}$.\n\n$$K_{23}^{\\top}Y_{23}+Y_{23}K_{23}=-W_{23}$$"
+          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\n# Stability certificate\n\nLet $K_{23},Y_{23},W_{23}\\in\\mathbb R^{n\\times n}$.\n\n% semath-recognition-evidence:start\nWe write $K_{23}$ for state matrix. We write $Y_{23}$ for lyapunov certificate matrix. We write $W_{23}$ for forcing matrix.\n% semath-recognition-evidence:end\n$$K_{23}^{\\top}Y_{23}+Y_{23}K_{23}=-W_{23}$$"
         }
       ],
       "mainFileId": "main",
@@ -2677,19 +2677,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cs16-lyap-pos-024",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap24.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nLet $L_{24},Z_{24},N_{24}$ be real square matrices of the same size.\n\\[\\left(L_{24}^\\top Z_{24}\\right)+\\left(Z_{24}L_{24}\\right)=-N_{24}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nLet $L_{24},Z_{24},N_{24}$ be real square matrices of the same size.\n% semath-recognition-evidence:start\n$L_{24}$ denotes state matrix. $Z_{24}$ denotes lyapunov certificate matrix. $N_{24}$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[\\left(L_{24}^\\top Z_{24}\\right)+\\left(Z_{24}L_{24}\\right)=-N_{24}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2713,19 +2713,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cs16-lyap-pos-025",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap25.tex",
-          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe calligraphic matrices $\\mathcal A$, $\\mathcal P$, and $\\mathcal Q$ lie in $\\mathbb R^{n\\times n}$.\n\\[\\mathcal A^{\\top}\\mathcal P+\\mathcal P\\mathcal A=-\\mathcal Q\\]"
+          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe calligraphic matrices $\\mathcal A$, $\\mathcal P$, and $\\mathcal Q$ lie in $\\mathbb R^{n\\times n}$.\n% semath-recognition-evidence:start\nHere $\\mathcal A$ denotes state matrix, $\\mathcal P$ denotes lyapunov certificate matrix, and $\\mathcal Q$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[\\mathcal A^{\\top}\\mathcal P+\\mathcal P\\mathcal A=-\\mathcal Q\\]"
         }
       ],
       "mainFileId": "main",
@@ -2749,19 +2749,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-026",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap26.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nLet $\\mathbf A,\\mathbf P,\\mathbf Q\\in\\mathbb R^{r\\times r}$.\n\\[\\mathbf A^{\\mathsf T}\\mathbf P+\\mathbf P\\mathbf A=-\\mathbf Q\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nLet $\\mathbf A,\\mathbf P,\\mathbf Q\\in\\mathbb R^{r\\times r}$.\n% semath-recognition-evidence:start\nLet $\\mathbf A$ denote state matrix, $\\mathbf P$ denote lyapunov certificate matrix, and $\\mathbf Q$ denote forcing matrix.\n% semath-recognition-evidence:end\n\\[\\mathbf A^{\\mathsf T}\\mathbf P+\\mathbf P\\mathbf A=-\\mathbf Q\\]"
         }
       ],
       "mainFileId": "main",
@@ -2785,19 +2785,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cs16-lyap-pos-027",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap27.tex",
-          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nLet $A_c^{(1)},P_c^{(1)},Q_c^{(1)}\\in\\mathbb R^{n\\times n}$.\n\\[(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nLet $A_c^{(1)},P_c^{(1)},Q_c^{(1)}\\in\\mathbb R^{n\\times n}$.\n% semath-recognition-evidence:start\nLet $A_c^{(1)}$, $P_c^{(1)}$, and $Q_c^{(1)}$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n\\[(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2821,19 +2821,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cs16-lyap-pos-028",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap28.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nMatrices $F_r$, $X_r$, and $R_r$ are all $p$ by $p$.\n\\[F_r ^ {\\top} X_r + X_r F_r = - R_r\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nMatrices $F_r$, $X_r$, and $R_r$ are all $p$ by $p$.\n% semath-recognition-evidence:start\nWe write $F_r$ for state matrix. We write $X_r$ for lyapunov certificate matrix. We write $R_r$ for forcing matrix.\n% semath-recognition-evidence:end\n\\[F_r ^ {\\top} X_r + X_r F_r = - R_r\\]"
         }
       ],
       "mainFileId": "main",
@@ -2857,19 +2857,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cs16-lyap-pos-029",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap29.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\nLet $M_a,H_a,S_a\\in\\mathbb R^{d\\times d}$.\n\\[\\begin{aligned}M_a^T H_a&+H_aM_a\\\\&=-S_a\\end{aligned}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\nLet $M_a,H_a,S_a\\in\\mathbb R^{d\\times d}$.\n% semath-recognition-evidence:start\n$M_a$ denotes state matrix. $H_a$ denotes lyapunov certificate matrix. $S_a$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}M_a^T H_a&+H_aM_a\\\\&=-S_a\\end{aligned}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2893,19 +2893,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cs16-lyap-pos-030",
       "lawId": "continuous-lyapunov-equation",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "lyap30.tex",
-          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $K_b,Y_b,\\Omega_b$ be square matrices with common order $n$.\n\\[-\\Omega_b=\\bigl(K_b^{\\intercal}Y_b\\bigr)+\\bigl(Y_bK_b\\bigr)\\]"
+          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\nLet $K_b,Y_b,\\Omega_b$ be square matrices with common order $n$.\n% semath-recognition-evidence:start\nHere $K_b$ denotes state matrix, $Y_b$ denotes lyapunov certificate matrix, and $\\Omega_b$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[-\\Omega_b=\\bigl(K_b^{\\intercal}Y_b\\bigr)+\\bigl(Y_bK_b\\bigr)\\]"
         }
       ],
       "mainFileId": "main",
@@ -2929,7 +2929,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },

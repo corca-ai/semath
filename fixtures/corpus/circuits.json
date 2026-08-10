@@ -5,12 +5,12 @@
     {
       "id": "ohm-pos-basic-drop",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nFor the resistor branch, the constitutive relation is $V=IR$."
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nFor the resistor branch, the constitutive relation is % semath-recognition-evidence:start\nLet $V$ denote voltage, $I$ denote electric current, and $R$ denote resistance.\n% semath-recognition-evidence:end\n$V=IR$."
         }
       ],
       "mainFileId": "main",
@@ -33,19 +33,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "ohm-pos-solve-current",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nThe branch current follows from \\[I=\\frac{V}{R}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nThe branch current follows from % semath-recognition-evidence:start\nLet $I$, $V$, and $R$ denote electric current, voltage, and resistance, respectively.\n% semath-recognition-evidence:end\n\\[I=\\frac{V}{R}\\]."
         }
       ],
       "mainFileId": "main",
@@ -68,19 +68,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "ohm-pos-solve-resistance",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nFor a measured operating point, use $R=\\frac{V}{I}$."
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nFor a measured operating point, use % semath-recognition-evidence:start\nWe write $R$ for resistance. We write $V$ for voltage. We write $I$ for electric current.\n% semath-recognition-evidence:end\n$R=\\frac{V}{I}$."
         }
       ],
       "mainFileId": "main",
@@ -103,19 +103,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "ohm-pos-source-subscripts",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe source resistor obeys \\[V_s=I_sR_s\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe source resistor obeys % semath-recognition-evidence:start\n$V_s$ denotes voltage. $I_s$ denotes electric current. $R_s$ denotes resistance.\n% semath-recognition-evidence:end\n\\[V_s=I_sR_s\\]."
         }
       ],
       "mainFileId": "main",
@@ -138,19 +138,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "ohm-pos-terminal-voltage",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nAcross terminals \\(a\\) and \\(b\\), the passive-sign relation is $V_{ab}=R_b I_{ab}$."
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nAcross terminals \\(a\\) and \\(b\\), the passive-sign relation is % semath-recognition-evidence:start\nHere $V_{ab}$ denotes voltage, $R_b$ denotes resistance, and $I_{ab}$ denotes electric current.\n% semath-recognition-evidence:end\n$V_{ab}=R_b I_{ab}$."
         }
       ],
       "mainFileId": "main",
@@ -173,19 +173,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "ohm-pos-time-domain",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor an ideal time-invariant resistor, \\[v(t)=R\\,i(t)\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor an ideal time-invariant resistor, % semath-recognition-evidence:start\nLet $v(t)$ denote voltage, $R$ denote resistance, and $i(t)$ denote electric current.\n% semath-recognition-evidence:end\n\\[v(t)=R\\,i(t)\\]."
         }
       ],
       "mainFileId": "main",
@@ -208,19 +208,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "ohm-pos-time-domain-current",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nSolving the same device law for current gives $i(t)=v(t)/R$."
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nSolving the same device law for current gives % semath-recognition-evidence:start\nLet $i(t)$, $v(t)$, and $R$ denote electric current, voltage, and resistance, respectively.\n% semath-recognition-evidence:end\n$i(t)=v(t)/R$."
         }
       ],
       "mainFileId": "main",
@@ -243,19 +243,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "ohm-pos-element-labels",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe labeled element satisfies \\[V_R=R\\,I_R\\]."
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe labeled element satisfies % semath-recognition-evidence:start\nWe write $V_R$ for voltage. We write $R$ for resistance. We write $I_R$ for electric current.\n% semath-recognition-evidence:end\n\\[V_R=R\\,I_R\\]."
         }
       ],
       "mainFileId": "main",
@@ -278,19 +278,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "ohm-pos-delta-voltage",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet \\(\\Delta V\\) be the signed drop. Then $\\Delta V=I_\\ell R_\\ell$."
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet \\(\\Delta V\\) be the signed drop. Then % semath-recognition-evidence:start\n$\\Delta V$ denotes voltage. $I_\\ell$ denotes electric current. $R_\\ell$ denotes resistance.\n% semath-recognition-evidence:end\n$\\Delta V=I_\\ell R_\\ell$."
         }
       ],
       "mainFileId": "main",
@@ -313,19 +313,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "ohm-pos-emf-symbol",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nHere \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; $E=J\\rho$."
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nHere \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; % semath-recognition-evidence:start\nHere $E$ denotes voltage, $J$ denotes electric current, and $\\rho$ denotes resistance.\n% semath-recognition-evidence:end\n$E=J\\rho$."
         }
       ],
       "mainFileId": "main",
@@ -348,19 +348,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "ohm-pos-european-voltage",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nUsing \\(U\\) for voltage, the resistor equation is \\[U=R I\\]."
+          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nUsing \\(U\\) for voltage, the resistor equation is % semath-recognition-evidence:start\nLet $U$ denote voltage, $R$ denote resistance, and $I$ denote electric current.\n% semath-recognition-evidence:end\n\\[U=R I\\]."
         }
       ],
       "mainFileId": "main",
@@ -383,19 +383,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "ohm-pos-product-first",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nThe lab sheet presents the relation with the product first: \\[I R=V\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nThe lab sheet presents the relation with the product first: % semath-recognition-evidence:start\nLet $I$, $R$, and $V$ denote electric current, resistance, and voltage, respectively.\n% semath-recognition-evidence:end\n\\[I R=V\\]."
         }
       ],
       "mainFileId": "main",
@@ -418,19 +418,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "ohm-pos-grouped-product",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nFor clarity, the report groups the measured factors as $V=(I)(R)$."
+          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nFor clarity, the report groups the measured factors as % semath-recognition-evidence:start\nWe write $V$ for voltage. We write $I$ for electric current. We write $R$ for resistance.\n% semath-recognition-evidence:end\n$V=(I)(R)$."
         }
       ],
       "mainFileId": "main",
@@ -453,19 +453,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "ohm-pos-parenthesized-law",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nThe asserted device law is \\[(V)=(R\\,I)\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nThe asserted device law is % semath-recognition-evidence:start\n$V$ denotes voltage. $R$ denotes resistance. $I$ denotes electric current.\n% semath-recognition-evidence:end\n\\[(V)=(R\\,I)\\]."
         }
       ],
       "mainFileId": "main",
@@ -488,19 +488,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "ohm-pos-declared-before",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses $V_d=I_dR_d$."
+          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses % semath-recognition-evidence:start\nHere $V_d$ denotes voltage, $I_d$ denotes electric current, and $R_d$ denotes resistance.\n% semath-recognition-evidence:end\n$V_d=I_dR_d$."
         }
       ],
       "mainFileId": "main",
@@ -523,19 +523,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "ohm-pos-declared-after",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe branch model is \\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
+          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe branch model is % semath-recognition-evidence:start\nLet $e_b$ denote voltage, $j_b$ denote electric current, and $r_b$ denote resistance.\n% semath-recognition-evidence:end\n\\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
         }
       ],
       "mainFileId": "main",
@@ -558,19 +558,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "ohm-pos-sentence-interleaved",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nWith current \\(i_L\\) directed into the marked terminal, $v_L=R_L i_L$ gives the load voltage."
+          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nWith current \\(i_L\\) directed into the marked terminal, % semath-recognition-evidence:start\nLet $v_L$, $R_L$, and $i_L$ denote voltage, resistance, and electric current, respectively.\n% semath-recognition-evidence:end\n$v_L=R_L i_L$ gives the load voltage."
         }
       ],
       "mainFileId": "main",
@@ -593,19 +593,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "ohm-pos-units-in-prose",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nVoltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is \\[V_m=I_mR_m\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nVoltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is % semath-recognition-evidence:start\nWe write $V_m$ for voltage. We write $I_m$ for electric current. We write $R_m$ for resistance.\n% semath-recognition-evidence:end\n\\[V_m=I_mR_m\\]."
         }
       ],
       "mainFileId": "main",
@@ -628,19 +628,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "ohm-pos-macro-single",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nUsing the project voltage alias, the component equation is $\\Vdrop=I R$."
+          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nUsing the project voltage alias, the component equation is % semath-recognition-evidence:start\n$\\Vdrop$ denotes voltage. $I$ denotes electric current. $R$ denotes resistance.\n% semath-recognition-evidence:end\n$\\Vdrop=I R$."
         }
       ],
       "mainFileId": "main",
@@ -669,19 +669,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "ohm-pos-macro-all-roles",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nThe schematic notation states \\[\\Volt=\\Ampere\\,\\Ohmic\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nThe schematic notation states % semath-recognition-evidence:start\nHere $\\Volt$ denotes voltage, $\\Ampere$ denotes electric current, and $\\Ohmic$ denotes resistance.\n% semath-recognition-evidence:end\n\\[\\Volt=\\Ampere\\,\\Ohmic\\]."
         }
       ],
       "mainFileId": "main",
@@ -718,19 +718,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "ohm-pos-reference-direction",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nFor the marked positive voltage terminal and entering current arrow, \\[v_+=r_p i_+\\]."
+          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nFor the marked positive voltage terminal and entering current arrow, % semath-recognition-evidence:start\nLet $v_+$ denote voltage, $r_p$ denote resistance, and $i_+$ denote electric current.\n% semath-recognition-evidence:end\n\\[v_+=r_p i_+\\]."
         }
       ],
       "mainFileId": "main",
@@ -753,19 +753,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "ohm-pos-load-subscript",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe load line uses $V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
+          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe load line uses % semath-recognition-evidence:start\nLet $V_{\\mathrm{load}}$, $I_{\\mathrm{load}}$, and $R_{\\mathrm{load}}$ denote voltage, electric current, and resistance, respectively.\n% semath-recognition-evidence:end\n$V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
         }
       ],
       "mainFileId": "main",
@@ -788,19 +788,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "ohm-pos-sensor-branch",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nFor sensor branch \\(3\\), \\[v_3=i_3 r_3\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nFor sensor branch \\(3\\), % semath-recognition-evidence:start\nWe write $v_3$ for voltage. We write $i_3$ for electric current. We write $r_3$ for resistance.\n% semath-recognition-evidence:end\n\\[v_3=i_3 r_3\\]."
         }
       ],
       "mainFileId": "main",
@@ -823,19 +823,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "ohm-pos-resistance-left",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe inferred element value is $\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
+          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe inferred element value is % semath-recognition-evidence:start\n$\\mathcal{R}_x$ denotes resistance. $V_x$ denotes voltage. $I_x$ denotes electric current.\n% semath-recognition-evidence:end\n$\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
         }
       ],
       "mainFileId": "main",
@@ -858,19 +858,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "ohm-pos-aligned-presentation",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nThe selected row of the derivation is \\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
+          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nThe selected row of the derivation is % semath-recognition-evidence:start\nHere $V_o$ denotes voltage, $I_o$ denotes electric current, and $R_o$ denotes resistance.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
@@ -893,19 +893,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "ohm-pos-boxed-presentation",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nThe final component model is highlighted as \\[\\boxed{V_c=R_c I_c}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nThe final component model is highlighted as % semath-recognition-evidence:start\nLet $V_c$ denote voltage, $R_c$ denote resistance, and $I_c$ denote electric current.\n% semath-recognition-evidence:end\n\\[\\boxed{V_c=R_c I_c}\\]."
         }
       ],
       "mainFileId": "main",
@@ -928,19 +928,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "ohm-pos-ratio-grouping",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nAfter isolating current, the worksheet obtains \\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
+          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nAfter isolating current, the worksheet obtains % semath-recognition-evidence:start\nLet $i_x$, $v_x$, and $r_x$ denote electric current, voltage, and resistance, respectively.\n% semath-recognition-evidence:end\n\\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
         }
       ],
       "mainFileId": "main",
@@ -963,19 +963,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "ohm-pos-multiline-declaration",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nVoltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus \\[V_h=R_h I_h\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nVoltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus % semath-recognition-evidence:start\nWe write $V_h$ for voltage. We write $R_h$ for resistance. We write $I_h$ for electric current.\n% semath-recognition-evidence:end\n\\[V_h=R_h I_h\\]."
         }
       ],
       "mainFileId": "main",
@@ -998,19 +998,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "ohm-pos-multifile-declaration",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\n\\input{symbols}\nThe resistor equation is \\[V_b=I_bR_b\\]."
+          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\n\\input{symbols}\nThe resistor equation is % semath-recognition-evidence:start\n$V_b$ denotes voltage. $I_b$ denotes electric current. $R_b$ denotes resistance.\n% semath-recognition-evidence:end\n\\[V_b=I_bR_b\\]."
         },
         {
           "fileId": "symbols",
@@ -1038,19 +1038,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "ohm-pos-multifile-macro",
       "lawId": "ohm-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\n\\input{notation}\nThe branch law is $\\BranchV=\\BranchI\\BranchR$."
+          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\n\\input{notation}\nThe branch law is % semath-recognition-evidence:start\nHere $\\BranchV$ denotes voltage, $\\BranchI$ denotes electric current, and $\\BranchR$ denotes resistance.\n% semath-recognition-evidence:end\n$\\BranchV=\\BranchI\\BranchR$."
         },
         {
           "fileId": "notation",
@@ -1092,7 +1092,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
@@ -1197,7 +1197,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1034. [let paired]\nA presentation-only symbol follows: \\[q_{1234}\\]\n\nHere \\(R\\) is declared to be current, \\(I\\) resistance, and \\(V\\) voltage, followed by \\[V=IR\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1034. [let paired]\nA presentation-only symbol follows: \\[q_{1234}\\]\n\nHere \\(R\\) is declared to be current, \\(I\\) resistance, and \\(V\\) current, followed by \\[V=IR\\]."
         }
       ],
       "mainFileId": "main",
@@ -1719,12 +1719,12 @@
     {
       "id": "kcl-pos-two-in-one-out",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nAt node \\(n\\), the entering currents balance the leaving branch: $I_1+I_2=I_3$."
+          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nAt node \\(n\\), the entering currents balance the leaving branch: % semath-recognition-evidence:start\nLet $I_1$ denote electric current, $I_2$ denote electric current, and $I_3$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states terminal currents for $I_1+I_2=I_3$."
         }
       ],
       "mainFileId": "main",
@@ -1747,19 +1747,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kcl-pos-one-in-two-out",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nThe junction equation is \\[I_{\\mathrm{in}}=I_a+I_b\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nThe junction equation is % semath-recognition-evidence:start\nLet $I_{\\mathrm{in}}$, $I_a$, and $I_b$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states node for \\[I_{\\mathrm{in}}=I_a+I_b\\]."
         }
       ],
       "mainFileId": "main",
@@ -1782,19 +1782,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kcl-pos-signed-zero",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nWith entering currents positive, the node law is $I_a+I_b-I_c=0$."
+          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nWith entering currents positive, the node law is % semath-recognition-evidence:start\nWe write $I_a$ for electric current. We write $I_b$ for electric current. We write $I_c$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states junction for $I_a+I_b-I_c=0$."
         }
       ],
       "mainFileId": "main",
@@ -1817,19 +1817,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kcl-pos-zero-left",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nThe same node balance is displayed as \\[0=I_p+I_q-I_r\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nThe same node balance is displayed as % semath-recognition-evidence:start\n$I_p$ denotes electric current. $I_q$ denotes electric current. $I_r$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states kcl for \\[0=I_p+I_q-I_r\\]."
         }
       ],
       "mainFileId": "main",
@@ -1852,19 +1852,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-number-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-number-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kcl-pos-indexed-sum",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nUsing outward reference directions, KCL gives $\\sum_{k=1}^{m} I_k=0$."
+          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nUsing outward reference directions, KCL gives % semath-recognition-evidence:start\nHere $I_k$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states branch for $\\sum_{k=1}^{m} I_k=0$."
         }
       ],
       "mainFileId": "main",
@@ -1885,19 +1885,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kcl-pos-in-out-sums",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe aggregate statement is \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
+          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe aggregate statement is % semath-recognition-evidence:start\nLet $i_j$ denote electric current and $i_j$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states balance for \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
         }
       ],
       "mainFileId": "main",
@@ -1919,19 +1919,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kcl-pos-node-subscripts",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nAt node \\(A\\), the labeled branches satisfy $I_{A1}+I_{A2}=I_{A3}$."
+          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nAt node \\(A\\), the labeled branches satisfy % semath-recognition-evidence:start\nLet $I_{A1}$, $I_{A2}$, and $I_{A3}$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states aggregate for $I_{A1}+I_{A2}=I_{A3}$."
         }
       ],
       "mainFileId": "main",
@@ -1954,19 +1954,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kcl-pos-lowercase-time",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nInstantaneously, \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
+          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nInstantaneously, % semath-recognition-evidence:start\nWe write $i_1(t)$ for electric current. We write $i_2(t)$ for electric current. We write $i_3(t)$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states entering for \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
         }
       ],
       "mainFileId": "main",
@@ -1989,19 +1989,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol-number-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kcl-pos-branch-names",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nThe source current splits according to $I_S=I_L+I_B$."
+          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nThe source current splits according to % semath-recognition-evidence:start\n$I_S$ denotes electric current. $I_L$ denotes electric current. $I_B$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states outgoing for $I_S=I_L+I_B$."
         }
       ],
       "mainFileId": "main",
@@ -2024,19 +2024,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kcl-pos-product-free-reorder",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nThe report writes the outgoing side first: \\[I_o+I_p=I_s\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nThe report writes the outgoing side first: % semath-recognition-evidence:start\nHere $I_o$ denotes electric current, $I_p$ denotes electric current, and $I_s$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states feeders for \\[I_o+I_p=I_s\\]."
         }
       ],
       "mainFileId": "main",
@@ -2059,19 +2059,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kcl-pos-grouped-sides",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nFor presentation, the balance is $(I_1+I_2)=(I_3+I_4)$."
+          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nFor presentation, the balance is % semath-recognition-evidence:start\nLet $I_1$ denote electric current, $I_2$ denote electric current, $I_3$ denote electric current, and $I_4$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states flow groups for $(I_1+I_2)=(I_3+I_4)$."
         }
       ],
       "mainFileId": "main",
@@ -2095,19 +2095,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kcl-pos-boxed-node-law",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nThe selected node equation is \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nThe selected node equation is % semath-recognition-evidence:start\nLet $i_a$, $i_b$, $i_c$, and $i_d$ denote electric current, electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states reference for \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
         }
       ],
       "mainFileId": "main",
@@ -2131,19 +2131,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kcl-pos-declared-before",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nLet \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then $j_1+j_2=j_3$."
+          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nLet \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then % semath-recognition-evidence:start\nWe write $j_1$ for electric current. We write $j_2$ for electric current. We write $j_3$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states current splits for $j_1+j_2=j_3$."
         }
       ],
       "mainFileId": "main",
@@ -2166,19 +2166,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kcl-pos-declared-after",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe junction obeys \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
+          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe junction obeys % semath-recognition-evidence:start\n$a$ denotes electric current. $b$ denotes electric current. $c$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states currents satisfy for \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
         }
       ],
       "mainFileId": "main",
@@ -2201,19 +2201,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kcl-pos-all-leaving",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nAll four branch arrows point away from the node, so $i_a+i_b+i_c+i_d=0$."
+          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nAll four branch arrows point away from the node, so % semath-recognition-evidence:start\nHere $i_a$ denotes electric current, $i_b$ denotes electric current, $i_c$ denotes electric current, and $i_d$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states currents obey for $i_a+i_b+i_c+i_d=0$."
         }
       ],
       "mainFileId": "main",
@@ -2237,19 +2237,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kcl-pos-all-entering",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nWith every arrow defined toward the node, the signed currents satisfy \\[j_a+j_b+j_c=0\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nWith every arrow defined toward the node, the signed currents satisfy % semath-recognition-evidence:start\nLet $j_a$ denote electric current, $j_b$ denote electric current, and $j_c$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states currents balance for \\[j_a+j_b+j_c=0\\]."
         }
       ],
       "mainFileId": "main",
@@ -2272,19 +2272,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kcl-pos-explicit-negative",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nThe measured negative branch value is retained in $I_1+(-I_2)+I_3=0$."
+          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nThe measured negative branch value is retained in % semath-recognition-evidence:start\nLet $I_1$, $I_2$, and $I_3$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states conservation for $I_1+(-I_2)+I_3=0$."
         }
       ],
       "mainFileId": "main",
@@ -2307,19 +2307,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kcl-pos-four-way-split",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nAt the distribution node, \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nAt the distribution node, % semath-recognition-evidence:start\nWe write $I_{\\rm feed}$ for electric current. We write $I_1$ for electric current. We write $I_2$ for electric current. We write $I_3$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states terminal currents for \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
         }
       ],
       "mainFileId": "main",
@@ -2343,19 +2343,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-number-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kcl-pos-small-signal",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nFor the transistor terminal currents, the node equation is $i_e=i_b+i_c$."
+          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nFor the transistor terminal currents, the node equation is % semath-recognition-evidence:start\n$i_e$ denotes electric current. $i_b$ denotes electric current. $i_c$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states node for $i_e=i_b+i_c$."
         }
       ],
       "mainFileId": "main",
@@ -2378,19 +2378,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kcl-pos-phasor-balance",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nAt the AC node the phasor currents obey \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nAt the AC node the phasor currents obey % semath-recognition-evidence:start\nHere $\\tilde I_1$ denotes electric current, $\\tilde I_2$ denotes electric current, and $\\tilde I_3$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states junction for \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
         }
       ],
       "mainFileId": "main",
@@ -2413,19 +2413,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kcl-pos-aligned",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe derivation isolates the node row as \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe derivation isolates the node row as % semath-recognition-evidence:start\nLet $I_x$ denote electric current, $I_y$ denote electric current, and $I_z$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states kcl for \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
@@ -2448,19 +2448,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kcl-pos-underbraced-groups",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe flow groups are shown as $\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}$."
+          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe flow groups are shown as % semath-recognition-evidence:start\nLet $I_a$, $I_b$, $I_c$, and $I_d$ denote electric current, electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states branch for $\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}$."
         }
       ],
       "mainFileId": "main",
@@ -2484,19 +2484,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kcl-pos-multi-symbol-prose",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nCurrents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives \\[p+q=r+s\\]."
+          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nCurrents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives % semath-recognition-evidence:start\nWe write $p$ for electric current. We write $q$ for electric current. We write $r$ for electric current. We write $s$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states balance for \\[p+q=r+s\\]."
         }
       ],
       "mainFileId": "main",
@@ -2520,19 +2520,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kcl-pos-unit-context",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nEvery branch quantity is measured in amperes, and the junction balance is $J_0-J_1-J_2=0$."
+          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nEvery branch quantity is measured in amperes, and the junction balance is % semath-recognition-evidence:start\n$J_0$ denotes electric current. $J_1$ denotes electric current. $J_2$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states aggregate for $J_0-J_1-J_2=0$."
         }
       ],
       "mainFileId": "main",
@@ -2555,19 +2555,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kcl-pos-node-label-after",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe equation \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
+          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe equation % semath-recognition-evidence:start\nHere $k_1$ denotes electric current, $k_2$ denotes electric current, and $k_3$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states entering for \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
         }
       ],
       "mainFileId": "main",
@@ -2590,19 +2590,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol-number-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-symbol-number-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kcl-pos-comma-subscripts",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nThe two feeders satisfy $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
+          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nThe two feeders satisfy % semath-recognition-evidence:start\nLet $I_{\\mathrm{in},1}$ denote electric current, $I_{\\mathrm{in},2}$ denote electric current, and $I_{\\mathrm{out}}$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states outgoing for $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
         }
       ],
       "mainFileId": "main",
@@ -2625,19 +2625,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kcl-pos-reference-node",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nRelative to reference node \\(n_0\\), \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
+          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nRelative to reference node \\(n_0\\), % semath-recognition-evidence:start\nLet $i_{n0,1}$, $i_{n0,2}$, and $i_{n0,3}$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states feeders for \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
         }
       ],
       "mainFileId": "main",
@@ -2660,19 +2660,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kcl-pos-macro-branches",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nThe aliased branch currents satisfy $\\InOne+\\InTwo=\\OutOne$."
+          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nThe aliased branch currents satisfy % semath-recognition-evidence:start\nWe write $\\InOne$ for electric current. We write $\\InTwo$ for electric current. We write $\\OutOne$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states flow groups for $\\InOne+\\InTwo=\\OutOne$."
         }
       ],
       "mainFileId": "main",
@@ -2709,19 +2709,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kcl-pos-multifile-declaration",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\n\\input{branches}\nAt node \\(q\\), \\[I_u+I_v=I_w\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\n\\input{branches}\nAt node \\(q\\), % semath-recognition-evidence:start\n$I_u$ denotes electric current. $I_v$ denotes electric current. $I_w$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states reference for \\[I_u+I_v=I_w\\]."
         },
         {
           "fileId": "branches",
@@ -2749,19 +2749,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kcl-pos-multifile-macro",
       "lawId": "kirchhoff-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{node-macros}\nThe node law is $\\Feed=\\LoadA+\\LoadB$."
+          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{node-macros}\nThe node law is % semath-recognition-evidence:start\nHere $\\Feed$ denotes electric current, $\\LoadA$ denotes electric current, and $\\LoadB$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states current splits for $\\Feed=\\LoadA+\\LoadB$."
         },
         {
           "fileId": "node-macros",
@@ -2803,7 +2803,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
@@ -3430,12 +3430,12 @@
     {
       "id": "cap-pos-basic-derivative",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1101. [where clause]\nA grouped symbol is $ {q_{1301}} $.\n\nFor the ideal capacitor, the passive-sign relation is $i=C\\frac{dv}{dt}$."
+          "content": "Suppose the notation is local to this calculation, case 1101. [where clause]\nA grouped symbol is $ {q_{1301}} $.\n\nFor the ideal capacitor, the passive-sign relation is % semath-recognition-evidence:start\nLet $i$ denote electric current, $C$ denote capacitance, $v$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$i=C\\frac{dv}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3459,19 +3459,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cap-pos-element-subscripts",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1102). [we write]\nA styled symbol is $\\mathbf{q}_{1302}$.\n\nThe labeled component obeys \\[I_C=C\\frac{dV_C}{dt}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1102). [we write]\nA styled symbol is $\\mathbf{q}_{1302}$.\n\nThe labeled component obeys % semath-recognition-evidence:start\nLet $I_C$, $C$, $V_C$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[I_C=C\\frac{dV_C}{dt}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3495,19 +3495,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cap-pos-solve-capacitance",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1103. [symbol list]\nAn indexed symbol is $q_{1303}$.\n\nFrom a transient measurement, compute $C=\\frac{i}{dv/dt}$."
+          "content": "As a deliberately unsupported instance, examine relation 1103. [symbol list]\nAn indexed symbol is $q_{1303}$.\n\nFrom a transient measurement, compute % semath-recognition-evidence:start\nWe write $C$ for capacitance. We write $i$ for electric current. We write $v$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n$C=\\frac{i}{dv/dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3531,19 +3531,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cap-pos-solve-slope",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1104). [role first]\n\\newcommand{\\baselineprobe}{q_{1304}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe voltage slope is \\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
+          "content": "No domain interpretation is asserted for the following formula (1104). [role first]\n\\newcommand{\\baselineprobe}{q_{1304}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe voltage slope is % semath-recognition-evidence:start\n$v$ denotes voltage. $t$ denotes duration. $i$ denotes electric current. $C$ denotes capacitance.\n% semath-recognition-evidence:end\n\\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3567,19 +3567,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cap-pos-time-functions",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1105. [suppose that]\nA presentation-only symbol is $q_{1305}$.\n\nWith explicit time dependence, $i(t)=C\\,\\frac{d v(t)}{dt}$."
+          "content": "Consider the following independently stated relation in example 1105. [suppose that]\nA presentation-only symbol is $q_{1305}$.\n\nWith explicit time dependence, % semath-recognition-evidence:start\nHere $i(t)$ denotes electric current, $C$ denotes capacitance, $v(t)$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n$i(t)=C\\,\\frac{d v(t)}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3603,19 +3603,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cap-pos-dot-notation",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1106. [given that]\nA presentation-only symbol follows: \\[q_{1306}\\]\n\nThe same constitutive law in dot notation is \\[i(t)=C\\dot v(t)\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1106. [given that]\nA presentation-only symbol follows: \\[q_{1306}\\]\n\nThe same constitutive law in dot notation is % semath-recognition-evidence:start\nLet $i(t)$ denote electric current, $C$ denote capacitance, $v(t)$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n\\[i(t)=C\\dot v(t)\\]."
         }
       ],
       "mainFileId": "main",
@@ -3639,19 +3639,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cap-pos-phasor-free-dot",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1107). [define as]\n\\begin{equation}q_{1307}\\end{equation}\n\nFor the transient waveform, $I_c=C_c\\dot V_c$."
+          "content": "The next formula is presented without an assumed named law (1107). [define as]\n\\begin{equation}q_{1307}\\end{equation}\n\nFor the transient waveform, % semath-recognition-evidence:start\nLet $I_c$, $C_c$, $V_c$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n$I_c=C_c\\dot V_c$."
         }
       ],
       "mainFileId": "main",
@@ -3675,19 +3675,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cap-pos-product-first",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1108). [in this model]\n\\[\\begin{aligned}q_{1308}\\end{aligned}\\]\n\nThe worksheet writes the derivative product first: \\[C\\,\\frac{dV}{dt}=I\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1108). [in this model]\n\\[\\begin{aligned}q_{1308}\\end{aligned}\\]\n\nThe worksheet writes the derivative product first: % semath-recognition-evidence:start\nWe write $C$ for capacitance. We write $V$ for voltage. We write $t$ for duration. We write $I$ for electric current.\n% semath-recognition-evidence:end\n\\[C\\,\\frac{dV}{dt}=I\\]."
         }
       ],
       "mainFileId": "main",
@@ -3711,19 +3711,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cap-pos-grouped",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1109. [throughout section]\nA grouped symbol is $ {q_{1309}} $.\n\nThe constitutive equation is presented as $(i)=\\left(C\\,dv/dt\\right)$."
+          "content": "Suppose the notation is local to this calculation, case 1109. [throughout section]\nA grouped symbol is $ {q_{1309}} $.\n\nThe constitutive equation is presented as % semath-recognition-evidence:start\n$i$ denotes electric current. $C$ denotes capacitance. $v$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$(i)=\\left(C\\,dv/dt\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -3747,19 +3747,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cap-pos-terminal-pair",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1110). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1310}$.\n\nAcross terminals \\(a,b\\), \\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1110). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1310}$.\n\nAcross terminals \\(a,b\\), % semath-recognition-evidence:start\nHere $i_{ab}$ denotes electric current, $C_{ab}$ denotes capacitance, $v_{ab}$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3783,19 +3783,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cap-pos-declared-before",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1111. [separate sentences]\nAn indexed symbol is $q_{1311}$.\n\nLet \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then $j=K\\,du/dt$."
+          "content": "As a deliberately unsupported instance, examine relation 1111. [separate sentences]\nAn indexed symbol is $q_{1311}$.\n\nLet \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then % semath-recognition-evidence:start\nLet $j$ denote electric current, $K$ denote capacitance, $u$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$j=K\\,du/dt$."
         }
       ],
       "mainFileId": "main",
@@ -3819,19 +3819,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cap-pos-declared-after",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1112). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1312}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe device follows \\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
+          "content": "No domain interpretation is asserted for the following formula (1112). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1312}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe device follows % semath-recognition-evidence:start\nLet $a$, $B$, $e$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
         }
       ],
       "mainFileId": "main",
@@ -3855,19 +3855,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cap-pos-multi-symbol-prose",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1113. [let singular]\nA presentation-only symbol is $q_{1313}$.\n\nCurrent \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; $j_x=K_x\\frac{du_x}{dt}$."
+          "content": "Consider the following independently stated relation in example 1113. [let singular]\nA presentation-only symbol is $q_{1313}$.\n\nCurrent \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; % semath-recognition-evidence:start\nWe write $j_x$ for electric current. We write $K_x$ for capacitance. We write $u_x$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n$j_x=K_x\\frac{du_x}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3891,19 +3891,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cap-pos-macro-voltage",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1114. [let paired]\nA presentation-only symbol follows: \\[q_{1314}\\]\n\nUsing the project voltage alias, the capacitor law is $i=C\\frac{d\\CapV}{dt}$."
+          "content": "For comparison, inspect the displayed expression numbered 1114. [let paired]\nA presentation-only symbol follows: \\[q_{1314}\\]\n\nUsing the project voltage alias, the capacitor law is % semath-recognition-evidence:start\n$i$ denotes electric current. $C$ denotes capacitance. $\\CapV$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$i=C\\frac{d\\CapV}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3933,19 +3933,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cap-pos-macro-all-roles",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1115). [let series]\n\\begin{equation}q_{1315}\\end{equation}\n\nThe aliased transient equation is \\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
+          "content": "The next formula is presented without an assumed named law (1115). [let series]\n\\begin{equation}q_{1315}\\end{equation}\n\nThe aliased transient equation is % semath-recognition-evidence:start\nHere $\\CapI$ denotes electric current, $\\CapC$ denotes capacitance, $\\CapV$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3983,19 +3983,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "macro-context",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cap-pos-aligned",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1116). [respectively]\n\\[\\begin{aligned}q_{1316}\\end{aligned}\\]\n\nThe derivation highlights \\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1116). [respectively]\n\\[\\begin{aligned}q_{1316}\\end{aligned}\\]\n\nThe derivation highlights % semath-recognition-evidence:start\nLet $i_o$ denote electric current, $C_o$ denote capacitance, $v_o$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4019,19 +4019,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cap-pos-boxed",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1117. [where clause]\nA grouped symbol is $ {q_{1317}} $.\n\nThe final capacitor model is \\[\\boxed{I_x=C_x\\dot V_x}\\]."
+          "content": "Suppose the notation is local to this calculation, case 1117. [where clause]\nA grouped symbol is $ {q_{1317}} $.\n\nThe final capacitor model is % semath-recognition-evidence:start\nLet $I_x$, $C_x$, $V_x$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[\\boxed{I_x=C_x\\dot V_x}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4055,19 +4055,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cap-pos-at-time-tau",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1118). [we write]\nA styled symbol is $\\mathbf{q}_{1318}$.\n\nAt the sample instant, \\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1118). [we write]\nA styled symbol is $\\mathbf{q}_{1318}$.\n\nAt the sample instant, % semath-recognition-evidence:start\nWe write $i(\\tau)$ for electric current. We write $C$ for capacitance. We write $v$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n\\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4091,19 +4091,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cap-pos-european-voltage",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1119. [symbol list]\nAn indexed symbol is $q_{1319}$.\n\nUsing \\(u\\) for voltage, the element law is $i_c=C_c\\,du_c/dt$."
+          "content": "As a deliberately unsupported instance, examine relation 1119. [symbol list]\nAn indexed symbol is $q_{1319}$.\n\nUsing \\(u\\) for voltage, the element law is % semath-recognition-evidence:start\n$i_c$ denotes electric current. $C_c$ denotes capacitance. $u_c$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$i_c=C_c\\,du_c/dt$."
         }
       ],
       "mainFileId": "main",
@@ -4127,19 +4127,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cap-pos-current-j",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1120). [role first]\n\\newcommand{\\baselineprobe}{q_{1320}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current symbol \\(j(t)\\) is defined by \\[j(t)=C_s\\dot v_s(t)\\]."
+          "content": "No domain interpretation is asserted for the following formula (1120). [role first]\n\\newcommand{\\baselineprobe}{q_{1320}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current symbol \\(j(t)\\) is defined by % semath-recognition-evidence:start\nHere $j(t)$ denotes electric current, $C_s$ denotes capacitance, $v_s(t)$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[j(t)=C_s\\dot v_s(t)\\]."
         }
       ],
       "mainFileId": "main",
@@ -4163,19 +4163,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cap-pos-capacitance-k",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1121. [suppose that]\nA presentation-only symbol is $q_{1321}$.\n\nFor capacitance \\(K_m\\), the law reads $i_m=K_m\\,v_m'$."
+          "content": "Consider the following independently stated relation in example 1121. [suppose that]\nA presentation-only symbol is $q_{1321}$.\n\nFor capacitance \\(K_m\\), the law reads % semath-recognition-evidence:start\nLet $i_m$ denote electric current, $K_m$ denote capacitance, $v_m$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$i_m=K_m\\,v_m'$."
         }
       ],
       "mainFileId": "main",
@@ -4199,19 +4199,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cap-pos-descriptive-subscripts",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1122. [given that]\nA presentation-only symbol follows: \\[q_{1322}\\]\n\nThe storage element satisfies \\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1122. [given that]\nA presentation-only symbol follows: \\[q_{1322}\\]\n\nThe storage element satisfies % semath-recognition-evidence:start\nLet $I_{\\mathrm{cap}}$, $C_{\\mathrm{cap}}$, $V_{\\mathrm{cap}}$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4235,19 +4235,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "cap-pos-opposite-reference",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1123). [define as]\n\\begin{equation}q_{1323}\\end{equation}\n\nCurrent \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so \\[i_{\\rm out}=-C\\,dv/dt\\]."
+          "content": "The next formula is presented without an assumed named law (1123). [define as]\n\\begin{equation}q_{1323}\\end{equation}\n\nCurrent \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so % semath-recognition-evidence:start\nWe write $i_{\\rm out}$ for electric current. We write $C$ for capacitance. We write $v$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n\\[i_{\\rm out}=-C\\,dv/dt\\]."
         }
       ],
       "mainFileId": "main",
@@ -4271,19 +4271,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "cap-pos-differential-operator",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1124). [in this model]\n\\[\\begin{aligned}q_{1324}\\end{aligned}\\]\n\nWith \\(D_t\\) denoting time differentiation, the model is $i=C D_t v$."
+          "content": "In this local discussion, only the explicit statement below is available (1124). [in this model]\n\\[\\begin{aligned}q_{1324}\\end{aligned}\\]\n\nWith \\(D_t\\) denoting time differentiation, the model is % semath-recognition-evidence:start\n$i$ denotes electric current. $C$ denotes capacitance. $v$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$i=C D_t v$."
         }
       ],
       "mainFileId": "main",
@@ -4307,19 +4307,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "cap-pos-prime-voltage",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1125. [throughout section]\nA grouped symbol is $ {q_{1325}} $.\n\nThe prime denotes differentiation with respect to time in \\[i_q=C_q v_q'\\]."
+          "content": "Suppose the notation is local to this calculation, case 1125. [throughout section]\nA grouped symbol is $ {q_{1325}} $.\n\nThe prime denotes differentiation with respect to time in % semath-recognition-evidence:start\nHere $i_q$ denotes electric current, $C_q$ denotes capacitance, $v_q$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[i_q=C_q v_q'\\]."
         }
       ],
       "mainFileId": "main",
@@ -4343,19 +4343,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "cap-pos-units-context",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1126). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1326}$.\n\nWith capacitance in farads and voltage slope in volts per second, $I_m=C_m\\,dV_m/dt$ yields amperes."
+          "content": "The symbols below have no meaning beyond this standalone example (1126). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1326}$.\n\nWith capacitance in farads and voltage slope in volts per second, % semath-recognition-evidence:start\nLet $I_m$ denote electric current, $C_m$ denote capacitance, $V_m$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$I_m=C_m\\,dV_m/dt$ yields amperes."
         }
       ],
       "mainFileId": "main",
@@ -4379,19 +4379,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "cap-pos-spaced-derivative",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1127. [separate sentences]\nAn indexed symbol is $q_{1327}$.\n\nThe notation deliberately spaces the differential: \\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1127. [separate sentences]\nAn indexed symbol is $q_{1327}$.\n\nThe notation deliberately spaces the differential: % semath-recognition-evidence:start\nLet $i_z$, $C_z$, $v_z$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4415,19 +4415,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "cap-pos-parenthesized-slope",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1128). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1328}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current relation is $i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
+          "content": "No domain interpretation is asserted for the following formula (1128). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1328}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current relation is % semath-recognition-evidence:start\nWe write $i_n$ for electric current. We write $C_n$ for capacitance. We write $v_n$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n$i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -4451,19 +4451,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "cap-pos-multifile-declaration",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1129. [let singular]\nA presentation-only symbol is $q_{1329}$.\n\n\\input{cap-symbols}\nThe element obeys \\[j_f=K_f\\frac{du_f}{dt}\\]."
+          "content": "Consider the following independently stated relation in example 1129. [let singular]\nA presentation-only symbol is $q_{1329}$.\n\n\\input{cap-symbols}\nThe element obeys % semath-recognition-evidence:start\n$j_f$ denotes electric current. $K_f$ denotes capacitance. $u_f$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[j_f=K_f\\frac{du_f}{dt}\\]."
         },
         {
           "fileId": "symbols",
@@ -4492,19 +4492,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "cap-pos-multifile-macro",
       "lawId": "capacitor-current-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1130. [let paired]\nA presentation-only symbol follows: \\[q_{1330}\\]\n\n\\input{cap-notation}\nThe transient law is $\\StoreI=\\StoreC\\dot{\\StoreV}$."
+          "content": "For comparison, inspect the displayed expression numbered 1130. [let paired]\nA presentation-only symbol follows: \\[q_{1330}\\]\n\n\\input{cap-notation}\nThe transient law is % semath-recognition-evidence:start\nHere $\\StoreI$ denotes electric current, $\\StoreC$ denotes capacitance, $\\StoreV$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n$\\StoreI=\\StoreC\\dot{\\StoreV}$."
         },
         {
           "fileId": "notation",
@@ -4547,7 +4547,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },

@@ -61,6 +61,10 @@ const decoder = new TextDecoder();
 const wasm = await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url));
 const wasmArtifactBytes = (await stat(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url)))
   .size;
+const wasmInitStarted = performance.now();
+await init({ module_or_path: wasm });
+const wasmInitMs = performance.now() - wasmInitStarted;
+collectGarbage();
 const rssBefore = residentBytes();
 const coldStarted = performance.now();
 
@@ -88,9 +92,10 @@ const snapshot: ProjectSnapshot = {
   protocolVersion: SEMATH_PROTOCOL_VERSION,
 };
 const initialTransferBytes = encodedLength(snapshot);
+collectGarbage();
+const rssAfterSyntax = residentBytes();
 
 const worker = createWorkerHost(async () => {
-  await init({ module_or_path: wasm });
   return operations(new SemathEngine());
 });
 const engineColdStarted = performance.now();
@@ -99,8 +104,10 @@ const initial = await worker.request<UpdateResult>({
   kind: "reset",
   snapshot,
 });
-const engineColdMs = performance.now() - engineColdStarted;
-const coldMs = performance.now() - coldStarted;
+const engineColdMs = wasmInitMs + performance.now() - engineColdStarted;
+const coldMs = wasmInitMs + performance.now() - coldStarted;
+collectGarbage();
+const rssAfterEngine = residentBytes();
 assertCounters(initial, DOCUMENT_COUNT + 1);
 
 const deltaDurations: number[] = [];
@@ -114,6 +121,10 @@ let currentSource: PerformanceFixtureDocument = sources[0]!;
 let current = documents[1]!;
 
 for (let run = 0; run < DELTA_RUNS; run += 1) {
+  // Keep the memory sample about one edit/query lifecycle. Without collecting
+  // the previous iteration first, Bun's allocator can make this gate count
+  // unreachable transient buffers as retained editor state.
+  collectGarbage();
   inventoryVersion += 1;
   currentSource = editPerformanceDocument(currentSource, run);
 
@@ -140,7 +151,6 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
     kind: "change",
   });
   deltaDurations.push(performance.now() - started);
-  peakRss = Math.max(peakRss, residentBytes());
   if (update.analyzedFileIds.length !== 0) {
     throw new Error("budget comment-only delta performed semantic analysis");
   }
@@ -166,6 +176,7 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
     durations.push(performance.now() - queryStarted);
     queryDurations.set(query.kind, durations);
   }
+  peakRss = Math.max(peakRss, residentBytes());
 }
 
 inventoryVersion += 1;
@@ -247,6 +258,7 @@ if (
   throw new Error("budget incremental and clean rebuild summaries diverged");
 }
 clean.free();
+collectGarbage();
 const rssAfterDispose = residentBytes();
 const retainedRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
 
@@ -279,6 +291,10 @@ const report = {
   peakRssGrowthBytes: peakRssGrowth,
   queryP95ByKind,
   retainedRssGrowthBytes: retainedRssGrowth,
+  rssGrowthByStage: {
+    engineBytes: Math.max(0, rssAfterEngine - rssAfterSyntax),
+    syntaxBytes: Math.max(0, rssAfterSyntax - rssBefore),
+  },
   semanticDeltaMs,
   syntax: {
     bytesPerNode:
@@ -301,6 +317,7 @@ const report = {
   },
   transferBytes: maxTransferBytes,
   wasmArtifactBytes,
+  wasmInitMs,
 };
 console.log(`budget metrics: ${JSON.stringify(report)}`);
 const reportPath = process.env.SEMATH_BUDGET_REPORT;
@@ -454,6 +471,10 @@ function residentBytes(): number {
     }
   }
   throw new Error("unable to read resident memory after interrupted system calls");
+}
+
+function collectGarbage(): void {
+  Bun.gc(true);
 }
 
 function assertCounters(update: UpdateResult, analyzedDocuments: number) {

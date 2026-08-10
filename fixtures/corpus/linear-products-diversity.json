@@ -11,23 +11,23 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-01",
+      "id": "synthetic-matrix-matrix-product-recognized-01",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -50,12 +50,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -65,13 +65,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-02",
+      "id": "synthetic-matrix-matrix-product-recognized-02",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -96,12 +96,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -111,13 +111,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-03",
+      "id": "synthetic-matrix-matrix-product-recognized-03",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -141,12 +141,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -156,13 +156,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-04",
+      "id": "synthetic-matrix-matrix-product-recognized-04",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -186,12 +186,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -201,13 +201,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-05",
+      "id": "synthetic-matrix-matrix-product-recognized-05",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -231,23 +231,23 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-06",
+      "id": "synthetic-matrix-matrix-product-recognized-06",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -270,12 +270,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -285,13 +285,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-07",
+      "id": "synthetic-matrix-matrix-product-recognized-07",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -315,12 +315,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -330,13 +330,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-08",
+      "id": "synthetic-matrix-matrix-product-recognized-08",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -360,12 +360,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -375,13 +375,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-09",
+      "id": "synthetic-matrix-matrix-product-recognized-09",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -405,12 +405,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -420,13 +420,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-10",
+      "id": "synthetic-matrix-matrix-product-recognized-10",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -450,23 +450,23 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-11",
+      "id": "synthetic-matrix-matrix-product-recognized-11",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -489,12 +489,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -504,13 +504,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-12",
+      "id": "synthetic-matrix-matrix-product-recognized-12",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -535,12 +535,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -550,13 +550,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-13",
+      "id": "synthetic-matrix-matrix-product-recognized-13",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -580,23 +580,23 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-14",
+      "id": "synthetic-matrix-matrix-product-recognized-14",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -619,12 +619,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -634,13 +634,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-15",
+      "id": "synthetic-matrix-matrix-product-recognized-15",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -664,12 +664,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -679,13 +679,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-16",
+      "id": "synthetic-matrix-matrix-product-recognized-16",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -709,12 +709,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -724,13 +724,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-17",
+      "id": "synthetic-matrix-matrix-product-recognized-17",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -754,12 +754,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -769,13 +769,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-18",
+      "id": "synthetic-matrix-matrix-product-recognized-18",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -799,23 +799,23 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-19",
+      "id": "synthetic-matrix-matrix-product-recognized-19",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -838,12 +838,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -853,13 +853,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-20",
+      "id": "synthetic-matrix-matrix-product-recognized-20",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -883,12 +883,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -898,13 +898,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-21",
+      "id": "synthetic-matrix-matrix-product-recognized-21",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -928,12 +928,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -943,13 +943,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-22",
+      "id": "synthetic-matrix-matrix-product-recognized-22",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -974,12 +974,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -989,13 +989,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-23",
+      "id": "synthetic-matrix-matrix-product-recognized-23",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1019,12 +1019,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1034,13 +1034,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-24",
+      "id": "synthetic-matrix-matrix-product-recognized-24",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1064,12 +1064,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1079,13 +1079,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-25",
+      "id": "synthetic-matrix-matrix-product-recognized-25",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1109,12 +1109,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1124,13 +1124,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-26",
+      "id": "synthetic-matrix-matrix-product-recognized-26",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1154,23 +1154,23 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-27",
+      "id": "synthetic-matrix-matrix-product-recognized-27",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1193,12 +1193,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1208,13 +1208,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-28",
+      "id": "synthetic-matrix-matrix-product-recognized-28",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1238,12 +1238,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1253,13 +1253,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-29",
+      "id": "synthetic-matrix-matrix-product-recognized-29",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1283,12 +1283,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1298,13 +1298,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-30",
+      "id": "synthetic-matrix-matrix-product-recognized-30",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1328,12 +1328,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1343,13 +1343,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-31",
+      "id": "synthetic-matrix-matrix-product-recognized-31",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1373,23 +1373,23 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-32",
+      "id": "synthetic-matrix-matrix-product-recognized-32",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1413,12 +1413,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1428,13 +1428,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-33",
+      "id": "synthetic-matrix-matrix-product-recognized-33",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1458,12 +1458,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1473,13 +1473,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-34",
+      "id": "synthetic-matrix-matrix-product-recognized-34",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1503,23 +1503,23 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-35",
+      "id": "synthetic-matrix-matrix-product-recognized-35",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1542,12 +1542,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1557,13 +1557,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-36",
+      "id": "synthetic-matrix-matrix-product-recognized-36",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1587,12 +1587,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1602,13 +1602,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-37",
+      "id": "synthetic-matrix-matrix-product-recognized-37",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1632,12 +1632,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1647,13 +1647,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-38",
+      "id": "synthetic-matrix-matrix-product-recognized-38",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1677,12 +1677,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1692,13 +1692,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-39",
+      "id": "synthetic-matrix-matrix-product-recognized-39",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1722,23 +1722,23 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. $Y = M \\, N$",
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $M$ be a q by r matrix, $N$ an r by s matrix, and $Y$ a q by s matrix. % semath-recognition-evidence:start\nLet $Y$, $M$, and $N$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$Y = M \\, N$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Y",
         "left": "M",
         "right": "N"
       },
-      "id": "synthetic-matrix-matrix-product-established-40",
+      "id": "synthetic-matrix-matrix-product-recognized-40",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1761,12 +1761,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1776,13 +1776,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-41",
+      "id": "synthetic-matrix-matrix-product-recognized-41",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1806,12 +1806,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1821,13 +1821,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-42",
+      "id": "synthetic-matrix-matrix-product-recognized-42",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1852,12 +1852,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. $E F = D$",
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $E$, $F$, and $D$ be compatible matrices. % semath-recognition-evidence:start\n$D$ denotes linear operator matrix. $E$ denotes linear operator matrix. $F$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$E F = D$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1867,13 +1867,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "D",
         "left": "E",
         "right": "F"
       },
-      "id": "synthetic-matrix-matrix-product-established-43",
+      "id": "synthetic-matrix-matrix-product-recognized-43",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1897,12 +1897,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1912,13 +1912,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-44",
+      "id": "synthetic-matrix-matrix-product-recognized-44",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1942,12 +1942,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1957,13 +1957,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-45",
+      "id": "synthetic-matrix-matrix-product-recognized-45",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -1987,12 +1987,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=AB$",
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. % semath-recognition-evidence:start\nLet $C$ denote linear operator matrix, $A$ denote linear operator matrix, and $B$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$C=AB$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2002,13 +2002,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "C",
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-matrix-matrix-product-established-46",
+      "id": "synthetic-matrix-matrix-product-recognized-46",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -2032,12 +2032,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. $Q=(R S)$",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $R$, $S$, and $Q$ be compatible matrices. % semath-recognition-evidence:start\nWe write $Q$ for linear operator matrix. We write $R$ for linear operator matrix. We write $S$ for linear operator matrix.\n% semath-recognition-evidence:end\n$Q=(R S)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2047,13 +2047,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "Q",
         "left": "R",
         "right": "S"
       },
-      "id": "synthetic-matrix-matrix-product-established-47",
+      "id": "synthetic-matrix-matrix-product-recognized-47",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -2077,23 +2077,23 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. $\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an a by b matrix, $V$ a b by c matrix, and $W$ an a by c matrix. % semath-recognition-evidence:start\nHere $W$ denotes linear operator matrix, $U$ denotes linear operator matrix, and $V$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{W}=\\mathbf{U}\\mathbf{V}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "W",
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-matrix-matrix-product-established-48",
+      "id": "synthetic-matrix-matrix-product-recognized-48",
       "lawId": "matrix-matrix-product",
       "variationTags": [
         "conventional-notation",
@@ -3363,22 +3363,22 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-01",
+      "id": "synthetic-matrix-transpose-definition-recognized-01",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3401,12 +3401,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3416,12 +3416,12 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-02",
+      "id": "synthetic-matrix-transpose-definition-recognized-02",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3446,12 +3446,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3461,12 +3461,12 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-03",
+      "id": "synthetic-matrix-transpose-definition-recognized-03",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3490,12 +3490,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3505,12 +3505,12 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-04",
+      "id": "synthetic-matrix-transpose-definition-recognized-04",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3534,12 +3534,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3549,12 +3549,12 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-05",
+      "id": "synthetic-matrix-transpose-definition-recognized-05",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3578,22 +3578,22 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-06",
+      "id": "synthetic-matrix-transpose-definition-recognized-06",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3616,12 +3616,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3631,12 +3631,12 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-07",
+      "id": "synthetic-matrix-transpose-definition-recognized-07",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3660,12 +3660,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3675,12 +3675,12 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-08",
+      "id": "synthetic-matrix-transpose-definition-recognized-08",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3704,12 +3704,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3719,12 +3719,12 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-09",
+      "id": "synthetic-matrix-transpose-definition-recognized-09",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3748,12 +3748,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3763,12 +3763,12 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-10",
+      "id": "synthetic-matrix-transpose-definition-recognized-10",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3792,22 +3792,22 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-11",
+      "id": "synthetic-matrix-transpose-definition-recognized-11",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3830,12 +3830,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3845,12 +3845,12 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-12",
+      "id": "synthetic-matrix-transpose-definition-recognized-12",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3875,12 +3875,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3890,12 +3890,12 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-13",
+      "id": "synthetic-matrix-transpose-definition-recognized-13",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3919,22 +3919,22 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-14",
+      "id": "synthetic-matrix-transpose-definition-recognized-14",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -3957,12 +3957,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3972,12 +3972,12 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-15",
+      "id": "synthetic-matrix-transpose-definition-recognized-15",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4001,12 +4001,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4016,12 +4016,12 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-16",
+      "id": "synthetic-matrix-transpose-definition-recognized-16",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4045,12 +4045,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4060,12 +4060,12 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-17",
+      "id": "synthetic-matrix-transpose-definition-recognized-17",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4089,12 +4089,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4104,12 +4104,12 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-18",
+      "id": "synthetic-matrix-transpose-definition-recognized-18",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4133,22 +4133,22 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-19",
+      "id": "synthetic-matrix-transpose-definition-recognized-19",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4171,12 +4171,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4186,12 +4186,12 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-20",
+      "id": "synthetic-matrix-transpose-definition-recognized-20",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4215,12 +4215,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4230,12 +4230,12 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-21",
+      "id": "synthetic-matrix-transpose-definition-recognized-21",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4259,12 +4259,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4274,12 +4274,12 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-22",
+      "id": "synthetic-matrix-transpose-definition-recognized-22",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4304,12 +4304,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4319,12 +4319,12 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-23",
+      "id": "synthetic-matrix-transpose-definition-recognized-23",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4348,12 +4348,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4363,12 +4363,12 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-24",
+      "id": "synthetic-matrix-transpose-definition-recognized-24",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4392,12 +4392,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4407,12 +4407,12 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-25",
+      "id": "synthetic-matrix-transpose-definition-recognized-25",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4436,12 +4436,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4451,12 +4451,12 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-26",
+      "id": "synthetic-matrix-transpose-definition-recognized-26",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4480,22 +4480,22 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-27",
+      "id": "synthetic-matrix-transpose-definition-recognized-27",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4518,12 +4518,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4533,12 +4533,12 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-28",
+      "id": "synthetic-matrix-transpose-definition-recognized-28",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4562,12 +4562,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4577,12 +4577,12 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-29",
+      "id": "synthetic-matrix-transpose-definition-recognized-29",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4606,12 +4606,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4621,12 +4621,12 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-30",
+      "id": "synthetic-matrix-transpose-definition-recognized-30",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4650,12 +4650,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4665,12 +4665,12 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-31",
+      "id": "synthetic-matrix-transpose-definition-recognized-31",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4694,22 +4694,22 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-32",
+      "id": "synthetic-matrix-transpose-definition-recognized-32",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4733,12 +4733,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4748,12 +4748,12 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-33",
+      "id": "synthetic-matrix-transpose-definition-recognized-33",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4777,12 +4777,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4792,12 +4792,12 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-34",
+      "id": "synthetic-matrix-transpose-definition-recognized-34",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4821,22 +4821,22 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-35",
+      "id": "synthetic-matrix-transpose-definition-recognized-35",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4859,12 +4859,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4874,12 +4874,12 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-36",
+      "id": "synthetic-matrix-transpose-definition-recognized-36",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4903,12 +4903,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4918,12 +4918,12 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-37",
+      "id": "synthetic-matrix-transpose-definition-recognized-37",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4947,12 +4947,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4962,12 +4962,12 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-38",
+      "id": "synthetic-matrix-transpose-definition-recognized-38",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -4991,12 +4991,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5006,12 +5006,12 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-39",
+      "id": "synthetic-matrix-transpose-definition-recognized-39",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5035,22 +5035,22 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies $N=M^{\\top}$",
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $M$ and $N$ be matrices. The transposed matrix satisfies % semath-recognition-evidence:start\nLet $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively.\n% semath-recognition-evidence:end\n$N=M^{\\top}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "N",
         "operator": "M"
       },
-      "id": "synthetic-matrix-transpose-definition-established-40",
+      "id": "synthetic-matrix-transpose-definition-recognized-40",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5073,12 +5073,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5088,12 +5088,12 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-41",
+      "id": "synthetic-matrix-transpose-definition-recognized-41",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5117,12 +5117,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5132,12 +5132,12 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-42",
+      "id": "synthetic-matrix-transpose-definition-recognized-42",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5162,12 +5162,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is $U^T=V$",
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $U$ and $V$ be matrices. The transpose relation is % semath-recognition-evidence:start\n$V$ denotes linear operator matrix. $U$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$U^T=V$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5177,12 +5177,12 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "V",
         "operator": "U"
       },
-      "id": "synthetic-matrix-transpose-definition-established-43",
+      "id": "synthetic-matrix-transpose-definition-recognized-43",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5206,12 +5206,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5221,12 +5221,12 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-44",
+      "id": "synthetic-matrix-transpose-definition-recognized-44",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5250,12 +5250,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5265,12 +5265,12 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-45",
+      "id": "synthetic-matrix-transpose-definition-recognized-45",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5294,12 +5294,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is $B=A^T$",
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $A$ be an m by n matrix and $B$ an n by m matrix. The matrix transpose is % semath-recognition-evidence:start\nLet $B$ denote linear operator matrix and $A$ denote linear operator matrix.\n% semath-recognition-evidence:end\n$B=A^T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5309,12 +5309,12 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "B",
         "operator": "A"
       },
-      "id": "synthetic-matrix-transpose-definition-established-46",
+      "id": "synthetic-matrix-transpose-definition-recognized-46",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5338,12 +5338,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives $S=R^{\\intercal}$",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $R$ and $S$ be matrices. Matrix transpose notation gives % semath-recognition-evidence:start\nWe write $S$ for linear operator matrix. We write $R$ for linear operator matrix.\n% semath-recognition-evidence:end\n$S=R^{\\intercal}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5353,12 +5353,12 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "S",
         "operator": "R"
       },
-      "id": "synthetic-matrix-transpose-definition-established-47",
+      "id": "synthetic-matrix-transpose-definition-recognized-47",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",
@@ -5382,22 +5382,22 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is $\\mathbf{L}=\\mathbf{K}^{T}$",
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $K$ and $L$ be square matrices. The transposed matrix is % semath-recognition-evidence:start\nHere $L$ denotes linear operator matrix and $K$ denotes linear operator matrix.\n% semath-recognition-evidence:end\n$\\mathbf{L}=\\mathbf{K}^{T}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "result": "L",
         "operator": "K"
       },
-      "id": "synthetic-matrix-transpose-definition-established-48",
+      "id": "synthetic-matrix-transpose-definition-recognized-48",
       "lawId": "matrix-transpose-definition",
       "variationTags": [
         "conventional-notation",

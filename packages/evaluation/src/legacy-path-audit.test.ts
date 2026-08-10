@@ -19,7 +19,11 @@ describe("legacy semantic path audit", () => {
   test("returns findings in the reviewed ownership order", () => {
     const sources: Record<string, string> = {};
     for (const rule of LEGACY_SEMANTIC_PATHS) {
-      sources[rule.path] = `${sources[rule.path] ?? ""}\n${rule.markers.join("\n")}`;
+      const signature =
+        "scopeStart" in rule
+          ? `${rule.scopeStart}\n${rule.markers.join("\n")}${rule.scopeEnd}`
+          : rule.markers.join("\n");
+      sources[rule.path] = `${sources[rule.path] ?? ""}\n${signature}`;
     }
     expect(auditLegacySemanticPaths(sources).map((finding) => finding.id)).toEqual(
       LEGACY_SEMANTIC_PATHS.map((rule) => rule.id),

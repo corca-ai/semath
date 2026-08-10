@@ -496,7 +496,6 @@ pub(crate) fn observe_laws(
                     quantities,
                     consistency,
                     external,
-                    true,
                 );
                 let typed = expression_is_well_typed(actual, shapes);
                 supported && typed
@@ -671,9 +670,7 @@ fn expression_shape(expression: &SemanticExpr, shapes: &ShapeObservations) -> Sh
             ShapeInference::Known(_) | ShapeInference::Invalid => ShapeInference::Invalid,
             ShapeInference::Unknown => ShapeInference::Unknown,
         },
-        SemanticExprKind::Sum(terms) => {
-            combine_equal_shapes(terms.iter().map(|term| expression_shape(term, shapes)))
-        }
+        SemanticExprKind::Sum(terms) => additive_shape(terms, shapes),
         SemanticExprKind::Product(factors) => factors.iter().fold(
             ShapeInference::Known(vec!["scalar".into()]),
             |left, right| combine_product_shapes(left, expression_shape(right, shapes)),
@@ -764,11 +761,40 @@ fn expression_shape(expression: &SemanticExpr, shapes: &ShapeObservations) -> Sh
             .map_or(ShapeInference::Unknown, |argument| {
                 expression_shape(argument, shapes)
             }),
-        SemanticExprKind::Relation { left, right, .. } => combine_equal_shapes([
-            expression_shape(left, shapes),
-            expression_shape(right, shapes),
-        ]),
+        SemanticExprKind::Relation { left, right, .. } => {
+            if is_additive_zero(left) {
+                expression_shape(right, shapes)
+            } else if is_additive_zero(right) {
+                expression_shape(left, shapes)
+            } else {
+                combine_equal_shapes([
+                    expression_shape(left, shapes),
+                    expression_shape(right, shapes),
+                ])
+            }
+        }
         _ => ShapeInference::Unknown,
+    }
+}
+
+fn additive_shape(terms: &[SemanticExpr], shapes: &ShapeObservations) -> ShapeInference {
+    let nonzero = terms
+        .iter()
+        .filter(|term| !is_additive_zero(term))
+        .map(|term| expression_shape(term, shapes))
+        .collect::<Vec<_>>();
+    if nonzero.is_empty() {
+        ShapeInference::Known(vec!["scalar".into()])
+    } else {
+        combine_equal_shapes(nonzero)
+    }
+}
+
+fn is_additive_zero(expression: &SemanticExpr) -> bool {
+    match &expression.kind {
+        SemanticExprKind::Number(value) => value == "0",
+        SemanticExprKind::Negate(inner) => is_additive_zero(inner),
+        _ => false,
     }
 }
 
@@ -1439,7 +1465,6 @@ fn roles_are_supported(
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
-    notation_enabled: bool,
 ) -> bool {
     roles.iter().all(|role| {
         bindings.get(&role.id).is_some_and(|expression| {
@@ -1455,7 +1480,6 @@ fn roles_are_supported(
                         quantities,
                         consistency,
                         external,
-                        notation_enabled,
                     )
                 })
         })
@@ -1482,19 +1506,16 @@ fn role_symbol_is_supported(
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
-    notation_enabled: bool,
 ) -> bool {
     let notation_symbol = symbol.split('_').next().unwrap_or(symbol);
     if let Some(quantity) = role.quantity.as_deref()
         && !quantity_is_supported(
             quantity,
-            role,
             symbol,
             notation_symbol,
             offset,
             quantities,
             external,
-            notation_enabled,
         )
     {
         return false;
@@ -1533,9 +1554,9 @@ fn role_symbol_is_supported(
         {
             Some(shape) if shape.kind != expected_shape => return false,
             Some(_) => {}
-            None if !(role.concept.starts_with("quantities-units:")
-                || external.has_shape(offset, symbol, expected_shape)
-                || notation_enabled && notation_matches(&role.notation, notation_symbol)) =>
+            None if !(role.quantity.is_some()
+                || role.concept.starts_with("quantities-units:")
+                || external.has_shape(offset, symbol, expected_shape)) =>
             {
                 return false;
             }
@@ -1548,21 +1569,18 @@ fn role_symbol_is_supported(
     if role.concept.starts_with("quantities-units:") {
         return quantity_is_supported(
             &role.concept,
-            role,
             symbol,
             notation_symbol,
             offset,
             quantities,
             external,
-            notation_enabled,
         );
     }
     if role.concept == "linear-algebra:linear-operator" {
         return shapes
             .shape_at(symbol, offset)
             .is_some_and(|shape| shape.kind == "matrix")
-            || external.has_shape(offset, symbol, "matrix")
-            || (notation_enabled && notation_matches(&role.notation, notation_symbol));
+            || external.has_shape(offset, symbol, "matrix");
     }
     consistency
         .roles_at(symbol, offset)
@@ -1570,7 +1588,6 @@ fn role_symbol_is_supported(
         .iter()
         .any(|claim| claim.concept_id == role.concept)
         || external.has_role(offset, symbol, &role.concept)
-        || (notation_enabled && notation_matches(&role.notation, notation_symbol))
 }
 
 fn concepts_are_comparable(left: &str, right: &str) -> bool {
@@ -1585,13 +1602,11 @@ fn concepts_are_comparable(left: &str, right: &str) -> bool {
 #[allow(clippy::too_many_arguments)]
 fn quantity_is_supported(
     expected: &str,
-    role: &PackLawRole,
     symbol: &str,
     notation_symbol: &str,
     offset: u32,
     quantities: &QuantityObservations,
     external: &ExternalTypeEnvironment,
-    notation_enabled: bool,
 ) -> bool {
     let mut local = quantities.at(symbol, offset).0;
     if notation_symbol != symbol {
@@ -1602,25 +1617,9 @@ fn quantity_is_supported(
             .iter()
             .filter_map(|quantity| quantity.quantity_kind_id.as_deref())
             .collect::<Vec<_>>();
-        return if declared.is_empty() {
-            notation_enabled && notation_matches(&role.notation, notation_symbol)
-        } else {
-            declared.iter().all(|kind| *kind == expected)
-        };
+        return !declared.is_empty() && declared.iter().all(|kind| *kind == expected);
     }
     external.has_quantity(offset, symbol, expected)
-        || (notation_enabled && notation_matches(&role.notation, notation_symbol))
-}
-
-fn notation_matches(notation: &[String], symbol: &str) -> bool {
-    let normalized = symbol.replace(['\\', '{', '}', ' '], "");
-    notation.iter().any(|candidate| {
-        let candidate = candidate.replace(['\\', '{', '}', ' '], "");
-        normalized == candidate
-            || normalized
-                .strip_prefix(&candidate)
-                .is_some_and(|suffix| suffix.starts_with('_') || suffix.starts_with('('))
-    })
 }
 
 fn recognition(
@@ -2099,17 +2098,19 @@ mod tests {
     }
 
     #[test]
-    fn conventional_circuit_notation_is_typed_by_the_pack() {
-        assert_eq!(
-            recognized_laws("The asserted device law is \\[(V)=(R\\,I)\\]."),
-            ["ohm-law"]
+    fn conventional_notation_without_typed_evidence_is_refused() {
+        assert!(recognized_laws("The asserted device law is \\[(V)=(R\\,I)\\].").is_empty());
+        assert!(
+            recognized_laws(
+                "Let $x$ and $u$ be vectors and $A$ and $B$ matrices. $\\dot{x}=Ax+Bu$",
+            )
+            .is_empty()
         );
     }
 
     #[test]
     fn a_capacitor_refusal_can_still_be_a_valid_resistor_law() {
-        let source =
-            "The equation $i=V/R$ is a resistor current law, not a capacitor derivative law.";
+        let source = "Let $i$ denote electric current, $V$ voltage, and $R$ resistance. The equation $i=V/R$ is a resistor current law, not a capacitor derivative law.";
         assert_eq!(recognized_laws(source), ["ohm-law"]);
     }
 
@@ -2152,7 +2153,7 @@ mod tests {
 
     #[test]
     fn recognizes_a_typed_continuous_state_equation() {
-        let source = "Let $x$ be an n-dimensional vector. Let $u$ be an m-dimensional vector. Let $A$ be an n by n matrix. Let $B$ be an n by m matrix. $\\dot{x}=Ax+Bu$";
+        let source = "Let $x$ be an n-dimensional state vector. Let $u$ be an m-dimensional control input vector. Let $A$ be an n by n state matrix. Let $B$ be an n by m input matrix. $\\dot{x}=Ax+Bu$";
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             file_id: "main".into(),
@@ -2189,13 +2190,13 @@ mod tests {
 
     #[test]
     fn recognizes_coordinated_state_space_declarations() {
-        let source = "Let $x$ be an $n$-dimensional state vector, $u$ an $m$-dimensional control vector, $A$ an $n$ by $n$ matrix, and $B$ an $n$ by $m$ matrix. $\\dot{x}=Ax+Bu$";
+        let source = "Let $x$ be an $n$-dimensional state vector, $u$ an $m$-dimensional control input vector, $A$ an $n$ by $n$ state matrix, and $B$ an $n$ by $m$ input matrix. $\\dot{x}=Ax+Bu$";
         assert_eq!(recognized_laws(source), ["continuous-state-equation"]);
     }
 
     #[test]
     fn recognizes_symbolic_state_space_declarations() {
-        let source = "In a continuous state-space model, $z\\in\\mathbb R^p$, $v\\in\\mathbb R^r$, $F\\in\\mathbb R^{p\\times p}$, and $G\\in\\mathbb R^{p\\times r}$. $\\dot{z} = Fz + Gv$.";
+        let source = "In a continuous state-space model, $z\\in\\mathbb R^p$, $v\\in\\mathbb R^r$, $F\\in\\mathbb R^{p\\times p}$, and $G\\in\\mathbb R^{p\\times r}$. Here $z$ denotes the state, $v$ the control input, $F$ the state matrix, and $G$ the input matrix. $\\dot{z} = Fz + Gv$.";
         assert_eq!(recognized_laws(source), ["continuous-state-equation"]);
     }
 
@@ -2215,7 +2216,7 @@ mod tests {
                 "newton-second-law",
             ),
             (
-                "During the coasting interval, $K_{e07}$ is measured in joules, $m_{e07}$ in kilograms, and $v_{e07}$ in metres per second. The definition gives $$K_{e07}=\\frac12m_{e07}v_{e07}^{2}$$",
+                "During the coasting interval, $K_{e07}$ is measured in joules, $m_{e07}$ in kilograms, and $v_{e07}$ in metres per second. Here $K_{e07}$ denotes kinetic energy, $m_{e07}$ mass, and $v_{e07}$ velocity. The definition gives $$K_{e07}=\\frac12m_{e07}v_{e07}^{2}$$",
                 "kinetic-energy-definition",
             ),
             (
@@ -2228,22 +2229,22 @@ mod tests {
     }
 
     #[test]
-    fn recognizes_foundation_cases_with_membership_units_and_trailing_roles() {
+    fn recognizes_foundation_cases_with_membership_units_and_source_ordered_roles() {
         for (source, expected) in [
             (
-                "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n\\[\\dot{a}=F_a a+G_a b\\]",
+                "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$. Here $a$ denotes the state, $b$ the control input, $F_a$ the state matrix, and $G_a$ the input matrix.\n\\[\\dot{a}=F_a a+G_a b\\]",
                 "continuous-state-equation",
             ),
             (
-                "The vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n\\[\\dot{\\rho}=U\\rho+V\\sigma\\]",
+                "Let $\\rho\\in\\mathbb R^n$, $\\sigma\\in\\mathbb R^m$, $U\\in\\mathbb R^{n\\times n}$, and $V\\in\\mathbb R^{n\\times m}$. We write $\\rho$ for state vector. We write $\\sigma$ for control input vector. We write $U$ for state matrix. We write $V$ for input matrix.\n\\[\\dot{\\rho}=U\\rho+V\\sigma\\]",
                 "continuous-state-equation",
             ),
             (
-                "During steady translation, $P$ is measured in watts, $F$ in newtons, and $v$ in metres per second along the force. Thus \\[P=F\\,v\\]",
+                "During steady translation, $P$ is measured in watts, $F$ in newtons, and $v$ in metres per second. Here $P$ denotes power, $F$ force, and $v$ velocity. Thus \\[P=F\\,v\\]",
                 "mechanical-power",
             ),
             (
-                "The calculation shows \\[K=\\tfrac{1}{2}m(v)^{2}\\] The notation note identifies $K$ as kinetic energy, $m$ as mass, and $v$ as speed.",
+                "Here $K$ denotes kinetic energy, $m$ denotes mass, and $v$ denotes speed. The calculation shows \\[K=\\tfrac{1}{2}m(v)^{2}\\]",
                 "kinetic-energy-definition",
             ),
         ] {
@@ -2253,7 +2254,7 @@ mod tests {
 
     #[test]
     fn recognizes_grouped_subscripted_state_equation() {
-        let source = "Let $s_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$.\n\\[\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)\\]";
+        let source = "Let $s_1\\in\\mathbb R^d$, $v_1\\in\\mathbb R^c$, $K_1\\in\\mathbb R^{d\\times d}$, and $L_1\\in\\mathbb R^{d\\times c}$. Here $s_1$ denotes the state, $v_1$ the control input, $K_1$ the state matrix, and $L_1$ the input matrix.\n\\[\\dot{s_1}=\\left(K_1s_1\\right)+\\left(L_1v_1\\right)\\]";
         assert_eq!(recognized_laws(source), ["continuous-state-equation"]);
     }
 
@@ -2310,7 +2311,7 @@ mod tests {
                 "event-union",
             ),
             (
-                "This example states a first derivative. Let $f$ be a function of $x$, and let $g$ denote its first derivative. $g=\\frac{d f}{d x}$",
+                "This example states a first derivative. Let $f$ be a function of $x$, $x$ the differentiation variable, and $g$ its first derivative. $g=\\frac{d f}{d x}$",
                 "first-derivative-relation",
             ),
             (
@@ -2322,7 +2323,7 @@ mod tests {
                 "set-union",
             ),
             (
-                "This example states a gradient descent update. In a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+                "This example states a gradient descent update. Let $y$, $x$, $\\alpha$, and $g$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively. $y=x-\\alpha g$",
                 "gradient-descent-update",
             ),
         ] {
@@ -2350,15 +2351,15 @@ mod tests {
                 "linear-output-equation",
             ),
             (
-                "Let $C$, $P_c$, and $Q_c$ be $n\\times n$ matrices. $\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c$",
+                "Let $C$, $P_c$, and $Q_c$ be $n\\times n$ matrices. We write $C$ for state matrix. We write $P_c$ for Lyapunov certificate matrix. We write $Q_c$ for forcing matrix. $\\left(C^\\top P_c\\right)+\\left(P_cC\\right)=-Q_c$",
                 "continuous-lyapunov-equation",
             ),
             (
-                "For Angular frequency, let $w$ denote angular frequency scalar, $p$ denote pi scalar, and $f$ denote frequency scalar. $w=2pf$",
+                "For Angular frequency, let $w$ denote angular frequency scalar, $p$ denote the circle constant pi scalar, and $f$ denote cyclic frequency scalar. $w=2pf$",
                 "angular-frequency-definition",
             ),
             (
-                "Wave propagation uses $v=f\\lambda$.",
+                "For wave propagation, let $v$ denote wave speed, $f$ cyclic frequency, and $\\lambda$ wavelength. Then $v=f\\lambda$.",
                 "wave-speed-relation",
             ),
             (
@@ -2370,7 +2371,7 @@ mod tests {
                 "wave-speed-relation",
             ),
             (
-                "For Electric force, let $F$ denote force vector, $q$ denote charge scalar, and $E$ denote electric field vector. $F=qE$",
+                "For Electric force, let $F$ denote force vector, $q$ denote electric charge scalar, and $E$ denote electric field vector. $F=qE$",
                 "electric-force-law",
             ),
             (
@@ -2379,6 +2380,10 @@ mod tests {
             ),
             (
                 "For Sensible heat, let $Q$ denote heat transfer scalar, $m$ denote mass scalar, $c$ denote specific heat scalar, and $T$ denote temperature change scalar. $Q=mcT$",
+                "sensible-heat-relation",
+            ),
+            (
+                "Let $h$ be heat transfer, $m$ mass, $s$ specific heat, and $d$ temperature change. Then $h=msd$.",
                 "sensible-heat-relation",
             ),
             (
@@ -2399,9 +2404,15 @@ mod tests {
     }
 
     #[test]
+    fn recognizes_typed_zero_balance_lyapunov_form() {
+        let source = "Let $B$ be a state matrix, $L_b$ a Lyapunov certificate matrix, and $N_b$ a forcing matrix. $0=B^\\top L_b+L_bB+N_b$";
+        assert_eq!(recognized_laws(source), ["continuous-lyapunov-equation"]);
+    }
+
+    #[test]
     fn resolves_typed_conditions_to_bound_symbols_and_source_evidence() {
         let derivative = recognized_law_observations(
-            "This example states a first derivative. Let $f$ be a function of $x$, and let $g$ denote its first derivative. $g=\\frac{d f}{d x}$",
+            "This example states a first derivative. Let $f$ be a function of $x$, $x$ the differentiation variable, and $g$ its first derivative. $g=\\frac{d f}{d x}$",
         );
         let condition = &derivative[0].conditions[0];
         assert_eq!(condition.condition_id, "function-differentiable");

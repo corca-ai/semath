@@ -11,17 +11,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ and $B$ denote events. $A\\cup B$",
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ and $B$ denote events. % semath-recognition-evidence:start\nLet $A$ denote event and $B$ denote event.\n% semath-recognition-evidence:end\n$A\\cup B$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
@@ -46,17 +46,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $E$ be an event and $F$ another event. $E \\cup F$",
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $E$ be an event and $F$ another event. % semath-recognition-evidence:start\nLet $E$ and $F$ denote event and event, respectively.\n% semath-recognition-evidence:end\n$E \\cup F$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "E",
         "right": "F"
@@ -81,17 +81,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $G$ and $H$ represent events. ${G}\\cup{H}$",
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $G$ and $H$ represent events. % semath-recognition-evidence:start\nWe write $G$ for event. We write $H$ for event.\n% semath-recognition-evidence:end\n${G}\\cup{H}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "G",
         "right": "H"
@@ -116,17 +116,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $U$ and $V$ be events. The event union is $V\\cup U$",
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $U$ and $V$ be events. The event union is % semath-recognition-evidence:start\n$V$ denotes event. $U$ denotes event.\n% semath-recognition-evidence:end\n$V\\cup U$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "V",
         "right": "U"
@@ -151,17 +151,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ denote events. $\\mathrm{C}\\cup\\mathrm{D}$",
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ denote events. % semath-recognition-evidence:start\nHere $C$ denotes event and $D$ denotes event.\n% semath-recognition-evidence:end\n$\\mathrm{C}\\cup\\mathrm{D}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"

@@ -11,24 +11,24 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-01",
+      "id": "synthetic-gradient-descent-update-recognized-01",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -51,12 +51,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -66,14 +66,14 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-02",
+      "id": "synthetic-gradient-descent-update-recognized-02",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -98,12 +98,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -113,14 +113,14 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-03",
+      "id": "synthetic-gradient-descent-update-recognized-03",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -144,12 +144,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -159,14 +159,14 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-04",
+      "id": "synthetic-gradient-descent-update-recognized-04",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -190,12 +190,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -205,14 +205,14 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-05",
+      "id": "synthetic-gradient-descent-update-recognized-05",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -236,24 +236,24 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-06",
+      "id": "synthetic-gradient-descent-update-recognized-06",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -276,12 +276,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -291,14 +291,14 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-07",
+      "id": "synthetic-gradient-descent-update-recognized-07",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -322,12 +322,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -337,14 +337,14 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-08",
+      "id": "synthetic-gradient-descent-update-recognized-08",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -368,12 +368,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -383,14 +383,14 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-09",
+      "id": "synthetic-gradient-descent-update-recognized-09",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -414,12 +414,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -429,14 +429,14 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-10",
+      "id": "synthetic-gradient-descent-update-recognized-10",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -460,24 +460,24 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-11",
+      "id": "synthetic-gradient-descent-update-recognized-11",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -500,12 +500,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -515,14 +515,14 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-12",
+      "id": "synthetic-gradient-descent-update-recognized-12",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -547,12 +547,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -562,14 +562,14 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-13",
+      "id": "synthetic-gradient-descent-update-recognized-13",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -593,24 +593,24 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-14",
+      "id": "synthetic-gradient-descent-update-recognized-14",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -633,12 +633,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -648,14 +648,14 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-15",
+      "id": "synthetic-gradient-descent-update-recognized-15",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -679,12 +679,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -694,14 +694,14 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-16",
+      "id": "synthetic-gradient-descent-update-recognized-16",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -725,12 +725,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -740,14 +740,14 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-17",
+      "id": "synthetic-gradient-descent-update-recognized-17",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -771,12 +771,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -786,14 +786,14 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-18",
+      "id": "synthetic-gradient-descent-update-recognized-18",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -817,24 +817,24 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-19",
+      "id": "synthetic-gradient-descent-update-recognized-19",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -857,12 +857,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -872,14 +872,14 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-20",
+      "id": "synthetic-gradient-descent-update-recognized-20",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -903,12 +903,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -918,14 +918,14 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-21",
+      "id": "synthetic-gradient-descent-update-recognized-21",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -949,12 +949,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -964,14 +964,14 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-22",
+      "id": "synthetic-gradient-descent-update-recognized-22",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -996,12 +996,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1011,14 +1011,14 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-23",
+      "id": "synthetic-gradient-descent-update-recognized-23",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1042,12 +1042,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1057,14 +1057,14 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-24",
+      "id": "synthetic-gradient-descent-update-recognized-24",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1088,12 +1088,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1103,14 +1103,14 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-25",
+      "id": "synthetic-gradient-descent-update-recognized-25",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1134,12 +1134,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1149,14 +1149,14 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-26",
+      "id": "synthetic-gradient-descent-update-recognized-26",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1180,24 +1180,24 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-27",
+      "id": "synthetic-gradient-descent-update-recognized-27",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1220,12 +1220,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1235,14 +1235,14 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-28",
+      "id": "synthetic-gradient-descent-update-recognized-28",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1266,12 +1266,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1281,14 +1281,14 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-29",
+      "id": "synthetic-gradient-descent-update-recognized-29",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1312,12 +1312,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1327,14 +1327,14 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-30",
+      "id": "synthetic-gradient-descent-update-recognized-30",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1358,12 +1358,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1373,14 +1373,14 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-31",
+      "id": "synthetic-gradient-descent-update-recognized-31",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1404,24 +1404,24 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-32",
+      "id": "synthetic-gradient-descent-update-recognized-32",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1445,12 +1445,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1460,14 +1460,14 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-33",
+      "id": "synthetic-gradient-descent-update-recognized-33",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1491,12 +1491,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1506,14 +1506,14 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-34",
+      "id": "synthetic-gradient-descent-update-recognized-34",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1537,24 +1537,24 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-35",
+      "id": "synthetic-gradient-descent-update-recognized-35",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1577,12 +1577,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1592,14 +1592,14 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-36",
+      "id": "synthetic-gradient-descent-update-recognized-36",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1623,12 +1623,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1638,14 +1638,14 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-37",
+      "id": "synthetic-gradient-descent-update-recognized-37",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1669,12 +1669,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1684,14 +1684,14 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-38",
+      "id": "synthetic-gradient-descent-update-recognized-38",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1715,12 +1715,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1730,14 +1730,14 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-39",
+      "id": "synthetic-gradient-descent-update-recognized-39",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1761,24 +1761,24 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. $z=w-\\eta d$",
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the optimization update, let $w$ and $z$ be vectors, $d$ a gradient vector, and $\\eta$ a scalar step. % semath-recognition-evidence:start\nLet $z$, $w$, $\\eta$, and $d$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively.\n% semath-recognition-evidence:end\n$z=w-\\eta d$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "eta",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-40",
+      "id": "synthetic-gradient-descent-update-recognized-40",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1801,12 +1801,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1816,14 +1816,14 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-41",
+      "id": "synthetic-gradient-descent-update-recognized-41",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1847,12 +1847,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1862,14 +1862,14 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-42",
+      "id": "synthetic-gradient-descent-update-recognized-42",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1894,12 +1894,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. $x-\\alpha g=y$",
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $x$, $y$, and $g$ be compatible optimization vectors and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\n$y$ denotes iterate vector. $x$ denotes iterate vector. $\\alpha$ denotes step size scalar. $g$ denotes gradient vector.\n% semath-recognition-evidence:end\n$x-\\alpha g=y$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1909,14 +1909,14 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-43",
+      "id": "synthetic-gradient-descent-update-recognized-43",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1940,12 +1940,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1955,14 +1955,14 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-44",
+      "id": "synthetic-gradient-descent-update-recognized-44",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -1986,12 +1986,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2001,14 +2001,14 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-45",
+      "id": "synthetic-gradient-descent-update-recognized-45",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -2032,12 +2032,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. $y=x-\\alpha g$",
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nIn a gradient descent step, let $x$ and $y$ be n-dimensional iterates, $g$ an n-dimensional gradient vector, and $\\alpha$ a scalar step size. % semath-recognition-evidence:start\nLet $y$ denote iterate vector, $x$ denote iterate vector, $\\alpha$ denote step size scalar, and $g$ denote gradient vector.\n% semath-recognition-evidence:end\n$y=x-\\alpha g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2047,14 +2047,14 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-46",
+      "id": "synthetic-gradient-descent-update-recognized-46",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -2078,12 +2078,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. $y = x - \\alpha \\, g$",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nDuring gradient descent, let $x$ and $y$ be vectors, $g$ the gradient, and $\\alpha$ scalar. % semath-recognition-evidence:start\nWe write $y$ for iterate vector. We write $x$ for iterate vector. We write $\\alpha$ for step size scalar. We write $g$ for gradient vector.\n% semath-recognition-evidence:end\n$y = x - \\alpha \\, g$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2093,14 +2093,14 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "y",
         "current": "x",
         "step": "alpha",
         "gradient": "g"
       },
-      "id": "synthetic-gradient-descent-update-established-47",
+      "id": "synthetic-gradient-descent-update-recognized-47",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",
@@ -2124,24 +2124,24 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. ${z}={w}-(\\gamma d)$",
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nFor a descent step, let $w$ and $z$ be vectors, $d$ the gradient, and $\\gamma$ scalar. % semath-recognition-evidence:start\nHere $z$ denotes iterate vector, $w$ denotes iterate vector, $\\gamma$ denotes step size scalar, and $d$ denotes gradient vector.\n% semath-recognition-evidence:end\n${z}={w}-(\\gamma d)$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "next": "z",
         "current": "w",
         "step": "gamma",
         "gradient": "d"
       },
-      "id": "synthetic-gradient-descent-update-established-48",
+      "id": "synthetic-gradient-descent-update-recognized-48",
       "lawId": "gradient-descent-update",
       "variationTags": [
         "conventional-notation",

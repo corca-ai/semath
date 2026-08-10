@@ -24,7 +24,11 @@ analysis. Clean and incremental summaries must agree.
 
 Every report separates syntax construction, adapter lowering, engine
 decode/ingestion, total cold reset, syntax update, total edit latency, and each
-query kind. It also records peak/retained RSS growth, initial and delta transfer
+query kind. Cold timing includes WebAssembly module initialization. RSS growth
+starts after module initialization so host-specific compiled-code caches are not
+misreported as document or editor state; it records syntax and engine growth
+separately and collects unreachable buffers between timed edit lifecycles. The
+report also records peak/retained RSS growth, initial and delta transfer
 bytes, CST nodes/recovery/bytes per document and per node, invalidated
 documents, semantic nodes/rules visited, and the WASM artifact size. These are
 augmented by occurrence, entity, claim, evidence, dependency-edge, and

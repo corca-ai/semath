@@ -240,7 +240,7 @@ function validateLawCapability(
       const cases = corpora.get(suite.id)?.cases.filter(
         (item) => "lawId" in item && item.lawId === lawId,
       ) ?? [];
-      positives += cases.filter((item) => item.expectation === "established").length;
+      positives += cases.filter((item) => item.expectation === "recognized").length;
       refusals += cases.filter((item) => item.expectation === "refused").length;
       if (cases.length) suite.requiredDimensions.forEach((dimension) => dimensions.add(dimension));
     }

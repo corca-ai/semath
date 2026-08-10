@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,13 +26,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-01",
+      "id": "synthetic-electric-force-law-recognized-01",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -56,7 +56,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -71,13 +71,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-02",
+      "id": "synthetic-electric-force-law-recognized-02",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -102,7 +102,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -117,13 +117,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-03",
+      "id": "synthetic-electric-force-law-recognized-03",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -147,7 +147,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -162,13 +162,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-04",
+      "id": "synthetic-electric-force-law-recognized-04",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -192,7 +192,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -207,13 +207,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-05",
+      "id": "synthetic-electric-force-law-recognized-05",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -237,7 +237,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -247,13 +247,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-06",
+      "id": "synthetic-electric-force-law-recognized-06",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -276,7 +276,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -291,13 +291,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-07",
+      "id": "synthetic-electric-force-law-recognized-07",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -321,7 +321,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -336,13 +336,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-08",
+      "id": "synthetic-electric-force-law-recognized-08",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -366,7 +366,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -386,13 +386,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-09",
+      "id": "synthetic-electric-force-law-recognized-09",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -417,7 +417,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -432,13 +432,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-10",
+      "id": "synthetic-electric-force-law-recognized-10",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -462,7 +462,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -477,13 +477,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-11",
+      "id": "synthetic-electric-force-law-recognized-11",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -507,7 +507,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -527,13 +527,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-12",
+      "id": "synthetic-electric-force-law-recognized-12",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -559,7 +559,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -579,13 +579,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-13",
+      "id": "synthetic-electric-force-law-recognized-13",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -610,7 +610,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -625,13 +625,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-14",
+      "id": "synthetic-electric-force-law-recognized-14",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -655,7 +655,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -670,13 +670,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-15",
+      "id": "synthetic-electric-force-law-recognized-15",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -700,7 +700,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -720,13 +720,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-16",
+      "id": "synthetic-electric-force-law-recognized-16",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -751,7 +751,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -766,13 +766,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-17",
+      "id": "synthetic-electric-force-law-recognized-17",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -796,7 +796,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -811,13 +811,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-18",
+      "id": "synthetic-electric-force-law-recognized-18",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -841,7 +841,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -851,13 +851,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-19",
+      "id": "synthetic-electric-force-law-recognized-19",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -880,7 +880,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -895,13 +895,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-20",
+      "id": "synthetic-electric-force-law-recognized-20",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -925,7 +925,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -940,13 +940,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-21",
+      "id": "synthetic-electric-force-law-recognized-21",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -970,7 +970,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -985,13 +985,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-22",
+      "id": "synthetic-electric-force-law-recognized-22",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1016,7 +1016,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1031,13 +1031,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-23",
+      "id": "synthetic-electric-force-law-recognized-23",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -1061,7 +1061,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1081,13 +1081,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-24",
+      "id": "synthetic-electric-force-law-recognized-24",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1112,7 +1112,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1127,13 +1127,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-25",
+      "id": "synthetic-electric-force-law-recognized-25",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -1157,7 +1157,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1177,13 +1177,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-26",
+      "id": "synthetic-electric-force-law-recognized-26",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1208,7 +1208,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1223,13 +1223,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-27",
+      "id": "synthetic-electric-force-law-recognized-27",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1253,7 +1253,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1273,13 +1273,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-28",
+      "id": "synthetic-electric-force-law-recognized-28",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1304,7 +1304,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1324,13 +1324,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-29",
+      "id": "synthetic-electric-force-law-recognized-29",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1355,7 +1355,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1370,13 +1370,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-30",
+      "id": "synthetic-electric-force-law-recognized-30",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1400,7 +1400,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1420,13 +1420,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-31",
+      "id": "synthetic-electric-force-law-recognized-31",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1451,7 +1451,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1461,13 +1461,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-32",
+      "id": "synthetic-electric-force-law-recognized-32",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1491,7 +1491,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1506,13 +1506,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-33",
+      "id": "synthetic-electric-force-law-recognized-33",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1536,7 +1536,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1551,13 +1551,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-34",
+      "id": "synthetic-electric-force-law-recognized-34",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1581,7 +1581,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1591,13 +1591,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-35",
+      "id": "synthetic-electric-force-law-recognized-35",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1620,7 +1620,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1635,13 +1635,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-36",
+      "id": "synthetic-electric-force-law-recognized-36",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -1665,7 +1665,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1680,13 +1680,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-37",
+      "id": "synthetic-electric-force-law-recognized-37",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -1710,7 +1710,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1725,13 +1725,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-38",
+      "id": "synthetic-electric-force-law-recognized-38",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -1755,7 +1755,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1775,13 +1775,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-39",
+      "id": "synthetic-electric-force-law-recognized-39",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1806,7 +1806,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1816,13 +1816,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "q",
         "charge": "k",
         "electric-field": "u"
       },
-      "id": "synthetic-electric-force-law-established-40",
+      "id": "synthetic-electric-force-law-recognized-40",
       "lawId": "electric-force-law",
       "variationTags": [
         "display-notation",
@@ -1845,7 +1845,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1865,13 +1865,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-41",
+      "id": "synthetic-electric-force-law-recognized-41",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1896,7 +1896,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1916,13 +1916,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-42",
+      "id": "synthetic-electric-force-law-recognized-42",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1948,7 +1948,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1968,13 +1968,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "v",
         "charge": "h",
         "electric-field": "g"
       },
-      "id": "synthetic-electric-force-law-established-43",
+      "id": "synthetic-electric-force-law-recognized-43",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1999,7 +1999,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2019,13 +2019,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-44",
+      "id": "synthetic-electric-force-law-recognized-44",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2050,7 +2050,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2065,13 +2065,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-45",
+      "id": "synthetic-electric-force-law-recognized-45",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -2095,7 +2095,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2115,13 +2115,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "y",
         "charge": "c",
         "electric-field": "x"
       },
-      "id": "synthetic-electric-force-law-established-46",
+      "id": "synthetic-electric-force-law-recognized-46",
       "lawId": "electric-force-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2146,7 +2146,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2161,13 +2161,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "r",
         "charge": "a",
         "electric-field": "b"
       },
-      "id": "synthetic-electric-force-law-established-47",
+      "id": "synthetic-electric-force-law-recognized-47",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -2191,7 +2191,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2201,13 +2201,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "force": "o",
         "charge": "m",
         "electric-field": "i"
       },
-      "id": "synthetic-electric-force-law-established-48",
+      "id": "synthetic-electric-force-law-recognized-48",
       "lawId": "electric-force-law",
       "variationTags": [
         "conventional-notation",
@@ -3561,7 +3561,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -3576,13 +3576,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-01",
+      "id": "synthetic-electric-potential-energy-recognized-01",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -3606,7 +3606,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -3621,13 +3621,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-02",
+      "id": "synthetic-electric-potential-energy-recognized-02",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -3652,7 +3652,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -3667,13 +3667,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-03",
+      "id": "synthetic-electric-potential-energy-recognized-03",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -3697,7 +3697,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -3712,13 +3712,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-04",
+      "id": "synthetic-electric-potential-energy-recognized-04",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -3742,7 +3742,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3757,13 +3757,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-05",
+      "id": "synthetic-electric-potential-energy-recognized-05",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -3787,7 +3787,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3797,13 +3797,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-06",
+      "id": "synthetic-electric-potential-energy-recognized-06",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -3826,7 +3826,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -3841,13 +3841,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-07",
+      "id": "synthetic-electric-potential-energy-recognized-07",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -3871,7 +3871,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -3886,13 +3886,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-08",
+      "id": "synthetic-electric-potential-energy-recognized-08",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -3916,7 +3916,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -3936,13 +3936,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-09",
+      "id": "synthetic-electric-potential-energy-recognized-09",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -3967,7 +3967,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -3982,13 +3982,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-10",
+      "id": "synthetic-electric-potential-energy-recognized-10",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -4012,7 +4012,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4027,13 +4027,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-11",
+      "id": "synthetic-electric-potential-energy-recognized-11",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4057,7 +4057,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4077,13 +4077,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-12",
+      "id": "synthetic-electric-potential-energy-recognized-12",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4109,7 +4109,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4129,13 +4129,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-13",
+      "id": "synthetic-electric-potential-energy-recognized-13",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4160,7 +4160,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4175,13 +4175,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-14",
+      "id": "synthetic-electric-potential-energy-recognized-14",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4205,7 +4205,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4220,13 +4220,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-15",
+      "id": "synthetic-electric-potential-energy-recognized-15",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4250,7 +4250,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4270,13 +4270,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-16",
+      "id": "synthetic-electric-potential-energy-recognized-16",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4301,7 +4301,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4316,13 +4316,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-17",
+      "id": "synthetic-electric-potential-energy-recognized-17",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4346,7 +4346,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4361,13 +4361,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-18",
+      "id": "synthetic-electric-potential-energy-recognized-18",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4391,7 +4391,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4401,13 +4401,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-19",
+      "id": "synthetic-electric-potential-energy-recognized-19",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4430,7 +4430,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4445,13 +4445,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-20",
+      "id": "synthetic-electric-potential-energy-recognized-20",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4475,7 +4475,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4490,13 +4490,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-21",
+      "id": "synthetic-electric-potential-energy-recognized-21",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -4520,7 +4520,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4535,13 +4535,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-22",
+      "id": "synthetic-electric-potential-energy-recognized-22",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4566,7 +4566,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4581,13 +4581,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-23",
+      "id": "synthetic-electric-potential-energy-recognized-23",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -4611,7 +4611,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4631,13 +4631,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-24",
+      "id": "synthetic-electric-potential-energy-recognized-24",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4662,7 +4662,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4677,13 +4677,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-25",
+      "id": "synthetic-electric-potential-energy-recognized-25",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -4707,7 +4707,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4727,13 +4727,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-26",
+      "id": "synthetic-electric-potential-energy-recognized-26",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4758,7 +4758,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4773,13 +4773,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-27",
+      "id": "synthetic-electric-potential-energy-recognized-27",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4803,7 +4803,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4823,13 +4823,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-28",
+      "id": "synthetic-electric-potential-energy-recognized-28",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4854,7 +4854,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4874,13 +4874,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-29",
+      "id": "synthetic-electric-potential-energy-recognized-29",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -4905,7 +4905,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4920,13 +4920,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-30",
+      "id": "synthetic-electric-potential-energy-recognized-30",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -4950,7 +4950,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4970,13 +4970,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-31",
+      "id": "synthetic-electric-potential-energy-recognized-31",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5001,7 +5001,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5011,13 +5011,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-32",
+      "id": "synthetic-electric-potential-energy-recognized-32",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5041,7 +5041,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5056,13 +5056,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-33",
+      "id": "synthetic-electric-potential-energy-recognized-33",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5086,7 +5086,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5101,13 +5101,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-34",
+      "id": "synthetic-electric-potential-energy-recognized-34",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5131,7 +5131,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5141,13 +5141,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-35",
+      "id": "synthetic-electric-potential-energy-recognized-35",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5170,7 +5170,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5185,13 +5185,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-36",
+      "id": "synthetic-electric-potential-energy-recognized-36",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -5215,7 +5215,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5230,13 +5230,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-37",
+      "id": "synthetic-electric-potential-energy-recognized-37",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5260,7 +5260,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5275,13 +5275,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-38",
+      "id": "synthetic-electric-potential-energy-recognized-38",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -5305,7 +5305,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -5325,13 +5325,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-39",
+      "id": "synthetic-electric-potential-energy-recognized-39",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5356,7 +5356,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5366,13 +5366,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "q",
         "charge": "k",
         "voltage": "u"
       },
-      "id": "synthetic-electric-potential-energy-established-40",
+      "id": "synthetic-electric-potential-energy-recognized-40",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "display-notation",
@@ -5395,7 +5395,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5415,13 +5415,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-41",
+      "id": "synthetic-electric-potential-energy-recognized-41",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5446,7 +5446,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5466,13 +5466,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-42",
+      "id": "synthetic-electric-potential-energy-recognized-42",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5498,7 +5498,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5518,13 +5518,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "v",
         "charge": "h",
         "voltage": "g"
       },
-      "id": "synthetic-electric-potential-energy-established-43",
+      "id": "synthetic-electric-potential-energy-recognized-43",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5549,7 +5549,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5569,13 +5569,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-44",
+      "id": "synthetic-electric-potential-energy-recognized-44",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5600,7 +5600,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5615,13 +5615,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-45",
+      "id": "synthetic-electric-potential-energy-recognized-45",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5645,7 +5645,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5665,13 +5665,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "y",
         "charge": "c",
         "voltage": "x"
       },
-      "id": "synthetic-electric-potential-energy-established-46",
+      "id": "synthetic-electric-potential-energy-recognized-46",
       "lawId": "electric-potential-energy",
       "mainFileId": "main",
       "variationTags": [
@@ -5696,7 +5696,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5711,13 +5711,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "r",
         "charge": "a",
         "voltage": "b"
       },
-      "id": "synthetic-electric-potential-energy-established-47",
+      "id": "synthetic-electric-potential-energy-recognized-47",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -5741,7 +5741,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5751,13 +5751,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "energy": "o",
         "charge": "m",
         "voltage": "i"
       },
-      "id": "synthetic-electric-potential-energy-established-48",
+      "id": "synthetic-electric-potential-energy-recognized-48",
       "lawId": "electric-potential-energy",
       "variationTags": [
         "conventional-notation",
@@ -7111,7 +7111,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7126,13 +7126,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-01",
+      "id": "synthetic-electric-power-law-recognized-01",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7156,7 +7156,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7171,13 +7171,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-02",
+      "id": "synthetic-electric-power-law-recognized-02",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7202,7 +7202,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7217,13 +7217,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-03",
+      "id": "synthetic-electric-power-law-recognized-03",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7247,7 +7247,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7262,13 +7262,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-04",
+      "id": "synthetic-electric-power-law-recognized-04",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7292,7 +7292,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7307,13 +7307,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-05",
+      "id": "synthetic-electric-power-law-recognized-05",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7337,7 +7337,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7347,13 +7347,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-06",
+      "id": "synthetic-electric-power-law-recognized-06",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -7376,7 +7376,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7391,13 +7391,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-07",
+      "id": "synthetic-electric-power-law-recognized-07",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7421,7 +7421,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -7436,13 +7436,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-08",
+      "id": "synthetic-electric-power-law-recognized-08",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -7466,7 +7466,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -7486,13 +7486,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-09",
+      "id": "synthetic-electric-power-law-recognized-09",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7517,7 +7517,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7532,13 +7532,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-10",
+      "id": "synthetic-electric-power-law-recognized-10",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -7562,7 +7562,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7577,13 +7577,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-11",
+      "id": "synthetic-electric-power-law-recognized-11",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7607,7 +7607,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7627,13 +7627,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-12",
+      "id": "synthetic-electric-power-law-recognized-12",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7659,7 +7659,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7679,13 +7679,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-13",
+      "id": "synthetic-electric-power-law-recognized-13",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7710,7 +7710,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7725,13 +7725,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-14",
+      "id": "synthetic-electric-power-law-recognized-14",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7755,7 +7755,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7770,13 +7770,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-15",
+      "id": "synthetic-electric-power-law-recognized-15",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7800,7 +7800,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7820,13 +7820,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-16",
+      "id": "synthetic-electric-power-law-recognized-16",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -7851,7 +7851,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7866,13 +7866,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-17",
+      "id": "synthetic-electric-power-law-recognized-17",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7896,7 +7896,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -7911,13 +7911,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-18",
+      "id": "synthetic-electric-power-law-recognized-18",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7941,7 +7941,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -7951,13 +7951,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-19",
+      "id": "synthetic-electric-power-law-recognized-19",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -7980,7 +7980,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7995,13 +7995,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-20",
+      "id": "synthetic-electric-power-law-recognized-20",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8025,7 +8025,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8040,13 +8040,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-21",
+      "id": "synthetic-electric-power-law-recognized-21",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -8070,7 +8070,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8085,13 +8085,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-22",
+      "id": "synthetic-electric-power-law-recognized-22",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8116,7 +8116,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8131,13 +8131,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-23",
+      "id": "synthetic-electric-power-law-recognized-23",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -8161,7 +8161,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8181,13 +8181,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-24",
+      "id": "synthetic-electric-power-law-recognized-24",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8212,7 +8212,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8227,13 +8227,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-25",
+      "id": "synthetic-electric-power-law-recognized-25",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -8257,7 +8257,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8277,13 +8277,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-26",
+      "id": "synthetic-electric-power-law-recognized-26",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8308,7 +8308,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8323,13 +8323,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-27",
+      "id": "synthetic-electric-power-law-recognized-27",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8353,7 +8353,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8373,13 +8373,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-28",
+      "id": "synthetic-electric-power-law-recognized-28",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8404,7 +8404,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8424,13 +8424,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-29",
+      "id": "synthetic-electric-power-law-recognized-29",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8455,7 +8455,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8470,13 +8470,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-30",
+      "id": "synthetic-electric-power-law-recognized-30",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8500,7 +8500,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8520,13 +8520,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-31",
+      "id": "synthetic-electric-power-law-recognized-31",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8551,7 +8551,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8561,13 +8561,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-32",
+      "id": "synthetic-electric-power-law-recognized-32",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8591,7 +8591,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8606,13 +8606,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-33",
+      "id": "synthetic-electric-power-law-recognized-33",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8636,7 +8636,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8651,13 +8651,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-34",
+      "id": "synthetic-electric-power-law-recognized-34",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8681,7 +8681,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8691,13 +8691,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-35",
+      "id": "synthetic-electric-power-law-recognized-35",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8720,7 +8720,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8735,13 +8735,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-36",
+      "id": "synthetic-electric-power-law-recognized-36",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -8765,7 +8765,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8780,13 +8780,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-37",
+      "id": "synthetic-electric-power-law-recognized-37",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -8810,7 +8810,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8825,13 +8825,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-38",
+      "id": "synthetic-electric-power-law-recognized-38",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -8855,7 +8855,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8875,13 +8875,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-39",
+      "id": "synthetic-electric-power-law-recognized-39",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8906,7 +8906,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8916,13 +8916,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "q",
         "voltage": "k",
         "current": "u"
       },
-      "id": "synthetic-electric-power-law-established-40",
+      "id": "synthetic-electric-power-law-recognized-40",
       "lawId": "electric-power-law",
       "variationTags": [
         "display-notation",
@@ -8945,7 +8945,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8965,13 +8965,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-41",
+      "id": "synthetic-electric-power-law-recognized-41",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -8996,7 +8996,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -9016,13 +9016,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-42",
+      "id": "synthetic-electric-power-law-recognized-42",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -9048,7 +9048,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -9068,13 +9068,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "v",
         "voltage": "h",
         "current": "g"
       },
-      "id": "synthetic-electric-power-law-established-43",
+      "id": "synthetic-electric-power-law-recognized-43",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -9099,7 +9099,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -9119,13 +9119,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-44",
+      "id": "synthetic-electric-power-law-recognized-44",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -9150,7 +9150,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9165,13 +9165,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-45",
+      "id": "synthetic-electric-power-law-recognized-45",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -9195,7 +9195,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9215,13 +9215,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "y",
         "voltage": "c",
         "current": "x"
       },
-      "id": "synthetic-electric-power-law-established-46",
+      "id": "synthetic-electric-power-law-recognized-46",
       "lawId": "electric-power-law",
       "mainFileId": "main",
       "variationTags": [
@@ -9246,7 +9246,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -9261,13 +9261,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "r",
         "voltage": "a",
         "current": "b"
       },
-      "id": "synthetic-electric-power-law-established-47",
+      "id": "synthetic-electric-power-law-recognized-47",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",
@@ -9291,7 +9291,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -9301,13 +9301,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "power": "o",
         "voltage": "m",
         "current": "i"
       },
-      "id": "synthetic-electric-power-law-established-48",
+      "id": "synthetic-electric-power-law-recognized-48",
       "lawId": "electric-power-law",
       "variationTags": [
         "conventional-notation",

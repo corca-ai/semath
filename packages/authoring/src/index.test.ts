@@ -31,7 +31,7 @@ describe("pack authoring policies", () => {
   test("scaffolds balanced, varied, strict probe evidence", () => {
     const workspace = scaffoldPackWorkspace(pack);
     expect(workspace.corpus.cases).toHaveLength(10);
-    expect(workspace.corpus.cases.filter((item) => item.expectation === "established")).toHaveLength(5);
+    expect(workspace.corpus.cases.filter((item) => item.expectation === "recognized")).toHaveLength(5);
     expect(workspace.corpus.cases.filter((item) => item.expectation === "refused")).toHaveLength(5);
     expect(new Set(workspace.corpus.cases.map((item) => item.diversity.proseFamily)).size).toBe(5);
     expect(findCorpusTagProblems(workspace.manifest, new Map([[workspace.corpus.domain, workspace.corpus]]))).toEqual([]);

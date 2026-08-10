@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,13 +26,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-01",
+      "id": "synthetic-linear-momentum-definition-recognized-01",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -56,7 +56,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -71,13 +71,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-02",
+      "id": "synthetic-linear-momentum-definition-recognized-02",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -102,7 +102,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -117,13 +117,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-03",
+      "id": "synthetic-linear-momentum-definition-recognized-03",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -147,7 +147,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -162,13 +162,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-04",
+      "id": "synthetic-linear-momentum-definition-recognized-04",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -192,7 +192,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -207,13 +207,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-05",
+      "id": "synthetic-linear-momentum-definition-recognized-05",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -237,7 +237,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -247,13 +247,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-06",
+      "id": "synthetic-linear-momentum-definition-recognized-06",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -276,7 +276,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -291,13 +291,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-07",
+      "id": "synthetic-linear-momentum-definition-recognized-07",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -321,7 +321,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -336,13 +336,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-08",
+      "id": "synthetic-linear-momentum-definition-recognized-08",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -366,7 +366,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -386,13 +386,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-09",
+      "id": "synthetic-linear-momentum-definition-recognized-09",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -417,7 +417,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -432,13 +432,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-10",
+      "id": "synthetic-linear-momentum-definition-recognized-10",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -462,7 +462,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -477,13 +477,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-11",
+      "id": "synthetic-linear-momentum-definition-recognized-11",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -507,7 +507,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -527,13 +527,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-12",
+      "id": "synthetic-linear-momentum-definition-recognized-12",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -559,7 +559,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -579,13 +579,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-13",
+      "id": "synthetic-linear-momentum-definition-recognized-13",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -610,7 +610,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -625,13 +625,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-14",
+      "id": "synthetic-linear-momentum-definition-recognized-14",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -655,7 +655,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -670,13 +670,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-15",
+      "id": "synthetic-linear-momentum-definition-recognized-15",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -700,7 +700,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -720,13 +720,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-16",
+      "id": "synthetic-linear-momentum-definition-recognized-16",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -751,7 +751,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -766,13 +766,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-17",
+      "id": "synthetic-linear-momentum-definition-recognized-17",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -796,7 +796,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -811,13 +811,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-18",
+      "id": "synthetic-linear-momentum-definition-recognized-18",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -841,7 +841,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -851,13 +851,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-19",
+      "id": "synthetic-linear-momentum-definition-recognized-19",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -880,7 +880,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -895,13 +895,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-20",
+      "id": "synthetic-linear-momentum-definition-recognized-20",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -925,7 +925,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -940,13 +940,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-21",
+      "id": "synthetic-linear-momentum-definition-recognized-21",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -970,7 +970,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -985,13 +985,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-22",
+      "id": "synthetic-linear-momentum-definition-recognized-22",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1016,7 +1016,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1031,13 +1031,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-23",
+      "id": "synthetic-linear-momentum-definition-recognized-23",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -1061,7 +1061,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1081,13 +1081,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-24",
+      "id": "synthetic-linear-momentum-definition-recognized-24",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1112,7 +1112,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1127,13 +1127,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-25",
+      "id": "synthetic-linear-momentum-definition-recognized-25",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -1157,7 +1157,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1177,13 +1177,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-26",
+      "id": "synthetic-linear-momentum-definition-recognized-26",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1208,7 +1208,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1223,13 +1223,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-27",
+      "id": "synthetic-linear-momentum-definition-recognized-27",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1253,7 +1253,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1273,13 +1273,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-28",
+      "id": "synthetic-linear-momentum-definition-recognized-28",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1304,7 +1304,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1324,13 +1324,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-29",
+      "id": "synthetic-linear-momentum-definition-recognized-29",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1355,7 +1355,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1370,13 +1370,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-30",
+      "id": "synthetic-linear-momentum-definition-recognized-30",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1400,7 +1400,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1420,13 +1420,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-31",
+      "id": "synthetic-linear-momentum-definition-recognized-31",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1451,7 +1451,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1461,13 +1461,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-32",
+      "id": "synthetic-linear-momentum-definition-recognized-32",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1491,7 +1491,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1506,13 +1506,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-33",
+      "id": "synthetic-linear-momentum-definition-recognized-33",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1536,7 +1536,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1551,13 +1551,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-34",
+      "id": "synthetic-linear-momentum-definition-recognized-34",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1581,7 +1581,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1591,13 +1591,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-35",
+      "id": "synthetic-linear-momentum-definition-recognized-35",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1620,7 +1620,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1635,13 +1635,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-36",
+      "id": "synthetic-linear-momentum-definition-recognized-36",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -1665,7 +1665,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1680,13 +1680,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-37",
+      "id": "synthetic-linear-momentum-definition-recognized-37",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -1710,7 +1710,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1725,13 +1725,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-38",
+      "id": "synthetic-linear-momentum-definition-recognized-38",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -1755,7 +1755,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1775,13 +1775,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-39",
+      "id": "synthetic-linear-momentum-definition-recognized-39",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1806,7 +1806,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1816,13 +1816,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "q",
         "mass": "k",
         "velocity": "u"
       },
-      "id": "synthetic-linear-momentum-definition-established-40",
+      "id": "synthetic-linear-momentum-definition-recognized-40",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "display-notation",
@@ -1845,7 +1845,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1865,13 +1865,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-41",
+      "id": "synthetic-linear-momentum-definition-recognized-41",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1896,7 +1896,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1916,13 +1916,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-42",
+      "id": "synthetic-linear-momentum-definition-recognized-42",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1948,7 +1948,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1968,13 +1968,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "v",
         "mass": "h",
         "velocity": "g"
       },
-      "id": "synthetic-linear-momentum-definition-established-43",
+      "id": "synthetic-linear-momentum-definition-recognized-43",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1999,7 +1999,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2019,13 +2019,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-44",
+      "id": "synthetic-linear-momentum-definition-recognized-44",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -2050,7 +2050,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2065,13 +2065,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-45",
+      "id": "synthetic-linear-momentum-definition-recognized-45",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -2095,7 +2095,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2115,13 +2115,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "y",
         "mass": "c",
         "velocity": "x"
       },
-      "id": "synthetic-linear-momentum-definition-established-46",
+      "id": "synthetic-linear-momentum-definition-recognized-46",
       "lawId": "linear-momentum-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -2146,7 +2146,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2161,13 +2161,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "r",
         "mass": "a",
         "velocity": "b"
       },
-      "id": "synthetic-linear-momentum-definition-established-47",
+      "id": "synthetic-linear-momentum-definition-recognized-47",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",
@@ -2191,7 +2191,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2201,13 +2201,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "momentum": "o",
         "mass": "m",
         "velocity": "i"
       },
-      "id": "synthetic-linear-momentum-definition-established-48",
+      "id": "synthetic-linear-momentum-definition-recognized-48",
       "lawId": "linear-momentum-definition",
       "variationTags": [
         "conventional-notation",

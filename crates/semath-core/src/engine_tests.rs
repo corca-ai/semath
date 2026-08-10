@@ -1,10 +1,15 @@
-use super::SemathEngine;
+use super::{
+    SemanticOccurrenceSeed, SemathEngine, completes_application_at, notation_occurrence_range,
+};
+use crate::candidate::StructuralCandidateOption;
 use crate::parser::test_math_regions;
+use crate::semantic_index::{CandidateFamily, OccurrenceKind};
 use crate::{
-    ChangeEnvelope, DocumentLanguage, MeaningDecision, PROTOCOL_VERSION, ProjectChange,
-    ProjectDocument, ProjectInclude, ProjectMacro, ProjectMacroExpansion,
-    ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query,
-    QueryEnvelope, QueryValue, SourceRange,
+    ChangeEnvelope, DocumentLanguage, MeaningDecision, NotationArgument, NotationNode,
+    NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION, ProjectChange, ProjectDocument,
+    ProjectInclude, ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus,
+    ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query, QueryEnvelope, QueryValue,
+    SourceRange, SyntaxState,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -46,6 +51,66 @@ fn query(query: Query, inventory_version: u64, document_version: u64) -> QueryEn
         analysis_generation: inventory_version,
         query,
     }
+}
+
+fn range(start_offset: u32, end_offset: u32) -> SourceRange {
+    SourceRange {
+        start_offset,
+        end_offset,
+    }
+}
+
+#[test]
+fn expands_a_style_body_to_its_exact_source_notation() {
+    let mut input = document("main", "main.tex", "$\\mathbf{y}$", 1);
+    input.nodes.push(NotationNode {
+        kind: NotationNodeKind::Style,
+        parent: None,
+        children: Vec::new(),
+        ranges: NotationNodeRanges {
+            full: range(1, 11),
+            command: Some(range(1, 8)),
+            name: None,
+            nucleus: None,
+            editable: Some(range(9, 10)),
+        },
+        state: SyntaxState::Complete,
+        name: Some("mathbf".into()),
+        text: None,
+        arguments: vec![NotationArgument {
+            node: 0,
+            role: "body".into(),
+            syntax: "required".into(),
+            range: range(9, 10),
+        }],
+        math_class: None,
+        provenance: None,
+    });
+    assert_eq!(
+        notation_occurrence_range(&input, &range(9, 10)),
+        range(1, 11)
+    );
+}
+
+#[test]
+fn application_boundary_requires_a_complete_ancestor_in_the_same_math_region() {
+    let seed = SemanticOccurrenceSeed {
+        kind: OccurrenceKind::Notation,
+        surface: "ECE".into(),
+        selection_range: range(1, 5),
+        range: range(1, 5),
+        structural_path: vec![0],
+        source_text: "\\ECE".into(),
+        notation: Vec::new(),
+        application_end_offset: Some(8),
+        candidate_options: vec![StructuralCandidateOption {
+            family: CandidateFamily::Application,
+            interpretation: "application".into(),
+        }],
+    };
+    assert!(completes_application_at(&seed, &range(0, 9), 8));
+    assert!(!completes_application_at(&seed, &range(0, 9), 9));
+    assert!(!completes_application_at(&seed, &range(8, 12), 8));
 }
 
 #[test]

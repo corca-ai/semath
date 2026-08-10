@@ -11,22 +11,22 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-01",
+      "id": "synthetic-set-intersection-recognized-01",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -49,12 +49,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -64,12 +64,12 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-02",
+      "id": "synthetic-set-intersection-recognized-02",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -94,12 +94,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -109,12 +109,12 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-03",
+      "id": "synthetic-set-intersection-recognized-03",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -138,12 +138,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -153,12 +153,12 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-04",
+      "id": "synthetic-set-intersection-recognized-04",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -182,12 +182,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -197,12 +197,12 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-05",
+      "id": "synthetic-set-intersection-recognized-05",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -226,22 +226,22 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-06",
+      "id": "synthetic-set-intersection-recognized-06",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -264,12 +264,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -279,12 +279,12 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-07",
+      "id": "synthetic-set-intersection-recognized-07",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -308,12 +308,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -323,12 +323,12 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-08",
+      "id": "synthetic-set-intersection-recognized-08",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -352,12 +352,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -367,12 +367,12 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-09",
+      "id": "synthetic-set-intersection-recognized-09",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -396,12 +396,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -411,12 +411,12 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-10",
+      "id": "synthetic-set-intersection-recognized-10",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -440,22 +440,22 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-11",
+      "id": "synthetic-set-intersection-recognized-11",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -478,12 +478,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -493,12 +493,12 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-12",
+      "id": "synthetic-set-intersection-recognized-12",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -523,12 +523,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -538,12 +538,12 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-13",
+      "id": "synthetic-set-intersection-recognized-13",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -567,22 +567,22 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-14",
+      "id": "synthetic-set-intersection-recognized-14",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -605,12 +605,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -620,12 +620,12 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-15",
+      "id": "synthetic-set-intersection-recognized-15",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -649,12 +649,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -664,12 +664,12 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-16",
+      "id": "synthetic-set-intersection-recognized-16",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -693,12 +693,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -708,12 +708,12 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-17",
+      "id": "synthetic-set-intersection-recognized-17",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -737,12 +737,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -752,12 +752,12 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-18",
+      "id": "synthetic-set-intersection-recognized-18",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -781,22 +781,22 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-19",
+      "id": "synthetic-set-intersection-recognized-19",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -819,12 +819,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -834,12 +834,12 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-20",
+      "id": "synthetic-set-intersection-recognized-20",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -863,12 +863,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -878,12 +878,12 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-21",
+      "id": "synthetic-set-intersection-recognized-21",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -907,12 +907,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -922,12 +922,12 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-22",
+      "id": "synthetic-set-intersection-recognized-22",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -952,12 +952,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -967,12 +967,12 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-23",
+      "id": "synthetic-set-intersection-recognized-23",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -996,12 +996,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1011,12 +1011,12 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-24",
+      "id": "synthetic-set-intersection-recognized-24",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1040,12 +1040,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1055,12 +1055,12 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-25",
+      "id": "synthetic-set-intersection-recognized-25",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1084,12 +1084,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1099,12 +1099,12 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-26",
+      "id": "synthetic-set-intersection-recognized-26",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1128,22 +1128,22 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-27",
+      "id": "synthetic-set-intersection-recognized-27",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1166,12 +1166,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1181,12 +1181,12 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-28",
+      "id": "synthetic-set-intersection-recognized-28",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1210,12 +1210,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1225,12 +1225,12 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-29",
+      "id": "synthetic-set-intersection-recognized-29",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1254,12 +1254,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1269,12 +1269,12 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-30",
+      "id": "synthetic-set-intersection-recognized-30",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1298,12 +1298,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1313,12 +1313,12 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-31",
+      "id": "synthetic-set-intersection-recognized-31",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1342,22 +1342,22 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-32",
+      "id": "synthetic-set-intersection-recognized-32",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1381,12 +1381,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1396,12 +1396,12 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-33",
+      "id": "synthetic-set-intersection-recognized-33",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1425,12 +1425,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1440,12 +1440,12 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-34",
+      "id": "synthetic-set-intersection-recognized-34",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1469,22 +1469,22 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-35",
+      "id": "synthetic-set-intersection-recognized-35",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1507,12 +1507,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1522,12 +1522,12 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-36",
+      "id": "synthetic-set-intersection-recognized-36",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1551,12 +1551,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1566,12 +1566,12 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-37",
+      "id": "synthetic-set-intersection-recognized-37",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1595,12 +1595,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1610,12 +1610,12 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-38",
+      "id": "synthetic-set-intersection-recognized-38",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1639,12 +1639,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1654,12 +1654,12 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-39",
+      "id": "synthetic-set-intersection-recognized-39",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1683,22 +1683,22 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. $A \\cap B$",
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ and $B$ represent sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cap B$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-intersection-established-40",
+      "id": "synthetic-set-intersection-recognized-40",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1721,12 +1721,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1736,12 +1736,12 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-41",
+      "id": "synthetic-set-intersection-recognized-41",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1765,12 +1765,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1780,12 +1780,12 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-42",
+      "id": "synthetic-set-intersection-recognized-42",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1810,12 +1810,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is $Y\\cap X$",
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $X$ and $Y$ be sets. The set intersection is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cap X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1825,12 +1825,12 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-intersection-established-43",
+      "id": "synthetic-set-intersection-recognized-43",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1854,12 +1854,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1869,12 +1869,12 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-44",
+      "id": "synthetic-set-intersection-recognized-44",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1898,12 +1898,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1913,12 +1913,12 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-45",
+      "id": "synthetic-set-intersection-recognized-45",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1942,12 +1942,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. $S\\cap T$",
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cap T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1957,12 +1957,12 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-intersection-established-46",
+      "id": "synthetic-set-intersection-recognized-46",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -1986,12 +1986,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. ${U}\\cap{V}$",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $U$ and $V$ denote sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cap{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2001,12 +2001,12 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-intersection-established-47",
+      "id": "synthetic-set-intersection-recognized-47",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -2030,22 +2030,22 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cap\\mathcal{D}$",
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cap\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-intersection-established-48",
+      "id": "synthetic-set-intersection-recognized-48",
       "lawId": "set-intersection",
       "variationTags": [
         "conventional-notation",
@@ -3315,22 +3315,22 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-01",
+      "id": "synthetic-set-union-recognized-01",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3353,12 +3353,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3368,12 +3368,12 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-02",
+      "id": "synthetic-set-union-recognized-02",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3398,12 +3398,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3413,12 +3413,12 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-03",
+      "id": "synthetic-set-union-recognized-03",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3442,12 +3442,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3457,12 +3457,12 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-04",
+      "id": "synthetic-set-union-recognized-04",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3486,12 +3486,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3501,12 +3501,12 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-05",
+      "id": "synthetic-set-union-recognized-05",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3530,22 +3530,22 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-06",
+      "id": "synthetic-set-union-recognized-06",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3568,12 +3568,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3583,12 +3583,12 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-07",
+      "id": "synthetic-set-union-recognized-07",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3612,12 +3612,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3627,12 +3627,12 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-08",
+      "id": "synthetic-set-union-recognized-08",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3656,12 +3656,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3671,12 +3671,12 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-09",
+      "id": "synthetic-set-union-recognized-09",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3700,12 +3700,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3715,12 +3715,12 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-10",
+      "id": "synthetic-set-union-recognized-10",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3744,22 +3744,22 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-11",
+      "id": "synthetic-set-union-recognized-11",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3782,12 +3782,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3797,12 +3797,12 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-12",
+      "id": "synthetic-set-union-recognized-12",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3827,12 +3827,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3842,12 +3842,12 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-13",
+      "id": "synthetic-set-union-recognized-13",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3871,22 +3871,22 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-14",
+      "id": "synthetic-set-union-recognized-14",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3909,12 +3909,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3924,12 +3924,12 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-15",
+      "id": "synthetic-set-union-recognized-15",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3953,12 +3953,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3968,12 +3968,12 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-16",
+      "id": "synthetic-set-union-recognized-16",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -3997,12 +3997,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4012,12 +4012,12 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-17",
+      "id": "synthetic-set-union-recognized-17",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4041,12 +4041,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4056,12 +4056,12 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-18",
+      "id": "synthetic-set-union-recognized-18",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4085,22 +4085,22 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-19",
+      "id": "synthetic-set-union-recognized-19",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4123,12 +4123,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4138,12 +4138,12 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-20",
+      "id": "synthetic-set-union-recognized-20",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4167,12 +4167,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4182,12 +4182,12 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-21",
+      "id": "synthetic-set-union-recognized-21",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4211,12 +4211,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4226,12 +4226,12 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-22",
+      "id": "synthetic-set-union-recognized-22",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4256,12 +4256,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4271,12 +4271,12 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-23",
+      "id": "synthetic-set-union-recognized-23",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4300,12 +4300,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4315,12 +4315,12 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-24",
+      "id": "synthetic-set-union-recognized-24",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4344,12 +4344,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4359,12 +4359,12 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-25",
+      "id": "synthetic-set-union-recognized-25",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4388,12 +4388,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4403,12 +4403,12 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-26",
+      "id": "synthetic-set-union-recognized-26",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4432,22 +4432,22 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-27",
+      "id": "synthetic-set-union-recognized-27",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4470,12 +4470,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4485,12 +4485,12 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-28",
+      "id": "synthetic-set-union-recognized-28",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4514,12 +4514,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4529,12 +4529,12 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-29",
+      "id": "synthetic-set-union-recognized-29",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4558,12 +4558,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4573,12 +4573,12 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-30",
+      "id": "synthetic-set-union-recognized-30",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4602,12 +4602,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4617,12 +4617,12 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-31",
+      "id": "synthetic-set-union-recognized-31",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4646,22 +4646,22 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-32",
+      "id": "synthetic-set-union-recognized-32",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4685,12 +4685,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4700,12 +4700,12 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-33",
+      "id": "synthetic-set-union-recognized-33",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4729,12 +4729,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4744,12 +4744,12 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-34",
+      "id": "synthetic-set-union-recognized-34",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4773,22 +4773,22 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-35",
+      "id": "synthetic-set-union-recognized-35",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4811,12 +4811,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4826,12 +4826,12 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-36",
+      "id": "synthetic-set-union-recognized-36",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4855,12 +4855,12 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4870,12 +4870,12 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-37",
+      "id": "synthetic-set-union-recognized-37",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4899,12 +4899,12 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4914,12 +4914,12 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-38",
+      "id": "synthetic-set-union-recognized-38",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4943,12 +4943,12 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -4958,12 +4958,12 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-39",
+      "id": "synthetic-set-union-recognized-39",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -4987,22 +4987,22 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. $A \\cup B$",
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nIn this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nLet $A$ and $B$ denote sets. % semath-recognition-evidence:start\nLet $A$ and $B$ denote set and set, respectively.\n% semath-recognition-evidence:end\n$A \\cup B$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "A",
         "right": "B"
       },
-      "id": "synthetic-set-union-established-40",
+      "id": "synthetic-set-union-recognized-40",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5025,12 +5025,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5040,12 +5040,12 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-41",
+      "id": "synthetic-set-union-recognized-41",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5069,12 +5069,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5084,12 +5084,12 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-42",
+      "id": "synthetic-set-union-recognized-42",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5114,12 +5114,12 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is $Y\\cup X$",
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nThe symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nLet $X$ and $Y$ be sets. The set union is % semath-recognition-evidence:start\n$Y$ denotes set. $X$ denotes set.\n% semath-recognition-evidence:end\n$Y\\cup X$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5129,12 +5129,12 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "Y",
         "right": "X"
       },
-      "id": "synthetic-set-union-established-43",
+      "id": "synthetic-set-union-recognized-43",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5158,12 +5158,12 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5173,12 +5173,12 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-44",
+      "id": "synthetic-set-union-recognized-44",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5202,12 +5202,12 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5217,12 +5217,12 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-45",
+      "id": "synthetic-set-union-recognized-45",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5246,12 +5246,12 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. $S\\cup T$",
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nThe next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nLet $S$ and $T$ be sets. % semath-recognition-evidence:start\nLet $S$ denote set and $T$ denote set.\n% semath-recognition-evidence:end\n$S\\cup T$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5261,12 +5261,12 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "S",
         "right": "T"
       },
-      "id": "synthetic-set-union-established-46",
+      "id": "synthetic-set-union-recognized-46",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5290,12 +5290,12 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. ${U}\\cup{V}$",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nLet $U$ and $V$ be sets. % semath-recognition-evidence:start\nWe write $U$ for set. We write $V$ for set.\n% semath-recognition-evidence:end\n${U}\\cup{V}$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -5305,12 +5305,12 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "U",
         "right": "V"
       },
-      "id": "synthetic-set-union-established-47",
+      "id": "synthetic-set-union-recognized-47",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",
@@ -5334,22 +5334,22 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. $\\mathcal{C}\\cup\\mathcal{D}$",
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nAs a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet $C$ and $D$ be sets. % semath-recognition-evidence:start\nHere $C$ denotes set and $D$ denotes set.\n% semath-recognition-evidence:end\n$\\mathcal{C}\\cup\\mathcal{D}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "left": "C",
         "right": "D"
       },
-      "id": "synthetic-set-union-established-48",
+      "id": "synthetic-set-union-recognized-48",
       "lawId": "set-union",
       "variationTags": [
         "conventional-notation",

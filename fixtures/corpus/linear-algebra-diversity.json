@@ -1,12 +1,12 @@
 {
   "cases": [
     {
-      "id": "synthetic-matrix-vector-product-established-01",
+      "id": "synthetic-matrix-vector-product-recognized-01",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "Consider the following independently stated relation in example 1. [let singular]\nA presentation-only symbol is $q_{201}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         }
       ],
       "cursor": {
@@ -14,7 +14,7 @@
         "needle": "y =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -35,17 +35,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-02",
+      "id": "synthetic-matrix-vector-product-recognized-02",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 2: this appendix file file is intentionally outside the formula's declaration scope.\nWe write $x_{102}$ for the input and $y_{102}$ for the output.",
@@ -58,7 +58,7 @@
         "needle": "b =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -81,17 +81,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-03",
+      "id": "synthetic-matrix-vector-product-recognized-03",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 3: this context file file is intentionally outside the formula's declaration scope.\nDefine $x_{103}$ as the sample and $y_{103}$ as the estimate.",
@@ -104,7 +104,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -126,17 +126,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-04",
+      "id": "synthetic-matrix-vector-product-recognized-04",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 4: this nested section file is intentionally outside the formula's declaration scope.\nThe local output is represented by $y_{104}$ after the formula.",
@@ -149,7 +149,7 @@
         "needle": "b =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -171,17 +171,17 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-05",
+      "id": "synthetic-matrix-vector-product-recognized-05",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 5: this definitions file file is intentionally outside the formula's declaration scope.\nHere $x_{105}$ denotes the input, where $y_{105}$ represents the output.",
@@ -194,7 +194,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -216,17 +216,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-06",
+      "id": "synthetic-matrix-vector-product-recognized-06",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         }
       ],
       "cursor": {
@@ -234,7 +234,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -255,17 +255,17 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-07",
+      "id": "synthetic-matrix-vector-product-recognized-07",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 7: this appendix file file is intentionally outside the formula's declaration scope.\n$x_{107}$ denotes the source. $y_{107}$ denotes the target. $z_{107}$ denotes the residual.",
@@ -278,7 +278,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -300,17 +300,17 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-08",
+      "id": "synthetic-matrix-vector-product-recognized-08",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 8: this context file file is intentionally outside the formula's declaration scope.\nHere $x_{108}$ denotes the input, where $y_{108}$ represents the output.",
@@ -323,7 +323,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -345,17 +345,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-09",
+      "id": "synthetic-matrix-vector-product-recognized-09",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "Consider the following independently stated relation in example 9. [given that]\nA presentation-only symbol follows: \\[q_{209}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 9: this nested section file is intentionally outside the formula's declaration scope.\nGiven $x_{109}$ as the input, take $y_{109}$ to represent the output.",
@@ -368,7 +368,7 @@
         "needle": "z}=",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -390,17 +390,17 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-10",
+      "id": "synthetic-matrix-vector-product-recognized-10",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 10: this definitions file file is intentionally outside the formula's declaration scope.\n$x_{110}$ denotes the source. $y_{110}$ denotes the target. $z_{110}$ denotes the residual.",
@@ -413,7 +413,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -435,17 +435,17 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-11",
+      "id": "synthetic-matrix-vector-product-recognized-11",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "The next formula is presented without an assumed named law (11). [respectively]\nA presentation-only symbol is $q_{211}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         }
       ],
       "cursor": {
@@ -453,7 +453,7 @@
         "needle": "z}=",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -474,17 +474,17 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-12",
+      "id": "synthetic-matrix-vector-product-recognized-12",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "In this local discussion, only the explicit statement below is available (12). [suppose that]\n\\newcommand{\\syntheticprobe}{q_{212}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 12: this nested section file is intentionally outside the formula's declaration scope.\nSuppose that $x_{112}$ is the observed input and $y_{112}$ is the predicted output.",
@@ -497,7 +497,7 @@
         "needle": "y =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -520,17 +520,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-13",
+      "id": "synthetic-matrix-vector-product-recognized-13",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "Suppose the notation is local to this calculation, case 13. [compact parenthetical]\nAn indexed symbol is $q_{213}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 13: this definitions file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{113}$) is fixed locally.",
@@ -543,7 +543,7 @@
         "needle": "z}=",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -565,17 +565,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-14",
+      "id": "synthetic-matrix-vector-product-recognized-14",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "The symbols below have no meaning beyond this standalone example (14). [let series]\nA styled symbol is $\\mathbf{q}_{214}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         }
       ],
       "cursor": {
@@ -583,7 +583,7 @@
         "needle": "y =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -604,17 +604,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-15",
+      "id": "synthetic-matrix-vector-product-recognized-15",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 15: this appendix file file is intentionally outside the formula's declaration scope.\nSuppose that $x_{115}$ is the observed input and $y_{115}$ is the predicted output.",
@@ -627,7 +627,7 @@
         "needle": "b =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -649,17 +649,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-16",
+      "id": "synthetic-matrix-vector-product-recognized-16",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "No domain interpretation is asserted for the following formula (16). [compact parenthetical]\nA grouped symbol is $ {q_{216}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 16: this context file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{116}$) is fixed locally.",
@@ -672,7 +672,7 @@
         "needle": "y =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -694,17 +694,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-17",
+      "id": "synthetic-matrix-vector-product-recognized-17",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 17: this nested section file is intentionally outside the formula's declaration scope.\nLet $x_{117}$, $y_{117}$, and $z_{117}$ denote the local input, state, and output, respectively.",
@@ -717,7 +717,7 @@
         "needle": "b =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -739,17 +739,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-18",
+      "id": "synthetic-matrix-vector-product-recognized-18",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 18: this definitions file file is intentionally outside the formula's declaration scope.\nThe local input and output are denoted by $x_{118}$ and $y_{118}$, respectively.",
@@ -762,7 +762,7 @@
         "needle": "s} =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -784,17 +784,17 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-19",
+      "id": "synthetic-matrix-vector-product-recognized-19",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         }
       ],
       "cursor": {
@@ -802,7 +802,7 @@
         "needle": "b =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -823,17 +823,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-20",
+      "id": "synthetic-matrix-vector-product-recognized-20",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 20: this appendix file file is intentionally outside the formula's declaration scope.\nLet $x_{120}$ and $y_{120}$ denote the local input and output, respectively.",
@@ -846,7 +846,7 @@
         "needle": "s} =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -868,17 +868,17 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-21",
+      "id": "synthetic-matrix-vector-product-recognized-21",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 21: this context file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{121}$ and $y_{121}$ represent the source and target, in that order.",
@@ -891,7 +891,7 @@
         "needle": "v=A",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -913,17 +913,17 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-22",
+      "id": "synthetic-matrix-vector-product-recognized-22",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 22: this nested section file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{122}$ stands for the independent variable.",
@@ -936,7 +936,7 @@
         "needle": "s} =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -959,17 +959,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-23",
+      "id": "synthetic-matrix-vector-product-recognized-23",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 23: this appendix file file is intentionally outside the formula's declaration scope.\nLet $x_{123}$ and $y_{123}$ denote the local input and output, respectively.",
@@ -982,7 +982,7 @@
         "needle": "v=A",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -1004,17 +1004,17 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-24",
+      "id": "synthetic-matrix-vector-product-recognized-24",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "No domain interpretation is asserted for the following formula (24). [symbol list]\nA styled symbol is $\\mathbf{q}_{224}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 24: this context file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{124}$ and $y_{124}$ represent the source and target, in that order.",
@@ -1027,7 +1027,7 @@
         "needle": "z}=",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -1049,17 +1049,17 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-25",
+      "id": "synthetic-matrix-vector-product-recognized-25",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 25: this nested section file is intentionally outside the formula's declaration scope.\nIn this model, $x_{125}$, $y_{125}$, and $z_{125}$ mean the sample, estimate, and error, respectively.",
@@ -1072,7 +1072,7 @@
         "needle": "v=A",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -1094,17 +1094,17 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-26",
+      "id": "synthetic-matrix-vector-product-recognized-26",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "For comparison, inspect the displayed expression numbered 26. [let singular]\nA grouped symbol is $ {q_{226}} $.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 26: this definitions file file is intentionally outside the formula's declaration scope.\nLet $x_{126}$ be the local input.",
@@ -1117,7 +1117,7 @@
         "needle": "z}=",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -1139,17 +1139,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-27",
+      "id": "synthetic-matrix-vector-product-recognized-27",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "The next formula is presented without an assumed named law (27). [we write]\n\\[\\begin{aligned}q_{227}\\end{aligned}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         }
       ],
       "cursor": {
@@ -1157,7 +1157,7 @@
         "needle": "y =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -1178,17 +1178,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-28",
+      "id": "synthetic-matrix-vector-product-recognized-28",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "In this local discussion, only the explicit statement below is available (28). [define as]\n\\begin{equation}q_{228}\\end{equation}\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 28: this appendix file file is intentionally outside the formula's declaration scope.\nDefine $x_{128}$ as the sample and $y_{128}$ as the estimate.",
@@ -1201,7 +1201,7 @@
         "needle": "z}=",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -1223,17 +1223,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-29",
+      "id": "synthetic-matrix-vector-product-recognized-29",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "Suppose the notation is local to this calculation, case 29. [let singular]\nA presentation-only symbol follows: \\[q_{229}\\]\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 29: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{129}$ be the local input.",
@@ -1246,7 +1246,7 @@
         "needle": "y =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -1268,17 +1268,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-30",
+      "id": "synthetic-matrix-vector-product-recognized-30",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 30: this nested section file is intentionally outside the formula's declaration scope.\nWe write $x_{130}$ for the input and $y_{130}$ for the output.",
@@ -1291,7 +1291,7 @@
         "needle": "b =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -1313,17 +1313,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-31",
+      "id": "synthetic-matrix-vector-product-recognized-31",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "As a deliberately unsupported instance, examine relation 31. [define as]\nA presentation-only symbol is $q_{231}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 31: this definitions file file is intentionally outside the formula's declaration scope.\nDefine $x_{131}$ as the sample and $y_{131}$ as the estimate.",
@@ -1336,7 +1336,7 @@
         "needle": "y =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -1358,17 +1358,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-32",
+      "id": "synthetic-matrix-vector-product-recognized-32",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         }
       ],
       "cursor": {
@@ -1376,7 +1376,7 @@
         "needle": "b =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -1398,17 +1398,17 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-33",
+      "id": "synthetic-matrix-vector-product-recognized-33",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 33: this appendix file file is intentionally outside the formula's declaration scope.\nHere $x_{133}$ denotes the input, where $y_{133}$ represents the output.",
@@ -1421,7 +1421,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -1443,17 +1443,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-34",
+      "id": "synthetic-matrix-vector-product-recognized-34",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 34: this definitions file file is intentionally outside the formula's declaration scope.\nGiven $x_{134}$ as the input, take $y_{134}$ to represent the output.",
@@ -1466,7 +1466,7 @@
         "needle": "b =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -1488,17 +1488,17 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-35",
+      "id": "synthetic-matrix-vector-product-recognized-35",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         }
       ],
       "cursor": {
@@ -1506,7 +1506,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -1527,17 +1527,17 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-36",
+      "id": "synthetic-matrix-vector-product-recognized-36",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 36: this appendix file file is intentionally outside the formula's declaration scope.\nHere $x_{136}$ denotes the input, where $y_{136}$ represents the output.",
@@ -1550,7 +1550,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -1572,17 +1572,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-37",
+      "id": "synthetic-matrix-vector-product-recognized-37",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         },
         {
           "content": "Supporting note 37: this context file file is intentionally outside the formula's declaration scope.\nGiven $x_{137}$ as the input, take $y_{137}$ to represent the output.",
@@ -1595,7 +1595,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -1617,17 +1617,17 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-38",
+      "id": "synthetic-matrix-vector-product-recognized-38",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         },
         {
           "content": "Supporting note 38: this nested section file is intentionally outside the formula's declaration scope.\n$x_{138}$ denotes the source. $y_{138}$ denotes the target. $z_{138}$ denotes the residual.",
@@ -1640,7 +1640,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -1662,17 +1662,17 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-39",
+      "id": "synthetic-matrix-vector-product-recognized-39",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "As a deliberately unsupported instance, examine relation 39. [respectively]\nA presentation-only symbol follows: \\[q_{239}\\]\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 39: this definitions file file is intentionally outside the formula's declaration scope.\nThe symbols $x_{139}$, $y_{139}$, and $z_{139}$ stand for the datum, estimate, and residual, respectively.",
@@ -1685,7 +1685,7 @@
         "needle": "z}=",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -1707,17 +1707,17 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-40",
+      "id": "synthetic-matrix-vector-product-recognized-40",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nFor comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         }
       ],
       "cursor": {
@@ -1725,7 +1725,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -1746,17 +1746,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-41",
+      "id": "synthetic-matrix-vector-product-recognized-41",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "Consider the following independently stated relation in example 41. [compact parenthetical]\nA presentation-only symbol is $q_{241}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 41: this appendix file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{141}$) is fixed locally.",
@@ -1769,7 +1769,7 @@
         "needle": "z}=",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -1791,17 +1791,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-42",
+      "id": "synthetic-matrix-vector-product-recognized-42",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "For comparison, inspect the displayed expression numbered 42. [let series]\n\\newcommand{\\syntheticprobe}{q_{242}}A macro-expanded symbol is $\\syntheticprobe$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 42: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{142}$, $y_{142}$, and $z_{142}$ denote the local input, state, and output, respectively.",
@@ -1814,7 +1814,7 @@
         "needle": "y =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -1837,17 +1837,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-43",
+      "id": "synthetic-matrix-vector-product-recognized-43",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "The next formula is presented without an assumed named law (43). [suppose that]\nAn indexed symbol is $q_{243}$.\n\nIn this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         },
         {
           "content": "Supporting note 43: this nested section file is intentionally outside the formula's declaration scope.\nSuppose that $x_{143}$ is the observed input and $y_{143}$ is the predicted output.",
@@ -1860,7 +1860,7 @@
         "needle": "z}=",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -1882,17 +1882,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-44",
+      "id": "synthetic-matrix-vector-product-recognized-44",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "In this local discussion, only the explicit statement below is available (44). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{244}$.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 44: this definitions file file is intentionally outside the formula's declaration scope.\nThe normalized vector ($x_{144}$) is fixed locally.",
@@ -1905,7 +1905,7 @@
         "needle": "y =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -1927,17 +1927,17 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-45",
+      "id": "synthetic-matrix-vector-product-recognized-45",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 45: this context file file is intentionally outside the formula's declaration scope.\nLet $x_{145}$, $y_{145}$, and $z_{145}$ denote the local input, state, and output, respectively.",
@@ -1950,7 +1950,7 @@
         "needle": "b =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -1972,17 +1972,17 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-46",
+      "id": "synthetic-matrix-vector-product-recognized-46",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "The symbols below have no meaning beyond this standalone example (46). [role first]\nA grouped symbol is $ {q_{246}} $.\n\nConsider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         },
         {
           "content": "Supporting note 46: this nested section file is intentionally outside the formula's declaration scope.\nThe local input and output are denoted by $x_{146}$ and $y_{146}$, respectively.",
@@ -1995,7 +1995,7 @@
         "needle": "y =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -2017,17 +2017,17 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-47",
+      "id": "synthetic-matrix-vector-product-recognized-47",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nThe next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         },
         {
           "content": "Supporting note 47: this definitions file file is intentionally outside the formula's declaration scope.\nThroughout this section, $x_{147}$ stands for the independent variable.",
@@ -2040,7 +2040,7 @@
         "needle": "b =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -2062,17 +2062,17 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
-      "id": "synthetic-matrix-vector-product-established-48",
+      "id": "synthetic-matrix-vector-product-recognized-48",
       "documents": [
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nSuppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         }
       ],
       "cursor": {
@@ -2080,7 +2080,7 @@
         "needle": "s} =",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -2101,7 +2101,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "equation-environment"
       }
     },

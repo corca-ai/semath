@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,7 +26,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -34,7 +34,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-01",
+      "id": "synthetic-linear-output-equation-recognized-01",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -58,7 +58,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -73,7 +73,7 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -81,7 +81,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-02",
+      "id": "synthetic-linear-output-equation-recognized-02",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -106,7 +106,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -121,7 +121,7 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -129,7 +129,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-03",
+      "id": "synthetic-linear-output-equation-recognized-03",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -153,7 +153,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -168,7 +168,7 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -176,7 +176,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-04",
+      "id": "synthetic-linear-output-equation-recognized-04",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -200,7 +200,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -215,7 +215,7 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -223,7 +223,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-05",
+      "id": "synthetic-linear-output-equation-recognized-05",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -247,7 +247,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -257,7 +257,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -265,7 +265,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-06",
+      "id": "synthetic-linear-output-equation-recognized-06",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -288,7 +288,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -303,7 +303,7 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -311,7 +311,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-07",
+      "id": "synthetic-linear-output-equation-recognized-07",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -335,7 +335,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -350,7 +350,7 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -358,7 +358,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-08",
+      "id": "synthetic-linear-output-equation-recognized-08",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -382,7 +382,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -402,7 +402,7 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -410,7 +410,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-09",
+      "id": "synthetic-linear-output-equation-recognized-09",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -435,7 +435,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -450,7 +450,7 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -458,7 +458,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-10",
+      "id": "synthetic-linear-output-equation-recognized-10",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -482,7 +482,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -497,7 +497,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -505,7 +505,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-11",
+      "id": "synthetic-linear-output-equation-recognized-11",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -529,7 +529,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -549,7 +549,7 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -557,7 +557,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-12",
+      "id": "synthetic-linear-output-equation-recognized-12",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -583,7 +583,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -603,7 +603,7 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -611,7 +611,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-13",
+      "id": "synthetic-linear-output-equation-recognized-13",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -636,7 +636,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -651,7 +651,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -659,7 +659,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-14",
+      "id": "synthetic-linear-output-equation-recognized-14",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -683,7 +683,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -698,7 +698,7 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -706,7 +706,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-15",
+      "id": "synthetic-linear-output-equation-recognized-15",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -730,7 +730,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -750,7 +750,7 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -758,7 +758,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-16",
+      "id": "synthetic-linear-output-equation-recognized-16",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -783,7 +783,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -798,7 +798,7 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -806,7 +806,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-17",
+      "id": "synthetic-linear-output-equation-recognized-17",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -830,7 +830,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -845,7 +845,7 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -853,7 +853,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-18",
+      "id": "synthetic-linear-output-equation-recognized-18",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -877,7 +877,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -887,7 +887,7 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -895,7 +895,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-19",
+      "id": "synthetic-linear-output-equation-recognized-19",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -918,7 +918,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -933,7 +933,7 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -941,7 +941,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-20",
+      "id": "synthetic-linear-output-equation-recognized-20",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -965,7 +965,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -980,7 +980,7 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -988,7 +988,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-21",
+      "id": "synthetic-linear-output-equation-recognized-21",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -1012,7 +1012,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1027,7 +1027,7 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -1035,7 +1035,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-22",
+      "id": "synthetic-linear-output-equation-recognized-22",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1060,7 +1060,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1075,7 +1075,7 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -1083,7 +1083,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-23",
+      "id": "synthetic-linear-output-equation-recognized-23",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -1107,7 +1107,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1127,7 +1127,7 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -1135,7 +1135,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-24",
+      "id": "synthetic-linear-output-equation-recognized-24",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1160,7 +1160,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1175,7 +1175,7 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -1183,7 +1183,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-25",
+      "id": "synthetic-linear-output-equation-recognized-25",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -1207,7 +1207,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1227,7 +1227,7 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -1235,7 +1235,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-26",
+      "id": "synthetic-linear-output-equation-recognized-26",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1260,7 +1260,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1275,7 +1275,7 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -1283,7 +1283,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-27",
+      "id": "synthetic-linear-output-equation-recognized-27",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1307,7 +1307,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1327,7 +1327,7 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -1335,7 +1335,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-28",
+      "id": "synthetic-linear-output-equation-recognized-28",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1360,7 +1360,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1380,7 +1380,7 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -1388,7 +1388,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-29",
+      "id": "synthetic-linear-output-equation-recognized-29",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1413,7 +1413,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1428,7 +1428,7 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -1436,7 +1436,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-30",
+      "id": "synthetic-linear-output-equation-recognized-30",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1460,7 +1460,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1480,7 +1480,7 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -1488,7 +1488,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-31",
+      "id": "synthetic-linear-output-equation-recognized-31",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1513,7 +1513,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1523,7 +1523,7 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -1531,7 +1531,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-32",
+      "id": "synthetic-linear-output-equation-recognized-32",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1555,7 +1555,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1570,7 +1570,7 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -1578,7 +1578,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-33",
+      "id": "synthetic-linear-output-equation-recognized-33",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1602,7 +1602,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1617,7 +1617,7 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -1625,7 +1625,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-34",
+      "id": "synthetic-linear-output-equation-recognized-34",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1649,7 +1649,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1659,7 +1659,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -1667,7 +1667,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-35",
+      "id": "synthetic-linear-output-equation-recognized-35",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1690,7 +1690,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1705,7 +1705,7 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -1713,7 +1713,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-36",
+      "id": "synthetic-linear-output-equation-recognized-36",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -1737,7 +1737,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1752,7 +1752,7 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -1760,7 +1760,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-37",
+      "id": "synthetic-linear-output-equation-recognized-37",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -1784,7 +1784,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1799,7 +1799,7 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -1807,7 +1807,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-38",
+      "id": "synthetic-linear-output-equation-recognized-38",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -1831,7 +1831,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1851,7 +1851,7 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -1859,7 +1859,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-39",
+      "id": "synthetic-linear-output-equation-recognized-39",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1884,7 +1884,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1894,7 +1894,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "q",
         "output-matrix": "k",
@@ -1902,7 +1902,7 @@
         "feedthrough-matrix": "s",
         "control-input": "w"
       },
-      "id": "synthetic-linear-output-equation-established-40",
+      "id": "synthetic-linear-output-equation-recognized-40",
       "lawId": "linear-output-equation",
       "variationTags": [
         "display-notation",
@@ -1925,7 +1925,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1945,7 +1945,7 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -1953,7 +1953,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-41",
+      "id": "synthetic-linear-output-equation-recognized-41",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -1978,7 +1978,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1998,7 +1998,7 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -2006,7 +2006,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-42",
+      "id": "synthetic-linear-output-equation-recognized-42",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -2032,7 +2032,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -2052,7 +2052,7 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "v",
         "output-matrix": "h",
@@ -2060,7 +2060,7 @@
         "feedthrough-matrix": "j",
         "control-input": "d"
       },
-      "id": "synthetic-linear-output-equation-established-43",
+      "id": "synthetic-linear-output-equation-recognized-43",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -2085,7 +2085,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2105,7 +2105,7 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -2113,7 +2113,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-44",
+      "id": "synthetic-linear-output-equation-recognized-44",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -2138,7 +2138,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2153,7 +2153,7 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -2161,7 +2161,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-45",
+      "id": "synthetic-linear-output-equation-recognized-45",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -2185,7 +2185,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2205,7 +2205,7 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "y",
         "output-matrix": "c",
@@ -2213,7 +2213,7 @@
         "feedthrough-matrix": "t",
         "control-input": "z"
       },
-      "id": "synthetic-linear-output-equation-established-46",
+      "id": "synthetic-linear-output-equation-recognized-46",
       "lawId": "linear-output-equation",
       "mainFileId": "main",
       "variationTags": [
@@ -2238,7 +2238,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2253,7 +2253,7 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "r",
         "output-matrix": "a",
@@ -2261,7 +2261,7 @@
         "feedthrough-matrix": "n",
         "control-input": "p"
       },
-      "id": "synthetic-linear-output-equation-established-47",
+      "id": "synthetic-linear-output-equation-recognized-47",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",
@@ -2285,7 +2285,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2295,7 +2295,7 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "output": "o",
         "output-matrix": "m",
@@ -2303,7 +2303,7 @@
         "feedthrough-matrix": "e",
         "control-input": "f"
       },
-      "id": "synthetic-linear-output-equation-established-48",
+      "id": "synthetic-linear-output-equation-recognized-48",
       "lawId": "linear-output-equation",
       "variationTags": [
         "conventional-notation",

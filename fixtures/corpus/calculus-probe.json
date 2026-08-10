@@ -11,17 +11,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $f$ be a function of $x$, and let $g$ denote its first derivative. $g=\\frac{d f}{d x}$",
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $f$ be a function of $x$, and let $g$ denote its first derivative. % semath-recognition-evidence:start\nLet $g$ denote derivative, $f$ denote function, and $x$ denote variable.\n% semath-recognition-evidence:end\n$g=\\frac{d f}{d x}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "derivative": "g",
         "function": "f",
@@ -47,17 +47,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $y$ be a differentiable function of $t$ and $v$ its derivative. $v = \\frac{d y}{d t}$",
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $y$ be a differentiable function of $t$ and $v$ its derivative. % semath-recognition-evidence:start\nLet $v$, $y$, and $t$ denote derivative, function, and variable, respectively.\n% semath-recognition-evidence:end\n$v = \\frac{d y}{d t}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "derivative": "v",
         "function": "y",
@@ -83,17 +83,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $h$ be a function of $s$ and $k$ its first derivative. $\\frac{d h}{d s}=k$",
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $h$ be a function of $s$ and $k$ its first derivative. % semath-recognition-evidence:start\nWe write $k$ for derivative. We write $h$ for function. We write $s$ for variable.\n% semath-recognition-evidence:end\n$\\frac{d h}{d s}=k$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "derivative": "k",
         "function": "h",
@@ -119,17 +119,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $f$ be a function of $x$ and $g$ its derivative. ${g}=\\frac{d {f}}{d {x}}$",
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $f$ be a function of $x$ and $g$ its derivative. % semath-recognition-evidence:start\n$g$ denotes derivative. $f$ denotes function. $x$ denotes variable.\n% semath-recognition-evidence:end\n${g}=\\frac{d {f}}{d {x}}$",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "derivative": "g",
         "function": "f",
@@ -155,17 +155,17 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nSuppose $f$ is differentiable with respect to $x$ and $g$ represents the derivative. \\[g=\\dfrac{d f}{d x}\\]",
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nSuppose $f$ is differentiable with respect to $x$ and $g$ represents the derivative. % semath-recognition-evidence:start\nHere $g$ denotes derivative, $f$ denotes function, and $x$ denotes variable.\n% semath-recognition-evidence:end\n\\[g=\\dfrac{d f}{d x}\\]",
           "fileId": "main",
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "derivative": "g",
         "function": "f",

@@ -8,7 +8,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y = Mx$"
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $M$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. % semath-recognition-evidence:start\nLet $y$ denote vector, $M$ denote linear operator matrix, and $x$ denote vector.\n% semath-recognition-evidence:end\n$y = Mx$"
         }
       ],
       "cursor": {
@@ -16,7 +16,7 @@
         "needle": "y =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "y",
@@ -34,7 +34,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "inline-math"
       }
     },
@@ -44,7 +44,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. $v=A \\, u$"
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $A$ be a p by q matrix. Let $u$ be a q-dimensional vector. Let $v$ be a p-dimensional vector. % semath-recognition-evidence:start\nLet $v$, $A$, and $u$ denote vector, linear operator matrix, and vector, respectively.\n% semath-recognition-evidence:end\n$v=A \\, u$"
         }
       ],
       "cursor": {
@@ -52,7 +52,7 @@
         "needle": "v=A",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "v",
@@ -70,7 +70,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
@@ -80,7 +80,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. $b = (T a)$"
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $T$ be an r by s matrix. Let $a$ be an s-dimensional vector. Let $b$ be an r-dimensional vector. % semath-recognition-evidence:start\nWe write $b$ for vector. We write $T$ for linear operator matrix. We write $a$ for vector.\n% semath-recognition-evidence:end\n$b = (T a)$"
         }
       ],
       "cursor": {
@@ -88,7 +88,7 @@
         "needle": "b =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "b",
@@ -106,7 +106,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
@@ -116,7 +116,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. $\\mathbf{z}=K\\mathbf{x}$"
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $K$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $z$ be an m-dimensional vector. % semath-recognition-evidence:start\n$z$ denotes vector. $K$ denotes linear operator matrix. $x$ denotes vector.\n% semath-recognition-evidence:end\n$\\mathbf{z}=K\\mathbf{x}$"
         }
       ],
       "cursor": {
@@ -124,7 +124,7 @@
         "needle": "z}=",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "z",
@@ -142,7 +142,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
@@ -152,7 +152,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. ${s} = {H}{r}$"
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $H$ be an a by b matrix. Let $r$ be a b-dimensional vector. Let $s$ be an a-dimensional vector. % semath-recognition-evidence:start\nHere $s$ denotes vector, $H$ denotes linear operator matrix, and $r$ denotes vector.\n% semath-recognition-evidence:end\n${s} = {H}{r}$"
         }
       ],
       "cursor": {
@@ -160,7 +160,7 @@
         "needle": "s} =",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "matrix-vector-product",
       "expectedRoles": {
         "result": "s",
@@ -178,7 +178,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol",
+        "semanticSkeleton": "recognized-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },

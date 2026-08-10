@@ -7,12 +7,12 @@ thresholds.
 
 | Signal | Meaning | It does not mean |
 | --- | --- | --- |
-| Recall | authored positive cases that establish one target law | field-wide notation coverage |
+| Recall | authored positive cases that recognize one target law | field-wide notation coverage |
 | Precision | target recognitions absent from authored refusal cases | probabilistic confidence |
 | Role accuracy | expected roles bind the intended symbols | universal validity of the formula |
 | Evidence integrity | conclusions retain conditions and source ranges | sufficiency outside the source context |
-| Refusal preservation | negative cases avoid establishing the target law | proof that the input is false |
-| Adversarial refusal | unknown and cross-pack collision cases establish no law | refusal of a different, valid law in the same formula |
+| Refusal preservation | negative cases avoid recognizing the target law | proof that the input is false |
+| Adversarial refusal | unknown and cross-pack collision cases recognize no law | refusal of a different, valid law in the same formula |
 | Variation coverage | labeled notation, prose, role, constraint, project, macro, and mutation families | equal real-world frequency |
 | Diversity cells | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles | real-world prevalence |
 | Metamorphic invariance | irrelevant prose, comments, and document ordering preserve outcomes | arbitrary source rewrites are safe |
@@ -23,6 +23,11 @@ thresholds.
 Thresholds apply to every law, so a broad suite cannot hide a weak law. The
 evaluator also rejects missing or unexpected generated observations rather than
 treating an empty set as success.
+
+Corpus expectations deliberately say `recognized` or `refused`. Recognition
+means that one typed relation is present in the result; it does not require the
+whole cursor view to have an `established` meaning decision. Decision status is
+the separate exhaustive-evidence judgment defined by the public protocol.
 
 The current baseline has 3,106 checked-in synthetic law cases and 249
 deterministic runtime variants. It includes 56 independently scored unknown,

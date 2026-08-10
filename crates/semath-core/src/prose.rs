@@ -1015,6 +1015,9 @@ fn definition_clause(segment: &str) -> (Option<&str>, bool) {
         })
         .trim_end_matches(" and")
         .trim_end_matches(" while")
+        .trim_end_matches(|character: char| {
+            character.is_whitespace() || matches!(character, ',' | ';' | ':' | '.')
+        })
         .trim();
     let lower = clause.to_ascii_lowercase();
     for prefix in ["a ", "an ", "the "] {
@@ -1696,6 +1699,27 @@ mod tests {
             .collect::<Vec<_>>();
         assert!(definitions.contains(&("x", "n-dimensional iterates")));
         assert!(definitions.contains(&("y", "n-dimensional iterates")));
+        assert!(definitions.contains(&("g", "gradient")), "{definitions:?}");
+    }
+
+    #[test]
+    fn maps_elided_copulas_across_parallel_declarations() {
+        let analysis = analyze(
+            "Let $h$ be heat transfer, $m$ mass, $s$ specific heat, and $d$ temperature change. Then $h=msd$.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        for expected in [
+            ("h", "heat transfer"),
+            ("m", "mass"),
+            ("s", "specific heat"),
+            ("d", "temperature change"),
+        ] {
+            assert!(definitions.contains(&expected), "{definitions:?}");
+        }
     }
 
     #[test]

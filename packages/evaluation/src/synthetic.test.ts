@@ -25,7 +25,7 @@ const positive: CorpusCase = {
     fileId: "main",
     path: "main.md",
   }],
-  expectation: "established",
+  expectation: "recognized",
   expectedRoles: { acceleration: "a", force: "F", mass: "m" },
   id: "positive-source",
   lawId: "newton-second-law",
@@ -94,7 +94,7 @@ describe("synthetic corpus planning", () => {
     const second = generateLawDiversityCorpus("mechanics-diversity", source, spec());
     expect(first).toEqual(second);
     expect(first.cases).toHaveLength(16);
-    expect(first.cases.filter((item) => item.expectation === "established")).toHaveLength(10);
+    expect(first.cases.filter((item) => item.expectation === "recognized")).toHaveLength(10);
     expect(new Set(first.cases.map((item) => item.diversity.proseFamily)).size).toBe(8);
     expect(first.cases.some((item) => item.cursor.edge === "after")).toBe(true);
     expect(positive.documents[0]!.content).not.toContain("presentation-only");

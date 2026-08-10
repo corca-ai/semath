@@ -2,7 +2,7 @@ import type {
   Corpus,
   CorpusCase,
   DiversityProfile,
-  EstablishedCorpusCase,
+  RecognizedCorpusCase,
   LawRefusalCorpusCase,
 } from "./model";
 
@@ -33,7 +33,7 @@ export interface PromotionSeedSpec {
   suites: readonly PromotionSeedSuite[];
 }
 
-type LawCase = EstablishedCorpusCase | LawRefusalCorpusCase;
+type LawCase = RecognizedCorpusCase | LawRefusalCorpusCase;
 
 const BASELINE_PROSE_FAMILIES = [
   "let-singular",
@@ -152,7 +152,7 @@ export function buildPromotionSeedCorpus(suite: PromotionSeedSuite): Corpus {
         fileId: "main",
         path: "main.md",
       }],
-      expectation: "established",
+      expectation: "recognized",
       expectedRoles,
       id,
       lawId: law.lawId,
@@ -224,7 +224,7 @@ export function generateLawDiversityCorpus(
   const cases = lawIds.flatMap((lawId) => {
     const candidates = lawCases.filter((item) => item.lawId === lawId);
     const positives = candidates.filter(
-      (item): item is EstablishedCorpusCase => item.expectation === "established",
+      (item): item is RecognizedCorpusCase => item.expectation === "recognized",
     );
     const refusals = candidates.filter(
       (item): item is LawRefusalCorpusCase => item.expectation === "refused",
@@ -463,7 +463,7 @@ function semanticSkeleton(item: CorpusCase, index: number): string {
     .replace(/[^A-Za-z0-9]+/gu, "-")
     .replace(/^-+|-+$/gu, "")
     .slice(0, 42);
-  const mutation = item.expectation === "refused" ? item.refusalCategory : "established";
+  const mutation = item.expectation === "refused" ? item.refusalCategory : "recognized";
   return safeIdentifier(`${mutation}-${needle || `form-${index % 12}`}`);
 }
 
@@ -549,18 +549,20 @@ function syntaxExample(
 
 function stripGeneratedBaselineDecoration(content: string): string {
   const marker = "\n\n";
-  if (!content.startsWith("Consider the following independently stated relation") &&
-      !content.startsWith("For comparison, inspect") &&
-      !content.startsWith("The next formula is presented") &&
-      !content.startsWith("In this local discussion") &&
-      !content.startsWith("Suppose the notation is local") &&
-      !content.startsWith("The symbols below have no meaning") &&
-      !content.startsWith("As a deliberately unsupported instance") &&
-      !content.startsWith("No domain interpretation is asserted")) {
-    return content;
+  let result = content;
+  while (result.startsWith("Consider the following independently stated relation") ||
+      result.startsWith("For comparison, inspect") ||
+      result.startsWith("The next formula is presented") ||
+      result.startsWith("In this local discussion") ||
+      result.startsWith("Suppose the notation is local") ||
+      result.startsWith("The symbols below have no meaning") ||
+      result.startsWith("As a deliberately unsupported instance") ||
+      result.startsWith("No domain interpretation is asserted")) {
+    const separator = result.indexOf(marker);
+    if (separator < 0) return result;
+    result = result.slice(separator + marker.length);
   }
-  const separator = content.indexOf(marker);
-  return separator < 0 ? content : content.slice(separator + marker.length);
+  return result;
 }
 
 function contextPath(topology: string, index: number): string {
