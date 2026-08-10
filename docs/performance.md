@@ -33,6 +33,12 @@ defaults, not live production telemetry. The dependency lock pins the
 wasmtex input used for a report; record the Semath and wasmtex commits when
 comparing reports.
 
+The normal and scale gates cap law candidates at 20 visited rules per document.
+This is a structural dispatch budget, independent of installed pack count.
+Pure 100-pack and 500-pack fixtures additionally require a uniquely keyed form
+to select exactly one candidate, while exhaustive unification remains the test
+oracle for index completeness.
+
 Ordinary CI runs both document counts to catch deterministic scope, transfer,
 memory, and artifact regressions. It enforces latency on the smaller fixture,
 but only reports 501-document timings because a shared runner is not a stable

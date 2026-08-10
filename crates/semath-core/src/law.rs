@@ -24,6 +24,105 @@ struct CompiledLaw {
     placeholders: BTreeSet<String>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum DispatchRoot {
+    Relation(String),
+    Apply(String),
+    Other,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum DispatchFeature {
+    Apply(String),
+    Cross,
+    Derivative,
+    Dot,
+    Fraction,
+    Power,
+    Product(usize),
+    Sum(usize),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+struct DispatchKey {
+    root: DispatchRoot,
+    feature: Option<DispatchFeature>,
+}
+
+#[derive(Default)]
+struct LawDispatch {
+    candidates: BTreeMap<DispatchKey, Vec<usize>>,
+}
+
+impl LawDispatch {
+    fn compile(laws: &[CompiledLaw]) -> Self {
+        let mut dispatch = Self::default();
+        for (index, compiled) in laws.iter().enumerate() {
+            dispatch.insert(
+                index,
+                &compiled.forms,
+                &compiled.placeholders,
+                compiled.law.roles.iter().any(|role| role.variadic),
+            );
+        }
+        dispatch
+    }
+
+    fn insert(
+        &mut self,
+        index: usize,
+        forms: &[SemanticExpr],
+        placeholders: &BTreeSet<String>,
+        variadic: bool,
+    ) {
+        let mut keys = forms
+            .iter()
+            .map(|form| DispatchKey {
+                root: dispatch_root(form),
+                feature: strongest_dispatch_feature(form, placeholders),
+            })
+            .collect::<BTreeSet<_>>();
+        if variadic {
+            keys.insert(DispatchKey {
+                root: DispatchRoot::Relation("equals".into()),
+                feature: None,
+            });
+        }
+        for key in keys {
+            self.candidates.entry(key).or_default().push(index);
+        }
+    }
+
+    fn candidate_indices(&self, expression: &SemanticExpr) -> Vec<usize> {
+        let root = dispatch_root(expression);
+        let mut keys = expression_dispatch_features(expression)
+            .into_iter()
+            .map(|feature| DispatchKey {
+                root: root.clone(),
+                feature: Some(feature),
+            })
+            .collect::<Vec<_>>();
+        keys.push(DispatchKey {
+            root,
+            feature: None,
+        });
+        keys.into_iter()
+            .filter_map(|key| self.candidates.get(&key))
+            .flatten()
+            .copied()
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect()
+    }
+
+    fn candidates(&self, expression: &SemanticExpr) -> Vec<&'static CompiledLaw> {
+        self.candidate_indices(expression)
+            .into_iter()
+            .map(|index| &COMPILED_LAWS[index])
+            .collect()
+    }
+}
+
 static COMPILED_LAWS: LazyLock<Vec<CompiledLaw>> = LazyLock::new(|| {
     built_in_packs()
         .iter()
@@ -51,6 +150,107 @@ static COMPILED_LAWS: LazyLock<Vec<CompiledLaw>> = LazyLock::new(|| {
         })
         .collect()
 });
+
+static LAW_DISPATCH: LazyLock<LawDispatch> =
+    LazyLock::new(|| LawDispatch::compile(COMPILED_LAWS.as_slice()));
+
+fn dispatch_root(expression: &SemanticExpr) -> DispatchRoot {
+    match &expression.kind {
+        SemanticExprKind::Relation { operator, .. } => DispatchRoot::Relation(operator.clone()),
+        SemanticExprKind::Apply { operator, .. } => DispatchRoot::Apply(operator.clone()),
+        _ => DispatchRoot::Other,
+    }
+}
+
+fn strongest_dispatch_feature(
+    expression: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+) -> Option<DispatchFeature> {
+    let mut features = BTreeSet::new();
+    collect_dispatch_features(expression, placeholders, &mut features);
+    features.into_iter().min_by_key(dispatch_feature_priority)
+}
+
+fn expression_dispatch_features(expression: &SemanticExpr) -> BTreeSet<DispatchFeature> {
+    let mut features = BTreeSet::new();
+    collect_dispatch_features(expression, &BTreeSet::new(), &mut features);
+    features
+}
+
+fn collect_dispatch_features(
+    expression: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+    output: &mut BTreeSet<DispatchFeature>,
+) {
+    match &expression.kind {
+        SemanticExprKind::Symbol(symbol) if placeholders.contains(symbol) => {}
+        SemanticExprKind::Negate(inner) => collect_dispatch_features(inner, placeholders, output),
+        SemanticExprKind::Power(base, exponent) => {
+            output.insert(DispatchFeature::Power);
+            collect_dispatch_features(base, placeholders, output);
+            collect_dispatch_features(exponent, placeholders, output);
+        }
+        SemanticExprKind::Sum(items) => {
+            output.insert(DispatchFeature::Sum(items.len()));
+            for item in items {
+                collect_dispatch_features(item, placeholders, output);
+            }
+        }
+        SemanticExprKind::Product(items) => {
+            output.insert(DispatchFeature::Product(items.len()));
+            for item in items {
+                collect_dispatch_features(item, placeholders, output);
+            }
+        }
+        SemanticExprKind::Fraction(left, right) => {
+            output.insert(DispatchFeature::Fraction);
+            collect_dispatch_features(left, placeholders, output);
+            collect_dispatch_features(right, placeholders, output);
+        }
+        SemanticExprKind::Dot(left, right) => {
+            output.insert(DispatchFeature::Dot);
+            collect_dispatch_features(left, placeholders, output);
+            collect_dispatch_features(right, placeholders, output);
+        }
+        SemanticExprKind::Cross(left, right) => {
+            output.insert(DispatchFeature::Cross);
+            collect_dispatch_features(left, placeholders, output);
+            collect_dispatch_features(right, placeholders, output);
+        }
+        SemanticExprKind::Derivative { expression, .. } => {
+            output.insert(DispatchFeature::Derivative);
+            collect_dispatch_features(expression, placeholders, output);
+        }
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } => {
+            output.insert(DispatchFeature::Apply(operator.clone()));
+            if arguments.len() == 1 {
+                output.insert(DispatchFeature::Product(2));
+            }
+            for argument in arguments {
+                collect_dispatch_features(argument, placeholders, output);
+            }
+        }
+        SemanticExprKind::Relation { left, right, .. } => {
+            collect_dispatch_features(left, placeholders, output);
+            collect_dispatch_features(right, placeholders, output);
+        }
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Number(_)
+        | SemanticExprKind::Unknown(_) => {}
+    }
+}
+
+fn dispatch_feature_priority(feature: &DispatchFeature) -> u8 {
+    match feature {
+        DispatchFeature::Apply(_) => 0,
+        DispatchFeature::Cross | DispatchFeature::Derivative | DispatchFeature::Dot => 1,
+        DispatchFeature::Fraction | DispatchFeature::Power => 2,
+        DispatchFeature::Product(_) | DispatchFeature::Sum(_) => 3,
+    }
+}
 
 fn derived_solved_forms(form: &SemanticExpr) -> Vec<SemanticExpr> {
     let SemanticExprKind::Relation {
@@ -265,7 +465,7 @@ pub(crate) fn observe_laws(
     let mut recognitions = Vec::new();
     let mut visited_rules = 0;
     for actual in canonical_expressions {
-        for compiled in COMPILED_LAWS.iter() {
+        for compiled in LAW_DISPATCH.candidates(actual) {
             if recognitions.len() >= MAX_LAW_MATCHES {
                 break;
             }
@@ -1762,7 +1962,7 @@ fn variadic_labels(expression: &SemanticExpr) -> Vec<String> {
 mod tests {
     use std::collections::{BTreeMap, BTreeSet};
 
-    use super::{observe_laws, unify};
+    use super::{COMPILED_LAWS, LAW_DISPATCH, LawDispatch, observe_laws, unify, unify_all};
     use crate::canonical::{SemanticExpr, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
     use crate::parser::{ParsedMath, parse_regions, test_math_regions};
@@ -1786,6 +1986,53 @@ mod tests {
                 expression
             })
             .collect()
+    }
+
+    #[test]
+    fn indexed_dispatch_is_complete_against_exhaustive_unification() {
+        for compiled in &*COMPILED_LAWS {
+            for actual in &compiled.forms {
+                let exhaustive = COMPILED_LAWS
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, candidate)| {
+                        candidate.forms.iter().any(|form| {
+                            !unify_all(form, actual, &candidate.placeholders, &BTreeMap::new())
+                                .is_empty()
+                        })
+                    })
+                    .map(|(index, _)| index)
+                    .collect::<BTreeSet<_>>();
+                let indexed = LAW_DISPATCH
+                    .candidate_indices(actual)
+                    .into_iter()
+                    .filter(|index| {
+                        let candidate = &COMPILED_LAWS[*index];
+                        candidate.forms.iter().any(|form| {
+                            !unify_all(form, actual, &candidate.placeholders, &BTreeMap::new())
+                                .is_empty()
+                        })
+                    })
+                    .collect::<BTreeSet<_>>();
+                assert_eq!(indexed, exhaustive, "{}", compiled.law.id);
+            }
+        }
+    }
+
+    #[test]
+    fn dispatch_stays_structurally_bounded_at_hundreds_of_synthetic_packs() {
+        for pack_count in [100, 500] {
+            let forms = (0..pack_count)
+                .map(|index| lower_template(&format!("synthetic{index}(x)")))
+                .collect::<Vec<_>>();
+            let mut dispatch = LawDispatch::default();
+            for (index, form) in forms.iter().enumerate() {
+                dispatch.insert(index, std::slice::from_ref(form), &BTreeSet::new(), false);
+            }
+            for (index, form) in forms.iter().enumerate() {
+                assert_eq!(dispatch.candidate_indices(form), [index]);
+            }
+        }
     }
 
     #[test]

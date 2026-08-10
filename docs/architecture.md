@@ -128,6 +128,12 @@ registry; the same compiler report is exposed through WASM to authoring tools.
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
 
+Law dispatch compiles root operators and mandatory canonical structure into an
+immutable index. Inference sends only structurally compatible candidates to
+the generic unifier; a bounded generic bucket exists only for forms such as
+variadic balances that have no sound discriminator. The exhaustive scan is a
+test oracle, not a production path.
+
 Authoring keeps a functional core and an effectful shell. Rust owns schema,
 catalog, dependency, canonical-form, unit, and dimension validation. Pure
 TypeScript functions plan reviewed probe cells, quality runs, explanations,

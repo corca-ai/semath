@@ -45,6 +45,7 @@ const QUERY_P95_BUDGET_MS = 8;
 const RETAINED_RSS_BUDGET_BYTES = (DOCUMENT_COUNT >= 500 ? 192 : 112) * 1024 * 1024;
 const MAX_AFFECTED_DOCUMENTS = 2;
 const MAX_TRANSFER_BYTES = 16 * 1024;
+const MAX_LAW_RULES_PER_DOCUMENT = 20;
 
 const sources = buildPerformanceDocuments(DOCUMENT_COUNT);
 const main = {
@@ -317,6 +318,11 @@ if (TIMING_GATE && semanticDeltaMs > SEMANTIC_DELTA_BUDGET_MS) {
 }
 if (TIMING_GATE && queryP95 > QUERY_P95_BUDGET_MS) {
   throw new Error(`budget query p95 ${queryP95.toFixed(2)}ms exceeded ${QUERY_P95_BUDGET_MS}ms`);
+}
+if (initial.stats.lawRulesVisited > (DOCUMENT_COUNT + 1) * MAX_LAW_RULES_PER_DOCUMENT) {
+  throw new Error(
+    `budget law dispatch visited ${initial.stats.lawRulesVisited} rules for ${DOCUMENT_COUNT + 1} documents`,
+  );
 }
 if (peakRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
   throw new Error(`budget peak RSS growth ${peakRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`);
