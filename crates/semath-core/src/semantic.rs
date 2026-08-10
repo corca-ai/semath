@@ -105,6 +105,7 @@ impl SemanticClaims {
             concepts,
             assumptions: self.assumptions.clone(),
             claims,
+            candidates: Vec::new(),
             relations,
             quantities: self.quantities.clone(),
             truncated: concepts_truncated || claims_truncated || relations_truncated,

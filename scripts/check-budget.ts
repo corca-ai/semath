@@ -460,6 +460,7 @@ function assertCounters(update: UpdateResult, analyzedDocuments: number) {
     "semanticEvidence",
     "semanticDependencyEdges",
     "invalidatedSemanticClaims",
+    "semanticCandidates",
   ] as const) {
     if (update.stats[key] < 0 || !Number.isFinite(update.stats[key])) {
       throw new Error(`budget ${key} counter is invalid`);

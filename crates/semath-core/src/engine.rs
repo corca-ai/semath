@@ -4,6 +4,9 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
+use crate::candidate::{
+    StructuralCandidateOption, append_semantic_candidates, structural_candidate_options,
+};
 use crate::canonical::{SemanticExpr, lower_document_region};
 use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
@@ -13,23 +16,25 @@ use crate::project_order::{ProjectOrder, ProjectOrderDocument};
 use crate::scope::ScopeGraph;
 use crate::semantic::SemanticFactStore;
 use crate::semantic_index::{
-    Claim, ClaimId, ClaimObject, ClaimPredicate, DocumentSemanticFacts, EntityId, EvidenceId,
-    EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier, Mention,
-    MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex, ResolutionStatus,
-    SourceOccurrence, SourceOccurrenceId,
+    CandidateFamily, Claim, ClaimId, ClaimObject, ClaimPredicate, DocumentSemanticFacts, EntityId,
+    EvidenceId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier,
+    Mention, MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex,
+    ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
 };
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query,
-    QueryEnvelope, QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticContextInfo,
-    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
-    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
+    QueryEnvelope, QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticCandidateInfo,
+    SemanticCandidateStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
+    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
+    UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
 const MAX_SYMBOL_DIAGNOSTICS: usize = 8;
 const MAX_VIEW_DIAGNOSTICS: usize = 8;
 const MAX_VIEW_DECLARATIONS: usize = 16;
+const MAX_VIEW_CANDIDATES: usize = 16;
 
 #[derive(Debug, Error)]
 pub enum EngineError {
@@ -71,6 +76,7 @@ struct SemanticOccurrenceSeed {
     structural_path: Vec<u32>,
     source_text: String,
     notation: Vec<NotationComponent>,
+    candidate_options: Vec<StructuralCandidateOption>,
 }
 
 #[derive(Clone)]
@@ -116,10 +122,17 @@ impl AnalyzedDocument {
             .flat_map(|math| &math.symbols)
             .map(|(surface, selection_range)| {
                 let range = notation_occurrence_range(&document, selection_range);
+                let structural_path = notation_path(&document, selection_range);
                 SemanticOccurrenceSeed {
                     surface: surface.clone(),
                     selection_range: selection_range.clone(),
-                    structural_path: notation_path(&document, selection_range),
+                    candidate_options: structural_candidate_options(
+                        &document,
+                        &structural_path,
+                        &range,
+                        surface,
+                    ),
+                    structural_path,
                     source_text: source_text(&document, &range),
                     notation: notation_components(&document, selection_range, surface),
                     range,
@@ -340,33 +353,40 @@ fn lower_semantic_document(
             ),
             id.clone(),
         );
-        occurrences.push(SourceOccurrence {
-            id,
-            component_id: document.component_id.clone(),
-            kind: OccurrenceKind::Notation,
-            range: seed.range.clone(),
-            selection_range: seed.selection_range.clone(),
-            scope_path: document.scopes.path_at(seed.selection_range.start_offset),
-            structural_path: seed.structural_path.clone(),
-            availability_order: order
-                .position(&source.file_id, seed.selection_range.start_offset)
-                .unwrap_or(u64::MAX),
-            surface: seed.surface.clone(),
-            source_text: seed.source_text.clone(),
-            notation: seed.notation.clone(),
-        });
+        occurrences.push((
+            SourceOccurrence {
+                id,
+                component_id: document.component_id.clone(),
+                kind: OccurrenceKind::Notation,
+                range: seed.range.clone(),
+                selection_range: seed.selection_range.clone(),
+                scope_path: document.scopes.path_at(seed.selection_range.start_offset),
+                structural_path: seed.structural_path.clone(),
+                availability_order: order
+                    .position(&source.file_id, seed.selection_range.start_offset)
+                    .unwrap_or(u64::MAX),
+                surface: seed.surface.clone(),
+                source_text: seed.source_text.clone(),
+                notation: seed.notation.clone(),
+            },
+            seed.candidate_options.clone(),
+        ));
     }
-    occurrences.sort_by_key(|item| {
+    occurrences.sort_by_key(|(item, _)| {
         (
             item.range.start_offset,
             item.range.end_offset,
             item.id.local_id,
         )
     });
-    occurrences.dedup_by(|left, right| left.range == right.range && left.surface == right.surface);
+    occurrences.dedup_by(|(left, _), (right, _)| {
+        left.range == right.range && left.surface == right.surface
+    });
     occurrences_by_range.clear();
-    for (local_id, occurrence) in occurrences.iter_mut().enumerate() {
+    let mut candidates = Vec::new();
+    for (local_id, (occurrence, options)) in occurrences.iter_mut().enumerate() {
         occurrence.id.local_id = local_id as u32;
+        append_semantic_candidates(source, occurrence, options, &mut candidates);
         occurrences_by_range.insert(
             (
                 source.file_id.clone(),
@@ -384,6 +404,10 @@ fn lower_semantic_document(
             occurrence.id.clone(),
         );
     }
+    let occurrences = occurrences
+        .into_iter()
+        .map(|(occurrence, _)| occurrence)
+        .collect::<Vec<_>>();
 
     let mut entities = Vec::new();
     let mut evidence = Vec::new();
@@ -442,10 +466,27 @@ fn lower_semantic_document(
             subject: entity.clone(),
             predicate: ClaimPredicate::Defines,
             object: ClaimObject::Occurrence(anchor),
-            evidence_id,
+            evidence_id: evidence_id.clone(),
             tier: InferenceTier::ExplicitClaim,
             derivation_depth: 0,
         });
+        for (type_index, candidate_type) in explicit_candidate_types(&definition.description)
+            .into_iter()
+            .enumerate()
+        {
+            claims.push(Claim {
+                id: ClaimId(format!(
+                    "{}:{}:definition-type-claim:{}:{type_index}",
+                    source.file_id, source.document_version, definition_index
+                )),
+                subject: entity.clone(),
+                predicate: ClaimPredicate::HasType,
+                object: ClaimObject::Text(candidate_type.to_owned()),
+                evidence_id: evidence_id.clone(),
+                tier: InferenceTier::ExplicitClaim,
+                derivation_depth: 0,
+            });
+        }
         definitions.insert(entity.clone(), definition.clone());
         entities.push(entity);
     }
@@ -466,10 +507,38 @@ fn lower_semantic_document(
             mentions,
             evidence,
             claims,
+            candidates,
         },
         definitions,
         occurrences: occurrences_by_range,
     }
+}
+
+fn explicit_candidate_types(description: &str) -> Vec<&'static str> {
+    let lower = description.to_ascii_lowercase();
+    let normalized = lower
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .collect::<HashSet<_>>();
+    [
+        ("function", "function"),
+        ("operator", "operator"),
+        ("mapping", "map"),
+        ("map", "map"),
+        ("metric", "metric"),
+        ("estimate", "estimate"),
+        ("transform", "transform"),
+        ("mean", "mean"),
+        ("vector", "vector"),
+        ("tensor", "tensor"),
+        ("set", "set"),
+        ("derivative", "derivative"),
+        ("differential", "differential"),
+    ]
+    .into_iter()
+    .filter_map(|(word, value)| normalized.contains(word).then_some(value))
+    .take(4)
+    .collect()
 }
 
 fn notation_occurrence_range(document: &ProjectDocument, selection: &SourceRange) -> SourceRange {
@@ -927,6 +996,7 @@ impl SemathEngine {
                 semantic_evidence: semantic_stats.evidence,
                 semantic_dependency_edges: semantic_stats.dependency_edges,
                 invalidated_semantic_claims: semantic_stats.invalidated_claims,
+                semantic_candidates: semantic_stats.candidates,
             },
             analyzed_file_ids,
         }
@@ -1049,13 +1119,51 @@ impl SemathEngine {
                 )
             })
             .unwrap_or_else(|| (Vec::new(), None, None));
-        facts.context(
+        let mut context = facts.context(
             definitions,
             symbol_name,
             entity_id,
             offset,
             self.index.external_types.get(file_id),
-        )
+        );
+        if let Some((_, occurrence)) = symbol
+            && let Some(occurrence_id) = self.index.occurrences_by_range.get(&(
+                file_id.to_owned(),
+                occurrence.start_offset,
+                occurrence.end_offset,
+            ))
+        {
+            let mut candidates = self
+                .index
+                .semantic
+                .candidates_for(occurrence_id)
+                .into_iter()
+                .map(|candidate| SemanticCandidateInfo {
+                    candidate_id: candidate.id.0.clone(),
+                    family: candidate_family_name(candidate.family).to_owned(),
+                    interpretation: candidate.interpretation.clone(),
+                    status: candidate_status(
+                        &candidate.supporting_claims,
+                        &candidate.rejecting_claims,
+                    ),
+                    range: candidate.range.clone(),
+                    supporting_claim_ids: candidate
+                        .supporting_claims
+                        .iter()
+                        .map(|claim| claim.0.clone())
+                        .collect(),
+                    rejecting_claim_ids: candidate
+                        .rejecting_claims
+                        .iter()
+                        .map(|claim| claim.0.clone())
+                        .collect(),
+                })
+                .collect::<Vec<_>>();
+            context.truncated |= candidates.len() > MAX_VIEW_CANDIDATES;
+            candidates.truncate(MAX_VIEW_CANDIDATES);
+            context.candidates = candidates;
+        }
+        context
     }
 
     fn semantic_view(
@@ -1434,6 +1542,29 @@ fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
 
 fn equation_node_count(node: &crate::EquationNode) -> u32 {
     1 + node.children.iter().map(equation_node_count).sum::<u32>()
+}
+
+fn candidate_family_name(family: CandidateFamily) -> &'static str {
+    match family {
+        CandidateFamily::Application => "application",
+        CandidateFamily::Binder => "binder",
+        CandidateFamily::Bracketed => "bracketed",
+        CandidateFamily::Decoration => "decoration",
+        CandidateFamily::Differential => "differential",
+        CandidateFamily::Juxtaposition => "juxtaposition",
+        CandidateFamily::Operator => "operator",
+        CandidateFamily::Script => "script",
+        CandidateFamily::Style => "style",
+    }
+}
+
+fn candidate_status(supporting: &[ClaimId], rejecting: &[ClaimId]) -> SemanticCandidateStatus {
+    match (supporting.is_empty(), rejecting.is_empty()) {
+        (false, false) => SemanticCandidateStatus::Conflicting,
+        (false, true) => SemanticCandidateStatus::Supported,
+        (true, false) => SemanticCandidateStatus::Rejected,
+        (true, true) => SemanticCandidateStatus::Unresolved,
+    }
 }
 
 fn document_diagnostics(

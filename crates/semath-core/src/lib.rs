@@ -1,4 +1,5 @@
 mod binder;
+mod candidate;
 mod canonical;
 mod consistency;
 mod cursor;

@@ -209,6 +209,16 @@ export interface SemanticClaimInfo {
   value: string;
 }
 
+export interface SemanticCandidateInfo {
+  candidateId: string;
+  family: string;
+  interpretation: string;
+  status: "conflicting" | "rejected" | "supported" | "unresolved";
+  range: SourceRange;
+  supportingClaimIds: readonly string[];
+  rejectingClaimIds: readonly string[];
+}
+
 export interface RelationRoleInfo {
   conceptId?: string;
   label: string;
@@ -229,6 +239,7 @@ export interface RelationInfo {
 export interface SemanticContextInfo {
   assumptions?: readonly AssumptionInfo[];
   claims: readonly SemanticClaimInfo[];
+  candidates: readonly SemanticCandidateInfo[];
   concepts: readonly ConceptInfo[];
   relations: readonly RelationInfo[];
   quantities: readonly QuantityInfo[];
@@ -378,6 +389,7 @@ export interface AnalysisStats {
   semanticEvidence: number;
   semanticDependencyEdges: number;
   invalidatedSemanticClaims: number;
+  semanticCandidates: number;
   totalDocuments: number;
 }
 
