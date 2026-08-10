@@ -42,6 +42,8 @@ artifacts.
   smallest authoritative test layer for each capability.
 - [Semantic quality scorecards](semantic-quality-scorecards.md) — interpret and
   change calibration, refusal, corpus, parity, and performance budgets.
+- [Performance gates](performance.md) — reproduce full-path latency, memory,
+  transfer, artifact, and bounded-invalidation measurements.
 
 ## Maintain the project
 

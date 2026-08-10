@@ -1,7 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
 import { performance } from "node:perf_hooks";
 import init, { SemathEngine } from "../lib/wasm/semath_wasm.js";
-import { LatexSyntaxService, type LatexDocumentInput } from "wasmtex/syntax";
+import { LatexSyntaxService } from "wasmtex/syntax";
 import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index";
 import {
   SEMATH_PROTOCOL_VERSION,
@@ -9,6 +9,7 @@ import {
   type ProjectSnapshot,
   type QueryEnvelope,
   type QueryResult,
+  type SemathQuery,
   type SemathWorkerRequest,
   type UpdateResult,
 } from "../packages/protocol/src/index";
@@ -16,8 +17,14 @@ import {
   SemathWorkerHost,
   type SemathWorkerOperations,
 } from "../packages/worker/src/host";
+import {
+  buildPerformanceDocuments,
+  editPerformanceDocument,
+  type PerformanceFixtureDocument,
+} from "./performance-fixtures";
 
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
+const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";
 const DELTA_RUNS = positiveInteger(
   "SEMATH_BUDGET_DELTA_RUNS",
   DOCUMENT_COUNT >= 500 ? 10 : 30,
@@ -29,22 +36,13 @@ const COLD_BUDGET_MS = DOCUMENT_COUNT >= 500 ? 5_000 : 2_500;
 // Hosted runners occasionally lose a single edit to a 40–60ms scheduler
 // pause. Keep the p95 gate below one 60Hz frame plus that observed jitter,
 // while the dedicated syntax/query measurements remain visible for diagnosis.
-const DELTA_P95_BUDGET_MS = 75;
-const QUERY_P95_BUDGET_MS = 3;
+const DELTA_P95_BUDGET_MS = STABLE_HOST_GATE ? (DOCUMENT_COUNT >= 500 ? 50 : 25) : 75;
+const QUERY_P95_BUDGET_MS = 8;
 const RETAINED_RSS_BUDGET_BYTES = (DOCUMENT_COUNT >= 500 ? 192 : 112) * 1024 * 1024;
 const MAX_AFFECTED_DOCUMENTS = 2;
 const MAX_TRANSFER_BYTES = 16 * 1024;
 
-const sources = Array.from({ length: DOCUMENT_COUNT }, (_, index) => ({
-  content: [
-    `Let p${index} denote probability and let A${index} and B${index} be events.`,
-    `$p${index} = \\frac{\\mathbb{P}(A${index} \\cap B${index})}{\\mathbb{P}(B${index})}$`,
-  ].join("\n"),
-  documentVersion: 1,
-  fileId: `section-${index}`,
-  language: "latex" as const,
-  path: `section-${index}.tex`,
-}));
+const sources = buildPerformanceDocuments(DOCUMENT_COUNT);
 const main = {
   content: sources.map((source) => `\\input{${source.path}}`).join("\n"),
   documentVersion: 1,
@@ -56,6 +54,8 @@ const main = {
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const wasm = await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url));
+const wasmArtifactBytes = (await stat(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url)))
+  .size;
 const rssBefore = process.memoryUsage().rss;
 const coldStarted = performance.now();
 
@@ -66,7 +66,7 @@ const documents = [main, ...sources].map((source) => {
   if (!fileSyntax) throw new Error(`missing syntax for ${source.fileId}`);
   return adaptWasmtexDocument({
     content: source.content,
-    language: source.language,
+    language: source.language ?? "latex",
     syntax: fileSyntax,
   });
 });
@@ -93,21 +93,17 @@ assertCounters(initial, DOCUMENT_COUNT + 1);
 
 const deltaDurations: number[] = [];
 const syntaxDurations: number[] = [];
-const queryDurations: number[] = [];
+const queryDurations = new Map<SemathQuery["kind"], number[]>();
 let peakRss = process.memoryUsage().rss;
 let maxAffected = 0;
 let maxTransferBytes = 0;
 let inventoryVersion = snapshot.inventoryVersion;
-let currentSource: LatexDocumentInput = sources[0]!;
+let currentSource: PerformanceFixtureDocument = sources[0]!;
 let current = documents[1]!;
 
 for (let run = 0; run < DELTA_RUNS; run += 1) {
   inventoryVersion += 1;
-  currentSource = {
-    ...currentSource,
-    content: `${sources[0]!.content}\n% delta ${run}`,
-    documentVersion: currentSource.documentVersion + 1,
-  };
+  currentSource = editPerformanceDocument(currentSource, run);
 
   const started = performance.now();
   const syntaxStarted = performance.now();
@@ -144,26 +140,26 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
   }
   assertCounters(update, update.analyzedFileIds.length);
 
-  const query: QueryEnvelope = {
-    analysisGeneration: run + 1,
-    documentVersion: current.documentVersion,
-    epoch: snapshot.epoch,
-    inventoryVersion,
-    protocolVersion: SEMATH_PROTOCOL_VERSION,
-    query: {
-      fileId: current.fileId,
-      kind: "semanticView",
-      offset: current.content.indexOf("$p") + 1,
-    },
-  };
-  const queryStarted = performance.now();
-  await worker.request<QueryResult>({
-    envelope: query,
-    id: worker.nextId(),
-    kind: "query",
-    priority: "cursor",
-  });
-  queryDurations.push(performance.now() - queryStarted);
+  for (const query of measuredQueries(currentSource)) {
+    const envelope: QueryEnvelope = {
+      analysisGeneration: run + 1,
+      documentVersion: current.documentVersion,
+      epoch: snapshot.epoch,
+      inventoryVersion,
+      protocolVersion: SEMATH_PROTOCOL_VERSION,
+      query,
+    };
+    const queryStarted = performance.now();
+    await worker.request<QueryResult>({
+      envelope,
+      id: worker.nextId(),
+      kind: "query",
+      priority: "cursor",
+    });
+    const durations = queryDurations.get(query.kind) ?? [];
+    durations.push(performance.now() - queryStarted);
+    queryDurations.set(query.kind, durations);
+  }
 }
 
 if (syntax.getStats().parseCount !== DOCUMENT_COUNT + 1 + DELTA_RUNS) {
@@ -208,12 +204,23 @@ if (
 }
 clean.free();
 await worker.dispose();
+const rssAfterDispose = process.memoryUsage().rss;
+const retainedRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
 
 const deltaP95 = percentile(deltaDurations, 0.95);
 const deltaMedian = percentile(deltaDurations, 0.5);
 const syntaxP95 = percentile(syntaxDurations, 0.95);
-const queryP95 = percentile(queryDurations, 0.95);
-const peakRssGrowth = Math.max(0, peakRss - rssBefore);
+const queryP95ByKind = Object.fromEntries(
+  [...queryDurations].map(([kind, durations]) => [kind, percentile(durations, 0.95)]),
+);
+const queryP95 = Math.max(...Object.values(queryP95ByKind));
+const peakRssGrowth = Math.max(0, Math.max(peakRss, rssAfterDispose) - rssBefore);
+const syntaxStats = syntax.getStats() as ReturnType<LatexSyntaxService["getStats"]> & {
+  lastInvalidatedDocuments?: number;
+  notationNodes?: number;
+  recoveredNodes?: number;
+  snapshotBytes?: number;
+};
 if (coldMs > COLD_BUDGET_MS) {
   throw new Error(`budget cold start ${coldMs.toFixed(2)}ms exceeded ${COLD_BUDGET_MS}ms`);
 }
@@ -226,23 +233,45 @@ if (queryP95 > QUERY_P95_BUDGET_MS) {
 if (peakRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
   throw new Error(`budget peak RSS growth ${peakRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`);
 }
+if (retainedRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
+  throw new Error(
+    `budget retained RSS growth ${retainedRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`,
+  );
+}
+if (
+  syntaxStats.lastInvalidatedDocuments !== undefined &&
+  syntaxStats.lastInvalidatedDocuments !== 1
+) {
+  throw new Error(
+    `budget leaf edit transferred ${syntaxStats.lastInvalidatedDocuments} syntax documents`,
+  );
+}
 if (maxTransferBytes > MAX_TRANSFER_BYTES) {
   throw new Error(`budget delta transfer ${maxTransferBytes}B exceeded ${MAX_TRANSFER_BYTES}B`);
 }
-console.log(
-  [
-    "budget OK:",
-    `documents=${DOCUMENT_COUNT + 1}`,
-    `cold=${coldMs.toFixed(2)}ms`,
-    `syntax-p95=${syntaxP95.toFixed(2)}ms`,
-    `delta-median=${deltaMedian.toFixed(2)}ms`,
-    `delta-p95=${deltaP95.toFixed(2)}ms`,
-    `query-p95=${queryP95.toFixed(2)}ms`,
-    `peak-rss-growth=${peakRssGrowth}B`,
-    `max-transfer=${maxTransferBytes}B`,
-    `max-affected=${maxAffected}`,
-  ].join(" "),
-);
+const report = {
+  affectedDocuments: maxAffected,
+  coldMs,
+  deltaMedianMs: deltaMedian,
+  deltaP95Ms: deltaP95,
+  documents: DOCUMENT_COUNT + 1,
+  fixtureFamilies: [...new Set(sources.map((source) => source.family))],
+  peakRssGrowthBytes: peakRssGrowth,
+  queryP95ByKind,
+  retainedRssGrowthBytes: retainedRssGrowth,
+  syntax: {
+    deltaP95Ms: syntaxP95,
+    notationNodes: syntaxStats.notationNodes ?? null,
+    parseCount: syntaxStats.parseCount,
+    recoveredNodes: syntaxStats.recoveredNodes ?? null,
+    snapshotBytes: syntaxStats.snapshotBytes ?? null,
+  },
+  transferBytes: maxTransferBytes,
+  wasmArtifactBytes,
+};
+console.log(`budget OK: ${JSON.stringify(report)}`);
+const reportPath = process.env.SEMATH_BUDGET_REPORT;
+if (reportPath) await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 
 function operations(engine: SemathEngine): SemathWorkerOperations {
   return {
@@ -311,6 +340,18 @@ function decodeQuery(bytes: Uint8Array): QueryResult {
 
 function encodedLength(value: unknown): number {
   return encoder.encode(JSON.stringify(value)).byteLength;
+}
+
+function measuredQueries(document: PerformanceFixtureDocument): readonly SemathQuery[] {
+  const target = { fileId: document.fileId, offset: document.queryOffset };
+  return [
+    { ...target, kind: "selection" },
+    { ...target, kind: "semanticView" },
+    { ...target, kind: "definition" },
+    { ...target, kind: "references" },
+    { ...target, kind: "prepareRename" },
+    { ...target, kind: "rename", newName: "renamed" },
+  ];
 }
 
 function positiveInteger(name: string, fallback: number): number {
