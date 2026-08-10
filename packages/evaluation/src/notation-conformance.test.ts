@@ -158,12 +158,12 @@ function nodeSummary(node: LatexFileSyntax["nodes"][number]) {
   return {
     kind: node.kind,
     name: node.name,
-    origin: node.provenance.origin,
+    origin: node.provenance?.origin ?? "source",
     state: node.state,
     text: node.text,
   };
 }
 
 function expandedCall(syntax: LatexFileSyntax | null) {
-  return syntax?.nodes.find((node) => node.provenance.origin === "expansion");
+  return syntax?.nodes.find((node) => node.provenance?.origin === "expansion");
 }

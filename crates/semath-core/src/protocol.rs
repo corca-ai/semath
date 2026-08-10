@@ -120,7 +120,7 @@ pub struct NotationNode {
     #[serde(default)]
     pub arguments: Vec<NotationArgument>,
     pub math_class: Option<String>,
-    pub provenance: SyntaxProvenance,
+    pub provenance: Option<SyntaxProvenance>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

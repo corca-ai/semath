@@ -74,9 +74,9 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
                 ));
             }
         }
-        if node.provenance.source.file_id == document.file_id
-            && !valid_range(&node.provenance.source.range)
-        {
+        if node.provenance.as_ref().is_some_and(|provenance| {
+            provenance.source.file_id == document.file_id && !valid_range(&provenance.source.range)
+        }) {
             return Err(format!("notation node {id} has invalid provenance"));
         }
     }

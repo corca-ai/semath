@@ -189,7 +189,9 @@ fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec
 }
 
 fn syntax_provenance(node: &crate::NotationNode) -> Vec<SourceRange> {
-    let provenance = &node.provenance;
+    let Some(provenance) = &node.provenance else {
+        return Vec::new();
+    };
     if provenance.origin == "source" {
         return Vec::new();
     }

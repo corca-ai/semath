@@ -35,18 +35,19 @@ const NOTATION_STATES = [
   "cyclic",
   "truncated",
 ] as const satisfies readonly LatexSyntaxState[];
+type ProvenanceOrigin = NonNullable<LatexNotationNode["provenance"]>["origin"];
 const PROVENANCE_ORIGINS = [
   "source",
   "call-site",
   "definition",
   "expansion",
   "generated",
-] as const satisfies readonly LatexNotationNode["provenance"]["origin"][];
+] as const satisfies readonly ProvenanceOrigin[];
 
 export interface NotationNodeExpectation {
   kind: LatexNotationNodeKind;
   name?: string;
-  provenanceOrigin?: LatexNotationNode["provenance"]["origin"];
+  provenanceOrigin?: ProvenanceOrigin;
   state?: LatexSyntaxState;
   text?: string;
 }
@@ -101,7 +102,7 @@ export function matchesNotationExpectation(
     (expectation.text === undefined || node.text === expectation.text) &&
     (expectation.state === undefined || node.state === expectation.state) &&
     (expectation.provenanceOrigin === undefined ||
-      node.provenance.origin === expectation.provenanceOrigin)
+      (node.provenance?.origin ?? "source") === expectation.provenanceOrigin)
   );
 }
 
