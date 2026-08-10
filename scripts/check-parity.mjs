@@ -185,6 +185,8 @@ function decode(value) {
 
 function assertEqual(left, right, label) {
   if (JSON.stringify(left) !== JSON.stringify(right)) {
-    throw new Error(`${label} mismatch`);
+    throw new Error(
+      `${label} mismatch\nleft=${JSON.stringify(left)}\nright=${JSON.stringify(right)}`,
+    );
   }
 }

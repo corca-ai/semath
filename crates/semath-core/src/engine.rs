@@ -123,7 +123,14 @@ struct ProjectState {
 impl ProjectState {
     fn replace(&mut self, document: ProjectDocument) -> Result<(), EngineError> {
         let file_id = document.file_id.clone();
-        let (document, facts) = AnalyzedDocument::analyze(document)?;
+        let previous_component = self
+            .documents
+            .get(&file_id)
+            .map(|document| document.component_id.clone());
+        let (mut document, facts) = AnalyzedDocument::analyze(document)?;
+        if let Some(component_id) = previous_component {
+            document.component_id = component_id;
+        }
         self.documents.insert(file_id.clone(), document);
         self.facts.insert(file_id, facts);
         Ok(())
