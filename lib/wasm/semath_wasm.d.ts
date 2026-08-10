@@ -4,8 +4,10 @@ export function createPackTemplate(pack_id: string): string;
 export function inspectPackCatalog(payload: Uint8Array): Uint8Array;
 export class SemathEngine {
   free(): void;
+  beginReset(payload: Uint8Array): void;
+  finishReset(): Uint8Array;
   applyChanges(payload: Uint8Array): Uint8Array;
-  resetProject(payload: Uint8Array): Uint8Array;
+  ingestResetDocument(payload: Uint8Array): void;
   constructor();
   query(payload: Uint8Array): Uint8Array;
 }
@@ -18,9 +20,11 @@ export interface InitOutput {
   readonly createPackTemplate: (a: number, b: number, c: number) => void;
   readonly inspectPackCatalog: (a: number, b: number, c: number) => void;
   readonly semathengine_applyChanges: (a: number, b: number, c: number, d: number) => void;
+  readonly semathengine_beginReset: (a: number, b: number, c: number, d: number) => void;
+  readonly semathengine_finishReset: (a: number, b: number) => void;
+  readonly semathengine_ingestResetDocument: (a: number, b: number, c: number, d: number) => void;
   readonly semathengine_new: () => number;
   readonly semathengine_query: (a: number, b: number, c: number, d: number) => void;
-  readonly semathengine_resetProject: (a: number, b: number, c: number, d: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_export_0: (a: number, b: number) => number;
   readonly __wbindgen_export_1: (a: number, b: number, c: number) => void;

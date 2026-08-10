@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
+
 pub const PROTOCOL_VERSION: u32 = 4;
+pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -27,14 +30,215 @@ pub struct MathRegion {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectDocument {
+    pub schema_version: u32,
     pub file_id: String,
     pub path: String,
     pub language: DocumentLanguage,
     pub content: String,
     pub document_version: u64,
+    pub nodes: Vec<NotationNode>,
+    pub math_roots: Vec<MathRoot>,
+    pub visible_prose: Vec<VisibleProseSpan>,
+    pub scopes: Vec<SyntaxScope>,
+    pub declarations: Vec<StructuralDeclaration>,
+    #[cfg(test)]
+    #[serde(default)]
     pub math_regions: Vec<MathRegion>,
     pub macros: Vec<ProjectMacro>,
     pub includes: Vec<ProjectInclude>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum SyntaxState {
+    Complete,
+    Incomplete,
+    Ambiguous,
+    Opaque,
+    Cyclic,
+    Truncated,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum NotationNodeKind {
+    Token,
+    Sequence,
+    Group,
+    Command,
+    Script,
+    Delimiter,
+    Alignment,
+    Environment,
+    Modifier,
+    Style,
+    NamedOperator,
+    Opaque,
+    Error,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct NotationNodeRanges {
+    pub full: SourceRange,
+    pub command: Option<SourceRange>,
+    pub name: Option<SourceRange>,
+    pub nucleus: Option<SourceRange>,
+    pub editable: Option<SourceRange>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SyntaxProvenance {
+    pub origin: String,
+    pub source: ProjectSourceRef,
+    pub call_site: Option<ProjectSourceRef>,
+    #[serde(default)]
+    pub definitions: Vec<ProjectSourceRef>,
+    pub editable: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct NotationArgument {
+    pub node: u32,
+    pub role: String,
+    pub syntax: String,
+    pub range: SourceRange,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct NotationNode {
+    pub kind: NotationNodeKind,
+    pub parent: Option<u32>,
+    pub children: Vec<u32>,
+    pub ranges: NotationNodeRanges,
+    pub state: SyntaxState,
+    pub name: Option<String>,
+    pub text: Option<String>,
+    #[serde(default)]
+    pub arguments: Vec<NotationArgument>,
+    pub math_class: Option<String>,
+    pub provenance: Option<SyntaxProvenance>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathRoot {
+    pub node: u32,
+    pub delimiter: String,
+    pub full_range: SourceRange,
+    pub content_range: SourceRange,
+    pub state: MathRootState,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathRootState {
+    Complete,
+    Incomplete,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct VisibleProseSpan {
+    pub range: SourceRange,
+    pub state: CompleteSyntaxState,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum CompleteSyntaxState {
+    Complete,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SyntaxScope {
+    pub kind: String,
+    pub parent: Option<u32>,
+    pub range: SourceRange,
+    pub state: MathRootState,
+    pub name: Option<String>,
+    pub level: Option<String>,
+    pub source: Option<ProjectSourceRef>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(
+    tag = "kind",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase"
+)]
+pub enum StructuralDeclaration {
+    Class {
+        name: String,
+        options: String,
+        source: ProjectSourceRef,
+    },
+    Package {
+        name: String,
+        options: String,
+        source: ProjectSourceRef,
+    },
+    Environment {
+        name: String,
+        source: ProjectSourceRef,
+    },
+    Macro {
+        name: String,
+        parameters: Option<u32>,
+        optional_default: Option<String>,
+        body: Option<String>,
+        body_source: Option<ProjectSourceRef>,
+        source: ProjectSourceRef,
+        state: Option<MathRootState>,
+    },
+    Operator {
+        name: String,
+        surface: String,
+        limits: bool,
+        source: ProjectSourceRef,
+        name_source: ProjectSourceRef,
+        surface_source: ProjectSourceRef,
+        state: MathRootState,
+    },
+    PairedDelimiter {
+        name: String,
+        left: String,
+        right: String,
+        source: ProjectSourceRef,
+        name_source: ProjectSourceRef,
+        state: MathRootState,
+    },
+    Glossary {
+        key: String,
+        options: Vec<StructuralField>,
+        fields: Vec<StructuralField>,
+        source: ProjectSourceRef,
+        key_source: ProjectSourceRef,
+        state: MathRootState,
+    },
+    Acronym {
+        key: String,
+        short: String,
+        long: String,
+        options: Vec<StructuralField>,
+        source: ProjectSourceRef,
+        key_source: ProjectSourceRef,
+        short_source: ProjectSourceRef,
+        long_source: ProjectSourceRef,
+        state: MathRootState,
+    },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct StructuralField {
+    pub name: String,
+    pub value: String,
+    pub source: ProjectSourceRef,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -72,6 +276,36 @@ pub struct ProjectMacroExpansion {
     pub surface: Option<String>,
     #[serde(default)]
     pub input_range: Option<SourceRange>,
+    #[serde(default)]
+    pub notation: Option<GeneratedNotationTree>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneratedNotationTree {
+    pub nodes: Vec<GeneratedNotationNode>,
+    pub root: u32,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneratedNotationNode {
+    pub kind: NotationNodeKind,
+    pub children: Vec<u32>,
+    pub state: SyntaxState,
+    pub name: Option<String>,
+    pub text: Option<String>,
+    #[serde(default)]
+    pub arguments: Vec<GeneratedNotationArgument>,
+    pub math_class: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneratedNotationArgument {
+    pub node: u32,
+    pub role: String,
+    pub syntax: String,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -88,7 +322,9 @@ pub enum ProjectMacroExpansionStatus {
 #[serde(rename_all = "camelCase")]
 pub struct ProjectInclude {
     pub path: String,
-    pub source_range: SourceRange,
+    #[serde(rename = "type")]
+    pub kind: String,
+    pub source: ProjectSourceRef,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -111,10 +347,20 @@ pub struct ProjectSnapshot {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectSnapshotMetadata {
+    pub protocol_version: u32,
+    pub epoch: String,
+    pub inventory_version: u64,
+    pub project_id: String,
+    pub main_file_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
 pub enum ProjectChange {
     Upsert {
-        document: ProjectDocument,
+        document: Box<ProjectDocument>,
     },
     PathChange {
         #[serde(rename = "fileId")]
@@ -220,25 +466,18 @@ pub struct DefinitionInfo {
     pub location: Location,
     pub evidence: Evidence,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub semantic_id: Option<SemanticSymbolId>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct SemanticSymbolId {
-    pub component_id: String,
-    pub file_id: String,
-    pub scope_path: Vec<u32>,
-    pub kind: String,
-    pub anchor: u32,
+    pub entity_id: Option<EntityId>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SymbolInfo {
     pub symbol: String,
+    pub occurrence_id: SourceOccurrenceId,
+    pub notation: Vec<NotationComponent>,
+    pub source_notation: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub semantic_id: Option<SemanticSymbolId>,
+    pub entity_id: Option<EntityId>,
     pub location: Location,
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ShapeInfo>,
@@ -338,7 +577,7 @@ pub struct SemanticContextInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub symbol: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub semantic_id: Option<SemanticSymbolId>,
+    pub entity_id: Option<EntityId>,
     pub concepts: Vec<ConceptInfo>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub assumptions: Vec<AssumptionInfo>,
@@ -574,6 +813,12 @@ pub struct AnalysisStats {
     pub semantic_nodes: u32,
     pub constraints: u32,
     pub law_rules_visited: u32,
+    pub semantic_occurrences: u32,
+    pub semantic_entities: u32,
+    pub semantic_claims: u32,
+    pub semantic_evidence: u32,
+    pub semantic_dependency_edges: u32,
+    pub invalidated_semantic_claims: u32,
 }
 
 #[cfg(test)]

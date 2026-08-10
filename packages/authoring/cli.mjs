@@ -192,7 +192,12 @@ async function runWasm(plan) {
   const decoder = new TextDecoder();
   const engine = new wasm.SemathEngine();
   try {
-    engine.resetProject(encoder.encode(JSON.stringify(plan.snapshot)));
+    const { documents, ...metadata } = plan.snapshot;
+    engine.beginReset(encoder.encode(JSON.stringify(metadata)));
+    for (const document of documents) {
+      engine.ingestResetDocument(encoder.encode(JSON.stringify(document)));
+    }
+    engine.finishReset();
     return plan.queries.map((query) =>
       JSON.parse(decoder.decode(engine.query(encoder.encode(JSON.stringify(query))))),
     );

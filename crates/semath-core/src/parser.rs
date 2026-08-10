@@ -1,12 +1,319 @@
 #[cfg(test)]
-use crate::DocumentLanguage;
-use crate::{EquationNode, MathRegion, SourceIndex, SourceRange};
+use crate::{DocumentLanguage, SourceIndex};
+use crate::{
+    EquationNode, GeneratedNotationTree, MathRegion, MathRootState, NotationNode, NotationNodeKind,
+    ProjectDocument, SourceRange, WASMTEX_SYNTAX_SCHEMA_VERSION,
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct ParsedMath {
     pub region: MathRegion,
     pub root: EquationNode,
     pub symbols: Vec<(String, SourceRange)>,
+}
+
+pub(crate) fn parse_snapshot(document: &ProjectDocument) -> Result<Vec<ParsedMath>, String> {
+    if document.schema_version != WASMTEX_SYNTAX_SCHEMA_VERSION {
+        return Err(format!(
+            "unsupported wasmtex syntax schema {}; expected {}",
+            document.schema_version, WASMTEX_SYNTAX_SCHEMA_VERSION
+        ));
+    }
+    let source_length = document.content.encode_utf16().count() as u32;
+    validate_snapshot(document, source_length)?;
+    document
+        .math_roots
+        .iter()
+        .map(|root| {
+            let mut symbols = Vec::new();
+            let mut visiting = vec![false; document.nodes.len()];
+            let equation =
+                lower_snapshot_node(root.node, &document.nodes, &mut visiting, &mut symbols)?;
+            Ok(ParsedMath {
+                region: MathRegion {
+                    full_range: root.full_range.clone(),
+                    content_range: root.content_range.clone(),
+                    delimiter: root.delimiter.clone(),
+                    closed: root.state == MathRootState::Complete,
+                },
+                root: equation,
+                symbols,
+            })
+        })
+        .collect()
+}
+
+fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(), String> {
+    if document.nodes.len() > 100_000 {
+        return Err("notation arena exceeds the Semath ingestion cap".to_owned());
+    }
+    let valid_range = |range: &SourceRange| {
+        range.start_offset <= range.end_offset && range.end_offset <= source_length
+    };
+    for (id, node) in document.nodes.iter().enumerate() {
+        if !valid_range(&node.ranges.full) {
+            return Err(format!("notation node {id} has an invalid source range"));
+        }
+        if node
+            .children
+            .iter()
+            .any(|child| *child as usize >= document.nodes.len())
+        {
+            return Err(format!("notation node {id} has an invalid child"));
+        }
+        if node
+            .parent
+            .is_some_and(|parent| parent as usize >= document.nodes.len())
+        {
+            return Err(format!("notation node {id} has an invalid parent"));
+        }
+        for child in &node.children {
+            if document.nodes[*child as usize].parent != Some(id as u32) {
+                return Err(format!(
+                    "notation node {id} has an inconsistent child parent"
+                ));
+            }
+        }
+        if node.provenance.as_ref().is_some_and(|provenance| {
+            provenance.source.file_id == document.file_id && !valid_range(&provenance.source.range)
+        }) {
+            return Err(format!("notation node {id} has invalid provenance"));
+        }
+    }
+    for root in &document.math_roots {
+        if root.node as usize >= document.nodes.len()
+            || document.nodes[root.node as usize].parent.is_some()
+            || !valid_range(&root.full_range)
+            || !valid_range(&root.content_range)
+            || root.content_range.start_offset < root.full_range.start_offset
+            || root.content_range.end_offset > root.full_range.end_offset
+        {
+            return Err("math root is corrupt".to_owned());
+        }
+    }
+    let document_scopes = document
+        .scopes
+        .iter()
+        .filter(|scope| scope.kind == "document" && scope.parent.is_none())
+        .collect::<Vec<_>>();
+    if document_scopes.len() != 1
+        || document_scopes[0].range
+            != (SourceRange {
+                start_offset: 0,
+                end_offset: source_length,
+            })
+    {
+        return Err("syntax snapshot must contain one full document scope".to_owned());
+    }
+    for (id, scope) in document.scopes.iter().enumerate() {
+        if !valid_range(&scope.range) {
+            return Err(format!("syntax scope {id} has an invalid range"));
+        }
+        if let Some(parent) = scope.parent {
+            let Some(parent_scope) = document.scopes.get(parent as usize) else {
+                return Err(format!("syntax scope {id} has an invalid parent"));
+            };
+            if parent_scope.range.start_offset > scope.range.start_offset
+                || scope.range.end_offset > parent_scope.range.end_offset
+            {
+                return Err(format!("syntax scope {id} escapes its parent"));
+            }
+        }
+        let mut cursor = scope.parent;
+        let mut visited = vec![false; document.scopes.len()];
+        while let Some(parent) = cursor {
+            let parent = parent as usize;
+            if parent >= document.scopes.len() || visited[parent] {
+                return Err(format!("syntax scope {id} has a cyclic parent chain"));
+            }
+            visited[parent] = true;
+            cursor = document.scopes[parent].parent;
+        }
+    }
+    if document
+        .visible_prose
+        .iter()
+        .any(|span| !valid_range(&span.range))
+    {
+        return Err("visible prose span has an invalid range".to_owned());
+    }
+    let mut generated_nodes = 0usize;
+    for (event, tree) in document
+        .macros
+        .iter()
+        .filter_map(|event| event.expansion.notation.as_ref().map(|tree| (event, tree)))
+    {
+        generated_nodes = generated_nodes.saturating_add(tree.nodes.len());
+        if generated_nodes > 100_000 {
+            return Err("generated notation exceeds the Semath ingestion cap".to_owned());
+        }
+        validate_generated_tree(tree).map_err(|reason| {
+            format!(
+                "macro {} has invalid generated notation: {reason}",
+                event.name
+            )
+        })?;
+    }
+    Ok(())
+}
+
+fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static str> {
+    if tree.nodes.is_empty() || tree.nodes.len() > 10_000 {
+        return Err("node count is outside the per-expansion cap");
+    }
+    if tree.root as usize >= tree.nodes.len() {
+        return Err("root does not exist");
+    }
+    for node in &tree.nodes {
+        if node
+            .children
+            .iter()
+            .chain(node.arguments.iter().map(|argument| &argument.node))
+            .any(|child| *child as usize >= tree.nodes.len())
+        {
+            return Err("child does not exist");
+        }
+    }
+    let mut active = vec![false; tree.nodes.len()];
+    let mut visited = vec![false; tree.nodes.len()];
+    let mut stack = vec![(tree.root, false, 0usize)];
+    while let Some((node_id, leaving, depth)) = stack.pop() {
+        let index = node_id as usize;
+        if leaving {
+            active[index] = false;
+            visited[index] = true;
+            continue;
+        }
+        if active[index] {
+            return Err("tree contains a cycle");
+        }
+        if visited[index] {
+            continue;
+        }
+        if depth > 128 {
+            return Err("tree exceeds the nesting cap");
+        }
+        active[index] = true;
+        stack.push((node_id, true, depth));
+        for child in tree.nodes[index].children.iter().rev() {
+            stack.push((*child, false, depth + 1));
+        }
+    }
+    Ok(())
+}
+
+fn lower_snapshot_node(
+    id: u32,
+    nodes: &[NotationNode],
+    visiting: &mut [bool],
+    symbols: &mut Vec<(String, SourceRange)>,
+) -> Result<EquationNode, String> {
+    let index = id as usize;
+    let node = nodes
+        .get(index)
+        .ok_or_else(|| format!("notation node {id} does not exist"))?;
+    if visiting[index] {
+        return Err(format!("notation node {id} contains a cycle"));
+    }
+    visiting[index] = true;
+    let mut child_symbols = Vec::new();
+    let mut children = node
+        .children
+        .iter()
+        .map(|child| lower_snapshot_node(*child, nodes, visiting, &mut child_symbols))
+        .collect::<Result<Vec<_>, _>>()?;
+    visiting[index] = false;
+
+    let range = node.ranges.full.clone();
+    let (kind, label) = match node.kind {
+        NotationNodeKind::Token => {
+            let text = node.text.clone().unwrap_or_default();
+            let kind = if text
+                .chars()
+                .all(|character| character.is_ascii_digit() || character == '.')
+                && text.chars().any(|character| character.is_ascii_digit())
+            {
+                "number"
+            } else if text.chars().count() == 1
+                && text
+                    .chars()
+                    .next()
+                    .is_some_and(|character| "+-=<>*/|,:&".contains(character))
+            {
+                "operator"
+            } else if text.chars().any(char::is_alphabetic) {
+                symbols.push((text.clone(), range.clone()));
+                "symbol"
+            } else {
+                "text"
+            };
+            (kind, Some(text))
+        }
+        NotationNodeKind::NamedOperator => {
+            let name = node.name.clone().unwrap_or_default();
+            let symbol_range = node.ranges.name.clone().unwrap_or_else(|| range.clone());
+            if !name.is_empty() {
+                symbols.push((name.clone(), symbol_range));
+            }
+            children.clear();
+            ("symbol", Some(name))
+        }
+        NotationNodeKind::Sequence => ("sequence", None),
+        NotationNodeKind::Group => ("group", None),
+        NotationNodeKind::Delimiter => ("delimited", node.name.clone()),
+        NotationNodeKind::Modifier | NotationNodeKind::Style => {
+            ("styled", node.name.as_ref().map(|name| format!("\\{name}")))
+        }
+        NotationNodeKind::Script => {
+            let script_kind = node.name.as_deref().unwrap_or("subscript");
+            if children.len() >= 2 {
+                let script = children.remove(1);
+                let script_range = script.range.clone();
+                children.insert(
+                    1,
+                    EquationNode {
+                        kind: script_kind.to_owned(),
+                        label: None,
+                        range: script_range,
+                        children: vec![script],
+                    },
+                );
+            }
+            ("scripted", None)
+        }
+        NotationNodeKind::Command => {
+            let name = node.name.clone().unwrap_or_default();
+            let kind = match name.as_str() {
+                "frac" | "dfrac" | "tfrac" => "fraction",
+                "sqrt" => "root",
+                "sum" => "sum",
+                "int" => "integral",
+                "lim" => "limit",
+                "forall" | "exists" => "quantifier",
+                _ => "command",
+            };
+            if kind == "command" && !name.is_empty() {
+                symbols.push((
+                    format!("\\{name}"),
+                    node.ranges.command.clone().unwrap_or_else(|| range.clone()),
+                ));
+            }
+            (kind, Some(format!("\\{name}")))
+        }
+        NotationNodeKind::Alignment => ("alignment", node.name.clone()),
+        NotationNodeKind::Environment => ("environment", node.name.clone()),
+        NotationNodeKind::Opaque => ("opaque", node.name.clone().or_else(|| node.text.clone())),
+        NotationNodeKind::Error => ("error", node.name.clone().or_else(|| node.text.clone())),
+    };
+    if node.kind != NotationNodeKind::NamedOperator {
+        symbols.extend(child_symbols);
+    }
+    Ok(EquationNode {
+        kind: kind.to_owned(),
+        label,
+        range,
+        children,
+    })
 }
 
 #[cfg(test)]
@@ -97,6 +404,7 @@ fn escaped(bytes: &[u8], offset: usize) -> bool {
     slashes % 2 == 1
 }
 
+#[cfg(test)]
 fn range(index: &SourceIndex, start: usize, end: usize) -> SourceRange {
     SourceRange {
         start_offset: index.utf16_for_byte(start),
@@ -104,6 +412,7 @@ fn range(index: &SourceIndex, start: usize, end: usize) -> SourceRange {
     }
 }
 
+#[cfg(test)]
 pub(crate) fn parse_regions(source: &str, regions: &[MathRegion]) -> Vec<ParsedMath> {
     let index = SourceIndex::new(source);
     regions
@@ -124,6 +433,7 @@ pub(crate) fn parse_regions(source: &str, regions: &[MathRegion]) -> Vec<ParsedM
         .collect()
 }
 
+#[cfg(test)]
 struct Parser<'a> {
     source: &'a str,
     base_byte: usize,
@@ -132,6 +442,7 @@ struct Parser<'a> {
     symbols: Vec<(String, SourceRange)>,
 }
 
+#[cfg(test)]
 impl<'a> Parser<'a> {
     fn new(source: &'a str, base_byte: usize, index: &'a SourceIndex) -> Self {
         Self {
@@ -583,6 +894,7 @@ impl<'a> Parser<'a> {
     }
 }
 
+#[cfg(test)]
 fn application_head(node: &EquationNode) -> bool {
     matches!(
         node.kind.as_str(),
@@ -604,8 +916,30 @@ pub(crate) fn selection_path(node: &EquationNode, offset: u32, output: &mut Vec<
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_regions, selection_path, test_math_regions};
-    use crate::DocumentLanguage;
+    use super::{
+        parse_regions, parse_snapshot, selection_path, test_math_regions, validate_generated_tree,
+    };
+    use crate::{
+        DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, NotationNodeKind,
+        ProjectDocument, SyntaxState,
+    };
+
+    #[test]
+    fn rejects_cyclic_generated_macro_notation() {
+        let tree = GeneratedNotationTree {
+            root: 0,
+            nodes: vec![GeneratedNotationNode {
+                kind: NotationNodeKind::Sequence,
+                children: vec![0],
+                state: SyntaxState::Complete,
+                name: None,
+                text: None,
+                arguments: Vec::new(),
+                math_class: None,
+            }],
+        };
+        assert_eq!(validate_generated_tree(&tree), Err("tree contains a cycle"));
+    }
 
     #[test]
     fn finds_markdown_math_but_not_fenced_code() {
@@ -667,5 +1001,74 @@ mod tests {
                 .iter()
                 .any(|node| { node.kind == "delimited" && node.label.as_deref() == Some("()") })
         );
+    }
+
+    #[test]
+    fn v4_named_operator_is_one_occurrence_and_incomplete_nodes_degrade_locally() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 4,
+            "fileId": "main",
+            "path": "main.tex",
+            "language": "latex",
+            "content": "$\\operatorname{ECE}$ $x+{$",
+            "documentVersion": 1,
+            "nodes": [
+                {
+                    "kind": "token", "parent": 1, "children": [],
+                    "ranges": {"full": {"startOffset": 15, "endOffset": 18}, "editable": {"startOffset": 15, "endOffset": 18}},
+                    "state": "complete", "text": "ECE",
+                    "provenance": {"origin": "source", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 15, "endOffset": 18}}, "editable": true}
+                },
+                {
+                    "kind": "named-operator", "parent": null, "children": [0],
+                    "ranges": {"full": {"startOffset": 1, "endOffset": 19}, "name": {"startOffset": 15, "endOffset": 18}, "editable": {"startOffset": 1, "endOffset": 19}},
+                    "state": "complete", "name": "ECE",
+                    "provenance": {"origin": "source", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 1, "endOffset": 19}}, "editable": true}
+                },
+                {
+                    "kind": "opaque", "parent": null, "children": [],
+                    "ranges": {"full": {"startOffset": 22, "endOffset": 25}, "editable": {"startOffset": 22, "endOffset": 25}},
+                    "state": "truncated",
+                    "provenance": {"origin": "source", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 22, "endOffset": 25}}, "editable": true}
+                }
+            ],
+            "mathRoots": [
+                {"node": 1, "delimiter": "$", "fullRange": {"startOffset": 0, "endOffset": 20}, "contentRange": {"startOffset": 1, "endOffset": 19}, "state": "complete"},
+                {"node": 2, "delimiter": "$", "fullRange": {"startOffset": 21, "endOffset": 26}, "contentRange": {"startOffset": 22, "endOffset": 25}, "state": "incomplete"}
+            ],
+            "visibleProse": [{"range": {"startOffset": 20, "endOffset": 21}, "state": "complete"}],
+            "scopes": [{"kind": "document", "parent": null, "range": {"startOffset": 0, "endOffset": 26}, "state": "complete"}],
+            "declarations": [], "macros": [], "includes": []
+        }))
+        .unwrap();
+
+        let parsed = parse_snapshot(&document).unwrap();
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(
+            parsed[0].symbols,
+            [(
+                "ECE".to_owned(),
+                crate::SourceRange {
+                    start_offset: 15,
+                    end_offset: 18
+                }
+            )]
+        );
+        assert!(parsed[1].symbols.is_empty());
+        assert!(!parsed[1].region.closed);
+    }
+
+    #[test]
+    fn v4_rejects_a_corrupt_arena_root() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 4, "fileId": "main", "path": "main.tex", "language": "latex",
+            "content": "$x$", "documentVersion": 1, "nodes": [],
+            "mathRoots": [{"node": 4, "delimiter": "$", "fullRange": {"startOffset": 0, "endOffset": 3}, "contentRange": {"startOffset": 1, "endOffset": 2}, "state": "complete"}],
+            "visibleProse": [],
+            "scopes": [{"kind": "document", "parent": null, "range": {"startOffset": 0, "endOffset": 3}, "state": "complete"}],
+            "declarations": [], "macros": [], "includes": []
+        }))
+        .unwrap();
+        assert!(parse_snapshot(&document).is_err());
     }
 }

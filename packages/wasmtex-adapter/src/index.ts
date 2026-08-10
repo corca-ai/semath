@@ -4,7 +4,10 @@ import {
   type ProjectDocument,
   type ProjectSnapshot,
 } from "../../protocol/src/index";
-import type { LatexFileSyntax } from "wasmtex/syntax";
+import {
+  assertLatexSyntaxSchemaVersion,
+  type LatexFileSyntax,
+} from "wasmtex/syntax";
 
 export interface SourceDocument {
   content: string;
@@ -13,18 +16,41 @@ export interface SourceDocument {
 }
 
 export function adaptWasmtexDocument(source: SourceDocument): ProjectDocument {
+  assertLatexSyntaxSchemaVersion(source.syntax);
   return {
     content: source.content,
-    documentVersion: source.syntax.documentVersion,
-    fileId: source.syntax.fileId,
-    includes: source.syntax.includes.map((include) => ({
-      path: include.path,
-      sourceRange: include.source.range,
-    })),
     language: source.language,
-    macros: source.syntax.macros,
-    mathRegions: source.syntax.mathRegions,
-    path: source.syntax.path,
+    ...source.syntax,
+  };
+}
+
+export function adaptNonLatexDocument(input: {
+  content: string;
+  documentVersion: number;
+  fileId: string;
+  language: "bibtex";
+  path: string;
+}): ProjectDocument {
+  return {
+    ...input,
+    declarations: [],
+    includes: [],
+    macros: [],
+    mathRoots: [],
+    nodes: [],
+    schemaVersion: 4,
+    scopes: [
+      {
+        kind: "document",
+        parent: null,
+        range: {
+          startOffset: 0,
+          endOffset: input.content.length,
+        },
+        state: "complete",
+      },
+    ],
+    visibleProse: [],
   };
 }
 

@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use crate::canonical::SemanticExpr;
 use crate::consistency::roles_conflict;
 use crate::consistency::{RoleObservations, observe_roles};
 use crate::domain::{DomainObservations, observe_domains};
@@ -8,11 +9,12 @@ use crate::parser::ParsedMath;
 use crate::prose::observe_prose;
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
+use crate::semantic_index::EntityId;
 use crate::shape::{ShapeObservations, observe_shapes};
 use crate::{
     AssumptionInfo, ConceptInfo, DefinitionInfo, Evidence, LawRecognition, ProjectDocument,
     QuantityInfo, RelationInfo, RoleInfo, SemanticClaimInfo, SemanticClaimStatus,
-    SemanticContextInfo, SemanticSymbolId, ShapeInfo,
+    SemanticContextInfo, ShapeInfo,
 };
 
 const MAX_CONCEPTS: usize = 16;
@@ -73,7 +75,7 @@ impl SemanticClaims {
     pub fn context(
         &self,
         symbol: Option<String>,
-        semantic_id: Option<SemanticSymbolId>,
+        entity_id: Option<EntityId>,
     ) -> SemanticContextInfo {
         let mut concepts = self.concepts();
         let concepts_truncated = concepts.len() > MAX_CONCEPTS;
@@ -99,7 +101,7 @@ impl SemanticClaims {
 
         SemanticContextInfo {
             symbol,
-            semantic_id,
+            entity_id,
             concepts,
             assumptions: self.assumptions.clone(),
             claims,
@@ -202,12 +204,12 @@ impl SemanticFactStore {
     pub fn refresh_laws(
         &mut self,
         document: &ProjectDocument,
-        parsed: &[ParsedMath],
+        canonical_expressions: &[SemanticExpr],
         external: &ExternalTypeEnvironment,
     ) {
         self.laws = observe_laws(
             document,
-            parsed,
+            canonical_expressions,
             &self.shapes,
             &self.quantities,
             &self.roles,
@@ -220,7 +222,7 @@ impl SemanticFactStore {
         &self,
         definitions: Vec<DefinitionInfo>,
         symbol: Option<String>,
-        semantic_id: Option<SemanticSymbolId>,
+        entity_id: Option<EntityId>,
         offset: u32,
         external: Option<&ExternalTypeEnvironment>,
     ) -> SemanticContextInfo {
@@ -261,7 +263,7 @@ impl SemanticFactStore {
             quantities,
             self.assumptions_at(offset),
         )
-        .context(symbol, semantic_id)
+        .context(symbol, entity_id)
     }
 
     fn assumptions_at(&self, offset: u32) -> Vec<AssumptionInfo> {

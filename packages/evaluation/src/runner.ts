@@ -7,7 +7,10 @@ import {
   type QueryEnvelope,
   type QueryResult,
 } from "../../protocol/src/index";
-import { adaptWasmtexDocument } from "../../wasmtex-adapter/src/index";
+import {
+  adaptNonLatexDocument,
+  adaptWasmtexDocument,
+} from "../../wasmtex-adapter/src/index";
 import type {
   Corpus,
   CorpusCase,
@@ -83,14 +86,13 @@ export function planQualityRun(
     for (const input of inputs) {
       const language = languageOf(input.path);
       if (language === "bibtex") {
-        documents.push({
-          ...input,
+        documents.push(adaptNonLatexDocument({
+          content: input.content,
           documentVersion: 1,
-          includes: [],
+          fileId: input.fileId,
           language,
-          macros: [],
-          mathRegions: [],
-        });
+          path: input.path,
+        }));
         continue;
       }
       const snapshot = syntax.getFile(input.fileId);

@@ -26,6 +26,13 @@ describe("protocol", () => {
         path: "main.md",
         range: { endOffset: 2, startOffset: 1 },
       },
+      occurrenceId: {
+        documentVersion: 1,
+        fileId: "main",
+        localId: 0,
+      },
+      notation: [],
+      sourceNotation: "x",
       shapes: [],
       symbol: "x",
       truncated: false,

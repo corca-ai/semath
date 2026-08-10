@@ -1,4 +1,11 @@
+import type {
+  LatexDocumentSyntaxSnapshot,
+  LatexInclude,
+  LatexMacroEvent,
+} from "wasmtex/syntax";
+
 export const SEMATH_PROTOCOL_VERSION = 4 as const;
+export const WASMTEX_SYNTAX_SCHEMA_VERSION = 4 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -7,48 +14,15 @@ export interface SourceRange {
   startOffset: number;
 }
 
-export interface MathRegion {
-  closed: boolean;
-  contentRange: SourceRange;
-  delimiter: string;
-  fullRange: SourceRange;
-}
-
-export interface ProjectInclude {
-  path: string;
-  sourceRange: SourceRange;
-}
-
-export interface ProjectSourceRef {
-  fileId: string;
-  path: string;
-  range: SourceRange;
-}
-
-export interface ProjectMacro {
-  definitions: readonly ProjectSourceRef[];
-  expansion: {
-    depth: number;
-    editable: boolean;
-    inputRange?: SourceRange;
-    status:
-      "cycle" | "expanded" | "not-applicable" | "truncated" | "unresolved";
-    surface?: string;
-  };
-  kind: "call" | "definition";
-  name: string;
-  source: ProjectSourceRef;
-}
-
-export interface ProjectDocument {
+export interface ProjectDocument extends LatexDocumentSyntaxSnapshot {
   content: string;
   documentVersion: number;
   fileId: string;
   language: DocumentLanguage;
-  includes: readonly ProjectInclude[];
-  macros: readonly ProjectMacro[];
-  mathRegions: readonly MathRegion[];
+  includes: readonly LatexInclude[];
+  macros: readonly LatexMacroEvent[];
   path: string;
+  schemaVersion: typeof WASMTEX_SYNTAX_SCHEMA_VERSION;
 }
 
 export interface ProjectSnapshot {
@@ -59,6 +33,8 @@ export interface ProjectSnapshot {
   projectId: string;
   protocolVersion: typeof SEMATH_PROTOCOL_VERSION;
 }
+
+export type ProjectSnapshotMetadata = Omit<ProjectSnapshot, "documents">;
 
 export type ProjectChange =
   | { document: ProjectDocument; kind: "upsert" }
@@ -112,20 +88,36 @@ export interface Evidence {
 
 export interface DefinitionInfo {
   description: string;
+  entityId?: EntityId;
   evidence: Evidence;
   location: Location;
-  semanticId?: SemanticSymbolId;
   symbol: string;
 }
 
-/** Stable within one project snapshot; stable file identity survives path moves. */
-export interface SemanticSymbolId {
-  anchor: number;
-  componentId: string;
+/** One real source occurrence in a specific document revision. */
+export interface SourceOccurrenceId {
+  documentVersion: number;
   fileId: string;
+  localId: number;
+}
+
+/** A scoped semantic entity anchored to source evidence. */
+export interface EntityId {
+  anchor: SourceOccurrenceId;
+  componentId: string;
   kind: string;
   scopePath: readonly number[];
 }
+
+export type NotationComponent =
+  | { kind: "identifier"; value: string }
+  | { kind: "named-surface"; value: string }
+  | { kind: "modifier"; name: string }
+  | { kind: "style"; name: string }
+  | { kind: "subscript" }
+  | { kind: "superscript" }
+  | { kind: "argument"; role: string }
+  | { kind: "delimiter"; value: string };
 
 export interface ShapeInfo {
   dimensions: readonly string[];
@@ -162,10 +154,13 @@ export interface QuantityInfo {
 export interface SymbolInfo {
   definitions: readonly DefinitionInfo[];
   diagnostics: readonly SemanticDiagnostic[];
+  entityId?: EntityId;
   location: Location;
+  notation: readonly NotationComponent[];
+  occurrenceId: SourceOccurrenceId;
+  sourceNotation: string;
   quantities?: readonly QuantityInfo[];
   roles?: readonly RoleInfo[];
-  semanticId?: SemanticSymbolId;
   shapes: readonly ShapeInfo[];
   symbol: string;
   truncated: boolean;
@@ -237,7 +232,7 @@ export interface SemanticContextInfo {
   concepts: readonly ConceptInfo[];
   relations: readonly RelationInfo[];
   quantities: readonly QuantityInfo[];
-  semanticId?: SemanticSymbolId;
+  entityId?: EntityId;
   symbol?: string;
   truncated: boolean;
 }
@@ -377,6 +372,12 @@ export interface AnalysisStats {
   lawRulesVisited: number;
   recognizedLaws: number;
   semanticNodes: number;
+  semanticOccurrences: number;
+  semanticEntities: number;
+  semanticClaims: number;
+  semanticEvidence: number;
+  semanticDependencyEdges: number;
+  invalidatedSemanticClaims: number;
   totalDocuments: number;
 }
 

@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -8,10 +9,8 @@ use crate::scientific_prose::{
     ClauseDisposition, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
     extract_assumptions, segment_scientific_clauses,
 };
-use crate::scope::ScopeGraph;
 use crate::{
-    AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, SemanticSymbolId,
-    SourceIndex, SourceRange,
+    AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, SourceIndex, SourceRange,
 };
 
 static LET_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
@@ -168,9 +167,11 @@ pub(crate) fn observe_prose(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
 ) -> ProseObservations {
-    let index = SourceIndex::new(&document.content);
+    let visible_source = visible_prose_source(document);
+    let source = visible_source.as_ref();
+    let index = SourceIndex::new(source);
     let mut analysis = ProseObservations::default();
-    let clauses = segment_scientific_clauses(&document.content, document.language);
+    let clauses = segment_scientific_clauses(source, document.language);
     let mentions = parsed
         .iter()
         .filter_map(|math| {
@@ -184,8 +185,8 @@ pub(crate) fn observe_prose(
         .collect::<Vec<_>>();
     collect_assumptions(&index, &clauses, &mentions, &mut analysis);
 
-    collect_coordinated_definitions(document, parsed, &index, &clauses, &mut analysis);
-    collect_clause_definitions(document, parsed, &index, &clauses, &mut analysis);
+    collect_coordinated_definitions(document, source, parsed, &index, &clauses, &mut analysis);
+    collect_clause_definitions(document, source, parsed, &index, &clauses, &mut analysis);
     for math in parsed {
         let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
             continue;
@@ -197,10 +198,10 @@ pub(crate) fn observe_prose(
         {
             continue;
         }
-        let before_start = bounded_start(&document.content, start_byte, 160);
-        let after_end = bounded_end(&document.content, end_byte, 240);
-        let before = &document.content[before_start..start_byte];
-        let after = &document.content[end_byte..after_end];
+        let before_start = bounded_start(source, start_byte, 160);
+        let after_end = bounded_end(source, end_byte, 240);
+        let before = &source[before_start..start_byte];
+        let after = &source[end_byte..after_end];
         let trimmed_after = after.trim_start().to_ascii_lowercase();
         if let Some(captures) = INLINE_VECTOR_SUFFIX.captures(after) {
             let evidence_end = end_byte + captures.get(0).unwrap().end();
@@ -248,9 +249,7 @@ pub(crate) fn observe_prose(
                 before_start + prefix.get(0).unwrap().start(),
                 end_byte + suffix.end(),
             );
-        } else if let Some(explicit) =
-            explicit_single_definition(before, after, math, document, &index)
-        {
+        } else if let Some(explicit) = explicit_single_definition(before, after, math) {
             push_claim(
                 &mut analysis,
                 document,
@@ -357,6 +356,7 @@ pub(crate) fn observe_prose(
 
         collect_notation_table(
             document,
+            source,
             &index,
             &symbol,
             &symbol_range,
@@ -366,21 +366,12 @@ pub(crate) fn observe_prose(
         );
     }
     deduplicate(&mut analysis);
-    let scopes = ScopeGraph::new(document);
-    for definition in &mut analysis.definitions {
-        definition.semantic_id = Some(SemanticSymbolId {
-            component_id: document.file_id.clone(),
-            file_id: document.file_id.clone(),
-            scope_path: scopes.path_at(definition.location.range.start_offset),
-            kind: "definition".into(),
-            anchor: definition.location.range.start_offset,
-        });
-    }
     analysis
 }
 
 fn collect_clause_definitions(
     document: &ProjectDocument,
+    source: &str,
     parsed: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
@@ -397,6 +388,7 @@ fn collect_clause_definitions(
         if sentence_lower.contains("respectively") || sentence_lower.contains("in that order") {
             collect_ordered_clause_definition(
                 document,
+                source,
                 parsed,
                 index,
                 output,
@@ -411,20 +403,14 @@ fn collect_clause_definitions(
                 let start = index.byte_for_utf16(math.region.full_range.start_offset);
                 sentence_start <= start
                     && start < sentence_end
-                    && !is_description_parameter(
-                        document,
-                        math,
-                        sentence_start,
-                        sentence_end,
-                        index,
-                    )
+                    && !is_description_parameter(source, math, sentence_start, sentence_end, index)
             })
             .collect::<Vec<_>>();
         if regions.len() < 2 {
             continue;
         }
         let prefix_end = index.byte_for_utf16(regions[0].region.full_range.start_offset);
-        let prefix = &document.content[sentence_start..prefix_end];
+        let prefix = &source[sentence_start..prefix_end];
         let contextual = [
             "let",
             "where",
@@ -440,7 +426,7 @@ fn collect_clause_definitions(
             .iter()
             .filter(|math| {
                 let end = index.byte_for_utf16(math.region.full_range.end_offset);
-                definition_clause(&document.content[end..sentence_end]).1
+                definition_clause(&source[end..sentence_end]).1
             })
             .count();
         if !contextual && explicit < 2 {
@@ -454,7 +440,7 @@ fn collect_clause_definitions(
             let next = regions.get(position + 1).map_or(sentence_end, |next| {
                 index.byte_for_utf16(next.region.full_range.start_offset)
             });
-            let (description, _) = definition_clause(&document.content[end..next]);
+            let (description, _) = definition_clause(&source[end..next]);
             let Some(description) = description else {
                 continue;
             };
@@ -475,6 +461,7 @@ fn collect_clause_definitions(
 
 fn collect_ordered_clause_definition(
     document: &ProjectDocument,
+    source: &str,
     parsed: &[ParsedMath],
     index: &SourceIndex,
     output: &mut ProseObservations,
@@ -487,7 +474,7 @@ fn collect_ordered_clause_definition(
             let start = index.byte_for_utf16(math.region.full_range.start_offset);
             sentence_start <= start
                 && start < sentence_end
-                && !is_description_parameter(document, math, sentence_start, sentence_end, index)
+                && !is_description_parameter(source, math, sentence_start, sentence_end, index)
         })
         .filter(|math| primary_symbol(document, math).is_some())
         .collect::<Vec<_>>();
@@ -495,7 +482,7 @@ fn collect_ordered_clause_definition(
         return;
     }
     let last_end = index.byte_for_utf16(regions.last().unwrap().region.full_range.end_offset);
-    let suffix = document.content[last_end..sentence_end].trim();
+    let suffix = source[last_end..sentence_end].trim();
     let suffix = suffix
         .trim_end_matches(|character: char| character.is_whitespace() || character == '.')
         .trim_end_matches("respectively")
@@ -584,7 +571,7 @@ fn collect_assumptions(
 }
 
 fn is_description_parameter(
-    document: &ProjectDocument,
+    source: &str,
     math: &ParsedMath,
     sentence_start: usize,
     sentence_end: usize,
@@ -595,12 +582,10 @@ fn is_description_parameter(
     if end > sentence_end {
         return false;
     }
-    let before = document.content[sentence_start..start]
+    let before = source[sentence_start..start]
         .trim_end()
         .to_ascii_lowercase();
-    let after = document.content[end..sentence_end]
-        .trim_start()
-        .to_ascii_lowercase();
+    let after = source[end..sentence_end].trim_start().to_ascii_lowercase();
     after.starts_with("-dimensional")
         || after.starts_with("dimensional")
         || after.starts_with("by ")
@@ -681,8 +666,6 @@ fn explicit_single_definition<'a>(
     before: &str,
     after: &'a str,
     math: &ParsedMath,
-    document: &ProjectDocument,
-    index: &SourceIndex,
 ) -> Option<SingleDefinitionMatch<'a>> {
     let trimmed_after = after.trim_start();
     if trimmed_after.starts_with(',') || trimmed_after.starts_with("and ") {
@@ -746,11 +729,8 @@ fn explicit_single_definition<'a>(
         });
     }
 
-    let start_byte = index.byte_for_utf16(math.region.content_range.start_offset);
-    let end_byte = index.byte_for_utf16(math.region.content_range.end_offset);
-    let math_source = &document.content[start_byte..end_byte];
     if DIRECT_PREFIX.is_match(before)
-        && math_source.contains(":=")
+        && contains_assignment(&math.root)
         && let Some(captures) = EXPRESSION_DEFINES_SUFFIX.captures(after)
     {
         let description = captures.get(1).unwrap();
@@ -764,8 +744,22 @@ fn explicit_single_definition<'a>(
     None
 }
 
+fn contains_assignment(node: &crate::EquationNode) -> bool {
+    let mut labels = Vec::new();
+    collect_equation_labels(node, &mut labels);
+    labels.windows(2).any(|pair| pair == [Some(":"), Some("=")])
+}
+
+fn collect_equation_labels<'a>(node: &'a crate::EquationNode, output: &mut Vec<Option<&'a str>>) {
+    output.push(node.label.as_deref());
+    for child in &node.children {
+        collect_equation_labels(child, output);
+    }
+}
+
 fn collect_coordinated_definitions(
     document: &ProjectDocument,
+    source: &str,
     parsed: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
@@ -773,7 +767,8 @@ fn collect_coordinated_definitions(
 ) {
     for arity in (2..=8).rev() {
         for group in parsed.windows(arity) {
-            let Some(definitions) = coordinated_group(document, group, index, clauses) else {
+            let Some(definitions) = coordinated_group(document, source, group, index, clauses)
+            else {
                 continue;
             };
             for definition in definitions {
@@ -804,6 +799,7 @@ struct CoordinatedDefinition {
 
 fn coordinated_group(
     document: &ProjectDocument,
+    source: &str,
     group: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
@@ -824,7 +820,7 @@ fn coordinated_group(
         .iter()
         .map(|math| index.byte_for_utf16(math.region.full_range.end_offset))
         .collect::<Vec<_>>();
-    if !valid_symbol_separators(&document.content, &starts, &ends) {
+    if !valid_symbol_separators(source, &starts, &ends) {
         return None;
     }
 
@@ -834,10 +830,10 @@ fn coordinated_group(
     if clause.disposition != ClauseDisposition::Establishing || last_end > clause.end {
         return None;
     }
-    let before_start = bounded_start(&document.content, first_start, 120);
-    let after_end = bounded_end(&document.content, last_end, 360);
-    let before = &document.content[before_start..first_start];
-    let after = &document.content[last_end..after_end];
+    let before_start = bounded_start(source, first_start, 120);
+    let after_end = bounded_end(source, last_end, 360);
+    let before = &source[before_start..first_start];
+    let after = &source[last_end..after_end];
     let (lead, prefix_start) = coordination_lead(before)?;
     let (descriptions, rule_id, suffix_end) = coordinated_descriptions(lead, after, group.len())?;
     let statement_start = before_start + prefix_start;
@@ -923,6 +919,7 @@ fn shared_description_is_unambiguous(description: &str) -> bool {
 #[allow(clippy::too_many_arguments)]
 fn collect_notation_table(
     document: &ProjectDocument,
+    source: &str,
     index: &SourceIndex,
     symbol: &str,
     symbol_range: &SourceRange,
@@ -930,13 +927,13 @@ fn collect_notation_table(
     end_byte: usize,
     analysis: &mut ProseObservations,
 ) {
-    let line_start = document.content[..start_byte]
+    let line_start = source[..start_byte]
         .rfind('\n')
         .map_or(0, |offset| offset + 1);
-    let line_end = document.content[end_byte..]
+    let line_end = source[end_byte..]
         .find('\n')
-        .map_or(document.content.len(), |offset| end_byte + offset);
-    let line = &document.content[line_start..line_end];
+        .map_or(source.len(), |offset| end_byte + offset);
+    let line = &source[line_start..line_end];
     if !line.contains('|') {
         return;
     }
@@ -993,7 +990,7 @@ fn push_claim(
             range: symbol_range.clone(),
         },
         evidence: definition_evidence.clone(),
-        semantic_id: None,
+        entity_id: None,
     });
     if let Some((shape, refinements)) = shape_claim(description) {
         analysis.shapes.push(ProseShapeClaim {
@@ -1064,6 +1061,65 @@ fn last_word(value: &str) -> Option<&str> {
         .rfind(|word| !word.is_empty())
 }
 
+fn visible_prose_source(document: &ProjectDocument) -> Cow<'_, str> {
+    #[cfg(test)]
+    if document.visible_prose.is_empty() {
+        return Cow::Borrowed(&document.content);
+    }
+    let index = SourceIndex::new(&document.content);
+    let mut visible = vec![false; document.content.len()];
+    let mut math_boundary = vec![false; document.content.len()];
+    for span in &document.visible_prose {
+        let start = index.byte_for_utf16(span.range.start_offset);
+        let end = index.byte_for_utf16(span.range.end_offset);
+        visible[start..end].fill(true);
+    }
+    // Inline math is part of a scientific sentence. Preserve its source-sized
+    // surface so clauses such as "real $n$ by $n$ matrices" keep the symbols
+    // that carry their dimensions. wasmtex has already established these
+    // ranges as math, so this does not make comments or control prose visible.
+    for root in &document.math_roots {
+        if root.delimiter != "$" && root.delimiter != "\\(" {
+            continue;
+        }
+        let start = index.byte_for_utf16(root.content_range.start_offset);
+        let end = index.byte_for_utf16(root.content_range.end_offset);
+        visible[start..end].fill(true);
+    }
+    for root in &document.math_roots {
+        let start = index.byte_for_utf16(root.full_range.start_offset);
+        let end = index.byte_for_utf16(root.full_range.end_offset);
+        if start < math_boundary.len() {
+            math_boundary[start] = true;
+        }
+        if end > start && end - 1 < math_boundary.len() {
+            math_boundary[end - 1] = true;
+        }
+    }
+    let mut output = String::with_capacity(document.content.len());
+    for (offset, character) in document.content.char_indices() {
+        if math_boundary[offset] {
+            output.push('$');
+        } else if character == '\n' || character == '\r' || visible[offset] {
+            output.push(character);
+        } else {
+            output.push(match character.len_utf8() {
+                1 => ' ',
+                2 => '\u{00a0}',
+                3 => '\u{2000}',
+                4 => '\u{10000}',
+                _ => unreachable!("UTF-8 scalar width is at most four bytes"),
+            });
+        }
+    }
+    debug_assert_eq!(output.len(), document.content.len());
+    debug_assert_eq!(
+        output.encode_utf16().count(),
+        document.content.encode_utf16().count()
+    );
+    Cow::Owned(output)
+}
+
 fn bounded_start(source: &str, end: usize, characters: usize) -> usize {
     source[..end]
         .char_indices()
@@ -1114,6 +1170,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
+            schema_version: 4,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),
             includes: Vec::new(),

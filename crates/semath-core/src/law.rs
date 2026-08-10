@@ -1,12 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
-use crate::canonical::{
-    SemanticExpr, SemanticExprKind, associative, lower_document_region, lower_template,
-};
+use crate::canonical::{SemanticExpr, SemanticExprKind, associative, lower_template};
 use crate::consistency::{RoleObservations, roles_conflict};
 use crate::pack::{PackLaw, PackLawRole, built_in_packs};
-use crate::parser::ParsedMath;
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
@@ -257,7 +254,7 @@ impl LawObservations {
 
 pub(crate) fn observe_laws(
     document: &ProjectDocument,
-    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -265,22 +262,20 @@ pub(crate) fn observe_laws(
 ) -> LawObservations {
     let mut recognitions = Vec::new();
     let mut visited_rules = 0;
-    for math in parsed.iter().filter(|math| math.region.closed) {
-        let mut actual = lower_document_region(document, &math.region.content_range);
-        actual.range = math.region.content_range.clone();
+    for actual in canonical_expressions {
         for compiled in COMPILED_LAWS.iter() {
             if recognitions.len() >= MAX_LAW_MATCHES {
                 break;
             }
             visited_rules += 1;
-            if !context_supports_law(document, &actual, compiled) {
+            if !context_supports_law(document, actual, compiled) {
                 continue;
             }
             let candidates = compiled
                 .forms
                 .iter()
-                .flat_map(|form| unify_all(form, &actual, &compiled.placeholders, &BTreeMap::new()))
-                .chain(variadic_balance(compiled, &actual))
+                .flat_map(|form| unify_all(form, actual, &compiled.placeholders, &BTreeMap::new()))
+                .chain(variadic_balance(compiled, actual))
                 .collect::<Vec<_>>();
             let Some(bindings) = candidates.into_iter().find(|bindings| {
                 let supported = roles_are_supported(
@@ -293,12 +288,12 @@ pub(crate) fn observe_laws(
                     external,
                     true,
                 );
-                let typed = expression_is_well_typed(&actual, shapes);
+                let typed = expression_is_well_typed(actual, shapes);
                 supported && typed
             }) else {
                 continue;
             };
-            recognitions.push(recognition(compiled, &actual, bindings));
+            recognitions.push(recognition(compiled, actual, bindings));
         }
     }
     recognitions.sort_by_key(|recognition| {
@@ -1634,13 +1629,27 @@ mod tests {
     use std::collections::{BTreeMap, BTreeSet};
 
     use super::{observe_laws, unify};
-    use crate::canonical::lower_template;
+    use crate::canonical::{SemanticExpr, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
-    use crate::parser::{parse_regions, test_math_regions};
+    use crate::parser::{ParsedMath, parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::quantity::observe_quantities;
     use crate::shape::observe_shapes;
     use crate::{DocumentLanguage, ProjectDocument};
+
+    fn canonical_expressions(
+        document: &ProjectDocument,
+        parsed: &[ParsedMath],
+    ) -> Vec<SemanticExpr> {
+        parsed
+            .iter()
+            .map(|math| {
+                let mut expression = lower_document_region(document, &math.region.content_range);
+                expression.range = math.region.content_range.clone();
+                expression
+            })
+            .collect()
+    }
 
     #[test]
     fn equality_and_commutative_products_are_presentation_independent() {
@@ -1713,6 +1722,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
+            schema_version: 4,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),
             includes: Vec::new(),
@@ -1724,7 +1739,7 @@ mod tests {
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let laws = observe_laws(
             &document,
-            &parsed,
+            &canonical_expressions(&document, &parsed),
             &shapes,
             &quantities,
             &roles,
@@ -1743,6 +1758,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
+            schema_version: 4,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),
             includes: Vec::new(),
@@ -1754,7 +1775,7 @@ mod tests {
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let laws = observe_laws(
             &document,
-            &parsed,
+            &canonical_expressions(&document, &parsed),
             &shapes,
             &quantities,
             &roles,
@@ -1982,6 +2003,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
+            schema_version: 4,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),
             includes: Vec::new(),
@@ -1993,7 +2020,7 @@ mod tests {
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         observe_laws(
             &document,
-            &parsed,
+            &canonical_expressions(&document, &parsed),
             &shapes,
             &quantities,
             &roles,

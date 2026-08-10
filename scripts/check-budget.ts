@@ -229,17 +229,11 @@ const clean = new SemathEngine();
 const finalDocuments = documents.map((document) =>
   document.fileId === current.fileId ? current : document,
 );
-const cleanUpdate = decodeUpdate(
-  clean.resetProject(
-    encoder.encode(
-      JSON.stringify({
-        ...snapshot,
-        documents: finalDocuments,
-        inventoryVersion: inventoryVersion + 1,
-      }),
-    ),
-  ),
-);
+const cleanUpdate = resetEngine(clean, {
+  ...snapshot,
+  documents: finalDocuments,
+  inventoryVersion: inventoryVersion + 1,
+});
 if (
   initial.stats.totalDocuments !== cleanUpdate.stats.totalDocuments ||
   initial.stats.recognizedLaws !== cleanUpdate.stats.recognizedLaws
@@ -353,9 +347,18 @@ function operations(engine: SemathEngine): SemathWorkerOperations {
       return decodeQuery(engine.query(encoder.encode(JSON.stringify(envelope))));
     },
     reset(project) {
-      return decodeUpdate(engine.resetProject(encoder.encode(JSON.stringify(project))));
+      return resetEngine(engine, project);
     },
   };
+}
+
+function resetEngine(engine: SemathEngine, project: ProjectSnapshot): UpdateResult {
+  const { documents, ...metadata } = project;
+  engine.beginReset(encoder.encode(JSON.stringify(metadata)));
+  for (const document of documents) {
+    engine.ingestResetDocument(encoder.encode(JSON.stringify(document)));
+  }
+  return decodeUpdate(engine.finishReset());
 }
 
 function createWorkerHost(createEngine: () => Promise<SemathWorkerOperations>) {
@@ -447,7 +450,17 @@ function assertCounters(update: UpdateResult, analyzedDocuments: number) {
   if (update.stats.analyzedDocuments !== analyzedDocuments) {
     throw new Error("budget analyzed-document counter is inconsistent");
   }
-  for (const key of ["semanticNodes", "constraints", "lawRulesVisited"] as const) {
+  for (const key of [
+    "semanticNodes",
+    "constraints",
+    "lawRulesVisited",
+    "semanticOccurrences",
+    "semanticEntities",
+    "semanticClaims",
+    "semanticEvidence",
+    "semanticDependencyEdges",
+    "invalidatedSemanticClaims",
+  ] as const) {
     if (update.stats[key] < 0 || !Number.isFinite(update.stats[key])) {
       throw new Error(`budget ${key} counter is invalid`);
     }

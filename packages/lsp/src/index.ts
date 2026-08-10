@@ -26,7 +26,10 @@ import {
   type SemanticEditProposal,
   type SourceRange,
 } from "../../protocol/src/index";
-import { adaptWasmtexDocument } from "../../wasmtex-adapter/src/index";
+import {
+  adaptNonLatexDocument,
+  adaptWasmtexDocument,
+} from "../../wasmtex-adapter/src/index";
 import { SemathWorkerEngine } from "../../worker/src/index";
 
 export type { JsonRpcMessage } from "wasmtex/lsp/server";
@@ -302,16 +305,13 @@ export class SemathLspServer {
     let document: ProjectDocument;
     if (language === "bibtex") {
       this.latex.updateFile(path, content);
-      document = {
+      document = adaptNonLatexDocument({
         content,
         documentVersion,
         fileId,
-        includes: [],
         language,
-        macros: [],
-        mathRegions: [],
         path,
-      };
+      });
     } else {
       const syntax = this.latex.updateDocument({
         content,
@@ -383,8 +383,11 @@ export class SemathLspServer {
     );
     if (result.value.kind === "semanticView") {
       const value = result.value.view;
+      const sourceNotation = value.symbol?.sourceNotation;
       const lines = [
-        `**${value.summary}**`,
+        sourceNotation
+          ? `**\`${sourceNotation}\` — ${value.summary}**`
+          : `**${value.summary}**`,
         value.symbol?.shapes[0]?.display ?? "",
         ...(value.symbol?.roles ?? []).map((role) => role.description),
         ...(value.symbol?.definitions ?? []).map((definition) => definition.description),

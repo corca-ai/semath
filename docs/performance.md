@@ -27,7 +27,9 @@ decode/ingestion, total cold reset, syntax update, total edit latency, and each
 query kind. It also records peak/retained RSS growth, initial and delta transfer
 bytes, CST nodes/recovery/bytes per document and per node, invalidated
 documents, semantic nodes/rules visited, and the WASM artifact size. These are
-code defaults, not live production telemetry. The dependency lock pins the
+augmented by occurrence, entity, claim, evidence, dependency-edge, and
+invalidation counters from the authoritative semantic index. These are code
+defaults, not live production telemetry. The dependency lock pins the
 wasmtex input used for a report; record the Semath and wasmtex commits when
 comparing reports.
 

@@ -52,14 +52,17 @@ pub enum NotationComponent {
 #[serde(rename_all = "camelCase")]
 pub struct SourceOccurrence {
     pub id: SourceOccurrenceId,
+    pub component_id: String,
     pub kind: OccurrenceKind,
     pub range: SourceRange,
+    pub selection_range: SourceRange,
     pub scope_path: Vec<u32>,
     pub structural_path: Vec<u32>,
     /// Monotonic project-snapshot order assigned by the lowering boundary.
     /// Cross-file visibility must never compare unrelated file-local offsets.
     pub availability_order: u64,
     pub surface: String,
+    pub source_text: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notation: Vec<NotationComponent>,
 }
@@ -238,9 +241,18 @@ pub struct ProjectSemanticIndex {
 
 impl ProjectSemanticIndex {
     pub fn replace_document(&mut self, facts: DocumentSemanticFacts) -> Result<(), String> {
+        self.replace_documents(vec![facts])
+    }
+
+    pub fn replace_documents(
+        &mut self,
+        documents: Vec<DocumentSemanticFacts>,
+    ) -> Result<(), String> {
         let mut next = self.clone();
-        next.retract_document(&facts.file_id);
-        next.validate_and_insert(facts)?;
+        for facts in documents {
+            next.retract_document(&facts.file_id);
+            next.validate_and_insert(facts)?;
+        }
         next.rebuild_indexes();
         *self = next;
         Ok(())
@@ -258,17 +270,48 @@ impl ProjectSemanticIndex {
         if !self.mentions.contains_key(occurrence_id) {
             return unsupported(occurrence_id.clone());
         }
-        let normalized = normalize_surface(&occurrence.surface);
+        let normalized = binding_key(occurrence);
         let mut by_entity = BTreeMap::<EntityId, ResolutionCandidate>::new();
-        for claim_id in self.binding_claims.get(&normalized).into_iter().flatten() {
-            let claim = &self.claims[claim_id];
-            let evidence = &self.evidence[&claim.evidence_id];
-            if !scope_visible(&evidence.scope_path, &occurrence.scope_path)
-                || evidence.available_after > occurrence.availability_order
-                || evidence.modality != EvidenceModality::Asserted
-            {
-                continue;
-            }
+        let mut visible = self
+            .binding_claims
+            .get(&normalized)
+            .into_iter()
+            .flatten()
+            .filter_map(|claim_id| {
+                let claim = &self.claims[claim_id];
+                let evidence = &self.evidence[&claim.evidence_id];
+                if !scope_visible(&evidence.scope_path, &occurrence.scope_path)
+                    || evidence.available_after > occurrence.availability_order
+                    || evidence.modality != EvidenceModality::Asserted
+                    || claim.subject.component_id != occurrence.component_id
+                {
+                    return None;
+                }
+                Some((claim, evidence))
+            })
+            .collect::<Vec<_>>();
+        let local_scope = visible
+            .iter()
+            .filter(|(_, evidence)| evidence.source.file_id == occurrence.id.file_id)
+            .map(|(_, evidence)| evidence.scope_path.len())
+            .max();
+        if let Some(scope_depth) = local_scope {
+            let latest = visible
+                .iter()
+                .filter(|(_, evidence)| {
+                    evidence.source.file_id == occurrence.id.file_id
+                        && evidence.scope_path.len() == scope_depth
+                })
+                .map(|(_, evidence)| evidence.available_after)
+                .max()
+                .expect("local binding has an availability order");
+            visible.retain(|(_, evidence)| {
+                evidence.source.file_id == occurrence.id.file_id
+                    && evidence.scope_path.len() == scope_depth
+                    && evidence.available_after == latest
+            });
+        }
+        for (claim, evidence) in visible {
             let candidate =
                 by_entity
                     .entry(claim.subject.clone())
@@ -338,6 +381,10 @@ impl ProjectSemanticIndex {
         self.occurrences.get(id)
     }
 
+    pub fn occurrences(&self) -> impl Iterator<Item = &SourceOccurrence> {
+        self.occurrences.values()
+    }
+
     pub fn claim(&self, id: &ClaimId) -> Option<&Claim> {
         self.claims.get(id)
     }
@@ -385,6 +432,20 @@ impl ProjectSemanticIndex {
             }
             if !known_occurrences.contains(&entity.anchor) {
                 return Err("entity anchor is not a source occurrence".to_owned());
+            }
+            let anchor = self
+                .occurrences
+                .get(&entity.anchor)
+                .or_else(|| {
+                    facts
+                        .occurrences
+                        .iter()
+                        .find(|item| item.id == entity.anchor)
+                })
+                .expect("known entity anchor");
+            if entity.component_id != anchor.component_id || entity.scope_path != anchor.scope_path
+            {
+                return Err("entity component or scope differs from its anchor".to_owned());
             }
             if entity.component_id.trim().is_empty() || entity.kind.trim().is_empty() {
                 return Err("entity identity has an empty component or kind".to_owned());
@@ -599,7 +660,7 @@ impl ProjectSemanticIndex {
                 && let Some(occurrence) = self.occurrences.get(occurrence_id)
             {
                 self.binding_claims
-                    .entry(normalize_surface(&occurrence.surface))
+                    .entry(binding_key(occurrence))
                     .or_default()
                     .insert(claim.id.clone());
             }
@@ -624,8 +685,12 @@ fn claim_depends_on_file(
         })
 }
 
-fn normalize_surface(surface: &str) -> String {
-    surface.trim().to_owned()
+fn binding_key(occurrence: &SourceOccurrence) -> String {
+    if occurrence.notation.is_empty() {
+        return occurrence.surface.trim().to_owned();
+    }
+    serde_json::to_string(&occurrence.notation)
+        .expect("notation components always serialize to a binding key")
 }
 
 fn scope_visible(declaration: &[u32], occurrence: &[u32]) -> bool {
@@ -666,8 +731,13 @@ mod tests {
                 document_version: version,
                 local_id,
             },
+            component_id: file_id.to_owned(),
             kind: OccurrenceKind::Notation,
             range: SourceRange {
+                start_offset: start,
+                end_offset: start + surface.encode_utf16().count().max(1) as u32,
+            },
+            selection_range: SourceRange {
                 start_offset: start,
                 end_offset: start + surface.encode_utf16().count().max(1) as u32,
             },
@@ -675,15 +745,16 @@ mod tests {
             structural_path: vec![local_id],
             availability_order: order,
             surface: surface.to_owned(),
+            source_text: surface.to_owned(),
             notation,
         }
     }
 
-    fn entity(occurrence: &SourceOccurrence, component_id: &str) -> EntityId {
+    fn entity(occurrence: &SourceOccurrence, kind: &str) -> EntityId {
         EntityId {
-            component_id: component_id.to_owned(),
+            component_id: occurrence.component_id.clone(),
             scope_path: occurrence.scope_path.clone(),
-            kind: "symbol".to_owned(),
+            kind: kind.to_owned(),
             anchor: occurrence.id.clone(),
         }
     }
@@ -1204,7 +1275,7 @@ mod tests {
                 1,
                 number + 1,
                 number * 10,
-                number as u64 + 1,
+                1,
                 &[],
                 "x",
                 Vec::new(),

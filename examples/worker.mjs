@@ -1,40 +1,26 @@
 import { SemathWorkerEngine } from "semath/worker";
 import { SEMATH_PROTOCOL_VERSION } from "semath/protocol";
+import { createProjectSnapshot } from "semath/wasmtex-adapter";
+import { LatexSyntaxService } from "wasmtex/syntax";
 
 const epoch = "standalone-worker-example";
 const engine = await SemathWorkerEngine.create(() => import("semath/wasm"));
 const content = "Let $x$ denote the input. Use $x$.";
-const mathRegions = [...content.matchAll(/\$([^$]+)\$/g)].map((match) => ({
-  closed: true,
-  contentRange: {
-    startOffset: match.index + 1,
-    endOffset: match.index + match[0].length - 1,
-  },
-  delimiter: "$",
-  fullRange: {
-    startOffset: match.index,
-    endOffset: match.index + match[0].length,
-  },
-}));
-engine.reset({
-  protocolVersion: SEMATH_PROTOCOL_VERSION,
+const source = {
+  fileId: "main",
+  path: "main.md",
+  language: "markdown",
+  content,
+  documentVersion: 1,
+};
+const syntax = new LatexSyntaxService().upsert(source);
+engine.reset(createProjectSnapshot({
+  documents: [{ content, language: "markdown", syntax }],
   epoch,
   inventoryVersion: 1,
   projectId: "example",
   mainFileId: "main",
-  documents: [
-    {
-      fileId: "main",
-      path: "main.md",
-      language: "markdown",
-      content,
-      documentVersion: 1,
-      includes: [],
-      macros: [],
-      mathRegions,
-    },
-  ],
-});
+}));
 const result = engine.query({
   protocolVersion: SEMATH_PROTOCOL_VERSION,
   epoch,

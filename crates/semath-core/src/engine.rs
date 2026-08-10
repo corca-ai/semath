@@ -1,21 +1,29 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
+use crate::canonical::{SemanticExpr, lower_document_region};
 use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
-use crate::parser::{ParsedMath, parse_regions, selection_path};
+use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
 use crate::scope::ScopeGraph;
 use crate::semantic::SemanticFactStore;
+use crate::semantic_index::{
+    Claim, ClaimId, ClaimObject, ClaimPredicate, DocumentSemanticFacts, EntityId, EvidenceId,
+    EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier, Mention,
+    MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex, ResolutionStatus,
+    SourceOccurrence, SourceOccurrenceId,
+};
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
-    ProjectChange, ProjectDocument, ProjectSnapshot, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticContextInfo, SemanticDiagnostic,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
-    SourceRange, SymbolInfo, UpdateResult,
+    ProjectChange, ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query,
+    QueryEnvelope, QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticContextInfo,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
+    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -35,6 +43,10 @@ pub enum EngineError {
     MissingDocument(String),
     #[error("document version mismatch")]
     DocumentVersionMismatch,
+    #[error("invalid wasmtex syntax snapshot: {0}")]
+    InvalidSyntaxSnapshot(String),
+    #[error("invalid semantic facts: {0}")]
+    InvalidSemanticFacts(String),
     #[error("invalid JSON payload: {0}")]
     InvalidJson(#[from] serde_json::Error),
 }
@@ -46,6 +58,19 @@ struct AnalyzedDocument {
     hygiene: HygieneAnalysis,
     scopes: ScopeGraph,
     component_id: String,
+    analysis_fingerprint: u64,
+    canonical_expressions: Vec<SemanticExpr>,
+    semantic_occurrences: Vec<SemanticOccurrenceSeed>,
+}
+
+#[derive(Clone, Debug)]
+struct SemanticOccurrenceSeed {
+    surface: String,
+    selection_range: SourceRange,
+    range: SourceRange,
+    structural_path: Vec<u32>,
+    source_text: String,
+    notation: Vec<NotationComponent>,
 }
 
 #[derive(Clone)]
@@ -74,56 +99,95 @@ struct IndexedTypeFact {
 }
 
 impl AnalyzedDocument {
-    fn analyze(document: ProjectDocument) -> (Self, SemanticFactStore) {
-        let parsed = parse_regions(&document.content, &document.math_regions);
+    fn analyze(mut document: ProjectDocument) -> Result<(Self, SemanticFactStore), EngineError> {
+        #[cfg(test)]
+        let parsed = if document.nodes.is_empty() {
+            crate::parser::parse_regions(&document.content, &document.math_regions)
+        } else {
+            parse_snapshot(&document).map_err(EngineError::InvalidSyntaxSnapshot)?
+        };
+        #[cfg(not(test))]
+        let parsed = parse_snapshot(&document).map_err(EngineError::InvalidSyntaxSnapshot)?;
         let scopes = ScopeGraph::new(&document);
         let facts = SemanticFactStore::build(&document, &parsed);
         let hygiene = analyze_hygiene(&document, &parsed, &facts.definitions);
-        (
+        let semantic_occurrences = parsed
+            .iter()
+            .flat_map(|math| &math.symbols)
+            .map(|(surface, selection_range)| {
+                let range = notation_occurrence_range(&document, selection_range);
+                SemanticOccurrenceSeed {
+                    surface: surface.clone(),
+                    selection_range: selection_range.clone(),
+                    structural_path: notation_path(&document, selection_range),
+                    source_text: source_text(&document, &range),
+                    notation: notation_components(&document, selection_range, surface),
+                    range,
+                }
+            })
+            .collect();
+        let canonical_expressions = parsed
+            .iter()
+            .map(|math| {
+                let mut expression = lower_document_region(&document, &math.region.content_range);
+                expression.range = math.region.content_range.clone();
+                expression
+            })
+            .collect();
+        let analysis_fingerprint = analysis_fingerprint(&document);
+        compact_analyzed_document(&mut document);
+        Ok((
             Self {
                 component_id: document.file_id.clone(),
                 document,
                 parsed,
                 hygiene,
                 scopes,
+                analysis_fingerprint,
+                canonical_expressions,
+                semantic_occurrences,
             },
             facts,
-        )
+        ))
     }
 }
 
 #[derive(Default)]
-struct ProjectSemanticIndex {
+struct ProjectState {
     documents: HashMap<String, AnalyzedDocument>,
     facts: HashMap<String, SemanticFactStore>,
     order: ProjectOrder,
     external_types: HashMap<String, ExternalTypeEnvironment>,
+    semantic: ProjectSemanticIndex,
+    definitions_by_entity: BTreeMap<EntityId, DefinitionInfo>,
+    occurrences_by_range: HashMap<(String, u32, u32), SourceOccurrenceId>,
 }
 
-impl ProjectSemanticIndex {
-    fn replace(&mut self, document: ProjectDocument) {
+impl ProjectState {
+    fn replace(&mut self, document: ProjectDocument) -> Result<(), EngineError> {
         let file_id = document.file_id.clone();
         let previous_component = self
             .documents
             .get(&file_id)
-            .map(|current| current.component_id.clone());
-        let (mut document, mut facts) = AnalyzedDocument::analyze(document);
+            .map(|document| document.component_id.clone());
+        let (mut document, facts) = AnalyzedDocument::analyze(document)?;
         if let Some(component_id) = previous_component {
-            document.component_id.clone_from(&component_id);
-            for definition in &mut facts.definitions {
-                if let Some(identity) = &mut definition.semantic_id {
-                    identity.component_id.clone_from(&component_id);
-                }
-            }
+            document.component_id = component_id;
         }
         self.documents.insert(file_id.clone(), document);
         self.facts.insert(file_id, facts);
+        Ok(())
     }
 
     fn remove(&mut self, file_id: &str) {
         self.documents.remove(file_id);
         self.facts.remove(file_id);
         self.external_types.remove(file_id);
+        self.semantic.remove_document(file_id);
+        self.definitions_by_entity
+            .retain(|entity, _| entity.anchor.file_id != file_id);
+        self.occurrences_by_range
+            .retain(|(candidate, _, _), _| candidate != file_id);
     }
 
     fn facts(&self, file_id: &str) -> &SemanticFactStore {
@@ -182,6 +246,348 @@ impl ProjectSemanticIndex {
             path: document.document.path.clone(),
         })
     }
+
+    fn rebuild_semantic_index(&mut self) -> Result<(), EngineError> {
+        let mut semantic = ProjectSemanticIndex::default();
+        self.definitions_by_entity.clear();
+        self.occurrences_by_range.clear();
+        let mut file_ids = self.documents.keys().cloned().collect::<Vec<_>>();
+        file_ids.sort();
+        let mut semantic_documents = Vec::with_capacity(file_ids.len());
+        for file_id in file_ids {
+            let document = self
+                .documents
+                .get(&file_id)
+                .expect("semantic lowering requires an analyzed document");
+            let lowered = lower_semantic_document(document, self.facts(&file_id), &self.order);
+            self.definitions_by_entity.extend(lowered.definitions);
+            self.occurrences_by_range.extend(lowered.occurrences);
+            semantic_documents.push(lowered.facts);
+        }
+        semantic
+            .replace_documents(semantic_documents)
+            .map_err(EngineError::InvalidSemanticFacts)?;
+        self.semantic = semantic;
+        Ok(())
+    }
+
+    fn replace_semantic_documents(&mut self, file_ids: &[String]) -> Result<(), EngineError> {
+        let lowered = file_ids
+            .iter()
+            .map(|file_id| {
+                let document = self
+                    .documents
+                    .get(file_id)
+                    .expect("semantic lowering requires an analyzed document");
+                lower_semantic_document(document, self.facts(file_id), &self.order)
+            })
+            .collect::<Vec<_>>();
+        let mut semantic_documents = Vec::with_capacity(lowered.len());
+        let mut definitions = BTreeMap::new();
+        let mut occurrences = HashMap::new();
+        for item in lowered {
+            semantic_documents.push(item.facts);
+            definitions.extend(item.definitions);
+            occurrences.extend(item.occurrences);
+        }
+        self.semantic
+            .replace_documents(semantic_documents)
+            .map_err(EngineError::InvalidSemanticFacts)?;
+        let replaced = file_ids.iter().map(String::as_str).collect::<HashSet<_>>();
+        self.definitions_by_entity
+            .retain(|entity, _| !replaced.contains(entity.anchor.file_id.as_str()));
+        self.occurrences_by_range
+            .retain(|(candidate, _, _), _| !replaced.contains(candidate.as_str()));
+        self.definitions_by_entity.extend(definitions);
+        self.occurrences_by_range.extend(occurrences);
+        Ok(())
+    }
+}
+
+struct LoweredSemanticDocument {
+    facts: DocumentSemanticFacts,
+    definitions: BTreeMap<EntityId, DefinitionInfo>,
+    occurrences: HashMap<(String, u32, u32), SourceOccurrenceId>,
+}
+
+fn lower_semantic_document(
+    document: &AnalyzedDocument,
+    facts: &SemanticFactStore,
+    order: &ProjectOrder,
+) -> LoweredSemanticDocument {
+    let source = &document.document;
+    let mut occurrences = Vec::new();
+    let mut occurrences_by_range = HashMap::new();
+    for (local_id, seed) in document.semantic_occurrences.iter().enumerate() {
+        let id = SourceOccurrenceId {
+            file_id: source.file_id.clone(),
+            document_version: source.document_version,
+            local_id: local_id as u32,
+        };
+        occurrences_by_range.insert(
+            (
+                source.file_id.clone(),
+                seed.selection_range.start_offset,
+                seed.selection_range.end_offset,
+            ),
+            id.clone(),
+        );
+        occurrences_by_range.insert(
+            (
+                source.file_id.clone(),
+                seed.range.start_offset,
+                seed.range.end_offset,
+            ),
+            id.clone(),
+        );
+        occurrences.push(SourceOccurrence {
+            id,
+            component_id: document.component_id.clone(),
+            kind: OccurrenceKind::Notation,
+            range: seed.range.clone(),
+            selection_range: seed.selection_range.clone(),
+            scope_path: document.scopes.path_at(seed.selection_range.start_offset),
+            structural_path: seed.structural_path.clone(),
+            availability_order: order
+                .position(&source.file_id, seed.selection_range.start_offset)
+                .unwrap_or(u64::MAX),
+            surface: seed.surface.clone(),
+            source_text: seed.source_text.clone(),
+            notation: seed.notation.clone(),
+        });
+    }
+    occurrences.sort_by_key(|item| {
+        (
+            item.range.start_offset,
+            item.range.end_offset,
+            item.id.local_id,
+        )
+    });
+    occurrences.dedup_by(|left, right| left.range == right.range && left.surface == right.surface);
+    occurrences_by_range.clear();
+    for (local_id, occurrence) in occurrences.iter_mut().enumerate() {
+        occurrence.id.local_id = local_id as u32;
+        occurrences_by_range.insert(
+            (
+                source.file_id.clone(),
+                occurrence.range.start_offset,
+                occurrence.range.end_offset,
+            ),
+            occurrence.id.clone(),
+        );
+        occurrences_by_range.insert(
+            (
+                source.file_id.clone(),
+                occurrence.selection_range.start_offset,
+                occurrence.selection_range.end_offset,
+            ),
+            occurrence.id.clone(),
+        );
+    }
+
+    let mut entities = Vec::new();
+    let mut evidence = Vec::new();
+    let mut claims = Vec::new();
+    let mut definitions = BTreeMap::new();
+    for (definition_index, definition) in facts.definitions.iter().enumerate() {
+        let key = (
+            source.file_id.clone(),
+            definition.location.range.start_offset,
+            definition.location.range.end_offset,
+        );
+        let Some(anchor) = occurrences_by_range.get(&key).cloned() else {
+            continue;
+        };
+        let scope_path = document
+            .scopes
+            .path_at(definition.location.range.start_offset);
+        let entity = EntityId {
+            component_id: document.component_id.clone(),
+            scope_path,
+            kind: "definition".to_owned(),
+            anchor: anchor.clone(),
+        };
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:definition-evidence:{}",
+            source.file_id, source.document_version, definition_index
+        ));
+        let claim_id = ClaimId(format!(
+            "{}:{}:definition-claim:{}",
+            source.file_id, source.document_version, definition_index
+        ));
+        let availability = order
+            .position(&source.file_id, definition.location.range.start_offset)
+            .unwrap_or(u64::MAX)
+            .max(
+                occurrences
+                    .iter()
+                    .find(|occurrence| occurrence.id == anchor)
+                    .map_or(0, |occurrence| occurrence.availability_order),
+            );
+        evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: anchor.clone(),
+            scope_path: entity.scope_path.clone(),
+            available_after: availability,
+            polarity: EvidencePolarity::Positive,
+            modality: EvidenceModality::Asserted,
+            origin: EvidenceOrigin::Explicit,
+            provenance: vec![anchor.clone()],
+            parent_claims: Vec::new(),
+            rule_id: definition.evidence.rule_id.clone(),
+            rule_version: 1,
+        });
+        claims.push(Claim {
+            id: claim_id,
+            subject: entity.clone(),
+            predicate: ClaimPredicate::Defines,
+            object: ClaimObject::Occurrence(anchor),
+            evidence_id,
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
+        definitions.insert(entity.clone(), definition.clone());
+        entities.push(entity);
+    }
+    let mentions = occurrences
+        .iter()
+        .map(|occurrence| Mention {
+            occurrence_id: occurrence.id.clone(),
+            modality: MentionModality::Notation,
+        })
+        .collect();
+    LoweredSemanticDocument {
+        facts: DocumentSemanticFacts {
+            file_id: source.file_id.clone(),
+            document_version: source.document_version,
+            source_utf16_length: source.content.encode_utf16().count() as u32,
+            occurrences,
+            entities,
+            mentions,
+            evidence,
+            claims,
+        },
+        definitions,
+        occurrences: occurrences_by_range,
+    }
+}
+
+fn notation_occurrence_range(document: &ProjectDocument, selection: &SourceRange) -> SourceRange {
+    document
+        .nodes
+        .iter()
+        .filter(|node| {
+            let identity_range = match node.kind {
+                crate::NotationNodeKind::NamedOperator => node.ranges.name.as_ref(),
+                crate::NotationNodeKind::Modifier
+                | crate::NotationNodeKind::Style
+                | crate::NotationNodeKind::Script => node.ranges.nucleus.as_ref(),
+                _ => None,
+            };
+            identity_range.is_some_and(|identity| {
+                identity.start_offset <= selection.start_offset
+                    && selection.end_offset <= identity.end_offset
+            })
+        })
+        .max_by_key(|node| node.ranges.full.end_offset - node.ranges.full.start_offset)
+        .map_or_else(|| selection.clone(), |node| node.ranges.full.clone())
+}
+
+fn notation_path(document: &ProjectDocument, range: &SourceRange) -> Vec<u32> {
+    let mut candidates = document
+        .nodes
+        .iter()
+        .enumerate()
+        .filter(|(_, node)| {
+            node.ranges.full.start_offset <= range.start_offset
+                && range.end_offset <= node.ranges.full.end_offset
+        })
+        .map(|(id, node)| {
+            (
+                id as u32,
+                node.ranges.full.end_offset - node.ranges.full.start_offset,
+            )
+        })
+        .collect::<Vec<_>>();
+    candidates.sort_by_key(|(_, width)| std::cmp::Reverse(*width));
+    candidates.into_iter().map(|(id, _)| id).collect()
+}
+
+fn notation_components(
+    document: &ProjectDocument,
+    range: &SourceRange,
+    surface: &str,
+) -> Vec<NotationComponent> {
+    let mut components = Vec::new();
+    for node_id in notation_path(document, range) {
+        let node = &document.nodes[node_id as usize];
+        match node.kind {
+            crate::NotationNodeKind::Modifier => {
+                if let Some(name) = &node.name {
+                    components.push(NotationComponent::Modifier { name: name.clone() });
+                }
+            }
+            crate::NotationNodeKind::Style => {
+                if let Some(name) = &node.name {
+                    components.push(NotationComponent::Style { name: name.clone() });
+                }
+            }
+            crate::NotationNodeKind::Script => match node.name.as_deref() {
+                Some("superscript") => components.push(NotationComponent::Superscript),
+                Some("subscript") => components.push(NotationComponent::Subscript),
+                _ => {}
+            },
+            crate::NotationNodeKind::NamedOperator => {
+                components.push(NotationComponent::NamedSurface {
+                    value: node.name.clone().unwrap_or_else(|| surface.to_owned()),
+                });
+            }
+            _ => {}
+        }
+    }
+    if !components
+        .iter()
+        .any(|component| matches!(component, NotationComponent::NamedSurface { .. }))
+    {
+        components.push(NotationComponent::Identifier {
+            value: surface.to_owned(),
+        });
+    }
+    components
+}
+
+fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {
+    let index = crate::SourceIndex::new(&document.content);
+    let start = index.byte_for_utf16(range.start_offset);
+    let end = index.byte_for_utf16(range.end_offset);
+    document.content.get(start..end).unwrap_or("").to_owned()
+}
+
+fn analysis_fingerprint(document: &ProjectDocument) -> u64 {
+    let encoded = serde_json::to_vec(&(
+        document.schema_version,
+        document.language,
+        &document.nodes,
+        &document.math_roots,
+        &document.declarations,
+        &document.macros,
+        &document.includes,
+    ))
+    .expect("validated syntax snapshots must remain serializable");
+    let mut hasher = DefaultHasher::new();
+    encoded.hash(&mut hasher);
+    hasher.finish()
+}
+
+fn compact_analyzed_document(document: &mut ProjectDocument) {
+    document.nodes.clear();
+    document.math_roots.clear();
+    document.visible_prose.clear();
+    document.scopes.clear();
+    document.declarations.clear();
+    document.macros.clear();
+    #[cfg(test)]
+    document.math_regions.clear();
 }
 
 #[derive(Default)]
@@ -191,29 +597,53 @@ pub struct SemathEngine {
     project_id: String,
     main_file_id: Option<String>,
     analysis_generation: u64,
-    index: ProjectSemanticIndex,
+    index: ProjectState,
 }
 
 impl SemathEngine {
     pub fn reset(&mut self, snapshot: ProjectSnapshot) -> Result<UpdateResult, EngineError> {
-        check_protocol(snapshot.protocol_version)?;
-        let changed_file_ids = snapshot
-            .documents
-            .iter()
-            .map(|doc| doc.file_id.clone())
-            .collect::<Vec<_>>();
-        self.epoch = snapshot.epoch;
-        self.inventory_version = snapshot.inventory_version;
-        self.project_id = snapshot.project_id;
-        self.main_file_id = snapshot.main_file_id;
-        self.analysis_generation = 0;
-        self.index.documents.clear();
-        self.index.facts.clear();
-        for document in snapshot.documents {
-            self.index.replace(document);
+        let ProjectSnapshot {
+            protocol_version,
+            epoch,
+            inventory_version,
+            project_id,
+            main_file_id,
+            documents,
+        } = snapshot;
+        self.begin_reset(ProjectSnapshotMetadata {
+            protocol_version,
+            epoch,
+            inventory_version,
+            project_id,
+            main_file_id,
+        })?;
+        for document in documents {
+            self.ingest_reset_document(document)?;
         }
-        self.refresh_semantic_identities();
+        self.finish_reset()
+    }
+
+    pub fn begin_reset(&mut self, metadata: ProjectSnapshotMetadata) -> Result<(), EngineError> {
+        check_protocol(metadata.protocol_version)?;
+        self.epoch = metadata.epoch;
+        self.inventory_version = metadata.inventory_version;
+        self.project_id = metadata.project_id;
+        self.main_file_id = metadata.main_file_id;
+        self.analysis_generation = 0;
+        self.index = ProjectState::default();
+        Ok(())
+    }
+
+    pub fn ingest_reset_document(&mut self, document: ProjectDocument) -> Result<(), EngineError> {
+        self.index.replace(document)
+    }
+
+    pub fn finish_reset(&mut self) -> Result<UpdateResult, EngineError> {
+        let mut changed_file_ids = self.index.documents.keys().cloned().collect::<Vec<_>>();
+        changed_file_ids.sort();
+        self.refresh_project_topology();
         self.refresh_project_laws(&changed_file_ids.iter().cloned().collect());
+        self.index.rebuild_semantic_index()?;
         Ok(self.update_result(changed_file_ids.clone(), changed_file_ids))
     }
 
@@ -238,6 +668,7 @@ impl SemathEngine {
             .collect::<HashSet<_>>();
         let mut affected = self.index.order.affected_by(&requested);
         let mut changed = Vec::new();
+        let mut revision_only = Vec::new();
         let mut order_changed = false;
         let mut semantic_changed = false;
         for change in envelope.changes {
@@ -250,9 +681,14 @@ impl SemathEngine {
                     if accept {
                         let previous_order = self.index.order_document(&file_id);
                         if self.can_reuse_analysis(&document) {
-                            self.index.documents.get_mut(&file_id).unwrap().document = document;
+                            let current = self.index.documents.get_mut(&file_id).unwrap();
+                            current.scopes = ScopeGraph::new(&document);
+                            let mut document = *document;
+                            compact_analyzed_document(&mut document);
+                            current.document = document;
+                            revision_only.push(file_id.clone());
                         } else {
-                            self.index.replace(document);
+                            self.index.replace(*document)?;
                             semantic_changed = true;
                         }
                         order_changed |= previous_order != self.index.order_document(&file_id);
@@ -277,7 +713,7 @@ impl SemathEngine {
         self.inventory_version = envelope.inventory_version;
         self.analysis_generation = envelope.analysis_generation;
         if order_changed {
-            self.refresh_semantic_identities();
+            self.refresh_project_topology();
             affected.extend(self.index.order.affected_by(&requested));
         }
         let mut analyzed = if semantic_changed || order_changed {
@@ -291,6 +727,18 @@ impl SemathEngine {
         analyzed.sort();
         if !analyzed.is_empty() {
             self.refresh_project_laws(&analyzed.iter().cloned().collect());
+            if order_changed {
+                self.index.rebuild_semantic_index()?;
+            }
+        }
+        if !order_changed {
+            let mut semantic_updates = analyzed.clone();
+            semantic_updates.extend(revision_only);
+            semantic_updates.sort();
+            semantic_updates.dedup();
+            if !semantic_updates.is_empty() {
+                self.index.replace_semantic_documents(&semantic_updates)?;
+            }
         }
         changed.sort();
         Ok(self.update_result(changed, analyzed))
@@ -330,7 +778,7 @@ impl SemathEngine {
         let offset = query_offset.unwrap_or(0);
         let parsed =
             query_offset.and_then(|offset| parsed_math_at_cursor(&document.parsed, offset));
-        let symbol = parsed.and_then(|math| symbol_at_cursor(math, offset));
+        let symbol = parsed.and_then(|math| semantic_symbol_at_cursor(document, math, offset));
         let cursor_offset = symbol.as_ref().map_or_else(
             || {
                 parsed.map_or(offset, |math| {
@@ -416,6 +864,18 @@ impl SemathEngine {
         Ok(serde_json::to_vec(&result)?)
     }
 
+    pub fn begin_reset_json(&mut self, payload: &[u8]) -> Result<(), EngineError> {
+        self.begin_reset(serde_json::from_slice(payload)?)
+    }
+
+    pub fn ingest_reset_document_json(&mut self, payload: &[u8]) -> Result<(), EngineError> {
+        self.ingest_reset_document(serde_json::from_slice(payload)?)
+    }
+
+    pub fn finish_reset_json(&mut self) -> Result<Vec<u8>, EngineError> {
+        Ok(serde_json::to_vec(&self.finish_reset()?)?)
+    }
+
     pub fn apply_json(&mut self, payload: &[u8]) -> Result<Vec<u8>, EngineError> {
         let result = self.apply(serde_json::from_slice(payload)?)?;
         Ok(serde_json::to_vec(&result)?)
@@ -431,6 +891,7 @@ impl SemathEngine {
         changed_file_ids: Vec<String>,
         analyzed_file_ids: Vec<String>,
     ) -> UpdateResult {
+        let semantic_stats = self.index.semantic.stats();
         UpdateResult {
             protocol_version: PROTOCOL_VERSION,
             epoch: self.epoch.clone(),
@@ -460,6 +921,12 @@ impl SemathEngine {
                     .iter()
                     .map(|file_id| self.index.facts(file_id).laws.visited_rules())
                     .sum(),
+                semantic_occurrences: semantic_stats.occurrences,
+                semantic_entities: semantic_stats.entities,
+                semantic_claims: semantic_stats.claims,
+                semantic_evidence: semantic_stats.evidence,
+                semantic_dependency_edges: semantic_stats.dependency_edges,
+                invalidated_semantic_claims: semantic_stats.invalidated_claims,
             },
             analyzed_file_ids,
         }
@@ -489,105 +956,30 @@ impl SemathEngine {
         let Some(current) = self.index.documents.get(&next.file_id) else {
             return false;
         };
-        let current = &current.document;
-        current.path == next.path
-            && current.language == next.language
-            && current.math_regions == next.math_regions
-            && current.macros == next.macros
-            && current.includes == next.includes
-            && appended_comments_only(&current.content, &next.content)
-    }
-
-    fn definitions_for(&self, symbol: &str) -> Vec<DefinitionInfo> {
-        let mut definitions: Vec<_> = self
-            .index
-            .facts
-            .values()
-            .flat_map(|facts| facts.definitions.iter())
-            .filter(|definition| definition.symbol == symbol)
-            .cloned()
-            .collect();
-        definitions.sort_by(|left, right| {
-            left.location.path.cmp(&right.location.path).then(
-                left.location
-                    .range
-                    .start_offset
-                    .cmp(&right.location.range.start_offset),
-            )
-        });
-        definitions
+        current.document.path == next.path
+            && current.document.language == next.language
+            && current.document.schema_version == next.schema_version
+            && current.analysis_fingerprint == analysis_fingerprint(next)
+            && appended_comments_only(&current.document.content, &next.content)
     }
 
     fn visible_definitions(
         &self,
         file_id: &str,
         occurrence: &SourceRange,
-        symbol: &str,
+        _symbol: &str,
     ) -> Vec<DefinitionInfo> {
-        let Some(document) = self.index.documents.get(file_id) else {
-            return Vec::new();
-        };
-        let occurrence_scope = document.scopes.path_at(occurrence.start_offset);
-        let candidates = self
-            .definitions_for(symbol)
-            .into_iter()
-            .filter(|definition| {
-                definition
-                    .semantic_id
-                    .as_ref()
-                    .is_some_and(|identity| identity.component_id == document.component_id)
-            })
-            .filter(|definition| {
-                if definition.location.file_id == file_id {
-                    definition.location.range.start_offset <= occurrence.start_offset
-                        && definition.semantic_id.as_ref().is_some_and(|identity| {
-                            scope_visible(&identity.scope_path, &occurrence_scope)
-                        })
-                } else {
-                    self.index.order.precedes(
-                        &definition.location.file_id,
-                        definition.location.range.start_offset,
-                        file_id,
-                        occurrence.start_offset,
-                    )
-                }
-            })
-            .collect::<Vec<_>>();
-        let mut local = candidates
-            .iter()
-            .filter(|definition| {
-                definition.location.file_id == file_id
-                    && definition.location.range.start_offset <= occurrence.start_offset
-                    && definition.semantic_id.as_ref().is_some_and(|identity| {
-                        scope_visible(&identity.scope_path, &occurrence_scope)
+        self.resolved_entity(file_id, occurrence)
+            .and_then(|entity| {
+                self.index
+                    .definitions_by_entity
+                    .get(&entity)
+                    .cloned()
+                    .map(|mut definition| {
+                        definition.entity_id = Some(entity);
+                        definition
                     })
             })
-            .cloned()
-            .collect::<Vec<_>>();
-        local.sort_by_key(|definition| {
-            let identity = definition.semantic_id.as_ref().unwrap();
-            (
-                identity.scope_path.len(),
-                definition.location.range.start_offset,
-            )
-        });
-        if !local.is_empty() {
-            return local;
-        }
-        if candidates.len() == 1 {
-            return candidates;
-        }
-        let document_scoped = candidates
-            .into_iter()
-            .filter(|definition| {
-                definition
-                    .semantic_id
-                    .as_ref()
-                    .is_some_and(|identity| identity.scope_path.is_empty())
-            })
-            .collect::<Vec<_>>();
-        (document_scoped.len() == 1)
-            .then(|| document_scoped[0].clone())
             .into_iter()
             .collect()
     }
@@ -600,35 +992,26 @@ impl SemathEngine {
     ) -> Option<DefinitionInfo> {
         self.visible_definitions(file_id, occurrence, symbol)
             .into_iter()
-            .max_by_key(|definition| {
-                let identity = definition.semantic_id.as_ref().unwrap();
-                (
-                    identity.scope_path.len(),
-                    definition.location.range.start_offset,
-                )
-            })
+            .next()
     }
 
     fn references_for(&self, definition: &DefinitionInfo) -> Vec<Location> {
+        let Some(entity) = &definition.entity_id else {
+            return Vec::new();
+        };
         let mut locations = Vec::new();
-        for document in self.index.documents.values() {
-            for math in &document.parsed {
-                for (symbol, range) in &math.symbols {
-                    if symbol != &definition.symbol {
-                        continue;
-                    }
-                    if self
-                        .resolve_definition(&document.document.file_id, range, symbol)
-                        .as_ref()
-                        .is_some_and(|resolved| resolved.semantic_id == definition.semantic_id)
-                    {
-                        locations.push(Location {
-                            file_id: document.document.file_id.clone(),
-                            path: document.document.path.clone(),
-                            range: range.clone(),
-                        });
-                    }
-                }
+        for occurrence in self.index.semantic.occurrences() {
+            let resolution = self.index.semantic.resolve(&occurrence.id);
+            if resolution.status == ResolutionStatus::Established
+                && resolution.candidates.len() == 1
+                && resolution.candidates[0].entity_id == *entity
+            {
+                let document = &self.index.documents[&occurrence.id.file_id];
+                locations.push(Location {
+                    file_id: occurrence.id.file_id.clone(),
+                    path: document.document.path.clone(),
+                    range: occurrence.range.clone(),
+                });
             }
         }
         locations.sort_by(|left, right| {
@@ -639,6 +1022,17 @@ impl SemathEngine {
         locations
     }
 
+    fn resolved_entity(&self, file_id: &str, range: &SourceRange) -> Option<EntityId> {
+        let occurrence_id = self.index.occurrences_by_range.get(&(
+            file_id.to_owned(),
+            range.start_offset,
+            range.end_offset,
+        ))?;
+        let resolution = self.index.semantic.resolve(occurrence_id);
+        (resolution.status == ResolutionStatus::Established && resolution.candidates.len() == 1)
+            .then(|| resolution.candidates[0].entity_id.clone())
+    }
+
     fn semantic_context(
         &self,
         facts: &SemanticFactStore,
@@ -646,12 +1040,11 @@ impl SemathEngine {
         symbol: Option<&(String, SourceRange)>,
         offset: u32,
     ) -> SemanticContextInfo {
-        let (definitions, semantic_id, symbol_name) = symbol
+        let (definitions, entity_id, symbol_name) = symbol
             .map(|(name, occurrence)| {
                 (
                     self.visible_definitions(file_id, occurrence, name),
-                    self.resolve_definition(file_id, occurrence, name)
-                        .and_then(|definition| definition.semantic_id),
+                    self.resolved_entity(file_id, occurrence),
                     Some(name.clone()),
                 )
             })
@@ -659,7 +1052,7 @@ impl SemathEngine {
         facts.context(
             definitions,
             symbol_name,
-            semantic_id,
+            entity_id,
             offset,
             self.index.external_types.get(file_id),
         )
@@ -674,7 +1067,7 @@ impl SemathEngine {
         offset: u32,
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
-        let symbol_info = symbol.as_ref().map(|(name, occurrence)| {
+        let symbol_info = symbol.as_ref().and_then(|(name, occurrence)| {
             self.symbol_info(document, facts, name, occurrence, offset, hygiene_enabled)
         });
         let context = self.semantic_context(facts, &document.document.file_id, symbol, offset);
@@ -764,7 +1157,7 @@ impl SemathEngine {
         occurrence: &SourceRange,
         offset: u32,
         hygiene_enabled: bool,
-    ) -> SymbolInfo {
+    ) -> Option<SymbolInfo> {
         let mut definitions =
             self.visible_definitions(&document.document.file_id, occurrence, name);
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
@@ -786,15 +1179,22 @@ impl SemathEngine {
         }
         let (diagnostics, diagnostics_truncated) =
             symbol_diagnostics(document, facts, name, offset, &shapes, hygiene_enabled);
-        SymbolInfo {
+        let occurrence_id = self.index.occurrences_by_range.get(&(
+            document.document.file_id.clone(),
+            occurrence.start_offset,
+            occurrence.end_offset,
+        ))?;
+        let semantic_occurrence = self.index.semantic.occurrence(occurrence_id)?;
+        Some(SymbolInfo {
             symbol: name.into(),
-            semantic_id: self
-                .resolve_definition(&document.document.file_id, occurrence, name)
-                .and_then(|definition| definition.semantic_id),
+            occurrence_id: occurrence_id.clone(),
+            notation: semantic_occurrence.notation.clone(),
+            source_notation: semantic_occurrence.source_text.clone(),
+            entity_id: self.resolved_entity(&document.document.file_id, occurrence),
             location: Location {
                 file_id: document.document.file_id.clone(),
                 path: document.document.path.clone(),
-                range: occurrence.clone(),
+                range: semantic_occurrence.range.clone(),
             },
             definitions,
             shapes,
@@ -806,7 +1206,7 @@ impl SemathEngine {
                 || quantities_truncated
                 || roles_truncated
                 || diagnostics_truncated,
-        }
+        })
     }
 
     fn refresh_project_laws(&mut self, targets: &HashSet<String>) {
@@ -907,15 +1307,17 @@ impl SemathEngine {
         for (file_id, environment) in environments {
             let document = self.index.documents.get(&file_id).unwrap();
             let source = document.document.clone();
-            let parsed = document.parsed.clone();
-            self.index
-                .facts_mut(&file_id)
-                .refresh_laws(&source, &parsed, &environment);
+            let canonical_expressions = document.canonical_expressions.clone();
+            self.index.facts_mut(&file_id).refresh_laws(
+                &source,
+                &canonical_expressions,
+                &environment,
+            );
             self.index.external_types.insert(file_id, environment);
         }
     }
 
-    fn refresh_semantic_identities(&mut self) {
+    fn refresh_project_topology(&mut self) {
         let project_order = ProjectOrder::new(
             self.index
                 .documents
@@ -929,14 +1331,6 @@ impl SemathEngine {
                 .component_for(file_id)
                 .map(str::to_owned)
                 .unwrap_or_else(|| file_id.clone());
-        }
-        for (file_id, facts) in &mut self.index.facts {
-            let component_id = &self.index.documents.get(file_id).unwrap().component_id;
-            for definition in &mut facts.definitions {
-                if let Some(identity) = &mut definition.semantic_id {
-                    identity.component_id.clone_from(component_id);
-                }
-            }
         }
         self.index.order = project_order;
     }
@@ -960,14 +1354,6 @@ fn appended_comments_only(current: &str, next: &str) -> bool {
         && appended
             .lines()
             .all(|line| line.trim().is_empty() || line.trim_start().starts_with('%'))
-}
-
-fn scope_visible(definition: &[u32], occurrence: &[u32]) -> bool {
-    definition.len() <= occurrence.len()
-        && definition
-            .iter()
-            .zip(occurrence)
-            .all(|(left, right)| left == right)
 }
 
 fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMath> {
@@ -994,9 +1380,45 @@ fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMa
         })
 }
 
-fn symbol_at_cursor(math: &ParsedMath, offset: u32) -> Option<(String, SourceRange)> {
-    symbol_range_at_cursor(&math.symbols, offset)
-        .map(|(symbol, range)| (symbol.clone(), range.clone()))
+fn semantic_symbol_at_cursor(
+    document: &AnalyzedDocument,
+    math: &ParsedMath,
+    offset: u32,
+) -> Option<(String, SourceRange)> {
+    if let Some((symbol, range)) = symbol_range_at_cursor(&math.symbols, offset) {
+        return Some((symbol.clone(), range.clone()));
+    }
+    let mut candidates = document
+        .semantic_occurrences
+        .iter()
+        .filter(|seed| {
+            math.region.full_range.start_offset <= seed.range.start_offset
+                && seed.range.end_offset <= math.region.full_range.end_offset
+        })
+        .filter(|seed| seed.range.contains(offset))
+        .collect::<Vec<_>>();
+    if candidates.is_empty() {
+        candidates.extend(document.semantic_occurrences.iter().filter(|seed| {
+            math.region.full_range.start_offset <= seed.range.start_offset
+                && seed.range.end_offset <= math.region.full_range.end_offset
+                && seed.range.start_offset < seed.range.end_offset
+                && seed.range.end_offset == offset
+        }));
+    }
+    candidates.sort_by_key(|seed| {
+        (
+            seed.range.end_offset - seed.range.start_offset,
+            seed.selection_range.end_offset - seed.selection_range.start_offset,
+            seed.selection_range.start_offset,
+        )
+    });
+    let selected = *candidates.first()?;
+    if candidates.get(1).is_some_and(|next| {
+        next.range == selected.range && next.selection_range != selected.selection_range
+    }) {
+        return None;
+    }
+    Some((selected.surface.clone(), selected.selection_range.clone()))
 }
 
 fn symbol_range_at_cursor(

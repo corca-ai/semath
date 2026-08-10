@@ -38,5 +38,18 @@ There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
 
+Source selection exposes a revision-local `SourceOccurrenceId`; established
+meaning exposes a scoped `EntityId` anchored to one such occurrence. Notation
+components such as modifiers, styles, scripts, and named operators remain part
+of the occurrence and never become flat string identities. Definitions and
+references resolve through the project semantic index, not a project-wide
+symbol scan.
+
+Project documents contain the complete wasmtex syntax schema 4 snapshot. The
+adapter validates the schema and forwards the arena, roots, visible prose,
+scopes, declarations, and provenance without reconstructing or selectively
+copying structural facts. Corrupt top-level contracts fail explicitly;
+incomplete or opaque subtrees remain local unsupported evidence.
+
 Core semantic behavior belongs to Rust. Packages own transport and lifecycle;
 applications own presentation, permissions, review, apply, and undo.
