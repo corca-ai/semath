@@ -7,6 +7,8 @@ export const PERFORMANCE_FIXTURE_FAMILIES = [
   "unicode-and-combining",
   "malformed-recovery",
   "binder-and-rename",
+  "document-shaped-report",
+  "scoped-neighbor",
 ] as const;
 
 export type PerformanceFixtureFamily = (typeof PERFORMANCE_FIXTURE_FAMILIES)[number];
@@ -82,5 +84,22 @@ function fixtureBody(family: PerformanceFixtureFamily, index: number, symbol: st
       return `\$${symbol}=\\frac{\\hat{x_${index}}{\\left(y+z\\right.\$`;
     case "binder-and-rename":
       return `\$${symbol}=\\sum_{k=1}^{n} a_k+\\int_0^1 f(t)\\,dt\$`;
+    case "document-shaped-report":
+      return [
+        "\\section{Background}",
+        "The surrounding experiment reports several independent measurements before the calibrated result.",
+        "$\\xi_{\\mathrm{aux}}=17$",
+        "\\section{Reported result}",
+        `\$${symbol}=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
+        "$\\zeta_{\\mathrm{aux}}=19$",
+      ].join("\n");
+    case "scoped-neighbor":
+      return [
+        "\\section{Independent notation}",
+        "$\\mathbf{q}_{\\mathrm{aux}}=\\frac{1}{2}$",
+        "\\section{Current result}",
+        `\$${symbol}=\\widehat{y}_{t+1}+\\operatorname{loss}(x)\$`,
+        "$\\frac{1}{$",
+      ].join("\n");
   }
 }

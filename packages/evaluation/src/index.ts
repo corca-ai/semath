@@ -1,6 +1,7 @@
 export * from "./conformance";
 export * from "./differential";
 export * from "./challenge";
+export * from "./cursor-invariants";
 export * from "./foundation";
 export * from "./legacy-path-audit";
 export * from "./metamorphic";

@@ -18,10 +18,36 @@ export const CHALLENGE_METRICS = [
   "scope",
   "structure",
 ] as const;
+export const CHALLENGE_DECISIONS = [
+  "established",
+  "partial",
+  "ambiguous",
+  "conflicting",
+  "unsupported",
+] as const;
+export const CHALLENGE_DOCUMENT_SHAPES = [
+  "distant-prose",
+  "macro-neighbor",
+  "malformed-neighbor",
+  "multi-equation",
+  "project-neighbor",
+  "sectioned",
+] as const;
+export const CHALLENGE_PROBLEM_POLICIES = ["none", "source-conflict"] as const;
 
 export type ChallengeLayer = (typeof CHALLENGE_LAYERS)[number];
 export type ChallengeMetric = (typeof CHALLENGE_METRICS)[number];
 export type ChallengeOutcome = "positive" | "refusal";
+export type ChallengeDecision = (typeof CHALLENGE_DECISIONS)[number];
+export type ChallengeDocumentShape = (typeof CHALLENGE_DOCUMENT_SHAPES)[number];
+export type ChallengeProblemPolicy =
+  (typeof CHALLENGE_PROBLEM_POLICIES)[number];
+
+export interface ChallengeDecisionExpectation {
+  readonly meaning: "absent" | "present";
+  readonly problems: ChallengeProblemPolicy;
+  readonly status: ChallengeDecision;
+}
 
 export interface ChallengeExpectation {
   readonly assumptionValue?: string;
@@ -48,6 +74,8 @@ export interface ChallengeCase {
     readonly needle: string;
   };
   readonly documents: readonly CorpusDocument[];
+  readonly decisionExpectation?: ChallengeDecisionExpectation;
+  readonly documentShape?: ChallengeDocumentShape;
   readonly expectation: ChallengeExpectation;
   readonly id: string;
   readonly metric: ChallengeMetric;
@@ -58,7 +86,7 @@ export interface ChallengeCase {
 
 export interface ChallengeCorpus {
   readonly cases: readonly ChallengeCase[];
-  readonly schemaVersion: 2;
+  readonly schemaVersion: 2 | 3;
 }
 
 export interface ChallengeObservation {
@@ -74,9 +102,14 @@ export interface ChallengeObservation {
     readonly ruleId: string;
     readonly symbol: string;
   }[];
+  readonly meaningLabel?: string;
+  readonly meaningRelationId?: string | null;
+  readonly problemCount: number;
+  readonly reasonKinds: readonly string[];
   readonly relationIds: readonly string[];
   readonly shapes: readonly string[];
   readonly sourceNotation?: string;
+  readonly sourceGrounded: boolean;
   readonly status?: string;
   readonly symbols: readonly string[];
 }
@@ -84,11 +117,31 @@ export interface ChallengeObservation {
 export interface ChallengeScorecard {
   readonly cases: number;
   readonly failures: readonly string[];
-  readonly layers: Readonly<Record<ChallengeLayer, { passed: number; total: number }>>;
-  readonly metrics: Readonly<Record<ChallengeMetric, { passed: number; total: number }>>;
-  readonly outcomes: Readonly<Record<ChallengeOutcome, { passed: number; total: number }>>;
+  readonly decisions: Readonly<
+    Record<ChallengeDecision, { passed: number; total: number }>
+  >;
+  readonly explanation: { passed: number; total: number };
+  readonly layers: Readonly<
+    Record<ChallengeLayer, { passed: number; total: number }>
+  >;
+  readonly metrics: Readonly<
+    Record<ChallengeMetric, { passed: number; total: number }>
+  >;
+  readonly outcomes: Readonly<
+    Record<ChallengeOutcome, { passed: number; total: number }>
+  >;
   readonly passed: number;
-  readonly schemaVersion: 2;
+  readonly problemPolicy: Readonly<
+    Record<ChallengeProblemPolicy, { passed: number; total: number }>
+  >;
+  readonly reasonIntegrity: { passed: number; total: number };
+  readonly schemaVersion: 2 | 3;
+}
+
+interface ChallengeV3Profile {
+  readonly caseId: string;
+  readonly decision: ChallengeDecisionExpectation;
+  readonly documentShape: ChallengeDocumentShape;
 }
 
 export interface DevelopmentFixtureCase {
@@ -108,7 +161,8 @@ export function findChallengeFixtureLeaks(
   );
   const leaks = new Set<string>();
   for (const item of challenge) {
-    if (developmentIds.has(item.id)) leaks.add(`${item.id}: duplicate fixture id`);
+    if (developmentIds.has(item.id))
+      leaks.add(`${item.id}: duplicate fixture id`);
     for (const document of item.documents) {
       if (developmentSources.has(normalizedSource(document.content))) {
         leaks.add(`${item.id}: duplicate fixture source`);
@@ -121,15 +175,23 @@ export function findChallengeFixtureLeaks(
 export function parseChallengeCorpus(value: unknown): ChallengeCorpus {
   const root = record(value, "challenge");
   exact(root, ["schemaVersion", "cases"], "challenge");
-  if (root.schemaVersion !== 2) throw new Error("challenge.schemaVersion: must be 2");
+  if (root.schemaVersion !== 2)
+    throw new Error("challenge.schemaVersion: must be 2");
   if (!Array.isArray(root.cases) || root.cases.length < 48) {
     throw new Error("challenge.cases: must contain at least 48 frozen cases");
   }
-  const cases = root.cases.map((item, index) => parseCase(item, `challenge.cases[${index}]`));
-  unique(cases.map((item) => item.id), "challenge.cases.id");
+  const cases = root.cases.map((item, index) =>
+    parseCase(item, `challenge.cases[${index}]`),
+  );
+  unique(
+    cases.map((item) => item.id),
+    "challenge.cases.id",
+  );
   for (const layer of CHALLENGE_LAYERS) {
     for (const outcome of ["positive", "refusal"] as const) {
-      if (!cases.some((item) => item.owner === layer && item.outcome === outcome)) {
+      if (
+        !cases.some((item) => item.owner === layer && item.outcome === outcome)
+      ) {
         throw new Error(`challenge.cases: missing ${layer}/${outcome}`);
       }
     }
@@ -143,14 +205,90 @@ export function parseChallengeCorpus(value: unknown): ChallengeCorpus {
   return { cases, schemaVersion: 2 };
 }
 
+/**
+ * Composes the frozen v2 semantic boundaries with a strict document-shaped v3
+ * profile. The profile contains only independent test policy; it never reads
+ * production recognition or presentation code.
+ */
+export function parseChallengeV3(
+  baseValue: unknown,
+  profileValue: unknown,
+): ChallengeCorpus {
+  const base = parseChallengeCorpus(baseValue);
+  const root = record(profileValue, "challenge-v3");
+  exact(
+    root,
+    ["schemaVersion", "baseSchemaVersion", "profiles"],
+    "challenge-v3",
+  );
+  if (root.schemaVersion !== 3)
+    throw new Error("challenge-v3.schemaVersion: must be 3");
+  if (root.baseSchemaVersion !== 2) {
+    throw new Error("challenge-v3.baseSchemaVersion: must be 2");
+  }
+  if (
+    !Array.isArray(root.profiles) ||
+    root.profiles.length !== base.cases.length
+  ) {
+    throw new Error(
+      `challenge-v3.profiles: must contain exactly ${base.cases.length} profiles`,
+    );
+  }
+  const profiles = root.profiles.map((value, index) =>
+    parseV3Profile(value, `challenge-v3.profiles[${index}]`),
+  );
+  unique(
+    profiles.map((profile) => profile.caseId),
+    "challenge-v3.profiles.caseId",
+  );
+  const profileById = new Map(
+    profiles.map((profile) => [profile.caseId, profile]),
+  );
+  const unknown = profiles
+    .filter((profile) => !base.cases.some((item) => item.id === profile.caseId))
+    .map((profile) => profile.caseId);
+  if (unknown.length)
+    throw new Error(`challenge-v3.profiles: unknown case ${unknown.sort()[0]}`);
+
+  const cases = base.cases.map((item) => {
+    const profile = profileById.get(item.id);
+    if (!profile)
+      throw new Error(`challenge-v3.profiles: missing case ${item.id}`);
+    return shapeChallengeCase(item, profile);
+  });
+  for (const shape of CHALLENGE_DOCUMENT_SHAPES) {
+    if (!cases.some((item) => item.documentShape === shape)) {
+      throw new Error(`challenge-v3.profiles: missing document shape ${shape}`);
+    }
+  }
+  for (const status of CHALLENGE_DECISIONS) {
+    if (!cases.some((item) => item.decisionExpectation?.status === status)) {
+      throw new Error(`challenge-v3.profiles: missing decision ${status}`);
+    }
+  }
+  for (const policy of CHALLENGE_PROBLEM_POLICIES) {
+    if (!cases.some((item) => item.decisionExpectation?.problems === policy)) {
+      throw new Error(
+        `challenge-v3.profiles: missing problem policy ${policy}`,
+      );
+    }
+  }
+  return { cases, schemaVersion: 3 };
+}
+
 export function scoreChallenge(
   corpus: ChallengeCorpus,
   observations: readonly ChallengeObservation[],
 ): ChallengeScorecard {
   const byId = new Map(observations.map((item) => [item.caseId, item]));
   const failures: string[] = [];
-  if (byId.size !== observations.length) failures.push("challenge: duplicate observations");
+  if (byId.size !== observations.length)
+    failures.push("challenge: duplicate observations");
   const passed = new Set<string>();
+  const decisionPassed = new Set<string>();
+  const explanationPassed = new Set<string>();
+  const problemPassed = new Set<string>();
+  const reasonPassed = new Set<string>();
   for (const item of corpus.cases) {
     const observation = byId.get(item.id);
     if (!observation) {
@@ -158,8 +296,37 @@ export function scoreChallenge(
       continue;
     }
     const expected = item.expectation;
+    const decision = item.decisionExpectation;
+    const decisionMismatch =
+      decision && observation.status !== decision.status
+        ? `decision ${decision.status}`
+        : undefined;
+    const meaningPresent = observation.meaningLabel !== undefined;
+    const explanationMismatch = decision
+      ? meaningPresent !== (decision.meaning === "present")
+        ? `meaning ${decision.meaning}`
+        : expected.relationId &&
+            observation.meaningRelationId !== expected.relationId
+          ? `meaning relation ${expected.relationId}`
+          : observation.meaningRelationId && !observation.sourceGrounded
+            ? "source-grounded meaning"
+            : undefined
+      : undefined;
+    const problemMismatch =
+      decision && !problemPolicyMatches(decision.problems, observation)
+        ? `problems ${decision.problems}`
+        : undefined;
+    const reasonMismatch =
+      decision && !reasonsAreValid(decision.status, observation)
+        ? `reason integrity for ${decision.status}`
+        : undefined;
+    if (decision && !decisionMismatch) decisionPassed.add(item.id);
+    if (decision && !explanationMismatch) explanationPassed.add(item.id);
+    if (decision && !problemMismatch) problemPassed.add(item.id);
+    if (decision && !reasonMismatch) reasonPassed.add(item.id);
     const mismatches = [
-      expected.assumptionValue && !observation.assumptionValues.includes(expected.assumptionValue)
+      expected.assumptionValue &&
+      !observation.assumptionValues.includes(expected.assumptionValue)
         ? `assumption ${expected.assumptionValue}`
         : undefined,
       expected.candidateFamily &&
@@ -196,7 +363,8 @@ export function scoreChallenge(
       )
         ? `definition evidence ${expected.definitionRuleId}`
         : undefined,
-      expected.excludedConceptId && observation.conceptIds.includes(expected.excludedConceptId)
+      expected.excludedConceptId &&
+      observation.conceptIds.includes(expected.excludedConceptId)
         ? `excluded concept ${expected.excludedConceptId}`
         : undefined,
       expected.excludedDefinitionSymbol &&
@@ -205,16 +373,19 @@ export function scoreChallenge(
       )
         ? `excluded definition ${expected.excludedDefinitionSymbol}`
         : undefined,
-      expected.excludedRelationId && observation.relationIds.includes(expected.excludedRelationId)
+      expected.excludedRelationId &&
+      observation.relationIds.includes(expected.excludedRelationId)
         ? `excluded relation ${expected.excludedRelationId}`
         : undefined,
-      expected.relationId && !observation.relationIds.includes(expected.relationId)
+      expected.relationId &&
+      !observation.relationIds.includes(expected.relationId)
         ? `relation ${expected.relationId}`
         : undefined,
       expected.shape && !observation.shapes.includes(expected.shape)
         ? `shape ${expected.shape}`
         : undefined,
-      expected.sourceNotation && observation.sourceNotation !== expected.sourceNotation
+      expected.sourceNotation &&
+      observation.sourceNotation !== expected.sourceNotation
         ? `source notation ${expected.sourceNotation}`
         : undefined,
       expected.status && observation.status !== expected.status
@@ -223,8 +394,13 @@ export function scoreChallenge(
       expected.symbol && !observation.symbols.includes(expected.symbol)
         ? `symbol ${expected.symbol}`
         : undefined,
+      decisionMismatch,
+      explanationMismatch,
+      problemMismatch,
+      reasonMismatch,
     ].filter((item): item is string => Boolean(item));
-    if (mismatches.length) failures.push(`${item.id}: missing ${mismatches.join(", ")}`);
+    if (mismatches.length)
+      failures.push(`${item.id}: missing ${mismatches.join(", ")}`);
     else passed.add(item.id);
   }
   for (const item of observations) {
@@ -234,9 +410,21 @@ export function scoreChallenge(
   }
   return {
     cases: corpus.cases.length,
+    decisions: tallyExpected(
+      corpus.cases,
+      decisionPassed,
+      CHALLENGE_DECISIONS,
+      (item) => item.decisionExpectation?.status,
+    ),
+    explanation: countedExpected(corpus.cases, explanationPassed),
     failures: [...new Set(failures)].sort(),
     layers: tally(corpus.cases, passed, CHALLENGE_LAYERS, (item) => item.owner),
-    metrics: tally(corpus.cases, passed, CHALLENGE_METRICS, (item) => item.metric),
+    metrics: tally(
+      corpus.cases,
+      passed,
+      CHALLENGE_METRICS,
+      (item) => item.metric,
+    ),
     outcomes: tally(
       corpus.cases,
       passed,
@@ -244,15 +432,199 @@ export function scoreChallenge(
       (item) => item.outcome,
     ),
     passed: passed.size,
-    schemaVersion: 2,
+    problemPolicy: tallyExpected(
+      corpus.cases,
+      problemPassed,
+      CHALLENGE_PROBLEM_POLICIES,
+      (item) => item.decisionExpectation?.problems,
+    ),
+    reasonIntegrity: countedExpected(corpus.cases, reasonPassed),
+    schemaVersion: corpus.schemaVersion,
   };
+}
+
+function parseV3Profile(value: unknown, path: string): ChallengeV3Profile {
+  const item = record(value, path);
+  exact(item, ["caseId", "decision", "documentShape"], path);
+  const decision = record(item.decision, `${path}.decision`);
+  exact(decision, ["meaning", "problems", "status"], `${path}.decision`);
+  return {
+    caseId: text(item.caseId, `${path}.caseId`),
+    decision: {
+      meaning: oneOf(
+        decision.meaning,
+        ["absent", "present"] as const,
+        `${path}.decision.meaning`,
+      ),
+      problems: oneOf(
+        decision.problems,
+        CHALLENGE_PROBLEM_POLICIES,
+        `${path}.decision.problems`,
+      ),
+      status: oneOf(
+        decision.status,
+        CHALLENGE_DECISIONS,
+        `${path}.decision.status`,
+      ),
+    },
+    documentShape: oneOf(
+      item.documentShape,
+      CHALLENGE_DOCUMENT_SHAPES,
+      `${path}.documentShape`,
+    ),
+  };
+}
+
+function shapeChallengeCase(
+  item: ChallengeCase,
+  profile: ChallengeV3Profile,
+): ChallengeCase {
+  const target = item.documents.find(
+    (document) => document.fileId === item.cursor.fileId,
+  );
+  if (!target) throw new Error(`${item.id}: missing cursor document`);
+  const markdown =
+    target.path.endsWith(".md") || target.path.endsWith(".markdown");
+  const marker = item.id.replaceAll(/[^a-zA-Z0-9]/gu, "-");
+  const equation = markdown
+    ? `\n\nA separate calibration check records $\\xi_{\\mathrm{aux}}=17$.\n`
+    : `\n\\[\\xi_{\\mathrm{aux}}=17\\]\n`;
+  const prose =
+    "The surrounding report compares several independent measurements. " +
+    "Only explicit declarations in the current scope may determine the notation below.\n\n";
+  const documents = item.documents.map((document) => {
+    if (document.fileId !== target.fileId) return document;
+    const content = (() => {
+      switch (profile.documentShape) {
+        case "distant-prose":
+          return prose.repeat(3) + document.content + equation;
+        case "macro-neighbor":
+          return markdown
+            ? prose + document.content + equation
+            : `\\newcommand{\\auxmetric}{\\xi_{\\mathrm{aux}}}\n$\\auxmetric=17$.\n${document.content}`;
+        case "malformed-neighbor":
+          return (
+            document.content +
+            equation +
+            (markdown
+              ? "\nAn unfinished neighbor is $\\frac{1}{"
+              : "\n$\\frac{1}{$")
+          );
+        case "multi-equation":
+          return (
+            equation + prose + document.content + equation.replace("17", "19")
+          );
+        case "project-neighbor":
+          return prose + document.content;
+        case "sectioned":
+          return markdown
+            ? `# Background\n\n${equation}\n# Reported result\n\n${document.content}`
+            : `\\section{Background}\n${equation}\\section{Reported result}\n${document.content}`;
+      }
+    })();
+    return { ...document, content };
+  });
+  if (profile.documentShape === "project-neighbor") {
+    documents.push({
+      content: `Independent appendix for ${marker}.\n${equation}`,
+      fileId: `v3-neighbor-${marker}`,
+      path: `v3-neighbor-${marker}.${markdown ? "md" : "tex"}`,
+    });
+  }
+  return {
+    ...item,
+    decisionExpectation: profile.decision,
+    documents,
+    documentShape: profile.documentShape,
+    variationTags: [
+      ...item.variationTags,
+      `document-shape:${profile.documentShape}`,
+    ],
+  };
+}
+
+function problemPolicyMatches(
+  policy: ChallengeProblemPolicy,
+  observation: ChallengeObservation,
+): boolean {
+  return policy === "none"
+    ? observation.problemCount === 0
+    : observation.problemCount > 0 &&
+        observation.reasonKinds.includes("source-conflict");
+}
+
+function reasonsAreValid(
+  status: ChallengeDecision,
+  observation: ChallengeObservation,
+): boolean {
+  const allowed: Readonly<Record<ChallengeDecision, ReadonlySet<string>>> = {
+    ambiguous: new Set(["uncertainty", "engine-limit"]),
+    conflicting: new Set(["source-conflict"]),
+    established: new Set(["proof"]),
+    partial: new Set(["uncertainty", "engine-limit"]),
+    unsupported: new Set(["uncertainty", "engine-limit"]),
+  };
+  if (observation.reasonKinds.some((kind) => !allowed[status].has(kind)))
+    return false;
+  if (status === "established") {
+    return (
+      observation.reasonKinds.includes("proof") && observation.sourceGrounded
+    );
+  }
+  if (status === "conflicting") {
+    return (
+      observation.reasonKinds.includes("source-conflict") &&
+      observation.sourceGrounded
+    );
+  }
+  return status === "partial" || observation.reasonKinds.length > 0;
+}
+
+function countedExpected(
+  cases: readonly ChallengeCase[],
+  passed: ReadonlySet<string>,
+): { passed: number; total: number } {
+  const expected = cases.filter((item) => item.decisionExpectation);
+  return {
+    passed: expected.filter((item) => passed.has(item.id)).length,
+    total: expected.length,
+  };
+}
+
+function tallyExpected<const Keys extends readonly string[]>(
+  items: readonly ChallengeCase[],
+  passed: ReadonlySet<string>,
+  keys: Keys,
+  select: (item: ChallengeCase) => Keys[number] | undefined,
+): Record<Keys[number], { passed: number; total: number }> {
+  return Object.fromEntries(
+    keys.map((key) => {
+      const selected = items.filter((item) => select(item) === key);
+      return [
+        key,
+        {
+          passed: selected.filter((item) => passed.has(item.id)).length,
+          total: selected.length,
+        },
+      ];
+    }),
+  ) as Record<Keys[number], { passed: number; total: number }>;
 }
 
 function parseCase(value: unknown, path: string): ChallengeCase {
   const item = record(value, path);
   exact(
     item,
-    ["id", "documents", "cursor", "expectation", "metric", "outcome", "owner", "variationTags"],
+    [
+      "id",
+      "documents",
+      "cursor",
+      "expectation",
+      "metric",
+      "outcome",
+      "owner",
+      "variationTags",
+    ],
     path,
   );
   const id = text(item.id, `${path}.id`);
@@ -261,23 +633,35 @@ function parseCase(value: unknown, path: string): ChallengeCase {
   }
   const documents = item.documents.map((value, index) => {
     const document = record(value, `${path}.documents[${index}]`);
-    exact(document, ["content", "fileId", "path"], `${path}.documents[${index}]`);
+    exact(
+      document,
+      ["content", "fileId", "path"],
+      `${path}.documents[${index}]`,
+    );
     return {
       content: text(document.content, `${path}.documents[${index}].content`),
       fileId: text(document.fileId, `${path}.documents[${index}].fileId`),
       path: text(document.path, `${path}.documents[${index}].path`),
     };
   });
-  unique(documents.map((item) => item.fileId), `${path}.documents.fileId`);
+  unique(
+    documents.map((item) => item.fileId),
+    `${path}.documents.fileId`,
+  );
   const cursor = record(item.cursor, `${path}.cursor`);
   exact(cursor, ["edge", "fileId", "needle"], `${path}.cursor`);
   const cursorFileId = text(cursor.fileId, `${path}.cursor.fileId`);
   const needle = text(cursor.needle, `${path}.cursor.needle`);
-  const cursorDocument = documents.find((document) => document.fileId === cursorFileId);
-  if (!cursorDocument) throw new Error(`${path}.cursor.fileId: unknown ${cursorFileId}`);
+  const cursorDocument = documents.find(
+    (document) => document.fileId === cursorFileId,
+  );
+  if (!cursorDocument)
+    throw new Error(`${path}.cursor.fileId: unknown ${cursorFileId}`);
   const occurrences = cursorDocument.content.split(needle).length - 1;
   if (occurrences !== 1) {
-    throw new Error(`${path}.cursor.needle: must occur exactly once; found ${occurrences}`);
+    throw new Error(
+      `${path}.cursor.needle: must occur exactly once; found ${occurrences}`,
+    );
   }
   const expectation = record(item.expectation, `${path}.expectation`);
   const expectationKeys = [
@@ -305,7 +689,13 @@ function parseCase(value: unknown, path: string): ChallengeCase {
     cursor: {
       ...(cursor.edge === undefined
         ? {}
-        : { edge: oneOf(cursor.edge, ["after", "before"] as const, `${path}.cursor.edge`) }),
+        : {
+            edge: oneOf(
+              cursor.edge,
+              ["after", "before"] as const,
+              `${path}.cursor.edge`,
+            ),
+          }),
       fileId: cursorFileId,
       needle,
     },
@@ -319,7 +709,11 @@ function parseCase(value: unknown, path: string): ChallengeCase {
     ),
     id,
     metric: oneOf(item.metric, CHALLENGE_METRICS, `${path}.metric`),
-    outcome: oneOf(item.outcome, ["positive", "refusal"] as const, `${path}.outcome`),
+    outcome: oneOf(
+      item.outcome,
+      ["positive", "refusal"] as const,
+      `${path}.outcome`,
+    ),
     owner: oneOf(item.owner, CHALLENGE_LAYERS, `${path}.owner`),
     variationTags: stringList(item.variationTags, `${path}.variationTags`),
   };
@@ -338,7 +732,9 @@ function validateBoundaryPairs(cases: readonly ChallengeCase[]): void {
     }
   }
   if (pairs.size < 12) {
-    throw new Error("challenge.cases: must contain at least 12 semantic boundary pairs");
+    throw new Error(
+      "challenge.cases: must contain at least 12 semantic boundary pairs",
+    );
   }
   for (const [pair, outcomes] of pairs) {
     if (!outcomes.has("positive") || !outcomes.has("refusal")) {
@@ -365,7 +761,10 @@ function tally<
       const selected = items.filter((item) => select(item) === key);
       return [
         key,
-        { passed: selected.filter((item) => passed.has(item.id)).length, total: selected.length },
+        {
+          passed: selected.filter((item) => passed.has(item.id)).length,
+          total: selected.length,
+        },
       ];
     }),
   ) as Record<Keys[number], { passed: number; total: number }>;
@@ -378,19 +777,26 @@ function record(value: unknown, path: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-function exact(value: Record<string, unknown>, keys: readonly string[], path: string): void {
+function exact(
+  value: Record<string, unknown>,
+  keys: readonly string[],
+  path: string,
+): void {
   const allowed = new Set(keys);
   const unknown = Object.keys(value).filter((key) => !allowed.has(key));
-  if (unknown.length) throw new Error(`${path}: unknown field ${unknown.sort()[0]}`);
+  if (unknown.length)
+    throw new Error(`${path}: unknown field ${unknown.sort()[0]}`);
 }
 
 function text(value: unknown, path: string): string {
-  if (typeof value !== "string" || !value.trim()) throw new Error(`${path}: must be text`);
+  if (typeof value !== "string" || !value.trim())
+    throw new Error(`${path}: must be text`);
   return value;
 }
 
 function stringList(value: unknown, path: string): string[] {
-  if (!Array.isArray(value) || !value.length) throw new Error(`${path}: must be nonempty text[]`);
+  if (!Array.isArray(value) || !value.length)
+    throw new Error(`${path}: must be nonempty text[]`);
   const output = value.map((item, index) => text(item, `${path}[${index}]`));
   unique(output, path);
   return output;
@@ -408,5 +814,6 @@ function oneOf<const Values extends readonly string[]>(
 }
 
 function unique(values: readonly string[], path: string): void {
-  if (new Set(values).size !== values.length) throw new Error(`${path}: must be unique`);
+  if (new Set(values).size !== values.length)
+    throw new Error(`${path}: must be unique`);
 }

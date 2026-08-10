@@ -51,15 +51,15 @@
     "package:smoke": "node scripts/check-package-smoke.mjs",
     "pack:authoring": "bun packages/authoring/cli.mjs validate packs/*/v1.json && bun packages/authoring/cli.mjs audit-runtime packs/*/v1.json",
     "pack:conformance": "bun scripts/check-pack-conformance.ts",
-    "parity": "bun scripts/check-parity.mjs",
+    "parity": "bun scripts/check-parity.mjs && bun scripts/check-lifecycle.mjs",
     "scorecard": "SEMATH_SCORECARD_PATH=.artifacts/semantic-scorecard.json bun scripts/check-corpus.ts",
-    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run corpus && bun run foundation && bun run parity && bun run budget:stable && bun run package:smoke",
+    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run corpus && bun run foundation && SEMATH_LIFECYCLE_FULL=1 bun run parity && bun run budget:stable && bun run package:smoke",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit",
     "verify": "bun run check"
   },
   "dependencies": {
-    "wasmtex": "github:corca-ai/wasmtex#947d2c986ad4bb8b810153ab3ea17f119079e086"
+    "wasmtex": "github:corca-ai/wasmtex#0d34708807528f15f1898839acfe89c037b404ca"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",

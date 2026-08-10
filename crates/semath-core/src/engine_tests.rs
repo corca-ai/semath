@@ -297,6 +297,66 @@ fn incremental_upsert_matches_the_new_document_version() {
 }
 
 #[test]
+fn same_revision_structural_relink_reanalyzes_without_accepting_stale_text() {
+    let content = "Let $A$ and $B$ be events. $\\joint{A}{B}$";
+    let start = content.find("\\joint").unwrap() as u32;
+    let source = ProjectSourceRef {
+        file_id: "main".into(),
+        path: "main.tex".into(),
+        range: range(start, start + "\\joint".len() as u32),
+    };
+    let mut expanded = document("main", "main.tex", content, 1);
+    expanded.macros.push(ProjectMacro {
+        kind: ProjectMacroKind::Call,
+        name: "joint".into(),
+        source: source.clone(),
+        definitions: Vec::new(),
+        expansion: ProjectMacroExpansion {
+            status: ProjectMacroExpansionStatus::Expanded,
+            depth: 1,
+            editable: false,
+            surface: Some("A \\cap B".into()),
+            input_range: Some(range(start, start + "\\joint{A}{B}".len() as u32)),
+            notation: None,
+        },
+    });
+    let mut unresolved = document("main", "main.tex", content, 1);
+    unresolved.macros.push(ProjectMacro {
+        kind: ProjectMacroKind::Call,
+        name: "joint".into(),
+        source,
+        definitions: Vec::new(),
+        expansion: ProjectMacroExpansion {
+            status: ProjectMacroExpansionStatus::Unresolved,
+            depth: 0,
+            editable: false,
+            surface: None,
+            input_range: None,
+            notation: None,
+        },
+    });
+
+    let mut project = snapshot(content);
+    project.documents = vec![expanded];
+    let mut engine = SemathEngine::default();
+    engine.reset(project).unwrap();
+    let update = engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(unresolved),
+            }],
+        })
+        .unwrap();
+
+    assert_eq!(update.changed_file_ids, ["main"]);
+    assert_eq!(update.analyzed_file_ids, ["main"]);
+}
+
+#[test]
 fn append_only_comments_advance_the_version_without_semantic_reanalysis() {
     let original = "Let $x$ denote the input. $y=x$";
     let changed = format!("{original}\n% editor note\n  % another note");

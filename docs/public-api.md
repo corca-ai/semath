@@ -17,6 +17,9 @@ hard cutover to a small meaning-first API.
 Hosts send a complete `ProjectSnapshot`, then ordered `ChangeEnvelope` deltas.
 Every request carries protocol, inventory, document, and analysis versions so
 stale results can be rejected.
+An upsert may repeat a document version only for a wasmtex structural relink of
+identical source and path. Semath requires a changed structural fingerprint;
+same-version text changes remain stale and are ignored.
 
 The query surface is:
 

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   firstDifferentialFailure,
   planSemanticEditTrace,
+  planSemanticLifecycleTraces,
   shrinkEditTrace,
 } from "./differential";
 
@@ -12,6 +13,24 @@ describe("semantic differential planning", () => {
     expect(trace.steps.map((step) => step.kind)).toEqual([
       "upsert", "upsert", "upsert", "upsert", "upsert", "upsert", "path-change", "remove",
     ]);
+  });
+
+  test("plans every evidence lifecycle with establishment, retraction, and recovery", () => {
+    const traces = planSemanticLifecycleTraces(20);
+    expect(traces).toEqual(planSemanticLifecycleTraces(20));
+    expect(traces.map((trace) => trace.family)).toEqual([
+      "declaration-retraction",
+      "include-order",
+      "macro-retraction",
+      "malformed-recovery",
+      "polarity-retraction",
+      "typed-conflict-recovery",
+    ]);
+    for (const trace of traces) {
+      expect(trace.initialExpectedDecision).toBe("established");
+      expect(trace.stages.at(-1)?.expectedDecision).toBe("established");
+      expect(trace.stages.some((stage) => stage.expectedDecision !== "established")).toBe(true);
+    }
   });
 
   test("reports the first divergent stage and exact field", () => {
