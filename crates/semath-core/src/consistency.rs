@@ -540,6 +540,7 @@ fn first_source_offset(evidence: &Evidence) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::{classify_role, observe_roles};
+    use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::shape::observe_shapes;
@@ -564,7 +565,11 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let prose = observe_prose(&document, &parsed);
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         observe_roles(&document, &prose.definitions, &shapes)
     }

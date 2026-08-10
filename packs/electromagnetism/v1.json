@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "packId": "electromagnetism",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -232,7 +232,7 @@
     {
       "id": "electromagnetism-vocabulary",
       "topic": "foundations",
-      "patterns": [
+      "phrases": [
         "electromagnetism",
         "electrostatic",
         "charged particle",

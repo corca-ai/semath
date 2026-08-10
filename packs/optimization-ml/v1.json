@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "packId": "optimization-ml",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -148,7 +148,7 @@
     {
       "id": "vocabulary",
       "topic": "foundations",
-      "patterns": [
+      "phrases": [
         "optimization",
         "objective function",
         "gradient descent",
@@ -163,13 +163,7 @@
     {
       "id": "optimization-notation",
       "topic": "notation",
-      "patterns": [
-        "\\argmin",
-        "\\argmax",
-        "\\min_",
-        "\\max_",
-        "\\mathcal{L}"
-      ],
+      "structures": ["optimization"],
       "references": [
         "convex-optimization"
       ]

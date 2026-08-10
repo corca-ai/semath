@@ -3,7 +3,8 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-use crate::canonical::declared_symbols;
+use crate::canonical::{SemanticExpr, SemanticExprKind, declared_symbols};
+use crate::pack::{PackActivationStructure, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
     ClauseDisposition, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
@@ -164,6 +165,90 @@ pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: Vec<ProseShapeClaim>,
     pub assumptions: Vec<AssumptionInfo>,
+    pub semantic_evidence: ScientificSemanticEvidence,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ScientificClauseEvidence {
+    pub range: SourceRange,
+    pub disposition: ClauseDisposition,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct DomainPriorEvidence {
+    pub pack_id: String,
+    pub pack_version: String,
+    pub title: String,
+    pub disposition: ClauseDisposition,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct LawActivationEvidence {
+    pub pack_id: String,
+    pub law_id: String,
+    pub clause_range: SourceRange,
+    pub disposition: ClauseDisposition,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum FormulaOperationKind {
+    VectorDotProduct,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct FormulaOperationEvidence {
+    pub clause_range: SourceRange,
+    pub operation: FormulaOperationKind,
+    pub disposition: ClauseDisposition,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct ScientificSemanticEvidence {
+    pub clauses: Vec<ScientificClauseEvidence>,
+    pub domain_priors: Vec<DomainPriorEvidence>,
+    pub law_activations: Vec<LawActivationEvidence>,
+    pub formula_operations: Vec<FormulaOperationEvidence>,
+}
+
+impl ScientificSemanticEvidence {
+    pub fn formula_is_asserted(&self, range: &SourceRange) -> bool {
+        self.clause_for(range)
+            .is_none_or(|clause| clause.disposition == ClauseDisposition::Establishing)
+    }
+
+    pub fn law_activation(
+        &self,
+        pack_id: &str,
+        law_id: &str,
+        range: &SourceRange,
+    ) -> Option<&LawActivationEvidence> {
+        self.law_activations.iter().find(|activation| {
+            activation.pack_id == pack_id
+                && activation.law_id == law_id
+                && activation.disposition == ClauseDisposition::Establishing
+                && ranges_overlap(&activation.clause_range, range)
+        })
+    }
+
+    pub fn formula_operations(
+        &self,
+        range: &SourceRange,
+    ) -> impl Iterator<Item = &FormulaOperationEvidence> {
+        self.formula_operations.iter().filter(|operation| {
+            operation.disposition == ClauseDisposition::Establishing
+                && ranges_overlap(&operation.clause_range, range)
+        })
+    }
+
+    fn clause_for(&self, range: &SourceRange) -> Option<&ScientificClauseEvidence> {
+        self.clauses
+            .iter()
+            .filter(|clause| ranges_overlap(&clause.range, range))
+            .min_by_key(|clause| clause.range.end_offset - clause.range.start_offset)
+    }
 }
 
 fn primary_symbol(document: &ProjectDocument, math: &ParsedMath) -> Option<(String, SourceRange)> {
@@ -176,12 +261,15 @@ fn primary_symbol(document: &ProjectDocument, math: &ParsedMath) -> Option<(Stri
 pub(crate) fn observe_prose(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
 ) -> ProseObservations {
     let visible_source = visible_prose_source(document);
     let source = visible_source.as_ref();
     let index = SourceIndex::new(source);
     let mut analysis = ProseObservations::default();
     let clauses = segment_scientific_clauses(source, document.language);
+    analysis.semantic_evidence =
+        collect_semantic_evidence(document, source, &index, &clauses, canonical_expressions);
     let mentions = parsed
         .iter()
         .filter_map(|math| {
@@ -377,6 +465,294 @@ pub(crate) fn observe_prose(
     }
     deduplicate(&mut analysis);
     analysis
+}
+
+fn collect_semantic_evidence(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    canonical_expressions: &[SemanticExpr],
+) -> ScientificSemanticEvidence {
+    let clause_evidence = clauses
+        .iter()
+        .map(|clause| ScientificClauseEvidence {
+            range: SourceRange {
+                start_offset: index.utf16_for_byte(clause.start),
+                end_offset: index.utf16_for_byte(clause.end),
+            },
+            disposition: clause.disposition,
+        })
+        .collect::<Vec<_>>();
+    let mut domain_priors = Vec::new();
+    let mut law_activations = Vec::new();
+    let mut formula_operations = Vec::new();
+    for clause in clauses {
+        for range in phrase_ranges(source, index, clause, "vector dot product") {
+            formula_operations.push(FormulaOperationEvidence {
+                clause_range: SourceRange {
+                    start_offset: index.utf16_for_byte(clause.start),
+                    end_offset: index.utf16_for_byte(clause.end),
+                },
+                operation: FormulaOperationKind::VectorDotProduct,
+                disposition: clause.disposition,
+                evidence: Evidence {
+                    rule_id: "scientific-prose/vector-dot-product".into(),
+                    kind: "typed-operation-constraint".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![range],
+                },
+            });
+        }
+    }
+    for pack in built_in_packs() {
+        for rule in &pack.activation_rules {
+            for clause in clauses {
+                for phrase in &rule.phrases {
+                    for range in phrase_ranges(source, index, clause, phrase) {
+                        domain_priors.push(DomainPriorEvidence {
+                            pack_id: pack.pack_id.clone(),
+                            pack_version: pack.pack_version.clone(),
+                            title: pack.title.clone(),
+                            disposition: clause.disposition,
+                            evidence: Evidence {
+                                rule_id: format!("{}/activation/{}", pack.pack_id, rule.id),
+                                kind: "prose-domain-prior".into(),
+                                strength: "weak".into(),
+                                source_ranges: vec![range],
+                            },
+                        });
+                    }
+                }
+            }
+            for structure in &rule.structures {
+                for range in
+                    structural_activation_ranges(document, canonical_expressions, *structure)
+                {
+                    domain_priors.push(DomainPriorEvidence {
+                        pack_id: pack.pack_id.clone(),
+                        pack_version: pack.pack_version.clone(),
+                        title: pack.title.clone(),
+                        disposition: disposition_for_range(&clause_evidence, &range),
+                        evidence: Evidence {
+                            rule_id: format!("{}/activation/{}", pack.pack_id, rule.id),
+                            kind: "structural-domain-prior".into(),
+                            strength: "weak".into(),
+                            source_ranges: vec![range],
+                        },
+                    });
+                }
+            }
+        }
+        for law in &pack.laws {
+            for clause in clauses {
+                for phrase in &law.activation_phrases {
+                    for range in phrase_ranges(source, index, clause, phrase) {
+                        law_activations.push(LawActivationEvidence {
+                            pack_id: pack.pack_id.clone(),
+                            law_id: law.id.clone(),
+                            clause_range: SourceRange {
+                                start_offset: index.utf16_for_byte(clause.start),
+                                end_offset: index.utf16_for_byte(clause.end),
+                            },
+                            disposition: clause.disposition,
+                            evidence: Evidence {
+                                rule_id: format!(
+                                    "{}/law/{}/activation-phrase",
+                                    pack.pack_id, law.id
+                                ),
+                                kind: "explicit-prose".into(),
+                                strength: "strong".into(),
+                                source_ranges: vec![range],
+                            },
+                        });
+                    }
+                }
+            }
+        }
+    }
+    domain_priors.sort_by(|left, right| {
+        left.pack_id
+            .cmp(&right.pack_id)
+            .then(left.evidence.rule_id.cmp(&right.evidence.rule_id))
+            .then(evidence_range_key(&left.evidence).cmp(&evidence_range_key(&right.evidence)))
+    });
+    domain_priors.dedup();
+    law_activations.sort_by(|left, right| {
+        left.pack_id
+            .cmp(&right.pack_id)
+            .then(left.law_id.cmp(&right.law_id))
+            .then(evidence_range_key(&left.evidence).cmp(&evidence_range_key(&right.evidence)))
+    });
+    law_activations.dedup();
+    ScientificSemanticEvidence {
+        clauses: clause_evidence,
+        domain_priors,
+        law_activations,
+        formula_operations,
+    }
+}
+
+fn evidence_range_key(evidence: &Evidence) -> (u32, u32) {
+    evidence
+        .source_ranges
+        .first()
+        .map_or((0, 0), |range| (range.start_offset, range.end_offset))
+}
+
+fn phrase_ranges(
+    source: &str,
+    index: &SourceIndex,
+    clause: &ScientificClause<'_>,
+    phrase: &str,
+) -> Vec<SourceRange> {
+    let lower = clause.text.to_ascii_lowercase();
+    let phrase = phrase.to_ascii_lowercase();
+    let mut ranges = Vec::new();
+    let mut search_from = 0;
+    while let Some(found) = lower[search_from..].find(&phrase) {
+        let start = clause.start + search_from + found;
+        let end = start + phrase.len();
+        ranges.push(SourceRange {
+            start_offset: index.utf16_for_byte(start),
+            end_offset: index.utf16_for_byte(end),
+        });
+        search_from += found + phrase.len();
+    }
+    ranges.retain(|range| range.start_offset < range.end_offset);
+    debug_assert!(ranges.iter().all(|range| {
+        let start = index.byte_for_utf16(range.start_offset);
+        let end = index.byte_for_utf16(range.end_offset);
+        source.get(start..end).is_some()
+    }));
+    ranges
+}
+
+fn structural_activation_ranges(
+    document: &ProjectDocument,
+    canonical_expressions: &[SemanticExpr],
+    structure: PackActivationStructure,
+) -> Vec<SourceRange> {
+    let mut ranges = canonical_expressions
+        .iter()
+        .filter(|expression| expression_has_structure(expression, structure))
+        .map(|expression| expression.range.clone())
+        .collect::<Vec<_>>();
+    ranges.extend(
+        document
+            .nodes
+            .iter()
+            .filter(|node| node_has_structure(document, node, structure))
+            .map(|node| node.ranges.full.clone()),
+    );
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
+    ranges
+}
+
+fn expression_has_structure(expression: &SemanticExpr, structure: PackActivationStructure) -> bool {
+    let direct = match (&expression.kind, structure) {
+        (SemanticExprKind::Derivative { .. }, PackActivationStructure::Calculus) => true,
+        (SemanticExprKind::Apply { operator, .. }, PackActivationStructure::Calculus) => {
+            matches!(operator.as_str(), "integral" | "limit" | "nabla")
+        }
+        (SemanticExprKind::Apply { operator, .. }, PackActivationStructure::Discrete) => {
+            matches!(operator.as_str(), "intersection" | "union" | "binomial")
+        }
+        (SemanticExprKind::Relation { operator, .. }, PackActivationStructure::Discrete) => {
+            matches!(operator.as_str(), "membership" | "subset")
+        }
+        (SemanticExprKind::Apply { operator, .. }, PackActivationStructure::Optimization) => {
+            matches!(operator.as_str(), "argmin" | "argmax" | "min" | "max")
+        }
+        _ => false,
+    };
+    direct
+        || expression_children(expression).any(|child| expression_has_structure(child, structure))
+}
+
+fn expression_children(expression: &SemanticExpr) -> impl Iterator<Item = &SemanticExpr> {
+    let children: Vec<&SemanticExpr> = match &expression.kind {
+        SemanticExprKind::Sum(items) | SemanticExprKind::Product(items) => items.iter().collect(),
+        SemanticExprKind::Dot(left, right)
+        | SemanticExprKind::Cross(left, right)
+        | SemanticExprKind::Fraction(left, right) => vec![left, right],
+        SemanticExprKind::Power(base, exponent) => vec![base, exponent],
+        SemanticExprKind::Negate(inner)
+        | SemanticExprKind::Derivative {
+            expression: inner, ..
+        } => {
+            vec![inner]
+        }
+        SemanticExprKind::Relation { left, right, .. } => vec![left, right],
+        SemanticExprKind::Apply { arguments, .. } => arguments.iter().collect(),
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Number(_)
+        | SemanticExprKind::Unknown(_) => Vec::new(),
+    };
+    children.into_iter()
+}
+
+fn node_has_structure(
+    document: &ProjectDocument,
+    node: &crate::NotationNode,
+    structure: PackActivationStructure,
+) -> bool {
+    let name = node.name.as_deref().unwrap_or_default();
+    match structure {
+        PackActivationStructure::Calculus => {
+            matches!(
+                name,
+                "partial" | "int" | "iint" | "iiint" | "lim" | "nabla" | "dot" | "ddot"
+            )
+        }
+        PackActivationStructure::Discrete => {
+            matches!(
+                name,
+                "subset" | "in" | "cup" | "cap" | "forall" | "exists" | "binom"
+            )
+        }
+        PackActivationStructure::Optimization => {
+            matches!(name, "argmin" | "argmax" | "min" | "max")
+                || name == "mathcal" && bounded_node_text(document, node, 0) == "L"
+        }
+        PackActivationStructure::Probability => {
+            (name == "mathbb" && matches!(bounded_node_text(document, node, 0).as_str(), "P" | "E"))
+                || name == "Var"
+        }
+        PackActivationStructure::RealCoordinateSpace => {
+            name == "mathbb" && bounded_node_text(document, node, 0) == "R"
+        }
+    }
+}
+
+fn bounded_node_text(document: &ProjectDocument, node: &crate::NotationNode, depth: u8) -> String {
+    if depth == 8 {
+        return String::new();
+    }
+    if let Some(text) = &node.text {
+        return text.clone();
+    }
+    node.children
+        .iter()
+        .filter_map(|child| document.nodes.get(*child as usize))
+        .map(|child| bounded_node_text(document, child, depth + 1))
+        .collect()
+}
+
+fn disposition_for_range(
+    clauses: &[ScientificClauseEvidence],
+    range: &SourceRange,
+) -> ClauseDisposition {
+    clauses
+        .iter()
+        .filter(|clause| ranges_overlap(&clause.range, range))
+        .min_by_key(|clause| clause.range.end_offset - clause.range.start_offset)
+        .map_or(ClauseDisposition::Establishing, |clause| clause.disposition)
+}
+
+fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
+    left.start_offset < right.end_offset && right.start_offset < left.end_offset
 }
 
 fn collect_clause_definitions(
@@ -1200,6 +1576,7 @@ fn deduplicate(analysis: &mut ProseObservations) {
 #[cfg(test)]
 mod tests {
     use super::{ProseShape, observe_prose};
+    use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
@@ -1221,7 +1598,12 @@ mod tests {
             macros: Vec::new(),
             includes: Vec::new(),
         };
-        observe_prose(&document, &parse_regions(source, &regions))
+        let parsed = parse_regions(source, &regions);
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        observe_prose(&document, &parsed, &canonical)
     }
 
     #[test]

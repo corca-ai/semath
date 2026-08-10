@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "packId": "classical-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -272,7 +272,7 @@
     {
       "id": "mechanics-vocabulary",
       "topic": "foundations",
-      "patterns": [
+      "phrases": [
         "classical mechanics",
         "Newton's second law",
         "net force",

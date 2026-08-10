@@ -119,7 +119,16 @@ impl AnalyzedDocument {
         #[cfg(not(test))]
         let parsed = parse_snapshot(&document).map_err(EngineError::InvalidSyntaxSnapshot)?;
         let scopes = ScopeGraph::new(&document);
-        let observations = DocumentSemanticObservations::build(&document, &parsed);
+        let canonical_expressions = parsed
+            .iter()
+            .map(|math| {
+                let mut expression = lower_document_region(&document, &math.region.content_range);
+                expression.range = math.region.content_range.clone();
+                expression
+            })
+            .collect::<Vec<_>>();
+        let observations =
+            DocumentSemanticObservations::build(&document, &parsed, &canonical_expressions);
         let hygiene = analyze_hygiene(&document, &parsed, &observations.definitions);
         let mut semantic_occurrences: Vec<SemanticOccurrenceSeed> = parsed
             .iter()
@@ -175,14 +184,6 @@ impl AnalyzedDocument {
                 });
             }
         }
-        let canonical_expressions = parsed
-            .iter()
-            .map(|math| {
-                let mut expression = lower_document_region(&document, &math.region.content_range);
-                expression.range = math.region.content_range.clone();
-                expression
-            })
-            .collect();
         let analysis_fingerprint = analysis_fingerprint(&document);
         compact_analyzed_document(&mut document);
         Ok(Self {

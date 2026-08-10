@@ -6,7 +6,7 @@ use crate::consistency::{RoleObservations, observe_roles};
 use crate::domain::{DomainObservations, observe_domains};
 use crate::law::{ExternalTypeEnvironment, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
-use crate::prose::observe_prose;
+use crate::prose::{ScientificSemanticEvidence, observe_prose};
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
 use crate::semantic_index::EntityId;
@@ -179,13 +179,18 @@ pub(crate) struct DocumentSemanticObservations {
     pub roles: RoleObservations,
     pub laws: LawObservations,
     pub domains: DomainObservations,
+    semantic_evidence: ScientificSemanticEvidence,
     assumptions: Vec<AssumptionInfo>,
     assumption_scopes: ScopeGraph,
 }
 
 impl DocumentSemanticObservations {
-    pub fn build(document: &ProjectDocument, parsed: &[ParsedMath]) -> Self {
-        let prose = observe_prose(document, parsed);
+    pub fn build(
+        document: &ProjectDocument,
+        parsed: &[ParsedMath],
+        canonical_expressions: &[SemanticExpr],
+    ) -> Self {
+        let prose = observe_prose(document, parsed, canonical_expressions);
         let shapes = observe_shapes(document, parsed, &prose.shapes);
         let quantities = observe_quantities(document, parsed, &prose.definitions);
         let roles = observe_roles(document, &prose.definitions, &shapes);
@@ -193,7 +198,11 @@ impl DocumentSemanticObservations {
         // environment immediately after base observations are built. Running
         // every compiled law here would duplicate the dominant analysis pass.
         let laws = LawObservations::default();
-        let domains = observe_domains(document, laws.all());
+        let domains = observe_domains(
+            ScopeGraph::new(document),
+            &prose.semantic_evidence,
+            laws.all(),
+        );
         let assumption_scopes = ScopeGraph::new(document);
         Self {
             definitions: prose.definitions,
@@ -202,6 +211,7 @@ impl DocumentSemanticObservations {
             roles,
             laws,
             domains,
+            semantic_evidence: prose.semantic_evidence,
             assumptions: prose.assumptions,
             assumption_scopes,
         }
@@ -214,14 +224,18 @@ impl DocumentSemanticObservations {
         external: &ExternalTypeEnvironment,
     ) {
         self.laws = observe_laws(
-            document,
             canonical_expressions,
+            &self.semantic_evidence,
             &self.shapes,
             &self.quantities,
             &self.roles,
             external,
         );
-        self.domains = observe_domains(document, self.laws.all());
+        self.domains = observe_domains(
+            ScopeGraph::new(document),
+            &self.semantic_evidence,
+            self.laws.all(),
+        );
     }
 
     pub fn context(

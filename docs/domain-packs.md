@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath compiles schema-6 JSON packs into one bounded Rust semantic
+Semath compiles schema-7 JSON packs into one bounded Rust semantic
 runtime. Packs contain concepts, roles, laws, semantic forms, conditions,
 quantities, units, activation evidence, and references. They contain no
 executable code.
@@ -47,14 +47,16 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 6`, stable identity and SemVer, dependencies,
+Each pack declares `schemaVersion: 7`, stable identity and SemVer, dependencies,
 concepts, and typed laws. Concepts may declare reviewed English aliases. A law
 supplies canonical semantic forms and roles with a required semantic concept
 and optional orthogonal quantity, shape, notation, and variadic constraints.
 Each side condition has a closed kind, stable ID, validated role subjects, and
 a display label. Recognition resolves those subjects to bound source symbols,
 reports source evidence, and distinguishes verified, required, conflicting,
-and unsupported conditions without interpreting free-form prose.
+and unsupported conditions without interpreting free-form prose. Activation
+rules carry reviewed prose `phrases` and closed structural kinds; the removed
+`patterns` field is not accepted as a compatibility alias.
 
 The Rust compiler rejects unknown fields, duplicate identities, dependency
 cycles, missing or wrong-kind targets, invalid capability edges, inconsistent
@@ -89,7 +91,7 @@ automatic; no Rust registry or recognizer branch is edited. Then use
 reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of editable positive and refusal seeds,
-not evidence of maturity by itself. The checked-in schema-6 pack files and the
+not evidence of maturity by itself. The checked-in schema-7 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

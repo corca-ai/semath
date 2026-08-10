@@ -223,7 +223,8 @@ pub fn pack_template(pack_id: &str) -> Result<String, PackValidationError> {
         activation_rules: vec![PackActivationRule {
             id: "field-vocabulary".into(),
             topic: "foundations".into(),
-            patterns: vec![title.to_ascii_lowercase()],
+            phrases: vec![title.to_ascii_lowercase()],
+            structures: Vec::new(),
             references: vec![reference_id.clone()],
         }],
         roles: Vec::new(),

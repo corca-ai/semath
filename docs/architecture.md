@@ -110,10 +110,12 @@ command name is not treated as its meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 6 describes namespaced concepts and reviewed English aliases, typed law
+Schema 7 describes namespaced concepts and reviewed English aliases, typed law
 roles, semantic forms, conditions, activation evidence, quantities, units, and
-references. The generic unifier applies every compiled law; selecting a pack or
-law in orchestration code is forbidden.
+references. Activation evidence is either a reviewed prose phrase or a closed
+structural kind derived from the canonical math model; arbitrary pattern
+strings are not a runtime policy language. The generic unifier applies every
+compiled law; selecting a pack or law in orchestration code is forbidden.
 
 Law conditions use closed kinds and validated role subjects. The runtime
 resolves them to bound symbols and source evidence; free-form labels are only a

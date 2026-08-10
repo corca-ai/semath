@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "packId": "control-systems",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -402,7 +402,7 @@
     {
       "id": "control-vocabulary",
       "topic": "foundations",
-      "patterns": [
+      "phrases": [
         "control system",
         "state-space",
         "state transition",
