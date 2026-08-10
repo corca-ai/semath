@@ -55,6 +55,16 @@ enum ExportedTypeFact {
     Shape(ShapeInfo),
 }
 
+impl ExportedTypeFact {
+    fn symbol(&self) -> &str {
+        match self {
+            Self::Role(fact) => &fact.symbol,
+            Self::Quantity(fact) => &fact.symbol,
+            Self::Shape(fact) => &fact.symbol,
+        }
+    }
+}
+
 #[derive(Clone)]
 struct IndexedTypeFact {
     component_id: String,
@@ -840,6 +850,13 @@ impl SemathEngine {
                 roles.chain(quantities).chain(shapes)
             })
             .collect::<Vec<_>>();
+        let mut facts_by_symbol = HashMap::<String, Vec<IndexedTypeFact>>::new();
+        for fact in facts {
+            facts_by_symbol
+                .entry(fact.fact.symbol().to_owned())
+                .or_default()
+                .push(fact);
+        }
 
         let environments = targets
             .iter()
@@ -852,27 +869,34 @@ impl SemathEngine {
                         .symbols
                         .first()
                         .map_or(semantic_offset, |(_, range)| range.start_offset);
-                    for fact in &facts {
-                        if fact.file_id == *file_id
-                            || fact.component_id != target.component_id
-                            || !self.index.order.precedes(
-                                &fact.file_id,
-                                fact.source_offset,
-                                file_id,
-                                order_offset,
-                            )
-                        {
-                            continue;
-                        }
-                        match &fact.fact {
-                            ExportedTypeFact::Role(role) => {
-                                environment.add_role(semantic_offset, role.clone());
+                    let symbols = math
+                        .symbols
+                        .iter()
+                        .map(|(symbol, _)| symbol.as_str())
+                        .collect::<HashSet<_>>();
+                    for symbol in symbols {
+                        for fact in facts_by_symbol.get(symbol).into_iter().flatten() {
+                            if fact.file_id == *file_id
+                                || fact.component_id != target.component_id
+                                || !self.index.order.precedes(
+                                    &fact.file_id,
+                                    fact.source_offset,
+                                    file_id,
+                                    order_offset,
+                                )
+                            {
+                                continue;
                             }
-                            ExportedTypeFact::Quantity(quantity) => {
-                                environment.add_quantity(semantic_offset, quantity.clone());
-                            }
-                            ExportedTypeFact::Shape(shape) => {
-                                environment.add_shape(semantic_offset, shape.clone());
+                            match &fact.fact {
+                                ExportedTypeFact::Role(role) => {
+                                    environment.add_role(semantic_offset, role.clone());
+                                }
+                                ExportedTypeFact::Quantity(quantity) => {
+                                    environment.add_quantity(semantic_offset, quantity.clone());
+                                }
+                                ExportedTypeFact::Shape(shape) => {
+                                    environment.add_shape(semantic_offset, shape.clone());
+                                }
                             }
                         }
                     }

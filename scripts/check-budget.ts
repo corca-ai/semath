@@ -58,7 +58,7 @@ const decoder = new TextDecoder();
 const wasm = await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url));
 const wasmArtifactBytes = (await stat(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url)))
   .size;
-const rssBefore = process.memoryUsage().rss;
+const rssBefore = residentBytes();
 const coldStarted = performance.now();
 
 const syntax = new LatexSyntaxService();
@@ -96,7 +96,7 @@ assertCounters(initial, DOCUMENT_COUNT + 1);
 const deltaDurations: number[] = [];
 const syntaxDurations: number[] = [];
 const queryDurations = new Map<SemathQuery["kind"], number[]>();
-let peakRss = process.memoryUsage().rss;
+let peakRss = residentBytes();
 let maxAffected = 0;
 let maxTransferBytes = 0;
 let inventoryVersion = snapshot.inventoryVersion;
@@ -130,7 +130,7 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
     kind: "change",
   });
   deltaDurations.push(performance.now() - started);
-  peakRss = Math.max(peakRss, process.memoryUsage().rss);
+  peakRss = Math.max(peakRss, residentBytes());
   if (update.analyzedFileIds.length !== 0) {
     throw new Error("budget comment-only delta performed semantic analysis");
   }
@@ -183,7 +183,7 @@ const semanticUpdate = await worker.request<UpdateResult>({
   kind: "change",
 });
 const semanticDeltaMs = performance.now() - semanticStarted;
-peakRss = Math.max(peakRss, process.memoryUsage().rss);
+peakRss = Math.max(peakRss, residentBytes());
 maxAffected = semanticUpdate.analyzedFileIds.length;
 if (maxAffected > MAX_AFFECTED_DOCUMENTS) {
   throw new Error(
@@ -240,7 +240,7 @@ if (
 }
 clean.free();
 await worker.dispose();
-const rssAfterDispose = process.memoryUsage().rss;
+const rssAfterDispose = residentBytes();
 const retainedRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
 
 const deltaP95 = percentile(deltaDurations, 0.95);
@@ -405,6 +405,17 @@ function positiveInteger(name: string, fallback: number): number {
     throw new Error(`${name} must be a positive integer`);
   }
   return value;
+}
+
+function residentBytes(): number {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return process.memoryUsage().rss;
+    } catch (error) {
+      if (!(error instanceof Error) || !("errno" in error) || error.errno !== 4) throw error;
+    }
+  }
+  throw new Error("unable to read resident memory after interrupted system calls");
 }
 
 function assertCounters(update: UpdateResult, analyzedDocuments: number) {
