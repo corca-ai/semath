@@ -1061,7 +1061,7 @@ fn last_word(value: &str) -> Option<&str> {
         .rfind(|word| !word.is_empty())
 }
 
-fn visible_prose_source(document: &ProjectDocument) -> Cow<'_, str> {
+pub(crate) fn visible_prose_source(document: &ProjectDocument) -> Cow<'_, str> {
     #[cfg(test)]
     if document.visible_prose.is_empty() {
         return Cow::Borrowed(&document.content);

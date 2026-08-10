@@ -8,6 +8,7 @@ use crate::candidate::{
     StructuralCandidateOption, append_semantic_candidates, structural_candidate_options,
 };
 use crate::canonical::{SemanticExpr, lower_document_region};
+use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
 use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
@@ -66,10 +67,12 @@ struct AnalyzedDocument {
     analysis_fingerprint: u64,
     canonical_expressions: Vec<SemanticExpr>,
     semantic_occurrences: Vec<SemanticOccurrenceSeed>,
+    cross_modal_bindings: Vec<CrossModalBinding>,
 }
 
 #[derive(Clone, Debug)]
 struct SemanticOccurrenceSeed {
+    kind: OccurrenceKind,
     surface: String,
     selection_range: SourceRange,
     range: SourceRange,
@@ -117,13 +120,14 @@ impl AnalyzedDocument {
         let scopes = ScopeGraph::new(&document);
         let facts = SemanticFactStore::build(&document, &parsed);
         let hygiene = analyze_hygiene(&document, &parsed, &facts.definitions);
-        let semantic_occurrences = parsed
+        let mut semantic_occurrences: Vec<SemanticOccurrenceSeed> = parsed
             .iter()
             .flat_map(|math| &math.symbols)
             .map(|(surface, selection_range)| {
                 let range = notation_occurrence_range(&document, selection_range);
                 let structural_path = notation_path(&document, selection_range);
                 SemanticOccurrenceSeed {
+                    kind: OccurrenceKind::Notation,
                     surface: surface.clone(),
                     selection_range: selection_range.clone(),
                     candidate_options: structural_candidate_options(
@@ -139,6 +143,33 @@ impl AnalyzedDocument {
                 }
             })
             .collect();
+        let cross_modal_bindings = extract_cross_modal_bindings(&document);
+        for binding in &cross_modal_bindings {
+            semantic_occurrences.push(SemanticOccurrenceSeed {
+                kind: binding.occurrence_kind,
+                surface: binding.short.clone(),
+                selection_range: binding.short_range.clone(),
+                range: binding.short_range.clone(),
+                structural_path: Vec::new(),
+                source_text: source_text(&document, &binding.short_range),
+                notation: vec![NotationComponent::NamedSurface {
+                    value: binding.short.clone(),
+                }],
+                candidate_options: Vec::new(),
+            });
+            if binding.long_range != binding.short_range {
+                semantic_occurrences.push(SemanticOccurrenceSeed {
+                    kind: binding.occurrence_kind,
+                    surface: binding.long.clone(),
+                    selection_range: binding.long_range.clone(),
+                    range: binding.long_range.clone(),
+                    structural_path: Vec::new(),
+                    source_text: source_text(&document, &binding.long_range),
+                    notation: Vec::new(),
+                    candidate_options: Vec::new(),
+                });
+            }
+        }
         let canonical_expressions = parsed
             .iter()
             .map(|math| {
@@ -159,6 +190,7 @@ impl AnalyzedDocument {
                 analysis_fingerprint,
                 canonical_expressions,
                 semantic_occurrences,
+                cross_modal_bindings,
             },
             facts,
         ))
@@ -222,9 +254,15 @@ impl ProjectState {
             file_id: file_id.to_owned(),
             includes: document.document.includes.clone(),
             occurrence_offsets: document
-                .parsed
+                .semantic_occurrences
                 .iter()
-                .flat_map(|math| math.symbols.iter().map(|(_, range)| range.start_offset))
+                .map(|occurrence| occurrence.selection_range.start_offset)
+                .chain(
+                    document
+                        .cross_modal_bindings
+                        .iter()
+                        .map(|binding| binding.evidence_range.end_offset),
+                )
                 .chain(
                     facts
                         .definitions
@@ -357,7 +395,7 @@ fn lower_semantic_document(
             SourceOccurrence {
                 id,
                 component_id: document.component_id.clone(),
-                kind: OccurrenceKind::Notation,
+                kind: seed.kind,
                 range: seed.range.clone(),
                 selection_range: seed.selection_range.clone(),
                 scope_path: document.scopes.path_at(seed.selection_range.start_offset),
@@ -490,11 +528,21 @@ fn lower_semantic_document(
         definitions.insert(entity.clone(), definition.clone());
         entities.push(entity);
     }
+    let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
+    entities.extend(cross_modal.entities);
+    evidence.extend(cross_modal.evidence);
+    claims.extend(cross_modal.claims);
+    definitions.extend(cross_modal.definitions);
     let mentions = occurrences
         .iter()
         .map(|occurrence| Mention {
             occurrence_id: occurrence.id.clone(),
-            modality: MentionModality::Notation,
+            modality: match occurrence.kind {
+                OccurrenceKind::Notation => MentionModality::Notation,
+                OccurrenceKind::Prose => MentionModality::Prose,
+                OccurrenceKind::MacroDeclaration => MentionModality::Declaration,
+                OccurrenceKind::ResourceDeclaration => MentionModality::Resource,
+            },
         })
         .collect();
     LoweredSemanticDocument {
@@ -512,6 +560,156 @@ fn lower_semantic_document(
         definitions,
         occurrences: occurrences_by_range,
     }
+}
+
+#[derive(Default)]
+struct LoweredCrossModalFacts {
+    entities: Vec<EntityId>,
+    evidence: Vec<EvidenceRecord>,
+    claims: Vec<Claim>,
+    definitions: BTreeMap<EntityId, DefinitionInfo>,
+}
+
+fn lower_cross_modal_facts(
+    document: &AnalyzedDocument,
+    occurrences: &[SourceOccurrence],
+    occurrences_by_range: &HashMap<(String, u32, u32), SourceOccurrenceId>,
+    order: &ProjectOrder,
+) -> LoweredCrossModalFacts {
+    let source = &document.document;
+    let mut output = LoweredCrossModalFacts::default();
+    for (binding_index, binding) in document.cross_modal_bindings.iter().enumerate() {
+        let lookup = |range: &SourceRange| {
+            occurrences_by_range
+                .get(&(source.file_id.clone(), range.start_offset, range.end_offset))
+                .cloned()
+        };
+        let (Some(short), Some(anchor)) =
+            (lookup(&binding.short_range), lookup(&binding.long_range))
+        else {
+            continue;
+        };
+        let Some(anchor_occurrence) = occurrences
+            .iter()
+            .find(|occurrence| occurrence.id == anchor)
+        else {
+            continue;
+        };
+        let Some(short_occurrence) = occurrences.iter().find(|occurrence| occurrence.id == short)
+        else {
+            continue;
+        };
+        let entity = EntityId {
+            component_id: document.component_id.clone(),
+            scope_path: anchor_occurrence.scope_path.clone(),
+            kind: match binding.predicate {
+                BindingPredicate::Abbreviates => "acronym",
+                BindingPredicate::Aliases => "alias",
+                BindingPredicate::Names => "named-operator",
+            }
+            .to_owned(),
+            anchor: anchor.clone(),
+        };
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:cross-modal-evidence:{binding_index}",
+            source.file_id, source.document_version
+        ));
+        let available_after = order
+            .position(&source.file_id, binding.evidence_range.end_offset)
+            .unwrap_or(u64::MAX)
+            .max(short_occurrence.availability_order);
+        let mut provenance = vec![short.clone(), anchor.clone()];
+        provenance.sort();
+        provenance.dedup();
+        output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: short.clone(),
+            scope_path: entity.scope_path.clone(),
+            available_after,
+            polarity: binding.polarity,
+            modality: binding.modality,
+            origin: EvidenceOrigin::Explicit,
+            provenance,
+            parent_claims: Vec::new(),
+            rule_id: binding.rule_id.clone(),
+            rule_version: 1,
+        });
+        output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:cross-modal-binding:{binding_index}",
+                source.file_id, source.document_version
+            )),
+            subject: entity.clone(),
+            predicate: match binding.predicate {
+                BindingPredicate::Abbreviates => ClaimPredicate::Abbreviates,
+                BindingPredicate::Aliases => ClaimPredicate::Aliases,
+                BindingPredicate::Names => ClaimPredicate::Names,
+            },
+            object: ClaimObject::Occurrence(short.clone()),
+            evidence_id: evidence_id.clone(),
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
+        output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:cross-modal-definition:{binding_index}",
+                source.file_id, source.document_version
+            )),
+            subject: entity.clone(),
+            predicate: ClaimPredicate::Defines,
+            object: ClaimObject::Occurrence(anchor),
+            evidence_id: evidence_id.clone(),
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
+        for (type_index, candidate_type) in explicit_candidate_types(&binding.long)
+            .into_iter()
+            .enumerate()
+        {
+            output.claims.push(Claim {
+                id: ClaimId(format!(
+                    "{}:{}:cross-modal-type:{binding_index}:{type_index}",
+                    source.file_id, source.document_version
+                )),
+                subject: entity.clone(),
+                predicate: ClaimPredicate::HasType,
+                object: ClaimObject::Text(candidate_type.to_owned()),
+                evidence_id: evidence_id.clone(),
+                tier: InferenceTier::ExplicitClaim,
+                derivation_depth: 0,
+            });
+        }
+        output.definitions.insert(
+            entity.clone(),
+            DefinitionInfo {
+                symbol: binding.short.clone(),
+                description: binding.long.clone(),
+                location: Location {
+                    file_id: source.file_id.clone(),
+                    path: source.path.clone(),
+                    range: binding.short_range.clone(),
+                },
+                evidence: Evidence {
+                    rule_id: binding.rule_id.clone(),
+                    kind: match binding.occurrence_kind {
+                        OccurrenceKind::Prose => "explicit-prose",
+                        _ => "structural-declaration",
+                    }
+                    .to_owned(),
+                    strength: if binding.modality == EvidenceModality::Asserted {
+                        "strong"
+                    } else {
+                        "contextual"
+                    }
+                    .to_owned(),
+                    source_ranges: vec![binding.evidence_range.clone()],
+                },
+                entity_id: Some(entity.clone()),
+            },
+        );
+        output.entities.push(entity);
+    }
+    output
 }
 
 fn explicit_candidate_types(description: &str) -> Vec<&'static str> {

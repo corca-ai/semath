@@ -268,6 +268,114 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("binds prose acronyms to exact named surfaces and retracts stale evidence", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///acronym.md";
+    const content = [
+      "We report expected calibration error (ECE).",
+      "$\\operatorname{ECE}=0$. Plain $ECE$ stays plain.",
+    ].join("\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+      },
+    });
+    const named = content.indexOf("\\operatorname{ECE}") + 15;
+    const plain = content.lastIndexOf("$ECE$") + 2;
+    await server.handle({
+      id: 190,
+      method: "textDocument/definition",
+      params: { position: positionAt(content, named), textDocument: { uri } },
+    });
+    await server.handle({
+      id: 191,
+      method: "semath/semanticView",
+      params: { position: positionAt(content, named), textDocument: { uri } },
+    });
+    await server.handle({
+      id: 192,
+      method: "textDocument/definition",
+      params: { position: positionAt(content, plain), textDocument: { uri } },
+    });
+
+    expect(response(messages, 190)).toMatchObject({
+      range: {
+        start: positionAt(content, content.indexOf("(ECE)") + 1),
+      },
+      uri,
+    });
+    expect(response(messages, 191)).toMatchObject({
+      view: {
+        status: "partial",
+        summary: "expected calibration error",
+        symbol: {
+          sourceNotation: "\\operatorname{ECE}",
+          symbol: "ECE",
+        },
+      },
+    });
+    expect(response(messages, 192)).toBeNull();
+
+    const revised = content.replace(
+      "expected calibration error (ECE)",
+      "calibration quality",
+    );
+    await server.handle({
+      method: "textDocument/didChange",
+      params: {
+        contentChanges: [{ text: revised }],
+        textDocument: { uri, version: 2 },
+      },
+    });
+    await server.handle({
+      id: 193,
+      method: "textDocument/definition",
+      params: {
+        position: positionAt(revised, revised.indexOf("\\operatorname{ECE}") + 15),
+        textDocument: { uri },
+      },
+    });
+    expect(response(messages, 193)).toBeNull();
+    server.dispose();
+  });
+
+  test("shadows the same acronym by section instead of globally unioning strings", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///scoped-acronym.md";
+    const content = [
+      "# Metrics",
+      "Expected calibration error (ECE) is reported.",
+      "$\\operatorname{ECE}=0$.",
+      "# Engineering",
+      "Electrical computer engineering (ECE) is discussed.",
+      "$\\operatorname{ECE}$ programs are compared.",
+    ].join("\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+      },
+    });
+    for (const [id, offset] of [
+      [194, content.indexOf("\\operatorname{ECE}") + 15],
+      [195, content.lastIndexOf("\\operatorname{ECE}") + 15],
+    ] as const) {
+      await server.handle({
+        id,
+        method: "textDocument/definition",
+        params: { position: positionAt(content, offset), textDocument: { uri } },
+      });
+    }
+    expect(response(messages, 194).range.start).toEqual(
+      positionAt(content, content.indexOf("(ECE)") + 1),
+    );
+    expect(response(messages, 195).range.start).toEqual(
+      positionAt(content, content.lastIndexOf("(ECE)") + 1),
+    );
+    server.dispose();
+  });
+
   test("falls back to wasmtex for cross-file LaTeX navigation", async () => {
     const { messages, server } = await setup();
     await server.handle({
