@@ -295,9 +295,14 @@ fn command_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)>
         "sum" | "prod" | "int" | "iint" | "iiint" | "lim" | "forall" | "exists" => {
             add(options, CandidateFamily::Binder, "binder");
         }
-        "partial" | "nabla" => {
+        "partial" => {
             add(options, CandidateFamily::Differential, "differential");
             add(options, CandidateFamily::Differential, "derivative");
+        }
+        "nabla" => {
+            add(options, CandidateFamily::Differential, "gradient");
+            add(options, CandidateFamily::Differential, "divergence");
+            add(options, CandidateFamily::Differential, "curl");
         }
         "cdot" => {
             add(options, CandidateFamily::Operator, "multiplication");

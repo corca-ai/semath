@@ -598,6 +598,14 @@ fn expression_shape(expression: &SemanticExpr, shapes: &ShapeObservations) -> Sh
                 _ => ShapeInference::Unknown,
             }
         }
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } if matches!(operator.as_str(), "integral" | "partial-derivative") => arguments
+            .first()
+            .map_or(ShapeInference::Unknown, |argument| {
+                expression_shape(argument, shapes)
+            }),
         SemanticExprKind::Relation { left, right, .. } => combine_equal_shapes([
             expression_shape(left, shapes),
             expression_shape(right, shapes),

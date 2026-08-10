@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 5;
+pub const PROTOCOL_VERSION: u32 = 6;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

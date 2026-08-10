@@ -84,10 +84,13 @@ namespaced concepts; they do not add sentence recognizers.
 Source spelling and layout remain in the structural representation. The
 canonical IR represents a small compositional vocabulary: symbols, numbers,
 directional relations, sums, products, fractions, powers, multi-argument
-applications, composition, derivatives, dot and cross products, and explicit
-set union, intersection, and membership operators. Operator meaning is not
-encoded as a textbook law name. Every node keeps source ranges and macro
-provenance.
+applications, composition, total and partial derivatives with explicit order
+and variables, integrals with differentials and bounds when structurally
+available, nabla applications, dot and cross products, and explicit set union,
+intersection, and membership operators. Indexed occurrences retain base/index
+components while their complete surface remains the entity key. Operator
+meaning is not encoded as a textbook law name. Every node keeps source ranges
+and macro provenance.
 
 Normalization is layered:
 
@@ -156,7 +159,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 5 exposes selection, `semanticView`, definition, references, rename,
+Protocol 6 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView` is meaning-first: summary, roles, conditions,
 explicit assumptions, evidence, declarations, conflicts, and refusal are
 public; raw parser trees are not. Native, WASM, Worker, LSP, and CorTeX consume

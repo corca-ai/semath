@@ -144,6 +144,10 @@ impl AnalyzedDocument {
                 }
             })
             .collect();
+        semantic_occurrences.extend(structural_command_occurrences(
+            &document,
+            &semantic_occurrences,
+        ));
         let cross_modal_bindings = extract_cross_modal_bindings(&document);
         for binding in &cross_modal_bindings {
             semantic_occurrences.push(SemanticOccurrenceSeed {
@@ -194,6 +198,53 @@ impl AnalyzedDocument {
             observations,
         })
     }
+}
+
+fn structural_command_occurrences(
+    document: &ProjectDocument,
+    existing: &[SemanticOccurrenceSeed],
+) -> Vec<SemanticOccurrenceSeed> {
+    document
+        .nodes
+        .iter()
+        .filter(|node| {
+            node.kind == crate::NotationNodeKind::Command
+                && node.state == crate::SyntaxState::Complete
+        })
+        .filter_map(|node| {
+            let selection_range = node
+                .ranges
+                .command
+                .as_ref()
+                .or(node.ranges.name.as_ref())?
+                .clone();
+            if selection_range.start_offset == selection_range.end_offset
+                || existing
+                    .iter()
+                    .any(|seed| seed.selection_range == selection_range)
+            {
+                return None;
+            }
+            let structural_path = notation_path(document, &selection_range);
+            let surface = source_text(document, &selection_range);
+            let candidate_options = structural_candidate_options(
+                document,
+                &structural_path,
+                &node.ranges.full,
+                &surface,
+            );
+            (!candidate_options.is_empty()).then(|| SemanticOccurrenceSeed {
+                kind: OccurrenceKind::Notation,
+                surface: surface.clone(),
+                selection_range,
+                range: node.ranges.full.clone(),
+                structural_path,
+                source_text: source_text(document, &node.ranges.full),
+                notation: vec![NotationComponent::NamedSurface { value: surface }],
+                candidate_options,
+            })
+        })
+        .collect()
 }
 
 #[derive(Default)]
@@ -801,7 +852,21 @@ fn notation_components(
             }
             crate::NotationNodeKind::Script => match node.name.as_deref() {
                 Some("superscript") => components.push(NotationComponent::Superscript),
-                Some("subscript") => components.push(NotationComponent::Subscript),
+                Some("subscript") => {
+                    let base = node
+                        .children
+                        .first()
+                        .map(|child| bounded_notation_text(document, *child, 0))
+                        .unwrap_or_default();
+                    let index = node
+                        .children
+                        .get(1)
+                        .map(|child| bounded_notation_text(document, *child, 0))
+                        .unwrap_or_default();
+                    if !base.is_empty() && !index.is_empty() {
+                        components.push(NotationComponent::Subscript { base, index });
+                    }
+                }
                 _ => {}
             },
             crate::NotationNodeKind::NamedOperator => {
@@ -821,6 +886,25 @@ fn notation_components(
         });
     }
     components
+}
+
+fn bounded_notation_text(document: &ProjectDocument, node_id: u32, depth: u8) -> String {
+    if depth == 8 {
+        return String::new();
+    }
+    let Some(node) = document.nodes.get(node_id as usize) else {
+        return String::new();
+    };
+    if let Some(text) = &node.text {
+        return text.clone();
+    }
+    if node.children.is_empty() {
+        return node.name.clone().unwrap_or_default();
+    }
+    node.children
+        .iter()
+        .map(|child| bounded_notation_text(document, *child, depth + 1))
+        .collect()
 }
 
 fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {

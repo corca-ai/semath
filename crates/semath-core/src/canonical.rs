@@ -1065,6 +1065,27 @@ impl Parser {
                         provenance: token.provenance,
                     };
                 }
+                "int" | "iint" | "iiint" => return self.parse_integral(),
+                "nabla" => {
+                    let token = self.next();
+                    let mut argument = self.parse_power();
+                    if matches!(self.peek(), TokenKind::Open('(')) {
+                        let application_argument = self.parse_power();
+                        if let Some(applied) =
+                            apply_argument(argument.clone(), application_argument)
+                        {
+                            argument = applied;
+                        }
+                    }
+                    return SemanticExpr {
+                        range: merge_range(&token.range, &argument.range),
+                        provenance: [token.provenance, argument.provenance.clone()].concat(),
+                        kind: SemanticExprKind::Apply {
+                            operator: "nabla".into(),
+                            arguments: vec![argument],
+                        },
+                    };
+                }
                 "underbrace" => {
                     let command = self.next();
                     let mut expression = self.parse_group_or_atom();
@@ -1150,20 +1171,53 @@ impl Parser {
             }
             _ => (self.parse_group_or_atom(), self.parse_group_or_atom()),
         };
-        if let Some((expression, variable, order)) = derivative_parts(&numerator, &denominator) {
-            return SemanticExpr {
-                range: merge_range(&command.range, &denominator.range),
-                provenance: [
-                    command.provenance,
-                    numerator.provenance,
-                    denominator.provenance,
-                ]
-                .concat(),
-                kind: SemanticExprKind::Derivative {
-                    expression: Box::new(expression),
+        if let Some(derivative) = derivative_parts(&numerator, &denominator) {
+            let range = merge_range(&command.range, &denominator.range);
+            let provenance = [
+                command.provenance,
+                numerator.provenance.clone(),
+                denominator.provenance.clone(),
+            ]
+            .concat();
+            return match derivative {
+                ParsedDerivative::Total {
+                    expression,
                     variable,
                     order,
+                } => SemanticExpr {
+                    range,
+                    provenance,
+                    kind: SemanticExprKind::Derivative {
+                        expression: Box::new(expression),
+                        variable,
+                        order,
+                    },
                 },
+                ParsedDerivative::Partial {
+                    expression,
+                    variables,
+                    order,
+                } => {
+                    let mut arguments = vec![expression];
+                    arguments.extend(variables.into_iter().map(|variable| SemanticExpr {
+                        kind: SemanticExprKind::Symbol(variable),
+                        range: denominator.range.clone(),
+                        provenance: denominator.provenance.clone(),
+                    }));
+                    arguments.push(SemanticExpr {
+                        kind: SemanticExprKind::Number(order.to_string()),
+                        range: numerator.range.clone(),
+                        provenance: numerator.provenance.clone(),
+                    });
+                    SemanticExpr {
+                        range,
+                        provenance,
+                        kind: SemanticExprKind::Apply {
+                            operator: "partial-derivative".into(),
+                            arguments,
+                        },
+                    }
+                }
             };
         }
         combined(
@@ -1171,6 +1225,77 @@ impl Parser {
             &denominator,
             SemanticExprKind::Fraction(Box::new(numerator.clone()), Box::new(denominator.clone())),
         )
+    }
+
+    fn parse_integral(&mut self) -> SemanticExpr {
+        let command = self.next();
+        let mut lower = None;
+        let mut upper = None;
+        loop {
+            if self.consume_operator('_') {
+                lower = Some(self.parse_group_or_atom());
+            } else if self.consume_operator('^') {
+                upper = Some(self.parse_group_or_atom());
+            } else {
+                break;
+            }
+        }
+        let start = self.cursor;
+        let differential = (start..self.tokens.len().saturating_sub(1))
+            .rev()
+            .find(|index| {
+                token_name(&self.tokens[*index].kind) == Some("d")
+                    && token_name(&self.tokens[*index + 1].kind).is_some()
+                    && self.tokens.get(*index + 2).is_none_or(|token| {
+                        !starts_atom(&token.kind)
+                            || matches!(token.kind, TokenKind::Command(ref name) if is_relation_command(name))
+                    })
+            });
+        let Some(differential) = differential else {
+            return SemanticExpr {
+                kind: SemanticExprKind::Apply {
+                    operator: "integral".into(),
+                    arguments: Vec::new(),
+                },
+                range: command.range,
+                provenance: command.provenance,
+            };
+        };
+        if differential == start {
+            return SemanticExpr {
+                kind: SemanticExprKind::Apply {
+                    operator: "integral".into(),
+                    arguments: Vec::new(),
+                },
+                range: command.range,
+                provenance: command.provenance,
+            };
+        }
+        let integrand = Parser::new(self.tokens[start..differential].to_vec()).parse_relation();
+        let variable_token = self.tokens[differential + 1].clone();
+        let variable = SemanticExpr {
+            kind: SemanticExprKind::Symbol(
+                token_name(&variable_token.kind)
+                    .unwrap_or_default()
+                    .to_owned(),
+            ),
+            range: variable_token.range.clone(),
+            provenance: variable_token.provenance.clone(),
+        };
+        self.cursor = differential + 2;
+        let mut arguments = vec![integrand, variable];
+        if let (Some(lower), Some(upper)) = (lower, upper) {
+            arguments.push(lower);
+            arguments.push(upper);
+        }
+        SemanticExpr {
+            range: merge_range(&command.range, &variable_token.range),
+            provenance: command.provenance,
+            kind: SemanticExprKind::Apply {
+                operator: "integral".into(),
+                arguments,
+            },
+        }
     }
 
     fn parse_atom(&mut self) -> SemanticExpr {
@@ -1419,25 +1544,123 @@ fn starts_atom(token: &TokenKind) -> bool {
     }
 }
 
+fn token_name(token: &TokenKind) -> Option<&str> {
+    match token {
+        TokenKind::Identifier(name) | TokenKind::Command(name) => Some(name),
+        _ => None,
+    }
+}
+
+fn is_relation_command(name: &str) -> bool {
+    matches!(
+        name,
+        "ge" | "geq"
+            | "in"
+            | "le"
+            | "leq"
+            | "notin"
+            | "subset"
+            | "subseteq"
+            | "supset"
+            | "supseteq"
+    )
+}
+
+enum ParsedDerivative {
+    Total {
+        expression: SemanticExpr,
+        variable: String,
+        order: u8,
+    },
+    Partial {
+        expression: SemanticExpr,
+        variables: Vec<String>,
+        order: u8,
+    },
+}
+
 fn derivative_parts(
     numerator: &SemanticExpr,
     denominator: &SemanticExpr,
-) -> Option<(SemanticExpr, String, u8)> {
+) -> Option<ParsedDerivative> {
     let SemanticExprKind::Product(numerator_factors) = &numerator.kind else {
         return None;
     };
     let SemanticExprKind::Product(denominator_factors) = &denominator.kind else {
         return None;
     };
-    let (Some("d"), Some(expression), Some("d"), Some(variable)) = (
-        numerator_factors.first().and_then(symbol_name),
-        numerator_factors.get(1),
-        denominator_factors.first().and_then(symbol_name),
-        denominator_factors.get(1).and_then(symbol_name),
-    ) else {
+    let (operator, numerator_order) = differential_order(numerator_factors.first()?)?;
+    let expression = numerator_factors.get(1)?.clone();
+    if operator == "d" {
+        let (denominator_operator, _) = differential_order(denominator_factors.first()?)?;
+        if denominator_operator != "d" || denominator_factors.len() != 2 {
+            return None;
+        }
+        let (variable, variable_order) = variable_order(&denominator_factors[1])?;
+        if numerator_order != variable_order {
+            return None;
+        }
+        return Some(ParsedDerivative::Total {
+            expression,
+            variable,
+            order: numerator_order,
+        });
+    }
+    if operator != "partial" {
+        return None;
+    }
+    let mut variables = Vec::new();
+    let mut denominator_order = 0_u8;
+    let mut cursor = 0;
+    while cursor + 1 < denominator_factors.len() {
+        let (denominator_operator, operator_order) =
+            differential_order(&denominator_factors[cursor])?;
+        if denominator_operator != "partial" || operator_order != 1 {
+            return None;
+        }
+        let (variable, order) = variable_order(&denominator_factors[cursor + 1])?;
+        denominator_order = denominator_order.checked_add(order)?;
+        variables.extend(std::iter::repeat_n(variable, order as usize));
+        cursor += 2;
+    }
+    (cursor == denominator_factors.len() && numerator_order == denominator_order).then_some(
+        ParsedDerivative::Partial {
+            expression,
+            variables,
+            order: numerator_order,
+        },
+    )
+}
+
+fn differential_order(expression: &SemanticExpr) -> Option<(&str, u8)> {
+    match &expression.kind {
+        SemanticExprKind::Symbol(name) if matches!(name.as_str(), "d" | "partial") => {
+            Some((name, 1))
+        }
+        SemanticExprKind::Power(base, exponent) => {
+            let name = symbol_name(base)?;
+            matches!(name, "d" | "partial")
+                .then(|| number_order(exponent).map(|order| (name, order)))?
+        }
+        _ => None,
+    }
+}
+
+fn variable_order(expression: &SemanticExpr) -> Option<(String, u8)> {
+    match &expression.kind {
+        SemanticExprKind::Symbol(name) => Some((name.clone(), 1)),
+        SemanticExprKind::Power(base, exponent) => {
+            Some((symbol_name(base)?.into(), number_order(exponent)?))
+        }
+        _ => None,
+    }
+}
+
+fn number_order(expression: &SemanticExpr) -> Option<u8> {
+    let SemanticExprKind::Number(value) = &expression.kind else {
         return None;
     };
-    Some((expression.clone(), variable.into(), 1))
+    value.parse::<u8>().ok().filter(|order| *order > 0)
 }
 
 fn symbol_name(expression: &SemanticExpr) -> Option<&str> {
@@ -1550,6 +1773,28 @@ mod tests {
             SemanticExprKind::Apply { ref operator, ref arguments }
                 if operator == "compose" && arguments.len() == 2
         ));
+    }
+
+    #[test]
+    fn lowers_calculus_operators_with_explicit_variables_orders_and_bounds() {
+        assert_eq!(
+            render_canonical(&lower_template("\\int_0^1 g(t) \\, d t")),
+            "apply(integral,apply(g,symbol(t)),symbol(t),number(0),number(1))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\frac{d^2 f}{d x^2}")),
+            "derivative(symbol(f),x,2)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template(
+                "\\frac{\\partial^2 f}{\\partial x \\partial y}"
+            )),
+            "apply(partial-derivative,symbol(f),symbol(x),symbol(y),number(2))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\nabla f(x)")),
+            "apply(nabla,apply(f,symbol(x)))"
+        );
     }
 
     #[test]
