@@ -64,6 +64,30 @@ export const LEGACY_SEMANTIC_PATHS = [
     markers: ["pub refusal:", "pub status:", "pub summary:"],
   },
   {
+    id: "legacy-decision-summary-policy-ts",
+    ownerIssue: 202,
+    path: "packages/protocol/src/index.ts",
+    markers: ["summary: string;"],
+  },
+  {
+    id: "legacy-decision-missing-policy-ts",
+    ownerIssue: 202,
+    path: "packages/protocol/src/index.ts",
+    markers: ["missing: readonly MeaningRequirement[];"],
+  },
+  {
+    id: "legacy-decision-summary-policy-rust",
+    ownerIssue: 202,
+    path: "crates/semath-core/src/protocol.rs",
+    markers: ["summary: String,"],
+  },
+  {
+    id: "legacy-decision-missing-policy-rust",
+    ownerIssue: 202,
+    path: "crates/semath-core/src/protocol.rs",
+    markers: ["missing: Vec<MeaningRequirement>"],
+  },
+  {
     id: "legacy-pack-patterns-field",
     ownerIssue: 193,
     path: "crates/semath-core/src/pack.rs",

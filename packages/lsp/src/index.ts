@@ -385,17 +385,22 @@ export class SemathLspServer {
       const value = result.value.view;
       const decision = value.decision;
       const sourceNotation = value.symbol?.sourceNotation;
+      const meaning =
+        decision.status === "established" || decision.status === "partial"
+          ? decision.meaning.label
+          : undefined;
       const lines = [
-        sourceNotation
-          ? `**\`${sourceNotation}\` — ${decision.summary}**`
-          : `**${decision.summary}**`,
+        meaning && sourceNotation
+          ? `**\`${sourceNotation}\` — ${meaning}**`
+          : meaning
+            ? `**${meaning}**`
+            : sourceNotation
+              ? `**\`${sourceNotation}\`**`
+              : "",
         value.symbol?.shapes[0]?.display ?? "",
         ...(value.symbol?.roles ?? []).map((role) => role.description),
         ...(value.symbol?.definitions ?? []).map((definition) => definition.description),
         ...value.context.relations.map((relation) => relation.description),
-        ...(decision.status === "partial" || decision.status === "unsupported"
-          ? decision.missing.map((item) => item.label)
-          : []),
         ...(decision.status === "conflicting"
           ? decision.conflicts.map((item) => item.label)
           : []),

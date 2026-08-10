@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 7;
+pub const PROTOCOL_VERSION: u32 = 8;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -806,27 +806,50 @@ pub struct SemanticViewInfo {
 )]
 pub enum MeaningDecision {
     Established {
-        summary: String,
-        relation_id: String,
-        evidence: Vec<Evidence>,
+        meaning: MeaningConclusion,
+        reasons: Vec<DecisionReason>,
     },
     Partial {
-        summary: String,
+        meaning: MeaningConclusion,
         facts: Vec<MeaningFact>,
-        missing: Vec<MeaningRequirement>,
+        requirements: Vec<MeaningRequirement>,
+        reasons: Vec<DecisionReason>,
     },
     Ambiguous {
-        summary: String,
         alternatives: Vec<MeaningAlternative>,
+        reasons: Vec<DecisionReason>,
     },
     Conflicting {
-        summary: String,
         conflicts: Vec<MeaningConflict>,
+        reasons: Vec<DecisionReason>,
     },
     Unsupported {
-        summary: String,
-        missing: Vec<MeaningRequirement>,
+        reasons: Vec<DecisionReason>,
     },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MeaningConclusion {
+    pub label: String,
+    pub relation_id: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum DecisionReasonKind {
+    Proof,
+    Uncertainty,
+    EngineLimit,
+    SourceConflict,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DecisionReason {
+    pub kind: DecisionReasonKind,
+    pub label: String,
+    pub evidence: Vec<Evidence>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

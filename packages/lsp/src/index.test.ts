@@ -347,7 +347,11 @@ describe("SemathLspServer", () => {
       view: {
         decision: {
           status: "partial",
-          summary: "expected calibration error",
+          meaning: {
+            label: "expected calibration error",
+            relationId: null,
+          },
+          reasons: [],
         },
         symbol: {
           sourceNotation: "\\operatorname{ECE}",

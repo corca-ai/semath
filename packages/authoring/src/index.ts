@@ -79,30 +79,56 @@ export interface ScorecardComparison {
 }
 
 export function projectValidatedPack(value: unknown): AuthoringPack {
-  const pack = value as {
-    laws: {
-      id: string;
-      roles: { description?: string; id: string; shape?: string }[];
-      semanticForms: string[];
-      title: string;
-    }[];
-    packId: string;
-    title: string;
-  };
+  if (!isRecord(value)) throw new Error("validated pack must be an object");
+  const packId = requiredString(value.packId, "validated pack.packId");
+  const title = requiredString(value.title, "validated pack.title");
+  if (!Array.isArray(value.laws)) throw new Error("validated pack.laws must be an array");
   return {
-    laws: pack.laws.map((law) => ({
-      id: law.id,
-      roles: law.roles.map((role) => ({
-        id: role.id,
-        ...(role.description ? { description: role.description } : {}),
-        ...(role.shape ? { shape: role.shape } : {}),
-      })),
-      semanticForms: [...law.semanticForms],
-      title: law.title,
-    })),
-    packId: pack.packId,
-    title: pack.title,
+    laws: value.laws.map((candidate, lawIndex) => {
+      const path = `validated pack.laws[${lawIndex}]`;
+      if (!isRecord(candidate)) throw new Error(`${path} must be an object`);
+      if (!Array.isArray(candidate.roles)) throw new Error(`${path}.roles must be an array`);
+      if (!Array.isArray(candidate.semanticForms)) {
+        throw new Error(`${path}.semanticForms must be an array`);
+      }
+      return {
+        id: requiredString(candidate.id, `${path}.id`),
+        roles: candidate.roles.map((role, roleIndex) => {
+          const rolePath = `${path}.roles[${roleIndex}]`;
+          if (!isRecord(role)) throw new Error(`${rolePath} must be an object`);
+          const description = optionalString(role.description, `${rolePath}.description`);
+          const shape = optionalString(role.shape, `${rolePath}.shape`);
+          return {
+            id: requiredString(role.id, `${rolePath}.id`),
+            ...(description ? { description } : {}),
+            ...(shape ? { shape } : {}),
+          };
+        }),
+        semanticForms: candidate.semanticForms.map((form, formIndex) =>
+          requiredString(form, `${path}.semanticForms[${formIndex}]`),
+        ),
+        title: requiredString(candidate.title, `${path}.title`),
+      };
+    }),
+    packId,
+    title,
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function requiredString(value: unknown, path: string): string {
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`${path} must be a non-empty string`);
+  }
+  return value;
+}
+
+function optionalString(value: unknown, path: string): string | undefined {
+  if (value === undefined) return undefined;
+  return requiredString(value, path);
 }
 
 export function scaffoldPackWorkspace(pack: AuthoringPack): PackWorkspaceScaffold {

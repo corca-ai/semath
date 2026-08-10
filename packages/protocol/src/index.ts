@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 7 as const;
+export const SEMATH_PROTOCOL_VERSION = 8 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 4 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -338,31 +338,47 @@ export interface SemanticViewInfo {
 export type MeaningDecision =
   | {
       status: "established";
-      summary: string;
-      relationId: string;
-      evidence: readonly Evidence[];
+      meaning: MeaningConclusion;
+      reasons: readonly DecisionReason[];
     }
   | {
       status: "partial";
-      summary: string;
+      meaning: MeaningConclusion;
       facts: readonly MeaningFact[];
-      missing: readonly MeaningRequirement[];
+      requirements: readonly MeaningRequirement[];
+      reasons: readonly DecisionReason[];
     }
   | {
       status: "ambiguous";
-      summary: string;
       alternatives: readonly MeaningAlternative[];
+      reasons: readonly DecisionReason[];
     }
   | {
       status: "conflicting";
-      summary: string;
       conflicts: readonly MeaningConflict[];
+      reasons: readonly DecisionReason[];
     }
   | {
       status: "unsupported";
-      summary: string;
-      missing: readonly MeaningRequirement[];
+      reasons: readonly DecisionReason[];
     };
+
+export interface MeaningConclusion {
+  label: string;
+  relationId: string | null;
+}
+
+export type DecisionReasonKind =
+  | "proof"
+  | "uncertainty"
+  | "engine-limit"
+  | "source-conflict";
+
+export interface DecisionReason {
+  evidence: readonly Evidence[];
+  kind: DecisionReasonKind;
+  label: string;
+}
 
 export interface MeaningFact {
   evidence: readonly Evidence[];

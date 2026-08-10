@@ -1,7 +1,8 @@
 use crate::{
-    ConstraintStatus, Evidence, LawRecognition, MeaningAlternative, MeaningConflict,
-    MeaningDecision, MeaningFact, MeaningRequirement, SemanticCandidateInfo,
-    SemanticCandidateStatus, SemanticDiagnostic, SymbolInfo,
+    ConstraintStatus, DecisionReason, DecisionReasonKind, Evidence, LawRecognition,
+    MeaningAlternative, MeaningConclusion, MeaningConflict, MeaningDecision, MeaningFact,
+    MeaningRequirement, SemanticCandidateInfo, SemanticCandidateStatus, SemanticDiagnostic,
+    SymbolInfo,
 };
 
 const MAX_DECISION_ITEMS: usize = 8;
@@ -17,76 +18,107 @@ pub(crate) struct MeaningDecisionInput<'a> {
 pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision {
     let conflicts = collect_conflicts(&input);
     if !conflicts.is_empty() {
-        return MeaningDecision::Conflicting {
-            summary: "Conflicting semantic evidence".into(),
-            conflicts,
-        };
+        let reasons = conflicts
+            .iter()
+            .map(|conflict| DecisionReason {
+                kind: DecisionReasonKind::SourceConflict,
+                label: conflict.label.clone(),
+                evidence: deduplicate_evidence(conflict.evidence.clone()),
+            })
+            .collect();
+        return MeaningDecision::Conflicting { conflicts, reasons };
     }
 
     let alternatives = collect_alternatives(&input);
     if alternatives.len() > 1 {
         return MeaningDecision::Ambiguous {
-            summary: "Multiple semantic interpretations remain".into(),
             alternatives,
+            reasons: vec![uncertainty_reason(
+                "More than one source-compatible interpretation remains.",
+            )],
         };
     }
 
     if let Some(formula) = input.formulas.first() {
-        let missing = missing_formula_requirements(formula, input.truncated);
-        if missing.is_empty() {
+        let missing = missing_formula_requirements(formula);
+        if missing.is_empty() && !input.truncated {
             let relation = formula
                 .relation
                 .as_ref()
                 .expect("recognized formulas have a relation projection");
             return MeaningDecision::Established {
-                summary: formula.title.clone(),
-                relation_id: relation.relation_id.clone(),
-                evidence: established_evidence(formula),
+                meaning: MeaningConclusion {
+                    label: formula.title.clone(),
+                    relation_id: Some(relation.relation_id.clone()),
+                },
+                reasons: vec![DecisionReason {
+                    kind: DecisionReasonKind::Proof,
+                    label: "Supported by source-linked declarations and constraints.".into(),
+                    evidence: established_evidence(formula),
+                }],
             };
         }
         return MeaningDecision::Partial {
-            summary: formula.title.clone(),
+            meaning: MeaningConclusion {
+                label: formula.title.clone(),
+                relation_id: formula
+                    .relation
+                    .as_ref()
+                    .map(|relation| relation.relation_id.clone()),
+            },
             facts: formula_facts(formula),
-            missing,
+            requirements: missing,
+            reasons: truncation_reason(input.truncated).into_iter().collect(),
         };
     }
 
     if let Some(symbol) = input.symbol {
         return MeaningDecision::Partial {
-            summary: symbol
-                .definitions
-                .first()
-                .map_or_else(|| symbol.symbol.clone(), |item| item.description.clone()),
+            meaning: MeaningConclusion {
+                label: symbol
+                    .definitions
+                    .first()
+                    .map_or_else(|| symbol.symbol.clone(), |item| item.description.clone()),
+                relation_id: None,
+            },
             facts: symbol_facts(symbol),
-            missing: truncation_requirement(input.truncated)
-                .into_iter()
-                .collect(),
+            requirements: Vec::new(),
+            reasons: truncation_reason(input.truncated).into_iter().collect(),
         };
     }
 
     if let Some(alternative) = alternatives.into_iter().next() {
         return MeaningDecision::Partial {
-            summary: alternative.label.clone(),
+            meaning: MeaningConclusion {
+                label: alternative.label.clone(),
+                relation_id: None,
+            },
             facts: Vec::new(),
-            missing: vec![MeaningRequirement {
+            requirements: vec![MeaningRequirement {
                 requirement_id: format!("resolve/{}", alternative.alternative_id),
-                label: "Add source-linked type or role evidence for this interpretation.".into(),
+                label: "Independent source evidence does not yet select this interpretation."
+                    .into(),
                 subjects: Vec::new(),
                 evidence: alternative.evidence,
             }],
+            reasons: vec![uncertainty_reason(
+                "A structural interpretation is available without enough independent support.",
+            )],
         };
     }
 
-    let mut missing = vec![MeaningRequirement {
-        requirement_id: "meaning/typed-evidence".into(),
-        label: "Add a declaration or supported relation that establishes typed meaning.".into(),
-        subjects: Vec::new(),
-        evidence: Vec::new(),
-    }];
-    missing.extend(truncation_requirement(input.truncated));
     MeaningDecision::Unsupported {
-        summary: "No supported semantic interpretation".into(),
-        missing,
+        reasons: [
+            Some(DecisionReason {
+                kind: DecisionReasonKind::Uncertainty,
+                label: "No source-supported interpretation is currently available.".into(),
+                evidence: Vec::new(),
+            }),
+            truncation_reason(input.truncated),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
     }
 }
 
@@ -130,6 +162,10 @@ fn collect_conflicts(input: &MeaningDecisionInput<'_>) -> Vec<MeaningConflict> {
 }
 
 fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternative> {
+    let supported_candidate_exists = input
+        .candidates
+        .iter()
+        .any(|candidate| candidate.status == SemanticCandidateStatus::Supported);
     let mut alternatives = input
         .formulas
         .iter()
@@ -147,10 +183,9 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
                 .candidates
                 .iter()
                 .filter(|candidate| {
-                    matches!(
-                        candidate.status,
-                        SemanticCandidateStatus::Supported | SemanticCandidateStatus::Unresolved
-                    )
+                    candidate.status == SemanticCandidateStatus::Supported
+                        || (!supported_candidate_exists
+                            && candidate.status == SemanticCandidateStatus::Unresolved)
                 })
                 .map(|candidate| MeaningAlternative {
                     alternative_id: candidate.candidate_id.clone(),
@@ -167,7 +202,7 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
 }
 
 fn established_evidence(formula: &LawRecognition) -> Vec<Evidence> {
-    let mut evidence = formula
+    let evidence = formula
         .evidence
         .iter()
         .chain(
@@ -179,9 +214,7 @@ fn established_evidence(formula: &LawRecognition) -> Vec<Evidence> {
         )
         .cloned()
         .collect::<Vec<_>>();
-    evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
-    evidence.dedup();
-    evidence
+    deduplicate_evidence(evidence)
 }
 
 fn candidate_evidence(candidate: &SemanticCandidateInfo) -> Evidence {
@@ -193,10 +226,7 @@ fn candidate_evidence(candidate: &SemanticCandidateInfo) -> Evidence {
     }
 }
 
-fn missing_formula_requirements(
-    formula: &LawRecognition,
-    truncated: bool,
-) -> Vec<MeaningRequirement> {
+fn missing_formula_requirements(formula: &LawRecognition) -> Vec<MeaningRequirement> {
     let mut missing = formula
         .conditions
         .iter()
@@ -213,7 +243,6 @@ fn missing_formula_requirements(
             evidence: condition.evidence.clone(),
         })
         .collect::<Vec<_>>();
-    missing.extend(truncation_requirement(truncated));
     missing.truncate(MAX_DECISION_ITEMS);
     missing
 }
@@ -247,13 +276,44 @@ fn symbol_facts(symbol: &SymbolInfo) -> Vec<MeaningFact> {
         .collect()
 }
 
-fn truncation_requirement(truncated: bool) -> Option<MeaningRequirement> {
-    truncated.then(|| MeaningRequirement {
-        requirement_id: "meaning/untruncated-evidence".into(),
-        label: "Inspect the omitted evidence before establishing one interpretation.".into(),
-        subjects: Vec::new(),
+fn truncation_reason(truncated: bool) -> Option<DecisionReason> {
+    truncated.then(|| DecisionReason {
+        kind: DecisionReasonKind::EngineLimit,
+        label: "Additional engine evidence was omitted by a bounded result limit.".into(),
         evidence: Vec::new(),
     })
+}
+
+fn uncertainty_reason(label: &str) -> DecisionReason {
+    DecisionReason {
+        kind: DecisionReasonKind::Uncertainty,
+        label: label.into(),
+        evidence: Vec::new(),
+    }
+}
+
+fn deduplicate_evidence(mut evidence: Vec<Evidence>) -> Vec<Evidence> {
+    evidence.sort_by(|left, right| {
+        let left_range = left.source_ranges.first();
+        let right_range = right.source_ranges.first();
+        (
+            left.kind.as_str(),
+            left_range.map_or(0, |range| range.start_offset),
+            left_range.map_or(0, |range| range.end_offset),
+            left.rule_id.as_str(),
+        )
+            .cmp(&(
+                right.kind.as_str(),
+                right_range.map_or(0, |range| range.start_offset),
+                right_range.map_or(0, |range| range.end_offset),
+                right.rule_id.as_str(),
+            ))
+    });
+    evidence.dedup_by(|left, right| {
+        left.kind == right.kind && left.source_ranges == right.source_ranges
+    });
+    evidence.truncate(MAX_DECISION_ITEMS);
+    evidence
 }
 
 #[cfg(test)]
@@ -300,6 +360,81 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn independent_candidate_support_refines_ambiguity_monotonically() {
+        let supported = candidate("application", SemanticCandidateStatus::Supported);
+        let unresolved = candidate("multiplication", SemanticCandidateStatus::Unresolved);
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[supported.clone(), unresolved.clone()],
+            diagnostics: &[],
+            truncated: false,
+        });
+        assert!(matches!(
+            decision,
+            MeaningDecision::Partial { meaning, .. } if meaning.label == "application"
+        ));
+
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[
+                candidate("application", SemanticCandidateStatus::Unresolved),
+                unresolved,
+            ],
+            diagnostics: &[],
+            truncated: false,
+        });
+        assert!(matches!(decision, MeaningDecision::Ambiguous { .. }));
+
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[candidate(
+                "application",
+                SemanticCandidateStatus::Conflicting,
+            )],
+            diagnostics: &[],
+            truncated: false,
+        });
+        assert!(matches!(decision, MeaningDecision::Conflicting { .. }));
+    }
+
+    #[test]
+    fn uncertainty_and_source_conflict_have_separate_reason_kinds() {
+        let unsupported = decide_meaning(input(&[]));
+        assert!(matches!(
+            unsupported,
+            MeaningDecision::Unsupported { reasons }
+                if reasons.iter().all(|reason| reason.kind != DecisionReasonKind::SourceConflict)
+        ));
+
+        let diagnostic = SemanticDiagnostic {
+            code: "duplicate-role".into(),
+            message: "Incompatible role declarations".into(),
+            severity: "warning".into(),
+            range: SourceRange {
+                start_offset: 1,
+                end_offset: 2,
+            },
+            explanation: "The same occurrence has incompatible explicit roles.".into(),
+            evidence: Vec::new(),
+        };
+        let conflicting = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[],
+            diagnostics: &[diagnostic],
+            truncated: false,
+        });
+        assert!(matches!(
+            conflicting,
+            MeaningDecision::Conflicting { reasons, .. }
+                if reasons.iter().all(|reason| reason.kind == DecisionReasonKind::SourceConflict)
+        ));
+    }
+
     fn input(formulas: &[LawRecognition]) -> MeaningDecisionInput<'_> {
         MeaningDecisionInput {
             formulas,
@@ -307,6 +442,29 @@ mod tests {
             candidates: &[],
             diagnostics: &[],
             truncated: false,
+        }
+    }
+
+    fn candidate(interpretation: &str, status: SemanticCandidateStatus) -> SemanticCandidateInfo {
+        SemanticCandidateInfo {
+            candidate_id: interpretation.into(),
+            family: "application".into(),
+            interpretation: interpretation.into(),
+            status,
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 1,
+            },
+            supporting_claim_ids: if status == SemanticCandidateStatus::Supported {
+                vec!["support".into()]
+            } else {
+                Vec::new()
+            },
+            rejecting_claim_ids: if status == SemanticCandidateStatus::Conflicting {
+                vec!["reject".into()]
+            } else {
+                Vec::new()
+            },
         }
     }
 

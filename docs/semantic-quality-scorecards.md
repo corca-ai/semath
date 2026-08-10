@@ -16,6 +16,8 @@ thresholds.
 | Variation coverage | labeled notation, prose, role, constraint, project, macro, and mutation families | equal real-world frequency |
 | Diversity cells | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles | real-world prevalence |
 | Metamorphic invariance | irrelevant prose, comments, and document ordering preserve outcomes | arbitrary source rewrites are safe |
+| Pack-derived properties | every law receives positive, refusal, scope, mutation, macro/project, and cursor cells | production recognition agrees with itself |
+| Differential equivalence | clean, incremental, native, WASM, Worker, and LSP projections agree exactly | a second semantic engine exists |
 | Prose association | declared symbols receive their exact descriptions | the description is a supported domain concept |
 | Assumption extraction | explicit assumptions retain subjects and evidence | hypothetical or cited properties are assumptions |
 | Prose scope | declarations and assumptions obey section and include order | later or disconnected evidence is visible |
@@ -84,6 +86,11 @@ presentation, project, macro, constraint, mutation, and cursor batches. Pure
 generation and integrity checks reject stale output, normalized duplicates,
 duplicate semantic/syntax/prose/tag profiles, malformed delimiters, invalid
 environment nesting, ambiguous cursors, and leaked fixture identities.
+Pack validation also derives a deterministic bounded property plan from the
+reviewed law declarations. Its oracle is the declared transformation relation,
+not the production matcher. Broad generated execution and failure artifacts
+remain part of the manual quality workflow; only planner integrity and a small
+fixed sample run in default CI.
 
 Native/WASM parity, full-path incremental latency and memory, package integrity,
 and documentation are separate gates so failures remain actionable. The normal

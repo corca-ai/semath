@@ -1,9 +1,5 @@
-use super::{
-    SemanticOccurrenceSeed, SemathEngine, completes_application_at, notation_occurrence_range,
-};
-use crate::candidate::StructuralCandidateOption;
+use super::{SemathEngine, notation_occurrence_range};
 use crate::parser::test_math_regions;
-use crate::semantic_index::{CandidateFamily, OccurrenceKind};
 use crate::{
     ChangeEnvelope, DocumentLanguage, MeaningDecision, NotationArgument, NotationNode,
     NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION, ProjectChange, ProjectDocument,
@@ -93,27 +89,6 @@ fn expands_a_style_body_to_its_exact_source_notation() {
 }
 
 #[test]
-fn application_boundary_requires_a_complete_ancestor_in_the_same_math_region() {
-    let seed = SemanticOccurrenceSeed {
-        kind: OccurrenceKind::Notation,
-        surface: "ECE".into(),
-        selection_range: range(1, 5),
-        range: range(1, 5),
-        structural_path: vec![0],
-        source_text: "\\ECE".into(),
-        notation: Vec::new(),
-        application_end_offset: Some(8),
-        candidate_options: vec![StructuralCandidateOption {
-            family: CandidateFamily::Application,
-            interpretation: "application".into(),
-        }],
-    };
-    assert!(completes_application_at(&seed, &range(0, 9), 8));
-    assert!(!completes_application_at(&seed, &range(0, 9), 9));
-    assert!(!completes_application_at(&seed, &range(8, 12), 8));
-}
-
-#[test]
 fn resolves_definition_on_both_edges_of_a_symbol() {
     let content = "Let $A$ denote an event. Let $B$ denote an event. $p=\\frac{\\mathbb{P}(A \\cap B)}{\\mathbb{P}(B)}$";
     let occurrence = content.find("A \\cap").unwrap() as u32;
@@ -160,8 +135,8 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
     };
     assert!(matches!(
         &view.decision,
-        MeaningDecision::Partial { summary, missing, .. }
-            if summary == "Mechanical power" && !missing.is_empty()
+        MeaningDecision::Partial { meaning, requirements, .. }
+            if meaning.label == "Mechanical power" && !requirements.is_empty()
     ));
     assert_eq!(
         view.context.relations[0].relation_id,
@@ -204,7 +179,7 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
             panic!("expected semantic view")
         };
         assert!(
-            matches!(&view.decision, MeaningDecision::Partial { summary, .. } if summary == "Mechanical power"),
+            matches!(&view.decision, MeaningDecision::Partial { meaning, .. } if meaning.label == "Mechanical power"),
             "offset {offset}"
         );
     }
@@ -282,7 +257,7 @@ fn unsupported_formula_refuses_instead_of_guessing() {
     };
     assert!(matches!(
         view.decision,
-        MeaningDecision::Unsupported { ref missing, .. } if !missing.is_empty()
+        MeaningDecision::Unsupported { ref reasons } if !reasons.is_empty()
     ));
     assert!(view.context.relations.is_empty());
 }

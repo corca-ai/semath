@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 7 is a deliberate
+Semath is a library and language-service runtime. Protocol 8 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -27,16 +27,19 @@ The query surface is:
 - `diagnostics` and `explainDiagnostic`
 
 `semanticView` returns an established, partial, ambiguous, conflicting, or
-unsupported `decision` as a discriminated union. Established decisions contain
-one relation and its evidence; partial and unsupported decisions contain typed
-missing requirements; ambiguous decisions contain bounded alternatives; and
-conflicting decisions contain source-linked conflicts. Required or unsupported
-law conditions and truncated evidence cannot produce `established`.
+unsupported `decision` as a discriminated union. Established and partial
+decisions contain a structured known meaning; partial decisions may also carry
+neutral requirements for optional tooling. Ambiguous decisions contain bounded
+alternatives, and conflicting decisions contain source-linked conflicts. Every
+state has a deterministic bounded reason slice whose kinds distinguish proof,
+uncertainty, engine limits, and demonstrated source conflicts. A host must not
+turn uncertainty or an engine limit into a document diagnostic. Required or
+unsupported law conditions and truncated evidence cannot produce `established`.
 `context.assumptions` contains explicit, source-linked assumptions with their
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 7 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 8 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
