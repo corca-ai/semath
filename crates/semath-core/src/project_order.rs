@@ -246,6 +246,7 @@ fn source_positions(
                 &mut positions,
                 &mut sequence,
             );
+            sequence += 1;
         }
     }
     positions
@@ -266,73 +267,48 @@ fn visit(
         active.remove(file_id);
         return;
     };
-    let mut events = document
-        .occurrence_offsets
-        .iter()
-        .copied()
-        .map(Event::Occurrence)
-        .chain(
-            directed
-                .get(file_id)
-                .into_iter()
-                .flatten()
-                .cloned()
-                .map(Event::Include),
-        )
-        .collect::<Vec<_>>();
-    events.sort_by(|left, right| {
-        left.offset()
-            .cmp(&right.offset())
-            .then(left.kind_order().cmp(&right.kind_order()))
-    });
-    events.dedup_by(|left, right| match (left, right) {
-        (Event::Occurrence(left), Event::Occurrence(right)) => left == right,
-        _ => false,
-    });
-    for event in events {
-        match event {
-            Event::Occurrence(offset) => {
-                positions
-                    .entry(file_id.to_owned())
-                    .or_default()
-                    .entry(offset)
-                    .and_modify(|position| *position = None)
-                    .or_insert(Some(*sequence));
-                *sequence += 1;
-            }
-            Event::Include(edge) => visit(
-                &edge.target,
-                documents,
-                directed,
-                active,
-                positions,
-                sequence,
-            ),
+    let mut occurrences = document.occurrence_offsets.clone();
+    occurrences.sort_unstable();
+    occurrences.dedup();
+    let mut occurrence_index = 0;
+    for edge in directed.get(file_id).into_iter().flatten() {
+        while occurrences
+            .get(occurrence_index)
+            .is_some_and(|offset| *offset <= edge.offset)
+        {
+            insert_position(file_id, occurrences[occurrence_index], *sequence, positions);
+            occurrence_index += 1;
         }
+        *sequence += 1;
+        visit(
+            &edge.target,
+            documents,
+            directed,
+            active,
+            positions,
+            sequence,
+        );
+        *sequence += 1;
+    }
+    for offset in &occurrences[occurrence_index..] {
+        insert_position(file_id, *offset, *sequence, positions);
     }
     active.remove(file_id);
 }
 
-#[derive(Clone, Debug)]
-enum Event {
-    Occurrence(u32),
-    Include(IncludeEdge),
-}
-
-impl Event {
-    fn offset(&self) -> u32 {
-        match self {
-            Self::Occurrence(offset) => *offset,
-            Self::Include(edge) => edge.offset,
-        }
-    }
-
-    fn kind_order(&self) -> u8 {
-        match self {
-            Self::Occurrence(_) => 0,
-            Self::Include(_) => 1,
-        }
-    }
+fn insert_position(
+    file_id: &str,
+    offset: u32,
+    segment: u64,
+    positions: &mut HashMap<String, HashMap<u32, Option<u64>>>,
+) {
+    let position = (segment << 32) | u64::from(offset);
+    positions
+        .entry(file_id.to_owned())
+        .or_default()
+        .entry(offset)
+        .and_modify(|stored| *stored = None)
+        .or_insert(Some(position));
 }
 
 fn resolve_include(
@@ -473,5 +449,30 @@ mod tests {
         assert!(affected.contains("chapter"));
         assert!(affected.contains("main"));
         assert!(!affected.contains("orphan"));
+    }
+
+    #[test]
+    fn local_occurrence_growth_does_not_renumber_other_documents() {
+        let before = ProjectOrder::new(
+            vec![
+                document("main", "main.tex", &[1, 9], &[("chapter", 5)]),
+                document("chapter", "chapter.tex", &[2, 8], &[]),
+                document("orphan", "orphan.tex", &[3], &[]),
+            ],
+            Some("main"),
+        );
+        let after = ProjectOrder::new(
+            vec![
+                document("main", "main.tex", &[1, 9], &[("chapter", 5)]),
+                document("chapter", "chapter.tex", &[2, 4, 8], &[]),
+                document("orphan", "orphan.tex", &[3], &[]),
+            ],
+            Some("main"),
+        );
+
+        assert_eq!(before.position("main", 9), after.position("main", 9));
+        assert_eq!(before.position("orphan", 3), after.position("orphan", 3));
+        assert!(after.precedes("chapter", 2, "chapter", 4));
+        assert!(after.precedes("chapter", 4, "chapter", 8));
     }
 }

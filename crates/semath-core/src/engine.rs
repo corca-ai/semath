@@ -937,6 +937,7 @@ impl SemathEngine {
         let mut changed = Vec::new();
         let mut revision_only = Vec::new();
         let mut order_changed = false;
+        let mut topology_changed = false;
         let mut semantic_changed = false;
         for change in envelope.changes {
             match change {
@@ -958,19 +959,24 @@ impl SemathEngine {
                             self.index.replace(*document)?;
                             semantic_changed = true;
                         }
-                        order_changed |= previous_order != self.index.order_document(&file_id);
+                        let next_order = self.index.order_document(&file_id);
+                        topology_changed |=
+                            !same_order_topology(previous_order.as_ref(), next_order.as_ref());
+                        order_changed |= previous_order != next_order;
                         changed.push(file_id);
                     }
                 }
                 ProjectChange::PathChange { file_id, path } => {
                     let document = self.index.documents.get_mut(&file_id).unwrap();
                     order_changed |= document.document.path != path;
+                    topology_changed |= document.document.path != path;
                     semantic_changed = true;
                     document.document.path = path;
                     changed.push(file_id);
                 }
                 ProjectChange::Remove { file_id } => {
                     order_changed = true;
+                    topology_changed = true;
                     semantic_changed = true;
                     self.index.remove(&file_id);
                     changed.push(file_id);
@@ -994,11 +1000,11 @@ impl SemathEngine {
         analyzed.sort();
         if !analyzed.is_empty() {
             self.refresh_project_laws(&analyzed.iter().cloned().collect());
-            if order_changed {
+            if topology_changed {
                 self.index.rebuild_semantic_index()?;
             }
         }
-        if !order_changed {
+        if !topology_changed {
             let mut semantic_updates = analyzed.clone();
             semantic_updates.extend(revision_only);
             semantic_updates.sort();
@@ -1658,6 +1664,17 @@ impl SemathEngine {
         }
         self.index.order = project_order;
     }
+}
+
+fn same_order_topology(
+    previous: Option<&ProjectOrderDocument>,
+    next: Option<&ProjectOrderDocument>,
+) -> bool {
+    matches!(
+        (previous, next),
+        (Some(previous), Some(next))
+            if previous.path == next.path && previous.includes == next.includes
+    )
 }
 
 fn evidence_anchor(evidence: &Evidence) -> u32 {
