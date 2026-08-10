@@ -923,6 +923,451 @@
         "project-context",
         "project-scope"
       ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}=0"
+      },
+      "documents": [
+        {
+          "content": "Expected calibration error (ECE) is reported.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "Expected calibration error",
+        "definitionEvidenceRuleId": "english-long-short-parenthetical",
+        "symbol": "ECE"
+      },
+      "id": "acronym-long-short",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "parenthetical",
+        "named-operator"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{RMSE}"
+      },
+      "documents": [
+        {
+          "content": "RMSE (root mean squared error) is reported.\n$\\operatorname{RMSE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "root mean squared error",
+        "definitionEvidenceRuleId": "english-short-long-parenthetical",
+        "symbol": "RMSE"
+      },
+      "id": "acronym-short-long",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "parenthetical",
+        "reverse-direction"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "ECE stands for expected calibration error.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "expected calibration error",
+        "definitionEvidenceRuleId": "english-short-defines-long",
+        "symbol": "ECE"
+      },
+      "id": "acronym-stands-for",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "stands-for",
+        "active-voice"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "Expected calibration error is abbreviated as ECE.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "Expected calibration error",
+        "definitionEvidenceRuleId": "english-long-defines-short",
+        "symbol": "ECE"
+      },
+      "id": "acronym-abbreviated-as",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "abbreviated-as",
+        "passive"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "Expected calibration error, hereafter ECE, is reported.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "Expected calibration error",
+        "definitionEvidenceRuleId": "english-long-defines-short",
+        "symbol": "ECE"
+      },
+      "id": "acronym-hereafter",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "hereafter",
+        "apposition"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "ECE does not mean expected calibration error.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-negated",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "negation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "If ECE meant expected calibration error, continue.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-hypothetical",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "counterfactual"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "ECE might mean expected calibration error.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "hedging"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "According to the reference, ECE means expected calibration error.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "citation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "The phrase \"ECE means expected calibration error\" is quoted.\n$\\operatorname{ECE}=0$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-quoted",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "quotation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "$\\operatorname{ECE}=0$. Expected calibration error (ECE) is reported later.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-future-declaration",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "declarations-after",
+        "project-scope"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "\\newacronym{ece}{ECE}{expected calibration error}\n$\\operatorname{ECE}=0$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "expected calibration error",
+        "definitionEvidenceRuleId": "latex-acronym-declaration",
+        "symbol": "ECE"
+      },
+      "id": "acronym-resource",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "macro-provenance",
+        "project-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}"
+      },
+      "documents": [
+        {
+          "content": "\\newglossaryentry{ece}{name={ECE},description={expected calibration error}}\n$\\operatorname{ECE}=0$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "expected calibration error",
+        "definitionEvidenceRuleId": "latex-glossary-declaration",
+        "symbol": "ECE"
+      },
+      "id": "glossary-resource",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "glossary",
+        "macro-provenance",
+        "project-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\ECE(x)"
+      },
+      "documents": [
+        {
+          "content": "\\DeclareMathOperator{\\ECE}{ECE}\n$\\ECE(x)=0$",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "ECE",
+        "definitionEvidenceRuleId": "latex-math-operator-declaration",
+        "symbol": "ECE"
+      },
+      "id": "declared-math-operator",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "macro-provenance",
+        "named-operator",
+        "project-context"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "\\operatorname{ECE}=1"
+      },
+      "documents": [
+        {
+          "content": "# Metrics\nExpected calibration error (ECE) is reported.\n$\\operatorname{ECE}=0$.\n# Engineering\nElectrical computer engineering (ECE) is discussed.\n$\\operatorname{ECE}=1$.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "Electrical computer engineering",
+        "definitionEvidenceRuleId": "english-long-short-parenthetical",
+        "symbol": "ECE"
+      },
+      "id": "acronym-section-shadowing",
+      "metric": "association",
+      "variationTags": [
+        "english-declarations",
+        "notation",
+        "prose",
+        "acronym",
+        "project-scope",
+        "shadowing"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "ECE$"
+      },
+      "documents": [
+        {
+          "content": "Expected calibration error (ECE) is reported. Plain $ECE$ stays three identifiers.",
+          "fileId": "main",
+          "path": "main.md"
+        }
+      ],
+      "expectation": {
+        "excludedDefinitionSymbol": "ECE"
+      },
+      "id": "acronym-plain-juxtaposition",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "acronym",
+        "plain-juxtaposition",
+        "representation-boundary"
+      ]
     }
   ],
   "domain": "scientific-prose-foundation",
