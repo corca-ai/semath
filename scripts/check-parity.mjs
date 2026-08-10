@@ -4,9 +4,10 @@ import init, { SemathEngine } from "../lib/wasm/semath_wasm.js";
 import { LatexSyntaxService } from "wasmtex/syntax";
 import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index.ts";
 import { firstDifferentialFailure } from "../packages/evaluation/src/differential.ts";
+import { planCursorInvariantSurfaces } from "../packages/evaluation/src/cursor-invariants.ts";
 import { SEMATH_PROTOCOL_VERSION } from "../packages/protocol/src/index.ts";
 
-const sources = [
+const baseSources = [
   {
     content: [
       "\\newcommand{\\Both}[2]{#1 \\cap #2}",
@@ -47,10 +48,21 @@ const sources = [
     path: "unsupported.tex",
   },
 ];
+const cursorSurfaces = planCursorInvariantSurfaces();
+const sources = [
+  ...baseSources,
+  ...cursorSurfaces.map((surface) => ({
+    content: surface.content,
+    documentVersion: 1,
+    fileId: surface.fileId,
+    language: "latex",
+    path: surface.path,
+  })),
+];
 
 const snapshot = makeSnapshot(sources, 1);
 const probabilityOccurrence = sources[1].content.indexOf("A \\cap");
-const queries = [
+const baseQueries = [
   query("probability", probabilityOccurrence),
   query("probability", probabilityOccurrence + 1),
   query("unsupported", sources[3].content.indexOf("q =") + 1),
@@ -58,6 +70,17 @@ const queries = [
   definitionQuery("probability", probabilityOccurrence),
   definitionQuery("probability", probabilityOccurrence + 1),
 ];
+const cursorRequests = cursorSurfaces.flatMap((surface) =>
+  surface.probes.flatMap((probe) =>
+    ["semanticView", "definition", "references", "prepareRename"].map((kind) => ({
+      envelope: cursorQuery(surface.fileId, probe.offset, kind),
+      kind,
+      probe,
+      surface,
+    })),
+  ),
+);
+const queries = [...baseQueries, ...cursorRequests.map((request) => request.envelope)];
 const fixture = { queries, snapshot };
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {
@@ -87,6 +110,7 @@ assertEquivalent([
   { name: "clean", value: wasmResults[0].value },
   { name: "incremental", value: wasmResults[1].value },
 ], "cursor-edge semantic identity");
+assertCursorInvariants(cursorRequests, wasmResults.slice(baseQueries.length));
 if (reset.stats.totalDocuments !== sources.length || reset.stats.semanticNodes <= 0) {
   throw new Error("parity reset did not expose trustworthy analysis counters");
 }
@@ -188,6 +212,13 @@ function definitionQuery(fileId, offset) {
   return { ...query(fileId, offset), query: { fileId, kind: "definition", offset } };
 }
 
+function cursorQuery(fileId, offset, kind) {
+  return {
+    ...query(fileId, offset),
+    query: { fileId, kind, offset },
+  };
+}
+
 function engineQuery(target, value) {
   return target.query(encode(value));
 }
@@ -213,5 +244,52 @@ function assertEquivalent(stages, label) {
     throw new Error(
       `${label} mismatch at ${failure.stage}:${failure.path}\nexpected=${JSON.stringify(failure.expected)}\nactual=${JSON.stringify(failure.actual)}`,
     );
+  }
+}
+
+function assertCursorInvariants(requests, results) {
+  const grouped = new Map();
+  for (const [index, request] of requests.entries()) {
+    const key = `${request.surface.id}/${request.kind}`;
+    const values = grouped.get(key) ?? [];
+    values.push({ request, result: results[index] });
+    grouped.set(key, values);
+  }
+  for (const [key, entries] of grouped) {
+    if (entries[0].request.kind === "semanticView") {
+      const identities = entries.map(({ request, result }) => {
+        const value = result?.value;
+        const symbol = value?.kind === "semanticView" ? value.view.symbol : undefined;
+        if (
+          symbol?.sourceNotation !== request.surface.expectedSourceNotation ||
+          symbol.symbol !== request.surface.expectedSymbol
+        ) {
+          throw new Error(
+            `${key}/${request.probe.id}: expected ${request.surface.expectedSourceNotation}/${request.surface.expectedSymbol}, ` +
+              `observed ${symbol?.sourceNotation ?? "none"}/${symbol?.symbol ?? "none"}`,
+          );
+        }
+        return {
+          entityId: symbol.entityId ?? null,
+          occurrenceId: symbol.occurrenceId,
+          sourceNotation: symbol.sourceNotation,
+          symbol: symbol.symbol,
+        };
+      });
+      for (const identity of identities.slice(1)) {
+        assertEquivalent([
+          { name: "clean", value: identities[0] },
+          { name: "incremental", value: identity },
+        ], `${key} semantic occurrence`);
+      }
+      continue;
+    }
+    const values = entries.map(({ result }) => result?.value);
+    for (const value of values.slice(1)) {
+      assertEquivalent([
+        { name: "clean", value: values[0] },
+        { name: "incremental", value },
+      ], `${key} navigation result`);
+    }
   }
 }

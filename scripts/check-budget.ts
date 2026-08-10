@@ -24,6 +24,11 @@ import {
   type PerformanceFixtureDocument,
 } from "./performance-fixtures";
 import { shouldEnforceTiming } from "./performance-budget-policy";
+import {
+  planSemanticEditTrace,
+  planSemanticLifecycleTraces,
+  shrinkEditTrace,
+} from "../packages/evaluation/src/differential";
 
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
 const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";
@@ -269,6 +274,15 @@ const queryP95ByKind = Object.fromEntries(
   [...queryDurations].map(([kind, durations]) => [kind, percentile(durations, 0.95)]),
 );
 const queryP95 = Math.max(...Object.values(queryP95ByKind));
+const shrinkSource = planSemanticEditTrace(0x5e_21);
+let failureShrinkEvaluations = 0;
+const shrunkFailure = shrinkEditTrace(shrinkSource, (candidate) => {
+  failureShrinkEvaluations += 1;
+  return candidate.steps.some((step) => step.content?.includes("matrix"));
+});
+if (failureShrinkEvaluations > shrinkSource.steps.length || shrunkFailure.steps.length !== 1) {
+  throw new Error("budget failure shrinking exceeded deterministic linear work");
+}
 const peakRssGrowth = Math.max(0, Math.max(peakRss, rssAfterDispose) - rssBefore);
 const syntaxStats = syntax.getStats() as ReturnType<LatexSyntaxService["getStats"]> & {
   lastInvalidatedDocuments?: number;
@@ -286,10 +300,17 @@ const report = {
   deltaP95Ms: deltaP95,
   documents: DOCUMENT_COUNT + 1,
   engineColdMs,
+  failureShrink: {
+    evaluations: failureShrinkEvaluations,
+    inputSteps: shrinkSource.steps.length,
+    outputSteps: shrunkFailure.steps.length,
+  },
   fixtureFamilies: [...new Set(sources.map((source) => source.family))],
   initialTransferBytes,
   peakRssGrowthBytes: peakRssGrowth,
   queryP95ByKind,
+  semanticViewP95Ms: queryP95ByKind.semanticView ?? null,
+  lifecycleFamilies: planSemanticLifecycleTraces(0x5e_21).map((trace) => trace.family),
   retainedRssGrowthBytes: retainedRssGrowth,
   rssGrowthByStage: {
     engineBytes: Math.max(0, rssAfterEngine - rssAfterSyntax),

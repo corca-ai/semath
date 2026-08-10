@@ -23,6 +23,40 @@ export interface EditTrace {
   readonly steps: readonly EditTraceStep[];
 }
 
+export const SEMANTIC_LIFECYCLE_FAMILIES = [
+  "declaration-retraction",
+  "include-order",
+  "macro-retraction",
+  "malformed-recovery",
+  "polarity-retraction",
+  "typed-conflict-recovery",
+] as const;
+
+export type SemanticLifecycleFamily = (typeof SEMANTIC_LIFECYCLE_FAMILIES)[number];
+
+export interface SemanticLifecycleDocument {
+  readonly content: string;
+  readonly fileId: string;
+  readonly path: string;
+}
+
+export interface SemanticLifecycleStage {
+  readonly changes: readonly EditTraceStep[];
+  readonly expectedDecision: "conflicting" | "established" | "not-established";
+  readonly id: string;
+  readonly queryNeedle?: string;
+}
+
+export interface SemanticLifecycleTrace {
+  readonly family: SemanticLifecycleFamily;
+  readonly id: string;
+  readonly initialDocuments: readonly SemanticLifecycleDocument[];
+  readonly initialExpectedDecision: SemanticLifecycleStage["expectedDecision"];
+  readonly query: { readonly fileId: string; readonly needle: string };
+  readonly seed: number;
+  readonly stages: readonly SemanticLifecycleStage[];
+}
+
 /** A deterministic edit history that exercises assertion, conflict, retraction and recovery. */
 export function planSemanticEditTrace(seed: number): EditTrace {
   if (!Number.isSafeInteger(seed)) throw new Error("trace seed must be an integer");
@@ -41,6 +75,157 @@ export function planSemanticEditTrace(seed: number): EditTrace {
       { fileId: "definitions", kind: "remove" },
     ],
   };
+}
+
+/**
+ * Plans independent semantic lifecycles without consulting engine output. The
+ * cases establish evidence, remove or contradict it, then recover it so an
+ * executor can compare every incremental stage with a clean rebuild.
+ */
+export function planSemanticLifecycleTraces(seed: number): readonly SemanticLifecycleTrace[] {
+  if (!Number.isSafeInteger(seed)) throw new Error("trace seed must be an integer");
+  const suffix = Math.abs(seed % 10_000);
+  const probabilityDefinitions =
+    "Let $A$ and $B$ be events in the same probability space.";
+  const probabilityMain = "\\input{definitions}\n$A \\cap B$.";
+  const localProbability = `${probabilityDefinitions}\n$A \\cap B$.`;
+  const traces: SemanticLifecycleTrace[] = [
+    {
+      family: "declaration-retraction",
+      id: `lifecycle-${suffix}-declaration`,
+      initialDocuments: [
+        { content: probabilityMain, fileId: "main", path: "main.tex" },
+        { content: probabilityDefinitions, fileId: "definitions", path: "definitions.tex" },
+      ],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ fileId: "definitions", kind: "remove" }],
+          expectedDecision: "not-established",
+          id: "remove-evidence",
+        },
+        {
+          changes: [{ content: probabilityDefinitions, fileId: "definitions", kind: "upsert", path: "definitions.tex" }],
+          expectedDecision: "established",
+          id: "restore-evidence",
+        },
+      ],
+    },
+    {
+      family: "include-order",
+      id: `lifecycle-${suffix}-include-order`,
+      initialDocuments: [
+        { content: probabilityMain, fileId: "main", path: "main.tex" },
+        { content: probabilityDefinitions, fileId: "definitions", path: "definitions.tex" },
+      ],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "$A \\cap B$.\n\\input{definitions}", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          id: "move-evidence-after-use",
+        },
+        {
+          changes: [{ content: probabilityMain, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "restore-include-order",
+        },
+      ],
+    },
+    {
+      family: "macro-retraction",
+      id: `lifecycle-${suffix}-macro`,
+      initialDocuments: [
+        { content: "\\newcommand{\\joint}[2]{#1 \\cap #2}", fileId: "macros", path: "macros.tex" },
+        { content: `\\input{macros}\n${probabilityDefinitions}\n$\\joint{A}{B}$.`, fileId: "main", path: "main.tex" },
+      ],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "\\joint{A}{B}" },
+      seed,
+      stages: [
+        {
+          changes: [{ fileId: "macros", kind: "remove" }],
+          expectedDecision: "not-established",
+          id: "remove-macro-definition",
+        },
+        {
+          changes: [{ content: "\\newcommand{\\joint}[2]{#1 \\cap #2}", fileId: "macros", kind: "upsert", path: "macros.tex" }],
+          expectedDecision: "established",
+          id: "restore-macro-definition",
+        },
+      ],
+    },
+    {
+      family: "malformed-recovery",
+      id: `lifecycle-${suffix}-malformed`,
+      initialDocuments: [{ content: localProbability, fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: `${probabilityDefinitions}\n$A \\cap$.`, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          id: "break-expression",
+          queryNeedle: "A \\cap",
+        },
+        {
+          changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "repair-expression",
+        },
+      ],
+    },
+    {
+      family: "polarity-retraction",
+      id: `lifecycle-${suffix}-polarity`,
+      initialDocuments: [{ content: localProbability, fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "A and B might be events in the same probability space.\n$A \\cap B$.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          id: "hedge-declaration",
+        },
+        {
+          changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "restore-assertion",
+        },
+      ],
+    },
+    {
+      family: "typed-conflict-recovery",
+      id: `lifecycle-${suffix}-conflict`,
+      initialDocuments: [{ content: localProbability, fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "Let $e$ be kinetic energy, $Z$ mass, and $k$ speed.\n$e=Zk$.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "conflicting",
+          id: "introduce-explicit-conflict",
+          queryNeedle: "e=Zk",
+        },
+        {
+          changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "remove-conflict",
+        },
+      ],
+    },
+  ];
+  if (new Set(traces.map((trace) => trace.family)).size !== SEMANTIC_LIFECYCLE_FAMILIES.length) {
+    throw new Error("lifecycle trace plan is missing a required family");
+  }
+  return traces;
 }
 
 export function firstDifferentialFailure<T>(

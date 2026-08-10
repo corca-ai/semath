@@ -1,6 +1,6 @@
 # Pack maturity report
 
-This is measured repository state on 2026-08-10, not live production telemetry
+This is measured repository state on 2026-08-11, not live production telemetry
 and not a future plan. The [quality manifest](../fixtures/corpus-manifest.json)
 holds approved support policy; GitHub issues hold planned work.
 
@@ -21,14 +21,12 @@ holds approved support policy; GitHub issues hold planned work.
   Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus,
   discrete mathematics, and optimization remain deliberately narrow slices;
   evaluated capability evidence is not a field-completeness claim.
-- The independent frozen challenge v2 contains 48 cases across binding,
-  constraints, packs, presentation, resolution, and syntax. The Protocol 8
-  hard-cutover engine passes 48 of 48. Three reviewed oracle corrections preserve
-  a complete `\\sum` token during local malformed recovery and place the
-  higher-order derivative cursor on `\\partial^2`, the notation being tested;
-  the capacitor condition pair also declares its differentiation variable as
-  time on both sides of the boundary. Case IDs remain frozen, and each
-  correction removes an unintended variable rather than relaxing an outcome.
+- The independent frozen challenge v3 preserves 48 semantic boundaries across
+  binding, constraints, packs, presentation, resolution, and syntax, then
+  composes them into six realistic document shapes. The engine passes 48 of 48,
+  including all five decision states, source-grounded explanations, and the
+  neutral-versus-conflict Problems policy. Full execution remains a manual
+  release gate.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.

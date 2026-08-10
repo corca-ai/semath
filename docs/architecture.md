@@ -67,6 +67,10 @@ Pure extractors derive document observations from immutable documents. Project m
 reverse-include invalidation, cancellation, and caching form the effectful
 shell. An edit reanalyzes only the changed document and its reverse include
 closure; clean and incremental rebuilds must produce the same semantic result.
+When an external declaration relinks a wasmtex snapshot, Semath accepts the
+same text revision only if the source identity is unchanged and the structural
+fingerprint differs. This retracts generated meaning without admitting stale or
+rewritten text under an old document version.
 
 English scientific prose follows the same functional-core boundary. Bounded
 stages segment visible spans, extract mentions and claim spans, determine each

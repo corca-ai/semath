@@ -40,13 +40,16 @@ assumption, evidence, refusal, and scope independently instead of blending them
 into one recognition number.
 
 The frozen recognition challenge is separate from those development and
-diversity fixtures. Version 2 has 48 manually authored cases, including twelve
-positive/refusal semantic boundary pairs, grouped by the layer that owns a
-failure: syntax, binding, constraint, pack, resolution, or presentation. Exact
-IDs and normalized document sources must not occur in development or foundation
-fixtures. Association, structure, constraint, recognition, evidence, refusal,
-scope, and navigation remain separate metrics. Default CI validates
-the challenge schema and coverage matrix through pure tests but does not execute
+diversity fixtures. Version 3 preserves the 48 independently authored v2
+semantic boundaries and places every case into one reviewed document shape:
+distant prose, neighboring macros, neighboring malformed input, multiple
+equations, a multi-file project, or section scope. Every case declares the
+expected final decision, meaning presence, and Problems policy. The scorecard
+reports decision classes, source grounding, reason integrity, and problem
+visibility separately from association, structure, constraints, recognition,
+evidence, refusal, scope, and navigation. Exact IDs and normalized document
+sources must not occur in development or foundation fixtures. Default CI
+validates the schema, pure composition, and coverage matrix but does not execute
 the engine over the holdout.
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
@@ -90,7 +93,10 @@ Pack validation also derives a deterministic bounded property plan from the
 reviewed law declarations. Its oracle is the declared transformation relation,
 not the production matcher. Broad generated execution and failure artifacts
 remain part of the manual quality workflow; only planner integrity and a small
-fixed sample run in default CI.
+fixed sample run in default CI. A separate cursor plan exercises 102
+native/WASM queries across eight neutral structural families and compares
+semantic view, definition, references, and rename preparation at every reviewed
+edge.
 
 Native/WASM parity, full-path incremental latency and memory, package integrity,
 and documentation are separate gates so failures remain actionable. The normal

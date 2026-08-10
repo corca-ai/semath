@@ -1052,9 +1052,7 @@ impl SemathEngine {
             match change {
                 ProjectChange::Upsert { document } => {
                     let file_id = document.file_id.clone();
-                    let accept = self.index.documents.get(&file_id).is_none_or(|current| {
-                        document.document_version > current.document.document_version
-                    });
+                    let accept = self.accepts_upsert(&document);
                     if accept {
                         let previous_order = self.index.order_document(&file_id);
                         if self.can_reuse_analysis(&document) {
@@ -1344,6 +1342,21 @@ impl SemathEngine {
             && current.document.schema_version == next.schema_version
             && current.analysis_fingerprint == analysis_fingerprint(next)
             && appended_comments_only(&current.document.content, &next.content)
+    }
+
+    fn accepts_upsert(&self, next: &ProjectDocument) -> bool {
+        let Some(current) = self.index.documents.get(&next.file_id) else {
+            return true;
+        };
+        if next.document_version > current.document.document_version {
+            return true;
+        }
+        next.document_version == current.document.document_version
+            && next.content == current.document.content
+            && next.path == current.document.path
+            && next.language == current.document.language
+            && next.schema_version == current.document.schema_version
+            && analysis_fingerprint(next) != current.analysis_fingerprint
     }
 
     fn visible_definitions(
