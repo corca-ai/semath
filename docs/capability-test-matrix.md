@@ -5,7 +5,8 @@ reserved for real editor, Worker, and deployment wiring.
 
 | Capability | Authoritative test | Boundary evidence | E2E responsibility |
 | --- | --- | --- | --- |
-| Syntax, UTF-16, selection, binders | wasmtex contract plus Rust cursor/parser/binder tests | adapter and native/WASM parity | editor selection wiring |
+| Notation CST, UTF-16, cursor paths, malformed input | wasmtex contract plus `bun run notation:conformance` matrix/generative tests | adapter and clean/incremental parity | editor selection wiring |
+| Semantic selection and binders | Rust cursor/parser/binder tests | native/WASM parity | one semantic selection journey |
 | Definitions, references, rename | pure scope and include-order tests | LSP mapping and both cursor edges | one navigation journey |
 | Canonical meaning and typed laws | Rust canonical/unifier tests plus manifest-owned corpus | protocol and native/WASM equality | one meaning-first view |
 | Shapes, quantities, roles, diagnostics | pure extractors and contradiction tests | Worker/LSP result mapping | reveal one source-linked conflict |

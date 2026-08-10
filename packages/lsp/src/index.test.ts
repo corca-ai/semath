@@ -173,10 +173,15 @@ describe("SemathLspServer", () => {
     expect(response(messages, 51).items).toEqual(
       expect.arrayContaining([expect.objectContaining({ label: "\\section" })]),
     );
-    expect(server.getRuntimeStats()).toEqual({
+    expect(server.getRuntimeStats()).toMatchObject({
       documents: 2,
       inventoryVersion: 2,
-      syntax: { documents: 2, parseCount: 2 },
+      syntax: {
+        documents: 2,
+        notationNodes: expect.any(Number),
+        parseCount: 2,
+        snapshotBytes: expect.any(Number),
+      },
     });
 
     await server.handle({
@@ -404,7 +409,12 @@ describe("SemathLspServer", () => {
         },
       });
     }
-    expect(server.getRuntimeStats().syntax).toEqual({ documents: 3, parseCount: 3 });
+    expect(server.getRuntimeStats().syntax).toMatchObject({
+      documents: 3,
+      notationNodes: expect.any(Number),
+      parseCount: 3,
+      snapshotBytes: expect.any(Number),
+    });
 
     for (let id = 700; id < 720; id += 2) {
       await server.handle({

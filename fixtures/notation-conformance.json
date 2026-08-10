@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "requiredCoverage": {
+    "structuralFamily": ["delimiter", "macro-expansion", "modifier", "named-operator", "script", "style", "token"],
+    "surface": ["braced", "declaration", "direct", "macro", "malformed", "nested", "plain", "unbraced", "unicode"],
+    "context": ["display", "inline", "markdown", "prose-inline"],
+    "cursorTarget": ["argument", "delimiter", "name", "nucleus", "script", "trailing-edge"],
+    "outcome": ["complete", "generated", "incomplete", "opaque"]
+  },
+  "cases": [
+    {
+      "id": "hat-unbraced-nucleus",
+      "language": "latex",
+      "content": "$\\hat y$",
+      "cursor": { "needle": "y", "offset": 0 },
+      "expectedAncestor": { "kind": "modifier", "name": "hat", "state": "complete" },
+      "coverage": { "structuralFamily": "modifier", "surface": "unbraced", "context": "inline", "cursorTarget": "nucleus", "outcome": "complete" }
+    },
+    {
+      "id": "nested-style-hat-script",
+      "language": "latex",
+      "content": "$\\mathbf{\\hat{y_i}}$",
+      "cursor": { "needle": "y_i", "offset": 0 },
+      "expectedAncestor": { "kind": "modifier", "name": "hat", "state": "complete" },
+      "coverage": { "structuralFamily": "style", "surface": "nested", "context": "inline", "cursorTarget": "nucleus", "outcome": "complete" }
+    },
+    {
+      "id": "explicit-ece-middle",
+      "language": "latex",
+      "content": "Expected calibration error (ECE) is $\\operatorname{ECE}=x$.",
+      "cursor": { "needle": "\\operatorname{ECE}", "offset": 15 },
+      "expectedAncestor": { "kind": "named-operator", "name": "ECE", "state": "complete" },
+      "coverage": { "structuralFamily": "named-operator", "surface": "direct", "context": "prose-inline", "cursorTarget": "name", "outcome": "complete" }
+    },
+    {
+      "id": "explicit-ece-trailing-edge",
+      "language": "latex",
+      "content": "$$\\operatorname{ECE}=x$$",
+      "cursor": { "needle": "\\operatorname{ECE}", "offset": 17 },
+      "expectedAncestor": { "kind": "named-operator", "name": "ECE", "state": "complete" },
+      "coverage": { "structuralFamily": "named-operator", "surface": "braced", "context": "display", "cursorTarget": "trailing-edge", "outcome": "complete" }
+    },
+    {
+      "id": "styled-ece-is-not-named",
+      "language": "latex",
+      "content": "$\\mathrm{ECE}$",
+      "cursor": { "needle": "ECE", "offset": 1 },
+      "expectedAncestor": { "kind": "style", "name": "mathrm", "state": "complete" },
+      "forbiddenAncestor": { "kind": "named-operator" },
+      "coverage": { "structuralFamily": "style", "surface": "direct", "context": "inline", "cursorTarget": "argument", "outcome": "complete" }
+    },
+    {
+      "id": "plain-ece-remains-tokens",
+      "language": "latex",
+      "content": "$ECE$",
+      "cursor": { "needle": "ECE", "offset": 1 },
+      "expectedAncestor": { "kind": "token", "text": "C", "state": "complete" },
+      "forbiddenAncestor": { "kind": "named-operator" },
+      "coverage": { "structuralFamily": "token", "surface": "plain", "context": "inline", "cursorTarget": "name", "outcome": "opaque" }
+    },
+    {
+      "id": "named-acc-argument-boundary",
+      "language": "latex",
+      "content": "$\\operatorname{acc}(B_m)$",
+      "cursor": { "needle": "acc", "offset": 1 },
+      "expectedAncestor": { "kind": "named-operator", "name": "acc", "state": "complete" },
+      "coverage": { "structuralFamily": "named-operator", "surface": "direct", "context": "inline", "cursorTarget": "argument", "outcome": "complete" }
+    },
+    {
+      "id": "named-conf-trailing-edge",
+      "language": "latex",
+      "content": "$\\operatorname{conf}(B_m)$",
+      "cursor": { "needle": "conf", "offset": 4 },
+      "expectedAncestor": { "kind": "named-operator", "name": "conf", "state": "complete" },
+      "coverage": { "structuralFamily": "named-operator", "surface": "direct", "context": "inline", "cursorTarget": "trailing-edge", "outcome": "complete" }
+    },
+    {
+      "id": "subscript-path",
+      "language": "latex",
+      "content": "$B_m$",
+      "cursor": { "needle": "B_m", "offset": 2 },
+      "expectedAncestor": { "kind": "script", "name": "subscript", "state": "complete" },
+      "coverage": { "structuralFamily": "script", "surface": "direct", "context": "inline", "cursorTarget": "script", "outcome": "complete" }
+    },
+    {
+      "id": "unicode-modified-nucleus",
+      "language": "latex",
+      "content": "$\\hat 𝑦$",
+      "cursor": { "needle": "𝑦", "offset": 1 },
+      "expectedAncestor": { "kind": "modifier", "name": "hat", "state": "complete" },
+      "coverage": { "structuralFamily": "modifier", "surface": "unicode", "context": "inline", "cursorTarget": "nucleus", "outcome": "complete" }
+    },
+    {
+      "id": "malformed-hat-is-local",
+      "language": "latex",
+      "content": "$\\hat{x$",
+      "cursor": { "needle": "x", "offset": 0 },
+      "expectedAncestor": { "kind": "group", "state": "incomplete" },
+      "coverage": { "structuralFamily": "modifier", "surface": "malformed", "context": "inline", "cursorTarget": "nucleus", "outcome": "incomplete" }
+    },
+    {
+      "id": "declared-ece-call",
+      "language": "latex",
+      "content": "\\DeclareMathOperator{\\ECE}{ECE}\n$\\ECE=x$",
+      "cursor": { "needle": "$\\ECE", "offset": 3 },
+      "expectedAncestor": { "kind": "named-operator", "name": "ECE", "state": "complete", "provenanceOrigin": "expansion" },
+      "coverage": { "structuralFamily": "macro-expansion", "surface": "declaration", "context": "inline", "cursorTarget": "name", "outcome": "generated" }
+    },
+    {
+      "id": "nested-project-wrapper",
+      "language": "latex",
+      "content": "\\newcommand{\\estimate}[1]{\\hat{#1}}\n\\newcommand{\\prediction}[1]{\\estimate{#1}}\n$\\prediction{y}$",
+      "cursor": { "needle": "prediction{y}", "offset": 12 },
+      "expectedAncestor": { "kind": "modifier", "name": "hat", "state": "complete", "provenanceOrigin": "expansion" },
+      "coverage": { "structuralFamily": "macro-expansion", "surface": "macro", "context": "inline", "cursorTarget": "nucleus", "outcome": "generated" }
+    },
+    {
+      "id": "markdown-math-only",
+      "language": "markdown",
+      "content": "Visible ECE and $\\operatorname{ECE}$.",
+      "cursor": { "needle": "\\operatorname{ECE}", "offset": 15 },
+      "expectedAncestor": { "kind": "named-operator", "name": "ECE", "state": "complete" },
+      "coverage": { "structuralFamily": "named-operator", "surface": "direct", "context": "markdown", "cursorTarget": "name", "outcome": "complete" }
+    },
+    {
+      "id": "paired-delimiter-path",
+      "language": "latex",
+      "content": "$[a,b]$",
+      "cursor": { "needle": "[", "offset": 0 },
+      "expectedAncestor": { "kind": "delimiter", "name": "[]", "state": "complete" },
+      "coverage": { "structuralFamily": "delimiter", "surface": "direct", "context": "inline", "cursorTarget": "delimiter", "outcome": "complete" }
+    }
+  ]
+}
