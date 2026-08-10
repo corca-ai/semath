@@ -178,6 +178,44 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("addresses structural calculus operators and preserves indexed-family parts", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///calculus.tex";
+    const content = "Use $\\int_0^1 g(t)\\,dt$ and the indexed family $x_i$.";
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "latex", text: content, uri, version: 1 },
+      },
+    });
+    await server.handle({
+      id: 64,
+      method: "semath/semanticView",
+      params: {
+        position: positionAt(content, content.indexOf("\\int") + "\\int".length),
+        textDocument: { uri },
+      },
+    });
+    await server.handle({
+      id: 65,
+      method: "semath/semanticView",
+      params: {
+        position: positionAt(content, content.indexOf("x_i")),
+        textDocument: { uri },
+      },
+    });
+
+    expect(response(messages, 64).view.context.candidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ family: "binder", interpretation: "binder" }),
+      ]),
+    );
+    expect(response(messages, 65).view.symbol.notation).toEqual(
+      expect.arrayContaining([{ kind: "subscript", base: "x", index: "i" }]),
+    );
+    server.dispose();
+  });
+
   test("maps three-way English declarations through hover and definition", async () => {
     const { messages, server } = await setup();
     const uri = "file:///declarations.md";

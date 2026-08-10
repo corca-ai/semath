@@ -44,7 +44,7 @@ pub enum NotationComponent {
     NamedSurface { value: String },
     Modifier { name: String },
     Style { name: String },
-    Subscript,
+    Subscript { base: String, index: String },
     Superscript,
     Argument { role: String },
     Delimiter { value: String },

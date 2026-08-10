@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 5 as const;
+export const SEMATH_PROTOCOL_VERSION = 6 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 4 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -114,7 +114,7 @@ export type NotationComponent =
   | { kind: "named-surface"; value: string }
   | { kind: "modifier"; name: string }
   | { kind: "style"; name: string }
-  | { kind: "subscript" }
+  | { kind: "subscript"; base: string; index: string }
   | { kind: "superscript" }
   | { kind: "argument"; role: string }
   | { kind: "delimiter"; value: string };
