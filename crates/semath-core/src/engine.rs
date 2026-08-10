@@ -248,14 +248,26 @@ impl ProjectState {
     }
 
     fn rebuild_semantic_index(&mut self) -> Result<(), EngineError> {
-        self.semantic = ProjectSemanticIndex::default();
+        let mut semantic = ProjectSemanticIndex::default();
         self.definitions_by_entity.clear();
         self.occurrences_by_range.clear();
         let mut file_ids = self.documents.keys().cloned().collect::<Vec<_>>();
         file_ids.sort();
+        let mut semantic_documents = Vec::with_capacity(file_ids.len());
         for file_id in file_ids {
-            self.replace_semantic_document(&file_id)?;
+            let document = self
+                .documents
+                .get(&file_id)
+                .expect("semantic lowering requires an analyzed document");
+            let lowered = lower_semantic_document(document, self.facts(&file_id), &self.order);
+            self.definitions_by_entity.extend(lowered.definitions);
+            self.occurrences_by_range.extend(lowered.occurrences);
+            semantic_documents.push(lowered.facts);
         }
+        semantic
+            .replace_documents(semantic_documents)
+            .map_err(EngineError::InvalidSemanticFacts)?;
+        self.semantic = semantic;
         Ok(())
     }
 

@@ -241,9 +241,18 @@ pub struct ProjectSemanticIndex {
 
 impl ProjectSemanticIndex {
     pub fn replace_document(&mut self, facts: DocumentSemanticFacts) -> Result<(), String> {
+        self.replace_documents(vec![facts])
+    }
+
+    pub fn replace_documents(
+        &mut self,
+        documents: Vec<DocumentSemanticFacts>,
+    ) -> Result<(), String> {
         let mut next = self.clone();
-        next.retract_document(&facts.file_id);
-        next.validate_and_insert(facts)?;
+        for facts in documents {
+            next.retract_document(&facts.file_id);
+            next.validate_and_insert(facts)?;
+        }
         next.rebuild_indexes();
         *self = next;
         Ok(())
