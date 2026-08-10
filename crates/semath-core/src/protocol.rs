@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 8;
-pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
+pub const PROTOCOL_VERSION: u32 = 9;
+pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 5;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -39,6 +39,7 @@ pub struct ProjectDocument {
     pub nodes: Vec<NotationNode>,
     pub math_roots: Vec<MathRoot>,
     pub visible_prose: Vec<VisibleProseSpan>,
+    pub prose_annotations: Vec<ProseAnnotation>,
     pub scopes: Vec<SyntaxScope>,
     pub declarations: Vec<StructuralDeclaration>,
     #[cfg(test)]
@@ -145,6 +146,15 @@ pub enum MathRootState {
 pub struct VisibleProseSpan {
     pub range: SourceRange,
     pub state: CompleteSyntaxState,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProseAnnotation {
+    pub kind: String,
+    pub name: String,
+    pub range: SourceRange,
+    pub state: MathRootState,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -980,6 +990,9 @@ pub struct AnalysisStats {
     pub semantic_dependency_edges: u32,
     pub invalidated_semantic_claims: u32,
     pub semantic_candidates: u32,
+    pub prose_clauses: u32,
+    pub prose_construction_candidates: u32,
+    pub prose_matcher_work: u32,
 }
 
 #[cfg(test)]

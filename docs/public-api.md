@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 8 is a deliberate
+Semath is a library and language-service runtime. Protocol 9 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -42,7 +42,7 @@ unsupported law conditions and truncated evidence cannot produce `established`.
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 8 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 9 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
@@ -60,7 +60,8 @@ the exact end of a complete following argument. Cursor queries therefore do
 not rescan TeX, retain the frontend tree, or snap a callable across unrelated
 trailing syntax.
 
-Project documents contain the complete wasmtex syntax schema 4 snapshot. The
+Project documents contain the complete wasmtex syntax schema 5 snapshot, including
+neutral citation annotations alongside visible prose and structural scopes. The
 adapter validates the schema and forwards the arena, roots, visible prose,
 scopes, declarations, and provenance without reconstructing or selectively
 copying structural facts. Corrupt top-level contracts fail explicitly;

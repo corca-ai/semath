@@ -2,8 +2,8 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-use crate::prose::visible_prose_source;
-use crate::scientific_prose::{ClauseDisposition, segment_scientific_clauses};
+use crate::prose::{citation_byte_ranges, visible_prose_source};
+use crate::scientific_prose::segment_scientific_clauses;
 use crate::semantic_index::{EvidenceModality, EvidencePolarity, OccurrenceKind};
 use crate::{MathRootState, ProjectDocument, SourceIndex, SourceRange, StructuralDeclaration};
 
@@ -73,7 +73,8 @@ struct ByteBinding<'a> {
 pub(crate) fn extract_cross_modal_bindings(document: &ProjectDocument) -> Vec<CrossModalBinding> {
     let visible = visible_prose_source(document);
     let index = SourceIndex::new(&document.content);
-    let mut output = extract_prose_bindings(&visible, document.language)
+    let citations = citation_byte_ranges(document, &index);
+    let mut output = extract_prose_bindings(&visible, document.language, &citations)
         .into_iter()
         .map(|binding| CrossModalBinding {
             short: binding.short.to_owned(),
@@ -105,9 +106,13 @@ pub(crate) fn extract_cross_modal_bindings(document: &ProjectDocument) -> Vec<Cr
     output
 }
 
-fn extract_prose_bindings(source: &str, language: crate::DocumentLanguage) -> Vec<ByteBinding<'_>> {
+fn extract_prose_bindings<'a>(
+    source: &'a str,
+    language: crate::DocumentLanguage,
+    citation_ranges: &[(usize, usize)],
+) -> Vec<ByteBinding<'a>> {
     let mut output = Vec::new();
-    for clause in segment_scientific_clauses(source, language) {
+    for clause in segment_scientific_clauses(source, language, citation_ranges) {
         for captures in LONG_SHORT.captures_iter(clause.text) {
             let full = captures.get(0).unwrap();
             let long = captures.get(1).unwrap();
@@ -274,23 +279,13 @@ fn claim_disposition(
     {
         return (EvidencePolarity::Positive, EvidenceModality::Hedged);
     }
-    if ["according to", "as reported", "\\cite", "the reference"]
+    if ["according to", "as reported"]
         .iter()
         .any(|marker| segment.contains(marker))
     {
         return (EvidencePolarity::Positive, EvidenceModality::Cited);
     }
-    match clause.disposition {
-        ClauseDisposition::Establishing => (EvidencePolarity::Positive, EvidenceModality::Asserted),
-        ClauseDisposition::Negated => (EvidencePolarity::Negative, EvidenceModality::Asserted),
-        ClauseDisposition::Hypothetical => {
-            (EvidencePolarity::Positive, EvidenceModality::Hypothetical)
-        }
-        ClauseDisposition::Hedged | ClauseDisposition::Alternative => {
-            (EvidencePolarity::Positive, EvidenceModality::Hedged)
-        }
-        ClauseDisposition::Cited => (EvidencePolarity::Positive, EvidenceModality::Cited),
-    }
+    (clause.frame.polarity, clause.frame.evidence_modality())
 }
 
 fn initialism_suffix(long: &str, short: &str) -> Option<(usize, usize)> {
@@ -558,7 +553,7 @@ mod tests {
     fn extracts_both_parenthetical_directions_without_absorbing_leading_prose() {
         let source =
             "Report expected calibration error (ECE). RMSE (root mean squared error) follows.";
-        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown);
+        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown, &[]);
         assert_eq!(bindings.len(), 2);
         assert_eq!(
             (bindings[0].long, bindings[0].short),
@@ -573,7 +568,7 @@ mod tests {
     #[test]
     fn trims_explicit_claim_context_when_the_initialism_identifies_the_name() {
         let source = "ECE means expected calibration error in this report.";
-        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown);
+        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown, &[]);
         assert_eq!(bindings.len(), 1);
         assert_eq!(bindings[0].long, "expected calibration error");
     }
@@ -581,7 +576,7 @@ mod tests {
     #[test]
     fn classifies_mixed_negative_and_positive_claim_spans_independently() {
         let source = "ECE does not mean electrical computer engineering; but ECE means expected calibration error.";
-        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown);
+        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown, &[]);
         assert_eq!(bindings.len(), 2);
         assert_eq!(bindings[0].polarity, EvidencePolarity::Negative);
         assert_eq!(bindings[1].polarity, EvidencePolarity::Positive);
@@ -608,7 +603,7 @@ mod tests {
                 EvidenceModality::Quoted,
             ),
         ] {
-            let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown);
+            let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown, &[]);
             assert_eq!(bindings.len(), 1, "{source}");
             assert_eq!(bindings[0].modality, modality, "{source}");
         }
@@ -619,6 +614,7 @@ mod tests {
         assert!(extract_prose_bindings(
             "Electrical computer engineering (ECE) is one meaning, but random words (ECE) are not.",
             crate::DocumentLanguage::Markdown,
+            &[],
         )
         .iter()
         .all(|binding| binding.long != "random words"));

@@ -380,7 +380,8 @@ mod tests {
     #[test]
     fn named_calls_remain_two_unresolved_structural_possibilities() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 4,
+            "schemaVersion": 5,
+            "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
             "language": "latex",
@@ -443,7 +444,8 @@ mod tests {
     #[test]
     fn decorations_are_bounded_and_do_not_merge_with_the_nucleus() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 4,
+            "schemaVersion": 5,
+            "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
             "language": "latex",
@@ -484,7 +486,8 @@ mod tests {
     #[test]
     fn application_requires_the_next_meaningful_sibling_to_be_an_argument() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 4,
+            "schemaVersion": 5,
+            "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
             "language": "latex",

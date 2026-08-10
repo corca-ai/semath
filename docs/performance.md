@@ -17,6 +17,7 @@ mkdir -p .artifacts && bun run budget:report
 The fixture set deterministically rotates through the reported ECE expression,
 nested modifiers and styles, dense matrices, Unicode and combining characters,
 malformed recovery, binder/rename notation, sectioned multi-equation reports,
+citation-heavy combined discourse features, construction-heavy coordinated prose,
 and scoped malformed neighbors. A measured leaf edit must parse
 and transfer only its own syntax snapshot. Append-only comments must do no
 semantic analysis; a separate real notation mutation must analyze only its
@@ -38,10 +39,20 @@ defaults, not live production telemetry. The dependency lock pins the
 wasmtex input used for a report; record the Semath and wasmtex commits when
 comparing reports.
 
+`AnalysisStats` also reports segmented prose clauses, accepted construction
+candidates, and bounded matcher work. These counters make prose-coverage growth
+reviewable independently from wall-clock noise and prevent a larger construction
+inventory from hiding unbounded matching work.
+
 The report also names every lifecycle family, exposes semantic-view p95
 separately from other cursor queries, and records deterministic failure-shrinker
 input, output, and evaluation counts. Shrinking has a linear work budget; timing
 is not gated on a shared runner.
+
+Lifecycle parity explicitly adds and retracts citation attribution, hedging,
+conditions, negation, declarations, macros, and include visibility. Every stage
+must match a clean rebuild and restoration must return to the exact prior semantic
+projection.
 
 The normal and scale gates cap law candidates at 20 visited rules per document.
 This is a structural dispatch budget, independent of installed pack count.

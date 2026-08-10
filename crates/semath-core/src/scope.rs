@@ -215,12 +215,13 @@ mod tests {
 
     fn document(content: &str, language: DocumentLanguage) -> ProjectDocument {
         ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.md".into(),
             language,
             content: content.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

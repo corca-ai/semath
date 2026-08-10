@@ -928,6 +928,2744 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
+        "needle": "x_1$"
+      },
+      "documents": [
+        {
+          "content": "Let $x_1$ denote the hidden state.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the hidden state",
+        "symbol": "x_1"
+      },
+      "id": "construction-let-denote-state",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "active",
+        "let-denote"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "s_1$"
+      },
+      "documents": [
+        {
+          "content": "Let $s_1$ represent the sampled signal.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the sampled signal",
+        "symbol": "s_1"
+      },
+      "id": "construction-let-represent-signal",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "active",
+        "let-represent"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "L_1$"
+      },
+      "documents": [
+        {
+          "content": "Where $L_1$ denotes the training loss.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the training loss",
+        "symbol": "L_1"
+      },
+      "id": "construction-where-denotes-loss",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "trailing",
+        "where-denote"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "r_1$"
+      },
+      "documents": [
+        {
+          "content": "Where $r_1$ represents the event rate.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the event rate",
+        "symbol": "r_1"
+      },
+      "id": "construction-where-represents-rate",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "trailing",
+        "where-represent"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "v_1$"
+      },
+      "documents": [
+        {
+          "content": "Take $v_1$ to be the search direction.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the search direction",
+        "symbol": "v_1"
+      },
+      "id": "construction-take-vector",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "take"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "c_1$"
+      },
+      "documents": [
+        {
+          "content": "Take $c_1$ as the regularization weight.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the regularization weight",
+        "symbol": "c_1"
+      },
+      "id": "construction-take-scalar",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "take-as"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "T_1$"
+      },
+      "documents": [
+        {
+          "content": "Given $T_1$ as the transition mapping.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the transition mapping",
+        "symbol": "T_1"
+      },
+      "id": "construction-given-mapping",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "fronted",
+        "given"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "h_1$"
+      },
+      "documents": [
+        {
+          "content": "Given $h_1$ to be the decision threshold.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the decision threshold",
+        "symbol": "h_1"
+      },
+      "id": "construction-given-threshold",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "fronted",
+        "given-to-be"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "k_1$"
+      },
+      "documents": [
+        {
+          "content": "Suppose $k_1$ is the active index.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the active index",
+        "symbol": "k_1"
+      },
+      "id": "construction-suppose-index",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "assumption",
+        "suppose-is"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "K_1$"
+      },
+      "documents": [
+        {
+          "content": "Assume $K_1$ denotes the covariance kernel.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the covariance kernel",
+        "symbol": "K_1"
+      },
+      "id": "construction-assume-kernel",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "assumption",
+        "assume-denote"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "e_1$"
+      },
+      "documents": [
+        {
+          "content": "We write $e_1$ for the calibrated estimator.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the calibrated estimator",
+        "symbol": "e_1"
+      },
+      "id": "construction-write-estimator",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "convention",
+        "write-for"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "q_1$"
+      },
+      "documents": [
+        {
+          "content": "We write $q_1$ for the normalized residual.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the normalized residual",
+        "symbol": "q_1"
+      },
+      "id": "construction-write-residual",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "convention",
+        "write-for"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "a_1$"
+      },
+      "documents": [
+        {
+          "content": "Define $a_1$ as the aggregate score.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the aggregate score",
+        "symbol": "a_1"
+      },
+      "id": "construction-define-score",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "define-as"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "R_1$"
+      },
+      "documents": [
+        {
+          "content": "Define $R_1$ as the empirical risk.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the empirical risk",
+        "symbol": "R_1"
+      },
+      "id": "construction-define-risk",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "define-as"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "d_1$"
+      },
+      "documents": [
+        {
+          "content": "Denote by $d_1$ the geodesic distance.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "geodesic distance",
+        "symbol": "d_1"
+      },
+      "id": "construction-denote-distance",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "inverted",
+        "denote-by"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "m_1$"
+      },
+      "documents": [
+        {
+          "content": "Denote by $m_1$ the reference measure.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "reference measure",
+        "symbol": "m_1"
+      },
+      "id": "construction-denote-measure",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "inverted",
+        "denote-by"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "b_1$"
+      },
+      "documents": [
+        {
+          "content": "Set $b_1$ equal to the trust-region radius.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the trust-region radius",
+        "symbol": "b_1"
+      },
+      "id": "construction-set-radius",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "set-equal"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_1$"
+      },
+      "documents": [
+        {
+          "content": "Set $B_1$ equal to the iteration budget.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the iteration budget",
+        "symbol": "B_1"
+      },
+      "id": "construction-set-budget",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "set-equal"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "I_1$"
+      },
+      "documents": [
+        {
+          "content": "We use $I_1$ to represent the identity operator.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the identity operator",
+        "symbol": "I_1"
+      },
+      "id": "construction-use-identity",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "active",
+        "use-represent"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "M_1$"
+      },
+      "documents": [
+        {
+          "content": "We use $M_1$ to denote the observation mask.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the observation mask",
+        "symbol": "M_1"
+      },
+      "id": "construction-use-mask",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "active",
+        "use-denote"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_1$"
+      },
+      "documents": [
+        {
+          "content": "Call $D_1$ the feasible domain.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "feasible domain",
+        "symbol": "D_1"
+      },
+      "id": "construction-call-domain",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "call"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "P_1$"
+      },
+      "documents": [
+        {
+          "content": "Call $P_1$ the validation partition.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "validation partition",
+        "symbol": "P_1"
+      },
+      "id": "construction-call-partition",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "imperative",
+        "call"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_1$"
+      },
+      "documents": [
+        {
+          "content": "Here $A_1$ designates the averaging operator.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the averaging operator",
+        "symbol": "A_1"
+      },
+      "id": "construction-here-operator",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "contextual",
+        "designate"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "y_1$"
+      },
+      "documents": [
+        {
+          "content": "Here $y_1$ denotes the predicted output.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the predicted output",
+        "symbol": "y_1"
+      },
+      "id": "construction-here-output",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "contextual",
+        "here-denote"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "n_1$"
+      },
+      "documents": [
+        {
+          "content": "With $n_1$ denoting the batch count, training continues.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the batch count",
+        "symbol": "n_1"
+      },
+      "id": "construction-with-count",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "contextual",
+        "with-denoting"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "g_1$"
+      },
+      "documents": [
+        {
+          "content": "With $g_1$ representing the scale factor, the update follows.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the scale factor",
+        "symbol": "g_1"
+      },
+      "id": "construction-with-scale",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "contextual",
+        "with-representing"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "G_1$"
+      },
+      "documents": [
+        {
+          "content": "The symbol $G_1$ stands for the dependency graph.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the dependency graph",
+        "symbol": "G_1"
+      },
+      "id": "construction-symbol-graph",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "relational",
+        "stands-for"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "F_1$"
+      },
+      "documents": [
+        {
+          "content": "The notation $F_1$ refers to the feature map.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "the feature map",
+        "symbol": "F_1"
+      },
+      "id": "construction-notation-map",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "relational",
+        "refers-to"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u_1$"
+      },
+      "documents": [
+        {
+          "content": "The control sequence is denoted by $u_1$.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "control sequence",
+        "symbol": "u_1"
+      },
+      "id": "construction-passive-control",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "passive",
+        "denoted-by"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "z_1$"
+      },
+      "documents": [
+        {
+          "content": "The learned representation is represented by $z_1$.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "learned representation",
+        "symbol": "z_1"
+      },
+      "id": "construction-passive-representation",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "passive",
+        "represented-by"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "J_1$"
+      },
+      "documents": [
+        {
+          "content": "$J_1$, the local Jacobian, is evaluated once.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "local Jacobian",
+        "symbol": "J_1"
+      },
+      "id": "construction-appositive-jacobian",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "apposition",
+        "appositive"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "p_1$"
+      },
+      "documents": [
+        {
+          "content": "$p_1$, the reference prior, remains fixed.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "reference prior",
+        "symbol": "p_1"
+      },
+      "id": "construction-appositive-prior",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "apposition",
+        "appositive"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "f_1$"
+      },
+      "documents": [
+        {
+          "content": "The encoded feature ($f_1$) is cached.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "encoded feature",
+        "symbol": "f_1"
+      },
+      "id": "construction-parenthetical-feature",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "parenthetical"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "t_1$"
+      },
+      "documents": [
+        {
+          "content": "The observed target ($t_1$) is centered.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "observed target",
+        "symbol": "t_1"
+      },
+      "id": "construction-parenthetical-target",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "parenthetical"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "w_1$"
+      },
+      "documents": [
+        {
+          "content": "For each sample $w_1$, the score is recorded.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "sample",
+        "symbol": "w_1"
+      },
+      "id": "construction-quantified-sample",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "quantified",
+        "for-each"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "j_1$"
+      },
+      "documents": [
+        {
+          "content": "For every coordinate $j_1$, the derivative exists.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "coordinate",
+        "symbol": "j_1"
+      },
+      "id": "construction-quantified-coordinate",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "quantified",
+        "for-every"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "u_2$"
+      },
+      "documents": [
+        {
+          "content": "Let $l_1$ and $u_2$ denote the lower limit and the upper limit, respectively.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "upper limit",
+        "symbol": "u_2"
+      },
+      "id": "construction-pair-order",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "coordination",
+        "arity-2"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "s_2$"
+      },
+      "documents": [
+        {
+          "content": "Let $i_1$, $s_2$, and $o_3$ represent the input, state, and output, in that order.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "state",
+        "symbol": "s_2"
+      },
+      "id": "construction-triple-order",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "coordination",
+        "arity-3"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "c_2$"
+      },
+      "documents": [
+        {
+          "content": "Let $g_2$, $b_2$, $c_2$, and $r_2$ denote gain, bias, scale, and rate, respectively.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "scale",
+        "symbol": "c_2"
+      },
+      "id": "construction-quad-order",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "coordination",
+        "arity-4"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "W_2$"
+      },
+      "documents": [
+        {
+          "content": "Let $U_2$, $V_2$, and $W_2$ be function spaces.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "definitionDescription": "function spaces",
+        "symbol": "W_2"
+      },
+      "id": "construction-shared-spaces",
+      "metric": "association",
+      "variationTags": [
+        "different-role-set",
+        "english-declarations",
+        "prose",
+        "construction-corpus",
+        "coordination",
+        "shared"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_0$"
+      },
+      "documents": [
+        {
+          "content": "If $A_0$ were symmetric, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "symmetric",
+        "excludedDefinitionSymbol": "A_0"
+      },
+      "id": "frame-symmetric-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_0$"
+      },
+      "documents": [
+        {
+          "content": "$B_0$ might be symmetric.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "symmetric",
+        "excludedDefinitionSymbol": "B_0"
+      },
+      "id": "frame-symmetric-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_0$"
+      },
+      "documents": [
+        {
+          "content": "$C_0$ is not symmetric.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "symmetric",
+        "excludedDefinitionSymbol": "C_0"
+      },
+      "id": "frame-symmetric-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_0$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study1} reports that $D_0$ is symmetric.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "symmetric",
+        "excludedDefinitionSymbol": "D_0"
+      },
+      "id": "frame-symmetric-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_1$"
+      },
+      "documents": [
+        {
+          "content": "If $A_1$ were positive definite, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive definite",
+        "excludedDefinitionSymbol": "A_1"
+      },
+      "id": "frame-positive-definite-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_1$"
+      },
+      "documents": [
+        {
+          "content": "$B_1$ might be positive definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive definite",
+        "excludedDefinitionSymbol": "B_1"
+      },
+      "id": "frame-positive-definite-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_1$"
+      },
+      "documents": [
+        {
+          "content": "$C_1$ is not positive definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive definite",
+        "excludedDefinitionSymbol": "C_1"
+      },
+      "id": "frame-positive-definite-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_1$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study2} reports that $D_1$ is positive definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive definite",
+        "excludedDefinitionSymbol": "D_1"
+      },
+      "id": "frame-positive-definite-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_2$"
+      },
+      "documents": [
+        {
+          "content": "If $A_2$ were positive semidefinite, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive semidefinite",
+        "excludedDefinitionSymbol": "A_2"
+      },
+      "id": "frame-positive-semidefinite-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_2$"
+      },
+      "documents": [
+        {
+          "content": "$B_2$ might be positive semidefinite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive semidefinite",
+        "excludedDefinitionSymbol": "B_2"
+      },
+      "id": "frame-positive-semidefinite-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_2$"
+      },
+      "documents": [
+        {
+          "content": "$C_2$ is not positive semidefinite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive semidefinite",
+        "excludedDefinitionSymbol": "C_2"
+      },
+      "id": "frame-positive-semidefinite-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_2$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study3} reports that $D_2$ is positive semidefinite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive semidefinite",
+        "excludedDefinitionSymbol": "D_2"
+      },
+      "id": "frame-positive-semidefinite-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_3$"
+      },
+      "documents": [
+        {
+          "content": "If $A_3$ were negative definite, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "negative definite",
+        "excludedDefinitionSymbol": "A_3"
+      },
+      "id": "frame-negative-definite-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_3$"
+      },
+      "documents": [
+        {
+          "content": "$B_3$ might be negative definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "negative definite",
+        "excludedDefinitionSymbol": "B_3"
+      },
+      "id": "frame-negative-definite-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_3$"
+      },
+      "documents": [
+        {
+          "content": "$C_3$ is not negative definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "negative definite",
+        "excludedDefinitionSymbol": "C_3"
+      },
+      "id": "frame-negative-definite-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_3$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study4} reports that $D_3$ is negative definite.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "negative definite",
+        "excludedDefinitionSymbol": "D_3"
+      },
+      "id": "frame-negative-definite-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_4$"
+      },
+      "documents": [
+        {
+          "content": "If $A_4$ were continuous, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "continuous",
+        "excludedDefinitionSymbol": "A_4"
+      },
+      "id": "frame-continuous-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_4$"
+      },
+      "documents": [
+        {
+          "content": "$B_4$ might be continuous.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "continuous",
+        "excludedDefinitionSymbol": "B_4"
+      },
+      "id": "frame-continuous-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_4$"
+      },
+      "documents": [
+        {
+          "content": "$C_4$ is not continuous.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "continuous",
+        "excludedDefinitionSymbol": "C_4"
+      },
+      "id": "frame-continuous-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_4$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study5} reports that $D_4$ is continuous.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "continuous",
+        "excludedDefinitionSymbol": "D_4"
+      },
+      "id": "frame-continuous-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_5$"
+      },
+      "documents": [
+        {
+          "content": "If $A_5$ were differentiable, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "differentiable",
+        "excludedDefinitionSymbol": "A_5"
+      },
+      "id": "frame-differentiable-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_5$"
+      },
+      "documents": [
+        {
+          "content": "$B_5$ might be differentiable.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "differentiable",
+        "excludedDefinitionSymbol": "B_5"
+      },
+      "id": "frame-differentiable-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_5$"
+      },
+      "documents": [
+        {
+          "content": "$C_5$ is not differentiable.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "differentiable",
+        "excludedDefinitionSymbol": "C_5"
+      },
+      "id": "frame-differentiable-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_5$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study6} reports that $D_5$ is differentiable.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "differentiable",
+        "excludedDefinitionSymbol": "D_5"
+      },
+      "id": "frame-differentiable-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_6$"
+      },
+      "documents": [
+        {
+          "content": "If $A_6$ were invertible, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "invertible",
+        "excludedDefinitionSymbol": "A_6"
+      },
+      "id": "frame-invertible-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_6$"
+      },
+      "documents": [
+        {
+          "content": "$B_6$ might be invertible.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "invertible",
+        "excludedDefinitionSymbol": "B_6"
+      },
+      "id": "frame-invertible-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_6$"
+      },
+      "documents": [
+        {
+          "content": "$C_6$ is not invertible.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "invertible",
+        "excludedDefinitionSymbol": "C_6"
+      },
+      "id": "frame-invertible-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_6$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study7} reports that $D_6$ is invertible.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "invertible",
+        "excludedDefinitionSymbol": "D_6"
+      },
+      "id": "frame-invertible-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_7$"
+      },
+      "documents": [
+        {
+          "content": "If $A_7$ were independent, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "independent",
+        "excludedDefinitionSymbol": "A_7"
+      },
+      "id": "frame-independent-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_7$"
+      },
+      "documents": [
+        {
+          "content": "$B_7$ might be independent.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "independent",
+        "excludedDefinitionSymbol": "B_7"
+      },
+      "id": "frame-independent-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_7$"
+      },
+      "documents": [
+        {
+          "content": "$C_7$ is not independent.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "independent",
+        "excludedDefinitionSymbol": "C_7"
+      },
+      "id": "frame-independent-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_7$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study8} reports that $D_7$ is independent.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "independent",
+        "excludedDefinitionSymbol": "D_7"
+      },
+      "id": "frame-independent-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_8$"
+      },
+      "documents": [
+        {
+          "content": "If $A_8$ were nonnegative, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "nonnegative",
+        "excludedDefinitionSymbol": "A_8"
+      },
+      "id": "frame-nonnegative-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_8$"
+      },
+      "documents": [
+        {
+          "content": "$B_8$ might be nonnegative.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "nonnegative",
+        "excludedDefinitionSymbol": "B_8"
+      },
+      "id": "frame-nonnegative-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_8$"
+      },
+      "documents": [
+        {
+          "content": "$C_8$ is not nonnegative.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "nonnegative",
+        "excludedDefinitionSymbol": "C_8"
+      },
+      "id": "frame-nonnegative-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_8$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study9} reports that $D_8$ is nonnegative.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "nonnegative",
+        "excludedDefinitionSymbol": "D_8"
+      },
+      "id": "frame-nonnegative-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_9$"
+      },
+      "documents": [
+        {
+          "content": "If $A_9$ were strictly positive, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "strictly positive",
+        "excludedDefinitionSymbol": "A_9"
+      },
+      "id": "frame-strictly-positive-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_9$"
+      },
+      "documents": [
+        {
+          "content": "$B_9$ might be strictly positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "strictly positive",
+        "excludedDefinitionSymbol": "B_9"
+      },
+      "id": "frame-strictly-positive-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_9$"
+      },
+      "documents": [
+        {
+          "content": "$C_9$ is not strictly positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "strictly positive",
+        "excludedDefinitionSymbol": "C_9"
+      },
+      "id": "frame-strictly-positive-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_9$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study10} reports that $D_9$ is strictly positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "strictly positive",
+        "excludedDefinitionSymbol": "D_9"
+      },
+      "id": "frame-strictly-positive-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_10$"
+      },
+      "documents": [
+        {
+          "content": "If $A_10$ were steady state, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "steady state",
+        "excludedDefinitionSymbol": "A_10"
+      },
+      "id": "frame-steady-state-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_10$"
+      },
+      "documents": [
+        {
+          "content": "$B_10$ might be steady state.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "steady state",
+        "excludedDefinitionSymbol": "B_10"
+      },
+      "id": "frame-steady-state-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_10$"
+      },
+      "documents": [
+        {
+          "content": "$C_10$ is not steady state.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "steady state",
+        "excludedDefinitionSymbol": "C_10"
+      },
+      "id": "frame-steady-state-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_10$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study11} reports that $D_10$ is steady state.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "steady state",
+        "excludedDefinitionSymbol": "D_10"
+      },
+      "id": "frame-steady-state-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_11$"
+      },
+      "documents": [
+        {
+          "content": "If $A_11$ were small-signal, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "small-signal",
+        "excludedDefinitionSymbol": "A_11"
+      },
+      "id": "frame-small-signal-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_11$"
+      },
+      "documents": [
+        {
+          "content": "$B_11$ might be small-signal.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "small-signal",
+        "excludedDefinitionSymbol": "B_11"
+      },
+      "id": "frame-small-signal-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_11$"
+      },
+      "documents": [
+        {
+          "content": "$C_11$ is not small-signal.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "small-signal",
+        "excludedDefinitionSymbol": "C_11"
+      },
+      "id": "frame-small-signal-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_11$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study12} reports that $D_11$ is small-signal.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "small-signal",
+        "excludedDefinitionSymbol": "D_11"
+      },
+      "id": "frame-small-signal-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_12$"
+      },
+      "documents": [
+        {
+          "content": "If $A_12$ were time invariant, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "time invariant",
+        "excludedDefinitionSymbol": "A_12"
+      },
+      "id": "frame-time-invariant-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_12$"
+      },
+      "documents": [
+        {
+          "content": "$B_12$ might be time invariant.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "time invariant",
+        "excludedDefinitionSymbol": "B_12"
+      },
+      "id": "frame-time-invariant-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_12$"
+      },
+      "documents": [
+        {
+          "content": "$C_12$ is not time invariant.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "time invariant",
+        "excludedDefinitionSymbol": "C_12"
+      },
+      "id": "frame-time-invariant-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_12$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study13} reports that $D_12$ is time invariant.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "time invariant",
+        "excludedDefinitionSymbol": "D_12"
+      },
+      "id": "frame-time-invariant-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_13$"
+      },
+      "documents": [
+        {
+          "content": "If $A_13$ were idealized, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "idealized",
+        "excludedDefinitionSymbol": "A_13"
+      },
+      "id": "frame-idealized-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_13$"
+      },
+      "documents": [
+        {
+          "content": "$B_13$ might be idealized.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "idealized",
+        "excludedDefinitionSymbol": "B_13"
+      },
+      "id": "frame-idealized-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_13$"
+      },
+      "documents": [
+        {
+          "content": "$C_13$ is not idealized.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "idealized",
+        "excludedDefinitionSymbol": "C_13"
+      },
+      "id": "frame-idealized-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_13$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study14} reports that $D_13$ is idealized.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "idealized",
+        "excludedDefinitionSymbol": "D_13"
+      },
+      "id": "frame-idealized-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "A_14$"
+      },
+      "documents": [
+        {
+          "content": "If $A_14$ were positive, the argument would continue.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive",
+        "excludedDefinitionSymbol": "A_14"
+      },
+      "id": "frame-positive-conditional",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "conditionality",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "B_14$"
+      },
+      "documents": [
+        {
+          "content": "$B_14$ might be positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive",
+        "excludedDefinitionSymbol": "B_14"
+      },
+      "id": "frame-positive-hedged",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "hedging",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "C_14$"
+      },
+      "documents": [
+        {
+          "content": "$C_14$ is not positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive",
+        "excludedDefinitionSymbol": "C_14"
+      },
+      "id": "frame-positive-negative",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "negation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
+        "needle": "D_14$"
+      },
+      "documents": [
+        {
+          "content": "Earlier analysis \\parencite{study15} reports that $D_14$ is positive.",
+          "fileId": "main",
+          "path": "main.tex"
+        }
+      ],
+      "expectation": {
+        "excludedAssumptionValue": "positive",
+        "excludedDefinitionSymbol": "D_14"
+      },
+      "id": "frame-positive-cited",
+      "metric": "refusal",
+      "variationTags": [
+        "hard-negative",
+        "prose",
+        "semantic-mutation",
+        "citation",
+        "minimal-feature-mutation"
+      ]
+    },
+    {
+      "cursor": {
+        "edge": "before",
+        "fileId": "main",
         "needle": "\\operatorname{ECE}=0"
       },
       "documents": [

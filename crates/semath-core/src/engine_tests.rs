@@ -10,12 +10,13 @@ use crate::{
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
     ProjectDocument {
+        prose_annotations: vec![],
         file_id: file_id.into(),
         path: path.into(),
         language: DocumentLanguage::Latex,
         content: content.into(),
         document_version: version,
-        schema_version: 4,
+        schema_version: 5,
         nodes: Vec::new(),
         math_roots: Vec::new(),
         visible_prose: Vec::new(),

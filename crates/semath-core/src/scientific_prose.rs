@@ -1,17 +1,90 @@
 use crate::DocumentLanguage;
+use crate::semantic_index::{EvidenceModality, EvidencePolarity};
 
 const MAX_CLAUSE_BYTES: usize = 640;
 const MAX_CLAUSES: usize = 256;
 const MAX_ASSUMPTIONS_PER_CLAUSE: usize = 8;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum ClauseDisposition {
-    Establishing,
+pub(crate) enum CommunicativeAct {
+    Statement,
+    Definition,
+    Assumption,
+    Result,
+    Relation,
     Alternative,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Attribution {
+    Author,
     Cited,
-    Hedged,
-    Hypothetical,
-    Negated,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Conditionality {
+    Unconditional,
+    Conditional,
+    Counterfactual,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DiscourseFeatureKind {
+    Act,
+    Polarity,
+    Modality,
+    Attribution,
+    Conditionality,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct DiscourseFeatureEvidence {
+    pub kind: DiscourseFeatureKind,
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct DiscourseFrame {
+    pub act: CommunicativeAct,
+    pub polarity: EvidencePolarity,
+    pub modality: EvidenceModality,
+    pub attribution: Attribution,
+    pub conditionality: Conditionality,
+    pub evidence: Vec<DiscourseFeatureEvidence>,
+}
+
+impl DiscourseFrame {
+    pub(crate) fn establishes(&self) -> bool {
+        self.polarity == EvidencePolarity::Positive
+            && self.modality == EvidenceModality::Asserted
+            && self.attribution == Attribution::Author
+            && self.conditionality == Conditionality::Unconditional
+            && self.act != CommunicativeAct::Alternative
+    }
+
+    pub(crate) fn evidence_modality(&self) -> EvidenceModality {
+        if self.conditionality != Conditionality::Unconditional {
+            EvidenceModality::Hypothetical
+        } else if self.modality != EvidenceModality::Asserted {
+            self.modality
+        } else if self.attribution == Attribution::Cited {
+            EvidenceModality::Cited
+        } else {
+            EvidenceModality::Asserted
+        }
+    }
+}
+
+pub(crate) fn asserted_author_frame() -> DiscourseFrame {
+    DiscourseFrame {
+        act: CommunicativeAct::Statement,
+        polarity: EvidencePolarity::Positive,
+        modality: EvidenceModality::Asserted,
+        attribution: Attribution::Author,
+        conditionality: Conditionality::Unconditional,
+        evidence: Vec::new(),
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -19,7 +92,7 @@ pub(crate) struct ScientificClause<'a> {
     pub start: usize,
     pub end: usize,
     pub text: &'a str,
-    pub disposition: ClauseDisposition,
+    pub frame: DiscourseFrame,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -38,10 +111,11 @@ pub(crate) struct AssumptionCandidate {
     pub phrase_end: usize,
 }
 
-pub(crate) fn segment_scientific_clauses(
-    source: &str,
+pub(crate) fn segment_scientific_clauses<'a>(
+    source: &'a str,
     language: DocumentLanguage,
-) -> Vec<ScientificClause<'_>> {
+    citation_ranges: &[(usize, usize)],
+) -> Vec<ScientificClause<'a>> {
     let mut ranges = Vec::new();
     let mut byte_offset = 0;
     let mut fenced = false;
@@ -78,7 +152,7 @@ pub(crate) fn segment_scientific_clauses(
                     start,
                     end,
                     text,
-                    disposition: classify_disposition(text),
+                    frame: classify_discourse_frame(text, start, end, citation_ranges),
                 }
             })
         })
@@ -89,7 +163,7 @@ pub(crate) fn extract_assumptions(
     clause: &ScientificClause<'_>,
     mentions: &[ScientificMention],
 ) -> Vec<AssumptionCandidate> {
-    if clause.disposition != ClauseDisposition::Establishing {
+    if !clause.frame.establishes() {
         return Vec::new();
     }
     let lower = clause.text.to_ascii_lowercase().replace('-', " ");
@@ -204,60 +278,197 @@ fn split_visible_line(line_start: usize, line: &str, ranges: &mut Vec<(usize, us
     }
 }
 
-fn classify_disposition(text: &str) -> ClauseDisposition {
+fn classify_discourse_frame(
+    text: &str,
+    clause_start: usize,
+    clause_end: usize,
+    citation_ranges: &[(usize, usize)],
+) -> DiscourseFrame {
     let lower = text.trim().to_ascii_lowercase();
     let words = lower
         .split(|character: char| !character.is_ascii_alphabetic())
         .filter(|word| !word.is_empty())
         .collect::<Vec<_>>();
-    if starts_with_any(
-        &lower,
-        &[
-            "if ",
-            "were ",
-            "had ",
-            "imagine ",
-            "hypothetically",
-            "counterfactually",
-        ],
-    ) || words.iter().any(|word| matches!(*word, "would" | "could"))
-    {
-        ClauseDisposition::Hypothetical
-    } else if starts_with_any(
-        &lower,
-        &[
-            "according to ",
-            "as reported ",
-            "the citation ",
-            "the reference ",
-        ],
-    ) || lower.contains("\\cite")
-    {
-        ClauseDisposition::Cited
-    } else if words
+    let mut evidence = Vec::new();
+    let (conditionality, conditional_marker) =
+        if starts_with_any(&lower, &["were ", "had ", "imagine ", "counterfactually"])
+            || words
+                .iter()
+                .any(|word| matches!(*word, "would" | "were" | "had"))
+        {
+            (
+                Conditionality::Counterfactual,
+                first_marker(
+                    &lower,
+                    &["were", "had", "imagine", "counterfactually", "would"],
+                ),
+            )
+        } else if starts_with_any(&lower, &["if ", "when ", "provided ", "assuming "])
+            || words.contains(&"could")
+        {
+            (
+                Conditionality::Conditional,
+                first_marker(&lower, &["if", "when", "provided", "assuming", "could"]),
+            )
+        } else {
+            (Conditionality::Unconditional, None)
+        };
+    push_marker_evidence(
+        &mut evidence,
+        DiscourseFeatureKind::Conditionality,
+        clause_start,
+        conditional_marker,
+    );
+
+    let hedged_marker = words
         .iter()
-        .any(|word| matches!(*word, "might" | "perhaps" | "possibly" | "apparently"))
-        || lower.contains("seems to")
-        || lower.contains(" may be ")
-        || lower.contains("may denote")
-        || lower.contains("may represent")
-    {
-        ClauseDisposition::Hedged
-    } else if lower.contains("either ") && lower.contains(" or ")
-        || starts_with_any(&lower, &["alternatively", "otherwise"])
-    {
-        ClauseDisposition::Alternative
-    } else if starts_with_any(
+        .find(|word| {
+            matches!(
+                **word,
+                "might" | "may" | "perhaps" | "possibly" | "apparently"
+            )
+        })
+        .and_then(|word| lower.find(word).map(|start| (start, start + word.len())))
+        .or_else(|| first_marker(&lower, &["seems to", "appears to", "is likely to"]));
+    let modality = if hedged_marker.is_some() {
+        EvidenceModality::Hedged
+    } else {
+        EvidenceModality::Asserted
+    };
+    push_marker_evidence(
+        &mut evidence,
+        DiscourseFeatureKind::Modality,
+        clause_start,
+        hedged_marker,
+    );
+
+    let negative_marker = if starts_with_any(
         &lower,
         &["not ", "do not ", "does not ", "we do not ", "never "],
     ) || lower.starts_with("without ")
         || lower.contains(" is not ")
         || lower.contains(" are not ")
         || lower.contains(" must not ")
+        || [" not define", " not denote", " not represent", " not mean"]
+            .iter()
+            .any(|marker| lower.contains(marker))
     {
-        ClauseDisposition::Negated
+        first_marker(&lower, &["not", "never", "without"])
     } else {
-        ClauseDisposition::Establishing
+        None
+    };
+    let polarity = if negative_marker.is_some() {
+        EvidencePolarity::Negative
+    } else {
+        EvidencePolarity::Positive
+    };
+    push_marker_evidence(
+        &mut evidence,
+        DiscourseFeatureKind::Polarity,
+        clause_start,
+        negative_marker,
+    );
+
+    let citation = citation_ranges
+        .iter()
+        .copied()
+        .find(|(start, end)| *start < clause_end && clause_start < *end);
+    let lexical_attribution =
+        first_marker(&lower, &["according to", "as reported"]).or_else(|| {
+            starts_with_any(&lower, &["the citation ", "the reference "])
+                .then(|| first_marker(&lower, &["the citation", "the reference"]))
+                .flatten()
+        });
+    let attribution = if citation.is_some() || lexical_attribution.is_some() {
+        Attribution::Cited
+    } else {
+        Attribution::Author
+    };
+    if let Some((start, end)) = citation {
+        evidence.push(DiscourseFeatureEvidence {
+            kind: DiscourseFeatureKind::Attribution,
+            start,
+            end,
+        });
+    } else {
+        push_marker_evidence(
+            &mut evidence,
+            DiscourseFeatureKind::Attribution,
+            clause_start,
+            lexical_attribution,
+        );
+    }
+
+    let (act, act_marker) = classify_act(&lower);
+    push_marker_evidence(
+        &mut evidence,
+        DiscourseFeatureKind::Act,
+        clause_start,
+        act_marker,
+    );
+
+    DiscourseFrame {
+        act,
+        polarity,
+        modality,
+        attribution,
+        conditionality,
+        evidence,
+    }
+}
+
+fn classify_act(lower: &str) -> (CommunicativeAct, Option<(usize, usize)>) {
+    if let Some(marker) = first_marker(lower, &["alternatively", "otherwise", "either"]) {
+        return (CommunicativeAct::Alternative, Some(marker));
+    }
+    const DEFINITIONS: &[&str] = &[
+        "denote",
+        "represent",
+        "stand for",
+        "define",
+        "write",
+        "call",
+        "mean",
+    ];
+    const ASSUMPTIONS: &[&str] = &["assume", "suppose", "given", "subject to", "take"];
+    const RESULTS: &[&str] = &["therefore", "thus", "hence", "we obtain", "it follows"];
+    const RELATIONS: &[&str] = &["compared with", "in contrast", "whereas", "while"];
+    for (act, markers) in [
+        (CommunicativeAct::Definition, DEFINITIONS),
+        (CommunicativeAct::Assumption, ASSUMPTIONS),
+        (CommunicativeAct::Result, RESULTS),
+        (CommunicativeAct::Relation, RELATIONS),
+    ] {
+        if let Some(marker) = first_marker(lower, markers) {
+            return (act, Some(marker));
+        }
+    }
+    (CommunicativeAct::Statement, None)
+}
+
+fn first_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {
+    markers
+        .iter()
+        .filter_map(|marker| {
+            value
+                .find(marker)
+                .map(|start| (start, start + marker.len()))
+        })
+        .min_by_key(|(start, _)| *start)
+}
+
+fn push_marker_evidence(
+    evidence: &mut Vec<DiscourseFeatureEvidence>,
+    kind: DiscourseFeatureKind,
+    clause_start: usize,
+    marker: Option<(usize, usize)>,
+) {
+    if let Some((start, end)) = marker {
+        evidence.push(DiscourseFeatureEvidence {
+            kind,
+            start: clause_start + start,
+            end: clause_start + end,
+        });
     }
 }
 
@@ -357,12 +568,15 @@ mod tests {
     #[test]
     fn segments_visible_clauses_and_classifies_non_evidence() {
         let source = "Assume $A$ is symmetric. If $B$ were invertible, continue. $C$ might denote a matrix. Without adopting the convention, inspect $D$. % Assume steady state\n```\nAssume idealized operation.\n```";
-        let clauses = segment_scientific_clauses(source, DocumentLanguage::Markdown);
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Markdown, &[]);
         assert_eq!(clauses.len(), 5);
-        assert_eq!(clauses[0].disposition, ClauseDisposition::Establishing);
-        assert_eq!(clauses[1].disposition, ClauseDisposition::Hypothetical);
-        assert_eq!(clauses[2].disposition, ClauseDisposition::Hedged);
-        assert_eq!(clauses[3].disposition, ClauseDisposition::Negated);
+        assert!(clauses[0].frame.establishes());
+        assert_eq!(
+            clauses[1].frame.conditionality,
+            Conditionality::Counterfactual
+        );
+        assert_eq!(clauses[2].frame.modality, EvidenceModality::Hedged);
+        assert_eq!(clauses[3].frame.polarity, EvidencePolarity::Negative);
     }
 
     #[test]
@@ -377,7 +591,7 @@ mod tests {
     #[test]
     fn extracts_bounded_assumptions_with_subject_spans_and_refuses_negation() {
         let source = "Assume $A$ is symmetric and positive definite.";
-        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex)
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
             .into_iter()
             .next()
             .unwrap();
@@ -407,10 +621,25 @@ mod tests {
         );
 
         let negated = "Assume $A$ is not symmetric.";
-        let clause = segment_scientific_clauses(negated, DocumentLanguage::Latex)
+        let clause = segment_scientific_clauses(negated, DocumentLanguage::Latex, &[])
             .into_iter()
             .next()
             .unwrap();
         assert!(extract_assumptions(&clause, &mentions).is_empty());
+    }
+
+    #[test]
+    fn preserves_cited_hedged_negated_and_conditional_features_together() {
+        let source = "If prior work      might not define $A$ as a matrix.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[(14, 19)]);
+        let frame = &clauses[0].frame;
+
+        assert_eq!(frame.conditionality, Conditionality::Conditional);
+        assert_eq!(frame.attribution, Attribution::Cited);
+        assert_eq!(frame.modality, EvidenceModality::Hedged);
+        assert_eq!(frame.polarity, EvidencePolarity::Negative);
+        assert_eq!(frame.act, CommunicativeAct::Definition);
+        assert!(!frame.establishes());
+        assert!(frame.evidence.len() >= 5);
     }
 }

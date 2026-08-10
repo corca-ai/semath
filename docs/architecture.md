@@ -23,7 +23,7 @@ present and act on the result.
 
 ## Structural boundary
 
-Semath accepts wasmtex syntax-contract v4. Math regions, includes, project
+Semath accepts wasmtex syntax-contract v5. Math regions, prose annotations, includes, project
 macros, call-site ranges, expansion provenance, and ambiguity are supplied once
 at this boundary. Semath does not rescan TeX to construct a competing syntax
 model. Direct syntax, shallow call-site shapes, and range-free generated
@@ -72,10 +72,15 @@ same text revision only if the source identity is unchanged and the structural
 fingerprint differs. This retracts generated meaning without admitting stale or
 rewritten text under an old document version.
 
-English scientific prose follows the same functional-core boundary. Bounded
-stages segment visible spans, extract mentions and claim spans, determine each
-claim's polarity and modality, and lower it to the same occurrences, entities,
-claims, and evidence used by notation. Parenthetical and explicit acronym
+English scientific prose follows the same functional-core boundary. A bounded
+construction engine composes declarative lemma classes, voice, math-mention slots,
+coordination, and generic arity rather than selecting sentence-shaped regular
+expressions. Its typed discourse frame keeps communicative act, polarity, modality,
+attribution, and conditionality independent, with exact evidence for every detected
+feature. Recognition and establishment are separate pure steps: only positive,
+asserted, unconditional author claims establish meaning. Cited, hedged, hypothetical,
+alternative, and negative observations remain source-grounded without promotion.
+Parenthetical and explicit acronym
 forms, glossary/acronym resources, and named-operator declarations therefore
 share one resolution path. Non-asserting and negative claims remain
 source-linked evidence but cannot establish navigation. Exact notation keys
@@ -175,7 +180,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 8 exposes selection, `semanticView`, definition, references, rename,
+Protocol 9 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is

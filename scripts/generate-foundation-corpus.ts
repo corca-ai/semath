@@ -214,6 +214,8 @@ const scientificCases: FoundationCase[] = [
   },
 ];
 
+scientificCases.push(...constructionDefinitionCases(), ...discourseMutationCases());
+
 scientificCases.push(
   acronymDefinition(
     "acronym-long-short",
@@ -338,8 +340,9 @@ scientificCases.push(
   ),
 );
 
-if (scientificCases.length !== 50) {
-  throw new Error(`expected 50 scientific prose cases, got ${scientificCases.length}`);
+validateScientificCases(scientificCases);
+if (scientificCases.length !== 150) {
+  throw new Error(`expected 150 scientific prose cases, got ${scientificCases.length}`);
 }
 const scientificCorpus: FoundationCorpus = {
   cases: scientificCases,
@@ -356,6 +359,111 @@ if (check) {
   await writeFile(scientificPath, scientificOutput);
 }
 console.log(`${check ? "verified" : "generated"} scientific prose foundation corpus (${scientificCases.length} cases)`);
+
+function constructionDefinitionCases(): FoundationCase[] {
+  const rows = [
+    ["let-denote-state", "Let $x_1$ denote the hidden state.", "$x_1$", "x_1", "the hidden state", "active", "let-denote"],
+    ["let-represent-signal", "Let $s_1$ represent the sampled signal.", "$s_1$", "s_1", "the sampled signal", "active", "let-represent"],
+    ["where-denotes-loss", "Where $L_1$ denotes the training loss.", "$L_1$", "L_1", "the training loss", "trailing", "where-denote"],
+    ["where-represents-rate", "Where $r_1$ represents the event rate.", "$r_1$", "r_1", "the event rate", "trailing", "where-represent"],
+    ["take-vector", "Take $v_1$ to be the search direction.", "$v_1$", "v_1", "the search direction", "imperative", "take"],
+    ["take-scalar", "Take $c_1$ as the regularization weight.", "$c_1$", "c_1", "the regularization weight", "imperative", "take-as"],
+    ["given-mapping", "Given $T_1$ as the transition mapping.", "$T_1$", "T_1", "the transition mapping", "fronted", "given"],
+    ["given-threshold", "Given $h_1$ to be the decision threshold.", "$h_1$", "h_1", "the decision threshold", "fronted", "given-to-be"],
+    ["suppose-index", "Suppose $k_1$ is the active index.", "$k_1$", "k_1", "the active index", "assumption", "suppose-is"],
+    ["assume-kernel", "Assume $K_1$ denotes the covariance kernel.", "$K_1$", "K_1", "the covariance kernel", "assumption", "assume-denote"],
+    ["write-estimator", "We write $e_1$ for the calibrated estimator.", "$e_1$", "e_1", "the calibrated estimator", "convention", "write-for"],
+    ["write-residual", "We write $q_1$ for the normalized residual.", "$q_1$", "q_1", "the normalized residual", "convention", "write-for"],
+    ["define-score", "Define $a_1$ as the aggregate score.", "$a_1$", "a_1", "the aggregate score", "imperative", "define-as"],
+    ["define-risk", "Define $R_1$ as the empirical risk.", "$R_1$", "R_1", "the empirical risk", "imperative", "define-as"],
+    ["denote-distance", "Denote by $d_1$ the geodesic distance.", "$d_1$", "d_1", "geodesic distance", "inverted", "denote-by"],
+    ["denote-measure", "Denote by $m_1$ the reference measure.", "$m_1$", "m_1", "reference measure", "inverted", "denote-by"],
+    ["set-radius", "Set $b_1$ equal to the trust-region radius.", "$b_1$", "b_1", "the trust-region radius", "imperative", "set-equal"],
+    ["set-budget", "Set $B_1$ equal to the iteration budget.", "$B_1$", "B_1", "the iteration budget", "imperative", "set-equal"],
+    ["use-identity", "We use $I_1$ to represent the identity operator.", "$I_1$", "I_1", "the identity operator", "active", "use-represent"],
+    ["use-mask", "We use $M_1$ to denote the observation mask.", "$M_1$", "M_1", "the observation mask", "active", "use-denote"],
+    ["call-domain", "Call $D_1$ the feasible domain.", "$D_1$", "D_1", "feasible domain", "imperative", "call"],
+    ["call-partition", "Call $P_1$ the validation partition.", "$P_1$", "P_1", "validation partition", "imperative", "call"],
+    ["here-operator", "Here $A_1$ designates the averaging operator.", "$A_1$", "A_1", "the averaging operator", "contextual", "designate"],
+    ["here-output", "Here $y_1$ denotes the predicted output.", "$y_1$", "y_1", "the predicted output", "contextual", "here-denote"],
+    ["with-count", "With $n_1$ denoting the batch count, training continues.", "$n_1$", "n_1", "the batch count", "contextual", "with-denoting"],
+    ["with-scale", "With $g_1$ representing the scale factor, the update follows.", "$g_1$", "g_1", "the scale factor", "contextual", "with-representing"],
+    ["symbol-graph", "The symbol $G_1$ stands for the dependency graph.", "$G_1$", "G_1", "the dependency graph", "relational", "stands-for"],
+    ["notation-map", "The notation $F_1$ refers to the feature map.", "$F_1$", "F_1", "the feature map", "relational", "refers-to"],
+    ["passive-control", "The control sequence is denoted by $u_1$.", "$u_1$", "u_1", "control sequence", "passive", "denoted-by"],
+    ["passive-representation", "The learned representation is represented by $z_1$.", "$z_1$", "z_1", "learned representation", "passive", "represented-by"],
+    ["appositive-jacobian", "$J_1$, the local Jacobian, is evaluated once.", "$J_1$", "J_1", "local Jacobian", "apposition", "appositive"],
+    ["appositive-prior", "$p_1$, the reference prior, remains fixed.", "$p_1$", "p_1", "reference prior", "apposition", "appositive"],
+    ["parenthetical-feature", "The encoded feature ($f_1$) is cached.", "$f_1$", "f_1", "encoded feature", "parenthetical", "parenthetical"],
+    ["parenthetical-target", "The observed target ($t_1$) is centered.", "$t_1$", "t_1", "observed target", "parenthetical", "parenthetical"],
+    ["quantified-sample", "For each sample $w_1$, the score is recorded.", "$w_1$", "w_1", "sample", "quantified", "for-each"],
+    ["quantified-coordinate", "For every coordinate $j_1$, the derivative exists.", "$j_1$", "j_1", "coordinate", "quantified", "for-every"],
+    ["pair-order", "Let $l_1$ and $u_2$ denote the lower limit and the upper limit, respectively.", "$u_2$", "u_2", "upper limit", "coordination", "arity-2"],
+    ["triple-order", "Let $i_1$, $s_2$, and $o_3$ represent the input, state, and output, in that order.", "$s_2$", "s_2", "state", "coordination", "arity-3"],
+    ["quad-order", "Let $g_2$, $b_2$, $c_2$, and $r_2$ denote gain, bias, scale, and rate, respectively.", "$c_2$", "c_2", "scale", "coordination", "arity-4"],
+    ["shared-spaces", "Let $U_2$, $V_2$, and $W_2$ be function spaces.", "$W_2$", "W_2", "function spaces", "coordination", "shared"],
+  ] as const;
+  return rows.map(([id, content, needle, symbol, description, voice, construction]) =>
+    proseDefinition(
+      `construction-${id}`,
+      content,
+      needle,
+      symbol,
+      description,
+      "association",
+      ["construction-corpus", voice, construction],
+    ));
+}
+
+function discourseMutationCases(): FoundationCase[] {
+  const properties = [
+    ["symmetric", "symmetric"],
+    ["positive-definite", "positive definite"],
+    ["positive-semidefinite", "positive semidefinite"],
+    ["negative-definite", "negative definite"],
+    ["continuous", "continuous"],
+    ["differentiable", "differentiable"],
+    ["invertible", "invertible"],
+    ["independent", "independent"],
+    ["nonnegative", "nonnegative"],
+    ["strictly-positive", "strictly positive"],
+    ["steady-state", "steady state"],
+    ["small-signal", "small-signal"],
+    ["time-invariant", "time invariant"],
+    ["idealized", "idealized"],
+    ["positive", "positive"],
+  ] as const;
+  return properties.flatMap(([id, phrase], index) => {
+    const citation = `study${index + 1}`;
+    return [
+      proseRefusal(`frame-${id}-conditional`, `If $A_${index}$ were ${phrase}, the argument would continue.`, `$A_${index}$`, `A_${index}`, phrase, ["conditionality", "minimal-feature-mutation"]),
+      proseRefusal(`frame-${id}-hedged`, `$B_${index}$ might be ${phrase}.`, `$B_${index}$`, `B_${index}`, phrase, ["hedging", "minimal-feature-mutation"]),
+      proseRefusal(`frame-${id}-negative`, `$C_${index}$ is not ${phrase}.`, `$C_${index}$`, `C_${index}`, phrase, ["negation", "minimal-feature-mutation"]),
+      proseRefusal(`frame-${id}-cited`, `Earlier analysis \\parencite{${citation}} reports that $D_${index}$ is ${phrase}.`, `$D_${index}$`, `D_${index}`, phrase, ["citation", "minimal-feature-mutation"]),
+    ];
+  });
+}
+
+function validateScientificCases(cases: readonly FoundationCase[]): void {
+  const ids = new Set<string>();
+  const sentences = new Set<string>();
+  for (const item of cases) {
+    if (ids.has(item.id)) throw new Error(`duplicate scientific prose id: ${item.id}`);
+    ids.add(item.id);
+    const normalized = item.documents
+      .map((document) => document.content.toLowerCase().replace(/\s+/gu, " ").trim())
+      .join("\n");
+    if (sentences.has(normalized)) {
+      throw new Error(`duplicate normalized scientific prose sentence: ${item.id}`);
+    }
+    sentences.add(normalized);
+  }
+  const constructionCases = cases.filter((item) => item.variationTags.includes("construction-corpus"));
+  const frameCases = cases.filter((item) => item.id.startsWith("frame-"));
+  if (constructionCases.length !== 40 || frameCases.length !== 60) {
+    throw new Error(`scientific prose diversity drift: constructions=${constructionCases.length} frames=${frameCases.length}`);
+  }
+}
 
 function declarationCase(
   id: string,
