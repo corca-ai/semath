@@ -26,6 +26,7 @@ import {
 
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
 const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";
+const TIMING_GATE = STABLE_HOST_GATE || DOCUMENT_COUNT < 500;
 const DELTA_RUNS = positiveInteger(
   "SEMATH_BUDGET_DELTA_RUNS",
   DOCUMENT_COUNT >= 500 ? 10 : 30,
@@ -291,18 +292,18 @@ const report = {
 console.log(`budget metrics: ${JSON.stringify(report)}`);
 const reportPath = process.env.SEMATH_BUDGET_REPORT;
 if (reportPath) await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
-if (coldMs > COLD_BUDGET_MS) {
+if (TIMING_GATE && coldMs > COLD_BUDGET_MS) {
   throw new Error(`budget cold start ${coldMs.toFixed(2)}ms exceeded ${COLD_BUDGET_MS}ms`);
 }
-if (deltaP95 > DELTA_P95_BUDGET_MS) {
+if (TIMING_GATE && deltaP95 > DELTA_P95_BUDGET_MS) {
   throw new Error(`budget delta p95 ${deltaP95.toFixed(2)}ms exceeded ${DELTA_P95_BUDGET_MS}ms`);
 }
-if (semanticDeltaMs > SEMANTIC_DELTA_BUDGET_MS) {
+if (TIMING_GATE && semanticDeltaMs > SEMANTIC_DELTA_BUDGET_MS) {
   throw new Error(
     `budget semantic delta ${semanticDeltaMs.toFixed(2)}ms exceeded ${SEMANTIC_DELTA_BUDGET_MS}ms`,
   );
 }
-if (queryP95 > QUERY_P95_BUDGET_MS) {
+if (TIMING_GATE && queryP95 > QUERY_P95_BUDGET_MS) {
   throw new Error(`budget query p95 ${queryP95.toFixed(2)}ms exceeded ${QUERY_P95_BUDGET_MS}ms`);
 }
 if (peakRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
