@@ -168,6 +168,9 @@ fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec
             }
         }
         NotationNodeKind::Command => {
+            if is_spacing_command(node.name.as_deref()) {
+                return;
+            }
             push(
                 tokens,
                 TokenKind::Command(node.name.clone().unwrap_or_default()),
@@ -177,8 +180,24 @@ fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec
             }
         }
         NotationNodeKind::Opaque | NotationNodeKind::Error => {}
+        NotationNodeKind::Delimiter => {
+            let delimiters = match node.name.as_deref() {
+                Some("()") => Some(('(', ')')),
+                Some("[]") => Some(('[', ']')),
+                Some("{}") => Some(('{', '}')),
+                _ => None,
+            };
+            if let Some((open, _)) = delimiters {
+                push(tokens, TokenKind::Open(open));
+            }
+            for child in &node.children {
+                emit_snapshot_node(document, *child, tokens);
+            }
+            if let Some((_, close)) = delimiters {
+                push(tokens, TokenKind::Close(close));
+            }
+        }
         NotationNodeKind::Sequence
-        | NotationNodeKind::Delimiter
         | NotationNodeKind::Alignment
         | NotationNodeKind::Environment => {
             for child in &node.children {
@@ -186,6 +205,25 @@ fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec
             }
         }
     }
+}
+
+fn is_spacing_command(name: Option<&str>) -> bool {
+    matches!(
+        name,
+        Some(
+            " " | ","
+                | ":"
+                | ";"
+                | "!"
+                | "quad"
+                | "qquad"
+                | "enspace"
+                | "thinspace"
+                | "medspace"
+                | "thickspace"
+                | "negthinspace"
+        )
+    )
 }
 
 fn syntax_provenance(node: &crate::NotationNode) -> Vec<SourceRange> {
@@ -1274,7 +1312,8 @@ fn merge_provenance(left: &SemanticExpr, right: &SemanticExpr) -> Vec<SourceRang
 
 #[cfg(test)]
 mod tests {
-    use super::{SemanticExprKind, lower_template};
+    use super::{SemanticExprKind, lower_document_region, lower_template, render_canonical};
+    use crate::{ProjectDocument, SourceRange};
 
     #[test]
     fn presentation_forms_share_the_same_semantic_symbol() {
@@ -1317,5 +1356,47 @@ mod tests {
             SemanticExprKind::Apply { ref operator, ref arguments }
                 if operator == "compose" && arguments.len() == 2
         ));
+    }
+
+    #[test]
+    fn snapshot_lowering_preserves_delimiters_and_ignores_spacing_commands() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 4,
+            "fileId": "main",
+            "path": "main.tex",
+            "language": "latex",
+            "content": "v(t)=R\\,i(t)",
+            "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"v"},
+                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"t"},
+                {"kind":"delimiter","parent":9,"children":[1],"ranges":{"full":{"startOffset":1,"endOffset":4}},"state":"complete","name":"()"},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":4,"endOffset":5}},"state":"complete","text":"="},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":5,"endOffset":6}},"state":"complete","text":"R"},
+                {"kind":"command","parent":9,"children":[],"ranges":{"full":{"startOffset":6,"endOffset":8}},"state":"complete","name":","},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":8,"endOffset":9}},"state":"complete","text":"i"},
+                {"kind":"token","parent":8,"children":[],"ranges":{"full":{"startOffset":10,"endOffset":11}},"state":"complete","text":"t"},
+                {"kind":"delimiter","parent":9,"children":[7],"ranges":{"full":{"startOffset":9,"endOffset":12}},"state":"complete","name":"()"},
+                {"kind":"sequence","parent":null,"children":[0,2,3,4,5,6,8],"ranges":{"full":{"startOffset":0,"endOffset":12}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":9,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":12},"contentRange":{"startOffset":0,"endOffset":12},"state":"complete"}],
+            "visibleProse": [],
+            "scopes": [{"kind":"document","parent":null,"range":{"startOffset":0,"endOffset":12},"state":"complete"}],
+            "declarations": [],
+            "macros": [],
+            "includes": []
+        }))
+        .unwrap();
+        let expression = lower_document_region(
+            &document,
+            &SourceRange {
+                start_offset: 0,
+                end_offset: 12,
+            },
+        );
+        assert_eq!(
+            render_canonical(&expression),
+            "relation(equals,apply(v,symbol(t)),product(symbol(R),apply(i,symbol(t))))"
+        );
     }
 }
