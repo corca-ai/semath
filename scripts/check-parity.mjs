@@ -82,7 +82,7 @@ if (reset.stats.totalDocuments !== sources.length || reset.stats.semanticNodes <
 const established = wasmResults[0]?.value;
 if (
   established?.kind !== "semanticView" ||
-  established.view.status !== "established" ||
+  established.view.decision.status !== "established" ||
   established.view.context.relations.length !== 1
 ) {
   throw new Error(
@@ -90,7 +90,10 @@ if (
   );
 }
 const refused = wasmResults[1]?.value;
-if (refused?.kind !== "semanticView" || refused.view.status === "established") {
+if (
+  refused?.kind !== "semanticView" ||
+  refused.view.decision.status === "established"
+) {
   throw new Error("parity unsupported algebraic scenario was not safely refused");
 }
 

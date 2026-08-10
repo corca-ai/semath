@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 6 as const;
+export const SEMATH_PROTOCOL_VERSION = 7 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 4 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -315,7 +315,7 @@ export interface LawRecognition {
   rank: number;
   relation?: RelationInfo;
   result: SemanticConstraint;
-  status: "condition-missing" | "recognized" | "verified";
+  status: "condition-missing" | "conflicting" | "recognized" | "verified";
   title: string;
 }
 
@@ -327,15 +327,67 @@ export interface RenamePreparation {
 
 export interface SemanticViewInfo {
   context: SemanticContextInfo;
+  decision: MeaningDecision;
   declarations: readonly Location[];
   diagnostics: readonly SemanticDiagnostic[];
   domains: readonly DomainActivation[];
-  refusal?: string;
-  status:
-    "ambiguous" | "conflicting" | "established" | "partial" | "unsupported";
-  summary: string;
   symbol?: SymbolInfo;
   truncated: boolean;
+}
+
+export type MeaningDecision =
+  | {
+      status: "established";
+      summary: string;
+      relationId: string;
+      evidence: readonly Evidence[];
+    }
+  | {
+      status: "partial";
+      summary: string;
+      facts: readonly MeaningFact[];
+      missing: readonly MeaningRequirement[];
+    }
+  | {
+      status: "ambiguous";
+      summary: string;
+      alternatives: readonly MeaningAlternative[];
+    }
+  | {
+      status: "conflicting";
+      summary: string;
+      conflicts: readonly MeaningConflict[];
+    }
+  | {
+      status: "unsupported";
+      summary: string;
+      missing: readonly MeaningRequirement[];
+    };
+
+export interface MeaningFact {
+  evidence: readonly Evidence[];
+  factId: string;
+  label: string;
+}
+
+export interface MeaningRequirement {
+  evidence: readonly Evidence[];
+  label: string;
+  requirementId: string;
+  subjects: readonly string[];
+}
+
+export interface MeaningAlternative {
+  alternativeId: string;
+  evidence: readonly Evidence[];
+  label: string;
+  range: SourceRange;
+}
+
+export interface MeaningConflict {
+  conflictId: string;
+  evidence: readonly Evidence[];
+  label: string;
 }
 
 export interface SemanticTextEdit {

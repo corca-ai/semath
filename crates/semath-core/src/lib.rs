@@ -4,6 +4,7 @@ mod canonical;
 mod consistency;
 mod cross_modal;
 mod cursor;
+mod decision;
 mod domain;
 mod engine;
 mod hygiene;

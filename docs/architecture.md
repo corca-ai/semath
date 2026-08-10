@@ -167,11 +167,12 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 6 exposes selection, `semanticView`, definition, references, rename,
-and diagnostics. `semanticView` is meaning-first: summary, roles, conditions,
-explicit assumptions, evidence, declarations, conflicts, and refusal are
-public; raw parser trees are not. Native, WASM, Worker, LSP, and CorTeX consume
-the same result model.
+Protocol 7 exposes selection, `semanticView`, definition, references, rename,
+and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
+established, partial, ambiguous, conflicting, or unsupported. Summary text is
+a projection of that typed decision; it never selects policy. Native, WASM,
+Worker, LSP, and CorTeX consume the same result model, and raw parser trees are
+not public.
 
 Breaking API or UI changes are acceptable before 1.0 when they remove a
 duplicate path or produce a cleaner architecture. Compatibility layers must not

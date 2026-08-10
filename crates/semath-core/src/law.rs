@@ -8,9 +8,9 @@ use crate::prose::{FormulaOperationKind, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
-    ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition, QuantityInfo,
-    RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
-    SemanticConstraintKind, ShapeInfo,
+    ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition, LawRecognitionStatus,
+    QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind,
+    SemanticConstraint, SemanticConstraintKind, ShapeInfo,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -1687,7 +1687,7 @@ fn recognition(
         })
         .flatten()
         .collect();
-    let conditions = compiled
+    let conditions: Vec<LawConditionInfo> = compiled
         .law
         .conditions
         .iter()
@@ -1723,6 +1723,23 @@ fn recognition(
             }
         })
         .collect();
+    let status = if conditions
+        .iter()
+        .any(|condition| condition.status == ConstraintStatus::Conflicting)
+    {
+        LawRecognitionStatus::Conflicting
+    } else if conditions.iter().any(|condition| {
+        matches!(
+            condition.status,
+            ConstraintStatus::Required | ConstraintStatus::Unsupported
+        )
+    }) {
+        LawRecognitionStatus::ConditionMissing
+    } else if conditions.is_empty() {
+        LawRecognitionStatus::Recognized
+    } else {
+        LawRecognitionStatus::Verified
+    };
     let evidence = vec![formula_evidence.clone()];
     LawRecognition {
         law_id: compiled.law.id.clone(),
@@ -1730,7 +1747,7 @@ fn recognition(
         description: compiled.law.description.clone(),
         description_key: compiled.law.id.clone(),
         maturity: "recognition".into(),
-        status: "established".into(),
+        status,
         pack_id: compiled.pack_id.into(),
         pack_version: compiled.pack_version.into(),
         range: actual.range.clone(),

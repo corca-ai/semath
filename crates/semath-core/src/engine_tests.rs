@@ -1,10 +1,10 @@
 use super::SemathEngine;
 use crate::parser::test_math_regions;
 use crate::{
-    ChangeEnvelope, DocumentLanguage, PROTOCOL_VERSION, ProjectChange, ProjectDocument,
-    ProjectInclude, ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus,
-    ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query, QueryEnvelope, QueryValue,
-    SourceRange,
+    ChangeEnvelope, DocumentLanguage, MeaningDecision, PROTOCOL_VERSION, ProjectChange,
+    ProjectDocument, ProjectInclude, ProjectMacro, ProjectMacroExpansion,
+    ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query,
+    QueryEnvelope, QueryValue, SourceRange,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -93,8 +93,11 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert_eq!(view.status, "established");
-    assert_eq!(view.summary, "Mechanical power");
+    assert!(matches!(
+        &view.decision,
+        MeaningDecision::Partial { summary, missing, .. }
+            if summary == "Mechanical power" && !missing.is_empty()
+    ));
     assert_eq!(
         view.context.relations[0].relation_id,
         "classical-mechanics:mechanical-power"
@@ -107,7 +110,6 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
             .collect::<Vec<_>>(),
         ["power", "force", "velocity"],
     );
-    assert!(view.refusal.is_none());
 }
 
 #[test]
@@ -136,8 +138,10 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
         let QueryValue::SemanticView { view } = result.value else {
             panic!("expected semantic view")
         };
-        assert_eq!(view.status, "established", "offset {offset}");
-        assert_eq!(view.summary, "Mechanical power", "offset {offset}");
+        assert!(
+            matches!(&view.decision, MeaningDecision::Partial { summary, .. } if summary == "Mechanical power"),
+            "offset {offset}"
+        );
     }
 }
 
@@ -188,7 +192,7 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert_eq!(view.status, "established");
+    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
     let relation = &view.context.relations[0];
     assert!(relation.evidence[0].source_ranges[0].contains(invocation_start));
 }
@@ -211,8 +215,10 @@ fn unsupported_formula_refuses_instead_of_guessing() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert_eq!(view.status, "unsupported");
-    assert!(view.refusal.is_some());
+    assert!(matches!(
+        view.decision,
+        MeaningDecision::Unsupported { ref missing, .. } if !missing.is_empty()
+    ));
     assert!(view.context.relations.is_empty());
 }
 
@@ -377,7 +383,7 @@ fn included_type_declarations_drive_project_law_inference() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert_eq!(view.status, "established");
+    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
     assert_eq!(view.context.relations[0].relation_id, "circuits:ohm-law");
 
     let symbol_result = engine

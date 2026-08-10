@@ -37,7 +37,7 @@ const observations = corpus.cases.map((item, index): ChallengeObservation => {
     ...(view?.symbol?.sourceNotation
       ? { sourceNotation: view.symbol.sourceNotation }
       : {}),
-    ...(view ? { status: view.status } : {}),
+    ...(view ? { status: view.decision.status } : {}),
     symbols: [...new Set(view?.symbol ? [view.symbol.symbol] : [])],
   };
   if (debugIds.has(item.id)) console.error(JSON.stringify({ item, observation, view }, null, 2));

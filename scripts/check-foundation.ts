@@ -50,7 +50,7 @@ const observations = planned.map((item, index): FoundationObservation => {
       entry.quantityKindId ? [entry.quantityKindId] : [],
     ))],
     relationIds: [...new Set((view?.context.relations ?? []).map((entry) => entry.relationId))],
-    ...(view ? { status: view.status } : {}),
+    ...(view ? { status: view.decision.status } : {}),
     suiteId: item.suite.id,
     symbols: [...new Set([
       ...quantities.map((entry) => entry.symbol),

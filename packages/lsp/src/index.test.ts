@@ -75,7 +75,7 @@ describe("SemathLspServer", () => {
     expect(response(messages, 3).contents.value).toContain("the input");
     expect(response(messages, 4)).toMatchObject({
       kind: "semanticView",
-      view: { symbol: { symbol: "x" }, status: "partial" },
+      view: { decision: { status: "partial" }, symbol: { symbol: "x" } },
     });
     expect(
       messages.some(
@@ -345,8 +345,10 @@ describe("SemathLspServer", () => {
     });
     expect(response(messages, 191)).toMatchObject({
       view: {
-        status: "partial",
-        summary: "expected calibration error",
+        decision: {
+          status: "partial",
+          summary: "expected calibration error",
+        },
         symbol: {
           sourceNotation: "\\operatorname{ECE}",
           symbol: "ECE",
@@ -701,7 +703,7 @@ describe("SemathLspServer", () => {
             },
           ],
         },
-        status: "established",
+        decision: { status: "established" },
       },
     });
     server.dispose();
