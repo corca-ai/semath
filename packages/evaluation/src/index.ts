@@ -1,4 +1,5 @@
 export * from "./conformance";
+export * from "./challenge";
 export * from "./foundation";
 export * from "./metamorphic";
 export * from "./model";

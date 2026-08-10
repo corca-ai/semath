@@ -1,21 +1,12 @@
-import { spawnSync } from "node:child_process";
-import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   type FoundationObservation,
   scoreFoundation,
 } from "../packages/evaluation/src/index";
 import {
-  SEMATH_PROTOCOL_VERSION,
-  type DocumentLanguage,
-  type ProjectDocument,
-  type QueryEnvelope,
-  type QueryResult,
-} from "../packages/protocol/src/index";
-import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index";
-import {
   loadFoundationFixtures,
   loadQualityFixtures,
 } from "./evaluation-fixtures";
+import { runSemanticEvaluation } from "./semantic-evaluation-runner";
 
 const { manifest } = await loadQualityFixtures();
 const corpora = await loadFoundationFixtures(manifest);
@@ -24,76 +15,14 @@ const planned = manifest.foundationSuites.flatMap((suite) => {
   if (!corpus) throw new Error(`${suite.id}: foundation corpus was not loaded`);
   return corpus.cases.map((item) => ({ case: item, suite }));
 });
-const documents: ProjectDocument[] = [];
-const queries: QueryEnvelope[] = [];
-for (const item of planned) {
-  const prefix = `${item.suite.id}/${item.case.id}/`;
-  const inputs = item.case.documents.map((document) => ({
-    ...document,
-    fileId: prefix + document.fileId,
-    path: prefix + document.path,
-  }));
-  const syntax = new LatexSyntaxService();
-  syntax.reset({
-    documents: inputs.map((document) => ({ ...document, documentVersion: 1 })),
-  });
-  for (const input of inputs) {
-    const snapshot = syntax.getFile(input.fileId);
-    if (!snapshot) throw new Error(`${item.suite.id}/${item.case.id}: missing syntax`);
-    documents.push(
-      adaptWasmtexDocument({
-        content: input.content,
-        language: languageOf(input.path),
-        syntax: snapshot,
-      }),
-    );
-  }
-  const cursorDocument = inputs.find(
-    (document) => document.fileId === prefix + item.case.cursor.fileId,
-  );
-  if (!cursorDocument) throw new Error(`${item.case.id}: unknown cursor document`);
-  const first = cursorDocument.content.indexOf(item.case.cursor.needle);
-  const last = cursorDocument.content.lastIndexOf(item.case.cursor.needle);
-  if (first < 0 || first !== last) throw new Error(`${item.case.id}: ambiguous cursor needle`);
-  queries.push({
-    analysisGeneration: 0,
-    documentVersion: 1,
-    epoch: "foundation-corpus",
-    inventoryVersion: 1,
-    protocolVersion: SEMATH_PROTOCOL_VERSION,
-    query: {
-      fileId: prefix + item.case.cursor.fileId,
-      kind: "semanticView",
-      offset: item.case.cursor.edge === "after"
-        ? first + item.case.cursor.needle.length
-        : first,
-    },
-  });
-}
-
-const native = spawnSync(
-  "cargo",
-  ["run", "--quiet", "--locked", "-p", "semath-native"],
-  {
-    encoding: "utf8",
-    input: JSON.stringify({
-      queries,
-      snapshot: {
-        documents,
-        epoch: "foundation-corpus",
-        inventoryVersion: 1,
-        projectId: "foundation-corpus",
-        protocolVersion: SEMATH_PROTOCOL_VERSION,
-      },
-    }),
-    maxBuffer: 64 * 1024 * 1024,
-  },
+const results = runSemanticEvaluation(
+  planned.map((item) => ({
+    cursor: item.case.cursor,
+    documents: item.case.documents,
+    id: `${item.suite.id}/${item.case.id}`,
+  })),
+  "foundation-corpus",
 );
-if (native.status !== 0) throw new Error(native.stderr || "native foundation run failed");
-const results = JSON.parse(native.stdout) as QueryResult[];
-if (results.length !== planned.length) {
-  throw new Error(`native foundation run returned ${results.length}/${planned.length}`);
-}
 
 const observations = planned.map((item, index): FoundationObservation => {
   const result = results[index];
@@ -149,8 +78,4 @@ for (const suite of manifest.foundationSuites) {
   if (scorecard.failures.length) {
     throw new Error(`foundation quality gate failed:\n${scorecard.failures.join("\n")}`);
   }
-}
-
-function languageOf(path: string): DocumentLanguage {
-  return /\.md$/iu.test(path) ? "markdown" : "latex";
 }

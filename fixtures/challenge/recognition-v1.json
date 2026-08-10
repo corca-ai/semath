@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "binding-metric-long-short",
+      "owner": "binding",
+      "metric": "association",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "The balanced accuracy score (BAS) summarizes the classifier. We report $\\operatorname{BAS}=0.8$." }],
+      "cursor": { "fileId": "main", "needle": "\\operatorname{BAS}", "edge": "after" },
+      "expectation": { "symbol": "BAS", "definitionDescription": "balanced accuracy score" },
+      "variationTags": ["acronym", "english-context", "named-operator"]
+    },
+    {
+      "id": "binding-hedged-name-refusal",
+      "owner": "binding",
+      "metric": "refusal",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "BAS might stand for balanced accuracy score. The table contains $\\operatorname{BAS}$." }],
+      "cursor": { "fileId": "main", "needle": "\\operatorname{BAS}", "edge": "before" },
+      "expectation": { "excludedDefinitionSymbol": "BAS" },
+      "variationTags": ["acronym", "hedged", "safe-refusal"]
+    },
+    {
+      "id": "binding-respectively-circuit",
+      "owner": "binding",
+      "metric": "recognition",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $u$, $r$, and $j$ denote voltage, resistance, and electric current, respectively. Hence $u=rj$." }],
+      "cursor": { "fileId": "main", "needle": "u=rj", "edge": "after" },
+      "expectation": { "relationId": "circuits:ohm-law" },
+      "variationTags": ["respectively", "symbol-renaming", "typed"]
+    },
+    {
+      "id": "binding-role-collision-refusal",
+      "owner": "binding",
+      "metric": "constraint",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $u$ be voltage, $r$ resistance, and $j$ a differentiable function. Consider $u=rj$." }],
+      "cursor": { "fileId": "main", "needle": "u=rj", "edge": "before" },
+      "expectation": { "excludedRelationId": "circuits:ohm-law" },
+      "variationTags": ["role-conflict", "safe-refusal", "typed"]
+    },
+    {
+      "id": "constraint-matrix-vector-compatible",
+      "owner": "constraint",
+      "metric": "constraint",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $H$ be an m by n matrix, $q$ an n-dimensional vector, and $z$ an m-dimensional vector. Then $z=Hq$." }],
+      "cursor": { "fileId": "main", "needle": "z=Hq", "edge": "after" },
+      "expectation": { "relationId": "linear-algebra:matrix-vector-product" },
+      "variationTags": ["explicit-shapes", "matrix-vector", "typed"]
+    },
+    {
+      "id": "constraint-matrix-vector-mismatch",
+      "owner": "constraint",
+      "metric": "refusal",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $H$ be an m by n matrix, $q$ a k-dimensional vector with $k\\ne n$, and $z$ an m-dimensional vector. Consider $z=Hq$." }],
+      "cursor": { "fileId": "main", "needle": "z=Hq", "edge": "before" },
+      "expectation": { "excludedRelationId": "linear-algebra:matrix-vector-product" },
+      "variationTags": ["dimension-mismatch", "safe-refusal", "wrong-shape"]
+    },
+    {
+      "id": "constraint-explicit-vector-shape",
+      "owner": "constraint",
+      "metric": "evidence",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "Let $w$ be a p-dimensional vector. The current iterate is $w$." }],
+      "cursor": { "fileId": "main", "needle": "iterate is $w", "edge": "after" },
+      "expectation": { "symbol": "w", "shape": "Vector[p]" },
+      "variationTags": ["explicit-shapes", "role-prose", "vector-notation"]
+    },
+    {
+      "id": "constraint-incompatible-role-refusal",
+      "owner": "constraint",
+      "metric": "recognition",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $A$ and $B$ be ordinary sets rather than events. The expression is $A\\cap B$." }],
+      "cursor": { "fileId": "main", "needle": "A\\cap B", "edge": "after" },
+      "expectation": { "excludedRelationId": "probability:event-intersection" },
+      "variationTags": ["notation-collision", "role-conflict", "safe-refusal"]
+    },
+    {
+      "id": "pack-unfamiliar-ohm-symbols",
+      "owner": "pack",
+      "metric": "recognition",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "In the resistor model, $e$ is voltage, $Z$ is resistance, and $k$ is electric current. Therefore $e=Zk$." }],
+      "cursor": { "fileId": "main", "needle": "e=Zk", "edge": "before" },
+      "expectation": { "relationId": "circuits:ohm-law" },
+      "variationTags": ["english-context", "symbol-renaming", "typed"]
+    },
+    {
+      "id": "pack-cross-field-product-refusal",
+      "owner": "pack",
+      "metric": "refusal",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $e$ be kinetic energy, $Z$ mass, and $k$ speed. The proposed relation is $e=Zk$." }],
+      "cursor": { "fileId": "main", "needle": "e=Zk", "edge": "after" },
+      "expectation": { "excludedRelationId": "circuits:ohm-law" },
+      "variationTags": ["cross-field", "role-mismatch", "safe-refusal"]
+    },
+    {
+      "id": "pack-event-intersection",
+      "owner": "pack",
+      "metric": "association",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Events $C$ and $D$ belong to one probability space. Their joint event is $D\\cap C$." }],
+      "cursor": { "fileId": "main", "needle": "D\\cap C", "edge": "before" },
+      "expectation": { "relationId": "probability:event-intersection" },
+      "variationTags": ["event", "reordered-roles", "typed"]
+    },
+    {
+      "id": "pack-set-event-collision",
+      "owner": "pack",
+      "metric": "evidence",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "The symbols $C$ and $D$ name subsets of a graph vertex set, not random events. We use $C\\cap D$." }],
+      "cursor": { "fileId": "main", "needle": "C\\cap D", "edge": "after" },
+      "expectation": { "excludedRelationId": "probability:event-intersection" },
+      "variationTags": ["cross-pack", "notation-collision", "safe-refusal"]
+    },
+    {
+      "id": "presentation-decorated-source",
+      "owner": "presentation",
+      "metric": "structure",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Compare the observation $y$ with its estimate $\\widehat{y}$." }],
+      "cursor": { "fileId": "main", "needle": "\\widehat{y}", "edge": "after" },
+      "expectation": { "symbol": "y", "sourceNotation": "\\widehat{y}", "candidateFamily": "decoration", "candidateInterpretation": "estimate" },
+      "variationTags": ["decorated", "source-preserving", "widehat"]
+    },
+    {
+      "id": "presentation-plain-not-decorated",
+      "owner": "presentation",
+      "metric": "structure",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The plain observation is $y$, while an estimate is written elsewhere." }],
+      "cursor": { "fileId": "main", "needle": "is $y", "edge": "after" },
+      "expectation": { "symbol": "y", "sourceNotation": "y" },
+      "variationTags": ["plain-symbol", "safe-separation", "source-preserving"]
+    },
+    {
+      "id": "presentation-named-surface",
+      "owner": "presentation",
+      "metric": "navigation",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "\\DeclareMathOperator{\\FPR}{FPR}\nThe result is $\\FPR(x)$." }],
+      "cursor": { "fileId": "main", "needle": "\\FPR(x)", "edge": "before" },
+      "expectation": { "symbol": "FPR", "sourceNotation": "\\FPR", "definitionDescription": "FPR" },
+      "variationTags": ["declaration", "named-operator", "source-preserving"]
+    },
+    {
+      "id": "presentation-opaque-command-refusal",
+      "owner": "presentation",
+      "metric": "refusal",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "An unresolved notation is $\\mysterymetric{x}$." }],
+      "cursor": { "fileId": "main", "needle": "\\mysterymetric{x}", "edge": "before" },
+      "expectation": { "excludedDefinitionSymbol": "\\mysterymetric" },
+      "variationTags": ["opaque-macro", "safe-refusal", "unknown-command"]
+    },
+    {
+      "id": "resolution-resource-navigation",
+      "owner": "resolution",
+      "metric": "navigation",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "\\newacronym{auprc}{AUPRC}{area under the precision recall curve}\nWe report $\\operatorname{AUPRC}$." }],
+      "cursor": { "fileId": "main", "needle": "\\operatorname{AUPRC}", "edge": "after" },
+      "expectation": { "symbol": "AUPRC", "definitionDescription": "area under the precision recall curve", "definitionRuleId": "latex-acronym-declaration" },
+      "variationTags": ["acronym-resource", "evidence", "navigation"]
+    },
+    {
+      "id": "resolution-future-definition-refusal",
+      "owner": "resolution",
+      "metric": "navigation",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "First we use $\\operatorname{AUPRC}$. Later, area under the precision recall curve (AUPRC) is introduced." }],
+      "cursor": { "fileId": "main", "needle": "\\operatorname{AUPRC}", "edge": "before" },
+      "expectation": { "excludedDefinitionSymbol": "AUPRC" },
+      "variationTags": ["forward-scope", "safe-refusal", "source-order"]
+    },
+    {
+      "id": "resolution-included-definition",
+      "owner": "resolution",
+      "metric": "scope",
+      "outcome": "positive",
+      "documents": [
+        { "fileId": "main", "path": "main.tex", "content": "\\input{terms}\nThe estimate is $s$." },
+        { "fileId": "terms", "path": "terms.tex", "content": "Let $s$ denote the latent system state." }
+      ],
+      "cursor": { "fileId": "main", "needle": "estimate is $s", "edge": "after" },
+      "expectation": { "symbol": "s", "definitionDescription": "the latent system state" },
+      "variationTags": ["included-declarations", "multi-file", "project-scope"]
+    },
+    {
+      "id": "resolution-disconnected-refusal",
+      "owner": "resolution",
+      "metric": "scope",
+      "outcome": "refusal",
+      "documents": [
+        { "fileId": "main", "path": "main.tex", "content": "The estimate is $s$." },
+        { "fileId": "unused", "path": "unused.tex", "content": "Let $s$ denote the latent system state." }
+      ],
+      "cursor": { "fileId": "main", "needle": "estimate is $s", "edge": "after" },
+      "expectation": { "excludedDefinitionSymbol": "s" },
+      "variationTags": ["safe-refusal", "unreachable-file", "unresolved-scope"]
+    },
+    {
+      "id": "syntax-partial-candidate",
+      "owner": "syntax",
+      "metric": "structure",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Consider the formal expression $\\partial f/\\partial x$." }],
+      "cursor": { "fileId": "main", "needle": "\\partial f/", "edge": "before" },
+      "expectation": { "candidateFamily": "differential", "candidateInterpretation": "derivative" },
+      "variationTags": ["calculus", "partial-derivative", "structural-candidate"]
+    },
+    {
+      "id": "syntax-unknown-differential-refusal",
+      "owner": "syntax",
+      "metric": "refusal",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The opaque form is $\\unknownpartial f/\\unknownpartial x$." }],
+      "cursor": { "fileId": "main", "needle": "\\unknownpartial f", "edge": "before" },
+      "expectation": { "excludedDefinitionSymbol": "\\unknownpartial" },
+      "variationTags": ["opaque-macro", "safe-refusal", "unknown-command"]
+    },
+    {
+      "id": "syntax-integral-binder",
+      "owner": "syntax",
+      "metric": "constraint",
+      "outcome": "positive",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The accumulated quantity is $\\int_0^1 g(t)\\,dt$." }],
+      "cursor": { "fileId": "main", "needle": "\\int", "edge": "after" },
+      "expectation": { "candidateFamily": "binder", "candidateInterpretation": "binder" },
+      "variationTags": ["binder", "integral", "limits"]
+    },
+    {
+      "id": "syntax-index-family",
+      "owner": "syntax",
+      "metric": "evidence",
+      "outcome": "refusal",
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Without a declaration, $a_{ij}$ remains an indexed surface rather than a guessed tensor." }],
+      "cursor": { "fileId": "main", "needle": "a_{ij}", "edge": "after" },
+      "expectation": { "candidateFamily": "script", "candidateInterpretation": "index", "excludedConceptId": "linear-algebra:tensor" },
+      "variationTags": ["indexed-symbols", "safe-refusal", "structural-candidate"]
+    }
+  ]
+}
