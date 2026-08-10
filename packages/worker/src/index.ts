@@ -7,9 +7,11 @@ import type {
 
 interface WasmEngine {
   applyChanges(payload: Uint8Array): Uint8Array;
+  beginReset(payload: Uint8Array): void;
+  finishReset(): Uint8Array;
   free(): void;
+  ingestResetDocument(payload: Uint8Array): void;
   query(payload: Uint8Array): Uint8Array;
-  resetProject(payload: Uint8Array): Uint8Array;
 }
 
 interface WasmModule {
@@ -30,20 +32,27 @@ export class SemathWorkerEngine {
   }
 
   reset(snapshot: ProjectSnapshot) {
-    return decode(this.engine.resetProject(encoder.encode(JSON.stringify(snapshot))));
+    const { documents, ...metadata } = snapshot;
+    this.engine.beginReset(encode(metadata));
+    for (const document of documents) this.engine.ingestResetDocument(encode(document));
+    return decode(this.engine.finishReset());
   }
 
   apply(changes: ChangeEnvelope) {
-    return decode(this.engine.applyChanges(encoder.encode(JSON.stringify(changes))));
+    return decode(this.engine.applyChanges(encode(changes)));
   }
 
   query(envelope: QueryEnvelope): QueryResult {
-    return decode(this.engine.query(encoder.encode(JSON.stringify(envelope))));
+    return decode(this.engine.query(encode(envelope)));
   }
 
   dispose(): void {
     this.engine.free();
   }
+}
+
+function encode(value: unknown): Uint8Array {
+  return encoder.encode(JSON.stringify(value));
 }
 
 function decode<T>(payload: Uint8Array): T {

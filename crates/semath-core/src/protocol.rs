@@ -317,6 +317,16 @@ pub struct ProjectSnapshot {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectSnapshotMetadata {
+    pub protocol_version: u32,
+    pub epoch: String,
+    pub inventory_version: u64,
+    pub project_id: String,
+    pub main_file_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
 pub enum ProjectChange {
     Upsert {

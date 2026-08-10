@@ -34,6 +34,8 @@ export interface ProjectSnapshot {
   protocolVersion: typeof SEMATH_PROTOCOL_VERSION;
 }
 
+export type ProjectSnapshotMetadata = Omit<ProjectSnapshot, "documents">;
+
 export type ProjectChange =
   | { document: ProjectDocument; kind: "upsert" }
   | { fileId: string; kind: "path-change"; path: string }

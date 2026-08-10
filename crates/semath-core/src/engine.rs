@@ -20,10 +20,10 @@ use crate::semantic_index::{
 };
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
-    ProjectChange, ProjectDocument, ProjectSnapshot, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticContextInfo, SemanticDiagnostic,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
-    SourceRange, SymbolInfo, UpdateResult,
+    ProjectChange, ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query,
+    QueryEnvelope, QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticContextInfo,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
+    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -589,22 +589,45 @@ pub struct SemathEngine {
 
 impl SemathEngine {
     pub fn reset(&mut self, snapshot: ProjectSnapshot) -> Result<UpdateResult, EngineError> {
-        check_protocol(snapshot.protocol_version)?;
-        let changed_file_ids = snapshot
-            .documents
-            .iter()
-            .map(|doc| doc.file_id.clone())
-            .collect::<Vec<_>>();
-        self.epoch = snapshot.epoch;
-        self.inventory_version = snapshot.inventory_version;
-        self.project_id = snapshot.project_id;
-        self.main_file_id = snapshot.main_file_id;
-        self.analysis_generation = 0;
-        self.index.documents.clear();
-        self.index.facts.clear();
-        for document in snapshot.documents {
-            self.index.replace(document)?;
+        let ProjectSnapshot {
+            protocol_version,
+            epoch,
+            inventory_version,
+            project_id,
+            main_file_id,
+            documents,
+        } = snapshot;
+        self.begin_reset(ProjectSnapshotMetadata {
+            protocol_version,
+            epoch,
+            inventory_version,
+            project_id,
+            main_file_id,
+        })?;
+        for document in documents {
+            self.ingest_reset_document(document)?;
         }
+        self.finish_reset()
+    }
+
+    pub fn begin_reset(&mut self, metadata: ProjectSnapshotMetadata) -> Result<(), EngineError> {
+        check_protocol(metadata.protocol_version)?;
+        self.epoch = metadata.epoch;
+        self.inventory_version = metadata.inventory_version;
+        self.project_id = metadata.project_id;
+        self.main_file_id = metadata.main_file_id;
+        self.analysis_generation = 0;
+        self.index = ProjectState::default();
+        Ok(())
+    }
+
+    pub fn ingest_reset_document(&mut self, document: ProjectDocument) -> Result<(), EngineError> {
+        self.index.replace(document)
+    }
+
+    pub fn finish_reset(&mut self) -> Result<UpdateResult, EngineError> {
+        let mut changed_file_ids = self.index.documents.keys().cloned().collect::<Vec<_>>();
+        changed_file_ids.sort();
         self.refresh_project_topology();
         self.refresh_project_laws(&changed_file_ids.iter().cloned().collect());
         self.index.rebuild_semantic_index()?;
@@ -826,6 +849,18 @@ impl SemathEngine {
     pub fn reset_json(&mut self, payload: &[u8]) -> Result<Vec<u8>, EngineError> {
         let result = self.reset(serde_json::from_slice(payload)?)?;
         Ok(serde_json::to_vec(&result)?)
+    }
+
+    pub fn begin_reset_json(&mut self, payload: &[u8]) -> Result<(), EngineError> {
+        self.begin_reset(serde_json::from_slice(payload)?)
+    }
+
+    pub fn ingest_reset_document_json(&mut self, payload: &[u8]) -> Result<(), EngineError> {
+        self.ingest_reset_document(serde_json::from_slice(payload)?)
+    }
+
+    pub fn finish_reset_json(&mut self) -> Result<Vec<u8>, EngineError> {
+        Ok(serde_json::to_vec(&self.finish_reset()?)?)
     }
 
     pub fn apply_json(&mut self, payload: &[u8]) -> Result<Vec<u8>, EngineError> {

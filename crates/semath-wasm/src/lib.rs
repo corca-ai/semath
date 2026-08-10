@@ -32,6 +32,27 @@ impl SemathEngine {
             .map_err(|error| JsError::new(&error.to_string()))
     }
 
+    #[wasm_bindgen(js_name = beginReset)]
+    pub fn begin_reset(&mut self, payload: &[u8]) -> Result<(), JsError> {
+        self.core
+            .begin_reset_json(payload)
+            .map_err(|error| JsError::new(&error.to_string()))
+    }
+
+    #[wasm_bindgen(js_name = ingestResetDocument)]
+    pub fn ingest_reset_document(&mut self, payload: &[u8]) -> Result<(), JsError> {
+        self.core
+            .ingest_reset_document_json(payload)
+            .map_err(|error| JsError::new(&error.to_string()))
+    }
+
+    #[wasm_bindgen(js_name = finishReset)]
+    pub fn finish_reset(&mut self) -> Result<Vec<u8>, JsError> {
+        self.core
+            .finish_reset_json()
+            .map_err(|error| JsError::new(&error.to_string()))
+    }
+
     #[wasm_bindgen(js_name = applyChanges)]
     pub fn apply_changes(&mut self, payload: &[u8]) -> Result<Vec<u8>, JsError> {
         self.core
