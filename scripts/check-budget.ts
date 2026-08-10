@@ -221,6 +221,29 @@ const syntaxStats = syntax.getStats() as ReturnType<LatexSyntaxService["getStats
   recoveredNodes?: number;
   snapshotBytes?: number;
 };
+const report = {
+  affectedDocuments: maxAffected,
+  coldMs,
+  deltaMedianMs: deltaMedian,
+  deltaP95Ms: deltaP95,
+  documents: DOCUMENT_COUNT + 1,
+  fixtureFamilies: [...new Set(sources.map((source) => source.family))],
+  peakRssGrowthBytes: peakRssGrowth,
+  queryP95ByKind,
+  retainedRssGrowthBytes: retainedRssGrowth,
+  syntax: {
+    deltaP95Ms: syntaxP95,
+    notationNodes: syntaxStats.notationNodes ?? null,
+    parseCount: syntaxStats.parseCount,
+    recoveredNodes: syntaxStats.recoveredNodes ?? null,
+    snapshotBytes: syntaxStats.snapshotBytes ?? null,
+  },
+  transferBytes: maxTransferBytes,
+  wasmArtifactBytes,
+};
+console.log(`budget metrics: ${JSON.stringify(report)}`);
+const reportPath = process.env.SEMATH_BUDGET_REPORT;
+if (reportPath) await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 if (coldMs > COLD_BUDGET_MS) {
   throw new Error(`budget cold start ${coldMs.toFixed(2)}ms exceeded ${COLD_BUDGET_MS}ms`);
 }
@@ -249,29 +272,7 @@ if (
 if (maxTransferBytes > MAX_TRANSFER_BYTES) {
   throw new Error(`budget delta transfer ${maxTransferBytes}B exceeded ${MAX_TRANSFER_BYTES}B`);
 }
-const report = {
-  affectedDocuments: maxAffected,
-  coldMs,
-  deltaMedianMs: deltaMedian,
-  deltaP95Ms: deltaP95,
-  documents: DOCUMENT_COUNT + 1,
-  fixtureFamilies: [...new Set(sources.map((source) => source.family))],
-  peakRssGrowthBytes: peakRssGrowth,
-  queryP95ByKind,
-  retainedRssGrowthBytes: retainedRssGrowth,
-  syntax: {
-    deltaP95Ms: syntaxP95,
-    notationNodes: syntaxStats.notationNodes ?? null,
-    parseCount: syntaxStats.parseCount,
-    recoveredNodes: syntaxStats.recoveredNodes ?? null,
-    snapshotBytes: syntaxStats.snapshotBytes ?? null,
-  },
-  transferBytes: maxTransferBytes,
-  wasmArtifactBytes,
-};
-console.log(`budget OK: ${JSON.stringify(report)}`);
-const reportPath = process.env.SEMATH_BUDGET_REPORT;
-if (reportPath) await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+console.log("budget OK");
 
 function operations(engine: SemathEngine): SemathWorkerOperations {
   return {
