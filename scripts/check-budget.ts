@@ -62,7 +62,10 @@ const rssBefore = residentBytes();
 const coldStarted = performance.now();
 
 const syntax = new LatexSyntaxService();
+const syntaxColdStarted = performance.now();
 syntax.reset({ documents: [main, ...sources] });
+const syntaxColdMs = performance.now() - syntaxColdStarted;
+const adapterColdStarted = performance.now();
 const documents = [main, ...sources].map((source) => {
   const fileSyntax = syntax.getFile(source.fileId);
   if (!fileSyntax) throw new Error(`missing syntax for ${source.fileId}`);
@@ -72,6 +75,7 @@ const documents = [main, ...sources].map((source) => {
     syntax: fileSyntax,
   });
 });
+const adapterColdMs = performance.now() - adapterColdStarted;
 const snapshot: ProjectSnapshot = {
   documents,
   epoch: "quality-budget",
@@ -85,11 +89,13 @@ const worker = createWorkerHost(async () => {
   await init({ module_or_path: wasm });
   return operations(new SemathEngine());
 });
+const engineColdStarted = performance.now();
 const initial = await worker.request<UpdateResult>({
   id: worker.nextId(),
   kind: "reset",
   snapshot,
 });
+const engineColdMs = performance.now() - engineColdStarted;
 const coldMs = performance.now() - coldStarted;
 assertCounters(initial, DOCUMENT_COUNT + 1);
 
@@ -259,16 +265,20 @@ const syntaxStats = syntax.getStats() as ReturnType<LatexSyntaxService["getStats
 };
 const report = {
   affectedDocuments: maxAffected,
+  adapterColdMs,
+  analysis: initial.stats,
   coldMs,
   deltaMedianMs: deltaMedian,
   deltaP95Ms: deltaP95,
   documents: DOCUMENT_COUNT + 1,
+  engineColdMs,
   fixtureFamilies: [...new Set(sources.map((source) => source.family))],
   peakRssGrowthBytes: peakRssGrowth,
   queryP95ByKind,
   retainedRssGrowthBytes: retainedRssGrowth,
   semanticDeltaMs,
   syntax: {
+    coldMs: syntaxColdMs,
     deltaP95Ms: syntaxP95,
     notationNodes: syntaxStats.notationNodes ?? null,
     parseCount: syntaxStats.parseCount,
