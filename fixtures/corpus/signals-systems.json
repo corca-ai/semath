@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,13 +26,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-01",
+      "id": "synthetic-angular-frequency-definition-recognized-01",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -56,7 +56,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -71,13 +71,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-02",
+      "id": "synthetic-angular-frequency-definition-recognized-02",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -102,7 +102,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -117,13 +117,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-03",
+      "id": "synthetic-angular-frequency-definition-recognized-03",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -147,7 +147,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -162,13 +162,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-04",
+      "id": "synthetic-angular-frequency-definition-recognized-04",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -192,7 +192,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -207,13 +207,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-05",
+      "id": "synthetic-angular-frequency-definition-recognized-05",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -237,7 +237,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -247,13 +247,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-06",
+      "id": "synthetic-angular-frequency-definition-recognized-06",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -276,7 +276,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -291,13 +291,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-07",
+      "id": "synthetic-angular-frequency-definition-recognized-07",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -321,7 +321,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -336,13 +336,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-08",
+      "id": "synthetic-angular-frequency-definition-recognized-08",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -366,7 +366,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -386,13 +386,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-09",
+      "id": "synthetic-angular-frequency-definition-recognized-09",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -417,7 +417,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -432,13 +432,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-10",
+      "id": "synthetic-angular-frequency-definition-recognized-10",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -462,7 +462,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -477,13 +477,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-11",
+      "id": "synthetic-angular-frequency-definition-recognized-11",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -507,7 +507,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -527,13 +527,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-12",
+      "id": "synthetic-angular-frequency-definition-recognized-12",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -559,7 +559,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -579,13 +579,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-13",
+      "id": "synthetic-angular-frequency-definition-recognized-13",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -610,7 +610,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -625,13 +625,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-14",
+      "id": "synthetic-angular-frequency-definition-recognized-14",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -655,7 +655,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -670,13 +670,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-15",
+      "id": "synthetic-angular-frequency-definition-recognized-15",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -700,7 +700,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -720,13 +720,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-16",
+      "id": "synthetic-angular-frequency-definition-recognized-16",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -751,7 +751,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -766,13 +766,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-17",
+      "id": "synthetic-angular-frequency-definition-recognized-17",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -796,7 +796,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -811,13 +811,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-18",
+      "id": "synthetic-angular-frequency-definition-recognized-18",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -841,7 +841,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -851,13 +851,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-19",
+      "id": "synthetic-angular-frequency-definition-recognized-19",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -880,7 +880,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -895,13 +895,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-20",
+      "id": "synthetic-angular-frequency-definition-recognized-20",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -925,7 +925,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -940,13 +940,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-21",
+      "id": "synthetic-angular-frequency-definition-recognized-21",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -970,7 +970,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -985,13 +985,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-22",
+      "id": "synthetic-angular-frequency-definition-recognized-22",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1016,7 +1016,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1031,13 +1031,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-23",
+      "id": "synthetic-angular-frequency-definition-recognized-23",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -1061,7 +1061,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1081,13 +1081,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-24",
+      "id": "synthetic-angular-frequency-definition-recognized-24",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1112,7 +1112,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1127,13 +1127,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-25",
+      "id": "synthetic-angular-frequency-definition-recognized-25",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -1157,7 +1157,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1177,13 +1177,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-26",
+      "id": "synthetic-angular-frequency-definition-recognized-26",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1208,7 +1208,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1223,13 +1223,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-27",
+      "id": "synthetic-angular-frequency-definition-recognized-27",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1253,7 +1253,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1273,13 +1273,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-28",
+      "id": "synthetic-angular-frequency-definition-recognized-28",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1304,7 +1304,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1324,13 +1324,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-29",
+      "id": "synthetic-angular-frequency-definition-recognized-29",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1355,7 +1355,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1370,13 +1370,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-30",
+      "id": "synthetic-angular-frequency-definition-recognized-30",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1400,7 +1400,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1420,13 +1420,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-31",
+      "id": "synthetic-angular-frequency-definition-recognized-31",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1451,7 +1451,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1461,13 +1461,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-32",
+      "id": "synthetic-angular-frequency-definition-recognized-32",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1491,7 +1491,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1506,13 +1506,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-33",
+      "id": "synthetic-angular-frequency-definition-recognized-33",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1536,7 +1536,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1551,13 +1551,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-34",
+      "id": "synthetic-angular-frequency-definition-recognized-34",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1581,7 +1581,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1591,13 +1591,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-35",
+      "id": "synthetic-angular-frequency-definition-recognized-35",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1620,7 +1620,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1635,13 +1635,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-36",
+      "id": "synthetic-angular-frequency-definition-recognized-36",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -1665,7 +1665,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1680,13 +1680,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-37",
+      "id": "synthetic-angular-frequency-definition-recognized-37",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -1710,7 +1710,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1725,13 +1725,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-38",
+      "id": "synthetic-angular-frequency-definition-recognized-38",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -1755,7 +1755,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1775,13 +1775,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-39",
+      "id": "synthetic-angular-frequency-definition-recognized-39",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1806,7 +1806,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1816,13 +1816,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "q",
         "pi": "k",
         "frequency": "u"
       },
-      "id": "synthetic-angular-frequency-definition-established-40",
+      "id": "synthetic-angular-frequency-definition-recognized-40",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "display-notation",
@@ -1845,7 +1845,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1865,13 +1865,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-41",
+      "id": "synthetic-angular-frequency-definition-recognized-41",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1896,7 +1896,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1916,13 +1916,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-42",
+      "id": "synthetic-angular-frequency-definition-recognized-42",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1948,7 +1948,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1968,13 +1968,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "v",
         "pi": "h",
         "frequency": "g"
       },
-      "id": "synthetic-angular-frequency-definition-established-43",
+      "id": "synthetic-angular-frequency-definition-recognized-43",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -1999,7 +1999,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2019,13 +2019,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-44",
+      "id": "synthetic-angular-frequency-definition-recognized-44",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -2050,7 +2050,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2065,13 +2065,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-45",
+      "id": "synthetic-angular-frequency-definition-recognized-45",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -2095,7 +2095,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2115,13 +2115,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "y",
         "pi": "c",
         "frequency": "x"
       },
-      "id": "synthetic-angular-frequency-definition-established-46",
+      "id": "synthetic-angular-frequency-definition-recognized-46",
       "lawId": "angular-frequency-definition",
       "mainFileId": "main",
       "variationTags": [
@@ -2146,7 +2146,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2161,13 +2161,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "r",
         "pi": "a",
         "frequency": "b"
       },
-      "id": "synthetic-angular-frequency-definition-established-47",
+      "id": "synthetic-angular-frequency-definition-recognized-47",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -2191,7 +2191,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2201,13 +2201,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "angular-frequency": "o",
         "pi": "m",
         "frequency": "i"
       },
-      "id": "synthetic-angular-frequency-definition-established-48",
+      "id": "synthetic-angular-frequency-definition-recognized-48",
       "lawId": "angular-frequency-definition",
       "variationTags": [
         "conventional-notation",
@@ -3561,7 +3561,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -3576,12 +3576,12 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-01",
+      "id": "synthetic-period-frequency-reciprocity-recognized-01",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -3605,7 +3605,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -3620,12 +3620,12 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-02",
+      "id": "synthetic-period-frequency-reciprocity-recognized-02",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -3650,7 +3650,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -3665,12 +3665,12 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-03",
+      "id": "synthetic-period-frequency-reciprocity-recognized-03",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -3694,7 +3694,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -3709,12 +3709,12 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-04",
+      "id": "synthetic-period-frequency-reciprocity-recognized-04",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -3738,7 +3738,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3753,12 +3753,12 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-05",
+      "id": "synthetic-period-frequency-reciprocity-recognized-05",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -3782,7 +3782,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3792,12 +3792,12 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-06",
+      "id": "synthetic-period-frequency-reciprocity-recognized-06",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -3820,7 +3820,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -3835,12 +3835,12 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-07",
+      "id": "synthetic-period-frequency-reciprocity-recognized-07",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -3864,7 +3864,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -3879,12 +3879,12 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-08",
+      "id": "synthetic-period-frequency-reciprocity-recognized-08",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -3908,7 +3908,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -3928,12 +3928,12 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-09",
+      "id": "synthetic-period-frequency-reciprocity-recognized-09",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -3958,7 +3958,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -3973,12 +3973,12 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-10",
+      "id": "synthetic-period-frequency-reciprocity-recognized-10",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -4002,7 +4002,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4017,12 +4017,12 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-11",
+      "id": "synthetic-period-frequency-reciprocity-recognized-11",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4046,7 +4046,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4066,12 +4066,12 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-12",
+      "id": "synthetic-period-frequency-reciprocity-recognized-12",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4097,7 +4097,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4117,12 +4117,12 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-13",
+      "id": "synthetic-period-frequency-reciprocity-recognized-13",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4147,7 +4147,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4162,12 +4162,12 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-14",
+      "id": "synthetic-period-frequency-reciprocity-recognized-14",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4191,7 +4191,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4206,12 +4206,12 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-15",
+      "id": "synthetic-period-frequency-reciprocity-recognized-15",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4235,7 +4235,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4255,12 +4255,12 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-16",
+      "id": "synthetic-period-frequency-reciprocity-recognized-16",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4285,7 +4285,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4300,12 +4300,12 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-17",
+      "id": "synthetic-period-frequency-reciprocity-recognized-17",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4329,7 +4329,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4344,12 +4344,12 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-18",
+      "id": "synthetic-period-frequency-reciprocity-recognized-18",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4373,7 +4373,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4383,12 +4383,12 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-19",
+      "id": "synthetic-period-frequency-reciprocity-recognized-19",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4411,7 +4411,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4426,12 +4426,12 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-20",
+      "id": "synthetic-period-frequency-reciprocity-recognized-20",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4455,7 +4455,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4470,12 +4470,12 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-21",
+      "id": "synthetic-period-frequency-reciprocity-recognized-21",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -4499,7 +4499,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4514,12 +4514,12 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-22",
+      "id": "synthetic-period-frequency-reciprocity-recognized-22",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4544,7 +4544,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4559,12 +4559,12 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-23",
+      "id": "synthetic-period-frequency-reciprocity-recognized-23",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -4588,7 +4588,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4608,12 +4608,12 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-24",
+      "id": "synthetic-period-frequency-reciprocity-recognized-24",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4638,7 +4638,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4653,12 +4653,12 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-25",
+      "id": "synthetic-period-frequency-reciprocity-recognized-25",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -4682,7 +4682,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4702,12 +4702,12 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-26",
+      "id": "synthetic-period-frequency-reciprocity-recognized-26",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4732,7 +4732,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4747,12 +4747,12 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-27",
+      "id": "synthetic-period-frequency-reciprocity-recognized-27",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4776,7 +4776,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4796,12 +4796,12 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-28",
+      "id": "synthetic-period-frequency-reciprocity-recognized-28",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4826,7 +4826,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4846,12 +4846,12 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-29",
+      "id": "synthetic-period-frequency-reciprocity-recognized-29",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4876,7 +4876,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4891,12 +4891,12 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-30",
+      "id": "synthetic-period-frequency-reciprocity-recognized-30",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -4920,7 +4920,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4940,12 +4940,12 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-31",
+      "id": "synthetic-period-frequency-reciprocity-recognized-31",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -4970,7 +4970,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4980,12 +4980,12 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-32",
+      "id": "synthetic-period-frequency-reciprocity-recognized-32",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5009,7 +5009,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5024,12 +5024,12 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-33",
+      "id": "synthetic-period-frequency-reciprocity-recognized-33",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5053,7 +5053,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5068,12 +5068,12 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-34",
+      "id": "synthetic-period-frequency-reciprocity-recognized-34",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5097,7 +5097,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5107,12 +5107,12 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-35",
+      "id": "synthetic-period-frequency-reciprocity-recognized-35",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5135,7 +5135,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5150,12 +5150,12 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-36",
+      "id": "synthetic-period-frequency-reciprocity-recognized-36",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -5179,7 +5179,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5194,12 +5194,12 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-37",
+      "id": "synthetic-period-frequency-reciprocity-recognized-37",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5223,7 +5223,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5238,12 +5238,12 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-38",
+      "id": "synthetic-period-frequency-reciprocity-recognized-38",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -5267,7 +5267,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -5287,12 +5287,12 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-39",
+      "id": "synthetic-period-frequency-reciprocity-recognized-39",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -5317,7 +5317,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5327,12 +5327,12 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "q",
         "period": "k"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-40",
+      "id": "synthetic-period-frequency-reciprocity-recognized-40",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "display-notation",
@@ -5355,7 +5355,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5375,12 +5375,12 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-41",
+      "id": "synthetic-period-frequency-reciprocity-recognized-41",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -5405,7 +5405,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5425,12 +5425,12 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-42",
+      "id": "synthetic-period-frequency-reciprocity-recognized-42",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -5456,7 +5456,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5476,12 +5476,12 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "v",
         "period": "h"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-43",
+      "id": "synthetic-period-frequency-reciprocity-recognized-43",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -5506,7 +5506,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5526,12 +5526,12 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-44",
+      "id": "synthetic-period-frequency-reciprocity-recognized-44",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -5556,7 +5556,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5571,12 +5571,12 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-45",
+      "id": "synthetic-period-frequency-reciprocity-recognized-45",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5600,7 +5600,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5620,12 +5620,12 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "y",
         "period": "c"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-46",
+      "id": "synthetic-period-frequency-reciprocity-recognized-46",
       "lawId": "period-frequency-reciprocity",
       "mainFileId": "main",
       "variationTags": [
@@ -5650,7 +5650,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5665,12 +5665,12 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "r",
         "period": "a"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-47",
+      "id": "synthetic-period-frequency-reciprocity-recognized-47",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -5694,7 +5694,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5704,12 +5704,12 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "frequency": "o",
         "period": "m"
       },
-      "id": "synthetic-period-frequency-reciprocity-established-48",
+      "id": "synthetic-period-frequency-reciprocity-recognized-48",
       "lawId": "period-frequency-reciprocity",
       "variationTags": [
         "conventional-notation",
@@ -7063,7 +7063,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7078,13 +7078,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-01",
+      "id": "synthetic-wave-speed-relation-recognized-01",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7108,7 +7108,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7123,13 +7123,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-02",
+      "id": "synthetic-wave-speed-relation-recognized-02",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7154,7 +7154,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7169,13 +7169,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-03",
+      "id": "synthetic-wave-speed-relation-recognized-03",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7199,7 +7199,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7214,13 +7214,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-04",
+      "id": "synthetic-wave-speed-relation-recognized-04",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7244,7 +7244,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7259,13 +7259,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-05",
+      "id": "synthetic-wave-speed-relation-recognized-05",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7289,7 +7289,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7299,13 +7299,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-06",
+      "id": "synthetic-wave-speed-relation-recognized-06",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -7328,7 +7328,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7343,13 +7343,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-07",
+      "id": "synthetic-wave-speed-relation-recognized-07",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7373,7 +7373,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -7388,13 +7388,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-08",
+      "id": "synthetic-wave-speed-relation-recognized-08",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -7418,7 +7418,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -7438,13 +7438,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-09",
+      "id": "synthetic-wave-speed-relation-recognized-09",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7469,7 +7469,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7484,13 +7484,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-10",
+      "id": "synthetic-wave-speed-relation-recognized-10",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -7514,7 +7514,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7529,13 +7529,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-11",
+      "id": "synthetic-wave-speed-relation-recognized-11",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7559,7 +7559,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7579,13 +7579,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-12",
+      "id": "synthetic-wave-speed-relation-recognized-12",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7611,7 +7611,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7631,13 +7631,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-13",
+      "id": "synthetic-wave-speed-relation-recognized-13",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7662,7 +7662,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7677,13 +7677,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-14",
+      "id": "synthetic-wave-speed-relation-recognized-14",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7707,7 +7707,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7722,13 +7722,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-15",
+      "id": "synthetic-wave-speed-relation-recognized-15",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7752,7 +7752,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7772,13 +7772,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-16",
+      "id": "synthetic-wave-speed-relation-recognized-16",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -7803,7 +7803,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7818,13 +7818,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-17",
+      "id": "synthetic-wave-speed-relation-recognized-17",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7848,7 +7848,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -7863,13 +7863,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-18",
+      "id": "synthetic-wave-speed-relation-recognized-18",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7893,7 +7893,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -7903,13 +7903,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-19",
+      "id": "synthetic-wave-speed-relation-recognized-19",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7932,7 +7932,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7947,13 +7947,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-20",
+      "id": "synthetic-wave-speed-relation-recognized-20",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -7977,7 +7977,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7992,13 +7992,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-21",
+      "id": "synthetic-wave-speed-relation-recognized-21",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -8022,7 +8022,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8037,13 +8037,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-22",
+      "id": "synthetic-wave-speed-relation-recognized-22",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8068,7 +8068,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8083,13 +8083,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-23",
+      "id": "synthetic-wave-speed-relation-recognized-23",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -8113,7 +8113,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8133,13 +8133,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-24",
+      "id": "synthetic-wave-speed-relation-recognized-24",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8164,7 +8164,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8179,13 +8179,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-25",
+      "id": "synthetic-wave-speed-relation-recognized-25",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -8209,7 +8209,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8229,13 +8229,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-26",
+      "id": "synthetic-wave-speed-relation-recognized-26",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8260,7 +8260,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8275,13 +8275,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-27",
+      "id": "synthetic-wave-speed-relation-recognized-27",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8305,7 +8305,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8325,13 +8325,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-28",
+      "id": "synthetic-wave-speed-relation-recognized-28",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8356,7 +8356,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8376,13 +8376,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-29",
+      "id": "synthetic-wave-speed-relation-recognized-29",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8407,7 +8407,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8422,13 +8422,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-30",
+      "id": "synthetic-wave-speed-relation-recognized-30",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8452,7 +8452,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8472,13 +8472,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-31",
+      "id": "synthetic-wave-speed-relation-recognized-31",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8503,7 +8503,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8513,13 +8513,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-32",
+      "id": "synthetic-wave-speed-relation-recognized-32",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8543,7 +8543,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8558,13 +8558,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-33",
+      "id": "synthetic-wave-speed-relation-recognized-33",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8588,7 +8588,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8603,13 +8603,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-34",
+      "id": "synthetic-wave-speed-relation-recognized-34",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8633,7 +8633,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8643,13 +8643,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-35",
+      "id": "synthetic-wave-speed-relation-recognized-35",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8672,7 +8672,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8687,13 +8687,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-36",
+      "id": "synthetic-wave-speed-relation-recognized-36",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -8717,7 +8717,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8732,13 +8732,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-37",
+      "id": "synthetic-wave-speed-relation-recognized-37",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -8762,7 +8762,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8777,13 +8777,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-38",
+      "id": "synthetic-wave-speed-relation-recognized-38",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -8807,7 +8807,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8827,13 +8827,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-39",
+      "id": "synthetic-wave-speed-relation-recognized-39",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8858,7 +8858,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8868,13 +8868,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "q",
         "frequency": "k",
         "wavelength": "u"
       },
-      "id": "synthetic-wave-speed-relation-established-40",
+      "id": "synthetic-wave-speed-relation-recognized-40",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "display-notation",
@@ -8897,7 +8897,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8917,13 +8917,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-41",
+      "id": "synthetic-wave-speed-relation-recognized-41",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -8948,7 +8948,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8968,13 +8968,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-42",
+      "id": "synthetic-wave-speed-relation-recognized-42",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9000,7 +9000,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -9020,13 +9020,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "v",
         "frequency": "h",
         "wavelength": "g"
       },
-      "id": "synthetic-wave-speed-relation-established-43",
+      "id": "synthetic-wave-speed-relation-recognized-43",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9051,7 +9051,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -9071,13 +9071,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-44",
+      "id": "synthetic-wave-speed-relation-recognized-44",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9102,7 +9102,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9117,13 +9117,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-45",
+      "id": "synthetic-wave-speed-relation-recognized-45",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -9147,7 +9147,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9167,13 +9167,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "y",
         "frequency": "c",
         "wavelength": "x"
       },
-      "id": "synthetic-wave-speed-relation-established-46",
+      "id": "synthetic-wave-speed-relation-recognized-46",
       "lawId": "wave-speed-relation",
       "mainFileId": "main",
       "variationTags": [
@@ -9198,7 +9198,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -9213,13 +9213,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "r",
         "frequency": "a",
         "wavelength": "b"
       },
-      "id": "synthetic-wave-speed-relation-established-47",
+      "id": "synthetic-wave-speed-relation-recognized-47",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",
@@ -9243,7 +9243,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -9253,13 +9253,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "wave-speed": "o",
         "frequency": "m",
         "wavelength": "i"
       },
-      "id": "synthetic-wave-speed-relation-established-48",
+      "id": "synthetic-wave-speed-relation-recognized-48",
       "lawId": "wave-speed-relation",
       "variationTags": [
         "conventional-notation",

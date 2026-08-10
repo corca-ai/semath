@@ -310,7 +310,7 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
   const positives = symbolSets.map((symbols, index) => {
     const bindings = bindSymbols(law, symbols);
     const formula = renderFormula(law.semanticForms[index % law.semanticForms.length]!, bindings);
-    return establishedCase(law, bindings, formula, index);
+    return recognizedCase(law, bindings, formula, index);
   });
   const negativeMutations = [
     { category: "wrong-operator", mutate: wrongOperator },
@@ -369,7 +369,7 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
   return [...positives, ...refusals];
 }
 
-function establishedCase(
+function recognizedCase(
   law: AuthoringLaw,
   bindings: ReadonlyMap<string, string>,
   formula: string,
@@ -401,7 +401,7 @@ function establishedCase(
           fileId: "main",
           path: index === 2 ? "main.tex" : "main.md",
         }],
-    expectation: "established",
+    expectation: "recognized",
     expectedRoles: Object.fromEntries(bindings),
     id: `${law.id}-positive-${index + 1}`,
     lawId: law.id,

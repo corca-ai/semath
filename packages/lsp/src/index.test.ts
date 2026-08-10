@@ -483,6 +483,33 @@ describe("SemathLspServer", () => {
     }
   });
 
+  test("resolves a declared operator at the trailing edge of its application", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///declared-operator-trailing-edge.tex";
+    const content = "\\DeclareMathOperator{\\ECE}{ECE}\n$\\ECE(x)$";
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "latex", text: content, uri, version: 1 },
+      },
+    });
+    await server.handle({
+      id: 540,
+      method: "textDocument/definition",
+      params: {
+        position: positionAt(content, content.lastIndexOf("\\ECE(x)") + "\\ECE(x)".length),
+        textDocument: { uri },
+      },
+    });
+    expect(response(messages, 540)).toMatchObject({
+      range: {
+        start: positionAt(content, content.indexOf("{ECE}") + 1),
+      },
+      uri,
+    });
+    server.dispose();
+  });
+
   test("keeps hypothetical, hedged, cited, and quoted acronym claims non-navigable", async () => {
     const claims = [
       "If ECE meant expected calibration error, continue.",

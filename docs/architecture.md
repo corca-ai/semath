@@ -185,6 +185,9 @@ leave old and new semantic runtimes in parallel.
 - `bun run architecture` rejects reverse dependencies, duplicate adapters,
   production compatibility modes, raw-TeX parser leakage, and a parallel
   project fact store.
+- `bun run legacy:audit:check` rejects reviewed obsolete protocol fields,
+  pack-pattern runtime fields, raw lexical inference paths, and exhaustive
+  production dispatch signatures.
 - One pack schema/compiler and one generic law runtime are active.
 - Every conclusion retains source evidence and bounded uncertainty.
 - Pure transformations contain normalization, inference, ranking, and view

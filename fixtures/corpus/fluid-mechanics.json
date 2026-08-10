@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,14 +26,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-01",
+      "id": "synthetic-hydrostatic-pressure-recognized-01",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -57,7 +57,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -72,14 +72,14 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-02",
+      "id": "synthetic-hydrostatic-pressure-recognized-02",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -104,7 +104,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -119,14 +119,14 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-03",
+      "id": "synthetic-hydrostatic-pressure-recognized-03",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -150,7 +150,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -165,14 +165,14 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-04",
+      "id": "synthetic-hydrostatic-pressure-recognized-04",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -196,7 +196,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -211,14 +211,14 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-05",
+      "id": "synthetic-hydrostatic-pressure-recognized-05",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -242,7 +242,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -252,14 +252,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-06",
+      "id": "synthetic-hydrostatic-pressure-recognized-06",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -282,7 +282,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -297,14 +297,14 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-07",
+      "id": "synthetic-hydrostatic-pressure-recognized-07",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -328,7 +328,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -343,14 +343,14 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-08",
+      "id": "synthetic-hydrostatic-pressure-recognized-08",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -374,7 +374,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -394,14 +394,14 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-09",
+      "id": "synthetic-hydrostatic-pressure-recognized-09",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -426,7 +426,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -441,14 +441,14 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-10",
+      "id": "synthetic-hydrostatic-pressure-recognized-10",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -472,7 +472,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -487,14 +487,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-11",
+      "id": "synthetic-hydrostatic-pressure-recognized-11",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -518,7 +518,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -538,14 +538,14 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-12",
+      "id": "synthetic-hydrostatic-pressure-recognized-12",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -571,7 +571,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -591,14 +591,14 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-13",
+      "id": "synthetic-hydrostatic-pressure-recognized-13",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -623,7 +623,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -638,14 +638,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-14",
+      "id": "synthetic-hydrostatic-pressure-recognized-14",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -669,7 +669,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -684,14 +684,14 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-15",
+      "id": "synthetic-hydrostatic-pressure-recognized-15",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -715,7 +715,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -735,14 +735,14 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-16",
+      "id": "synthetic-hydrostatic-pressure-recognized-16",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -767,7 +767,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -782,14 +782,14 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-17",
+      "id": "synthetic-hydrostatic-pressure-recognized-17",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -813,7 +813,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -828,14 +828,14 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-18",
+      "id": "synthetic-hydrostatic-pressure-recognized-18",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -859,7 +859,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -869,14 +869,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-19",
+      "id": "synthetic-hydrostatic-pressure-recognized-19",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -899,7 +899,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -914,14 +914,14 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-20",
+      "id": "synthetic-hydrostatic-pressure-recognized-20",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -945,7 +945,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -960,14 +960,14 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-21",
+      "id": "synthetic-hydrostatic-pressure-recognized-21",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -991,7 +991,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1006,14 +1006,14 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-22",
+      "id": "synthetic-hydrostatic-pressure-recognized-22",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1038,7 +1038,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1053,14 +1053,14 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-23",
+      "id": "synthetic-hydrostatic-pressure-recognized-23",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -1084,7 +1084,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1104,14 +1104,14 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-24",
+      "id": "synthetic-hydrostatic-pressure-recognized-24",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1136,7 +1136,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1151,14 +1151,14 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-25",
+      "id": "synthetic-hydrostatic-pressure-recognized-25",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -1182,7 +1182,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1202,14 +1202,14 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-26",
+      "id": "synthetic-hydrostatic-pressure-recognized-26",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1234,7 +1234,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1249,14 +1249,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-27",
+      "id": "synthetic-hydrostatic-pressure-recognized-27",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1280,7 +1280,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1300,14 +1300,14 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-28",
+      "id": "synthetic-hydrostatic-pressure-recognized-28",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1332,7 +1332,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1352,14 +1352,14 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-29",
+      "id": "synthetic-hydrostatic-pressure-recognized-29",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1384,7 +1384,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1399,14 +1399,14 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-30",
+      "id": "synthetic-hydrostatic-pressure-recognized-30",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1430,7 +1430,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1450,14 +1450,14 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-31",
+      "id": "synthetic-hydrostatic-pressure-recognized-31",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1482,7 +1482,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1492,14 +1492,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-32",
+      "id": "synthetic-hydrostatic-pressure-recognized-32",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1523,7 +1523,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1538,14 +1538,14 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-33",
+      "id": "synthetic-hydrostatic-pressure-recognized-33",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1569,7 +1569,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1584,14 +1584,14 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-34",
+      "id": "synthetic-hydrostatic-pressure-recognized-34",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1615,7 +1615,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1625,14 +1625,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-35",
+      "id": "synthetic-hydrostatic-pressure-recognized-35",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1655,7 +1655,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1670,14 +1670,14 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-36",
+      "id": "synthetic-hydrostatic-pressure-recognized-36",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -1701,7 +1701,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1716,14 +1716,14 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-37",
+      "id": "synthetic-hydrostatic-pressure-recognized-37",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -1747,7 +1747,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1762,14 +1762,14 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-38",
+      "id": "synthetic-hydrostatic-pressure-recognized-38",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -1793,7 +1793,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1813,14 +1813,14 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-39",
+      "id": "synthetic-hydrostatic-pressure-recognized-39",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1845,7 +1845,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1855,14 +1855,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "q",
         "density": "k",
         "acceleration": "u",
         "height": "s"
       },
-      "id": "synthetic-hydrostatic-pressure-established-40",
+      "id": "synthetic-hydrostatic-pressure-recognized-40",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "display-notation",
@@ -1885,7 +1885,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1905,14 +1905,14 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-41",
+      "id": "synthetic-hydrostatic-pressure-recognized-41",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1937,7 +1937,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1957,14 +1957,14 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-42",
+      "id": "synthetic-hydrostatic-pressure-recognized-42",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -1990,7 +1990,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -2010,14 +2010,14 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "v",
         "density": "h",
         "acceleration": "g",
         "height": "j"
       },
-      "id": "synthetic-hydrostatic-pressure-established-43",
+      "id": "synthetic-hydrostatic-pressure-recognized-43",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -2042,7 +2042,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2062,14 +2062,14 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-44",
+      "id": "synthetic-hydrostatic-pressure-recognized-44",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -2094,7 +2094,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2109,14 +2109,14 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-45",
+      "id": "synthetic-hydrostatic-pressure-recognized-45",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -2140,7 +2140,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2160,14 +2160,14 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "y",
         "density": "c",
         "acceleration": "x",
         "height": "t"
       },
-      "id": "synthetic-hydrostatic-pressure-established-46",
+      "id": "synthetic-hydrostatic-pressure-recognized-46",
       "lawId": "hydrostatic-pressure",
       "mainFileId": "main",
       "variationTags": [
@@ -2192,7 +2192,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2207,14 +2207,14 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
         "height": "n"
       },
-      "id": "synthetic-hydrostatic-pressure-established-47",
+      "id": "synthetic-hydrostatic-pressure-recognized-47",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -2238,7 +2238,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2248,14 +2248,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "pressure": "o",
         "density": "m",
         "acceleration": "i",
         "height": "e"
       },
-      "id": "synthetic-hydrostatic-pressure-established-48",
+      "id": "synthetic-hydrostatic-pressure-recognized-48",
       "lawId": "hydrostatic-pressure",
       "variationTags": [
         "conventional-notation",
@@ -3609,7 +3609,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -3624,14 +3624,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-01",
+      "id": "synthetic-mass-flow-rate-recognized-01",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -3655,7 +3655,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -3670,14 +3670,14 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-02",
+      "id": "synthetic-mass-flow-rate-recognized-02",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -3702,7 +3702,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -3717,14 +3717,14 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-03",
+      "id": "synthetic-mass-flow-rate-recognized-03",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -3748,7 +3748,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -3763,14 +3763,14 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-04",
+      "id": "synthetic-mass-flow-rate-recognized-04",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -3794,7 +3794,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3809,14 +3809,14 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-05",
+      "id": "synthetic-mass-flow-rate-recognized-05",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -3840,7 +3840,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -3850,14 +3850,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-06",
+      "id": "synthetic-mass-flow-rate-recognized-06",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -3880,7 +3880,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -3895,14 +3895,14 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-07",
+      "id": "synthetic-mass-flow-rate-recognized-07",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -3926,7 +3926,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -3941,14 +3941,14 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-08",
+      "id": "synthetic-mass-flow-rate-recognized-08",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -3972,7 +3972,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -3992,14 +3992,14 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-09",
+      "id": "synthetic-mass-flow-rate-recognized-09",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4024,7 +4024,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4039,14 +4039,14 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-10",
+      "id": "synthetic-mass-flow-rate-recognized-10",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -4070,7 +4070,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4085,14 +4085,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-11",
+      "id": "synthetic-mass-flow-rate-recognized-11",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4116,7 +4116,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4136,14 +4136,14 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-12",
+      "id": "synthetic-mass-flow-rate-recognized-12",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4169,7 +4169,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4189,14 +4189,14 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-13",
+      "id": "synthetic-mass-flow-rate-recognized-13",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4221,7 +4221,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4236,14 +4236,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-14",
+      "id": "synthetic-mass-flow-rate-recognized-14",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4267,7 +4267,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4282,14 +4282,14 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-15",
+      "id": "synthetic-mass-flow-rate-recognized-15",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -4313,7 +4313,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4333,14 +4333,14 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-16",
+      "id": "synthetic-mass-flow-rate-recognized-16",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4365,7 +4365,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4380,14 +4380,14 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-17",
+      "id": "synthetic-mass-flow-rate-recognized-17",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -4411,7 +4411,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4426,14 +4426,14 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-18",
+      "id": "synthetic-mass-flow-rate-recognized-18",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -4457,7 +4457,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4467,14 +4467,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-19",
+      "id": "synthetic-mass-flow-rate-recognized-19",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -4497,7 +4497,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4512,14 +4512,14 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-20",
+      "id": "synthetic-mass-flow-rate-recognized-20",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -4543,7 +4543,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4558,14 +4558,14 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-21",
+      "id": "synthetic-mass-flow-rate-recognized-21",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -4589,7 +4589,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -4604,14 +4604,14 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-22",
+      "id": "synthetic-mass-flow-rate-recognized-22",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -4636,7 +4636,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -4651,14 +4651,14 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-23",
+      "id": "synthetic-mass-flow-rate-recognized-23",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -4682,7 +4682,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -4702,14 +4702,14 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-24",
+      "id": "synthetic-mass-flow-rate-recognized-24",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4734,7 +4734,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4749,14 +4749,14 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-25",
+      "id": "synthetic-mass-flow-rate-recognized-25",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -4780,7 +4780,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -4800,14 +4800,14 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-26",
+      "id": "synthetic-mass-flow-rate-recognized-26",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4832,7 +4832,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -4847,14 +4847,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-27",
+      "id": "synthetic-mass-flow-rate-recognized-27",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4878,7 +4878,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -4898,14 +4898,14 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-28",
+      "id": "synthetic-mass-flow-rate-recognized-28",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4930,7 +4930,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -4950,14 +4950,14 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-29",
+      "id": "synthetic-mass-flow-rate-recognized-29",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -4982,7 +4982,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -4997,14 +4997,14 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-30",
+      "id": "synthetic-mass-flow-rate-recognized-30",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5028,7 +5028,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5048,14 +5048,14 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-31",
+      "id": "synthetic-mass-flow-rate-recognized-31",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5080,7 +5080,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5090,14 +5090,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-32",
+      "id": "synthetic-mass-flow-rate-recognized-32",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5121,7 +5121,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5136,14 +5136,14 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-33",
+      "id": "synthetic-mass-flow-rate-recognized-33",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5167,7 +5167,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5182,14 +5182,14 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-34",
+      "id": "synthetic-mass-flow-rate-recognized-34",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5213,7 +5213,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5223,14 +5223,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-35",
+      "id": "synthetic-mass-flow-rate-recognized-35",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5253,7 +5253,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5268,14 +5268,14 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-36",
+      "id": "synthetic-mass-flow-rate-recognized-36",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -5299,7 +5299,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5314,14 +5314,14 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-37",
+      "id": "synthetic-mass-flow-rate-recognized-37",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5345,7 +5345,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5360,14 +5360,14 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-38",
+      "id": "synthetic-mass-flow-rate-recognized-38",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -5391,7 +5391,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -5411,14 +5411,14 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-39",
+      "id": "synthetic-mass-flow-rate-recognized-39",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5443,7 +5443,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5453,14 +5453,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "q",
         "density": "k",
         "area": "u",
         "velocity": "s"
       },
-      "id": "synthetic-mass-flow-rate-established-40",
+      "id": "synthetic-mass-flow-rate-recognized-40",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "display-notation",
@@ -5483,7 +5483,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -5503,14 +5503,14 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-41",
+      "id": "synthetic-mass-flow-rate-recognized-41",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5535,7 +5535,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -5555,14 +5555,14 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-42",
+      "id": "synthetic-mass-flow-rate-recognized-42",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5588,7 +5588,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -5608,14 +5608,14 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "v",
         "density": "h",
         "area": "g",
         "velocity": "j"
       },
-      "id": "synthetic-mass-flow-rate-established-43",
+      "id": "synthetic-mass-flow-rate-recognized-43",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5640,7 +5640,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -5660,14 +5660,14 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-44",
+      "id": "synthetic-mass-flow-rate-recognized-44",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5692,7 +5692,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5707,14 +5707,14 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-45",
+      "id": "synthetic-mass-flow-rate-recognized-45",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5738,7 +5738,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -5758,14 +5758,14 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "y",
         "density": "c",
         "area": "x",
         "velocity": "t"
       },
-      "id": "synthetic-mass-flow-rate-established-46",
+      "id": "synthetic-mass-flow-rate-recognized-46",
       "lawId": "mass-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -5790,7 +5790,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -5805,14 +5805,14 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
         "velocity": "n"
       },
-      "id": "synthetic-mass-flow-rate-established-47",
+      "id": "synthetic-mass-flow-rate-recognized-47",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -5836,7 +5836,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -5846,14 +5846,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "mass-flow-rate": "o",
         "density": "m",
         "area": "i",
         "velocity": "e"
       },
-      "id": "synthetic-mass-flow-rate-established-48",
+      "id": "synthetic-mass-flow-rate-recognized-48",
       "lawId": "mass-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7207,7 +7207,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7222,13 +7222,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-01",
+      "id": "synthetic-volumetric-flow-rate-recognized-01",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7252,7 +7252,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7267,13 +7267,13 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-02",
+      "id": "synthetic-volumetric-flow-rate-recognized-02",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7298,7 +7298,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7313,13 +7313,13 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-03",
+      "id": "synthetic-volumetric-flow-rate-recognized-03",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7343,7 +7343,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7358,13 +7358,13 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-04",
+      "id": "synthetic-volumetric-flow-rate-recognized-04",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7388,7 +7388,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7403,13 +7403,13 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-05",
+      "id": "synthetic-volumetric-flow-rate-recognized-05",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7433,7 +7433,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7443,13 +7443,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-06",
+      "id": "synthetic-volumetric-flow-rate-recognized-06",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -7472,7 +7472,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7487,13 +7487,13 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-07",
+      "id": "synthetic-volumetric-flow-rate-recognized-07",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7517,7 +7517,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -7532,13 +7532,13 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-08",
+      "id": "synthetic-volumetric-flow-rate-recognized-08",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -7562,7 +7562,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -7582,13 +7582,13 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-09",
+      "id": "synthetic-volumetric-flow-rate-recognized-09",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7613,7 +7613,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7628,13 +7628,13 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-10",
+      "id": "synthetic-volumetric-flow-rate-recognized-10",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -7658,7 +7658,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -7673,13 +7673,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-11",
+      "id": "synthetic-volumetric-flow-rate-recognized-11",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7703,7 +7703,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -7723,13 +7723,13 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-12",
+      "id": "synthetic-volumetric-flow-rate-recognized-12",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7755,7 +7755,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -7775,13 +7775,13 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-13",
+      "id": "synthetic-volumetric-flow-rate-recognized-13",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7806,7 +7806,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -7821,13 +7821,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-14",
+      "id": "synthetic-volumetric-flow-rate-recognized-14",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7851,7 +7851,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7866,13 +7866,13 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-15",
+      "id": "synthetic-volumetric-flow-rate-recognized-15",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7896,7 +7896,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -7916,13 +7916,13 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-16",
+      "id": "synthetic-volumetric-flow-rate-recognized-16",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -7947,7 +7947,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -7962,13 +7962,13 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-17",
+      "id": "synthetic-volumetric-flow-rate-recognized-17",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -7992,7 +7992,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8007,13 +8007,13 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-18",
+      "id": "synthetic-volumetric-flow-rate-recognized-18",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8037,7 +8037,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8047,13 +8047,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-19",
+      "id": "synthetic-volumetric-flow-rate-recognized-19",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8076,7 +8076,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8091,13 +8091,13 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-20",
+      "id": "synthetic-volumetric-flow-rate-recognized-20",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8121,7 +8121,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8136,13 +8136,13 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-21",
+      "id": "synthetic-volumetric-flow-rate-recognized-21",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -8166,7 +8166,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8181,13 +8181,13 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-22",
+      "id": "synthetic-volumetric-flow-rate-recognized-22",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8212,7 +8212,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8227,13 +8227,13 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-23",
+      "id": "synthetic-volumetric-flow-rate-recognized-23",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -8257,7 +8257,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8277,13 +8277,13 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-24",
+      "id": "synthetic-volumetric-flow-rate-recognized-24",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -8308,7 +8308,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8323,13 +8323,13 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-25",
+      "id": "synthetic-volumetric-flow-rate-recognized-25",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -8353,7 +8353,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8373,13 +8373,13 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-26",
+      "id": "synthetic-volumetric-flow-rate-recognized-26",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -8404,7 +8404,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8419,13 +8419,13 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-27",
+      "id": "synthetic-volumetric-flow-rate-recognized-27",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -8449,7 +8449,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8469,13 +8469,13 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-28",
+      "id": "synthetic-volumetric-flow-rate-recognized-28",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -8500,7 +8500,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8520,13 +8520,13 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-29",
+      "id": "synthetic-volumetric-flow-rate-recognized-29",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -8551,7 +8551,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8566,13 +8566,13 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-30",
+      "id": "synthetic-volumetric-flow-rate-recognized-30",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8596,7 +8596,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -8616,13 +8616,13 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-31",
+      "id": "synthetic-volumetric-flow-rate-recognized-31",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -8647,7 +8647,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -8657,13 +8657,13 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-32",
+      "id": "synthetic-volumetric-flow-rate-recognized-32",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8687,7 +8687,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -8702,13 +8702,13 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-33",
+      "id": "synthetic-volumetric-flow-rate-recognized-33",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8732,7 +8732,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -8747,13 +8747,13 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-34",
+      "id": "synthetic-volumetric-flow-rate-recognized-34",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8777,7 +8777,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8787,13 +8787,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-35",
+      "id": "synthetic-volumetric-flow-rate-recognized-35",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8816,7 +8816,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -8831,13 +8831,13 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-36",
+      "id": "synthetic-volumetric-flow-rate-recognized-36",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -8861,7 +8861,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -8876,13 +8876,13 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-37",
+      "id": "synthetic-volumetric-flow-rate-recognized-37",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -8906,7 +8906,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -8921,13 +8921,13 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-38",
+      "id": "synthetic-volumetric-flow-rate-recognized-38",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -8951,7 +8951,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -8971,13 +8971,13 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-39",
+      "id": "synthetic-volumetric-flow-rate-recognized-39",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -9002,7 +9002,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -9012,13 +9012,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "q",
         "area": "k",
         "velocity": "u"
       },
-      "id": "synthetic-volumetric-flow-rate-established-40",
+      "id": "synthetic-volumetric-flow-rate-recognized-40",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "display-notation",
@@ -9041,7 +9041,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -9061,13 +9061,13 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-41",
+      "id": "synthetic-volumetric-flow-rate-recognized-41",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -9092,7 +9092,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -9112,13 +9112,13 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-42",
+      "id": "synthetic-volumetric-flow-rate-recognized-42",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -9144,7 +9144,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -9164,13 +9164,13 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "v",
         "area": "h",
         "velocity": "g"
       },
-      "id": "synthetic-volumetric-flow-rate-established-43",
+      "id": "synthetic-volumetric-flow-rate-recognized-43",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -9195,7 +9195,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -9215,13 +9215,13 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-44",
+      "id": "synthetic-volumetric-flow-rate-recognized-44",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -9246,7 +9246,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9261,13 +9261,13 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-45",
+      "id": "synthetic-volumetric-flow-rate-recognized-45",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -9291,7 +9291,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -9311,13 +9311,13 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "y",
         "area": "c",
         "velocity": "x"
       },
-      "id": "synthetic-volumetric-flow-rate-established-46",
+      "id": "synthetic-volumetric-flow-rate-recognized-46",
       "lawId": "volumetric-flow-rate",
       "mainFileId": "main",
       "variationTags": [
@@ -9342,7 +9342,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -9357,13 +9357,13 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "r",
         "area": "a",
         "velocity": "b"
       },
-      "id": "synthetic-volumetric-flow-rate-established-47",
+      "id": "synthetic-volumetric-flow-rate-recognized-47",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",
@@ -9387,7 +9387,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -9397,13 +9397,13 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "flow-rate": "o",
         "area": "m",
         "velocity": "i"
       },
-      "id": "synthetic-volumetric-flow-rate-established-48",
+      "id": "synthetic-volumetric-flow-rate-recognized-48",
       "lawId": "volumetric-flow-rate",
       "variationTags": [
         "conventional-notation",

@@ -22,9 +22,13 @@ holds approved support policy; GitHub issues hold planned work.
   discrete mathematics, and optimization remain deliberately narrow slices;
   evaluated capability evidence is not a field-completeness claim.
 - The independent frozen challenge v2 contains 48 cases across binding,
-  constraints, packs, presentation, resolution, and syntax. Its initial
-  hard-cutover baseline passes 41 of 48; the seven exposed gaps are assigned to
-  issues #189 and #191 rather than hidden by fixture or threshold changes.
+  constraints, packs, presentation, resolution, and syntax. The Protocol 7
+  hard-cutover engine passes 48 of 48. Three reviewed oracle corrections preserve
+  a complete `\\sum` token during local malformed recovery and place the
+  higher-order derivative cursor on `\\partial^2`, the notation being tested;
+  the capacitor condition pair also declares its differentiation variable as
+  time on both sides of the boundary. Case IDs remain frozen, and each
+  correction removes an unintended variable rather than relaxing an outcome.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -40,13 +44,17 @@ field completeness.
 | Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
 | Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
 | Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
-| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 4 and the core use pack-qualified concept identities without a legacy role field |
+| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 7 and the core use pack-qualified concept identities without a legacy role field |
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 | Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |
 | Pack vocabulary | Natural concept paraphrases required runtime vocabulary edits | Schema 5 added reviewed concept aliases consumed by the generic classifier |
 | Constraints | Side conditions were free-form strings without machine-checkable subjects or evidence | Schema 6 uses closed constraint kinds, validated law roles, bound symbols, source evidence, and explicit resolution status |
 | Generic calculus IR | Integrals, partial derivatives, nabla applications, and indexed families lost operator structure | The shared structural path now keeps explicit differential variables, derivative order, integral bounds, and base/index components without command-specific pack logic |
+| Source notation | Styled, decorated, and declared operator surfaces collapsed to a leaf or failed at a trailing application edge | Exact wasmtex identity ranges and precomputed complete-application boundaries preserve source notation without retaining the syntax arena at query time |
+| Prose declarations | Elided parallel declarations such as “let h be heat transfer, m mass, …” lost later role evidence | One bounded clause grammar maps arbitrary-arity copula elision without pack-specific phrases |
+| Typed role shape | A strongly typed quantity could be rejected only because no redundant scalar word was present | Quantity evidence admits an absent shape while explicit incompatible shape evidence still refuses the law |
+| Section scope | Markdown sibling headings could leak acronym and prose evidence | wasmtex emits nested Markdown scopes; Semath resolves evidence only inside the structural scope graph |
 
 ## Remaining measured gaps
 

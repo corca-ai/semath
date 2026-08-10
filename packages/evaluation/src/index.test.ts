@@ -3,7 +3,7 @@ import {
   checkPackConformance,
   type Corpus,
   type CorpusCase,
-  type EstablishedCorpusCase,
+  type RecognizedCorpusCase,
   type LawRefusalCorpusCase,
   type CaseObservation,
   parseCorpus,
@@ -148,8 +148,8 @@ const diversity = {
 } as const;
 
 function corpusCase(
-  overrides: Partial<EstablishedCorpusCase> = {},
-): EstablishedCorpusCase {
+  overrides: Partial<RecognizedCorpusCase> = {},
+): RecognizedCorpusCase {
   return {
     cursor: { fileId: "main", needle: "F=ma" },
     documents: [
@@ -160,7 +160,7 @@ function corpusCase(
       },
     ],
     diversity,
-    expectation: "established",
+    expectation: "recognized",
     expectedRoles: { force: "F", mass: "m" },
     id: "positive",
     lawId: "newton-second-law",
@@ -193,21 +193,21 @@ function passingMetamorphicObservations(
   corpora: ReadonlyMap<string, Corpus>,
 ): CaseObservation[] {
   return planMetamorphicCases(manifest, corpora).map((planned) => {
-    const established = planned.case.expectation === "established";
+    const recognized = planned.case.expectation === "recognized";
     return {
       caseId: planned.case.id,
-      evidenceIntegrity: established,
-      establishedLawIds: established && "lawId" in planned.case
+      evidenceIntegrity: recognized,
+      recognizedLawIds: recognized && "lawId" in planned.case
         ? [planned.case.lawId]
         : [],
       generatedFrom: {
         caseId: planned.sourceCaseId,
         transform: planned.transform,
       },
-      rolesCorrect: established,
-      status: established ? "established" : "unsupported",
+      rolesCorrect: recognized,
+      status: recognized ? "established" : "unsupported",
       suiteId: planned.suiteId,
-      targetPresent: established,
+      targetPresent: recognized,
     };
   });
 }
@@ -381,7 +381,7 @@ describe("multidimensional scorecard", () => {
       {
         caseId: positive.id,
         evidenceIntegrity: true,
-        establishedLawIds: [positive.lawId],
+        recognizedLawIds: [positive.lawId],
         rolesCorrect: true,
         status: "established",
         suiteId: "mechanics",
@@ -390,7 +390,7 @@ describe("multidimensional scorecard", () => {
       {
         caseId: negative.id,
         evidenceIntegrity: false,
-        establishedLawIds: [],
+        recognizedLawIds: [],
         rolesCorrect: false,
         status: "unsupported",
         suiteId: "mechanics",
@@ -432,7 +432,7 @@ describe("multidimensional scorecard", () => {
         {
           caseId: positive.id,
           evidenceIntegrity: false,
-          establishedLawIds: [positive.lawId],
+          recognizedLawIds: [positive.lawId],
           rolesCorrect: true,
           status: "established",
           suiteId: "mechanics",
@@ -441,7 +441,7 @@ describe("multidimensional scorecard", () => {
         {
           caseId: negative.id,
           evidenceIntegrity: false,
-          establishedLawIds: [],
+          recognizedLawIds: [],
           rolesCorrect: false,
           status: "unsupported",
           suiteId: "mechanics",

@@ -94,7 +94,7 @@ if (process.env.SEMATH_CORPUS_REPORT) {
     const observation = observations[index];
     if (
       observation &&
-      ((item.case.expectation === "established" && !observation.targetPresent) ||
+      ((item.case.expectation === "recognized" && !observation.targetPresent) ||
         (item.case.expectation === "refused" && observation.targetPresent))
     ) {
       console.error(`case ${explanation.suiteId}/${explanation.caseId}: ${explanation.reason}`);

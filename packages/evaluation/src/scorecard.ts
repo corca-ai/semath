@@ -11,7 +11,7 @@ import { planMetamorphicCases } from "./metamorphic";
 export interface CaseObservation {
   caseId: string;
   evidenceIntegrity: boolean;
-  establishedLawIds: readonly string[];
+  recognizedLawIds: readonly string[];
   generatedFrom?: {
     caseId: string;
     transform: MetamorphicTransform;
@@ -151,10 +151,10 @@ export function scoreQuality(
     }
     if (item.case.expectation === "refused" && !("lawId" in item.case)) {
       adversarialCases += 1;
-      if (observation.establishedLawIds.length === 0) adversarialPassed += 1;
+      if (observation.recognizedLawIds.length === 0) adversarialPassed += 1;
       else {
         failures.push(
-          `${displayKey(key)}: refusal established unexpected laws ${observation.establishedLawIds.join(", ")}`,
+          `${displayKey(key)}: refusal recognized unexpected laws ${observation.recognizedLawIds.join(", ")}`,
         );
       }
     }
@@ -338,7 +338,7 @@ function countCase(
   item: CorpusCase,
   observation: CaseObservation,
 ): void {
-  if (item.expectation === "established") {
+  if (item.expectation === "recognized") {
     counters.positive += 1;
     counters.roleEligible += 1;
     counters.evidenceEligible += 1;
@@ -354,17 +354,17 @@ function countCase(
 
 function casePassed(item: CorpusCase, observation: CaseObservation): boolean {
   const allowed = "lawId" in item ? new Set([item.lawId]) : new Set<string>();
-  const hasUnexpectedLaw = observation.establishedLawIds.some(
+  const hasUnexpectedLaw = observation.recognizedLawIds.some(
     (lawId) => !allowed.has(lawId),
   );
-  return item.expectation === "established"
+  return item.expectation === "recognized"
     ? recognized(item.expectation, observation) &&
         observation.rolesCorrect &&
         observation.evidenceIntegrity &&
         !hasUnexpectedLaw
     : "lawId" in item
       ? !observation.targetPresent
-      : observation.establishedLawIds.length === 0;
+      : observation.recognizedLawIds.length === 0;
 }
 
 function scoreDiversity(
@@ -460,9 +460,7 @@ function recognized(
   observation: CaseObservation,
 ): boolean {
   return (
-    expectation === "established" &&
-    observation.status === "established" &&
-    observation.targetPresent
+    expectation === "recognized" && observation.targetPresent
   );
 }
 

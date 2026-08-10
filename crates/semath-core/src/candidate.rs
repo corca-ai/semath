@@ -108,6 +108,31 @@ pub(crate) fn structural_candidate_options(
         .collect()
 }
 
+pub(crate) fn application_end_offset(
+    document: &ProjectDocument,
+    structural_path: &[u32],
+    occurrence_range: &crate::SourceRange,
+) -> Option<u32> {
+    structural_path.iter().find_map(|node_id| {
+        let node = document.nodes.get(*node_id as usize)?;
+        if !matches!(
+            node.kind,
+            NotationNodeKind::NamedOperator | NotationNodeKind::Token
+        ) || node.ranges.full.start_offset < occurrence_range.start_offset
+            || node.ranges.full.end_offset > occurrence_range.end_offset
+        {
+            return None;
+        }
+        let argument = next_meaningful_sibling(document, *node_id)?;
+        (matches!(
+            argument.kind,
+            NotationNodeKind::Delimiter | NotationNodeKind::Group
+        ) && argument.state == crate::SyntaxState::Complete
+            && argument.ranges.full.start_offset < argument.ranges.full.end_offset)
+            .then_some(argument.ranges.full.end_offset)
+    })
+}
+
 pub(crate) fn append_semantic_candidates(
     document: &ProjectDocument,
     occurrence: &SourceOccurrence,
@@ -402,6 +427,17 @@ mod tests {
         assert!(candidates.iter().all(|candidate| {
             candidate.supporting_claims.is_empty() && candidate.rejecting_claims.is_empty()
         }));
+        assert_eq!(
+            application_end_offset(
+                &document,
+                &[2, 0],
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 18,
+                },
+            ),
+            Some(21)
+        );
     }
 
     #[test]

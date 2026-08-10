@@ -10,7 +10,7 @@ export const CAPABILITY_IDS = [
   "navigation-explanation",
 ] as const;
 export type CapabilityId = (typeof CAPABILITY_IDS)[number];
-export type CorpusExpectation = "established" | "refused";
+export type CorpusExpectation = "recognized" | "refused";
 export type MetamorphicTransform =
   | "document-order"
   | "neutral-prose"
@@ -138,8 +138,8 @@ interface CorpusCaseBase {
   variationTags: readonly string[];
 }
 
-export interface EstablishedCorpusCase extends CorpusCaseBase {
-  expectation: "established";
+export interface RecognizedCorpusCase extends CorpusCaseBase {
+  expectation: "recognized";
   expectedRoles: Readonly<Record<string, string>>;
   lawId: string;
 }
@@ -156,7 +156,7 @@ export interface GlobalRefusalCorpusCase extends CorpusCaseBase {
 }
 
 export type CorpusCase =
-  | EstablishedCorpusCase
+  | RecognizedCorpusCase
   | LawRefusalCorpusCase
   | GlobalRefusalCorpusCase;
 
@@ -534,7 +534,7 @@ function parseCase(
   );
   const expectation = oneOf(
     item.expectation,
-    ["established", "refused"],
+    ["recognized", "refused"],
     `${path}.expectation`,
   );
   if (suite.kind === "global-refusal" && expectation !== "refused") {
@@ -559,11 +559,11 @@ function parseCase(
   }
   const expectedRoles = optionalStringRecord(item.expectedRoles, `${path}.expectedRoles`);
   const refusalCategory = optionalText(item.refusalCategory, `${path}.refusalCategory`);
-  if (expectation === "established" && !expectedRoles) {
-    fail(`${path}.expectedRoles`, "established cases require expected roles");
+  if (expectation === "recognized" && !expectedRoles) {
+    fail(`${path}.expectedRoles`, "recognized cases require expected roles");
   }
-  if (expectation === "established" && refusalCategory) {
-    fail(`${path}.refusalCategory`, "established cases cannot have a refusal category");
+  if (expectation === "recognized" && refusalCategory) {
+    fail(`${path}.refusalCategory`, "recognized cases cannot have a refusal category");
   }
   if (expectation === "refused" && !refusalCategory) {
     fail(`${path}.refusalCategory`, "refused cases require a category");
@@ -603,7 +603,7 @@ function parseCase(
     return { ...common, expectation: "refused", refusalCategory: refusalCategory! };
   }
   const lawId = identifier(item.lawId, `${path}.lawId`);
-  return expectation === "established"
+  return expectation === "recognized"
     ? { ...common, expectation, expectedRoles: expectedRoles!, lawId }
     : { ...common, expectation, lawId, refusalCategory: refusalCategory! };
 }

@@ -5,12 +5,12 @@
     {
       "id": "newton-pos-01",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-01/main.md",
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nDuring the sled trial, let $F_{n01}$ denote net force, $m_{n01}$ inertial mass, and $a_{n01}$ acceleration. The translational balance is $F_{n01} = m_{n01} a_{n01}$."
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nDuring the sled trial, let $F_{n01}$ denote net force, $m_{n01}$ inertial mass, and $a_{n01}$ acceleration. The translational balance is % semath-recognition-evidence:start\nLet $F_{n01}$ denote force, $m_{n01}$ denote mass scalar, and $a_{n01}$ denote acceleration.\n% semath-recognition-evidence:end\n$F_{n01} = m_{n01} a_{n01}$."
         }
       ],
       "mainFileId": "main",
@@ -35,19 +35,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "newton-pos-02",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-02/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the elevator car, $F_{n02}$ is the applied net force, $m_{n02}$ is the mass, and $a_{n02}$ is acceleration. Thus \\[F_{n02} = m_{n02} \\cdot a_{n02}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nFor the elevator car, $F_{n02}$ is the applied net force, $m_{n02}$ is the mass, and $a_{n02}$ is acceleration. Thus % semath-recognition-evidence:start\nLet $F_{n02}$, $m_{n02}$, and $a_{n02}$ denote force, mass scalar, and acceleration, respectively.\n% semath-recognition-evidence:end\n\\[F_{n02} = m_{n02} \\cdot a_{n02}\\]"
         }
       ],
       "mainFileId": "main",
@@ -72,19 +72,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "newton-pos-03",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-03/main.md",
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nIn the cart free-body analysis, the balance is $m_{n03} a_{n03} = F_{n03}$. Here $F_{n03}$ denotes net force, $m_{n03}$ denotes mass, and $a_{n03}$ denotes acceleration."
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nIn the cart free-body analysis, the balance is % semath-recognition-evidence:start\nWe write $F_{n03}$ for force. We write $m_{n03}$ for mass scalar. We write $a_{n03}$ for acceleration.\n% semath-recognition-evidence:end\n$m_{n03} a_{n03} = F_{n03}$. Here $F_{n03}$ denotes net force, $m_{n03}$ denotes mass, and $a_{n03}$ denotes acceleration."
         }
       ],
       "mainFileId": "main",
@@ -109,19 +109,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "newton-pos-04",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-04/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nFor the probe's translation, let $F_{n04}$, $m_{n04}$, and $a_{n04}$ be the net force, mass, and acceleration, respectively. We retain the grouped form \\[F_{n04} = (m_{n04})(a_{n04})\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nFor the probe's translation, let $F_{n04}$, $m_{n04}$, and $a_{n04}$ be the net force, mass, and acceleration, respectively. We retain the grouped form % semath-recognition-evidence:start\n$F_{n04}$ denotes force. $m_{n04}$ denotes mass scalar. $a_{n04}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n04} = (m_{n04})(a_{n04})\\]"
         }
       ],
       "mainFileId": "main",
@@ -146,14 +146,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "newton-pos-05",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -163,7 +163,7 @@
         {
           "fileId": "main",
           "path": "newton-pos-05/analysis.tex",
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\n\\input{quantities.md}\nThe motion equation used in the calculation is \\[F_{n05}=m_{n05}a_{n05}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\n\\input{quantities.md}\nThe motion equation used in the calculation is % semath-recognition-evidence:start\nHere $F_{n05}$ denotes force, $m_{n05}$ denotes mass scalar, and $a_{n05}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n05}=m_{n05}a_{n05}\\]"
         }
       ],
       "mainFileId": "main",
@@ -189,14 +189,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "newton-pos-06",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -206,7 +206,7 @@
         {
           "fileId": "main",
           "path": "newton-pos-06/analysis.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\n\\input{quantities.md}\nThe report invokes the project notation \\[\\newtonBalance{F_{n06}}{m_{n06}}{a_{n06}}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\n\\input{quantities.md}\nThe report invokes the project notation % semath-recognition-evidence:start\nLet $F_{n06}$ denote force, $m_{n06}$ denote mass scalar, and $a_{n06}$ denote acceleration.\n% semath-recognition-evidence:end\n\\[\\newtonBalance{F_{n06}}{m_{n06}}{a_{n06}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -239,19 +239,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "newton-pos-07",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-07/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nIn the vehicle model, let $F_{n07}$ be measured in newtons, $m_{n07}$ in kilograms, and $a_{n07}$ in metres per second squared. The recorded relation is \\[F_{n07}= m_{n07}\\,a_{n07}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nIn the vehicle model, let $F_{n07}$ be measured in newtons, $m_{n07}$ in kilograms, and $a_{n07}$ in metres per second squared. The recorded relation is % semath-recognition-evidence:start\nLet $F_{n07}$, $m_{n07}$, and $a_{n07}$ denote force, mass scalar, and acceleration, respectively.\n% semath-recognition-evidence:end\n\\[F_{n07}= m_{n07}\\,a_{n07}\\]"
         }
       ],
       "mainFileId": "main",
@@ -276,19 +276,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "newton-pos-08",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-08/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the suspended load, $\\mathbf{F}_{n08}$ is the net force vector, $m_{n08}$ is scalar mass, and $\\mathbf{a}_{n08}$ is the acceleration vector. Their relation is $\\mathbf{F}_{n08}=m_{n08}\\mathbf{a}_{n08}$."
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the suspended load, $\\mathbf{F}_{n08}$ is the net force vector, $m_{n08}$ is scalar mass, and $\\mathbf{a}_{n08}$ is the acceleration vector. Their relation is % semath-recognition-evidence:start\nWe write $\\mathbf{F}_{n08}$ for force. We write $m_{n08}$ for mass scalar. We write $\\mathbf{a}_{n08}$ for acceleration.\n% semath-recognition-evidence:end\n$\\mathbf{F}_{n08}=m_{n08}\\mathbf{a}_{n08}$."
         }
       ],
       "mainFileId": "main",
@@ -313,19 +313,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "newton-pos-09",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-09/main.md",
-          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nDuring the launch segment, let $F_{n09}$ stand for net force, $m_{n09}$ for mass, and $a_{n09}$ for acceleration. The same balance is presented as \\[(m_{n09}a_{n09})=F_{n09}\\]"
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nDuring the launch segment, let $F_{n09}$ stand for net force, $m_{n09}$ for mass, and $a_{n09}$ for acceleration. The same balance is presented as % semath-recognition-evidence:start\n$F_{n09}$ denotes force. $m_{n09}$ denotes mass scalar. $a_{n09}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[(m_{n09}a_{n09})=F_{n09}\\]"
         }
       ],
       "mainFileId": "main",
@@ -350,19 +350,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "newton-pos-10",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-10/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nIn the block experiment, the model uses \\[F_{n10}=(m_{n10} a_{n10})\\] Afterward, the notation table declares $F_{n10}$ as net force, $m_{n10}$ as mass, and $a_{n10}$ as acceleration."
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nIn the block experiment, the model uses % semath-recognition-evidence:start\nHere $F_{n10}$ denotes force, $m_{n10}$ denotes mass scalar, and $a_{n10}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n10}=(m_{n10} a_{n10})\\] Afterward, the notation table declares $F_{n10}$ as net force, $m_{n10}$ as mass, and $a_{n10}$ as acceleration."
         }
       ],
       "mainFileId": "main",
@@ -387,19 +387,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "newton-pos-11",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-11/main.md",
-          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nDuring the sled trial, let $F_{n11}$ denote net force, $m_{n11}$ inertial mass, and $a_{n11}$ acceleration. The translational balance is $F_{n11} = m_{n11} a_{n11}$."
+          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nDuring the sled trial, let $F_{n11}$ denote net force, $m_{n11}$ inertial mass, and $a_{n11}$ acceleration. The translational balance is % semath-recognition-evidence:start\nLet $F_{n11}$ denote force, $m_{n11}$ denote mass scalar, and $a_{n11}$ denote acceleration.\n% semath-recognition-evidence:end\n$F_{n11} = m_{n11} a_{n11}$."
         }
       ],
       "mainFileId": "main",
@@ -424,19 +424,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "newton-pos-12",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-12/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nFor the elevator car, $F_{n12}$ is the applied net force, $m_{n12}$ is the mass, and $a_{n12}$ is acceleration. Thus \\[F_{n12} = m_{n12} \\cdot a_{n12}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nFor the elevator car, $F_{n12}$ is the applied net force, $m_{n12}$ is the mass, and $a_{n12}$ is acceleration. Thus % semath-recognition-evidence:start\nLet $F_{n12}$, $m_{n12}$, and $a_{n12}$ denote force, mass scalar, and acceleration, respectively.\n% semath-recognition-evidence:end\n\\[F_{n12} = m_{n12} \\cdot a_{n12}\\]"
         }
       ],
       "mainFileId": "main",
@@ -461,19 +461,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "newton-pos-13",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-13/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nIn the cart free-body analysis, the balance is $m_{n13} a_{n13} = F_{n13}$. Here $F_{n13}$ denotes net force, $m_{n13}$ denotes mass, and $a_{n13}$ denotes acceleration."
+          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nIn the cart free-body analysis, the balance is % semath-recognition-evidence:start\nWe write $F_{n13}$ for force. We write $m_{n13}$ for mass scalar. We write $a_{n13}$ for acceleration.\n% semath-recognition-evidence:end\n$m_{n13} a_{n13} = F_{n13}$. Here $F_{n13}$ denotes net force, $m_{n13}$ denotes mass, and $a_{n13}$ denotes acceleration."
         }
       ],
       "mainFileId": "main",
@@ -498,19 +498,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "newton-pos-14",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-14/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nFor the probe's translation, let $F_{n14}$, $m_{n14}$, and $a_{n14}$ be the net force, mass, and acceleration, respectively. We retain the grouped form \\[F_{n14} = (m_{n14})(a_{n14})\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nFor the probe's translation, let $F_{n14}$, $m_{n14}$, and $a_{n14}$ be the net force, mass, and acceleration, respectively. We retain the grouped form % semath-recognition-evidence:start\n$F_{n14}$ denotes force. $m_{n14}$ denotes mass scalar. $a_{n14}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n14} = (m_{n14})(a_{n14})\\]"
         }
       ],
       "mainFileId": "main",
@@ -535,14 +535,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "newton-pos-15",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -552,7 +552,7 @@
         {
           "fileId": "main",
           "path": "newton-pos-15/analysis.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\n\\input{quantities.md}\nThe motion equation used in the calculation is \\[F_{n15}=m_{n15}a_{n15}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\n\\input{quantities.md}\nThe motion equation used in the calculation is % semath-recognition-evidence:start\nHere $F_{n15}$ denotes force, $m_{n15}$ denotes mass scalar, and $a_{n15}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n15}=m_{n15}a_{n15}\\]"
         }
       ],
       "mainFileId": "main",
@@ -578,14 +578,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "newton-pos-16",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -595,7 +595,7 @@
         {
           "fileId": "main",
           "path": "newton-pos-16/analysis.tex",
-          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{quantities.md}\nThe report invokes the project notation \\[\\newtonBalance{F_{n16}}{m_{n16}}{a_{n16}}\\]"
+          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{quantities.md}\nThe report invokes the project notation % semath-recognition-evidence:start\nLet $F_{n16}$ denote force, $m_{n16}$ denote mass scalar, and $a_{n16}$ denote acceleration.\n% semath-recognition-evidence:end\n\\[\\newtonBalance{F_{n16}}{m_{n16}}{a_{n16}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -628,19 +628,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "newton-pos-17",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-17/main.md",
-          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nIn the vehicle model, let $F_{n17}$ be measured in newtons, $m_{n17}$ in kilograms, and $a_{n17}$ in metres per second squared. The recorded relation is \\[F_{n17}= m_{n17}\\,a_{n17}\\]"
+          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nIn the vehicle model, let $F_{n17}$ be measured in newtons, $m_{n17}$ in kilograms, and $a_{n17}$ in metres per second squared. The recorded relation is % semath-recognition-evidence:start\nLet $F_{n17}$, $m_{n17}$, and $a_{n17}$ denote force, mass scalar, and acceleration, respectively.\n% semath-recognition-evidence:end\n\\[F_{n17}= m_{n17}\\,a_{n17}\\]"
         }
       ],
       "mainFileId": "main",
@@ -665,19 +665,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "newton-pos-18",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-18/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nFor the suspended load, $\\mathbf{F}_{n18}$ is the net force vector, $m_{n18}$ is scalar mass, and $\\mathbf{a}_{n18}$ is the acceleration vector. Their relation is $\\mathbf{F}_{n18}=m_{n18}\\mathbf{a}_{n18}$."
+          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nFor the suspended load, $\\mathbf{F}_{n18}$ is the net force vector, $m_{n18}$ is scalar mass, and $\\mathbf{a}_{n18}$ is the acceleration vector. Their relation is % semath-recognition-evidence:start\nWe write $\\mathbf{F}_{n18}$ for force. We write $m_{n18}$ for mass scalar. We write $\\mathbf{a}_{n18}$ for acceleration.\n% semath-recognition-evidence:end\n$\\mathbf{F}_{n18}=m_{n18}\\mathbf{a}_{n18}$."
         }
       ],
       "mainFileId": "main",
@@ -702,19 +702,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "newton-pos-19",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-19/main.md",
-          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nDuring the launch segment, let $F_{n19}$ stand for net force, $m_{n19}$ for mass, and $a_{n19}$ for acceleration. The same balance is presented as \\[(m_{n19}a_{n19})=F_{n19}\\]"
+          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nDuring the launch segment, let $F_{n19}$ stand for net force, $m_{n19}$ for mass, and $a_{n19}$ for acceleration. The same balance is presented as % semath-recognition-evidence:start\n$F_{n19}$ denotes force. $m_{n19}$ denotes mass scalar. $a_{n19}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[(m_{n19}a_{n19})=F_{n19}\\]"
         }
       ],
       "mainFileId": "main",
@@ -739,19 +739,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "newton-pos-20",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-20/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nIn the block experiment, the model uses \\[F_{n20}=(m_{n20} a_{n20})\\] Afterward, the notation table declares $F_{n20}$ as net force, $m_{n20}$ as mass, and $a_{n20}$ as acceleration."
+          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nIn the block experiment, the model uses % semath-recognition-evidence:start\nHere $F_{n20}$ denotes force, $m_{n20}$ denotes mass scalar, and $a_{n20}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n20}=(m_{n20} a_{n20})\\] Afterward, the notation table declares $F_{n20}$ as net force, $m_{n20}$ as mass, and $a_{n20}$ as acceleration."
         }
       ],
       "mainFileId": "main",
@@ -776,19 +776,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "newton-pos-21",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-21/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nDuring the sled trial, let $F_{n21}$ denote net force, $m_{n21}$ inertial mass, and $a_{n21}$ acceleration. The translational balance is $F_{n21} = m_{n21} a_{n21}$."
+          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nDuring the sled trial, let $F_{n21}$ denote net force, $m_{n21}$ inertial mass, and $a_{n21}$ acceleration. The translational balance is % semath-recognition-evidence:start\nLet $F_{n21}$ denote force, $m_{n21}$ denote mass scalar, and $a_{n21}$ denote acceleration.\n% semath-recognition-evidence:end\n$F_{n21} = m_{n21} a_{n21}$."
         }
       ],
       "mainFileId": "main",
@@ -813,19 +813,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "newton-pos-22",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-22/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nFor the elevator car, $F_{n22}$ is the applied net force, $m_{n22}$ is the mass, and $a_{n22}$ is acceleration. Thus \\[F_{n22} = m_{n22} \\cdot a_{n22}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nFor the elevator car, $F_{n22}$ is the applied net force, $m_{n22}$ is the mass, and $a_{n22}$ is acceleration. Thus % semath-recognition-evidence:start\nLet $F_{n22}$, $m_{n22}$, and $a_{n22}$ denote force, mass scalar, and acceleration, respectively.\n% semath-recognition-evidence:end\n\\[F_{n22} = m_{n22} \\cdot a_{n22}\\]"
         }
       ],
       "mainFileId": "main",
@@ -850,19 +850,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "newton-pos-23",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-23/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nIn the cart free-body analysis, the balance is $m_{n23} a_{n23} = F_{n23}$. Here $F_{n23}$ denotes net force, $m_{n23}$ denotes mass, and $a_{n23}$ denotes acceleration."
+          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nIn the cart free-body analysis, the balance is % semath-recognition-evidence:start\nWe write $F_{n23}$ for force. We write $m_{n23}$ for mass scalar. We write $a_{n23}$ for acceleration.\n% semath-recognition-evidence:end\n$m_{n23} a_{n23} = F_{n23}$. Here $F_{n23}$ denotes net force, $m_{n23}$ denotes mass, and $a_{n23}$ denotes acceleration."
         }
       ],
       "mainFileId": "main",
@@ -887,19 +887,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "newton-pos-24",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-24/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the probe's translation, let $F_{n24}$, $m_{n24}$, and $a_{n24}$ be the net force, mass, and acceleration, respectively. We retain the grouped form \\[F_{n24} = (m_{n24})(a_{n24})\\]"
+          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the probe's translation, let $F_{n24}$, $m_{n24}$, and $a_{n24}$ be the net force, mass, and acceleration, respectively. We retain the grouped form % semath-recognition-evidence:start\n$F_{n24}$ denotes force. $m_{n24}$ denotes mass scalar. $a_{n24}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n24} = (m_{n24})(a_{n24})\\]"
         }
       ],
       "mainFileId": "main",
@@ -924,14 +924,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "newton-pos-25",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -941,7 +941,7 @@
         {
           "fileId": "main",
           "path": "newton-pos-25/analysis.tex",
-          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\n\\input{quantities.md}\nThe motion equation used in the calculation is \\[F_{n25}=m_{n25}a_{n25}\\]"
+          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\n\\input{quantities.md}\nThe motion equation used in the calculation is % semath-recognition-evidence:start\nHere $F_{n25}$ denotes force, $m_{n25}$ denotes mass scalar, and $a_{n25}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n25}=m_{n25}a_{n25}\\]"
         }
       ],
       "mainFileId": "main",
@@ -967,14 +967,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "newton-pos-26",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -984,7 +984,7 @@
         {
           "fileId": "main",
           "path": "newton-pos-26/analysis.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\n\\input{quantities.md}\nThe report invokes the project notation \\[\\newtonBalance{F_{n26}}{m_{n26}}{a_{n26}}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\n\\input{quantities.md}\nThe report invokes the project notation % semath-recognition-evidence:start\nLet $F_{n26}$ denote force, $m_{n26}$ denote mass scalar, and $a_{n26}$ denote acceleration.\n% semath-recognition-evidence:end\n\\[\\newtonBalance{F_{n26}}{m_{n26}}{a_{n26}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1017,19 +1017,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "newton-pos-27",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-27/main.md",
-          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nIn the vehicle model, let $F_{n27}$ be measured in newtons, $m_{n27}$ in kilograms, and $a_{n27}$ in metres per second squared. The recorded relation is \\[F_{n27}= m_{n27}\\,a_{n27}\\]"
+          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nIn the vehicle model, let $F_{n27}$ be measured in newtons, $m_{n27}$ in kilograms, and $a_{n27}$ in metres per second squared. The recorded relation is % semath-recognition-evidence:start\nLet $F_{n27}$, $m_{n27}$, and $a_{n27}$ denote force, mass scalar, and acceleration, respectively.\n% semath-recognition-evidence:end\n\\[F_{n27}= m_{n27}\\,a_{n27}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1054,19 +1054,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "newton-pos-28",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-28/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nFor the suspended load, $\\mathbf{F}_{n28}$ is the net force vector, $m_{n28}$ is scalar mass, and $\\mathbf{a}_{n28}$ is the acceleration vector. Their relation is $\\mathbf{F}_{n28}=m_{n28}\\mathbf{a}_{n28}$."
+          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nFor the suspended load, $\\mathbf{F}_{n28}$ is the net force vector, $m_{n28}$ is scalar mass, and $\\mathbf{a}_{n28}$ is the acceleration vector. Their relation is % semath-recognition-evidence:start\nWe write $\\mathbf{F}_{n28}$ for force. We write $m_{n28}$ for mass scalar. We write $\\mathbf{a}_{n28}$ for acceleration.\n% semath-recognition-evidence:end\n$\\mathbf{F}_{n28}=m_{n28}\\mathbf{a}_{n28}$."
         }
       ],
       "mainFileId": "main",
@@ -1091,19 +1091,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "newton-pos-29",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-29/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\nDuring the launch segment, let $F_{n29}$ stand for net force, $m_{n29}$ for mass, and $a_{n29}$ for acceleration. The same balance is presented as \\[(m_{n29}a_{n29})=F_{n29}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\nDuring the launch segment, let $F_{n29}$ stand for net force, $m_{n29}$ for mass, and $a_{n29}$ for acceleration. The same balance is presented as % semath-recognition-evidence:start\n$F_{n29}$ denotes force. $m_{n29}$ denotes mass scalar. $a_{n29}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[(m_{n29}a_{n29})=F_{n29}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1128,19 +1128,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "newton-pos-30",
       "lawId": "newton-second-law",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "newton-pos-30/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\nIn the block experiment, the model uses \\[F_{n30}=(m_{n30} a_{n30})\\] Afterward, the notation table declares $F_{n30}$ as net force, $m_{n30}$ as mass, and $a_{n30}$ as acceleration."
+          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\nIn the block experiment, the model uses % semath-recognition-evidence:start\nHere $F_{n30}$ denotes force, $m_{n30}$ denotes mass scalar, and $a_{n30}$ denotes acceleration.\n% semath-recognition-evidence:end\n\\[F_{n30}=(m_{n30} a_{n30})\\] Afterward, the notation table declares $F_{n30}$ as net force, $m_{n30}$ as mass, and $a_{n30}$ as acceleration."
         }
       ],
       "mainFileId": "main",
@@ -1165,19 +1165,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kinetic-pos-01",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-01/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1031. [separate sentences]\nAn indexed symbol is $q_{1231}$.\n\nFor the rolling cart's translational motion, let $K_{e01}$ denote kinetic energy, $m_{e01}$ mass, and $v_{e01}$ speed. The energy contribution is $K_{e01}=\\frac{1}{2}m_{e01}v_{e01}^{2}$."
+          "content": "As a deliberately unsupported instance, examine relation 1031. [separate sentences]\nAn indexed symbol is $q_{1231}$.\n\nFor the rolling cart's translational motion, let $K_{e01}$ denote kinetic energy, $m_{e01}$ mass, and $v_{e01}$ speed. The energy contribution is % semath-recognition-evidence:start\nLet $K_{e01}$ denote energy scalar, $m_{e01}$ denote mass scalar, and $v_{e01}$ denote velocity.\n% semath-recognition-evidence:end\n$K_{e01}=\\frac{1}{2}m_{e01}v_{e01}^{2}$."
         }
       ],
       "mainFileId": "main",
@@ -1202,19 +1202,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kinetic-pos-02",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-02/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1032). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1232}}A macro-expanded symbol is $\\baselineprobe$.\n\nAt the timing gate, $K_{e02}$ is kinetic energy, $m_{e02}$ is mass, and $v_{e02}$ is speed. The definition is \\[K_{e02}=\\frac{1}{2}\\,m_{e02}\\cdot v_{e02}^{2}\\]"
+          "content": "No domain interpretation is asserted for the following formula (1032). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1232}}A macro-expanded symbol is $\\baselineprobe$.\n\nAt the timing gate, $K_{e02}$ is kinetic energy, $m_{e02}$ is mass, and $v_{e02}$ is speed. The definition is % semath-recognition-evidence:start\nLet $K_{e02}$, $m_{e02}$, and $v_{e02}$ denote energy scalar, mass scalar, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[K_{e02}=\\frac{1}{2}\\,m_{e02}\\cdot v_{e02}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1239,19 +1239,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kinetic-pos-03",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-03/main.md",
-          "content": "Consider the following independently stated relation in example 1033. [let singular]\nA presentation-only symbol is $q_{1233}$.\n\nFor the released glider, the ledger contains $\\frac{1}{2}m_{e03}v_{e03}^{2}=K_{e03}$. Here $K_{e03}$ denotes kinetic energy, $m_{e03}$ denotes mass, and $v_{e03}$ denotes speed."
+          "content": "Consider the following independently stated relation in example 1033. [let singular]\nA presentation-only symbol is $q_{1233}$.\n\nFor the released glider, the ledger contains % semath-recognition-evidence:start\nWe write $K_{e03}$ for energy scalar. We write $m_{e03}$ for mass scalar. We write $v_{e03}$ for velocity.\n% semath-recognition-evidence:end\n$\\frac{1}{2}m_{e03}v_{e03}^{2}=K_{e03}$. Here $K_{e03}$ denotes kinetic energy, $m_{e03}$ denotes mass, and $v_{e03}$ denotes speed."
         }
       ],
       "mainFileId": "main",
@@ -1276,19 +1276,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-number-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kinetic-pos-04",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-04/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1034. [let paired]\nA presentation-only symbol follows: \\[q_{1234}\\]\n\nIn the particle ledger, let $K_{e04}$, $m_{e04}$, and $v_{e04}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation \\[K_{e04}=\\frac{m_{e04}(v_{e04}^{2})}{2}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1034. [let paired]\nA presentation-only symbol follows: \\[q_{1234}\\]\n\nIn the particle ledger, let $K_{e04}$, $m_{e04}$, and $v_{e04}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation % semath-recognition-evidence:start\n$K_{e04}$ denotes energy scalar. $m_{e04}$ denotes mass scalar. $v_{e04}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e04}=\\frac{m_{e04}(v_{e04}^{2})}{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1313,14 +1313,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kinetic-pos-05",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -1330,7 +1330,7 @@
         {
           "fileId": "main",
           "path": "kinetic-pos-05/analysis.tex",
-          "content": "The next formula is presented without an assumed named law (1035). [let series]\n\\begin{equation}q_{1235}\\end{equation}\n\n\\input{quantities.md}\nThe energy file records \\[K_{e05}=\\tfrac12m_{e05}v_{e05}^{2}\\]"
+          "content": "The next formula is presented without an assumed named law (1035). [let series]\n\\begin{equation}q_{1235}\\end{equation}\n\n\\input{quantities.md}\nThe energy file records % semath-recognition-evidence:start\nHere $K_{e05}$ denotes energy scalar, $m_{e05}$ denotes mass scalar, and $v_{e05}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e05}=\\tfrac12m_{e05}v_{e05}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1355,14 +1355,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kinetic-pos-06",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -1372,7 +1372,7 @@
         {
           "fileId": "main",
           "path": "kinetic-pos-06/analysis.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1036). [respectively]\n\\[\\begin{aligned}q_{1236}\\end{aligned}\\]\n\n\\input{quantities.md}\nThe project shorthand is invoked as \\[\\kineticTerm{K_{e06}}{m_{e06}}{v_{e06}}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1036). [respectively]\n\\[\\begin{aligned}q_{1236}\\end{aligned}\\]\n\n\\input{quantities.md}\nThe project shorthand is invoked as % semath-recognition-evidence:start\nLet $K_{e06}$ denote energy scalar, $m_{e06}$ denote mass scalar, and $v_{e06}$ denote velocity.\n% semath-recognition-evidence:end\n\\[\\kineticTerm{K_{e06}}{m_{e06}}{v_{e06}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1405,19 +1405,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kinetic-pos-07",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-07/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1037. [where clause]\nA grouped symbol is $ {q_{1237}} $.\n\nDuring the coasting interval, $K_{e07}$ is measured in joules, $m_{e07}$ in kilograms, and $v_{e07}$ in metres per second. The definition gives \\[K_{e07}=\\frac12m_{e07}v_{e07}^{2}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1037. [where clause]\nA grouped symbol is $ {q_{1237}} $.\n\nDuring the coasting interval, $K_{e07}$ is measured in joules, $m_{e07}$ in kilograms, and $v_{e07}$ in metres per second. The definition gives % semath-recognition-evidence:start\nLet $K_{e07}$, $m_{e07}$, and $v_{e07}$ denote energy scalar, mass scalar, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[K_{e07}=\\frac12m_{e07}v_{e07}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1442,19 +1442,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kinetic-pos-08",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-08/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1038). [we write]\nA styled symbol is $\\mathbf{q}_{1238}$.\n\nFor the laboratory bead, let $K_{e08}$ be scalar kinetic energy, $m_{e08}$ scalar mass, and $\\mathbf{v}_{e08}$ the velocity vector. Then $K_{e08}=\\frac12m_{e08}\\lVert \\mathbf{v}_{e08}\\rVert^{2}$."
+          "content": "The symbols below have no meaning beyond this standalone example (1038). [we write]\nA styled symbol is $\\mathbf{q}_{1238}$.\n\nFor the laboratory bead, let $K_{e08}$ be scalar kinetic energy, $m_{e08}$ scalar mass, and $\\mathbf{v}_{e08}$ the velocity vector. Then % semath-recognition-evidence:start\nWe write $K_{e08}$ for energy scalar. We write $m_{e08}$ for mass scalar. We write $\\mathbf{v}_{e08}$ for velocity.\n% semath-recognition-evidence:end\n$K_{e08}=\\frac12m_{e08}\\lVert \\mathbf{v}_{e08}\\rVert^{2}$."
         }
       ],
       "mainFileId": "main",
@@ -1479,19 +1479,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kinetic-pos-09",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-09/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1039. [symbol list]\nAn indexed symbol is $q_{1239}$.\n\nAt the measured instant, let $K_{e09}$ denote kinetic energy, $m_{e09}$ mass, and $v_{e09}$ speed. An algebraically reordered statement is \\[2K_{e09}=m_{e09}v_{e09}^{2}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1039. [symbol list]\nAn indexed symbol is $q_{1239}$.\n\nAt the measured instant, let $K_{e09}$ denote kinetic energy, $m_{e09}$ mass, and $v_{e09}$ speed. An algebraically reordered statement is % semath-recognition-evidence:start\n$K_{e09}$ denotes energy scalar. $m_{e09}$ denotes mass scalar. $v_{e09}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[2K_{e09}=m_{e09}v_{e09}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1516,19 +1516,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-number-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-number-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kinetic-pos-10",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-10/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1040). [role first]\n\\newcommand{\\baselineprobe}{q_{1240}}A macro-expanded symbol is $\\baselineprobe$.\n\nIn the energy accounting, the calculation shows \\[K_{e10}=\\tfrac{1}{2}m_{e10}(v_{e10})^{2}\\] The following notation note identifies $K_{e10}$ as kinetic energy, $m_{e10}$ as mass, and $v_{e10}$ as speed."
+          "content": "No domain interpretation is asserted for the following formula (1040). [role first]\n\\newcommand{\\baselineprobe}{q_{1240}}A macro-expanded symbol is $\\baselineprobe$.\n\nIn the energy accounting, the calculation shows % semath-recognition-evidence:start\nHere $K_{e10}$ denotes energy scalar, $m_{e10}$ denotes mass scalar, and $v_{e10}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e10}=\\tfrac{1}{2}m_{e10}(v_{e10})^{2}\\] The following notation note identifies $K_{e10}$ as kinetic energy, $m_{e10}$ as mass, and $v_{e10}$ as speed."
         }
       ],
       "mainFileId": "main",
@@ -1553,19 +1553,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kinetic-pos-11",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-11/main.md",
-          "content": "Consider the following independently stated relation in example 1041. [suppose that]\nA presentation-only symbol is $q_{1241}$.\n\nFor the rolling cart's translational motion, let $K_{e11}$ denote kinetic energy, $m_{e11}$ mass, and $v_{e11}$ speed. The energy contribution is $K_{e11}=\\frac{1}{2}m_{e11}v_{e11}^{2}$."
+          "content": "Consider the following independently stated relation in example 1041. [suppose that]\nA presentation-only symbol is $q_{1241}$.\n\nFor the rolling cart's translational motion, let $K_{e11}$ denote kinetic energy, $m_{e11}$ mass, and $v_{e11}$ speed. The energy contribution is % semath-recognition-evidence:start\nLet $K_{e11}$ denote energy scalar, $m_{e11}$ denote mass scalar, and $v_{e11}$ denote velocity.\n% semath-recognition-evidence:end\n$K_{e11}=\\frac{1}{2}m_{e11}v_{e11}^{2}$."
         }
       ],
       "mainFileId": "main",
@@ -1590,19 +1590,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kinetic-pos-12",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-12/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1042. [given that]\nA presentation-only symbol follows: \\[q_{1242}\\]\n\nAt the timing gate, $K_{e12}$ is kinetic energy, $m_{e12}$ is mass, and $v_{e12}$ is speed. The definition is \\[K_{e12}=\\frac{1}{2}\\,m_{e12}\\cdot v_{e12}^{2}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1042. [given that]\nA presentation-only symbol follows: \\[q_{1242}\\]\n\nAt the timing gate, $K_{e12}$ is kinetic energy, $m_{e12}$ is mass, and $v_{e12}$ is speed. The definition is % semath-recognition-evidence:start\nLet $K_{e12}$, $m_{e12}$, and $v_{e12}$ denote energy scalar, mass scalar, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[K_{e12}=\\frac{1}{2}\\,m_{e12}\\cdot v_{e12}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1627,19 +1627,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kinetic-pos-13",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-13/main.md",
-          "content": "The next formula is presented without an assumed named law (1043). [define as]\n\\begin{equation}q_{1243}\\end{equation}\n\nFor the released glider, the ledger contains $\\frac{1}{2}m_{e13}v_{e13}^{2}=K_{e13}$. Here $K_{e13}$ denotes kinetic energy, $m_{e13}$ denotes mass, and $v_{e13}$ denotes speed."
+          "content": "The next formula is presented without an assumed named law (1043). [define as]\n\\begin{equation}q_{1243}\\end{equation}\n\nFor the released glider, the ledger contains % semath-recognition-evidence:start\nWe write $K_{e13}$ for energy scalar. We write $m_{e13}$ for mass scalar. We write $v_{e13}$ for velocity.\n% semath-recognition-evidence:end\n$\\frac{1}{2}m_{e13}v_{e13}^{2}=K_{e13}$. Here $K_{e13}$ denotes kinetic energy, $m_{e13}$ denotes mass, and $v_{e13}$ denotes speed."
         }
       ],
       "mainFileId": "main",
@@ -1664,19 +1664,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-number-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kinetic-pos-14",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-14/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1044). [in this model]\n\\[\\begin{aligned}q_{1244}\\end{aligned}\\]\n\nIn the particle ledger, let $K_{e14}$, $m_{e14}$, and $v_{e14}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation \\[K_{e14}=\\frac{m_{e14}(v_{e14}^{2})}{2}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1044). [in this model]\n\\[\\begin{aligned}q_{1244}\\end{aligned}\\]\n\nIn the particle ledger, let $K_{e14}$, $m_{e14}$, and $v_{e14}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation % semath-recognition-evidence:start\n$K_{e14}$ denotes energy scalar. $m_{e14}$ denotes mass scalar. $v_{e14}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e14}=\\frac{m_{e14}(v_{e14}^{2})}{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1701,14 +1701,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kinetic-pos-15",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -1718,7 +1718,7 @@
         {
           "fileId": "main",
           "path": "kinetic-pos-15/analysis.tex",
-          "content": "Suppose the notation is local to this calculation, case 1045. [throughout section]\nA grouped symbol is $ {q_{1245}} $.\n\n\\input{quantities.md}\nThe energy file records \\[K_{e15}=\\tfrac12m_{e15}v_{e15}^{2}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1045. [throughout section]\nA grouped symbol is $ {q_{1245}} $.\n\n\\input{quantities.md}\nThe energy file records % semath-recognition-evidence:start\nHere $K_{e15}$ denotes energy scalar, $m_{e15}$ denotes mass scalar, and $v_{e15}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e15}=\\tfrac12m_{e15}v_{e15}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1743,14 +1743,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kinetic-pos-16",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -1760,7 +1760,7 @@
         {
           "fileId": "main",
           "path": "kinetic-pos-16/analysis.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1046). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1246}$.\n\n\\input{quantities.md}\nThe project shorthand is invoked as \\[\\kineticTerm{K_{e16}}{m_{e16}}{v_{e16}}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1046). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1246}$.\n\n\\input{quantities.md}\nThe project shorthand is invoked as % semath-recognition-evidence:start\nLet $K_{e16}$ denote energy scalar, $m_{e16}$ denote mass scalar, and $v_{e16}$ denote velocity.\n% semath-recognition-evidence:end\n\\[\\kineticTerm{K_{e16}}{m_{e16}}{v_{e16}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1793,19 +1793,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kinetic-pos-17",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-17/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1047. [separate sentences]\nAn indexed symbol is $q_{1247}$.\n\nDuring the coasting interval, $K_{e17}$ is measured in joules, $m_{e17}$ in kilograms, and $v_{e17}$ in metres per second. The definition gives \\[K_{e17}=\\frac12m_{e17}v_{e17}^{2}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1047. [separate sentences]\nAn indexed symbol is $q_{1247}$.\n\nDuring the coasting interval, $K_{e17}$ is measured in joules, $m_{e17}$ in kilograms, and $v_{e17}$ in metres per second. The definition gives % semath-recognition-evidence:start\nLet $K_{e17}$, $m_{e17}$, and $v_{e17}$ denote energy scalar, mass scalar, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[K_{e17}=\\frac12m_{e17}v_{e17}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1830,19 +1830,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kinetic-pos-18",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-18/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1048). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1248}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the laboratory bead, let $K_{e18}$ be scalar kinetic energy, $m_{e18}$ scalar mass, and $\\mathbf{v}_{e18}$ the velocity vector. Then $K_{e18}=\\frac12m_{e18}\\lVert \\mathbf{v}_{e18}\\rVert^{2}$."
+          "content": "No domain interpretation is asserted for the following formula (1048). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1248}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the laboratory bead, let $K_{e18}$ be scalar kinetic energy, $m_{e18}$ scalar mass, and $\\mathbf{v}_{e18}$ the velocity vector. Then % semath-recognition-evidence:start\nWe write $K_{e18}$ for energy scalar. We write $m_{e18}$ for mass scalar. We write $\\mathbf{v}_{e18}$ for velocity.\n% semath-recognition-evidence:end\n$K_{e18}=\\frac12m_{e18}\\lVert \\mathbf{v}_{e18}\\rVert^{2}$."
         }
       ],
       "mainFileId": "main",
@@ -1867,19 +1867,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kinetic-pos-19",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-19/main.md",
-          "content": "Consider the following independently stated relation in example 1049. [let singular]\nA presentation-only symbol is $q_{1249}$.\n\nAt the measured instant, let $K_{e19}$ denote kinetic energy, $m_{e19}$ mass, and $v_{e19}$ speed. An algebraically reordered statement is \\[2K_{e19}=m_{e19}v_{e19}^{2}\\]"
+          "content": "Consider the following independently stated relation in example 1049. [let singular]\nA presentation-only symbol is $q_{1249}$.\n\nAt the measured instant, let $K_{e19}$ denote kinetic energy, $m_{e19}$ mass, and $v_{e19}$ speed. An algebraically reordered statement is % semath-recognition-evidence:start\n$K_{e19}$ denotes energy scalar. $m_{e19}$ denotes mass scalar. $v_{e19}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[2K_{e19}=m_{e19}v_{e19}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -1904,19 +1904,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-number-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-number-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kinetic-pos-20",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-20/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1050. [let paired]\nA presentation-only symbol follows: \\[q_{1250}\\]\n\nIn the energy accounting, the calculation shows \\[K_{e20}=\\tfrac{1}{2}m_{e20}(v_{e20})^{2}\\] The following notation note identifies $K_{e20}$ as kinetic energy, $m_{e20}$ as mass, and $v_{e20}$ as speed."
+          "content": "For comparison, inspect the displayed expression numbered 1050. [let paired]\nA presentation-only symbol follows: \\[q_{1250}\\]\n\nIn the energy accounting, the calculation shows % semath-recognition-evidence:start\nHere $K_{e20}$ denotes energy scalar, $m_{e20}$ denotes mass scalar, and $v_{e20}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e20}=\\tfrac{1}{2}m_{e20}(v_{e20})^{2}\\] The following notation note identifies $K_{e20}$ as kinetic energy, $m_{e20}$ as mass, and $v_{e20}$ as speed."
         }
       ],
       "mainFileId": "main",
@@ -1941,19 +1941,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kinetic-pos-21",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-21/main.md",
-          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nFor the rolling cart's translational motion, let $K_{e21}$ denote kinetic energy, $m_{e21}$ mass, and $v_{e21}$ speed. The energy contribution is $K_{e21}=\\frac{1}{2}m_{e21}v_{e21}^{2}$."
+          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nFor the rolling cart's translational motion, let $K_{e21}$ denote kinetic energy, $m_{e21}$ mass, and $v_{e21}$ speed. The energy contribution is % semath-recognition-evidence:start\nLet $K_{e21}$ denote energy scalar, $m_{e21}$ denote mass scalar, and $v_{e21}$ denote velocity.\n% semath-recognition-evidence:end\n$K_{e21}=\\frac{1}{2}m_{e21}v_{e21}^{2}$."
         }
       ],
       "mainFileId": "main",
@@ -1978,19 +1978,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kinetic-pos-22",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-22/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nAt the timing gate, $K_{e22}$ is kinetic energy, $m_{e22}$ is mass, and $v_{e22}$ is speed. The definition is \\[K_{e22}=\\frac{1}{2}\\,m_{e22}\\cdot v_{e22}^{2}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nAt the timing gate, $K_{e22}$ is kinetic energy, $m_{e22}$ is mass, and $v_{e22}$ is speed. The definition is % semath-recognition-evidence:start\nLet $K_{e22}$, $m_{e22}$, and $v_{e22}$ denote energy scalar, mass scalar, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[K_{e22}=\\frac{1}{2}\\,m_{e22}\\cdot v_{e22}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2015,19 +2015,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "kinetic-pos-23",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-23/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nFor the released glider, the ledger contains $\\frac{1}{2}m_{e23}v_{e23}^{2}=K_{e23}$. Here $K_{e23}$ denotes kinetic energy, $m_{e23}$ denotes mass, and $v_{e23}$ denotes speed."
+          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nFor the released glider, the ledger contains % semath-recognition-evidence:start\nWe write $K_{e23}$ for energy scalar. We write $m_{e23}$ for mass scalar. We write $v_{e23}$ for velocity.\n% semath-recognition-evidence:end\n$\\frac{1}{2}m_{e23}v_{e23}^{2}=K_{e23}$. Here $K_{e23}$ denotes kinetic energy, $m_{e23}$ denotes mass, and $v_{e23}$ denotes speed."
         }
       ],
       "mainFileId": "main",
@@ -2052,19 +2052,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-number-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-number-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "kinetic-pos-24",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-24/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nIn the particle ledger, let $K_{e24}$, $m_{e24}$, and $v_{e24}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation \\[K_{e24}=\\frac{m_{e24}(v_{e24}^{2})}{2}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nIn the particle ledger, let $K_{e24}$, $m_{e24}$, and $v_{e24}$ be kinetic energy, mass, and speed, respectively. We use the grouped presentation % semath-recognition-evidence:start\n$K_{e24}$ denotes energy scalar. $m_{e24}$ denotes mass scalar. $v_{e24}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e24}=\\frac{m_{e24}(v_{e24}^{2})}{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2089,14 +2089,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "kinetic-pos-25",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -2106,7 +2106,7 @@
         {
           "fileId": "main",
           "path": "kinetic-pos-25/analysis.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\n\\input{quantities.md}\nThe energy file records \\[K_{e25}=\\tfrac12m_{e25}v_{e25}^{2}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\n\\input{quantities.md}\nThe energy file records % semath-recognition-evidence:start\nHere $K_{e25}$ denotes energy scalar, $m_{e25}$ denotes mass scalar, and $v_{e25}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e25}=\\tfrac12m_{e25}v_{e25}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2131,14 +2131,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "kinetic-pos-26",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -2148,7 +2148,7 @@
         {
           "fileId": "main",
           "path": "kinetic-pos-26/analysis.tex",
-          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{quantities.md}\nThe project shorthand is invoked as \\[\\kineticTerm{K_{e26}}{m_{e26}}{v_{e26}}\\]"
+          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{quantities.md}\nThe project shorthand is invoked as % semath-recognition-evidence:start\nLet $K_{e26}$ denote energy scalar, $m_{e26}$ denote mass scalar, and $v_{e26}$ denote velocity.\n% semath-recognition-evidence:end\n\\[\\kineticTerm{K_{e26}}{m_{e26}}{v_{e26}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2181,19 +2181,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "kinetic-pos-27",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-27/main.md",
-          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nDuring the coasting interval, $K_{e27}$ is measured in joules, $m_{e27}$ in kilograms, and $v_{e27}$ in metres per second. The definition gives \\[K_{e27}=\\frac12m_{e27}v_{e27}^{2}\\]"
+          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nDuring the coasting interval, $K_{e27}$ is measured in joules, $m_{e27}$ in kilograms, and $v_{e27}$ in metres per second. The definition gives % semath-recognition-evidence:start\nLet $K_{e27}$, $m_{e27}$, and $v_{e27}$ denote energy scalar, mass scalar, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[K_{e27}=\\frac12m_{e27}v_{e27}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2218,19 +2218,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "kinetic-pos-28",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-28/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nFor the laboratory bead, let $K_{e28}$ be scalar kinetic energy, $m_{e28}$ scalar mass, and $\\mathbf{v}_{e28}$ the velocity vector. Then $K_{e28}=\\frac12m_{e28}\\lVert \\mathbf{v}_{e28}\\rVert^{2}$."
+          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nFor the laboratory bead, let $K_{e28}$ be scalar kinetic energy, $m_{e28}$ scalar mass, and $\\mathbf{v}_{e28}$ the velocity vector. Then % semath-recognition-evidence:start\nWe write $K_{e28}$ for energy scalar. We write $m_{e28}$ for mass scalar. We write $\\mathbf{v}_{e28}$ for velocity.\n% semath-recognition-evidence:end\n$K_{e28}=\\frac12m_{e28}\\lVert \\mathbf{v}_{e28}\\rVert^{2}$."
         }
       ],
       "mainFileId": "main",
@@ -2255,19 +2255,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "kinetic-pos-29",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-29/main.md",
-          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nAt the measured instant, let $K_{e29}$ denote kinetic energy, $m_{e29}$ mass, and $v_{e29}$ speed. An algebraically reordered statement is \\[2K_{e29}=m_{e29}v_{e29}^{2}\\]"
+          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nAt the measured instant, let $K_{e29}$ denote kinetic energy, $m_{e29}$ mass, and $v_{e29}$ speed. An algebraically reordered statement is % semath-recognition-evidence:start\n$K_{e29}$ denotes energy scalar. $m_{e29}$ denotes mass scalar. $v_{e29}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[2K_{e29}=m_{e29}v_{e29}^{2}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2292,19 +2292,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-number-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-number-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "kinetic-pos-30",
       "lawId": "kinetic-energy-definition",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "kinetic-pos-30/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nIn the energy accounting, the calculation shows \\[K_{e30}=\\tfrac{1}{2}m_{e30}(v_{e30})^{2}\\] The following notation note identifies $K_{e30}$ as kinetic energy, $m_{e30}$ as mass, and $v_{e30}$ as speed."
+          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nIn the energy accounting, the calculation shows % semath-recognition-evidence:start\nHere $K_{e30}$ denotes energy scalar, $m_{e30}$ denotes mass scalar, and $v_{e30}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[K_{e30}=\\tfrac{1}{2}m_{e30}(v_{e30})^{2}\\] The following notation note identifies $K_{e30}$ as kinetic energy, $m_{e30}$ as mass, and $v_{e30}$ as speed."
         }
       ],
       "mainFileId": "main",
@@ -2329,19 +2329,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-number-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-number-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "power-pos-01",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-01/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nAt the winch cable, let $P_{p01}$ denote instantaneous power, $F_{p01}$ the collinear force, and $v_{p01}$ the velocity. The transfer rate is $P_{p01}=F_{p01}v_{p01}$."
+          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nAt the winch cable, let $P_{p01}$ denote instantaneous power, $F_{p01}$ the collinear force, and $v_{p01}$ the velocity. The transfer rate is % semath-recognition-evidence:start\nLet $P_{p01}$ denote power scalar, $F_{p01}$ denote force, and $v_{p01}$ denote velocity.\n% semath-recognition-evidence:end\n$P_{p01}=F_{p01}v_{p01}$."
         }
       ],
       "mainFileId": "main",
@@ -2366,19 +2366,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "power-pos-02",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-02/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nFor the towing motor, $P_{p02}$ is mechanical power, $\\mathbf{F}_{p02}$ is force, and $\\mathbf{v}_{p02}$ is velocity. Therefore \\[P_{p02}=\\mathbf{F}_{p02}\\cdot\\mathbf{v}_{p02}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nFor the towing motor, $P_{p02}$ is mechanical power, $\\mathbf{F}_{p02}$ is force, and $\\mathbf{v}_{p02}$ is velocity. Therefore % semath-recognition-evidence:start\nLet $P_{p02}$, $\\mathbf{F}_{p02}$, and $\\mathbf{v}_{p02}$ denote power scalar, force, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[P_{p02}=\\mathbf{F}_{p02}\\cdot\\mathbf{v}_{p02}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2403,19 +2403,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "power-pos-03",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-03/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nAt the contact point, the calculation uses $F_{p03}v_{p03}=P_{p03}$. Here $P_{p03}$ denotes power, $F_{p03}$ force along the motion, and $v_{p03}$ velocity."
+          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nAt the contact point, the calculation uses % semath-recognition-evidence:start\nWe write $P_{p03}$ for power scalar. We write $F_{p03}$ for force. We write $v_{p03}$ for velocity.\n% semath-recognition-evidence:end\n$F_{p03}v_{p03}=P_{p03}$. Here $P_{p03}$ denotes power, $F_{p03}$ force along the motion, and $v_{p03}$ velocity."
         }
       ],
       "mainFileId": "main",
@@ -2440,19 +2440,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "power-pos-04",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-04/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nDuring the lift, let $P_{p04}$, $F_{p04}$, and $v_{p04}$ be power, collinear force, and velocity, respectively. The grouped form is \\[P_{p04}=(F_{p04})(v_{p04})\\]"
+          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nDuring the lift, let $P_{p04}$, $F_{p04}$, and $v_{p04}$ be power, collinear force, and velocity, respectively. The grouped form is % semath-recognition-evidence:start\n$P_{p04}$ denotes power scalar. $F_{p04}$ denotes force. $v_{p04}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p04}=(F_{p04})(v_{p04})\\]"
         }
       ],
       "mainFileId": "main",
@@ -2477,14 +2477,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "power-pos-05",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -2494,7 +2494,7 @@
         {
           "fileId": "main",
           "path": "power-pos-05/analysis.tex",
-          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\n\\input{quantities.md}\nThe mechanical calculation records \\[P_{p05}=\\vec{F}_{p05}\\cdot\\vec{v}_{p05}\\]"
+          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\n\\input{quantities.md}\nThe mechanical calculation records % semath-recognition-evidence:start\nHere $P_{p05}$ denotes power scalar, $\\vec{F}_{p05}$ denotes force, and $\\vec{v}_{p05}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p05}=\\vec{F}_{p05}\\cdot\\vec{v}_{p05}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2519,14 +2519,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "power-pos-06",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -2536,7 +2536,7 @@
         {
           "fileId": "main",
           "path": "power-pos-06/analysis.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\n\\input{quantities.md}\nThe project shorthand appears as \\[\\mechanicalPower{P_{p06}}{F_{p06}}{v_{p06}}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\n\\input{quantities.md}\nThe project shorthand appears as % semath-recognition-evidence:start\nLet $P_{p06}$ denote power scalar, $F_{p06}$ denote force, and $v_{p06}$ denote velocity.\n% semath-recognition-evidence:end\n\\[\\mechanicalPower{P_{p06}}{F_{p06}}{v_{p06}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2569,19 +2569,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "power-pos-07",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-07/main.md",
-          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nDuring steady translation, $P_{p07}$ is measured in watts, $F_{p07}$ in newtons, and $v_{p07}$ in metres per second along the force. Thus \\[P_{p07}=F_{p07}\\,v_{p07}\\]"
+          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nDuring steady translation, $P_{p07}$ is measured in watts, $F_{p07}$ in newtons, and $v_{p07}$ in metres per second along the force. Thus % semath-recognition-evidence:start\nLet $P_{p07}$, $F_{p07}$, and $v_{p07}$ denote power scalar, force, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[P_{p07}=F_{p07}\\,v_{p07}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2606,19 +2606,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "power-pos-08",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-08/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nFor the pulling rope, let $P_{p08}$ be scalar power, $\\mathbf{F}_{p08}$ the force vector, and $\\mathbf{v}_{p08}$ the velocity vector. Then $P_{p08}=\\left(\\mathbf{F}_{p08}\\right)\\cdot\\left(\\mathbf{v}_{p08}\\right)$."
+          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nFor the pulling rope, let $P_{p08}$ be scalar power, $\\mathbf{F}_{p08}$ the force vector, and $\\mathbf{v}_{p08}$ the velocity vector. Then % semath-recognition-evidence:start\nWe write $P_{p08}$ for power scalar. We write $\\mathbf{F}_{p08}$ for force. We write $\\mathbf{v}_{p08}$ for velocity.\n% semath-recognition-evidence:end\n$P_{p08}=\\left(\\mathbf{F}_{p08}\\right)\\cdot\\left(\\mathbf{v}_{p08}\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -2643,19 +2643,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "power-pos-09",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-09/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nAt the measured instant, $P_{p09}$ denotes power while $\\mathbf{F}_{p09}$ and $\\mathbf{v}_{p09}$ denote force and velocity vectors. Commutativity gives \\[\\mathbf{v}_{p09}\\cdot\\mathbf{F}_{p09}=P_{p09}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nAt the measured instant, $P_{p09}$ denotes power while $\\mathbf{F}_{p09}$ and $\\mathbf{v}_{p09}$ denote force and velocity vectors. Commutativity gives % semath-recognition-evidence:start\n$P_{p09}$ denotes power scalar. $\\mathbf{F}_{p09}$ denotes force. $\\mathbf{v}_{p09}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[\\mathbf{v}_{p09}\\cdot\\mathbf{F}_{p09}=P_{p09}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2680,19 +2680,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "power-pos-10",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-10/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nIn the mechanical audit, the report states \\[P_{p10}=(F_{p10}v_{p10})\\] After the display, it declares $P_{p10}$ as power, $F_{p10}$ as force parallel to motion, and $v_{p10}$ as velocity."
+          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nIn the mechanical audit, the report states % semath-recognition-evidence:start\nHere $P_{p10}$ denotes power scalar, $F_{p10}$ denotes force, and $v_{p10}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p10}=(F_{p10}v_{p10})\\] After the display, it declares $P_{p10}$ as power, $F_{p10}$ as force parallel to motion, and $v_{p10}$ as velocity."
         }
       ],
       "mainFileId": "main",
@@ -2717,19 +2717,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "power-pos-11",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-11/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nAt the winch cable, let $P_{p11}$ denote instantaneous power, $F_{p11}$ the collinear force, and $v_{p11}$ the velocity. The transfer rate is $P_{p11}=F_{p11}v_{p11}$."
+          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nAt the winch cable, let $P_{p11}$ denote instantaneous power, $F_{p11}$ the collinear force, and $v_{p11}$ the velocity. The transfer rate is % semath-recognition-evidence:start\nLet $P_{p11}$ denote power scalar, $F_{p11}$ denote force, and $v_{p11}$ denote velocity.\n% semath-recognition-evidence:end\n$P_{p11}=F_{p11}v_{p11}$."
         }
       ],
       "mainFileId": "main",
@@ -2754,19 +2754,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "power-pos-12",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-12/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the towing motor, $P_{p12}$ is mechanical power, $\\mathbf{F}_{p12}$ is force, and $\\mathbf{v}_{p12}$ is velocity. Therefore \\[P_{p12}=\\mathbf{F}_{p12}\\cdot\\mathbf{v}_{p12}\\]"
+          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the towing motor, $P_{p12}$ is mechanical power, $\\mathbf{F}_{p12}$ is force, and $\\mathbf{v}_{p12}$ is velocity. Therefore % semath-recognition-evidence:start\nLet $P_{p12}$, $\\mathbf{F}_{p12}$, and $\\mathbf{v}_{p12}$ denote power scalar, force, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[P_{p12}=\\mathbf{F}_{p12}\\cdot\\mathbf{v}_{p12}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2791,19 +2791,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "power-pos-13",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-13/main.md",
-          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nAt the contact point, the calculation uses $F_{p13}v_{p13}=P_{p13}$. Here $P_{p13}$ denotes power, $F_{p13}$ force along the motion, and $v_{p13}$ velocity."
+          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nAt the contact point, the calculation uses % semath-recognition-evidence:start\nWe write $P_{p13}$ for power scalar. We write $F_{p13}$ for force. We write $v_{p13}$ for velocity.\n% semath-recognition-evidence:end\n$F_{p13}v_{p13}=P_{p13}$. Here $P_{p13}$ denotes power, $F_{p13}$ force along the motion, and $v_{p13}$ velocity."
         }
       ],
       "mainFileId": "main",
@@ -2828,19 +2828,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "power-pos-14",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-14/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nDuring the lift, let $P_{p14}$, $F_{p14}$, and $v_{p14}$ be power, collinear force, and velocity, respectively. The grouped form is \\[P_{p14}=(F_{p14})(v_{p14})\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nDuring the lift, let $P_{p14}$, $F_{p14}$, and $v_{p14}$ be power, collinear force, and velocity, respectively. The grouped form is % semath-recognition-evidence:start\n$P_{p14}$ denotes power scalar. $F_{p14}$ denotes force. $v_{p14}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p14}=(F_{p14})(v_{p14})\\]"
         }
       ],
       "mainFileId": "main",
@@ -2865,14 +2865,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "power-pos-15",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -2882,7 +2882,7 @@
         {
           "fileId": "main",
           "path": "power-pos-15/analysis.tex",
-          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\n\\input{quantities.md}\nThe mechanical calculation records \\[P_{p15}=\\vec{F}_{p15}\\cdot\\vec{v}_{p15}\\]"
+          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\n\\input{quantities.md}\nThe mechanical calculation records % semath-recognition-evidence:start\nHere $P_{p15}$ denotes power scalar, $\\vec{F}_{p15}$ denotes force, and $\\vec{v}_{p15}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p15}=\\vec{F}_{p15}\\cdot\\vec{v}_{p15}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2907,14 +2907,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "power-pos-16",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -2924,7 +2924,7 @@
         {
           "fileId": "main",
           "path": "power-pos-16/analysis.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\n\\input{quantities.md}\nThe project shorthand appears as \\[\\mechanicalPower{P_{p16}}{F_{p16}}{v_{p16}}\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\n\\input{quantities.md}\nThe project shorthand appears as % semath-recognition-evidence:start\nLet $P_{p16}$ denote power scalar, $F_{p16}$ denote force, and $v_{p16}$ denote velocity.\n% semath-recognition-evidence:end\n\\[\\mechanicalPower{P_{p16}}{F_{p16}}{v_{p16}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2957,19 +2957,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "power-pos-17",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-17/main.md",
-          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nDuring steady translation, $P_{p17}$ is measured in watts, $F_{p17}$ in newtons, and $v_{p17}$ in metres per second along the force. Thus \\[P_{p17}=F_{p17}\\,v_{p17}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nDuring steady translation, $P_{p17}$ is measured in watts, $F_{p17}$ in newtons, and $v_{p17}$ in metres per second along the force. Thus % semath-recognition-evidence:start\nLet $P_{p17}$, $F_{p17}$, and $v_{p17}$ denote power scalar, force, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[P_{p17}=F_{p17}\\,v_{p17}\\]"
         }
       ],
       "mainFileId": "main",
@@ -2994,19 +2994,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "power-pos-18",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-18/main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nFor the pulling rope, let $P_{p18}$ be scalar power, $\\mathbf{F}_{p18}$ the force vector, and $\\mathbf{v}_{p18}$ the velocity vector. Then $P_{p18}=\\left(\\mathbf{F}_{p18}\\right)\\cdot\\left(\\mathbf{v}_{p18}\\right)$."
+          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nFor the pulling rope, let $P_{p18}$ be scalar power, $\\mathbf{F}_{p18}$ the force vector, and $\\mathbf{v}_{p18}$ the velocity vector. Then % semath-recognition-evidence:start\nWe write $P_{p18}$ for power scalar. We write $\\mathbf{F}_{p18}$ for force. We write $\\mathbf{v}_{p18}$ for velocity.\n% semath-recognition-evidence:end\n$P_{p18}=\\left(\\mathbf{F}_{p18}\\right)\\cdot\\left(\\mathbf{v}_{p18}\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -3031,19 +3031,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "power-pos-19",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-19/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\nAt the measured instant, $P_{p19}$ denotes power while $\\mathbf{F}_{p19}$ and $\\mathbf{v}_{p19}$ denote force and velocity vectors. Commutativity gives \\[\\mathbf{v}_{p19}\\cdot\\mathbf{F}_{p19}=P_{p19}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\nAt the measured instant, $P_{p19}$ denotes power while $\\mathbf{F}_{p19}$ and $\\mathbf{v}_{p19}$ denote force and velocity vectors. Commutativity gives % semath-recognition-evidence:start\n$P_{p19}$ denotes power scalar. $\\mathbf{F}_{p19}$ denotes force. $\\mathbf{v}_{p19}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[\\mathbf{v}_{p19}\\cdot\\mathbf{F}_{p19}=P_{p19}\\]"
         }
       ],
       "mainFileId": "main",
@@ -3068,19 +3068,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "power-pos-20",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-20/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\nIn the mechanical audit, the report states \\[P_{p20}=(F_{p20}v_{p20})\\] After the display, it declares $P_{p20}$ as power, $F_{p20}$ as force parallel to motion, and $v_{p20}$ as velocity."
+          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\nIn the mechanical audit, the report states % semath-recognition-evidence:start\nHere $P_{p20}$ denotes power scalar, $F_{p20}$ denotes force, and $v_{p20}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p20}=(F_{p20}v_{p20})\\] After the display, it declares $P_{p20}$ as power, $F_{p20}$ as force parallel to motion, and $v_{p20}$ as velocity."
         }
       ],
       "mainFileId": "main",
@@ -3105,19 +3105,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "power-pos-21",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-21/main.md",
-          "content": "Consider the following independently stated relation in example 1081. [let singular]\nA presentation-only symbol is $q_{1281}$.\n\nAt the winch cable, let $P_{p21}$ denote instantaneous power, $F_{p21}$ the collinear force, and $v_{p21}$ the velocity. The transfer rate is $P_{p21}=F_{p21}v_{p21}$."
+          "content": "Consider the following independently stated relation in example 1081. [let singular]\nA presentation-only symbol is $q_{1281}$.\n\nAt the winch cable, let $P_{p21}$ denote instantaneous power, $F_{p21}$ the collinear force, and $v_{p21}$ the velocity. The transfer rate is % semath-recognition-evidence:start\nLet $P_{p21}$ denote power scalar, $F_{p21}$ denote force, and $v_{p21}$ denote velocity.\n% semath-recognition-evidence:end\n$P_{p21}=F_{p21}v_{p21}$."
         }
       ],
       "mainFileId": "main",
@@ -3142,19 +3142,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "power-pos-22",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-22/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1082. [let paired]\nA presentation-only symbol follows: \\[q_{1282}\\]\n\nFor the towing motor, $P_{p22}$ is mechanical power, $\\mathbf{F}_{p22}$ is force, and $\\mathbf{v}_{p22}$ is velocity. Therefore \\[P_{p22}=\\mathbf{F}_{p22}\\cdot\\mathbf{v}_{p22}\\]"
+          "content": "For comparison, inspect the displayed expression numbered 1082. [let paired]\nA presentation-only symbol follows: \\[q_{1282}\\]\n\nFor the towing motor, $P_{p22}$ is mechanical power, $\\mathbf{F}_{p22}$ is force, and $\\mathbf{v}_{p22}$ is velocity. Therefore % semath-recognition-evidence:start\nLet $P_{p22}$, $\\mathbf{F}_{p22}$, and $\\mathbf{v}_{p22}$ denote power scalar, force, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[P_{p22}=\\mathbf{F}_{p22}\\cdot\\mathbf{v}_{p22}\\]"
         }
       ],
       "mainFileId": "main",
@@ -3179,19 +3179,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
     {
       "id": "power-pos-23",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-23/main.md",
-          "content": "The next formula is presented without an assumed named law (1083). [let series]\n\\begin{equation}q_{1283}\\end{equation}\n\nAt the contact point, the calculation uses $F_{p23}v_{p23}=P_{p23}$. Here $P_{p23}$ denotes power, $F_{p23}$ force along the motion, and $v_{p23}$ velocity."
+          "content": "The next formula is presented without an assumed named law (1083). [let series]\n\\begin{equation}q_{1283}\\end{equation}\n\nAt the contact point, the calculation uses % semath-recognition-evidence:start\nWe write $P_{p23}$ for power scalar. We write $F_{p23}$ for force. We write $v_{p23}$ for velocity.\n% semath-recognition-evidence:end\n$F_{p23}v_{p23}=P_{p23}$. Here $P_{p23}$ denotes power, $F_{p23}$ force along the motion, and $v_{p23}$ velocity."
         }
       ],
       "mainFileId": "main",
@@ -3216,19 +3216,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "equation-environment"
       }
     },
     {
       "id": "power-pos-24",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-24/main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1084). [respectively]\n\\[\\begin{aligned}q_{1284}\\end{aligned}\\]\n\nDuring the lift, let $P_{p24}$, $F_{p24}$, and $v_{p24}$ be power, collinear force, and velocity, respectively. The grouped form is \\[P_{p24}=(F_{p24})(v_{p24})\\]"
+          "content": "In this local discussion, only the explicit statement below is available (1084). [respectively]\n\\[\\begin{aligned}q_{1284}\\end{aligned}\\]\n\nDuring the lift, let $P_{p24}$, $F_{p24}$, and $v_{p24}$ be power, collinear force, and velocity, respectively. The grouped form is % semath-recognition-evidence:start\n$P_{p24}$ denotes power scalar. $F_{p24}$ denotes force. $v_{p24}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p24}=(F_{p24})(v_{p24})\\]"
         }
       ],
       "mainFileId": "main",
@@ -3253,14 +3253,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "aligned-environment"
       }
     },
     {
       "id": "power-pos-25",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -3270,7 +3270,7 @@
         {
           "fileId": "main",
           "path": "power-pos-25/analysis.tex",
-          "content": "Suppose the notation is local to this calculation, case 1085. [where clause]\nA grouped symbol is $ {q_{1285}} $.\n\n\\input{quantities.md}\nThe mechanical calculation records \\[P_{p25}=\\vec{F}_{p25}\\cdot\\vec{v}_{p25}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1085. [where clause]\nA grouped symbol is $ {q_{1285}} $.\n\n\\input{quantities.md}\nThe mechanical calculation records % semath-recognition-evidence:start\nHere $P_{p25}$ denotes power scalar, $\\vec{F}_{p25}$ denotes force, and $\\vec{v}_{p25}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p25}=\\vec{F}_{p25}\\cdot\\vec{v}_{p25}\\]"
         }
       ],
       "mainFileId": "main",
@@ -3295,14 +3295,14 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },
     {
       "id": "power-pos-26",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "quantities",
@@ -3312,7 +3312,7 @@
         {
           "fileId": "main",
           "path": "power-pos-26/analysis.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1086). [we write]\nA styled symbol is $\\mathbf{q}_{1286}$.\n\n\\input{quantities.md}\nThe project shorthand appears as \\[\\mechanicalPower{P_{p26}}{F_{p26}}{v_{p26}}\\]"
+          "content": "The symbols below have no meaning beyond this standalone example (1086). [we write]\nA styled symbol is $\\mathbf{q}_{1286}$.\n\n\\input{quantities.md}\nThe project shorthand appears as % semath-recognition-evidence:start\nLet $P_{p26}$ denote power scalar, $F_{p26}$ denote force, and $v_{p26}$ denote velocity.\n% semath-recognition-evidence:end\n\\[\\mechanicalPower{P_{p26}}{F_{p26}}{v_{p26}}\\]"
         }
       ],
       "mainFileId": "main",
@@ -3345,19 +3345,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "multiple-documents",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       }
     },
     {
       "id": "power-pos-27",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-27/main.md",
-          "content": "As a deliberately unsupported instance, examine relation 1087. [symbol list]\nAn indexed symbol is $q_{1287}$.\n\nDuring steady translation, $P_{p27}$ is measured in watts, $F_{p27}$ in newtons, and $v_{p27}$ in metres per second along the force. Thus \\[P_{p27}=F_{p27}\\,v_{p27}\\]"
+          "content": "As a deliberately unsupported instance, examine relation 1087. [symbol list]\nAn indexed symbol is $q_{1287}$.\n\nDuring steady translation, $P_{p27}$ is measured in watts, $F_{p27}$ in newtons, and $v_{p27}$ in metres per second along the force. Thus % semath-recognition-evidence:start\nLet $P_{p27}$, $F_{p27}$, and $v_{p27}$ denote power scalar, force, and velocity, respectively.\n% semath-recognition-evidence:end\n\\[P_{p27}=F_{p27}\\,v_{p27}\\]"
         }
       ],
       "mainFileId": "main",
@@ -3382,19 +3382,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "indexed-instance"
       }
     },
     {
       "id": "power-pos-28",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-28/main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1088). [role first]\n\\newcommand{\\baselineprobe}{q_{1288}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the pulling rope, let $P_{p28}$ be scalar power, $\\mathbf{F}_{p28}$ the force vector, and $\\mathbf{v}_{p28}$ the velocity vector. Then $P_{p28}=\\left(\\mathbf{F}_{p28}\\right)\\cdot\\left(\\mathbf{v}_{p28}\\right)$."
+          "content": "No domain interpretation is asserted for the following formula (1088). [role first]\n\\newcommand{\\baselineprobe}{q_{1288}}A macro-expanded symbol is $\\baselineprobe$.\n\nFor the pulling rope, let $P_{p28}$ be scalar power, $\\mathbf{F}_{p28}$ the force vector, and $\\mathbf{v}_{p28}$ the velocity vector. Then % semath-recognition-evidence:start\nWe write $P_{p28}$ for power scalar. We write $\\mathbf{F}_{p28}$ for force. We write $\\mathbf{v}_{p28}$ for velocity.\n% semath-recognition-evidence:end\n$P_{p28}=\\left(\\mathbf{F}_{p28}\\right)\\cdot\\left(\\mathbf{v}_{p28}\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -3419,19 +3419,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       }
     },
     {
       "id": "power-pos-29",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-29/main.md",
-          "content": "Consider the following independently stated relation in example 1089. [suppose that]\nA presentation-only symbol is $q_{1289}$.\n\nAt the measured instant, $P_{p29}$ denotes power while $\\mathbf{F}_{p29}$ and $\\mathbf{v}_{p29}$ denote force and velocity vectors. Commutativity gives \\[\\mathbf{v}_{p29}\\cdot\\mathbf{F}_{p29}=P_{p29}\\]"
+          "content": "Consider the following independently stated relation in example 1089. [suppose that]\nA presentation-only symbol is $q_{1289}$.\n\nAt the measured instant, $P_{p29}$ denotes power while $\\mathbf{F}_{p29}$ and $\\mathbf{v}_{p29}$ denote force and velocity vectors. Commutativity gives % semath-recognition-evidence:start\n$P_{p29}$ denotes power scalar. $\\mathbf{F}_{p29}$ denotes force. $\\mathbf{v}_{p29}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[\\mathbf{v}_{p29}\\cdot\\mathbf{F}_{p29}=P_{p29}\\]"
         }
       ],
       "mainFileId": "main",
@@ -3456,19 +3456,19 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-number-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-number-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
     {
       "id": "power-pos-30",
       "lawId": "mechanical-power",
-      "expectation": "established",
+      "expectation": "recognized",
       "documents": [
         {
           "fileId": "main",
           "path": "power-pos-30/main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1090. [given that]\nA presentation-only symbol follows: \\[q_{1290}\\]\n\nIn the mechanical audit, the report states \\[P_{p30}=(F_{p30}v_{p30})\\] After the display, it declares $P_{p30}$ as power, $F_{p30}$ as force parallel to motion, and $v_{p30}$ as velocity."
+          "content": "For comparison, inspect the displayed expression numbered 1090. [given that]\nA presentation-only symbol follows: \\[q_{1290}\\]\n\nIn the mechanical audit, the report states % semath-recognition-evidence:start\nHere $P_{p30}$ denotes power scalar, $F_{p30}$ denotes force, and $v_{p30}$ denotes velocity.\n% semath-recognition-evidence:end\n\\[P_{p30}=(F_{p30}v_{p30})\\] After the display, it declares $P_{p30}$ as power, $F_{p30}$ as force parallel to motion, and $v_{p30}$ as velocity."
         }
       ],
       "mainFileId": "main",
@@ -3493,7 +3493,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-number-symbol-symbol-number",
+        "semanticSkeleton": "recognized-symbol-symbol-number-symbol-symbol-number",
         "syntaxStructure": "display-math"
       }
     },

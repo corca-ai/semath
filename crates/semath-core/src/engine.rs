@@ -5,7 +5,8 @@ use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
 use crate::candidate::{
-    StructuralCandidateOption, append_semantic_candidates, structural_candidate_options,
+    StructuralCandidateOption, append_semantic_candidates, application_end_offset,
+    structural_candidate_options,
 };
 use crate::canonical::{SemanticExpr, lower_document_region};
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
@@ -82,6 +83,7 @@ struct SemanticOccurrenceSeed {
     source_text: String,
     notation: Vec<NotationComponent>,
     candidate_options: Vec<StructuralCandidateOption>,
+    application_end_offset: Option<u32>,
 }
 
 #[derive(Clone)]
@@ -137,16 +139,18 @@ impl AnalyzedDocument {
             .map(|(surface, selection_range)| {
                 let range = notation_occurrence_range(&document, selection_range);
                 let structural_path = notation_path(&document, selection_range);
+                let candidate_options =
+                    structural_candidate_options(&document, &structural_path, &range, surface);
                 SemanticOccurrenceSeed {
                     kind: OccurrenceKind::Notation,
                     surface: surface.clone(),
                     selection_range: selection_range.clone(),
-                    candidate_options: structural_candidate_options(
+                    application_end_offset: application_end_offset(
                         &document,
                         &structural_path,
                         &range,
-                        surface,
                     ),
+                    candidate_options,
                     structural_path,
                     source_text: source_text(&document, &range),
                     notation: notation_components(&document, selection_range, surface),
@@ -171,6 +175,7 @@ impl AnalyzedDocument {
                     value: binding.short.clone(),
                 }],
                 candidate_options: Vec::new(),
+                application_end_offset: None,
             });
             if binding.long_range != binding.short_range {
                 semantic_occurrences.push(SemanticOccurrenceSeed {
@@ -182,6 +187,7 @@ impl AnalyzedDocument {
                     source_text: source_text(&document, &binding.long_range),
                     notation: Vec::new(),
                     candidate_options: Vec::new(),
+                    application_end_offset: None,
                 });
             }
         }
@@ -240,6 +246,11 @@ fn structural_command_occurrences(
                 surface: surface.clone(),
                 selection_range,
                 range: node.ranges.full.clone(),
+                application_end_offset: application_end_offset(
+                    document,
+                    &structural_path,
+                    &node.ranges.full,
+                ),
                 structural_path,
                 source_text: source_text(document, &node.ranges.full),
                 notation: vec![NotationComponent::NamedSurface { value: surface }],
@@ -799,9 +810,19 @@ fn notation_occurrence_range(document: &ProjectDocument, selection: &SourceRange
         .filter(|node| {
             let identity_range = match node.kind {
                 crate::NotationNodeKind::NamedOperator => node.ranges.name.as_ref(),
-                crate::NotationNodeKind::Modifier
-                | crate::NotationNodeKind::Style
-                | crate::NotationNodeKind::Script => node.ranges.nucleus.as_ref(),
+                crate::NotationNodeKind::Modifier | crate::NotationNodeKind::Script => {
+                    node.ranges.nucleus.as_ref().or_else(|| {
+                        node.arguments
+                            .iter()
+                            .find(|argument| argument.role == "nucleus")
+                            .map(|argument| &argument.range)
+                    })
+                }
+                crate::NotationNodeKind::Style => node
+                    .arguments
+                    .iter()
+                    .find(|argument| argument.role == "body")
+                    .map(|argument| &argument.range),
                 _ => None,
             };
             identity_range.is_some_and(|identity| {
@@ -1800,6 +1821,23 @@ fn semantic_symbol_at_cursor(
                 && seed.range.end_offset == offset
         }));
     }
+    if candidates.is_empty() {
+        candidates.extend(document.semantic_occurrences.iter().filter(|seed| {
+            math.region.full_range.start_offset <= seed.selection_range.start_offset
+                && seed.selection_range.end_offset <= math.region.full_range.end_offset
+                && (seed.selection_range.contains(offset)
+                    || (seed.selection_range.start_offset < seed.selection_range.end_offset
+                        && seed.selection_range.end_offset == offset))
+        }));
+    }
+    if candidates.is_empty() {
+        candidates.extend(
+            document
+                .semantic_occurrences
+                .iter()
+                .filter(|seed| completes_application_at(seed, &math.region.full_range, offset)),
+        );
+    }
     candidates.sort_by_key(|seed| {
         (
             seed.range.end_offset - seed.range.start_offset,
@@ -1814,6 +1852,16 @@ fn semantic_symbol_at_cursor(
         return None;
     }
     Some((selected.surface.clone(), selected.selection_range.clone()))
+}
+
+fn completes_application_at(
+    seed: &SemanticOccurrenceSeed,
+    math_range: &SourceRange,
+    offset: u32,
+) -> bool {
+    math_range.start_offset <= seed.selection_range.start_offset
+        && seed.selection_range.end_offset <= math_range.end_offset
+        && seed.application_end_offset == Some(offset)
 }
 
 fn symbol_range_at_cursor(

@@ -8,7 +8,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an event. Let $B$ be an event. $A \\cap B$"
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nLet $A$ be an event. Let $B$ be an event. % semath-recognition-evidence:start\nLet $A$ denote event and $B$ denote event.\n% semath-recognition-evidence:end\n$A \\cap B$"
         }
       ],
       "cursor": {
@@ -16,7 +16,7 @@
         "needle": "A \\cap",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "event-intersection",
       "expectedRoles": {
         "left": "A",
@@ -33,7 +33,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "inline-math"
       }
     },
@@ -43,7 +43,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $B$ be an event. Let $A$ be an event. $B\\cap A$"
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nLet $B$ be an event. Let $A$ be an event. % semath-recognition-evidence:start\nLet $B$ and $A$ denote event and event, respectively.\n% semath-recognition-evidence:end\n$B\\cap A$"
         }
       ],
       "cursor": {
@@ -51,7 +51,7 @@
         "needle": "B\\cap",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "event-intersection",
       "expectedRoles": {
         "left": "B",
@@ -68,7 +68,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "display-math"
       }
     },
@@ -78,7 +78,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $E$ be an event. Let $F$ be an event. ${E} \\cap {F}$"
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nLet $E$ be an event. Let $F$ be an event. % semath-recognition-evidence:start\nWe write $E$ for event. We write $F$ for event.\n% semath-recognition-evidence:end\n${E} \\cap {F}$"
         }
       ],
       "cursor": {
@@ -86,7 +86,7 @@
         "needle": "E} \\cap",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "event-intersection",
       "expectedRoles": {
         "left": "E",
@@ -103,7 +103,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "equation-environment"
       }
     },
@@ -113,7 +113,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $C$ be an event. Let $D$ be an event. $\\mathrm{C} \\cap \\mathrm{D}$"
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nLet $C$ be an event. Let $D$ be an event. % semath-recognition-evidence:start\n$C$ denotes event. $D$ denotes event.\n% semath-recognition-evidence:end\n$\\mathrm{C} \\cap \\mathrm{D}$"
         }
       ],
       "cursor": {
@@ -121,7 +121,7 @@
         "needle": "C} \\cap",
         "edge": "after"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "event-intersection",
       "expectedRoles": {
         "left": "C",
@@ -138,7 +138,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       }
     },
@@ -148,7 +148,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an event. Let $V$ be an event. $\\left(U\\right) \\cap \\left(V\\right)$"
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nLet $U$ be an event. Let $V$ be an event. % semath-recognition-evidence:start\nHere $U$ denotes event and $V$ denotes event.\n% semath-recognition-evidence:end\n$\\left(U\\right) \\cap \\left(V\\right)$"
         }
       ],
       "cursor": {
@@ -156,7 +156,7 @@
         "needle": "U\\right",
         "edge": "before"
       },
-      "expectation": "established",
+      "expectation": "recognized",
       "lawId": "event-intersection",
       "expectedRoles": {
         "left": "U",
@@ -173,7 +173,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       }
     },

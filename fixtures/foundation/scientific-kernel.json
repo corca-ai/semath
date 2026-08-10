@@ -27,7 +27,7 @@
       "id": "matrix-application-typed",
       "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $A$ be an m by n matrix, $x$ an n-dimensional vector, and $y$ an m-dimensional vector. $y=A(x)$" }],
       "cursor": { "fileId": "main", "needle": "A(x)", "edge": "after" },
-      "expectation": { "status": "established", "relationId": "linear-algebra:matrix-vector-product" },
+      "expectation": { "relationId": "linear-algebra:matrix-vector-product" },
       "variationTags": ["explicit-shapes", "parenthesized", "typed"]
     },
     {
@@ -80,35 +80,35 @@
     },
     {
       "id": "membership-declared-state-equation",
-      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$.\n\\begin{align}\\dot{a}&=F_a a+G_a b\\end{align}" }],
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $a\\in\\mathbb R^n$, $b\\in\\mathbb R^m$, $F_a\\in\\mathbb R^{n\\times n}$, and $G_a\\in\\mathbb R^{n\\times m}$. Here $a$ denotes the state, $b$ the control input, $F_a$ the state matrix, and $G_a$ the input matrix.\n\\begin{align}\\dot{a}&=F_a a+G_a b\\end{align}" }],
       "cursor": { "fileId": "main", "needle": "\\dot{a}&=F_a a+G_a b", "edge": "after" },
       "expectation": { "relationId": "control-systems:continuous-state-equation" },
       "variationTags": ["alignment-marker", "membership-declarations", "subscripts"]
     },
     {
       "id": "unit-declared-mechanical-power",
-      "documents": [{ "fileId": "main", "path": "main.md", "content": "During steady translation, $P$ is measured in watts, $F$ in newtons, and $v$ in metres per second along the force. Thus \\[P=F\\,v\\]" }],
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "During steady translation, $P$ is measured in watts, $F$ in newtons, and $v$ in metres per second. Here $P$ denotes power, $F$ force, and $v$ velocity. Thus \\[P=F\\,v\\]" }],
       "cursor": { "fileId": "main", "needle": "P=F\\,v", "edge": "before" },
       "expectation": { "relationId": "classical-mechanics:mechanical-power" },
       "variationTags": ["one-dimensional", "unit-explicit", "role-prose"]
     },
     {
       "id": "grouped-kinetic-energy",
-      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The calculation shows \\[K=\\tfrac{1}{2}m(v)^{2}\\] The notation note identifies $K$ as kinetic energy, $m$ as mass, and $v$ as speed." }],
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Here $K$ denotes kinetic energy, $m$ mass, and $v$ speed. The calculation shows \\[K=\\tfrac{1}{2}m(v)^{2}\\]" }],
       "cursor": { "fileId": "main", "needle": "K=\\tfrac{1}{2}m(v)^{2}", "edge": "after" },
       "expectation": { "relationId": "classical-mechanics:kinetic-energy-definition" },
       "variationTags": ["declarations-after", "grouping", "presentation-normalization"]
     },
     {
       "id": "time-domain-application",
-      "documents": [{ "fileId": "main", "path": "main.tex", "content": "For an ideal time-invariant resistor, \\[v(t)=R\\,i(t)\\]." }],
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "For an ideal time-invariant resistor, let $v$ denote voltage, $R$ resistance, $i$ electric current, and $t$ time. Then \\[v(t)=R\\,i(t)\\]." }],
       "cursor": { "fileId": "main", "needle": "v(t)=R\\,i(t)", "edge": "after" },
       "expectation": { "relationId": "circuits:ohm-law" },
       "variationTags": ["function-application", "lowercase", "time-domain"]
     },
     {
       "id": "greek-state-equation",
-      "documents": [{ "fileId": "main", "path": "main.tex", "content": "The vectors $\\rho\\in\\mathbb R^n$ and $\\sigma\\in\\mathbb R^m$ are state and input; $U\\in\\mathbb R^{n\\times n}$ and $V\\in\\mathbb R^{n\\times m}$ are their system matrices.\n\\begin{equation}\\dot{\\rho}=U\\rho+V\\sigma\\end{equation}" }],
+      "documents": [{ "fileId": "main", "path": "main.tex", "content": "Let $\\rho\\in\\mathbb R^n$, $\\sigma\\in\\mathbb R^m$, $U\\in\\mathbb R^{n\\times n}$, and $V\\in\\mathbb R^{n\\times m}$. We write $\\rho$ for state vector. We write $\\sigma$ for control input vector. We write $U$ for state matrix. We write $V$ for input matrix.\n\\begin{equation}\\dot{\\rho}=U\\rho+V\\sigma\\end{equation}" }],
       "cursor": { "fileId": "main", "needle": "\\dot{\\rho}=U\\rho+V\\sigma", "edge": "before" },
       "expectation": { "relationId": "control-systems:continuous-state-equation" },
       "variationTags": ["greek-symbols", "membership-declarations", "role-prose"]

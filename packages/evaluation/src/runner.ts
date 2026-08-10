@@ -172,7 +172,7 @@ export function explainQualityCase(
     : item.case.expectation;
   let reason = "No semantic view was returned.";
   if (view) {
-    if (item.case.expectation === "established" && targetPresent) {
+    if (item.case.expectation === "recognized" && targetPresent) {
       reason = "The target law matched with the required typed evidence.";
     } else if (item.case.expectation === "refused" && !targetPresent) {
       reason = `The target law was safely refused${
@@ -215,7 +215,7 @@ function observe(
         candidate.relationId.endsWith(`:${targetLawId}`),
       )
     : undefined;
-  const establishedLawIds = [
+  const recognizedLawIds = [
     ...new Set(
       (view?.context.relations ?? []).map((candidate) =>
         candidate.relationId.slice(candidate.relationId.lastIndexOf(":") + 1),
@@ -227,7 +227,7 @@ function observe(
     evidenceIntegrity: Boolean(
       relation && evidenceIsSourceLinked(relation.evidence, relation.conditions),
     ),
-    establishedLawIds,
+    recognizedLawIds,
     ...(item.generatedFrom ? { generatedFrom: item.generatedFrom } : {}),
     rolesCorrect: rolesMatch(
       relation?.roles ?? [],

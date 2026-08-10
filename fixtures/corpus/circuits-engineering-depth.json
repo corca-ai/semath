@@ -11,7 +11,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -26,14 +26,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-01",
+      "id": "synthetic-inductor-voltage-law-recognized-01",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -57,7 +57,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -72,14 +72,14 @@
           "path": "appendices/note-1.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-02",
+      "id": "synthetic-inductor-voltage-law-recognized-02",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -104,7 +104,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -119,14 +119,14 @@
           "path": "context-2.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-03",
+      "id": "synthetic-inductor-voltage-law-recognized-03",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -150,7 +150,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -165,14 +165,14 @@
           "path": "sections/context-3.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-04",
+      "id": "synthetic-inductor-voltage-law-recognized-04",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -196,7 +196,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -211,14 +211,14 @@
           "path": "definitions-4.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-05",
+      "id": "synthetic-inductor-voltage-law-recognized-05",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -242,7 +242,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -252,14 +252,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-06",
+      "id": "synthetic-inductor-voltage-law-recognized-06",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -282,7 +282,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "appendix-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -297,14 +297,14 @@
           "path": "appendices/note-6.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-07",
+      "id": "synthetic-inductor-voltage-law-recognized-07",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -328,7 +328,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "context-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -343,14 +343,14 @@
           "path": "context-7.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-08",
+      "id": "synthetic-inductor-voltage-law-recognized-08",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -374,7 +374,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "nested-section",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -394,14 +394,14 @@
           "path": "sections/context-8.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-09",
+      "id": "synthetic-inductor-voltage-law-recognized-09",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -426,7 +426,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -441,14 +441,14 @@
           "path": "definitions-9.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-10",
+      "id": "synthetic-inductor-voltage-law-recognized-10",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -472,7 +472,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "single-document",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -487,14 +487,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-11",
+      "id": "synthetic-inductor-voltage-law-recognized-11",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -518,7 +518,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -538,14 +538,14 @@
           "path": "sections/context-11.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-12",
+      "id": "synthetic-inductor-voltage-law-recognized-12",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -571,7 +571,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -591,14 +591,14 @@
           "path": "definitions-12.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-13",
+      "id": "synthetic-inductor-voltage-law-recognized-13",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -623,7 +623,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "single-document",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -638,14 +638,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-14",
+      "id": "synthetic-inductor-voltage-law-recognized-14",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -669,7 +669,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "appendix-file",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -684,14 +684,14 @@
           "path": "appendices/note-14.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-15",
+      "id": "synthetic-inductor-voltage-law-recognized-15",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -715,7 +715,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "context-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -735,14 +735,14 @@
           "path": "context-15.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-16",
+      "id": "synthetic-inductor-voltage-law-recognized-16",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -767,7 +767,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "nested-section",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -782,14 +782,14 @@
           "path": "sections/context-16.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-17",
+      "id": "synthetic-inductor-voltage-law-recognized-17",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -813,7 +813,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "definitions-file",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -828,14 +828,14 @@
           "path": "definitions-17.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-18",
+      "id": "synthetic-inductor-voltage-law-recognized-18",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -859,7 +859,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "single-document",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -869,14 +869,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-19",
+      "id": "synthetic-inductor-voltage-law-recognized-19",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -899,7 +899,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -914,14 +914,14 @@
           "path": "appendices/note-19.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-20",
+      "id": "synthetic-inductor-voltage-law-recognized-20",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -945,7 +945,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -960,14 +960,14 @@
           "path": "context-20.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-21",
+      "id": "synthetic-inductor-voltage-law-recognized-21",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -991,7 +991,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "nested-section",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1006,14 +1006,14 @@
           "path": "sections/context-21.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-22",
+      "id": "synthetic-inductor-voltage-law-recognized-22",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1038,7 +1038,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "appendix-file",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1053,14 +1053,14 @@
           "path": "appendices/note-22.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-23",
+      "id": "synthetic-inductor-voltage-law-recognized-23",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -1084,7 +1084,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "context-file",
         "proseFamily": "symbol-list",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1104,14 +1104,14 @@
           "path": "context-23.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-24",
+      "id": "synthetic-inductor-voltage-law-recognized-24",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1136,7 +1136,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "nested-section",
         "proseFamily": "in-this-model",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1151,14 +1151,14 @@
           "path": "sections/context-24.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-25",
+      "id": "synthetic-inductor-voltage-law-recognized-25",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -1182,7 +1182,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "definitions-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1202,14 +1202,14 @@
           "path": "definitions-25.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-26",
+      "id": "synthetic-inductor-voltage-law-recognized-26",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1234,7 +1234,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "single-document",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1249,14 +1249,14 @@
           "path": "roles.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-27",
+      "id": "synthetic-inductor-voltage-law-recognized-27",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1280,7 +1280,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "appendix-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1300,14 +1300,14 @@
           "path": "appendices/note-27.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-28",
+      "id": "synthetic-inductor-voltage-law-recognized-28",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1332,7 +1332,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "context-file",
         "proseFamily": "let-singular",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1352,14 +1352,14 @@
           "path": "context-28.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-29",
+      "id": "synthetic-inductor-voltage-law-recognized-29",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1384,7 +1384,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "nested-section",
         "proseFamily": "we-write",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1399,14 +1399,14 @@
           "path": "sections/context-29.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-30",
+      "id": "synthetic-inductor-voltage-law-recognized-30",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1430,7 +1430,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "definitions-file",
         "proseFamily": "define-as",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1450,14 +1450,14 @@
           "path": "definitions-30.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-31",
+      "id": "synthetic-inductor-voltage-law-recognized-31",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1482,7 +1482,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "single-document",
         "proseFamily": "declaration-after",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1492,14 +1492,14 @@
           "path": "main.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-32",
+      "id": "synthetic-inductor-voltage-law-recognized-32",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1523,7 +1523,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -1538,14 +1538,14 @@
           "path": "appendices/note-32.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-33",
+      "id": "synthetic-inductor-voltage-law-recognized-33",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1569,7 +1569,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "definitions-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -1584,14 +1584,14 @@
           "path": "definitions-33.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-34",
+      "id": "synthetic-inductor-voltage-law-recognized-34",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1615,7 +1615,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "single-document",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1625,14 +1625,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-35",
+      "id": "synthetic-inductor-voltage-law-recognized-35",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1655,7 +1655,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "appendix-file",
         "proseFamily": "where-clause",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -1670,14 +1670,14 @@
           "path": "appendices/note-35.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-36",
+      "id": "synthetic-inductor-voltage-law-recognized-36",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -1701,7 +1701,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "context-file",
         "proseFamily": "given-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -1716,14 +1716,14 @@
           "path": "context-36.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-37",
+      "id": "synthetic-inductor-voltage-law-recognized-37",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -1747,7 +1747,7 @@
         "mutationFamily": "shape-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "separate-sentences",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -1762,14 +1762,14 @@
           "path": "sections/context-37.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-38",
+      "id": "synthetic-inductor-voltage-law-recognized-38",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -1793,7 +1793,7 @@
         "mutationFamily": "wrong-factor",
         "projectTopology": "definitions-file",
         "proseFamily": "respectively",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "display-math"
       },
       "documents": [
@@ -1813,14 +1813,14 @@
           "path": "definitions-38.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-39",
+      "id": "synthetic-inductor-voltage-law-recognized-39",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1845,7 +1845,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "single-document",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1855,14 +1855,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "q",
         "inductance": "k",
         "current": "u",
         "time": "s"
       },
-      "id": "synthetic-inductor-voltage-law-established-40",
+      "id": "synthetic-inductor-voltage-law-recognized-40",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "display-notation",
@@ -1885,7 +1885,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "appendix-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "inline-math"
       },
       "documents": [
@@ -1905,14 +1905,14 @@
           "path": "appendices/note-40.tex"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-41",
+      "id": "synthetic-inductor-voltage-law-recognized-41",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1937,7 +1937,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "macro-expanded"
       },
       "documents": [
@@ -1957,14 +1957,14 @@
           "path": "context-41.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-42",
+      "id": "synthetic-inductor-voltage-law-recognized-42",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -1990,7 +1990,7 @@
         "mutationFamily": "affirmative",
         "projectTopology": "nested-section",
         "proseFamily": "suppose-that",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "indexed-instance"
       },
       "documents": [
@@ -2010,14 +2010,14 @@
           "path": "sections/context-42.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "v",
         "inductance": "h",
         "current": "g",
         "time": "j"
       },
-      "id": "synthetic-inductor-voltage-law-established-43",
+      "id": "synthetic-inductor-voltage-law-recognized-43",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2042,7 +2042,7 @@
         "mutationFamily": "wrong-role",
         "projectTopology": "definitions-file",
         "proseFamily": "compact-parenthetical",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "styled-symbols"
       },
       "documents": [
@@ -2062,14 +2062,14 @@
           "path": "definitions-43.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-44",
+      "id": "synthetic-inductor-voltage-law-recognized-44",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2094,7 +2094,7 @@
         "mutationFamily": "wrong-sign",
         "projectTopology": "context-file",
         "proseFamily": "let-series",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2109,14 +2109,14 @@
           "path": "context-44.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-45",
+      "id": "synthetic-inductor-voltage-law-recognized-45",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -2140,7 +2140,7 @@
         "mutationFamily": "scope-conflict",
         "projectTopology": "nested-section",
         "proseFamily": "role-first",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "grouped-expression"
       },
       "documents": [
@@ -2160,14 +2160,14 @@
           "path": "sections/context-45.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "y",
         "inductance": "c",
         "current": "x",
         "time": "t"
       },
-      "id": "synthetic-inductor-voltage-law-established-46",
+      "id": "synthetic-inductor-voltage-law-recognized-46",
       "lawId": "inductor-voltage-law",
       "mainFileId": "main",
       "variationTags": [
@@ -2192,7 +2192,7 @@
         "mutationFamily": "missing-term",
         "projectTopology": "definitions-file",
         "proseFamily": "throughout-section",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "aligned-environment"
       },
       "documents": [
@@ -2207,14 +2207,14 @@
           "path": "definitions-46.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "r",
         "inductance": "a",
         "current": "b",
         "time": "n"
       },
-      "id": "synthetic-inductor-voltage-law-established-47",
+      "id": "synthetic-inductor-voltage-law-recognized-47",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
@@ -2238,7 +2238,7 @@
         "mutationFamily": "wrong-operator",
         "projectTopology": "single-document",
         "proseFamily": "let-paired",
-        "semanticSkeleton": "established-symbol-symbol-symbol-symbol-symbol-symbol",
+        "semanticSkeleton": "recognized-symbol-symbol-symbol-symbol-symbol-symbol",
         "syntaxStructure": "equation-environment"
       },
       "documents": [
@@ -2248,14 +2248,14 @@
           "path": "main.md"
         }
       ],
-      "expectation": "established",
+      "expectation": "recognized",
       "expectedRoles": {
         "voltage": "o",
         "inductance": "m",
         "current": "i",
         "time": "e"
       },
-      "id": "synthetic-inductor-voltage-law-established-48",
+      "id": "synthetic-inductor-voltage-law-recognized-48",
       "lawId": "inductor-voltage-law",
       "variationTags": [
         "conventional-notation",
