@@ -23,6 +23,7 @@ jobs:
       - run: cargo test --workspace
       - run: bun run typecheck
       - run: bun test
+      - run: bun run architecture
       - run: bun run pack:conformance
       - run: bun run corpus
       - run: sha256sum -c SHA256SUMS

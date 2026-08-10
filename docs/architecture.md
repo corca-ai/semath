@@ -33,12 +33,14 @@ ambiguous expansions are refused.
 
 ## Project semantic index
 
-`ProjectSemanticIndex` is the sole persistent owner of semantic facts. Parsed
-documents retain source plus compact scope, hygiene, canonical, and candidate
-projections; the full wasmtex CST is released after analysis. The index owns
-definitions, aliases, roles, shapes, quantities, structural candidates,
-domains, and law recognitions. Queries project bounded views from that store
-instead of building parallel fact graphs.
+`ProjectSemanticIndex` is the sole project-wide identity, claim, evidence,
+candidate, and resolution authority. An analyzed document retains source plus
+compact scope, hygiene, canonical, candidate, and immutable observation
+projections; the full wasmtex CST is released after analysis. These
+observations are colocated with their document, have no independent identity
+graph, and are replaced atomically with it. Queries resolve them through the
+project index and project one bounded view; no parallel project fact store
+exists.
 
 The index has exactly two authoritative identities: a revision-qualified
 `SourceOccurrenceId` for real source spans and a scoped `EntityId` anchored to
@@ -61,7 +63,7 @@ dimension, and evidence records used locally. A per-document external type
 environment is derived from include order; facts never flow backwards across an
 include site or between disconnected components.
 
-Pure extractors derive fact stores from immutable documents. Project mutation,
+Pure extractors derive document observations from immutable documents. Project mutation,
 reverse-include invalidation, cancellation, and caching form the effectful
 shell. An edit reanalyzes only the changed document and its reverse include
 closure; clean and incremental rebuilds must produce the same semantic result.
@@ -164,6 +166,9 @@ leave old and new semantic runtimes in parallel.
 
 - Rust core behavior is host-independent and native/WASM-equivalent.
 - One structural frontend and one project semantic index own their facts.
+- `bun run architecture` rejects reverse dependencies, duplicate adapters,
+  production compatibility modes, raw-TeX parser leakage, and a parallel
+  project fact store.
 - One pack schema/compiler and one generic law runtime are active.
 - Every conclusion retains source evidence and bounded uncertainty.
 - Pure transformations contain normalization, inference, ranking, and view

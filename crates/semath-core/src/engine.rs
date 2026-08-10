@@ -15,7 +15,7 @@ use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
 use crate::scope::ScopeGraph;
-use crate::semantic::SemanticFactStore;
+use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
     CandidateFamily, Claim, ClaimId, ClaimObject, ClaimPredicate, DocumentSemanticFacts, EntityId,
     EvidenceId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier,
@@ -68,6 +68,7 @@ struct AnalyzedDocument {
     canonical_expressions: Vec<SemanticExpr>,
     semantic_occurrences: Vec<SemanticOccurrenceSeed>,
     cross_modal_bindings: Vec<CrossModalBinding>,
+    observations: DocumentSemanticObservations,
 }
 
 #[derive(Clone, Debug)]
@@ -108,7 +109,7 @@ struct IndexedTypeFact {
 }
 
 impl AnalyzedDocument {
-    fn analyze(mut document: ProjectDocument) -> Result<(Self, SemanticFactStore), EngineError> {
+    fn analyze(mut document: ProjectDocument) -> Result<Self, EngineError> {
         #[cfg(test)]
         let parsed = if document.nodes.is_empty() {
             crate::parser::parse_regions(&document.content, &document.math_regions)
@@ -118,8 +119,8 @@ impl AnalyzedDocument {
         #[cfg(not(test))]
         let parsed = parse_snapshot(&document).map_err(EngineError::InvalidSyntaxSnapshot)?;
         let scopes = ScopeGraph::new(&document);
-        let facts = SemanticFactStore::build(&document, &parsed);
-        let hygiene = analyze_hygiene(&document, &parsed, &facts.definitions);
+        let observations = DocumentSemanticObservations::build(&document, &parsed);
+        let hygiene = analyze_hygiene(&document, &parsed, &observations.definitions);
         let mut semantic_occurrences: Vec<SemanticOccurrenceSeed> = parsed
             .iter()
             .flat_map(|math| &math.symbols)
@@ -180,27 +181,24 @@ impl AnalyzedDocument {
             .collect();
         let analysis_fingerprint = analysis_fingerprint(&document);
         compact_analyzed_document(&mut document);
-        Ok((
-            Self {
-                component_id: document.file_id.clone(),
-                document,
-                parsed,
-                hygiene,
-                scopes,
-                analysis_fingerprint,
-                canonical_expressions,
-                semantic_occurrences,
-                cross_modal_bindings,
-            },
-            facts,
-        ))
+        Ok(Self {
+            component_id: document.file_id.clone(),
+            document,
+            parsed,
+            hygiene,
+            scopes,
+            analysis_fingerprint,
+            canonical_expressions,
+            semantic_occurrences,
+            cross_modal_bindings,
+            observations,
+        })
     }
 }
 
 #[derive(Default)]
 struct ProjectState {
     documents: HashMap<String, AnalyzedDocument>,
-    facts: HashMap<String, SemanticFactStore>,
     order: ProjectOrder,
     external_types: HashMap<String, ExternalTypeEnvironment>,
     semantic: ProjectSemanticIndex,
@@ -215,18 +213,16 @@ impl ProjectState {
             .documents
             .get(&file_id)
             .map(|document| document.component_id.clone());
-        let (mut document, facts) = AnalyzedDocument::analyze(document)?;
+        let mut document = AnalyzedDocument::analyze(document)?;
         if let Some(component_id) = previous_component {
             document.component_id = component_id;
         }
-        self.documents.insert(file_id.clone(), document);
-        self.facts.insert(file_id, facts);
+        self.documents.insert(file_id, document);
         Ok(())
     }
 
     fn remove(&mut self, file_id: &str) {
         self.documents.remove(file_id);
-        self.facts.remove(file_id);
         self.external_types.remove(file_id);
         self.semantic.remove_document(file_id);
         self.definitions_by_entity
@@ -235,21 +231,25 @@ impl ProjectState {
             .retain(|(candidate, _, _), _| candidate != file_id);
     }
 
-    fn facts(&self, file_id: &str) -> &SemanticFactStore {
-        self.facts
+    fn observations(&self, file_id: &str) -> &DocumentSemanticObservations {
+        &self
+            .documents
             .get(file_id)
-            .expect("every analyzed document must have one semantic fact store")
+            .expect("semantic observations require an analyzed document")
+            .observations
     }
 
-    fn facts_mut(&mut self, file_id: &str) -> &mut SemanticFactStore {
-        self.facts
+    fn observations_mut(&mut self, file_id: &str) -> &mut DocumentSemanticObservations {
+        &mut self
+            .documents
             .get_mut(file_id)
-            .expect("every analyzed document must have one semantic fact store")
+            .expect("semantic observations require an analyzed document")
+            .observations
     }
 
     fn order_document(&self, file_id: &str) -> Option<ProjectOrderDocument> {
         let document = self.documents.get(file_id)?;
-        let facts = self.facts(file_id);
+        let observations = &document.observations;
         Some(ProjectOrderDocument {
             file_id: file_id.to_owned(),
             includes: document.document.includes.clone(),
@@ -264,13 +264,13 @@ impl ProjectState {
                         .map(|binding| binding.evidence_range.end_offset),
                 )
                 .chain(
-                    facts
+                    observations
                         .definitions
                         .iter()
                         .map(|definition| definition.location.range.start_offset),
                 )
                 .chain(
-                    facts
+                    observations
                         .roles
                         .exported()
                         .into_iter()
@@ -278,7 +278,7 @@ impl ProjectState {
                         .map(|range| range.start_offset),
                 )
                 .chain(
-                    facts
+                    observations
                         .quantities
                         .exported()
                         .into_iter()
@@ -286,7 +286,7 @@ impl ProjectState {
                         .map(|range| range.start_offset),
                 )
                 .chain(
-                    facts
+                    observations
                         .shapes
                         .exported()
                         .into_iter()
@@ -310,7 +310,7 @@ impl ProjectState {
                 .documents
                 .get(&file_id)
                 .expect("semantic lowering requires an analyzed document");
-            let lowered = lower_semantic_document(document, self.facts(&file_id), &self.order);
+            let lowered = lower_semantic_document(document, &document.observations, &self.order);
             self.definitions_by_entity.extend(lowered.definitions);
             self.occurrences_by_range.extend(lowered.occurrences);
             semantic_documents.push(lowered.facts);
@@ -330,7 +330,7 @@ impl ProjectState {
                     .documents
                     .get(file_id)
                     .expect("semantic lowering requires an analyzed document");
-                lower_semantic_document(document, self.facts(file_id), &self.order)
+                lower_semantic_document(document, &document.observations, &self.order)
             })
             .collect::<Vec<_>>();
         let mut semantic_documents = Vec::with_capacity(lowered.len());
@@ -363,7 +363,7 @@ struct LoweredSemanticDocument {
 
 fn lower_semantic_document(
     document: &AnalyzedDocument,
-    facts: &SemanticFactStore,
+    observations: &DocumentSemanticObservations,
     order: &ProjectOrder,
 ) -> LoweredSemanticDocument {
     let source = &document.document;
@@ -451,7 +451,7 @@ fn lower_semantic_document(
     let mut evidence = Vec::new();
     let mut claims = Vec::new();
     let mut definitions = BTreeMap::new();
-    for (definition_index, definition) in facts.definitions.iter().enumerate() {
+    for (definition_index, definition) in observations.definitions.iter().enumerate() {
         let key = (
             source.file_id.clone(),
             definition.location.range.start_offset,
@@ -1038,7 +1038,7 @@ impl SemathEngine {
             .documents
             .get(file_id)
             .ok_or_else(|| EngineError::MissingDocument(file_id.clone()))?;
-        let facts = self.index.facts(file_id);
+        let observations = &document.observations;
         if document.document.document_version != envelope.document_version {
             return Err(EngineError::DocumentVersionMismatch);
         }
@@ -1070,7 +1070,7 @@ impl SemathEngine {
             Query::SemanticView { .. } => QueryValue::SemanticView {
                 view: Box::new(self.semantic_view(
                     document,
-                    facts,
+                    observations,
                     parsed,
                     symbol.as_ref(),
                     cursor_offset,
@@ -1100,14 +1100,14 @@ impl SemathEngine {
                 rename_proposal(document, parsed, cursor_offset, &new_name)
             }
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
-                diagnostics: document_diagnostics(document, facts, hygiene_enabled),
+                diagnostics: document_diagnostics(document, observations, hygiene_enabled),
             },
             Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
-                diagnostic: facts
+                diagnostic: observations
                     .shapes
                     .diagnostic(&code, cursor_offset)
-                    .or_else(|| facts.roles.diagnostic(&code, cursor_offset))
-                    .or_else(|| facts.quantities.diagnostic(&code, cursor_offset))
+                    .or_else(|| observations.roles.diagnostic(&code, cursor_offset))
+                    .or_else(|| observations.quantities.diagnostic(&code, cursor_offset))
                     .or_else(|| {
                         hygiene_enabled
                             .then(|| document.hygiene.diagnostic(&code, cursor_offset))
@@ -1170,9 +1170,9 @@ impl SemathEngine {
                 total_documents: self.index.documents.len() as u32,
                 recognized_laws: self
                     .index
-                    .facts
+                    .documents
                     .values()
-                    .map(|facts| facts.laws.all().len() as u32)
+                    .map(|document| document.observations.laws.all().len() as u32)
                     .sum(),
                 semantic_nodes: analyzed_file_ids
                     .iter()
@@ -1182,11 +1182,11 @@ impl SemathEngine {
                     .sum(),
                 constraints: analyzed_file_ids
                     .iter()
-                    .map(|file_id| self.index.facts(file_id).constraint_count())
+                    .map(|file_id| self.index.observations(file_id).constraint_count())
                     .sum(),
                 law_rules_visited: analyzed_file_ids
                     .iter()
-                    .map(|file_id| self.index.facts(file_id).laws.visited_rules())
+                    .map(|file_id| self.index.observations(file_id).laws.visited_rules())
                     .sum(),
                 semantic_occurrences: semantic_stats.occurrences,
                 semantic_entities: semantic_stats.entities,
@@ -1303,7 +1303,7 @@ impl SemathEngine {
 
     fn semantic_context(
         &self,
-        facts: &SemanticFactStore,
+        observations: &DocumentSemanticObservations,
         file_id: &str,
         symbol: Option<&(String, SourceRange)>,
         offset: u32,
@@ -1317,7 +1317,7 @@ impl SemathEngine {
                 )
             })
             .unwrap_or_else(|| (Vec::new(), None, None));
-        let mut context = facts.context(
+        let mut context = observations.context(
             definitions,
             symbol_name,
             entity_id,
@@ -1367,16 +1367,24 @@ impl SemathEngine {
     fn semantic_view(
         &self,
         document: &AnalyzedDocument,
-        facts: &SemanticFactStore,
+        observations: &DocumentSemanticObservations,
         parsed: Option<&ParsedMath>,
         symbol: Option<&(String, SourceRange)>,
         offset: u32,
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
         let symbol_info = symbol.as_ref().and_then(|(name, occurrence)| {
-            self.symbol_info(document, facts, name, occurrence, offset, hygiene_enabled)
+            self.symbol_info(
+                document,
+                observations,
+                name,
+                occurrence,
+                offset,
+                hygiene_enabled,
+            )
         });
-        let context = self.semantic_context(facts, &document.document.file_id, symbol, offset);
+        let context =
+            self.semantic_context(observations, &document.document.file_id, symbol, offset);
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -1388,7 +1396,7 @@ impl SemathEngine {
             .collect::<Vec<_>>();
         let declarations_truncated = declarations.len() > MAX_VIEW_DECLARATIONS;
         declarations.truncate(MAX_VIEW_DECLARATIONS);
-        let mut diagnostics = document_diagnostics(document, facts, hygiene_enabled)
+        let mut diagnostics = document_diagnostics(document, observations, hygiene_enabled)
             .into_iter()
             .filter(|diagnostic| {
                 parsed.is_some_and(|math| {
@@ -1398,7 +1406,7 @@ impl SemathEngine {
             .collect::<Vec<_>>();
         let diagnostics_truncated = diagnostics.len() > MAX_VIEW_DIAGNOSTICS;
         diagnostics.truncate(MAX_VIEW_DIAGNOSTICS);
-        let (domains, domains_truncated) = facts.domains.at(offset);
+        let (domains, domains_truncated) = observations.domains.at(offset);
         let conflicting = diagnostics
             .iter()
             .any(|diagnostic| matches!(diagnostic.severity.as_str(), "error" | "warning"));
@@ -1458,7 +1466,7 @@ impl SemathEngine {
     fn symbol_info(
         &self,
         document: &AnalyzedDocument,
-        facts: &SemanticFactStore,
+        observations: &DocumentSemanticObservations,
         name: &str,
         occurrence: &SourceRange,
         offset: u32,
@@ -1469,9 +1477,9 @@ impl SemathEngine {
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
         definitions.truncate(MAX_SYMBOL_DEFINITIONS);
         let external = self.index.external_types.get(&document.document.file_id);
-        let (mut shapes, shapes_truncated) = facts.shapes.claims_at(name, offset);
-        let (mut roles, roles_truncated) = facts.roles.roles_at(name, offset);
-        let (mut quantities, quantities_truncated) = facts.quantities.at(name, offset);
+        let (mut shapes, shapes_truncated) = observations.shapes.claims_at(name, offset);
+        let (mut roles, roles_truncated) = observations.roles.roles_at(name, offset);
+        let (mut quantities, quantities_truncated) = observations.quantities.at(name, offset);
         if let Some(external) = external {
             shapes.extend(external.shapes_at(offset, name));
             roles.extend(external.roles_at(offset, name));
@@ -1483,8 +1491,14 @@ impl SemathEngine {
             quantities.sort_by(|left, right| left.display.cmp(&right.display));
             quantities.dedup();
         }
-        let (diagnostics, diagnostics_truncated) =
-            symbol_diagnostics(document, facts, name, offset, &shapes, hygiene_enabled);
+        let (diagnostics, diagnostics_truncated) = symbol_diagnostics(
+            document,
+            observations,
+            name,
+            offset,
+            &shapes,
+            hygiene_enabled,
+        );
         let occurrence_id = self.index.occurrences_by_range.get(&(
             document.document.file_id.clone(),
             occurrence.start_offset,
@@ -1518,12 +1532,11 @@ impl SemathEngine {
     fn refresh_project_laws(&mut self, targets: &HashSet<String>) {
         let facts = self
             .index
-            .facts
+            .documents
             .iter()
-            .flat_map(|(file_id, semantic)| {
-                let document = self.index.documents.get(file_id).unwrap();
+            .flat_map(|(file_id, document)| {
                 let component_id = document.component_id.clone();
-                let roles = semantic.roles.exported().into_iter().map({
+                let roles = document.observations.roles.exported().into_iter().map({
                     let component_id = component_id.clone();
                     let file_id = file_id.clone();
                     move |role| IndexedTypeFact {
@@ -1533,17 +1546,22 @@ impl SemathEngine {
                         fact: ExportedTypeFact::Role(role),
                     }
                 });
-                let quantities = semantic.quantities.exported().into_iter().map({
-                    let component_id = component_id.clone();
-                    let file_id = file_id.clone();
-                    move |quantity| IndexedTypeFact {
-                        component_id: component_id.clone(),
-                        source_offset: evidence_anchor(&quantity.evidence),
-                        file_id: file_id.clone(),
-                        fact: ExportedTypeFact::Quantity(quantity),
-                    }
-                });
-                let shapes = semantic.shapes.exported().into_iter().map({
+                let quantities = document
+                    .observations
+                    .quantities
+                    .exported()
+                    .into_iter()
+                    .map({
+                        let component_id = component_id.clone();
+                        let file_id = file_id.clone();
+                        move |quantity| IndexedTypeFact {
+                            component_id: component_id.clone(),
+                            source_offset: evidence_anchor(&quantity.evidence),
+                            file_id: file_id.clone(),
+                            fact: ExportedTypeFact::Quantity(quantity),
+                        }
+                    });
+                let shapes = document.observations.shapes.exported().into_iter().map({
                     let component_id = component_id.clone();
                     let file_id = file_id.clone();
                     move |shape| IndexedTypeFact {
@@ -1614,7 +1632,7 @@ impl SemathEngine {
             let document = self.index.documents.get(&file_id).unwrap();
             let source = document.document.clone();
             let canonical_expressions = document.canonical_expressions.clone();
-            self.index.facts_mut(&file_id).refresh_laws(
+            self.index.observations_mut(&file_id).refresh_laws(
                 &source,
                 &canonical_expressions,
                 &environment,
@@ -1767,12 +1785,12 @@ fn candidate_status(supporting: &[ClaimId], rejecting: &[ClaimId]) -> SemanticCa
 
 fn document_diagnostics(
     document: &AnalyzedDocument,
-    facts: &SemanticFactStore,
+    observations: &DocumentSemanticObservations,
     hygiene_enabled: bool,
 ) -> Vec<SemanticDiagnostic> {
-    let mut diagnostics = facts.shapes.diagnostics.clone();
-    diagnostics.extend(facts.quantities.diagnostics.iter().cloned());
-    diagnostics.extend(facts.roles.diagnostics.iter().cloned());
+    let mut diagnostics = observations.shapes.diagnostics.clone();
+    diagnostics.extend(observations.quantities.diagnostics.iter().cloned());
+    diagnostics.extend(observations.roles.diagnostics.iter().cloned());
     if hygiene_enabled {
         diagnostics.extend(document.hygiene.diagnostics.iter().cloned());
     }
@@ -1782,17 +1800,17 @@ fn document_diagnostics(
 
 fn symbol_diagnostics(
     document: &AnalyzedDocument,
-    facts: &SemanticFactStore,
+    observations: &DocumentSemanticObservations,
     symbol: &str,
     offset: u32,
     shapes: &[ShapeInfo],
     hygiene_enabled: bool,
 ) -> (Vec<SemanticDiagnostic>, bool) {
-    let (mut diagnostics, shape_truncated) = facts.shapes.diagnostics_for(offset, shapes);
-    let (role_diagnostics, role_truncated) = facts.roles.diagnostics_for(symbol, offset);
+    let (mut diagnostics, shape_truncated) = observations.shapes.diagnostics_for(offset, shapes);
+    let (role_diagnostics, role_truncated) = observations.roles.diagnostics_for(symbol, offset);
     diagnostics.extend(role_diagnostics);
     diagnostics.extend(
-        facts
+        observations
             .quantities
             .diagnostics
             .iter()

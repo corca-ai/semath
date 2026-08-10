@@ -50,5 +50,3 @@ artifacts.
 - [Documentation Guide](metadoc.md) — write, organize, link, and lint docs.
 - [`AGENTS.md`](../AGENTS.md) — follow the compact working rules and repository
   map used by coding agents.
-- [`draft.md`](../draft.md) — consult the historical proposal and iteration
-  record; do not use it as the current architecture or plan.
