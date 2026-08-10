@@ -1,26 +1,82 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "signals-systems",
   "packVersion": "1.0.0",
   "packKind": "field",
   "namespace": "signals-systems",
   "title": "Signals and systems",
   "description": "Evidence-gated time, frequency, sampling, and propagation relations.",
-  "dependencies": [{
-    "packId": "quantities-units",
-    "versionMajor": 1,
-    "requiredCapabilities": ["semath:dimensional-analysis", "semath:quantities"]
-  }],
+  "dependencies": [
+    {
+      "packId": "quantities-units",
+      "versionMajor": 1,
+      "requiredCapabilities": [
+        "semath:dimensional-analysis",
+        "semath:quantities"
+      ]
+    }
+  ],
   "capabilities": {
-    "provides": ["semath:formula-recognition", "signals-systems:law-relations"],
-    "requires": ["semath:dimensional-analysis", "semath:quantities"]
+    "provides": [
+      "semath:formula-recognition",
+      "signals-systems:law-relations"
+    ],
+    "requires": [
+      "semath:dimensional-analysis",
+      "semath:quantities"
+    ]
   },
   "concepts": [
-    { "id": "periodic-signal", "conceptKind": "entity", "title": "Periodic signal", "description": "A signal repeating after a stated period.", "parents": [], "references": ["signals-systems"] },
-    { "id": "sampling-clock", "conceptKind": "system", "title": "Sampling clock", "description": "A clock defining a sampling period and rate.", "parents": [], "references": ["signals-systems"] },
-    { "id": "wave-propagation", "conceptKind": "relation", "title": "Wave propagation relation", "description": "The relation among speed, frequency, and wavelength.", "parents": [], "references": ["signals-systems"] },
-    { "id": "cyclic-frequency", "conceptKind": "quantity", "title": "Cyclic frequency", "description": "Cycles per unit time.", "parents": [], "references": ["signals-systems"] },
-    { "id": "angular-frequency", "conceptKind": "quantity", "title": "Angular frequency", "description": "Phase angle rate in radians per unit time.", "parents": [], "references": ["signals-systems"] }
+    {
+      "id": "periodic-signal",
+      "conceptKind": "entity",
+      "title": "Periodic signal",
+      "description": "A signal repeating after a stated period.",
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "sampling-clock",
+      "conceptKind": "system",
+      "title": "Sampling clock",
+      "description": "A clock defining a sampling period and rate.",
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "wave-propagation",
+      "conceptKind": "relation",
+      "title": "Wave propagation relation",
+      "description": "The relation among speed, frequency, and wavelength.",
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "cyclic-frequency",
+      "conceptKind": "quantity",
+      "title": "Cyclic frequency",
+      "description": "Cycles per unit time.",
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "angular-frequency",
+      "conceptKind": "quantity",
+      "title": "Angular frequency",
+      "description": "Phase angle rate in radians per unit time.",
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    }
   ],
   "quantityKinds": [],
   "units": [],
@@ -30,47 +86,195 @@
       "title": "Period-frequency reciprocity",
       "description": "Frequency is the reciprocal of period.",
       "roles": [
-        { "id": "frequency", "concept": "signals-systems:cyclic-frequency", "quantity": "quantities-units:frequency", "description": "Cyclic frequency.", "shape": "scalar", "notation": ["f", "nu"] },
-        { "id": "period", "concept": "quantities-units:duration", "description": "Signal period.", "shape": "scalar", "notation": ["T", "P", "tau"] }
+        {
+          "id": "frequency",
+          "concept": "signals-systems:cyclic-frequency",
+          "quantity": "quantities-units:frequency",
+          "description": "Cyclic frequency.",
+          "shape": "scalar",
+          "notation": [
+            "f",
+            "nu"
+          ]
+        },
+        {
+          "id": "period",
+          "concept": "quantities-units:duration",
+          "description": "Signal period.",
+          "shape": "scalar",
+          "notation": [
+            "T",
+            "P",
+            "tau"
+          ]
+        }
       ],
-      "semanticForms": ["frequency = 1 / period", "period = 1 / frequency"],
-      "conditions": ["The period is positive and both quantities refer to the same periodic signal."],
-      "references": ["signals-systems"]
+      "semanticForms": [
+        "frequency = 1 / period",
+        "period = 1 / frequency"
+      ],
+      "conditions": [
+        {
+          "id": "positive-period",
+          "kind": "positive",
+          "subjects": [
+            "period"
+          ],
+          "label": "The period is positive."
+        },
+        {
+          "id": "common-periodic-signal",
+          "kind": "same-context",
+          "subjects": [
+            "frequency",
+            "period"
+          ],
+          "label": "Frequency and period refer to the same periodic signal."
+        }
+      ],
+      "references": [
+        "signals-systems"
+      ]
     },
     {
       "id": "angular-frequency-definition",
       "title": "Angular frequency",
       "description": "Angular frequency equals two pi times cyclic frequency.",
       "roles": [
-        { "id": "angular-frequency", "concept": "signals-systems:angular-frequency", "quantity": "quantities-units:frequency", "description": "Angular frequency.", "shape": "scalar", "notation": ["omega", "w"] },
-        { "id": "pi", "concept": "quantities-units:dimensionless", "description": "The circle constant pi.", "shape": "scalar", "notation": ["pi"] },
-        { "id": "frequency", "concept": "signals-systems:cyclic-frequency", "quantity": "quantities-units:frequency", "description": "Cyclic frequency.", "shape": "scalar", "notation": ["f", "nu"] }
+        {
+          "id": "angular-frequency",
+          "concept": "signals-systems:angular-frequency",
+          "quantity": "quantities-units:frequency",
+          "description": "Angular frequency.",
+          "shape": "scalar",
+          "notation": [
+            "omega",
+            "w"
+          ]
+        },
+        {
+          "id": "pi",
+          "concept": "quantities-units:dimensionless",
+          "description": "The circle constant pi.",
+          "shape": "scalar",
+          "notation": [
+            "pi"
+          ]
+        },
+        {
+          "id": "frequency",
+          "concept": "signals-systems:cyclic-frequency",
+          "quantity": "quantities-units:frequency",
+          "description": "Cyclic frequency.",
+          "shape": "scalar",
+          "notation": [
+            "f",
+            "nu"
+          ]
+        }
       ],
-      "semanticForms": ["angular-frequency = 2 pi frequency"],
-      "conditions": ["Frequency and angular frequency describe the same oscillation."],
-      "references": ["signals-systems"]
+      "semanticForms": [
+        "angular-frequency = 2 pi frequency"
+      ],
+      "conditions": [
+        {
+          "id": "common-oscillation",
+          "kind": "same-context",
+          "subjects": [
+            "angular-frequency",
+            "frequency"
+          ],
+          "label": "Frequency and angular frequency describe the same oscillation."
+        }
+      ],
+      "references": [
+        "signals-systems"
+      ]
     },
     {
       "id": "wave-speed-relation",
       "title": "Wave speed relation",
       "description": "Propagation speed equals frequency multiplied by wavelength.",
       "roles": [
-        { "id": "wave-speed", "concept": "quantities-units:velocity", "description": "Wave propagation speed.", "shape": "scalar", "notation": ["c", "v"] },
-        { "id": "frequency", "concept": "signals-systems:cyclic-frequency", "quantity": "quantities-units:frequency", "description": "Cyclic frequency.", "shape": "scalar", "notation": ["f", "nu"] },
-        { "id": "wavelength", "concept": "quantities-units:length", "description": "Wavelength.", "shape": "scalar", "notation": ["lambda", "L"] }
+        {
+          "id": "wave-speed",
+          "concept": "quantities-units:velocity",
+          "description": "Wave propagation speed.",
+          "shape": "scalar",
+          "notation": [
+            "c",
+            "v"
+          ]
+        },
+        {
+          "id": "frequency",
+          "concept": "signals-systems:cyclic-frequency",
+          "quantity": "quantities-units:frequency",
+          "description": "Cyclic frequency.",
+          "shape": "scalar",
+          "notation": [
+            "f",
+            "nu"
+          ]
+        },
+        {
+          "id": "wavelength",
+          "concept": "quantities-units:length",
+          "description": "Wavelength.",
+          "shape": "scalar",
+          "notation": [
+            "lambda",
+            "L"
+          ]
+        }
       ],
-      "semanticForms": ["wave-speed = frequency wavelength", "wave-speed = frequency \\cdot wavelength"],
-      "conditions": ["Speed, frequency, and wavelength refer to one propagation mode in one medium."],
-      "references": ["signals-systems"]
+      "semanticForms": [
+        "wave-speed = frequency wavelength",
+        "wave-speed = frequency \\cdot wavelength"
+      ],
+      "conditions": [
+        {
+          "id": "common-propagation-mode",
+          "kind": "same-context",
+          "subjects": [
+            "wave-speed",
+            "frequency",
+            "wavelength"
+          ],
+          "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium."
+        }
+      ],
+      "references": [
+        "signals-systems"
+      ]
     }
   ],
-  "activationRules": [{
-    "id": "signals-vocabulary",
-    "topic": "foundations",
-    "patterns": ["signals and systems", "periodic signal", "sampling frequency", "sampling period", "angular frequency", "wave frequency", "wavelength", "propagation speed"],
-    "references": ["signals-systems"]
-  }],
+  "activationRules": [
+    {
+      "id": "signals-vocabulary",
+      "topic": "foundations",
+      "patterns": [
+        "signals and systems",
+        "periodic signal",
+        "sampling frequency",
+        "sampling period",
+        "angular frequency",
+        "wave frequency",
+        "wavelength",
+        "propagation speed"
+      ],
+      "references": [
+        "signals-systems"
+      ]
+    }
+  ],
   "roles": [],
   "operators": [],
-  "references": [{ "id": "signals-systems", "title": "Signals and Systems", "citation": "Alan V. Oppenheim, Alan S. Willsky, and S. Hamid Nawab, Signals and Systems, 2nd edition, Prentice Hall, 1997." }]
+  "references": [
+    {
+      "id": "signals-systems",
+      "title": "Signals and Systems",
+      "citation": "Alan V. Oppenheim, Alan S. Willsky, and S. Hamid Nawab, Signals and Systems, 2nd edition, Prentice Hall, 1997."
+    }
+  ]
 }

@@ -4,8 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::canonical::canonical_template;
 use crate::pack::{
-    DomainPack, PackActivationRule, PackCapabilities, PackConcept, PackKind, PackLaw, PackLawRole,
-    PackReference, PackValidationError, compile_pack, validate_catalog,
+    DomainPack, PackActivationRule, PackCapabilities, PackConcept, PackConditionKind, PackKind,
+    PackLaw, PackLawCondition, PackLawRole, PackReference, PackValidationError, compile_pack,
+    validate_catalog,
 };
 
 pub const PACK_AUTHORING_SCHEMA_VERSION: u32 = 1;
@@ -210,7 +211,12 @@ pub fn pack_template(pack_id: &str) -> Result<String, PackValidationError> {
                 template_role(pack_id, "coefficient", "Scalar coefficient."),
                 template_role(pack_id, "input", "Input value."),
             ],
-            conditions: vec!["The coefficient, input, and output are scalar.".into()],
+            conditions: vec![PackLawCondition {
+                id: "scalar-values".into(),
+                kind: PackConditionKind::ShapeCompatible,
+                subjects: vec!["coefficient".into(), "input".into(), "output".into()],
+                label: "The coefficient, input, and output are scalar.".into(),
+            }],
             activation_phrases: Vec::new(),
             references: vec![reference_id.clone()],
         }],

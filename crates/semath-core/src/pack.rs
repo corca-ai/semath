@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 5;
+pub const PACK_SCHEMA_VERSION: u32 = 6;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -150,10 +150,43 @@ pub struct PackLaw {
     pub semantic_forms: Vec<String>,
     pub roles: Vec<PackLawRole>,
     #[serde(default)]
-    pub conditions: Vec<String>,
+    pub conditions: Vec<PackLawCondition>,
     #[serde(default)]
     pub activation_phrases: Vec<String>,
     pub references: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PackLawCondition {
+    pub id: String,
+    pub kind: PackConditionKind,
+    pub subjects: Vec<String>,
+    pub label: String,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum PackConditionKind {
+    Assumption,
+    Differentiable,
+    DomainMembership,
+    Positive,
+    SameContext,
+    ShapeCompatible,
+    SignConvention,
+    Uniform,
+}
+
+impl PackConditionKind {
+    fn valid_arity(self, arity: usize) -> bool {
+        match self {
+            Self::Differentiable => arity == 2,
+            Self::DomainMembership | Self::Positive | Self::Uniform => arity >= 1,
+            Self::SameContext | Self::ShapeCompatible => arity >= 2,
+            Self::Assumption | Self::SignConvention => arity >= 1,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -424,6 +457,43 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
             &format!("{path}.roles"),
             law.roles.iter().map(|role| role.id.as_str()),
         )?;
+        let role_ids = law
+            .roles
+            .iter()
+            .map(|role| role.id.as_str())
+            .collect::<BTreeSet<_>>();
+        unique_ids(
+            &format!("{path}.conditions"),
+            law.conditions.iter().map(|condition| condition.id.as_str()),
+        )?;
+        for (condition_index, condition) in law.conditions.iter().enumerate() {
+            let condition_path = format!("{path}.conditions[{condition_index}]");
+            validate_id(&format!("{condition_path}.id"), &condition.id)?;
+            require_text(&format!("{condition_path}.label"), &condition.label)?;
+            if !condition.kind.valid_arity(condition.subjects.len()) {
+                return Err(error(
+                    format!("{condition_path}.subjects"),
+                    format!(
+                        "invalid arity {} for {:?}",
+                        condition.subjects.len(),
+                        condition.kind
+                    ),
+                ));
+            }
+            let subjects = unique_ids(
+                &format!("{condition_path}.subjects"),
+                condition.subjects.iter().map(String::as_str),
+            )?;
+            if let Some(subject) = subjects
+                .iter()
+                .find(|subject| !role_ids.contains(**subject))
+            {
+                return Err(error(
+                    format!("{condition_path}.subjects"),
+                    format!("unknown law role {subject}"),
+                ));
+            }
+        }
         for (role_index, role) in law.roles.iter().enumerate() {
             if role
                 .shape
@@ -691,11 +761,13 @@ fn error(path: impl Into<String>, message: impl Into<String>) -> PackValidationE
 
 #[cfg(test)]
 mod tests {
-    use super::{PACK_SCHEMA_VERSION, built_in_packs, compile_pack, validate_catalog};
+    use super::{
+        PACK_SCHEMA_VERSION, built_in_packs, compile_pack, validate_catalog, validate_pack,
+    };
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 5);
+        assert_eq!(PACK_SCHEMA_VERSION, 6);
         assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }
@@ -706,6 +778,28 @@ mod tests {
         source["patterns"] = serde_json::json!([]);
         let error = compile_pack(&serde_json::to_string(&source).unwrap()).unwrap_err();
         assert!(error.message.contains("unknown field"));
+    }
+
+    #[test]
+    fn rejects_legacy_and_incoherent_law_conditions() {
+        let pack = built_in_packs()
+            .iter()
+            .find(|pack| !pack.laws.is_empty())
+            .unwrap();
+        let mut legacy = serde_json::to_value(pack).unwrap();
+        legacy["laws"][0]["conditions"] = serde_json::json!(["legacy free-form condition"]);
+        assert!(compile_pack(&serde_json::to_string(&legacy).unwrap()).is_err());
+
+        let mut unknown_role = pack.clone();
+        unknown_role.laws[0].conditions[0].subjects =
+            vec!["function".into(), "missing-role".into()];
+        let error = validate_pack(&unknown_role).unwrap_err();
+        assert!(error.message.contains("unknown law role"));
+
+        let mut wrong_arity = pack.clone();
+        wrong_arity.laws[0].conditions[0].subjects.truncate(1);
+        let error = validate_pack(&wrong_arity).unwrap_err();
+        assert!(error.message.contains("invalid arity"));
     }
 
     #[test]

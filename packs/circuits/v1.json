@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "circuits",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -70,26 +70,50 @@
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Voltage across the component.",
-          "notation": ["V", "v", "U", "E", "e", "DeltaV"]
+          "notation": [
+            "V",
+            "v",
+            "U",
+            "E",
+            "e",
+            "DeltaV"
+          ]
         },
         {
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Current through the component.",
-          "notation": ["I", "i", "J", "j"]
+          "notation": [
+            "I",
+            "i",
+            "J",
+            "j"
+          ]
         },
         {
           "id": "resistance",
           "concept": "quantities-units:resistance",
           "description": "Electrical resistance of the component.",
-          "notation": ["R", "r", "rho"]
+          "notation": [
+            "R",
+            "r",
+            "rho"
+          ]
         }
       ],
       "semanticForms": [
         "voltage = resistance current"
       ],
       "conditions": [
-        "Voltage polarity and current reference direction use a consistent sign convention."
+        {
+          "id": "consistent-references",
+          "kind": "sign-convention",
+          "subjects": [
+            "voltage",
+            "current"
+          ],
+          "label": "Voltage polarity and current reference direction use a consistent sign convention."
+        }
       ],
       "references": [
         "engineering-circuits"
@@ -104,7 +128,20 @@
           "id": "branch-current",
           "concept": "quantities-units:electric-current",
           "description": "A signed current incident on the node.",
-          "notation": ["I", "i", "J", "j", "a", "b", "c", "k", "p", "q", "r", "s"],
+          "notation": [
+            "I",
+            "i",
+            "J",
+            "j",
+            "a",
+            "b",
+            "c",
+            "k",
+            "p",
+            "q",
+            "r",
+            "s"
+          ],
           "variadic": true
         }
       ],
@@ -112,13 +149,33 @@
         "\\sum branch-current = 0"
       ],
       "conditions": [
-        "All branch-current signs use one node convention."
+        {
+          "id": "node-current-convention",
+          "kind": "sign-convention",
+          "subjects": [
+            "branch-current"
+          ],
+          "label": "All branch-current signs use one node convention."
+        }
       ],
       "activationPhrases": [
-        "node", "junction", "kcl", "branch", "balance", "aggregate",
-        "entering", "outgoing", "feeders", "flow groups", "reference",
-        "current splits", "currents satisfy", "currents obey",
-        "currents balance", "conservation", "terminal currents"
+        "node",
+        "junction",
+        "kcl",
+        "branch",
+        "balance",
+        "aggregate",
+        "entering",
+        "outgoing",
+        "feeders",
+        "flow groups",
+        "reference",
+        "current splits",
+        "currents satisfy",
+        "currents obey",
+        "currents balance",
+        "conservation",
+        "terminal currents"
       ],
       "references": [
         "engineering-circuits"
@@ -133,25 +190,41 @@
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Capacitor current.",
-          "notation": ["I", "i", "j"]
+          "notation": [
+            "I",
+            "i",
+            "j"
+          ]
         },
         {
           "id": "capacitance",
           "concept": "quantities-units:capacitance",
           "description": "Capacitance.",
-          "notation": ["C", "K", "B"]
+          "notation": [
+            "C",
+            "K",
+            "B"
+          ]
         },
         {
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Capacitor voltage.",
-          "notation": ["V", "v", "u", "e"]
+          "notation": [
+            "V",
+            "v",
+            "u",
+            "e"
+          ]
         },
         {
           "id": "time",
           "concept": "quantities-units:duration",
           "description": "Time variable.",
-          "notation": ["t", "tau"]
+          "notation": [
+            "t",
+            "tau"
+          ]
         }
       ],
       "semanticForms": [
@@ -159,7 +232,15 @@
         "current = -capacitance \\frac{d voltage}{d time}"
       ],
       "conditions": [
-        "The passive sign convention is used."
+        {
+          "id": "passive-sign-convention",
+          "kind": "sign-convention",
+          "subjects": [
+            "current",
+            "voltage"
+          ],
+          "label": "The passive sign convention is used."
+        }
       ],
       "references": [
         "engineering-circuits"
@@ -170,17 +251,63 @@
       "title": "Inductor voltage law",
       "description": "Inductor voltage equals inductance times the current derivative.",
       "roles": [
-        { "id": "voltage", "concept": "quantities-units:voltage", "description": "Inductor terminal voltage.", "notation": ["V", "v", "u"] },
-        { "id": "inductance", "concept": "quantities-units:inductance", "description": "Inductance.", "shape": "scalar", "notation": ["L"] },
-        { "id": "current", "concept": "quantities-units:electric-current", "description": "Inductor current.", "notation": ["I", "i", "j"] },
-        { "id": "time", "concept": "quantities-units:duration", "description": "Time variable.", "notation": ["t", "tau"] }
+        {
+          "id": "voltage",
+          "concept": "quantities-units:voltage",
+          "description": "Inductor terminal voltage.",
+          "notation": [
+            "V",
+            "v",
+            "u"
+          ]
+        },
+        {
+          "id": "inductance",
+          "concept": "quantities-units:inductance",
+          "description": "Inductance.",
+          "shape": "scalar",
+          "notation": [
+            "L"
+          ]
+        },
+        {
+          "id": "current",
+          "concept": "quantities-units:electric-current",
+          "description": "Inductor current.",
+          "notation": [
+            "I",
+            "i",
+            "j"
+          ]
+        },
+        {
+          "id": "time",
+          "concept": "quantities-units:duration",
+          "description": "Time variable.",
+          "notation": [
+            "t",
+            "tau"
+          ]
+        }
       ],
       "semanticForms": [
         "voltage = inductance \\frac{d current}{d time}",
         "voltage = -inductance \\frac{d current}{d time}"
       ],
-      "conditions": ["The voltage and current reference directions use one stated sign convention."],
-      "references": ["engineering-circuits"]
+      "conditions": [
+        {
+          "id": "consistent-references",
+          "kind": "sign-convention",
+          "subjects": [
+            "voltage",
+            "current"
+          ],
+          "label": "The voltage and current reference directions use one stated sign convention."
+        }
+      ],
+      "references": [
+        "engineering-circuits"
+      ]
     }
   ],
   "activationRules": [
@@ -188,19 +315,19 @@
       "id": "circuit-vocabulary",
       "topic": "foundations",
       "patterns": [
-          "electric circuit",
-          "Ohm's law",
-          "resistor",
-          "circuit node",
-          "junction",
-          "node law",
-          "node balance",
-          "capacitor",
-          "capacitance",
-          "inductor",
-          "inductance",
-          "farads",
-          "passive-sign"
+        "electric circuit",
+        "Ohm's law",
+        "resistor",
+        "circuit node",
+        "junction",
+        "node law",
+        "node balance",
+        "capacitor",
+        "capacitance",
+        "inductor",
+        "inductance",
+        "farads",
+        "passive-sign"
       ],
       "references": [
         "engineering-circuits"

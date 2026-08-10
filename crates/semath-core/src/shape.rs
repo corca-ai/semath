@@ -6,10 +6,7 @@ use crate::canonical::declared_symbols;
 use crate::parser::ParsedMath;
 use crate::prose::{ProseShape, ProseShapeClaim};
 use crate::scope::ScopeGraph;
-use crate::{
-    Evidence, ProjectDocument, SemanticConstraint, SemanticDiagnostic, ShapeInfo, SourceIndex,
-    SourceRange,
-};
+use crate::{Evidence, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceIndex, SourceRange};
 
 static DIMENSION_PRODUCT: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\s*(?:\\times|×)\s*").unwrap());
@@ -45,6 +42,15 @@ pub(crate) enum Shape {
 }
 
 impl Shape {
+    fn kind_name(&self) -> &'static str {
+        match self {
+            Self::Scalar => "scalar",
+            Self::Vector(_) => "vector",
+            Self::Matrix(_, _) => "matrix",
+            Self::Tensor(_) => "tensor",
+        }
+    }
+
     fn display(&self) -> String {
         match self {
             Self::Scalar => "Scalar".into(),
@@ -75,21 +81,6 @@ impl Shape {
         match self {
             Self::Matrix(rows, columns) => Self::Matrix(columns.clone(), rows.clone()),
             other => other.clone(),
-        }
-    }
-
-    pub(crate) fn constraint(&self) -> SemanticConstraint {
-        let (kind, dimensions) = match self {
-            Self::Scalar => ("scalar", Vec::new()),
-            Self::Vector(dimension) => ("vector", vec![dimension.clone()]),
-            Self::Matrix(rows, columns) => ("matrix", vec![rows.clone(), columns.clone()]),
-            Self::Tensor(dimensions) => ("tensor", dimensions.clone()),
-        };
-        SemanticConstraint {
-            kind: kind.into(),
-            concepts: Vec::new(),
-            dimensions,
-            refinements: Vec::new(),
         }
     }
 }
@@ -158,7 +149,7 @@ impl ShapeObservations {
             .filter(|fact| fact.explicit)
             .map(|fact| ExplicitShapeClaim {
                 symbol: fact.symbol.clone(),
-                kind: fact.shape.constraint().kind,
+                kind: fact.shape.kind_name().into(),
                 display: fact.shape.display(),
                 symbol_range: fact.symbol_range.clone(),
                 evidence: fact.evidence.clone(),

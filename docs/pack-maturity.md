@@ -41,14 +41,14 @@ field completeness.
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 | Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |
-| Pack vocabulary | Natural concept paraphrases required runtime vocabulary edits | Schema 5 adds reviewed concept aliases consumed by the generic classifier |
+| Pack vocabulary | Natural concept paraphrases required runtime vocabulary edits | Schema 5 added reviewed concept aliases consumed by the generic classifier |
+| Constraints | Side conditions were free-form strings without machine-checkable subjects or evidence | Schema 6 and protocol 5 use closed constraint kinds, validated law roles, bound symbols, source evidence, and explicit resolution status |
 
 ## Remaining measured gaps
 
 | Category | Current limitation | Affected evidence |
 | --- | --- | --- |
 | Generic IR | Indexed families, partial derivatives, gradients, integrals, and operator result typing do not yet share a complete constraint path | Calculus, optimization, linear algebra, and control systems |
-| Constraints | Side conditions are reported but not uniformly represented as reusable typed constraints over independent variables, domains, shapes, and assumptions | Matrix products, derivatives, optimization updates, and engineering laws |
 | Coverage | Probe packs demonstrate coherent vertical slices, not broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
 
 The remaining limitations are inputs to later roadmap issues. They require

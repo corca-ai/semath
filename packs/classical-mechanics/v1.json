@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "classical-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -70,20 +70,26 @@
           "id": "net-force",
           "concept": "quantities-units:force",
           "description": "Net force acting on the body.",
-          "notation": ["F"]
+          "notation": [
+            "F"
+          ]
         },
         {
           "id": "mass",
           "concept": "quantities-units:mass",
           "description": "Inertial mass of the body.",
           "shape": "scalar",
-          "notation": ["m"]
+          "notation": [
+            "m"
+          ]
         },
         {
           "id": "acceleration",
           "concept": "quantities-units:acceleration",
           "description": "Acceleration in the active inertial frame.",
-          "notation": ["a"]
+          "notation": [
+            "a"
+          ]
         }
       ],
       "semanticForms": [
@@ -91,7 +97,16 @@
         "net-force = mass \\cdot acceleration"
       ],
       "conditions": [
-        "The quantities refer to one body in a common inertial frame."
+        {
+          "id": "common-body-frame",
+          "kind": "same-context",
+          "subjects": [
+            "net-force",
+            "mass",
+            "acceleration"
+          ],
+          "label": "The quantities refer to one body in a common inertial frame."
+        }
       ],
       "references": [
         "classical-mechanics"
@@ -107,20 +122,28 @@
           "concept": "quantities-units:energy",
           "description": "Kinetic energy.",
           "shape": "scalar",
-          "notation": ["K", "E", "T"]
+          "notation": [
+            "K",
+            "E",
+            "T"
+          ]
         },
         {
           "id": "mass",
           "concept": "quantities-units:mass",
           "description": "Inertial mass.",
           "shape": "scalar",
-          "notation": ["m"]
+          "notation": [
+            "m"
+          ]
         },
         {
           "id": "velocity",
           "concept": "quantities-units:velocity",
           "description": "Body velocity.",
-          "notation": ["v"]
+          "notation": [
+            "v"
+          ]
         }
       ],
       "semanticForms": [
@@ -129,7 +152,16 @@
         "energy = \\frac{1}{2} mass \\lVert velocity \\rVert^2"
       ],
       "conditions": [
-        "The expression uses nonrelativistic translational motion."
+        {
+          "id": "nonrelativistic-motion",
+          "kind": "assumption",
+          "subjects": [
+            "energy",
+            "mass",
+            "velocity"
+          ],
+          "label": "The expression uses nonrelativistic translational motion."
+        }
       ],
       "references": [
         "classical-mechanics"
@@ -145,19 +177,25 @@
           "concept": "quantities-units:power",
           "description": "Instantaneous power.",
           "shape": "scalar",
-          "notation": ["P"]
+          "notation": [
+            "P"
+          ]
         },
         {
           "id": "force",
           "concept": "quantities-units:force",
           "description": "Applied force.",
-          "notation": ["F"]
+          "notation": [
+            "F"
+          ]
         },
         {
           "id": "velocity",
           "concept": "quantities-units:velocity",
           "description": "Point velocity.",
-          "notation": ["v"]
+          "notation": [
+            "v"
+          ]
         }
       ],
       "semanticForms": [
@@ -165,7 +203,15 @@
         "power = force velocity"
       ],
       "conditions": [
-        "Force and velocity components use one coordinate frame."
+        {
+          "id": "common-frame",
+          "kind": "same-context",
+          "subjects": [
+            "force",
+            "velocity"
+          ],
+          "label": "Force and velocity components use one coordinate frame."
+        }
       ],
       "references": [
         "classical-mechanics"
@@ -176,18 +222,50 @@
       "title": "Linear momentum",
       "description": "Linear momentum equals inertial mass multiplied by velocity.",
       "roles": [
-        { "id": "momentum", "concept": "quantities-units:momentum", "description": "Linear momentum.", "notation": ["p"] },
-        { "id": "mass", "concept": "quantities-units:mass", "description": "Inertial mass.", "shape": "scalar", "notation": ["m"] },
-        { "id": "velocity", "concept": "quantities-units:velocity", "description": "Velocity in the active frame.", "notation": ["v"] }
+        {
+          "id": "momentum",
+          "concept": "quantities-units:momentum",
+          "description": "Linear momentum.",
+          "notation": [
+            "p"
+          ]
+        },
+        {
+          "id": "mass",
+          "concept": "quantities-units:mass",
+          "description": "Inertial mass.",
+          "shape": "scalar",
+          "notation": [
+            "m"
+          ]
+        },
+        {
+          "id": "velocity",
+          "concept": "quantities-units:velocity",
+          "description": "Velocity in the active frame.",
+          "notation": [
+            "v"
+          ]
+        }
       ],
       "semanticForms": [
         "momentum = mass velocity",
         "momentum = mass \\cdot velocity"
       ],
       "conditions": [
-        "Mass and velocity refer to one body in one nonrelativistic frame."
+        {
+          "id": "common-body-frame",
+          "kind": "same-context",
+          "subjects": [
+            "mass",
+            "velocity"
+          ],
+          "label": "Mass and velocity refer to one body in one nonrelativistic frame."
+        }
       ],
-      "references": ["classical-mechanics"]
+      "references": [
+        "classical-mechanics"
+      ]
     }
   ],
   "activationRules": [
@@ -195,17 +273,17 @@
       "id": "mechanics-vocabulary",
       "topic": "foundations",
       "patterns": [
-          "classical mechanics",
-          "Newton's second law",
-          "net force",
-          "inertial frame",
-          "kinetic energy",
-          "mechanical power",
-          "instantaneous power",
-          "linear momentum",
-          "newtons",
-          "joules",
-          "watts"
+        "classical mechanics",
+        "Newton's second law",
+        "net force",
+        "inertial frame",
+        "kinetic energy",
+        "mechanical power",
+        "instantaneous power",
+        "linear momentum",
+        "newtons",
+        "joules",
+        "watts"
       ],
       "references": [
         "classical-mechanics"

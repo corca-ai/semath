@@ -3,12 +3,13 @@ use std::sync::LazyLock;
 
 use crate::canonical::{SemanticExpr, SemanticExprKind, associative, lower_template};
 use crate::consistency::{RoleObservations, roles_conflict};
-use crate::pack::{PackLaw, PackLawRole, built_in_packs};
+use crate::pack::{PackConditionKind, PackLaw, PackLawRole, built_in_packs};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
-    Evidence, LawBinding, LawConditionInfo, LawRecognition, ProjectDocument, QuantityInfo,
-    RelationInfo, RelationRoleInfo, RoleInfo, SemanticConstraint, ShapeInfo,
+    ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition, ProjectDocument,
+    QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind,
+    SemanticConstraint, SemanticConstraintKind, ShapeInfo,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -293,7 +294,15 @@ pub(crate) fn observe_laws(
             }) else {
                 continue;
             };
-            recognitions.push(recognition(compiled, actual, bindings));
+            recognitions.push(recognition(
+                compiled,
+                actual,
+                bindings,
+                shapes,
+                quantities,
+                consistency,
+                external,
+            ));
         }
     }
     recognitions.sort_by_key(|recognition| {
@@ -429,7 +438,7 @@ fn context_supports_law(
         .law
         .conditions
         .iter()
-        .any(|condition| condition.to_ascii_lowercase().contains("square"))
+        .any(|condition| condition.label.to_ascii_lowercase().contains("square"))
         && context.contains("rectangular")
     {
         return false;
@@ -1452,6 +1461,10 @@ fn recognition(
     compiled: &CompiledLaw,
     actual: &SemanticExpr,
     bindings: BTreeMap<String, SemanticExpr>,
+    shapes: &ShapeObservations,
+    quantities: &QuantityObservations,
+    consistency: &RoleObservations,
+    external: &ExternalTypeEnvironment,
 ) -> LawRecognition {
     let formula_evidence = Evidence {
         rule_id: "semantic-law-unification".into(),
@@ -1474,7 +1487,7 @@ fn recognition(
                 parameter: role.id.clone(),
                 symbol,
                 constraint: SemanticConstraint {
-                    kind: "expression".into(),
+                    kind: SemanticConstraintKind::Expression,
                     concepts: vec![role.concept.clone()],
                     dimensions: Vec::new(),
                     refinements: Vec::new(),
@@ -1508,6 +1521,42 @@ fn recognition(
         })
         .flatten()
         .collect();
+    let conditions = compiled
+        .law
+        .conditions
+        .iter()
+        .map(|condition| {
+            let condition_bindings = formula_bindings
+                .iter()
+                .filter(|binding| condition.subjects.contains(&binding.parameter))
+                .collect::<Vec<_>>();
+            let (evidence, mechanically_verified) = condition_evidence(
+                condition.kind,
+                &condition.subjects,
+                &bindings,
+                actual.range.start_offset,
+                shapes,
+                quantities,
+                consistency,
+                external,
+            );
+            LawConditionInfo {
+                condition_id: condition.id.clone(),
+                kind: scientific_constraint_kind(condition.kind),
+                subjects: condition_bindings
+                    .iter()
+                    .map(|binding| binding.symbol.clone())
+                    .collect(),
+                label: condition.label.clone(),
+                status: condition_status(
+                    condition.kind,
+                    condition_bindings.len(),
+                    mechanically_verified,
+                ),
+                evidence,
+            }
+        })
+        .collect();
     let evidence = vec![formula_evidence.clone()];
     LawRecognition {
         law_id: compiled.law.id.clone(),
@@ -1521,32 +1570,151 @@ fn recognition(
         range: actual.range.clone(),
         bindings: formula_bindings,
         result: SemanticConstraint {
-            kind: "proposition".into(),
+            kind: SemanticConstraintKind::Proposition,
             concepts: Vec::new(),
             dimensions: Vec::new(),
             refinements: vec!["typed-law-instance".into()],
         },
-        conditions: compiled
-            .law
-            .conditions
-            .iter()
-            .map(|condition| LawConditionInfo {
-                kind: "applicability".into(),
-                label: condition.clone(),
-                status: "required".into(),
-            })
-            .collect(),
+        conditions,
         relation: Some(RelationInfo {
             relation_id: format!("{}:{}", compiled.pack_id, compiled.law.id),
             title: compiled.law.title.clone(),
             description: compiled.law.description.clone(),
             roles: relation_roles,
-            conditions: compiled.law.conditions.clone(),
+            conditions: compiled
+                .law
+                .conditions
+                .iter()
+                .map(|condition| condition.label.clone())
+                .collect(),
             evidence: evidence.clone(),
             range: actual.range.clone(),
         }),
         evidence,
         rank: 100,
+    }
+}
+
+fn scientific_constraint_kind(kind: PackConditionKind) -> ScientificConstraintKind {
+    match kind {
+        PackConditionKind::Assumption => ScientificConstraintKind::Assumption,
+        PackConditionKind::Differentiable => ScientificConstraintKind::Differentiable,
+        PackConditionKind::DomainMembership => ScientificConstraintKind::DomainMembership,
+        PackConditionKind::Positive => ScientificConstraintKind::Positive,
+        PackConditionKind::SameContext => ScientificConstraintKind::SameContext,
+        PackConditionKind::ShapeCompatible => ScientificConstraintKind::ShapeCompatible,
+        PackConditionKind::SignConvention => ScientificConstraintKind::SignConvention,
+        PackConditionKind::Uniform => ScientificConstraintKind::Uniform,
+    }
+}
+
+fn condition_status(
+    kind: PackConditionKind,
+    resolved_subjects: usize,
+    mechanically_verified: bool,
+) -> ConstraintStatus {
+    if resolved_subjects == 0 {
+        return ConstraintStatus::Unsupported;
+    }
+    match kind {
+        PackConditionKind::DomainMembership | PackConditionKind::ShapeCompatible
+            if mechanically_verified =>
+        {
+            ConstraintStatus::Verified
+        }
+        PackConditionKind::Assumption
+        | PackConditionKind::Differentiable
+        | PackConditionKind::Positive
+        | PackConditionKind::SameContext
+        | PackConditionKind::SignConvention
+        | PackConditionKind::Uniform
+        | PackConditionKind::DomainMembership
+        | PackConditionKind::ShapeCompatible => ConstraintStatus::Required,
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn condition_evidence(
+    kind: PackConditionKind,
+    subjects: &[String],
+    bindings: &BTreeMap<String, SemanticExpr>,
+    offset: u32,
+    shapes: &ShapeObservations,
+    quantities: &QuantityObservations,
+    consistency: &RoleObservations,
+    external: &ExternalTypeEnvironment,
+) -> (Vec<Evidence>, bool) {
+    let mut evidence = Vec::new();
+    let mut proved_subjects = 0;
+    for subject in subjects {
+        let Some(expression) = bindings.get(subject) else {
+            continue;
+        };
+        push_evidence(
+            &mut evidence,
+            Evidence {
+                rule_id: format!("typed-law-role/{subject}"),
+                kind: "canonical-binding".into(),
+                strength: "hard".into(),
+                source_ranges: vec![expression.range.clone()],
+            },
+        );
+        let symbols = semantic_symbols(expression);
+        let proved = !symbols.is_empty()
+            && symbols.iter().all(|symbol| {
+                let facts = match kind {
+                    PackConditionKind::ShapeCompatible => shapes
+                        .shape_at(symbol, offset)
+                        .into_iter()
+                        .map(|shape| shape.evidence)
+                        .chain(
+                            external
+                                .shapes_at(offset, symbol)
+                                .into_iter()
+                                .map(|shape| shape.evidence),
+                        )
+                        .collect::<Vec<_>>(),
+                    PackConditionKind::DomainMembership => consistency
+                        .roles_at(symbol, offset)
+                        .0
+                        .into_iter()
+                        .map(|role| role.evidence)
+                        .chain(
+                            quantities
+                                .at(symbol, offset)
+                                .0
+                                .into_iter()
+                                .map(|quantity| quantity.evidence),
+                        )
+                        .chain(
+                            external
+                                .roles_at(offset, symbol)
+                                .into_iter()
+                                .map(|role| role.evidence),
+                        )
+                        .chain(
+                            external
+                                .quantities_at(offset, symbol)
+                                .into_iter()
+                                .map(|quantity| quantity.evidence),
+                        )
+                        .collect(),
+                    _ => Vec::new(),
+                };
+                let has_facts = !facts.is_empty();
+                for fact in facts {
+                    push_evidence(&mut evidence, fact);
+                }
+                has_facts
+            });
+        proved_subjects += usize::from(proved);
+    }
+    (evidence, proved_subjects == subjects.len())
+}
+
+fn push_evidence(items: &mut Vec<Evidence>, evidence: Evidence) {
+    if !items.contains(&evidence) {
+        items.push(evidence);
     }
 }
 
@@ -1635,7 +1803,10 @@ mod tests {
     use crate::prose::observe_prose;
     use crate::quantity::observe_quantities;
     use crate::shape::observe_shapes;
-    use crate::{DocumentLanguage, ProjectDocument};
+    use crate::{
+        ConstraintStatus, DocumentLanguage, LawRecognition, ProjectDocument,
+        ScientificConstraintKind,
+    };
 
     fn canonical_expressions(
         document: &ProjectDocument,
@@ -1995,7 +2166,41 @@ mod tests {
         }
     }
 
+    #[test]
+    fn resolves_typed_conditions_to_bound_symbols_and_source_evidence() {
+        let derivative = recognized_law_observations(
+            "This example states a first derivative. Let $f$ be a function of $x$, and let $g$ denote its first derivative. $g=\\frac{d f}{d x}$",
+        );
+        let condition = &derivative[0].conditions[0];
+        assert_eq!(condition.condition_id, "function-differentiable");
+        assert_eq!(condition.kind, ScientificConstraintKind::Differentiable);
+        assert_eq!(condition.status, ConstraintStatus::Required);
+        assert_eq!(condition.subjects, ["f", "x"]);
+        assert_eq!(condition.evidence.len(), 2);
+        assert!(
+            condition
+                .evidence
+                .iter()
+                .all(|item| !item.source_ranges.is_empty())
+        );
+
+        let matrix = recognized_law_observations(
+            "Let $A$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y=Ax$",
+        );
+        assert_eq!(matrix[0].conditions[0].status, ConstraintStatus::Verified);
+        let json = serde_json::to_value(&matrix[0].conditions[0]).unwrap();
+        assert_eq!(json["kind"], "shape-compatible");
+        assert_eq!(json["status"], "verified");
+    }
+
     fn recognized_laws(source: &str) -> Vec<String> {
+        recognized_law_observations(source)
+            .iter()
+            .map(|law| law.law_id.clone())
+            .collect()
+    }
+
+    fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             file_id: "main".into(),
@@ -2027,8 +2232,6 @@ mod tests {
             &Default::default(),
         )
         .all()
-        .iter()
-        .map(|law| law.law_id.clone())
-        .collect()
+        .to_vec()
     }
 }

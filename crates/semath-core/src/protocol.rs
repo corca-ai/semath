@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 4;
+pub const PROTOCOL_VERSION: u32 = 5;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -669,13 +669,31 @@ pub struct SemanticDiagnostic {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticConstraint {
-    pub kind: String,
+    pub kind: SemanticConstraintKind,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub concepts: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub dimensions: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub refinements: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum SemanticConstraintKind {
+    Distribution,
+    Event,
+    Expression,
+    Function,
+    Graph,
+    Index,
+    Matrix,
+    Proposition,
+    RandomVariable,
+    Scalar,
+    Set,
+    Tensor,
+    Vector,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -690,9 +708,34 @@ pub struct LawBinding {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct LawConditionInfo {
-    pub kind: String,
+    pub condition_id: String,
+    pub kind: ScientificConstraintKind,
+    pub subjects: Vec<String>,
     pub label: String,
-    pub status: String,
+    pub status: ConstraintStatus,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum ScientificConstraintKind {
+    Assumption,
+    Differentiable,
+    DomainMembership,
+    Positive,
+    SameContext,
+    ShapeCompatible,
+    SignConvention,
+    Uniform,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum ConstraintStatus {
+    Conflicting,
+    Required,
+    Unsupported,
+    Verified,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "packId": "calculus-analysis",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -50,7 +50,9 @@
       "title": "Differentiation variable",
       "description": "The explicit independent variable of a derivative.",
       "parents": [],
-      "references": ["principles-analysis"]
+      "references": [
+        "principles-analysis"
+      ]
     }
   ],
   "quantityKinds": [],
@@ -60,14 +62,55 @@
       "id": "first-derivative-relation",
       "title": "First derivative relation",
       "description": "A derivative symbol equals the first derivative of a function with respect to an explicit variable.",
-      "semanticForms": ["derivative = \\frac{d function}{d variable}"],
-      "roles": [
-        { "id": "derivative", "concept": "calculus-analysis:derivative", "description": "First derivative value.", "notation": ["fprime", "g", "yprime"] },
-        { "id": "function", "concept": "calculus-analysis:function", "description": "Differentiated function.", "notation": ["f", "g", "y"] },
-        { "id": "variable", "concept": "calculus-analysis:variable", "description": "Differentiation variable.", "notation": ["x", "t", "s"] }
+      "semanticForms": [
+        "derivative = \\frac{d function}{d variable}"
       ],
-      "conditions": ["The function is differentiable with respect to the stated variable."],
-      "references": ["principles-analysis"]
+      "roles": [
+        {
+          "id": "derivative",
+          "concept": "calculus-analysis:derivative",
+          "description": "First derivative value.",
+          "notation": [
+            "fprime",
+            "g",
+            "yprime"
+          ]
+        },
+        {
+          "id": "function",
+          "concept": "calculus-analysis:function",
+          "description": "Differentiated function.",
+          "notation": [
+            "f",
+            "g",
+            "y"
+          ]
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Differentiation variable.",
+          "notation": [
+            "x",
+            "t",
+            "s"
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "id": "function-differentiable",
+          "kind": "differentiable",
+          "subjects": [
+            "function",
+            "variable"
+          ],
+          "label": "The function is differentiable with respect to the stated variable."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ]
     }
   ],
   "activationRules": [

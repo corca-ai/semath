@@ -107,10 +107,14 @@ command name is not treated as its meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 5 describes namespaced concepts and reviewed English aliases, typed law
+Schema 6 describes namespaced concepts and reviewed English aliases, typed law
 roles, semantic forms, conditions, activation evidence, quantities, units, and
 references. The generic unifier applies every compiled law; selecting a pack or
 law in orchestration code is forbidden.
+
+Law conditions use closed kinds and validated role subjects. The runtime
+resolves them to bound symbols and source evidence; free-form labels are only a
+presentation projection, never a second constraint model.
 
 Pack compilation rejects unknown fields, unresolved or wrong-kind concepts,
 invalid dependencies, cycles, and inconsistent dimensions. A build-generated,
@@ -152,7 +156,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 4 exposes selection, `semanticView`, definition, references, rename,
+Protocol 5 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView` is meaning-first: summary, roles, conditions,
 explicit assumptions, evidence, declarations, conflicts, and refusal are
 public; raw parser trees are not. Native, WASM, Worker, LSP, and CorTeX consume
