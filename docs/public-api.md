@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 4 is a deliberate
+Semath is a library and language-service runtime. Protocol 6 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -33,7 +33,7 @@ refusal explanation when appropriate. `context.assumptions` contains explicit,
 source-linked assumptions with their subjects; omission means none were
 established. Parser ASTs and legacy rewrite queries are not public.
 
-Protocol 4 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 6 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.

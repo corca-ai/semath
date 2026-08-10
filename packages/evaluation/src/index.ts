@@ -1,6 +1,7 @@
 export * from "./conformance";
 export * from "./challenge";
 export * from "./foundation";
+export * from "./legacy-path-audit";
 export * from "./metamorphic";
 export * from "./model";
 export * from "./notation-conformance";

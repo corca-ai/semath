@@ -33,10 +33,12 @@ assumption, evidence, refusal, and scope independently instead of blending them
 into one recognition number.
 
 The frozen recognition challenge is separate from those development and
-diversity fixtures. Its cases are manually authored and grouped by the layer
-that owns a failure: syntax, binding, constraint, pack, resolution, or
-presentation. Association, structure, constraint, recognition, evidence,
-refusal, scope, and navigation remain separate metrics. Default CI validates
+diversity fixtures. Version 2 has 48 manually authored cases, including twelve
+positive/refusal semantic boundary pairs, grouped by the layer that owns a
+failure: syntax, binding, constraint, pack, resolution, or presentation. Exact
+IDs and normalized document sources must not occur in development or foundation
+fixtures. Association, structure, constraint, recognition, evidence, refusal,
+scope, and navigation remain separate metrics. Default CI validates
 the challenge schema and coverage matrix through pure tests but does not execute
 the engine over the holdout.
 Evaluated laws require
