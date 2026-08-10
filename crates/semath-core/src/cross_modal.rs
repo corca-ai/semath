@@ -501,6 +501,12 @@ fn structural_binding(
     predicate: BindingPredicate,
     rule_id: &str,
 ) -> CrossModalBinding {
+    let occurrence_kind = match predicate {
+        BindingPredicate::Names => OccurrenceKind::MacroDeclaration,
+        BindingPredicate::Abbreviates | BindingPredicate::Aliases => {
+            OccurrenceKind::ResourceDeclaration
+        }
+    };
     CrossModalBinding {
         short: short.to_owned(),
         long: long.to_owned(),
@@ -510,7 +516,7 @@ fn structural_binding(
         polarity: EvidencePolarity::Positive,
         modality: EvidenceModality::Asserted,
         predicate,
-        occurrence_kind: OccurrenceKind::ResourceDeclaration,
+        occurrence_kind,
         rule_id: rule_id.to_owned(),
     }
 }
@@ -518,6 +524,35 @@ fn structural_binding(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn classifies_operator_and_resource_declarations_by_semantic_kind() {
+        let range = SourceRange {
+            start_offset: 0,
+            end_offset: 1,
+        };
+        let operator = structural_binding(
+            "ECE",
+            "expected calibration error",
+            &range,
+            &range,
+            &range,
+            BindingPredicate::Names,
+            "operator",
+        );
+        let acronym = structural_binding(
+            "ECE",
+            "expected calibration error",
+            &range,
+            &range,
+            &range,
+            BindingPredicate::Abbreviates,
+            "acronym",
+        );
+
+        assert_eq!(operator.occurrence_kind, OccurrenceKind::MacroDeclaration);
+        assert_eq!(acronym.occurrence_kind, OccurrenceKind::ResourceDeclaration);
+    }
 
     #[test]
     fn extracts_both_parenthetical_directions_without_absorbing_leading_prose() {
