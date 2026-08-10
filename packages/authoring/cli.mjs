@@ -14,6 +14,7 @@ import {
   observeQualityRun,
   parseCorpus,
   parseQualityManifest,
+  planPackPropertyCells,
   planQualityRun,
   scoreQuality,
   explainQualityCase,
@@ -78,6 +79,11 @@ async function validateCommand(paths) {
   const report = inspect(wasm, sources);
   printCompilerReport(report);
   assertCompilerClean(report);
+  const properties = planPackPropertyCells(
+    sources.map((source) => projectValidatedPack(JSON.parse(source.source))),
+    20,
+  );
+  console.log(`semantic property plan OK: ${properties.length} required law cells`);
 }
 
 async function scaffoldCommand([packPath, directory]) {

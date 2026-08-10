@@ -10,7 +10,9 @@ use crate::candidate::{
 };
 use crate::canonical::{SemanticExpr, lower_document_region};
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
-use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
+use crate::cursor::{
+    CursorOccurrence, interior_offset, item_at_cursor_with_trailing_edge, occurrence_at_cursor,
+};
 use crate::decision::{MeaningDecisionInput, decide_meaning};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
@@ -1804,64 +1806,28 @@ fn semantic_symbol_at_cursor(
     if let Some((symbol, range)) = symbol_range_at_cursor(&math.symbols, offset) {
         return Some((symbol.clone(), range.clone()));
     }
-    let mut candidates = document
+    let candidates = document
         .semantic_occurrences
         .iter()
         .filter(|seed| {
             math.region.full_range.start_offset <= seed.range.start_offset
                 && seed.range.end_offset <= math.region.full_range.end_offset
         })
-        .filter(|seed| seed.range.contains(offset))
         .collect::<Vec<_>>();
-    if candidates.is_empty() {
-        candidates.extend(document.semantic_occurrences.iter().filter(|seed| {
-            math.region.full_range.start_offset <= seed.range.start_offset
-                && seed.range.end_offset <= math.region.full_range.end_offset
-                && seed.range.start_offset < seed.range.end_offset
-                && seed.range.end_offset == offset
-        }));
-    }
-    if candidates.is_empty() {
-        candidates.extend(document.semantic_occurrences.iter().filter(|seed| {
-            math.region.full_range.start_offset <= seed.selection_range.start_offset
-                && seed.selection_range.end_offset <= math.region.full_range.end_offset
-                && (seed.selection_range.contains(offset)
-                    || (seed.selection_range.start_offset < seed.selection_range.end_offset
-                        && seed.selection_range.end_offset == offset))
-        }));
-    }
-    if candidates.is_empty() {
-        candidates.extend(
-            document
-                .semantic_occurrences
-                .iter()
-                .filter(|seed| completes_application_at(seed, &math.region.full_range, offset)),
-        );
-    }
-    candidates.sort_by_key(|seed| {
-        (
-            seed.range.end_offset - seed.range.start_offset,
-            seed.selection_range.end_offset - seed.selection_range.start_offset,
-            seed.selection_range.start_offset,
-        )
-    });
-    let selected = *candidates.first()?;
-    if candidates.get(1).is_some_and(|next| {
-        next.range == selected.range && next.selection_range != selected.selection_range
-    }) {
-        return None;
-    }
+    let ownership = candidates
+        .iter()
+        .map(|seed| CursorOccurrence {
+            occurrence: &seed.range,
+            selection: &seed.selection_range,
+            application_end: seed.application_end_offset.filter(|candidate| {
+                math.region.full_range.start_offset <= seed.selection_range.start_offset
+                    && seed.selection_range.end_offset <= math.region.full_range.end_offset
+                    && *candidate <= math.region.full_range.end_offset
+            }),
+        })
+        .collect::<Vec<_>>();
+    let selected = candidates[occurrence_at_cursor(&ownership, offset)?];
     Some((selected.surface.clone(), selected.selection_range.clone()))
-}
-
-fn completes_application_at(
-    seed: &SemanticOccurrenceSeed,
-    math_range: &SourceRange,
-    offset: u32,
-) -> bool {
-    math_range.start_offset <= seed.selection_range.start_offset
-        && seed.selection_range.end_offset <= math_range.end_offset
-        && seed.application_end_offset == Some(offset)
 }
 
 fn symbol_range_at_cursor(

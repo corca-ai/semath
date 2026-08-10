@@ -160,19 +160,30 @@ identity system. Longer pack vocabulary terms take precedence over embedded
 generic terms, while equal-specificity collisions remain unresolved.
 
 The public meaning states are `established`, `partial`, `ambiguous`,
-`conflicting`, and `unsupported`. Only deterministic results with verified side
-conditions may become reviewed edits. Semath does not prove unrestricted
+`conflicting`, and `unsupported`. A decision carries a typed reason slice:
+proof, neutral uncertainty, engine limit, or demonstrated source conflict.
+Decision state is not diagnostic severity. Missing engine evidence never
+becomes a document warning; only exact source-linked contradictions and invalid
+typed constraints do. Only deterministic results with verified side conditions
+may become reviewed edits. Semath does not prove unrestricted
 equivalence, infer arbitrary unstated intent, run pack code, or silently change
 units and coordinate frames.
 
 ## Public boundary
 
-Protocol 7 exposes selection, `semanticView`, definition, references, rename,
+Protocol 8 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
-established, partial, ambiguous, conflicting, or unsupported. Summary text is
-a projection of that typed decision; it never selects policy. Native, WASM,
+established, partial, ambiguous, conflicting, or unsupported. Known decisions
+carry a structured meaning; all decisions carry bounded typed reasons. There is
+no summary-string or missing-evidence presentation policy in the protocol. Native, WASM,
 Worker, LSP, and CorTeX consume the same result model, and raw parser trees are
 not public.
+
+Cursor ownership is one pure UTF-16 range policy over real occurrence,
+structural selection, and complete-application boundaries. Exact containment
+outranks trailing edges; gaps and ambiguous containers fail locally. Every
+valid component position therefore resolves through the same occurrence and
+entity instead of a query-specific cursor patch.
 
 Breaking API or UI changes are acceptable before 1.0 when they remove a
 duplicate path or produce a cleaner architecture. Compatibility layers must not
@@ -192,5 +203,9 @@ leave old and new semantic runtimes in parallel.
 - Every conclusion retains source evidence and bounded uncertainty.
 - Pure transformations contain normalization, inference, ranking, and view
   construction wherever practical.
+- Pack declarations automatically plan positive, refusal, scope, mutation,
+  macro/project, and cursor properties through an independent source grammar.
+  Clean/incremental and native/WASM/Worker/LSP comparisons report the first
+  divergent stage and exact field; neither oracle copies production matching.
 - User interfaces explain decisions and next actions, not internal trees.
 - Release WASM is built on an x86_64 Linux host, never on Apple Silicon.

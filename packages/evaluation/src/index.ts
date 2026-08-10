@@ -1,4 +1,5 @@
 export * from "./conformance";
+export * from "./differential";
 export * from "./challenge";
 export * from "./foundation";
 export * from "./legacy-path-audit";
@@ -6,6 +7,7 @@ export * from "./metamorphic";
 export * from "./model";
 export * from "./notation-conformance";
 export * from "./observation";
+export * from "./pack-properties";
 export * from "./runner";
 export * from "./scorecard";
 export * from "./synthetic";

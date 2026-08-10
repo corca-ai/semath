@@ -180,11 +180,12 @@ export function explainQualityCase(
       }.`;
     } else if (view.decision.status === "conflicting") {
       reason = view.decision.conflicts.map((conflict) => conflict.label).join("; ");
-    } else if (
-      view.decision.status === "partial" ||
-      view.decision.status === "unsupported"
-    ) {
-      reason = view.decision.missing.map((requirement) => requirement.label).join("; ");
+    } else if (view.decision.status === "partial") {
+      reason = [...view.decision.requirements, ...view.decision.reasons]
+        .map((item) => item.label)
+        .join("; ");
+    } else if (view.decision.status === "unsupported") {
+      reason = view.decision.reasons.map((item) => item.label).join("; ");
     } else if (view.diagnostics.length) {
       reason = view.diagnostics.map((diagnostic) => diagnostic.message).join("; ");
     } else {

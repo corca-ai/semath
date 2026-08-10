@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import init, { SemathEngine } from "../lib/wasm/semath_wasm.js";
 import { LatexSyntaxService } from "wasmtex/syntax";
 import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index.ts";
+import { firstDifferentialFailure } from "../packages/evaluation/src/differential.ts";
 import { SEMATH_PROTOCOL_VERSION } from "../packages/protocol/src/index.ts";
 
 const sources = [
@@ -48,11 +49,14 @@ const sources = [
 ];
 
 const snapshot = makeSnapshot(sources, 1);
+const probabilityOccurrence = sources[1].content.indexOf("A \\cap");
 const queries = [
-  query("probability", sources[1].content.indexOf("A \\cap") + 1),
+  query("probability", probabilityOccurrence),
+  query("probability", probabilityOccurrence + 1),
   query("unsupported", sources[3].content.indexOf("q =") + 1),
   query("circuits", sources[2].content.indexOf("i_1 +") + 1),
-  definitionQuery("probability", sources[1].content.indexOf("A \\cap") + 1),
+  definitionQuery("probability", probabilityOccurrence),
+  definitionQuery("probability", probabilityOccurrence + 1),
 ];
 const fixture = { queries, snapshot };
 
@@ -75,7 +79,14 @@ const decoder = new TextDecoder();
 const engine = new SemathEngine();
 const reset = resetEngine(engine, snapshot);
 const wasmResults = queries.map((entry) => decode(engine.query(encode(entry))));
-assertEqual(nativeResults, wasmResults, "native/WASM query results");
+assertEquivalent([
+  { name: "native", value: nativeResults },
+  { name: "wasm", value: wasmResults },
+], "native/WASM query results");
+assertEquivalent([
+  { name: "clean", value: wasmResults[0].value },
+  { name: "incremental", value: wasmResults[1].value },
+], "cursor-edge semantic identity");
 if (reset.stats.totalDocuments !== sources.length || reset.stats.semanticNodes <= 0) {
   throw new Error("parity reset did not expose trustworthy analysis counters");
 }
@@ -89,7 +100,7 @@ if (
     `parity meaning-first probability scenario was not established: ${JSON.stringify(established)}`,
   );
 }
-const refused = wasmResults[1]?.value;
+const refused = wasmResults[2]?.value;
 if (
   refused?.kind !== "semanticView" ||
   refused.view.decision.status === "established"
@@ -131,7 +142,10 @@ const incrementalResult = decode(engine.query(encode(incrementalQuery)));
 const clean = new SemathEngine();
 resetEngine(clean, updatedSnapshot);
 const cleanResult = decode(engineQuery(clean, incrementalQuery));
-assertEqual(incrementalResult.value, cleanResult.value, "incremental/clean semantic result");
+assertEquivalent([
+  { name: "clean", value: cleanResult.value },
+  { name: "incremental", value: incrementalResult.value },
+], "incremental/clean semantic result");
 engine.free();
 clean.free();
 console.log(
@@ -193,10 +207,11 @@ function decode(value) {
   return JSON.parse(decoder.decode(value));
 }
 
-function assertEqual(left, right, label) {
-  if (JSON.stringify(left) !== JSON.stringify(right)) {
+function assertEquivalent(stages, label) {
+  const failure = firstDifferentialFailure(stages);
+  if (failure) {
     throw new Error(
-      `${label} mismatch\nleft=${JSON.stringify(left)}\nright=${JSON.stringify(right)}`,
+      `${label} mismatch at ${failure.stage}:${failure.path}\nexpected=${JSON.stringify(failure.expected)}\nactual=${JSON.stringify(failure.actual)}`,
     );
   }
 }
