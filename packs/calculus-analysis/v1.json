@@ -19,6 +19,7 @@
       "conceptKind": "entity",
       "title": "Function",
       "description": "A mapping with an explicitly declared domain and codomain.",
+      "aliases": ["scalar-valued function", "vector-valued function"],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -29,6 +30,7 @@
       "conceptKind": "operator",
       "title": "Derivative",
       "description": "A derivative operator with an explicit variable.",
+      "aliases": ["first derivative", "higher derivative", "rate of change"],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -39,6 +41,7 @@
       "conceptKind": "operator",
       "title": "Integral",
       "description": "An integral operator with an explicit integrand and differential.",
+      "aliases": ["definite integral", "indefinite integral"],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -49,6 +52,7 @@
       "conceptKind": "entity",
       "title": "Differentiation variable",
       "description": "The explicit independent variable of a derivative.",
+      "aliases": ["independent variable", "differentiation variable"],
       "parents": [],
       "references": [
         "principles-analysis"

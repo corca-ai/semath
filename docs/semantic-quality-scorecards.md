@@ -24,10 +24,10 @@ Thresholds apply to every law, so a broad suite cannot hide a weak law. The
 evaluator also rejects missing or unexpected generated observations rather than
 treating an empty set as success.
 
-The current baseline has 3,050 checked-in synthetic law cases and 249
+The current baseline has 3,106 checked-in synthetic law cases and 249
 deterministic runtime variants. It includes 56 independently scored unknown,
 cross-pack, and cross-field collision cases. Separate foundation suites contain
-102 cases for the scientific kernel, quantities and units, and English
+118 cases for the scientific kernel, quantities and units, and English
 scientific prose. The prose suite reports association, classification,
 assumption, evidence, refusal, and scope independently instead of blending them
 into one recognition number.
@@ -83,3 +83,7 @@ and documentation are separate gates so failures remain actionable. The normal
 performance gate covers 61 documents and the scale gate covers 501; both include
 wasmtex syntax updates, adapter and Worker-host overhead, WASM analysis, cursor
 queries, transfer bytes, and affected-document counts.
+The manually dispatched workflow records timing on its shared runner but gates
+only deterministic semantic, memory, artifact-size, transfer, and incremental
+scope budgets there. Absolute timing gates remain strict on an explicitly
+stable host via `bun run budget:stable`.

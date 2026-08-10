@@ -19,6 +19,7 @@
       "conceptKind": "entity",
       "title": "Objective function",
       "description": "A function optimized over an explicitly declared variable.",
+      "aliases": ["loss function", "cost function", "optimization objective"],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -29,6 +30,7 @@
       "conceptKind": "operator",
       "title": "Argmin",
       "description": "An operator denoting minimizers of an objective.",
+      "aliases": ["minimizer", "minimizing argument", "optimal argument"],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -39,6 +41,7 @@
       "conceptKind": "entity",
       "title": "Optimization iterate",
       "description": "A current or updated candidate point in an iterative method.",
+      "aliases": ["current iterate", "next iterate", "parameter iterate"],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -49,6 +52,7 @@
       "conceptKind": "quantity",
       "title": "Objective gradient",
       "description": "The gradient of an objective evaluated at the current iterate.",
+      "aliases": ["objective gradient", "loss gradient", "cost gradient"],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -59,6 +63,7 @@
       "conceptKind": "quantity",
       "title": "Step size",
       "description": "A scalar multiplier controlling an optimization update.",
+      "aliases": ["learning rate", "update step size"],
       "parents": [],
       "references": [
         "convex-optimization"

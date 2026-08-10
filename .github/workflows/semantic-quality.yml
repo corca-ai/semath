@@ -14,3 +14,7 @@ jobs:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
       - run: bun run quality
+        env:
+          # Shared-runner CPU allocation is not a stable timing reference.
+          # Other semantic and structural performance budgets remain strict.
+          SEMATH_BUDGET_TIMING_GATE: "0"

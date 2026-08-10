@@ -19,18 +19,20 @@ the summary is only a compact view and never replaces the detailed contract.
 | Signals and systems | evaluated | all seven | — | — | 3 / 240 |
 | Linear algebra | evaluated | all seven | — | — | 3 / 270 |
 | Probability | evaluated | all seven | — | — | 2 / 180 |
-| Electromagnetism | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 3 / 240 |
-| Thermodynamics and heat transfer | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 3 / 240 |
-| Fluid mechanics | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 3 / 240 |
-| Calculus and analysis | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
-| Discrete mathematics | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 2 / 180 |
-| Optimization and ML | mixed | vocabulary | declarations, typing, laws, refusal, project/macro, explanation | — | 1 / 90 |
+| Electromagnetism | evaluated | all seven | — | — | 3 / 240 |
+| Thermodynamics and heat transfer | evaluated | all seven | — | — | 3 / 240 |
+| Fluid mechanics | evaluated | all seven | — | — | 3 / 240 |
+| Calculus and analysis | evaluated | all seven | — | — | 1 / 90 |
+| Discrete mathematics | evaluated | all seven | — | — | 2 / 180 |
+| Optimization and ML | evaluated | all seven | — | — | 1 / 90 |
 | Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 102 foundation |
 
 The seven capabilities are concept vocabulary, English declarations and roles,
 shape/quantity/unit typing, law recognition, diagnostic refusal,
 project/macro provenance, and navigation/explanation. The dated
 [maturity report](pack-maturity.md) records the evidence and remaining gaps.
+Evaluated means the declared vertical passes its capability contract; it never
+implies field-wide coverage.
 
 Evaluated law suites require at least 30 positive and 20 refusal cases per law
 across six dimensions; current diversity suites cover all seven. Probe suites
