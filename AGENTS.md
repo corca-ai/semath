@@ -25,6 +25,8 @@ CorTeX is the first host.
 - Preserve native/WASM behavior parity. Prefer the correct architecture and
   concise code over compatibility; breaking API and host UI changes are allowed.
 - Add focused tests at the lowest authoritative layer; minimize E2E coverage.
-- Run `bun run check` for code changes and `awiki lint -r` for documentation.
+- Run the fast `bun run check` for code changes and `awiki lint -r` for
+  documentation. Run the deliberately manual `bun run quality` before a
+  semantic release or when changing packs, corpora, inference, or thresholds.
 - Build release WASM on an x86_64 Linux host, never on Apple Silicon.
 - `CLAUDE.md` is a symlink to `AGENTS.md`; edit `AGENTS.md` and preserve the link.

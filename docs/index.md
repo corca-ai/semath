@@ -13,13 +13,17 @@ public contracts are host-independent.
 - [GitHub issues](https://github.com/corca-ai/semath/issues) contain current
   plans and acceptance criteria.
 
-Install dependencies with `bun install` and run the complete local verification
+Install dependencies with `bun install` and run the fast local verification
 suite with:
 
 ```sh
 bun run check
 awiki lint -r
 ```
+
+`bun run check` is the fast code gate used by pull requests. Expensive semantic
+corpus evaluation is intentionally manual; run `bun run quality` for semantic
+releases and changes to packs, corpora, inference, or quality thresholds.
 
 Release WASM must be built on an x86_64 Linux host. Apple Silicon machines may
 run native tests but must use `scripts/build-wasm-remote.sh` for release

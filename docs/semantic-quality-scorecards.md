@@ -37,9 +37,17 @@ least 95% recall. This baseline is release evidence, not a completeness claim or
 live production telemetry. It contains no imported real-world corpus, so it must
 not be used to claim field completeness or real-world frequency.
 
-Run the concise gate or write a stable machine-readable artifact with:
+Semantic corpus execution is a deliberate manual/release gate, not a default
+pull-request check. Default CI still parses schemas, verifies generated fixture
+integrity, tests the pure scorers, and enforces pack conformance. This keeps
+ordinary feedback fast without presenting an expensive synthetic evaluation as
+continuous production evidence.
+
+Run the complete manual gate, a focused evaluation, or write a stable
+machine-readable artifact with:
 
 ```sh
+bun run quality
 bun run corpus
 bun run corpus:generate:check
 bun run foundation
@@ -47,9 +55,11 @@ bun run foundation:generate:check
 bun run scorecard
 ```
 
-The latter writes `.artifacts/semantic-scorecard.json`. Generated scorecards and
-metamorphic fixtures are not version-controlled. Fix labels or behavior before
-changing a threshold; never lower one solely to make CI pass.
+`bun run scorecard` writes `.artifacts/semantic-scorecard.json`. The same
+complete gate is available through the manually dispatched `semantic-quality`
+GitHub workflow. Generated scorecards and metamorphic fixtures are not
+version-controlled. Fix labels or behavior before changing a threshold; never
+lower one solely to make a gate pass.
 
 The checked-in generation specification separates declaration, prose,
 presentation, project, macro, constraint, mutation, and cursor batches. Pure
