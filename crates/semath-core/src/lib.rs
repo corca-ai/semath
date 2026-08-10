@@ -16,6 +16,7 @@ mod quantity;
 mod scientific_prose;
 mod scope;
 mod semantic;
+pub mod semantic_index;
 mod shape;
 mod source_index;
 

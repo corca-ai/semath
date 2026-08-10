@@ -23,7 +23,7 @@ present and act on the result.
 
 ## Structural boundary
 
-Semath accepts wasmtex syntax-contract v3. Math regions, includes, project
+Semath accepts wasmtex syntax-contract v4. Math regions, includes, project
 macros, call-site ranges, expansion provenance, and ambiguity are supplied once
 at this boundary. Semath does not rescan TeX to construct a competing syntax
 model. Direct, one-level, and bounded composed macro expansions lower through
@@ -36,6 +36,14 @@ documents retain source, structural syntax, scopes, and hygiene state, while
 the index owns definitions, roles, shapes, quantities, domains, and law
 recognitions. Queries project bounded views from that store instead of building
 parallel fact graphs.
+
+The index has exactly two authoritative identities: a revision-qualified
+`SourceOccurrenceId` for real source spans and a scoped `EntityId` anchored to
+an occurrence. Notation components are compositional values, not identities.
+Typed claims retain explicit polarity, modality, source provenance, extraction
+rule version, and strictly increasing derivation tiers. Alias resolution is
+scope- and source-order-aware and retracts with its evidence; strings are never
+permanently unioned.
 
 Included documents contribute the same namespaced role, shape, quantity, unit,
 dimension, and evidence records used locally. A per-document external type
