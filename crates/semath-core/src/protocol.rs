@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 6;
+pub const PROTOCOL_VERSION: u32 = 7;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -746,7 +746,7 @@ pub struct LawRecognition {
     pub description: String,
     pub description_key: String,
     pub maturity: String,
-    pub status: String,
+    pub status: LawRecognitionStatus,
     pub pack_id: String,
     pub pack_version: String,
     pub range: SourceRange,
@@ -757,6 +757,15 @@ pub struct LawRecognition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relation: Option<RelationInfo>,
     pub rank: u32,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum LawRecognitionStatus {
+    ConditionMissing,
+    Conflicting,
+    Recognized,
+    Verified,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -779,16 +788,79 @@ pub struct RenamePreparation {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticViewInfo {
-    pub status: String,
-    pub summary: String,
+    pub decision: MeaningDecision,
     pub symbol: Option<SymbolInfo>,
     pub context: SemanticContextInfo,
     pub declarations: Vec<Location>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub domains: Vec<DomainActivation>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub refusal: Option<String>,
     pub truncated: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(
+    tag = "status",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+pub enum MeaningDecision {
+    Established {
+        summary: String,
+        relation_id: String,
+        evidence: Vec<Evidence>,
+    },
+    Partial {
+        summary: String,
+        facts: Vec<MeaningFact>,
+        missing: Vec<MeaningRequirement>,
+    },
+    Ambiguous {
+        summary: String,
+        alternatives: Vec<MeaningAlternative>,
+    },
+    Conflicting {
+        summary: String,
+        conflicts: Vec<MeaningConflict>,
+    },
+    Unsupported {
+        summary: String,
+        missing: Vec<MeaningRequirement>,
+    },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MeaningFact {
+    pub fact_id: String,
+    pub label: String,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MeaningRequirement {
+    pub requirement_id: String,
+    pub label: String,
+    pub subjects: Vec<String>,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MeaningAlternative {
+    pub alternative_id: String,
+    pub label: String,
+    pub range: SourceRange,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MeaningConflict {
+    pub conflict_id: String,
+    pub label: String,
+    pub evidence: Vec<Evidence>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -889,7 +961,19 @@ pub struct AnalysisStats {
 
 #[cfg(test)]
 mod tests {
-    use super::{Evidence, PhysicalDimensionInfo, QuantityInfo};
+    use super::{Evidence, MeaningDecision, PhysicalDimensionInfo, QuantityInfo};
+
+    #[test]
+    fn meaning_decision_rejects_fields_from_another_state() {
+        let invalid = serde_json::json!({
+            "status": "established",
+            "summary": "Example",
+            "relationId": "pack:law",
+            "evidence": [],
+            "missing": []
+        });
+        assert!(serde_json::from_value::<MeaningDecision>(invalid).is_err());
+    }
 
     #[test]
     fn quantity_wire_contract_keeps_an_empty_derivation_array() {

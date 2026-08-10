@@ -178,8 +178,13 @@ export function explainQualityCase(
       reason = `The target law was safely refused${
         "refusalCategory" in item.case ? ` (${item.case.refusalCategory})` : ""
       }.`;
-    } else if (view.refusal) {
-      reason = view.refusal;
+    } else if (view.decision.status === "conflicting") {
+      reason = view.decision.conflicts.map((conflict) => conflict.label).join("; ");
+    } else if (
+      view.decision.status === "partial" ||
+      view.decision.status === "unsupported"
+    ) {
+      reason = view.decision.missing.map((requirement) => requirement.label).join("; ");
     } else if (view.diagnostics.length) {
       reason = view.diagnostics.map((diagnostic) => diagnostic.message).join("; ");
     } else {
@@ -194,7 +199,7 @@ export function explainQualityCase(
     expected,
     observedRelations,
     reason,
-    status: view?.status ?? "missing",
+    status: view?.decision.status ?? "missing",
     suiteId: item.suiteId,
   };
 }
@@ -229,7 +234,7 @@ function observe(
       "expectedRoles" in item.case ? item.case.expectedRoles : undefined,
       item.case.macros,
     ),
-    ...(view ? { status: view.status } : {}),
+    ...(view ? { status: view.decision.status } : {}),
     suiteId: item.suiteId,
     targetPresent: Boolean(relation),
   };

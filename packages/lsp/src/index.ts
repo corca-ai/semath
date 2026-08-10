@@ -383,16 +383,22 @@ export class SemathLspServer {
     );
     if (result.value.kind === "semanticView") {
       const value = result.value.view;
+      const decision = value.decision;
       const sourceNotation = value.symbol?.sourceNotation;
       const lines = [
         sourceNotation
-          ? `**\`${sourceNotation}\` — ${value.summary}**`
-          : `**${value.summary}**`,
+          ? `**\`${sourceNotation}\` — ${decision.summary}**`
+          : `**${decision.summary}**`,
         value.symbol?.shapes[0]?.display ?? "",
         ...(value.symbol?.roles ?? []).map((role) => role.description),
         ...(value.symbol?.definitions ?? []).map((definition) => definition.description),
         ...value.context.relations.map((relation) => relation.description),
-        value.refusal ?? "",
+        ...(decision.status === "partial" || decision.status === "unsupported"
+          ? decision.missing.map((item) => item.label)
+          : []),
+        ...(decision.status === "conflicting"
+          ? decision.conflicts.map((item) => item.label)
+          : []),
       ].filter(Boolean);
       if (lines.length)
         return { contents: { kind: "markdown", value: lines.join("\n\n") } };

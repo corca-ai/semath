@@ -51,7 +51,7 @@
         { "fileId": "types", "path": "types.tex", "content": "Let $V$ be voltage, $R$ resistance, and $I$ electric current." }
       ],
       "cursor": { "fileId": "main", "needle": "V=RI", "edge": "before" },
-      "expectation": { "status": "established", "relationId": "circuits:ohm-law" },
+      "expectation": { "status": "partial", "relationId": "circuits:ohm-law" },
       "variationTags": ["included-declarations", "multi-file", "project-scope"]
     },
     {

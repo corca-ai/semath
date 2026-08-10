@@ -10,6 +10,7 @@ use crate::candidate::{
 use crate::canonical::{SemanticExpr, lower_document_region};
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
 use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
+use crate::decision::{MeaningDecisionInput, decide_meaning};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
@@ -1498,59 +1499,27 @@ impl SemathEngine {
         let diagnostics_truncated = diagnostics.len() > MAX_VIEW_DIAGNOSTICS;
         diagnostics.truncate(MAX_VIEW_DIAGNOSTICS);
         let (domains, domains_truncated) = observations.domains.at(offset);
-        let conflicting = diagnostics
-            .iter()
-            .any(|diagnostic| matches!(diagnostic.severity.as_str(), "error" | "warning"));
-        let (status, summary, refusal) = if conflicting {
-            (
-                "conflicting",
-                "Conflicting semantic evidence",
-                Some(
-                    "Resolve the source-linked conflicts before applying this interpretation."
-                        .into(),
-                ),
-            )
-        } else if context.relations.len() > 1 {
-            (
-                "ambiguous",
-                "Multiple semantic interpretations remain",
-                Some(
-                    "Add type, quantity, shape, or role declarations to disambiguate the formula."
-                        .into(),
-                ),
-            )
-        } else if let Some(relation) = context.relations.first() {
-            ("established", relation.title.as_str(), None)
-        } else if let Some(info) = &symbol_info {
-            (
-                "partial",
-                info.definitions
-                    .first()
-                    .map_or(info.symbol.as_str(), |definition| {
-                        definition.description.as_str()
-                    }),
-                None,
-            )
-        } else {
-            (
-                "unsupported",
-                "No supported semantic interpretation",
-                Some(
-                    "Semath could not establish a typed meaning from the available evidence."
-                        .into(),
-                ),
-            )
-        };
+        let truncated = declarations_truncated
+            || diagnostics_truncated
+            || domains_truncated
+            || context.truncated
+            || symbol_info.as_ref().is_some_and(|info| info.truncated);
+        let formulas = observations.laws.at(offset);
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &formulas,
+            symbol: symbol_info.as_ref(),
+            candidates: &context.candidates,
+            diagnostics: &diagnostics,
+            truncated,
+        });
         SemanticViewInfo {
-            status: status.into(),
-            summary: summary.into(),
+            decision,
             symbol: symbol_info,
             context,
             declarations,
             diagnostics,
             domains,
-            refusal,
-            truncated: declarations_truncated || diagnostics_truncated || domains_truncated,
+            truncated,
         }
     }
 
