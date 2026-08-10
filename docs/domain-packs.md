@@ -86,7 +86,7 @@ The generated corpus is a balanced set of editable positive and refusal seeds,
 not evidence of maturity by itself. The checked-in schema-5 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
-then conformance, foundation, and corpus evaluation.
+then conformance followed by the manual foundation and corpus evaluation.
 
 Pack breadth does not grant edit authority. Unknown roles, incompatible types,
 missing conditions, and opaque notation remain partial, ambiguous, conflicting,

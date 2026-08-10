@@ -225,6 +225,10 @@ if (incremental.analyzedFileIds.length !== 0) {
   throw new Error("budget empty delta unexpectedly reanalyzed documents");
 }
 
+// The parity rebuild is a separate lifecycle, not a second live editor engine.
+// Dispose the incremental worker first so this gate measures the maximum memory
+// of either valid lifecycle instead of an artificial overlap of both.
+await worker.dispose();
 const clean = new SemathEngine();
 const finalDocuments = documents.map((document) =>
   document.fileId === current.fileId ? current : document,
@@ -241,7 +245,6 @@ if (
   throw new Error("budget incremental and clean rebuild summaries diverged");
 }
 clean.free();
-await worker.dispose();
 const rssAfterDispose = residentBytes();
 const retainedRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
 
