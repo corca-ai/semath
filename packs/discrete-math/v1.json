@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "packId": "discrete-math",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -124,7 +124,7 @@
     {
       "id": "vocabulary",
       "topic": "foundations",
-      "patterns": [
+      "phrases": [
         "set theory",
         "combinatorics",
         "propositional logic",
@@ -139,15 +139,7 @@
     {
       "id": "discrete-notation",
       "topic": "notation",
-      "patterns": [
-        "\\subset",
-        "\\in",
-        "\\cup",
-        "\\cap",
-        "\\forall",
-        "\\exists",
-        "\\binom"
-      ],
+      "structures": ["discrete"],
       "references": [
         "concrete-mathematics"
       ]

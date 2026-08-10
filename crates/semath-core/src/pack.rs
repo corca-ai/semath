@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 6;
+pub const PACK_SCHEMA_VERSION: u32 = 7;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -210,8 +210,21 @@ pub struct PackLawRole {
 pub struct PackActivationRule {
     pub id: String,
     pub topic: String,
-    pub patterns: Vec<String>,
+    #[serde(default)]
+    pub phrases: Vec<String>,
+    #[serde(default)]
+    pub structures: Vec<PackActivationStructure>,
     pub references: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum PackActivationStructure {
+    Calculus,
+    Discrete,
+    Optimization,
+    Probability,
+    RealCoordinateSpace,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -568,14 +581,15 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
     for (index, rule) in pack.activation_rules.iter().enumerate() {
         let path = format!("activationRules[{index}]");
         require_text(&format!("{path}.topic"), &rule.topic)?;
-        if rule.patterns.is_empty()
-            || rule
-                .patterns
-                .iter()
-                .any(|pattern| pattern.trim().is_empty())
-        {
+        if rule.phrases.is_empty() && rule.structures.is_empty() {
             return Err(error(
-                format!("{path}.patterns"),
+                format!("{path}.evidence"),
+                "must contain an activation phrase or structural kind",
+            ));
+        }
+        if rule.phrases.iter().any(|pattern| pattern.trim().is_empty()) {
+            return Err(error(
+                format!("{path}.phrases"),
                 "must contain nonempty activation phrases",
             ));
         }
@@ -767,7 +781,7 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 6);
+        assert_eq!(PACK_SCHEMA_VERSION, 7);
         assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }

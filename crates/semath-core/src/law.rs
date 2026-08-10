@@ -4,12 +4,13 @@ use std::sync::LazyLock;
 use crate::canonical::{SemanticExpr, SemanticExprKind, associative, lower_template};
 use crate::consistency::{RoleObservations, roles_conflict};
 use crate::pack::{PackConditionKind, PackLaw, PackLawRole, built_in_packs};
+use crate::prose::{FormulaOperationKind, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
-    ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition, ProjectDocument,
-    QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind,
-    SemanticConstraint, SemanticConstraintKind, ShapeInfo,
+    ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition, QuantityInfo,
+    RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
+    SemanticConstraintKind, ShapeInfo,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -254,8 +255,8 @@ impl LawObservations {
 }
 
 pub(crate) fn observe_laws(
-    document: &ProjectDocument,
     canonical_expressions: &[SemanticExpr],
+    semantic_evidence: &ScientificSemanticEvidence,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -269,7 +270,15 @@ pub(crate) fn observe_laws(
                 break;
             }
             visited_rules += 1;
-            if !context_supports_law(document, actual, compiled) {
+            if !semantic_evidence.formula_is_asserted(&actual.range) {
+                continue;
+            }
+            if !formula_operations_are_well_typed(actual, semantic_evidence, shapes) {
+                continue;
+            }
+            let activation =
+                semantic_evidence.law_activation(compiled.pack_id, &compiled.law.id, &actual.range);
+            if !compiled.law.activation_phrases.is_empty() && activation.is_none() {
                 continue;
             }
             let candidates = compiled
@@ -294,7 +303,7 @@ pub(crate) fn observe_laws(
             }) else {
                 continue;
             };
-            recognitions.push(recognition(
+            let mut recognized = recognition(
                 compiled,
                 actual,
                 bindings,
@@ -302,7 +311,11 @@ pub(crate) fn observe_laws(
                 quantities,
                 consistency,
                 external,
-            ));
+            );
+            if let Some(activation) = activation {
+                recognized.evidence.push(activation.evidence.clone());
+            }
+            recognitions.push(recognized);
         }
     }
     recognitions.sort_by_key(|recognition| {
@@ -315,6 +328,36 @@ pub(crate) fn observe_laws(
     LawObservations {
         recognitions,
         visited_rules,
+    }
+}
+
+fn formula_operations_are_well_typed(
+    expression: &SemanticExpr,
+    evidence: &ScientificSemanticEvidence,
+    shapes: &ShapeObservations,
+) -> bool {
+    evidence
+        .formula_operations(&expression.range)
+        .all(|operation| match operation.operation {
+            FormulaOperationKind::VectorDotProduct => vector_dot_operands(expression)
+                .is_some_and(|(left, right)| {
+                    matches!(expression_shape(left, shapes), ShapeInference::Known(shape) if shape.first().is_some_and(|kind| kind == "vector"))
+                        && matches!(expression_shape(right, shapes), ShapeInference::Known(shape) if shape.first().is_some_and(|kind| kind == "vector"))
+                }),
+        })
+}
+
+fn vector_dot_operands(expression: &SemanticExpr) -> Option<(&SemanticExpr, &SemanticExpr)> {
+    match &expression.kind {
+        SemanticExprKind::Dot(left, right) => Some((left, right)),
+        SemanticExprKind::Relation { left, right, .. } => {
+            vector_dot_operands(left).or_else(|| vector_dot_operands(right))
+        }
+        SemanticExprKind::Negate(inner) => vector_dot_operands(inner),
+        SemanticExprKind::Sum(items) | SemanticExprKind::Product(items) => {
+            items.iter().find_map(vector_dot_operands)
+        }
+        _ => None,
     }
 }
 
@@ -385,91 +428,6 @@ fn balance_expression(expression: &SemanticExpr) -> bool {
         SemanticExprKind::Product(factors) => factors.iter().any(contains_sum_operator),
         _ => false,
     }
-}
-
-fn context_supports_law(
-    document: &ProjectDocument,
-    actual: &SemanticExpr,
-    compiled: &CompiledLaw,
-) -> bool {
-    let context = sentence_around(document, &actual.range).to_ascii_lowercase();
-    let contradicted = [
-        "does not apply",
-        "not valid",
-        "must not",
-        "merely",
-        "hypothetical",
-        "one could",
-        "one might",
-        "were an ideal",
-        "were constant",
-        "without assuming",
-        "no selected",
-        "no resolvable",
-        "incompatible candidates",
-        "conflicting",
-        "opposite directions",
-        "not imported",
-        "no imported",
-        "before the later",
-        "before that experiment",
-        "otherwise undeclared",
-        "undeclared shapes",
-        "without declaring their shapes",
-        "without assigning",
-        "two different nodes",
-        "nevertheless",
-        " both ",
-        "names a function",
-        "standalone equation",
-        "isolated relation",
-        "no shape declarations",
-        "but the formula",
-        "yet the document asserts",
-        "declared to be",
-        "no matrix",
-    ]
-    .iter()
-    .any(|cue| context.contains(cue));
-    if contradicted {
-        return false;
-    }
-    if compiled
-        .law
-        .conditions
-        .iter()
-        .any(|condition| condition.label.to_ascii_lowercase().contains("square"))
-        && context.contains("rectangular")
-    {
-        return false;
-    }
-    if !compiled.law.activation_phrases.is_empty() {
-        return compiled
-            .law
-            .activation_phrases
-            .iter()
-            .any(|cue| context.contains(&cue.to_ascii_lowercase()));
-    }
-    true
-}
-
-fn sentence_around<'a>(document: &'a ProjectDocument, range: &crate::SourceRange) -> &'a str {
-    let index = crate::SourceIndex::new(&document.content);
-    let offset = index.byte_for_utf16(range.start_offset);
-    let start = document.content[..offset]
-        .char_indices()
-        .rev()
-        .take_while(|(position, _)| offset - position <= 512)
-        .last()
-        .map_or(0, |(position, _)| position);
-    let end = document.content[offset..]
-        .char_indices()
-        .take_while(|(position, _)| *position <= 512)
-        .last()
-        .map_or(document.content.len(), |(position, character)| {
-            offset + position + character.len_utf8()
-        });
-    &document.content[start..end]
 }
 
 fn expression_is_well_typed(expression: &SemanticExpr, shapes: &ShapeObservations) -> bool {
@@ -1912,13 +1870,14 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let prose = observe_prose(&document, &parsed);
+        let canonical = canonical_expressions(&document, &parsed);
+        let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let laws = observe_laws(
-            &document,
-            &canonical_expressions(&document, &parsed),
+            &canonical,
+            &prose.semantic_evidence,
             &shapes,
             &quantities,
             &roles,
@@ -1948,13 +1907,14 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let prose = observe_prose(&document, &parsed);
+        let canonical = canonical_expressions(&document, &parsed);
+        let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let laws = observe_laws(
-            &document,
-            &canonical_expressions(&document, &parsed),
+            &canonical,
+            &prose.semantic_evidence,
             &shapes,
             &quantities,
             &roles,
@@ -2227,13 +2187,14 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let prose = observe_prose(&document, &parsed);
+        let canonical = canonical_expressions(&document, &parsed);
+        let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         observe_laws(
-            &document,
-            &canonical_expressions(&document, &parsed),
+            &canonical,
+            &prose.semantic_evidence,
             &shapes,
             &quantities,
             &roles,

@@ -190,6 +190,7 @@ fn defined_but_unused(symbol: &str, definition: &DefinitionInfo) -> SemanticDiag
 
 #[cfg(test)]
 mod tests {
+    use crate::canonical::lower_document_region;
     use serde::Deserialize;
 
     use super::analyze_hygiene;
@@ -239,7 +240,11 @@ mod tests {
                 includes: Vec::new(),
             };
             let parsed = parse_regions(&case.content, &regions);
-            let prose = observe_prose(&document, &parsed);
+            let canonical = parsed
+                .iter()
+                .map(|math| lower_document_region(&document, &math.region.content_range))
+                .collect::<Vec<_>>();
+            let prose = observe_prose(&document, &parsed, &canonical);
             let analysis = analyze_hygiene(&document, &parsed, &prose.definitions);
             let actual = analysis
                 .entries

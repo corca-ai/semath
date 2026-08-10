@@ -1,12 +1,10 @@
 use std::collections::BTreeMap;
 
-use regex::Regex;
-
 use crate::pack::built_in_packs;
+use crate::prose::ScientificSemanticEvidence;
+use crate::scientific_prose::ClauseDisposition;
 use crate::scope::ScopeGraph;
-use crate::{
-    DomainActivation, Evidence, LawRecognition, ProjectDocument, SourceIndex, SourceRange,
-};
+use crate::{DomainActivation, Evidence, LawRecognition, SourceRange};
 
 const MAX_PRIOR_MATCHES: usize = 64;
 const MAX_ACTIVATIONS: usize = 8;
@@ -137,11 +135,11 @@ impl DomainObservations {
 }
 
 pub(crate) fn observe_domains(
-    document: &ProjectDocument,
+    scopes: ScopeGraph,
+    semantic_evidence: &ScientificSemanticEvidence,
     formulas: &[LawRecognition],
 ) -> DomainObservations {
-    let scopes = ScopeGraph::new(document);
-    let priors = collect_priors(document, &scopes);
+    let priors = collect_priors(semantic_evidence, &scopes);
     let titles = built_in_packs()
         .iter()
         .map(|pack| (pack.pack_id.as_str(), pack.title.as_str()))
@@ -170,111 +168,38 @@ pub(crate) fn observe_domains(
     }
 }
 
-fn collect_priors(document: &ProjectDocument, scopes: &ScopeGraph) -> Vec<ScopedPrior> {
-    let index = SourceIndex::new(&document.content);
-    let mut priors = Vec::new();
-    for pack in built_in_packs() {
-        for rule in &pack.activation_rules {
-            let matcher = literal_matcher(&rule.patterns);
-            let mut ranges_by_scope = BTreeMap::<usize, Vec<SourceRange>>::new();
-            for found in matcher.find_iter(&document.content) {
-                if ranges_by_scope.values().map(Vec::len).sum::<usize>() >= MAX_PRIOR_MATCHES {
-                    break;
-                }
-                if ignored_source(document, found.start()) {
-                    continue;
-                }
-                let range = SourceRange {
-                    start_offset: index.utf16_for_byte(found.start()),
-                    end_offset: index.utf16_for_byte(found.end()),
-                };
-                ranges_by_scope
-                    .entry(scopes.id_at(range.start_offset))
-                    .or_default()
-                    .push(range);
-            }
-            for (scope_id, mut source_ranges) in ranges_by_scope {
-                source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
-                source_ranges.dedup();
-                priors.push(ScopedPrior {
-                    pack_id: pack.pack_id.clone(),
-                    pack_version: pack.pack_version.clone(),
-                    title: pack.title.clone(),
-                    scope_id,
-                    evidence: Evidence {
-                        rule_id: format!("{}/activation/{}", pack.pack_id, rule.id),
-                        kind: "domain-prior".into(),
-                        strength: "weak".into(),
-                        source_ranges,
-                    },
-                });
-            }
-        }
-    }
-    priors
-}
-
-fn literal_matcher(patterns: &[String]) -> Regex {
-    let mut patterns = patterns
+fn collect_priors(
+    semantic_evidence: &ScientificSemanticEvidence,
+    scopes: &ScopeGraph,
+) -> Vec<ScopedPrior> {
+    semantic_evidence
+        .domain_priors
         .iter()
-        .map(|pattern| regex::escape(pattern))
-        .collect::<Vec<_>>();
-    patterns.sort_by_key(|pattern| std::cmp::Reverse(pattern.len()));
-    Regex::new(&format!("(?i)(?:{})", patterns.join("|")))
-        .expect("escaped literals are valid regex")
-}
-
-fn ignored_source(document: &ProjectDocument, byte_offset: usize) -> bool {
-    match document.language {
-        crate::DocumentLanguage::Latex => in_latex_comment(&document.content, byte_offset),
-        crate::DocumentLanguage::Markdown => in_markdown_code(&document.content, byte_offset),
-        crate::DocumentLanguage::Bibtex => false,
-    }
-}
-
-fn in_latex_comment(source: &str, byte_offset: usize) -> bool {
-    let line_start = source[..byte_offset]
-        .rfind('\n')
-        .map_or(0, |position| position + 1);
-    let line = &source[line_start..byte_offset];
-    line.char_indices().any(|(position, character)| {
-        character == '%'
-            && line[..position]
-                .chars()
-                .rev()
-                .take_while(|character| *character == '\\')
-                .count()
-                % 2
-                == 0
-    })
-}
-
-fn in_markdown_code(source: &str, byte_offset: usize) -> bool {
-    let before = &source[..byte_offset];
-    let mut fenced = false;
-    let mut line_start = 0;
-    for line in before.split_inclusive('\n') {
-        if line.trim_start().starts_with("```") {
-            fenced = !fenced;
-        }
-        line_start += line.len();
-    }
-    if fenced {
-        return true;
-    }
-    let current_line = &before[before[..line_start.min(before.len())]
-        .rfind('\n')
-        .map_or(0, |position| position + 1)..];
-    current_line.matches('`').count() % 2 == 1
-        || before
-            .rfind("<!--")
-            .is_some_and(|open| before.rfind("-->").is_none_or(|closed| closed < open))
+        .filter(|prior| prior.disposition == ClauseDisposition::Establishing)
+        .take(MAX_PRIOR_MATCHES)
+        .map(|prior| ScopedPrior {
+            pack_id: prior.pack_id.clone(),
+            pack_version: prior.pack_version.clone(),
+            title: prior.title.clone(),
+            scope_id: scopes.id_at(
+                prior
+                    .evidence
+                    .source_ranges
+                    .first()
+                    .map_or(0, |range| range.start_offset),
+            ),
+            evidence: prior.evidence.clone(),
+        })
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::observe_domains;
+    use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
+    use crate::prose::observe_prose;
+    use crate::scope::ScopeGraph;
     use crate::{DocumentLanguage, ProjectDocument};
 
     fn analyze(source: &str, language: DocumentLanguage) -> super::DomainObservations {
@@ -296,8 +221,12 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(source, &regions);
-        let _ = parsed;
-        observe_domains(&document, &[])
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        let prose = observe_prose(&document, &parsed, &canonical);
+        observe_domains(ScopeGraph::new(&document), &prose.semantic_evidence, &[])
     }
 
     #[test]

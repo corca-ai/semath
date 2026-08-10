@@ -250,7 +250,8 @@ fn classify_disposition(text: &str) -> ClauseDisposition {
     } else if starts_with_any(
         &lower,
         &["not ", "do not ", "does not ", "we do not ", "never "],
-    ) || lower.contains(" is not ")
+    ) || lower.starts_with("without ")
+        || lower.contains(" is not ")
         || lower.contains(" are not ")
         || lower.contains(" must not ")
     {
@@ -355,12 +356,13 @@ mod tests {
 
     #[test]
     fn segments_visible_clauses_and_classifies_non_evidence() {
-        let source = "Assume $A$ is symmetric. If $B$ were invertible, continue. $C$ might denote a matrix. % Assume steady state\n```\nAssume idealized operation.\n```";
+        let source = "Assume $A$ is symmetric. If $B$ were invertible, continue. $C$ might denote a matrix. Without adopting the convention, inspect $D$. % Assume steady state\n```\nAssume idealized operation.\n```";
         let clauses = segment_scientific_clauses(source, DocumentLanguage::Markdown);
-        assert_eq!(clauses.len(), 4);
+        assert_eq!(clauses.len(), 5);
         assert_eq!(clauses[0].disposition, ClauseDisposition::Establishing);
         assert_eq!(clauses[1].disposition, ClauseDisposition::Hypothetical);
         assert_eq!(clauses[2].disposition, ClauseDisposition::Hedged);
+        assert_eq!(clauses[3].disposition, ClauseDisposition::Negated);
     }
 
     #[test]

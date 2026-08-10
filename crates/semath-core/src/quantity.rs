@@ -679,6 +679,7 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{Dimension, Exponent, find_quantity_kind, observe_quantities};
+    use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{
         DocumentLanguage, ProjectDocument, ProjectMacro, ProjectMacroExpansion,
@@ -745,7 +746,11 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(&document.content, &document.math_regions);
-        let prose = crate::prose::observe_prose(&document, &parsed);
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        let prose = crate::prose::observe_prose(&document, &parsed, &canonical);
         let analysis = observe_quantities(&document, &parsed, &prose.definitions);
         let force_offset = content.find("$F = m a$").unwrap() as u32 + 1;
         let claims = analysis.at("F", force_offset).0;
@@ -808,7 +813,11 @@ mod tests {
             includes: Vec::new(),
         };
         let parsed = parse_regions(&document.content, &document.math_regions);
-        let prose = crate::prose::observe_prose(&document, &parsed);
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        let prose = crate::prose::observe_prose(&document, &parsed, &canonical);
         let transparent = observe_quantities(&document, &parsed, &prose.definitions);
         assert_eq!(
             transparent.exported()[0].quantity_kind_id.as_deref(),
