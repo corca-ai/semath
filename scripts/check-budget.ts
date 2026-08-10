@@ -447,7 +447,17 @@ function assertCounters(update: UpdateResult, analyzedDocuments: number) {
   if (update.stats.analyzedDocuments !== analyzedDocuments) {
     throw new Error("budget analyzed-document counter is inconsistent");
   }
-  for (const key of ["semanticNodes", "constraints", "lawRulesVisited"] as const) {
+  for (const key of [
+    "semanticNodes",
+    "constraints",
+    "lawRulesVisited",
+    "semanticOccurrences",
+    "semanticEntities",
+    "semanticClaims",
+    "semanticEvidence",
+    "semanticDependencyEdges",
+    "invalidatedSemanticClaims",
+  ] as const) {
     if (update.stats[key] < 0 || !Number.isFinite(update.stats[key])) {
       throw new Error(`budget ${key} counter is invalid`);
     }

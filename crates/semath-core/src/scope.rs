@@ -1,4 +1,6 @@
-use crate::{DocumentLanguage, ProjectDocument, SourceIndex, SourceRange};
+#[cfg(test)]
+use crate::{DocumentLanguage, SourceIndex};
+use crate::{ProjectDocument, SourceRange};
 
 #[derive(Clone, Debug)]
 struct Scope {
@@ -15,45 +17,56 @@ pub(crate) struct ScopeGraph {
 
 impl ScopeGraph {
     pub fn new(document: &ProjectDocument) -> Self {
-        let index = SourceIndex::new(&document.content);
-        let document_end = index.utf16_for_byte(document.content.len());
-        let headings = headings(document, &index);
-        let mut scopes = vec![Scope {
-            id: 0,
-            depth: 0,
-            range: SourceRange {
-                start_offset: 0,
-                end_offset: document_end,
-            },
-            path: Vec::new(),
-        }];
-        let mut parents: Vec<(usize, u32)> = Vec::new();
-        for (position, (depth, start_offset)) in headings.iter().enumerate() {
-            while parents
-                .last()
-                .is_some_and(|(parent_depth, _)| parent_depth >= depth)
-            {
-                parents.pop();
-            }
-            let mut path = parents
-                .iter()
-                .map(|(_, offset)| *offset)
-                .collect::<Vec<_>>();
-            path.push(*start_offset);
-            let end_offset = headings[position + 1..]
-                .iter()
-                .find(|(next_depth, _)| next_depth <= depth)
-                .map_or(document_end, |(_, next_start)| *next_start);
-            scopes.push(Scope {
-                id: position + 1,
-                depth: *depth,
-                range: SourceRange {
-                    start_offset: *start_offset,
-                    end_offset,
+        #[cfg(test)]
+        if document.scopes.is_empty() {
+            return test_scope_graph(document);
+        }
+        let document_end = document.content.encode_utf16().count() as u32;
+        let mut scopes = document
+            .scopes
+            .iter()
+            .enumerate()
+            .map(|(id, syntax)| {
+                let mut ancestors = Vec::new();
+                let mut parent = syntax.parent;
+                let mut visited = vec![false; document.scopes.len()];
+                while let Some(parent_id) = parent {
+                    let parent_index = parent_id as usize;
+                    if parent_index >= document.scopes.len() || visited[parent_index] {
+                        break;
+                    }
+                    visited[parent_index] = true;
+                    let ancestor = &document.scopes[parent_index];
+                    if ancestor.kind != "document" {
+                        ancestors.push(ancestor.range.start_offset);
+                    }
+                    parent = ancestor.parent;
+                }
+                ancestors.reverse();
+                if syntax.kind != "document" {
+                    ancestors.push(syntax.range.start_offset);
+                }
+                Scope {
+                    id,
+                    depth: ancestors.len(),
+                    range: syntax.range.clone(),
+                    path: ancestors,
+                }
+            })
+            .collect::<Vec<_>>();
+        if scopes.iter().all(|scope| scope.depth != 0) || scopes.is_empty() {
+            scopes.insert(
+                0,
+                Scope {
+                    id: 0,
+                    depth: 0,
+                    range: SourceRange {
+                        start_offset: 0,
+                        end_offset: document_end,
+                    },
+                    path: Vec::new(),
                 },
-                path,
-            });
-            parents.push((*depth, *start_offset));
+            );
         }
         Self { scopes }
     }
@@ -99,15 +112,57 @@ impl ScopeGraph {
     }
 }
 
-fn headings(document: &ProjectDocument, index: &SourceIndex) -> Vec<(usize, u32)> {
-    match document.language {
-        DocumentLanguage::Markdown => markdown_headings(&document.content, index),
-        DocumentLanguage::Latex => latex_headings(&document.content, index),
+#[cfg(test)]
+fn test_scope_graph(document: &ProjectDocument) -> ScopeGraph {
+    let index = SourceIndex::new(&document.content);
+    let document_end = index.utf16_for_byte(document.content.len());
+    let headings = match document.language {
+        DocumentLanguage::Markdown => test_markdown_headings(&document.content, &index),
+        DocumentLanguage::Latex => test_latex_headings(&document.content, &index),
         DocumentLanguage::Bibtex => Vec::new(),
+    };
+    let mut scopes = vec![Scope {
+        id: 0,
+        depth: 0,
+        range: SourceRange {
+            start_offset: 0,
+            end_offset: document_end,
+        },
+        path: Vec::new(),
+    }];
+    let mut parents: Vec<(usize, u32)> = Vec::new();
+    for (position, (depth, start_offset)) in headings.iter().enumerate() {
+        while parents
+            .last()
+            .is_some_and(|(parent_depth, _)| parent_depth >= depth)
+        {
+            parents.pop();
+        }
+        let mut path = parents
+            .iter()
+            .map(|(_, offset)| *offset)
+            .collect::<Vec<_>>();
+        path.push(*start_offset);
+        let end_offset = headings[position + 1..]
+            .iter()
+            .find(|(next_depth, _)| next_depth <= depth)
+            .map_or(document_end, |(_, next_start)| *next_start);
+        scopes.push(Scope {
+            id: position + 1,
+            depth: *depth,
+            range: SourceRange {
+                start_offset: *start_offset,
+                end_offset,
+            },
+            path,
+        });
+        parents.push((*depth, *start_offset));
     }
+    ScopeGraph { scopes }
 }
 
-fn markdown_headings(source: &str, index: &SourceIndex) -> Vec<(usize, u32)> {
+#[cfg(test)]
+fn test_markdown_headings(source: &str, index: &SourceIndex) -> Vec<(usize, u32)> {
     let mut headings = Vec::new();
     let mut byte_offset = 0;
     let mut fenced = false;
@@ -132,7 +187,8 @@ fn markdown_headings(source: &str, index: &SourceIndex) -> Vec<(usize, u32)> {
     headings
 }
 
-fn latex_headings(source: &str, index: &SourceIndex) -> Vec<(usize, u32)> {
+#[cfg(test)]
+fn test_latex_headings(source: &str, index: &SourceIndex) -> Vec<(usize, u32)> {
     let mut headings = Vec::new();
     let mut byte_offset = 0;
     for line in source.split_inclusive('\n') {
@@ -164,6 +220,12 @@ mod tests {
             language,
             content: content.into(),
             document_version: 1,
+            schema_version: 4,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            declarations: Vec::new(),
             math_regions: Vec::new(),
             macros: Vec::new(),
             includes: Vec::new(),

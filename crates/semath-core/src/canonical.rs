@@ -1,4 +1,6 @@
-use crate::{ProjectDocument, ProjectMacroExpansionStatus, SourceIndex, SourceRange};
+use crate::{NotationNodeKind, ProjectDocument, SourceRange};
+#[cfg(test)]
+use crate::{ProjectMacroExpansionStatus, SourceIndex};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SemanticExpr {
@@ -64,8 +66,167 @@ pub(crate) fn lower_document_region(
     document: &ProjectDocument,
     range: &SourceRange,
 ) -> SemanticExpr {
-    let chunks = expanded_surface(document, range);
-    Parser::new(tokenize(&chunks, false)).parse_relation()
+    #[cfg(test)]
+    if document.nodes.is_empty() {
+        let chunks = expanded_surface(document, range);
+        return Parser::new(tokenize(&chunks, false)).parse_relation();
+    }
+    Parser::new(snapshot_tokens(document, range)).parse_relation()
+}
+
+fn snapshot_tokens(document: &ProjectDocument, range: &SourceRange) -> Vec<Token> {
+    let mut tokens = Vec::new();
+    if let Some(root) = document.math_roots.iter().find(|root| {
+        root.content_range.start_offset <= range.start_offset
+            && range.end_offset <= root.content_range.end_offset
+    }) {
+        emit_snapshot_node(document, root.node, &mut tokens);
+    }
+    coalesce_numbers(tokens)
+}
+
+fn emit_snapshot_node(document: &ProjectDocument, node_id: u32, tokens: &mut Vec<Token>) {
+    let Some(node) = document.nodes.get(node_id as usize) else {
+        return;
+    };
+    let range = node.ranges.full.clone();
+    let provenance = syntax_provenance(node);
+    let push = |tokens: &mut Vec<Token>, kind: TokenKind| {
+        tokens.push(Token {
+            kind,
+            range: range.clone(),
+            provenance: provenance.clone(),
+        });
+    };
+    match node.kind {
+        NotationNodeKind::Token => {
+            let text = node.text.as_deref().unwrap_or_default();
+            if text.chars().all(|character| character.is_whitespace()) {
+                return;
+            }
+            let kind = if text
+                .chars()
+                .all(|character| character.is_ascii_digit() || character == '.')
+                && text.chars().any(|character| character.is_ascii_digit())
+            {
+                TokenKind::Number(text.to_owned())
+            } else if text.chars().count() == 1 {
+                match text.chars().next().unwrap() {
+                    '{' | '(' | '[' => TokenKind::Open(text.chars().next().unwrap()),
+                    '}' | ')' | ']' => TokenKind::Close(text.chars().next().unwrap()),
+                    character if "+-=<>*/|,:'&".contains(character) => {
+                        TokenKind::Operator(character)
+                    }
+                    _ => TokenKind::Identifier(text.to_owned()),
+                }
+            } else {
+                TokenKind::Identifier(text.to_owned())
+            };
+            push(tokens, kind);
+        }
+        NotationNodeKind::NamedOperator => push(
+            tokens,
+            TokenKind::Identifier(node.name.clone().unwrap_or_default()),
+        ),
+        NotationNodeKind::Group => {
+            push(tokens, TokenKind::Open('{'));
+            for child in &node.children {
+                emit_snapshot_node(document, *child, tokens);
+            }
+            push(tokens, TokenKind::Close('}'));
+        }
+        NotationNodeKind::Script => {
+            if let Some(base) = node.children.first() {
+                emit_snapshot_node(document, *base, tokens);
+            }
+            push(
+                tokens,
+                TokenKind::Operator(if node.name.as_deref() == Some("superscript") {
+                    '^'
+                } else {
+                    '_'
+                }),
+            );
+            if let Some(script) = node.children.get(1) {
+                emit_snapshot_node(document, *script, tokens);
+            }
+        }
+        NotationNodeKind::Modifier => {
+            if matches!(node.name.as_deref(), Some("dot" | "ddot")) {
+                push(
+                    tokens,
+                    TokenKind::Command(node.name.clone().unwrap_or_default()),
+                );
+            }
+            for child in &node.children {
+                emit_snapshot_node(document, *child, tokens);
+            }
+        }
+        NotationNodeKind::Style => {
+            for child in &node.children {
+                emit_snapshot_node(document, *child, tokens);
+            }
+        }
+        NotationNodeKind::Command => {
+            push(
+                tokens,
+                TokenKind::Command(node.name.clone().unwrap_or_default()),
+            );
+            for child in &node.children {
+                emit_snapshot_node(document, *child, tokens);
+            }
+        }
+        NotationNodeKind::Opaque | NotationNodeKind::Error => {}
+        NotationNodeKind::Sequence
+        | NotationNodeKind::Delimiter
+        | NotationNodeKind::Alignment
+        | NotationNodeKind::Environment => {
+            for child in &node.children {
+                emit_snapshot_node(document, *child, tokens);
+            }
+        }
+    }
+}
+
+fn syntax_provenance(node: &crate::NotationNode) -> Vec<SourceRange> {
+    let provenance = &node.provenance;
+    if provenance.origin == "source" {
+        return Vec::new();
+    }
+    let mut ranges = vec![provenance.source.range.clone()];
+    ranges.extend(
+        provenance
+            .call_site
+            .iter()
+            .map(|source| source.range.clone()),
+    );
+    ranges.extend(
+        provenance
+            .definitions
+            .iter()
+            .map(|source| source.range.clone()),
+    );
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
+    ranges
+}
+
+fn coalesce_numbers(tokens: Vec<Token>) -> Vec<Token> {
+    let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
+    for token in tokens {
+        if let Some(previous) = output.last_mut()
+            && let (TokenKind::Number(left), TokenKind::Number(right)) =
+                (&mut previous.kind, &token.kind)
+            && previous.range.end_offset == token.range.start_offset
+            && previous.provenance == token.provenance
+        {
+            left.push_str(right);
+            previous.range.end_offset = token.range.end_offset;
+            continue;
+        }
+        output.push(token);
+    }
+    output
 }
 
 pub(crate) fn lower_template(source: &str) -> SemanticExpr {
@@ -175,6 +336,7 @@ pub(crate) fn declared_symbols(
         .collect()
 }
 
+#[cfg(test)]
 fn expanded_surface(document: &ProjectDocument, range: &SourceRange) -> Vec<SurfaceChunk> {
     let index = SourceIndex::new(&document.content);
     let start = index.byte_for_utf16(range.start_offset);
@@ -219,6 +381,7 @@ fn expanded_surface(document: &ProjectDocument, range: &SourceRange) -> Vec<Surf
     chunks
 }
 
+#[cfg(test)]
 fn push_source_chunk(
     chunks: &mut Vec<SurfaceChunk>,
     source: &str,

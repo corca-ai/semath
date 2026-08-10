@@ -69,6 +69,14 @@ impl ProjectOrder {
         matches!((definition, occurrence), (Some(left), Some(right)) if left <= right)
     }
 
+    pub fn position(&self, file_id: &str, offset: u32) -> Option<u64> {
+        self.positions
+            .get(file_id)
+            .and_then(|positions| positions.get(&offset))
+            .copied()
+            .flatten()
+    }
+
     pub fn affected_by(&self, changed: &HashSet<String>) -> HashSet<String> {
         let mut affected = changed.clone();
         let mut pending = changed.iter().cloned().collect::<Vec<_>>();
@@ -122,7 +130,7 @@ fn directed_edges(
                 .filter_map(|include| {
                     resolve_include(&document.path, &include.path, path_to_id).map(|target| {
                         IncludeEdge {
-                            offset: include.source_range.start_offset,
+                            offset: include.source.range.start_offset,
                             target,
                         }
                     })
@@ -365,7 +373,7 @@ fn normalize_project_path(path: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::{ProjectOrder, ProjectOrderDocument};
-    use crate::{ProjectInclude, SourceRange};
+    use crate::{ProjectInclude, ProjectSourceRef, SourceRange};
 
     fn document(
         file_id: &str,
@@ -379,9 +387,14 @@ mod tests {
                 .iter()
                 .map(|(path, offset)| ProjectInclude {
                     path: (*path).into(),
-                    source_range: SourceRange {
-                        start_offset: *offset,
-                        end_offset: *offset + 1,
+                    kind: "input".into(),
+                    source: ProjectSourceRef {
+                        file_id: file_id.into(),
+                        path: (*path).into(),
+                        range: SourceRange {
+                            start_offset: *offset,
+                            end_offset: *offset + 1,
+                        },
                     },
                 })
                 .collect(),

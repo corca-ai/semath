@@ -26,7 +26,10 @@ import {
   type SemanticEditProposal,
   type SourceRange,
 } from "../../protocol/src/index";
-import { adaptWasmtexDocument } from "../../wasmtex-adapter/src/index";
+import {
+  adaptNonLatexDocument,
+  adaptWasmtexDocument,
+} from "../../wasmtex-adapter/src/index";
 import { SemathWorkerEngine } from "../../worker/src/index";
 
 export type { JsonRpcMessage } from "wasmtex/lsp/server";
@@ -302,16 +305,13 @@ export class SemathLspServer {
     let document: ProjectDocument;
     if (language === "bibtex") {
       this.latex.updateFile(path, content);
-      document = {
+      document = adaptNonLatexDocument({
         content,
         documentVersion,
         fileId,
-        includes: [],
         language,
-        macros: [],
-        mathRegions: [],
         path,
-      };
+      });
     } else {
       const syntax = this.latex.updateDocument({
         content,

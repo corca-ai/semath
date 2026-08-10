@@ -14,6 +14,12 @@ fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDo
         language: DocumentLanguage::Latex,
         content: content.into(),
         document_version: version,
+        schema_version: 4,
+        nodes: Vec::new(),
+        math_roots: Vec::new(),
+        visible_prose: Vec::new(),
+        scopes: Vec::new(),
+        declarations: Vec::new(),
         math_regions: test_math_regions(content, DocumentLanguage::Latex),
         macros: Vec::new(),
         includes: Vec::new(),
@@ -222,7 +228,7 @@ fn incremental_upsert_matches_the_new_document_version() {
             inventory_version: 2,
             analysis_generation: 2,
             changes: vec![ProjectChange::Upsert {
-                document: document("main", "main.tex", changed, 2),
+                document: Box::new(document("main", "main.tex", changed, 2)),
             }],
         })
         .unwrap();
@@ -257,7 +263,7 @@ fn append_only_comments_advance_the_version_without_semantic_reanalysis() {
             inventory_version: 2,
             analysis_generation: 2,
             changes: vec![ProjectChange::Upsert {
-                document: document("main", "main.tex", &changed, 2),
+                document: Box::new(document("main", "main.tex", &changed, 2)),
             }],
         })
         .unwrap();
@@ -294,7 +300,7 @@ fn non_comment_suffixes_still_trigger_semantic_reanalysis() {
             inventory_version: 2,
             analysis_generation: 2,
             changes: vec![ProjectChange::Upsert {
-                document: document("main", "main.tex", &changed, 2),
+                document: Box::new(document("main", "main.tex", &changed, 2)),
             }],
         })
         .unwrap();
@@ -332,9 +338,14 @@ fn included_type_declarations_drive_project_law_inference() {
     let mut main_document = document("main", "main.tex", main, 1);
     main_document.includes.push(ProjectInclude {
         path: "definitions".into(),
-        source_range: SourceRange {
-            start_offset: 0,
-            end_offset: 19,
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 19,
+            },
         },
     });
     let mut engine = SemathEngine::default();
@@ -394,9 +405,14 @@ fn declarations_in_a_later_include_do_not_flow_backwards() {
     let mut main_document = document("main", "main.tex", main, 1);
     main_document.includes.push(ProjectInclude {
         path: "definitions".into(),
-        source_range: SourceRange {
-            start_offset: include_start,
-            end_offset: main.len() as u32,
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: SourceRange {
+                start_offset: include_start,
+                end_offset: main.len() as u32,
+            },
         },
     });
     let mut engine = SemathEngine::default();
@@ -443,9 +459,14 @@ fn incremental_project_type_refresh_matches_a_clean_rebuild() {
     let mut main_document = document("main", "main.tex", main, 1);
     main_document.includes.push(ProjectInclude {
         path: "definitions".into(),
-        source_range: SourceRange {
-            start_offset: 0,
-            end_offset: 19,
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 19,
+            },
         },
     });
     let base_snapshot = ProjectSnapshot {
@@ -468,7 +489,7 @@ fn incremental_project_type_refresh_matches_a_clean_rebuild() {
             inventory_version: 2,
             analysis_generation: 2,
             changes: vec![ProjectChange::Upsert {
-                document: document("definitions", "definitions.tex", changed, 2),
+                document: Box::new(document("definitions", "definitions.tex", changed, 2)),
             }],
         })
         .unwrap();
