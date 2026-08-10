@@ -1,8 +1,10 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 use thiserror::Error;
 
 use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
+use crate::canonical::{SemanticExpr, lower_document_region};
 use crate::cursor::{interior_offset, item_at_cursor_with_trailing_edge};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
@@ -56,6 +58,19 @@ struct AnalyzedDocument {
     hygiene: HygieneAnalysis,
     scopes: ScopeGraph,
     component_id: String,
+    analysis_fingerprint: u64,
+    canonical_expressions: Vec<SemanticExpr>,
+    semantic_occurrences: Vec<SemanticOccurrenceSeed>,
+}
+
+#[derive(Clone, Debug)]
+struct SemanticOccurrenceSeed {
+    surface: String,
+    selection_range: SourceRange,
+    range: SourceRange,
+    structural_path: Vec<u32>,
+    source_text: String,
+    notation: Vec<NotationComponent>,
 }
 
 #[derive(Clone)]
@@ -84,7 +99,7 @@ struct IndexedTypeFact {
 }
 
 impl AnalyzedDocument {
-    fn analyze(document: ProjectDocument) -> Result<(Self, SemanticFactStore), EngineError> {
+    fn analyze(mut document: ProjectDocument) -> Result<(Self, SemanticFactStore), EngineError> {
         #[cfg(test)]
         let parsed = if document.nodes.is_empty() {
             crate::parser::parse_regions(&document.content, &document.math_regions)
@@ -96,6 +111,31 @@ impl AnalyzedDocument {
         let scopes = ScopeGraph::new(&document);
         let facts = SemanticFactStore::build(&document, &parsed);
         let hygiene = analyze_hygiene(&document, &parsed, &facts.definitions);
+        let semantic_occurrences = parsed
+            .iter()
+            .flat_map(|math| &math.symbols)
+            .map(|(surface, selection_range)| {
+                let range = notation_occurrence_range(&document, selection_range);
+                SemanticOccurrenceSeed {
+                    surface: surface.clone(),
+                    selection_range: selection_range.clone(),
+                    structural_path: notation_path(&document, selection_range),
+                    source_text: source_text(&document, &range),
+                    notation: notation_components(&document, selection_range, surface),
+                    range,
+                }
+            })
+            .collect();
+        let canonical_expressions = parsed
+            .iter()
+            .map(|math| {
+                let mut expression = lower_document_region(&document, &math.region.content_range);
+                expression.range = math.region.content_range.clone();
+                expression
+            })
+            .collect();
+        let analysis_fingerprint = analysis_fingerprint(&document);
+        compact_analyzed_document(&mut document);
         Ok((
             Self {
                 component_id: document.file_id.clone(),
@@ -103,6 +143,9 @@ impl AnalyzedDocument {
                 parsed,
                 hygiene,
                 scopes,
+                analysis_fingerprint,
+                canonical_expressions,
+                semantic_occurrences,
             },
             facts,
         ))
@@ -250,28 +293,25 @@ fn lower_semantic_document(
     let source = &document.document;
     let mut occurrences = Vec::new();
     let mut occurrences_by_range = HashMap::new();
-    for (local_id, (surface, range)) in document
-        .parsed
-        .iter()
-        .flat_map(|math| &math.symbols)
-        .enumerate()
-    {
-        let occurrence_range = notation_occurrence_range(source, range);
-        let occurrence_source_text = source_text(source, &occurrence_range);
+    for (local_id, seed) in document.semantic_occurrences.iter().enumerate() {
         let id = SourceOccurrenceId {
             file_id: source.file_id.clone(),
             document_version: source.document_version,
             local_id: local_id as u32,
         };
         occurrences_by_range.insert(
-            (source.file_id.clone(), range.start_offset, range.end_offset),
+            (
+                source.file_id.clone(),
+                seed.selection_range.start_offset,
+                seed.selection_range.end_offset,
+            ),
             id.clone(),
         );
         occurrences_by_range.insert(
             (
                 source.file_id.clone(),
-                occurrence_range.start_offset,
-                occurrence_range.end_offset,
+                seed.range.start_offset,
+                seed.range.end_offset,
             ),
             id.clone(),
         );
@@ -279,16 +319,16 @@ fn lower_semantic_document(
             id,
             component_id: document.component_id.clone(),
             kind: OccurrenceKind::Notation,
-            range: occurrence_range,
-            selection_range: range.clone(),
-            scope_path: document.scopes.path_at(range.start_offset),
-            structural_path: notation_path(source, range),
+            range: seed.range.clone(),
+            selection_range: seed.selection_range.clone(),
+            scope_path: document.scopes.path_at(seed.selection_range.start_offset),
+            structural_path: seed.structural_path.clone(),
             availability_order: order
-                .position(&source.file_id, range.start_offset)
+                .position(&source.file_id, seed.selection_range.start_offset)
                 .unwrap_or(u64::MAX),
-            surface: surface.clone(),
-            source_text: occurrence_source_text,
-            notation: notation_components(source, range, surface),
+            surface: seed.surface.clone(),
+            source_text: seed.source_text.clone(),
+            notation: seed.notation.clone(),
         });
     }
     occurrences.sort_by_key(|item| {
@@ -498,6 +538,33 @@ fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {
     document.content.get(start..end).unwrap_or("").to_owned()
 }
 
+fn analysis_fingerprint(document: &ProjectDocument) -> u64 {
+    let encoded = serde_json::to_vec(&(
+        document.schema_version,
+        document.language,
+        &document.nodes,
+        &document.math_roots,
+        &document.declarations,
+        &document.macros,
+        &document.includes,
+    ))
+    .expect("validated syntax snapshots must remain serializable");
+    let mut hasher = DefaultHasher::new();
+    encoded.hash(&mut hasher);
+    hasher.finish()
+}
+
+fn compact_analyzed_document(document: &mut ProjectDocument) {
+    document.nodes.clear();
+    document.math_roots.clear();
+    document.visible_prose.clear();
+    document.scopes.clear();
+    document.declarations.clear();
+    document.macros.clear();
+    #[cfg(test)]
+    document.math_regions.clear();
+}
+
 #[derive(Default)]
 pub struct SemathEngine {
     epoch: String,
@@ -568,7 +635,9 @@ impl SemathEngine {
                         if self.can_reuse_analysis(&document) {
                             let current = self.index.documents.get_mut(&file_id).unwrap();
                             current.scopes = ScopeGraph::new(&document);
-                            current.document = *document;
+                            let mut document = *document;
+                            compact_analyzed_document(&mut document);
+                            current.document = document;
                             revision_only.push(file_id.clone());
                         } else {
                             self.index.replace(*document)?;
@@ -827,16 +896,11 @@ impl SemathEngine {
         let Some(current) = self.index.documents.get(&next.file_id) else {
             return false;
         };
-        let current = &current.document;
-        current.path == next.path
-            && current.language == next.language
-            && current.schema_version == next.schema_version
-            && current.nodes == next.nodes
-            && current.math_roots == next.math_roots
-            && current.declarations == next.declarations
-            && current.macros == next.macros
-            && current.includes == next.includes
-            && appended_comments_only(&current.content, &next.content)
+        current.document.path == next.path
+            && current.document.language == next.language
+            && current.document.schema_version == next.schema_version
+            && current.analysis_fingerprint == analysis_fingerprint(next)
+            && appended_comments_only(&current.document.content, &next.content)
     }
 
     fn visible_definitions(
@@ -1187,10 +1251,12 @@ impl SemathEngine {
         for (file_id, environment) in environments {
             let document = self.index.documents.get(&file_id).unwrap();
             let source = document.document.clone();
-            let parsed = document.parsed.clone();
-            self.index
-                .facts_mut(&file_id)
-                .refresh_laws(&source, &parsed, &environment);
+            let canonical_expressions = document.canonical_expressions.clone();
+            self.index.facts_mut(&file_id).refresh_laws(
+                &source,
+                &canonical_expressions,
+                &environment,
+            );
             self.index.external_types.insert(file_id, environment);
         }
     }

@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use crate::canonical::SemanticExpr;
 use crate::consistency::roles_conflict;
 use crate::consistency::{RoleObservations, observe_roles};
 use crate::domain::{DomainObservations, observe_domains};
@@ -203,12 +204,12 @@ impl SemanticFactStore {
     pub fn refresh_laws(
         &mut self,
         document: &ProjectDocument,
-        parsed: &[ParsedMath],
+        canonical_expressions: &[SemanticExpr],
         external: &ExternalTypeEnvironment,
     ) {
         self.laws = observe_laws(
             document,
-            parsed,
+            canonical_expressions,
             &self.shapes,
             &self.quantities,
             &self.roles,
