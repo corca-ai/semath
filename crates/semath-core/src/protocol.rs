@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::semantic_index::{EntityId, SourceOccurrenceId};
+use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
 pub const PROTOCOL_VERSION: u32 = 4;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 4;
@@ -434,6 +434,8 @@ pub struct DefinitionInfo {
 pub struct SymbolInfo {
     pub symbol: String,
     pub occurrence_id: SourceOccurrenceId,
+    pub notation: Vec<NotationComponent>,
+    pub source_notation: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity_id: Option<EntityId>,
     pub location: Location,

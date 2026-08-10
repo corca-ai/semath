@@ -257,6 +257,7 @@ fn lower_semantic_document(
         .enumerate()
     {
         let occurrence_range = notation_occurrence_range(source, range);
+        let occurrence_source_text = source_text(source, &occurrence_range);
         let id = SourceOccurrenceId {
             file_id: source.file_id.clone(),
             document_version: source.document_version,
@@ -279,12 +280,14 @@ fn lower_semantic_document(
             component_id: document.component_id.clone(),
             kind: OccurrenceKind::Notation,
             range: occurrence_range,
+            selection_range: range.clone(),
             scope_path: document.scopes.path_at(range.start_offset),
             structural_path: notation_path(source, range),
             availability_order: order
                 .position(&source.file_id, range.start_offset)
                 .unwrap_or(u64::MAX),
             surface: surface.clone(),
+            source_text: occurrence_source_text,
             notation: notation_components(source, range, surface),
         });
     }
@@ -307,16 +310,14 @@ fn lower_semantic_document(
             ),
             occurrence.id.clone(),
         );
-        if let Some(selection_range) = selection_range_for_occurrence(source, occurrence) {
-            occurrences_by_range.insert(
-                (
-                    source.file_id.clone(),
-                    selection_range.start_offset,
-                    selection_range.end_offset,
-                ),
-                occurrence.id.clone(),
-            );
-        }
+        occurrences_by_range.insert(
+            (
+                source.file_id.clone(),
+                occurrence.selection_range.start_offset,
+                occurrence.selection_range.end_offset,
+            ),
+            occurrence.id.clone(),
+        );
     }
 
     let mut entities = Vec::new();
@@ -427,22 +428,6 @@ fn notation_occurrence_range(document: &ProjectDocument, selection: &SourceRange
         .map_or_else(|| selection.clone(), |node| node.ranges.full.clone())
 }
 
-fn selection_range_for_occurrence(
-    document: &ProjectDocument,
-    occurrence: &SourceOccurrence,
-) -> Option<SourceRange> {
-    document
-        .nodes
-        .iter()
-        .filter(|node| node.ranges.full == occurrence.range)
-        .find_map(|node| {
-            node.ranges
-                .name
-                .clone()
-                .or_else(|| node.ranges.nucleus.clone())
-        })
-}
-
 fn notation_path(document: &ProjectDocument, range: &SourceRange) -> Vec<u32> {
     let mut candidates = document
         .nodes
@@ -504,6 +489,13 @@ fn notation_components(
         });
     }
     components
+}
+
+fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {
+    let index = crate::SourceIndex::new(&document.content);
+    let start = index.byte_for_utf16(range.start_offset);
+    let end = index.byte_for_utf16(range.end_offset);
+    document.content.get(start..end).unwrap_or("").to_owned()
 }
 
 #[derive(Default)]
@@ -955,7 +947,7 @@ impl SemathEngine {
         offset: u32,
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
-        let symbol_info = symbol.as_ref().map(|(name, occurrence)| {
+        let symbol_info = symbol.as_ref().and_then(|(name, occurrence)| {
             self.symbol_info(document, facts, name, occurrence, offset, hygiene_enabled)
         });
         let context = self.semantic_context(facts, &document.document.file_id, symbol, offset);
@@ -1045,7 +1037,7 @@ impl SemathEngine {
         occurrence: &SourceRange,
         offset: u32,
         hygiene_enabled: bool,
-    ) -> SymbolInfo {
+    ) -> Option<SymbolInfo> {
         let mut definitions =
             self.visible_definitions(&document.document.file_id, occurrence, name);
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
@@ -1067,14 +1059,17 @@ impl SemathEngine {
         }
         let (diagnostics, diagnostics_truncated) =
             symbol_diagnostics(document, facts, name, offset, &shapes, hygiene_enabled);
-        SymbolInfo {
+        let occurrence_id = self.index.occurrences_by_range.get(&(
+            document.document.file_id.clone(),
+            occurrence.start_offset,
+            occurrence.end_offset,
+        ))?;
+        let semantic_occurrence = self.index.semantic.occurrence(occurrence_id)?;
+        Some(SymbolInfo {
             symbol: name.into(),
-            occurrence_id: self.index.occurrences_by_range[&(
-                document.document.file_id.clone(),
-                occurrence.start_offset,
-                occurrence.end_offset,
-            )]
-                .clone(),
+            occurrence_id: occurrence_id.clone(),
+            notation: semantic_occurrence.notation.clone(),
+            source_notation: semantic_occurrence.source_text.clone(),
             entity_id: self.resolved_entity(&document.document.file_id, occurrence),
             location: Location {
                 file_id: document.document.file_id.clone(),
@@ -1091,7 +1086,7 @@ impl SemathEngine {
                 || quantities_truncated
                 || roles_truncated
                 || diagnostics_truncated,
-        }
+        })
     }
 
     fn refresh_project_laws(&mut self, targets: &HashSet<String>) {

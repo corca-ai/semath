@@ -107,6 +107,16 @@ export interface EntityId {
   scopePath: readonly number[];
 }
 
+export type NotationComponent =
+  | { kind: "identifier"; value: string }
+  | { kind: "named-surface"; value: string }
+  | { kind: "modifier"; name: string }
+  | { kind: "style"; name: string }
+  | { kind: "subscript" }
+  | { kind: "superscript" }
+  | { kind: "argument"; role: string }
+  | { kind: "delimiter"; value: string };
+
 export interface ShapeInfo {
   dimensions: readonly string[];
   display: string;
@@ -144,7 +154,9 @@ export interface SymbolInfo {
   diagnostics: readonly SemanticDiagnostic[];
   entityId?: EntityId;
   location: Location;
+  notation: readonly NotationComponent[];
   occurrenceId: SourceOccurrenceId;
+  sourceNotation: string;
   quantities?: readonly QuantityInfo[];
   roles?: readonly RoleInfo[];
   shapes: readonly ShapeInfo[];

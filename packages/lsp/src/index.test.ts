@@ -87,6 +87,52 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("keeps modifiers and named operators as compositional occurrences", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///notation.md";
+    const content = [
+      "Let $\\hat y$ denote the estimate.",
+      "Compare plain $y$ with $\\hat y$ and $\\operatorname{ECE}$.",
+    ].join("\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+      },
+    });
+    const plain = content.indexOf("$y$") + 1;
+    const hat = content.lastIndexOf("\\hat y") + "\\hat ".length;
+    const ece = content.lastIndexOf("ECE") + 1;
+    for (const [id, offset] of [
+      [61, plain],
+      [62, hat],
+      [63, ece],
+    ] as const) {
+      await server.handle({
+        id,
+        method: "semath/semanticView",
+        params: { position: positionAt(content, offset), textDocument: { uri } },
+      });
+    }
+
+    expect(response(messages, 61).view.symbol).not.toHaveProperty("entityId");
+    expect(response(messages, 62).view.symbol).toMatchObject({
+      entityId: expect.any(Object),
+      notation: [
+        { kind: "modifier", name: "hat" },
+        { kind: "identifier", value: "y" },
+      ],
+      sourceNotation: "\\hat y",
+      symbol: "y",
+    });
+    expect(response(messages, 63).view.symbol).toMatchObject({
+      notation: [{ kind: "named-surface", value: "ECE" }],
+      sourceNotation: "\\operatorname{ECE}",
+      symbol: "ECE",
+    });
+    server.dispose();
+  });
+
   test("maps three-way English declarations through hover and definition", async () => {
     const { messages, server } = await setup();
     const uri = "file:///declarations.md";

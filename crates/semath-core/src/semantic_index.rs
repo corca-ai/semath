@@ -55,12 +55,14 @@ pub struct SourceOccurrence {
     pub component_id: String,
     pub kind: OccurrenceKind,
     pub range: SourceRange,
+    pub selection_range: SourceRange,
     pub scope_path: Vec<u32>,
     pub structural_path: Vec<u32>,
     /// Monotonic project-snapshot order assigned by the lowering boundary.
     /// Cross-file visibility must never compare unrelated file-local offsets.
     pub availability_order: u64,
     pub surface: String,
+    pub source_text: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notation: Vec<NotationComponent>,
 }
@@ -722,10 +724,15 @@ mod tests {
                 start_offset: start,
                 end_offset: start + surface.encode_utf16().count().max(1) as u32,
             },
+            selection_range: SourceRange {
+                start_offset: start,
+                end_offset: start + surface.encode_utf16().count().max(1) as u32,
+            },
             scope_path: scope_path.to_vec(),
             structural_path: vec![local_id],
             availability_order: order,
             surface: surface.to_owned(),
+            source_text: surface.to_owned(),
             notation,
         }
     }

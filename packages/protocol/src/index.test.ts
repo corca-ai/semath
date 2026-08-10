@@ -31,6 +31,8 @@ describe("protocol", () => {
         fileId: "main",
         localId: 0,
       },
+      notation: [],
+      sourceNotation: "x",
       shapes: [],
       symbol: "x",
       truncated: false,
