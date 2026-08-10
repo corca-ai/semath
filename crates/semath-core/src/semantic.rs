@@ -167,7 +167,12 @@ impl SemanticClaims {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct SemanticFactStore {
+/// Immutable, document-local observations produced by pure extractors.
+///
+/// These values are an analysis cache, not a second project identity graph.
+/// Project-wide identity, claims, evidence, and resolution live exclusively in
+/// `ProjectSemanticIndex`.
+pub(crate) struct DocumentSemanticObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub shapes: ShapeObservations,
     pub quantities: QuantityObservations,
@@ -178,7 +183,7 @@ pub(crate) struct SemanticFactStore {
     assumption_scopes: ScopeGraph,
 }
 
-impl SemanticFactStore {
+impl DocumentSemanticObservations {
     pub fn build(document: &ProjectDocument, parsed: &[ParsedMath]) -> Self {
         let prose = observe_prose(document, parsed);
         let shapes = observe_shapes(document, parsed, &prose.shapes);

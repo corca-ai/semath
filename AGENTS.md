@@ -9,7 +9,6 @@ CorTeX is the first host.
 - Treat [`docs/architecture.md`](docs/architecture.md) as durable design and
   GitHub issues as current plans.
 - Follow [`docs/metadoc.md`](docs/metadoc.md) for documentation changes.
-- Use [`draft.md`](draft.md) only as a historical proposal and iteration record.
 
 ## Project map
 
