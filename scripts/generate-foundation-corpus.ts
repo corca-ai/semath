@@ -214,8 +214,132 @@ const scientificCases: FoundationCase[] = [
   },
 ];
 
-if (scientificCases.length !== 34) {
-  throw new Error(`expected 34 scientific prose cases, got ${scientificCases.length}`);
+scientificCases.push(
+  acronymDefinition(
+    "acronym-long-short",
+    "Expected calibration error (ECE) is reported.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}=0",
+    "Expected calibration error",
+    "english-long-short-parenthetical",
+    ["acronym", "parenthetical", "named-operator"],
+  ),
+  acronymDefinition(
+    "acronym-short-long",
+    "RMSE (root mean squared error) is reported.\n$\\operatorname{RMSE}=0$.",
+    "\\operatorname{RMSE}",
+    "root mean squared error",
+    "english-short-long-parenthetical",
+    ["acronym", "parenthetical", "reverse-direction"],
+    "RMSE",
+  ),
+  acronymDefinition(
+    "acronym-stands-for",
+    "ECE stands for expected calibration error.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    "expected calibration error",
+    "english-short-defines-long",
+    ["acronym", "stands-for", "active-voice"],
+  ),
+  acronymDefinition(
+    "acronym-abbreviated-as",
+    "Expected calibration error is abbreviated as ECE.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    "Expected calibration error",
+    "english-long-defines-short",
+    ["acronym", "abbreviated-as", "passive"],
+  ),
+  acronymDefinition(
+    "acronym-hereafter",
+    "Expected calibration error, hereafter ECE, is reported.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    "Expected calibration error",
+    "english-long-defines-short",
+    ["acronym", "hereafter", "apposition"],
+  ),
+  acronymRefusal(
+    "acronym-negated",
+    "ECE does not mean expected calibration error.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    ["acronym", "negation"],
+  ),
+  acronymRefusal(
+    "acronym-hypothetical",
+    "If ECE meant expected calibration error, continue.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    ["acronym", "counterfactual"],
+  ),
+  acronymRefusal(
+    "acronym-hedged",
+    "ECE might mean expected calibration error.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    ["acronym", "hedging"],
+  ),
+  acronymRefusal(
+    "acronym-cited",
+    "According to the reference, ECE means expected calibration error.\n$\\operatorname{ECE}=0$.",
+    "\\operatorname{ECE}",
+    ["acronym", "citation"],
+  ),
+  acronymRefusal(
+    "acronym-quoted",
+    'The phrase "ECE means expected calibration error" is quoted.\n$\\operatorname{ECE}=0$.',
+    "\\operatorname{ECE}",
+    ["acronym", "quotation"],
+  ),
+  acronymRefusal(
+    "acronym-future-declaration",
+    "$\\operatorname{ECE}=0$. Expected calibration error (ECE) is reported later.",
+    "\\operatorname{ECE}",
+    ["acronym", "declarations-after", "project-scope"],
+  ),
+  acronymDefinition(
+    "acronym-resource",
+    "\\newacronym{ece}{ECE}{expected calibration error}\n$\\operatorname{ECE}=0$",
+    "\\operatorname{ECE}",
+    "expected calibration error",
+    "latex-acronym-declaration",
+    ["acronym", "macro-provenance", "project-context"],
+    "ECE",
+    "main.tex",
+  ),
+  acronymDefinition(
+    "glossary-resource",
+    "\\newglossaryentry{ece}{name={ECE},description={expected calibration error}}\n$\\operatorname{ECE}=0$",
+    "\\operatorname{ECE}",
+    "expected calibration error",
+    "latex-glossary-declaration",
+    ["glossary", "macro-provenance", "project-context"],
+    "ECE",
+    "main.tex",
+  ),
+  acronymDefinition(
+    "declared-math-operator",
+    "\\DeclareMathOperator{\\ECE}{ECE}\n$\\ECE(x)=0$",
+    "\\ECE(x)",
+    "ECE",
+    "latex-math-operator-declaration",
+    ["macro-provenance", "named-operator", "project-context"],
+    "ECE",
+    "main.tex",
+  ),
+  acronymDefinition(
+    "acronym-section-shadowing",
+    "# Metrics\nExpected calibration error (ECE) is reported.\n$\\operatorname{ECE}=0$.\n# Engineering\nElectrical computer engineering (ECE) is discussed.\n$\\operatorname{ECE}=1$.",
+    "\\operatorname{ECE}=1",
+    "Electrical computer engineering",
+    "english-long-short-parenthetical",
+    ["acronym", "project-scope", "shadowing"],
+  ),
+  acronymRefusal(
+    "acronym-plain-juxtaposition",
+    "Expected calibration error (ECE) is reported. Plain $ECE$ stays three identifiers.",
+    "ECE$",
+    ["acronym", "plain-juxtaposition", "representation-boundary"],
+  ),
+);
+
+if (scientificCases.length !== 50) {
+  throw new Error(`expected 50 scientific prose cases, got ${scientificCases.length}`);
 }
 const scientificCorpus: FoundationCorpus = {
   cases: scientificCases,
@@ -330,5 +454,46 @@ function proseRefusal(
     id,
     metric: "refusal",
     variationTags: [...new Set(["hard-negative", "prose", "semantic-mutation", ...tags])],
+  };
+}
+
+function acronymDefinition(
+  id: string,
+  content: string,
+  needle: string,
+  definitionDescription: string,
+  definitionEvidenceRuleId: string,
+  tags: readonly string[],
+  symbol = "ECE",
+  path = "main.md",
+): FoundationCase {
+  return {
+    cursor: { edge: "before", fileId: "main", needle },
+    documents: [{ content, fileId: "main", path }],
+    expectation: { definitionDescription, definitionEvidenceRuleId, symbol },
+    id,
+    metric: "association",
+    variationTags: [
+      "english-declarations",
+      "notation",
+      "prose",
+      ...tags,
+    ],
+  };
+}
+
+function acronymRefusal(
+  id: string,
+  content: string,
+  needle: string,
+  tags: readonly string[],
+): FoundationCase {
+  return {
+    cursor: { edge: "before", fileId: "main", needle },
+    documents: [{ content, fileId: "main", path: "main.md" }],
+    expectation: { excludedDefinitionSymbol: "ECE" },
+    id,
+    metric: "refusal",
+    variationTags: ["hard-negative", "prose", "semantic-mutation", ...tags],
   };
 }

@@ -34,8 +34,9 @@ ambiguous expansions are refused.
 ## Project semantic index
 
 `ProjectSemanticIndex` is the sole persistent owner of semantic facts. Parsed
-documents retain source, structural syntax, scopes, and hygiene state, while
-the index owns definitions, roles, shapes, quantities, structural candidates,
+documents retain source plus compact scope, hygiene, canonical, and candidate
+projections; the full wasmtex CST is released after analysis. The index owns
+definitions, aliases, roles, shapes, quantities, structural candidates,
 domains, and law recognitions. Queries project bounded views from that store
 instead of building parallel fact graphs.
 
@@ -65,12 +66,16 @@ reverse-include invalidation, cancellation, and caching form the effectful
 shell. An edit reanalyzes only the changed document and its reverse include
 closure; clean and incremental rebuilds must produce the same semantic result.
 
-English scientific prose follows the same functional-core boundary. A bounded
-clause segmenter classifies establishing, negated, hypothetical, hedged, cited,
-and alternative statements. Separate pure stages extract symbols, align
-coordinated descriptions, classify assumptions, and construct exact evidence.
-Only establishing clauses enter the semantic store. Packs classify resulting
-descriptions through namespaced concepts; they do not add sentence recognizers.
+English scientific prose follows the same functional-core boundary. Bounded
+stages segment visible spans, extract mentions and claim spans, determine each
+claim's polarity and modality, and lower it to the same occurrences, entities,
+claims, and evidence used by notation. Parenthetical and explicit acronym
+forms, glossary/acronym resources, and named-operator declarations therefore
+share one resolution path. Non-asserting and negative claims remain
+source-linked evidence but cannot establish navigation. Exact notation keys
+prevent prose `ECE` from silently merging plain juxtaposition, styled text, and
+`\operatorname{ECE}`. Packs classify resulting descriptions through
+namespaced concepts; they do not add sentence recognizers.
 
 ## Canonical semantic IR
 

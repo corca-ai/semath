@@ -376,6 +376,103 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("lowers acronym, glossary, and named-operator declarations through one binding path", async () => {
+    const cases = [
+      {
+        content:
+          "\\newacronym{ece}{ECE}{expected calibration error}\n$\\operatorname{ECE}$",
+        declaration: "{ECE}",
+        declarationOffset: 1,
+        cursorOffset: 15,
+        languageId: "latex",
+        use: "\\operatorname{ECE}",
+      },
+      {
+        content:
+          "\\newglossaryentry{ece}{name={ECE},description={expected calibration error}}\n$\\operatorname{ECE}$",
+        declaration: "name={ECE}",
+        declarationOffset: 0,
+        cursorOffset: 15,
+        languageId: "latex",
+        use: "\\operatorname{ECE}",
+      },
+      {
+        content: "\\DeclareMathOperator{\\ECE}{ECE}\n$\\ECE(x)$",
+        declaration: "{ECE}",
+        declarationOffset: 1,
+        cursorOffset: 2,
+        languageId: "latex",
+        use: "\\ECE(x)",
+      },
+    ] as const;
+    for (const [index, item] of cases.entries()) {
+      const { messages, server } = await setup();
+      const uri = `file:///structural-${index}.tex`;
+      await server.handle({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            languageId: item.languageId,
+            text: item.content,
+            uri,
+            version: 1,
+          },
+        },
+      });
+      await server.handle({
+        id: 196 + index,
+        method: "textDocument/definition",
+        params: {
+          position: positionAt(
+            item.content,
+            item.content.lastIndexOf(item.use) + item.cursorOffset,
+          ),
+          textDocument: { uri },
+        },
+      });
+      expect(response(messages, 196 + index)).toMatchObject({
+        range: {
+          start: positionAt(
+            item.content,
+            item.content.indexOf(item.declaration) + item.declarationOffset,
+          ),
+        },
+        uri,
+      });
+      server.dispose();
+    }
+  });
+
+  test("keeps hypothetical, hedged, cited, and quoted acronym claims non-navigable", async () => {
+    const claims = [
+      "If ECE meant expected calibration error, continue.",
+      "ECE might mean expected calibration error.",
+      "According to the reference, ECE means expected calibration error.",
+      'The phrase "ECE means expected calibration error" is quoted.',
+    ];
+    for (const [index, claim] of claims.entries()) {
+      const { messages, server } = await setup();
+      const uri = `file:///non-asserting-${index}.md`;
+      const content = `${claim}\n$\\operatorname{ECE}=0$.`;
+      await server.handle({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+        },
+      });
+      await server.handle({
+        id: 200 + index,
+        method: "textDocument/definition",
+        params: {
+          position: positionAt(content, content.lastIndexOf("\\operatorname{ECE}") + 15),
+          textDocument: { uri },
+        },
+      });
+      expect(response(messages, 200 + index)).toBeNull();
+      server.dispose();
+    }
+  });
+
   test("falls back to wasmtex for cross-file LaTeX navigation", async () => {
     const { messages, server } = await setup();
     await server.handle({

@@ -163,7 +163,8 @@ fn extract_prose_bindings(source: &str, language: crate::DocumentLanguage) -> Ve
                 } else {
                     (captures.get(1).unwrap(), captures.get(2).unwrap())
                 };
-                let (long_start, long_end) = trim_long_phrase(long.as_str());
+                let (long_start, long_end) = initialism_span(long.as_str(), short.as_str())
+                    .unwrap_or_else(|| trim_long_phrase(long.as_str()));
                 if long_end <= long_start {
                     continue;
                 }
@@ -308,6 +309,18 @@ fn initialism_prefix(long: &str, short: &str) -> Option<(usize, usize)> {
             .eq_ignore_ascii_case(&normalized_short(short))
             .then_some((words[0].0, words[end - 1].1))
     })
+}
+
+fn initialism_span(long: &str, short: &str) -> Option<(usize, usize)> {
+    let words = word_ranges(long);
+    for start in 0..words.len() {
+        for end in start + 2..=words.len() {
+            if initials(long, &words[start..end]).eq_ignore_ascii_case(&normalized_short(short)) {
+                return Some((words[start].0, words[end - 1].1));
+            }
+        }
+    }
+    None
 }
 
 fn initials(value: &str, words: &[(usize, usize)]) -> String {
@@ -520,6 +533,14 @@ mod tests {
             (bindings[1].long, bindings[1].short),
             ("root mean squared error", "RMSE")
         );
+    }
+
+    #[test]
+    fn trims_explicit_claim_context_when_the_initialism_identifies_the_name() {
+        let source = "ECE means expected calibration error in this report.";
+        let bindings = extract_prose_bindings(source, crate::DocumentLanguage::Markdown);
+        assert_eq!(bindings.len(), 1);
+        assert_eq!(bindings[0].long, "expected calibration error");
     }
 
     #[test]
