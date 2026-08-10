@@ -271,22 +271,35 @@ impl ProjectState {
         Ok(())
     }
 
-    fn replace_semantic_document(&mut self, file_id: &str) -> Result<(), EngineError> {
-        let document = self
-            .documents
-            .get(file_id)
-            .expect("semantic lowering requires an analyzed document");
-        let facts = self.facts(file_id);
-        let lowered = lower_semantic_document(document, facts, &self.order);
+    fn replace_semantic_documents(&mut self, file_ids: &[String]) -> Result<(), EngineError> {
+        let lowered = file_ids
+            .iter()
+            .map(|file_id| {
+                let document = self
+                    .documents
+                    .get(file_id)
+                    .expect("semantic lowering requires an analyzed document");
+                lower_semantic_document(document, self.facts(file_id), &self.order)
+            })
+            .collect::<Vec<_>>();
+        let mut semantic_documents = Vec::with_capacity(lowered.len());
+        let mut definitions = BTreeMap::new();
+        let mut occurrences = HashMap::new();
+        for item in lowered {
+            semantic_documents.push(item.facts);
+            definitions.extend(item.definitions);
+            occurrences.extend(item.occurrences);
+        }
         self.semantic
-            .replace_document(lowered.facts)
+            .replace_documents(semantic_documents)
             .map_err(EngineError::InvalidSemanticFacts)?;
+        let replaced = file_ids.iter().map(String::as_str).collect::<HashSet<_>>();
         self.definitions_by_entity
-            .retain(|entity, _| entity.anchor.file_id != file_id);
+            .retain(|entity, _| !replaced.contains(entity.anchor.file_id.as_str()));
         self.occurrences_by_range
-            .retain(|(candidate, _, _), _| candidate != file_id);
-        self.definitions_by_entity.extend(lowered.definitions);
-        self.occurrences_by_range.extend(lowered.occurrences);
+            .retain(|(candidate, _, _), _| !replaced.contains(candidate.as_str()));
+        self.definitions_by_entity.extend(definitions);
+        self.occurrences_by_range.extend(occurrences);
         Ok(())
     }
 }
@@ -716,15 +729,15 @@ impl SemathEngine {
             self.refresh_project_laws(&analyzed.iter().cloned().collect());
             if order_changed {
                 self.index.rebuild_semantic_index()?;
-            } else {
-                for file_id in &analyzed {
-                    self.index.replace_semantic_document(file_id)?;
-                }
             }
         }
         if !order_changed {
-            for file_id in &revision_only {
-                self.index.replace_semantic_document(file_id)?;
+            let mut semantic_updates = analyzed.clone();
+            semantic_updates.extend(revision_only);
+            semantic_updates.sort();
+            semantic_updates.dedup();
+            if !semantic_updates.is_empty() {
+                self.index.replace_semantic_documents(&semantic_updates)?;
             }
         }
         changed.sort();
