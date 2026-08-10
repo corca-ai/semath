@@ -1068,14 +1068,27 @@ fn visible_prose_source(document: &ProjectDocument) -> Cow<'_, str> {
     }
     let index = SourceIndex::new(&document.content);
     let mut visible = vec![false; document.content.len()];
+    let mut math_boundary = vec![false; document.content.len()];
     for span in &document.visible_prose {
         let start = index.byte_for_utf16(span.range.start_offset);
         let end = index.byte_for_utf16(span.range.end_offset);
         visible[start..end].fill(true);
     }
+    for root in &document.math_roots {
+        let start = index.byte_for_utf16(root.full_range.start_offset);
+        let end = index.byte_for_utf16(root.full_range.end_offset);
+        if start < math_boundary.len() {
+            math_boundary[start] = true;
+        }
+        if end > start && end - 1 < math_boundary.len() {
+            math_boundary[end - 1] = true;
+        }
+    }
     let mut output = String::with_capacity(document.content.len());
     for (offset, character) in document.content.char_indices() {
-        if character == '\n' || character == '\r' || visible[offset] {
+        if math_boundary[offset] {
+            output.push('$');
+        } else if character == '\n' || character == '\r' || visible[offset] {
             output.push(character);
         } else {
             output.push(match character.len_utf8() {
