@@ -223,7 +223,9 @@ WASM 경계에서 node마다 함수를 호출하지 않는다.
 
 ```text
 create(config) -> handle
-resetProject(handle, encodedSnapshot)
+beginReset(handle, encodedProjectMetadata)
+ingestResetDocument(handle, encodedDocument)  # repeated, bounded memory
+finishReset(handle)
 applyChanges(handle, encodedChanges)
 query(handle, encodedQuery) -> encodedResult
 dispose(handle)

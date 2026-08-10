@@ -73,7 +73,7 @@ await init({
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const engine = new SemathEngine();
-const reset = decode(engine.resetProject(encode(snapshot)));
+const reset = resetEngine(engine, snapshot);
 const wasmResults = queries.map((entry) => decode(engine.query(encode(entry))));
 assertEqual(nativeResults, wasmResults, "native/WASM query results");
 if (reset.stats.totalDocuments !== sources.length || reset.stats.semanticNodes <= 0) {
@@ -126,7 +126,7 @@ const incrementalQuery = {
 const incrementalResult = decode(engine.query(encode(incrementalQuery)));
 
 const clean = new SemathEngine();
-clean.resetProject(encode(updatedSnapshot));
+resetEngine(clean, updatedSnapshot);
 const cleanResult = decode(engineQuery(clean, incrementalQuery));
 assertEqual(incrementalResult.value, cleanResult.value, "incremental/clean semantic result");
 engine.free();
@@ -177,6 +177,13 @@ function engineQuery(target, value) {
 
 function encode(value) {
   return encoder.encode(JSON.stringify(value));
+}
+
+function resetEngine(target, snapshot) {
+  const { documents, ...metadata } = snapshot;
+  target.beginReset(encode(metadata));
+  for (const document of documents) target.ingestResetDocument(encode(document));
+  return decode(target.finishReset());
 }
 
 function decode(value) {

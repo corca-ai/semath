@@ -25,13 +25,6 @@ impl SemathEngine {
         Self::default()
     }
 
-    #[wasm_bindgen(js_name = resetProject)]
-    pub fn reset_project(&mut self, payload: &[u8]) -> Result<Vec<u8>, JsError> {
-        self.core
-            .reset_json(payload)
-            .map_err(|error| JsError::new(&error.to_string()))
-    }
-
     #[wasm_bindgen(js_name = beginReset)]
     pub fn begin_reset(&mut self, payload: &[u8]) -> Result<(), JsError> {
         self.core
