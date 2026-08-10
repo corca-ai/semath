@@ -33,6 +33,21 @@ export function editPerformanceDocument(
   };
 }
 
+export function semanticallyEditPerformanceDocument(
+  source: PerformanceFixtureDocument,
+): PerformanceFixtureDocument {
+  const marker = "\\operatorname{ECE}";
+  const content = source.content.includes(marker)
+    ? source.content.replace(marker, `${marker}_{updated}`)
+    : `${source.content}\n$z_{updated}=1$`;
+  return {
+    ...source,
+    content,
+    documentVersion: source.documentVersion + 1,
+    queryOffset: source.queryOffset,
+  };
+}
+
 function performanceDocument(index: number): PerformanceFixtureDocument {
   const family = PERFORMANCE_FIXTURE_FAMILIES[index % PERFORMANCE_FIXTURE_FAMILIES.length]!;
   const symbol = `p${index}`;

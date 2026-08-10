@@ -20,6 +20,7 @@ import {
 import {
   buildPerformanceDocuments,
   editPerformanceDocument,
+  semanticallyEditPerformanceDocument,
   type PerformanceFixtureDocument,
 } from "./performance-fixtures";
 
@@ -37,6 +38,7 @@ const COLD_BUDGET_MS = DOCUMENT_COUNT >= 500 ? 5_000 : 2_500;
 // pause. Keep the p95 gate below one 60Hz frame plus that observed jitter,
 // while the dedicated syntax/query measurements remain visible for diagnosis.
 const DELTA_P95_BUDGET_MS = STABLE_HOST_GATE ? (DOCUMENT_COUNT >= 500 ? 50 : 25) : 75;
+const SEMANTIC_DELTA_BUDGET_MS = 50;
 const QUERY_P95_BUDGET_MS = 8;
 const RETAINED_RSS_BUDGET_BYTES = (DOCUMENT_COUNT >= 500 ? 192 : 112) * 1024 * 1024;
 const MAX_AFFECTED_DOCUMENTS = 2;
@@ -129,16 +131,10 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
   });
   deltaDurations.push(performance.now() - started);
   peakRss = Math.max(peakRss, process.memoryUsage().rss);
-  maxAffected = Math.max(maxAffected, update.analyzedFileIds.length);
-  if (update.analyzedFileIds.length > MAX_AFFECTED_DOCUMENTS) {
-    throw new Error(
-      `budget delta analyzed ${update.analyzedFileIds.length} documents; expected at most ${MAX_AFFECTED_DOCUMENTS}`,
-    );
+  if (update.analyzedFileIds.length !== 0) {
+    throw new Error("budget comment-only delta performed semantic analysis");
   }
-  if (!update.analyzedFileIds.includes(current.fileId) || !update.analyzedFileIds.includes("main")) {
-    throw new Error("budget affected closure omitted the changed file or its dependent main file");
-  }
-  assertCounters(update, update.analyzedFileIds.length);
+  assertCounters(update, 0);
 
   for (const query of measuredQueries(currentSource)) {
     const envelope: QueryEnvelope = {
@@ -162,13 +158,53 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
   }
 }
 
-if (syntax.getStats().parseCount !== DOCUMENT_COUNT + 1 + DELTA_RUNS) {
+inventoryVersion += 1;
+currentSource = semanticallyEditPerformanceDocument(currentSource);
+const semanticStarted = performance.now();
+const semanticSyntaxStarted = performance.now();
+const semanticSyntax = syntax.upsert(currentSource);
+syntaxDurations.push(performance.now() - semanticSyntaxStarted);
+current = adaptWasmtexDocument({
+  content: currentSource.content,
+  language: "latex",
+  syntax: semanticSyntax,
+});
+const semanticEnvelope: ChangeEnvelope = {
+  analysisGeneration: DELTA_RUNS + 1,
+  changes: [{ document: current, kind: "upsert" }],
+  epoch: snapshot.epoch,
+  inventoryVersion,
+  protocolVersion: SEMATH_PROTOCOL_VERSION,
+};
+maxTransferBytes = Math.max(maxTransferBytes, encodedLength(semanticEnvelope));
+const semanticUpdate = await worker.request<UpdateResult>({
+  changes: semanticEnvelope,
+  id: worker.nextId(),
+  kind: "change",
+});
+const semanticDeltaMs = performance.now() - semanticStarted;
+peakRss = Math.max(peakRss, process.memoryUsage().rss);
+maxAffected = semanticUpdate.analyzedFileIds.length;
+if (maxAffected > MAX_AFFECTED_DOCUMENTS) {
+  throw new Error(
+    `budget semantic delta analyzed ${maxAffected} documents; expected at most ${MAX_AFFECTED_DOCUMENTS}`,
+  );
+}
+if (
+  !semanticUpdate.analyzedFileIds.includes(current.fileId) ||
+  !semanticUpdate.analyzedFileIds.includes("main")
+) {
+  throw new Error("budget affected closure omitted the changed file or its dependent main file");
+}
+assertCounters(semanticUpdate, semanticUpdate.analyzedFileIds.length);
+
+if (syntax.getStats().parseCount !== DOCUMENT_COUNT + 2 + DELTA_RUNS) {
   throw new Error("budget syntax parse counter did not advance exactly once per changed document");
 }
 
 const incremental = await worker.request<UpdateResult>({
   changes: {
-    analysisGeneration: DELTA_RUNS + 1,
+    analysisGeneration: DELTA_RUNS + 2,
     changes: [],
     epoch: snapshot.epoch,
     inventoryVersion: inventoryVersion + 1,
@@ -231,6 +267,7 @@ const report = {
   peakRssGrowthBytes: peakRssGrowth,
   queryP95ByKind,
   retainedRssGrowthBytes: retainedRssGrowth,
+  semanticDeltaMs,
   syntax: {
     deltaP95Ms: syntaxP95,
     notationNodes: syntaxStats.notationNodes ?? null,
@@ -249,6 +286,11 @@ if (coldMs > COLD_BUDGET_MS) {
 }
 if (deltaP95 > DELTA_P95_BUDGET_MS) {
   throw new Error(`budget delta p95 ${deltaP95.toFixed(2)}ms exceeded ${DELTA_P95_BUDGET_MS}ms`);
+}
+if (semanticDeltaMs > SEMANTIC_DELTA_BUDGET_MS) {
+  throw new Error(
+    `budget semantic delta ${semanticDeltaMs.toFixed(2)}ms exceeded ${SEMANTIC_DELTA_BUDGET_MS}ms`,
+  );
 }
 if (queryP95 > QUERY_P95_BUDGET_MS) {
   throw new Error(`budget query p95 ${queryP95.toFixed(2)}ms exceeded ${QUERY_P95_BUDGET_MS}ms`);

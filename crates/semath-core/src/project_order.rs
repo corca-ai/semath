@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::ProjectInclude;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ProjectOrderDocument {
     pub file_id: String,
     pub includes: Vec<ProjectInclude>,

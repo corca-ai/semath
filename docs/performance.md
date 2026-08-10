@@ -17,9 +17,10 @@ mkdir -p .artifacts && bun run budget:report
 The fixture set deterministically rotates through the reported ECE expression,
 nested modifiers and styles, dense matrices, Unicode and combining characters,
 malformed recovery, and binder/rename notation. A measured leaf edit must parse
-and transfer only its own syntax snapshot and analyze only its reverse-include
-closure. An empty delta must do no analysis. Clean and incremental summaries
-must agree.
+and transfer only its own syntax snapshot. Append-only comments must do no
+semantic analysis; a separate real notation mutation must analyze only its
+reverse-include closure and complete within 50ms. An empty delta must also do no
+analysis. Clean and incremental summaries must agree.
 
 Every report separates cold reset, syntax update, total edit latency, each query
 kind, peak and retained RSS growth, adapter transfer bytes, syntax nodes and

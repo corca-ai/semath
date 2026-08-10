@@ -244,6 +244,65 @@ fn incremental_upsert_matches_the_new_document_version() {
 }
 
 #[test]
+fn append_only_comments_advance_the_version_without_semantic_reanalysis() {
+    let original = "Let $x$ denote the input. $y=x$";
+    let changed = format!("{original}\n% editor note\n  % another note");
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(original)).unwrap();
+
+    let update = engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: document("main", "main.tex", &changed, 2),
+            }],
+        })
+        .unwrap();
+
+    assert_eq!(update.changed_file_ids, ["main"]);
+    assert!(update.analyzed_file_ids.is_empty());
+    let result = engine
+        .query(query(
+            Query::Definition {
+                file_id: "main".into(),
+                offset: changed.rfind('x').unwrap() as u32,
+            },
+            2,
+            2,
+        ))
+        .unwrap();
+    let QueryValue::Locations { locations } = result.value else {
+        panic!("expected locations")
+    };
+    assert_eq!(locations.len(), 1);
+}
+
+#[test]
+fn non_comment_suffixes_still_trigger_semantic_reanalysis() {
+    let original = "Let $x$ denote the input. $y=x$";
+    let changed = format!("{original}\nLet $z$ denote the output.");
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(original)).unwrap();
+
+    let update = engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: document("main", "main.tex", &changed, 2),
+            }],
+        })
+        .unwrap();
+
+    assert_eq!(update.analyzed_file_ids, ["main"]);
+}
+
+#[test]
 fn protocol_requires_the_structural_frontend_contract() {
     let payload = serde_json::json!({
         "protocolVersion": PROTOCOL_VERSION,
