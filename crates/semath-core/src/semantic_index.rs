@@ -381,6 +381,10 @@ impl ProjectSemanticIndex {
         self.occurrences.get(id)
     }
 
+    pub fn occurrences(&self) -> impl Iterator<Item = &SourceOccurrence> {
+        self.occurrences.values()
+    }
+
     pub fn claim(&self, id: &ClaimId) -> Option<&Claim> {
         self.claims.get(id)
     }

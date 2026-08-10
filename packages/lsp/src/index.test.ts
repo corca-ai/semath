@@ -130,6 +130,51 @@ describe("SemathLspServer", () => {
       sourceNotation: "\\operatorname{ECE}",
       symbol: "ECE",
     });
+
+    const surfaces = ["\\hat y", "\\operatorname{ECE}"] as const;
+    let requestId = 100;
+    for (const surface of surfaces) {
+      const start = content.lastIndexOf(surface);
+      for (let offset = start; offset <= start + surface.length; offset += 1) {
+        const id = requestId++;
+        await server.handle({
+          id,
+          method: "semath/semanticView",
+          params: {
+            position: positionAt(content, offset),
+            textDocument: { uri },
+          },
+        });
+        const symbol = response(messages, id).view.symbol;
+        if (!symbol) {
+          throw new Error(`missing ${surface} at offset ${offset - start}`);
+        }
+        expect(symbol).toMatchObject({
+          location: {
+            range: {
+              endOffset: start + surface.length,
+              startOffset: start,
+            },
+          },
+          sourceNotation: surface,
+        });
+      }
+    }
+    const hatStart = content.lastIndexOf("\\hat y");
+    await server.handle({
+      id: 180,
+      method: "textDocument/references",
+      params: {
+        context: { includeDeclaration: true },
+        position: positionAt(content, hatStart),
+        textDocument: { uri },
+      },
+    });
+    const references = response(messages, 180);
+    expect(references).toHaveLength(2);
+    expect(new Set(references.map((location: unknown) => JSON.stringify(location))).size).toBe(
+      2,
+    );
     server.dispose();
   });
 

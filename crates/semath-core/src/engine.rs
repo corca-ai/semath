@@ -778,7 +778,7 @@ impl SemathEngine {
         let offset = query_offset.unwrap_or(0);
         let parsed =
             query_offset.and_then(|offset| parsed_math_at_cursor(&document.parsed, offset));
-        let symbol = parsed.and_then(|math| symbol_at_cursor(math, offset));
+        let symbol = parsed.and_then(|math| semantic_symbol_at_cursor(document, math, offset));
         let cursor_offset = symbol.as_ref().map_or_else(
             || {
                 parsed.map_or(offset, |math| {
@@ -1000,21 +1000,17 @@ impl SemathEngine {
             return Vec::new();
         };
         let mut locations = Vec::new();
-        for ((file_id, start_offset, end_offset), occurrence_id) in &self.index.occurrences_by_range
-        {
-            let resolution = self.index.semantic.resolve(occurrence_id);
+        for occurrence in self.index.semantic.occurrences() {
+            let resolution = self.index.semantic.resolve(&occurrence.id);
             if resolution.status == ResolutionStatus::Established
                 && resolution.candidates.len() == 1
                 && resolution.candidates[0].entity_id == *entity
             {
-                let document = &self.index.documents[file_id];
+                let document = &self.index.documents[&occurrence.id.file_id];
                 locations.push(Location {
-                    file_id: file_id.clone(),
+                    file_id: occurrence.id.file_id.clone(),
                     path: document.document.path.clone(),
-                    range: SourceRange {
-                        start_offset: *start_offset,
-                        end_offset: *end_offset,
-                    },
+                    range: occurrence.range.clone(),
                 });
             }
         }
@@ -1198,7 +1194,7 @@ impl SemathEngine {
             location: Location {
                 file_id: document.document.file_id.clone(),
                 path: document.document.path.clone(),
-                range: occurrence.clone(),
+                range: semantic_occurrence.range.clone(),
             },
             definitions,
             shapes,
@@ -1384,9 +1380,45 @@ fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMa
         })
 }
 
-fn symbol_at_cursor(math: &ParsedMath, offset: u32) -> Option<(String, SourceRange)> {
-    symbol_range_at_cursor(&math.symbols, offset)
-        .map(|(symbol, range)| (symbol.clone(), range.clone()))
+fn semantic_symbol_at_cursor(
+    document: &AnalyzedDocument,
+    math: &ParsedMath,
+    offset: u32,
+) -> Option<(String, SourceRange)> {
+    if let Some((symbol, range)) = symbol_range_at_cursor(&math.symbols, offset) {
+        return Some((symbol.clone(), range.clone()));
+    }
+    let mut candidates = document
+        .semantic_occurrences
+        .iter()
+        .filter(|seed| {
+            math.region.full_range.start_offset <= seed.range.start_offset
+                && seed.range.end_offset <= math.region.full_range.end_offset
+        })
+        .filter(|seed| seed.range.contains(offset))
+        .collect::<Vec<_>>();
+    if candidates.is_empty() {
+        candidates.extend(document.semantic_occurrences.iter().filter(|seed| {
+            math.region.full_range.start_offset <= seed.range.start_offset
+                && seed.range.end_offset <= math.region.full_range.end_offset
+                && seed.range.start_offset < seed.range.end_offset
+                && seed.range.end_offset == offset
+        }));
+    }
+    candidates.sort_by_key(|seed| {
+        (
+            seed.range.end_offset - seed.range.start_offset,
+            seed.selection_range.end_offset - seed.selection_range.start_offset,
+            seed.selection_range.start_offset,
+        )
+    });
+    let selected = *candidates.first()?;
+    if candidates.get(1).is_some_and(|next| {
+        next.range == selected.range && next.selection_range != selected.selection_range
+    }) {
+        return None;
+    }
+    Some((selected.surface.clone(), selected.selection_range.clone()))
 }
 
 fn symbol_range_at_cursor(
