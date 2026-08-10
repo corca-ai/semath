@@ -7,6 +7,8 @@ export const PERFORMANCE_FIXTURE_FAMILIES = [
   "unicode-and-combining",
   "malformed-recovery",
   "binder-and-rename",
+  "citation-heavy-prose",
+  "construction-heavy-prose",
   "document-shaped-report",
   "scoped-neighbor",
 ] as const;
@@ -84,6 +86,19 @@ function fixtureBody(family: PerformanceFixtureFamily, index: number, symbol: st
       return `\$${symbol}=\\frac{\\hat{x_${index}}{\\left(y+z\\right.\$`;
     case "binder-and-rename":
       return `\$${symbol}=\\sum_{k=1}^{n} a_k+\\int_0^1 f(t)\\,dt\$`;
+    case "citation-heavy-prose":
+      return [
+        `Prior work \\parencite[see][p. ${index + 1}]{study${index}} might not define $A_${index}$ as symmetric.`,
+        `According to \\textcite{review${index}}, $B_${index}$ could represent a comparison baseline.`,
+        `\$${symbol}=\\operatorname{ECE}(B_${index})\$`,
+      ].join("\n");
+    case "construction-heavy-prose":
+      return [
+        `Let $x_${index}$, $y_${index}$, and $z_${index}$ denote the input, state, and output, respectively.`,
+        `The transition mapping is denoted by $T_${index}$.`,
+        `With $n_${index}$ representing the sample count, we write $L_${index}$ for the aggregate loss.`,
+        `\$${symbol}=L_${index}(T_${index}x_${index})\$`,
+      ].join("\n");
     case "document-shaped-report":
       return [
         "\\section{Background}",

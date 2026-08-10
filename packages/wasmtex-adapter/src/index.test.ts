@@ -17,7 +17,7 @@ describe("wasmtex adapter", () => {
         language: "latex",
         syntax: { ...syntax, schemaVersion: 3 } as unknown as typeof syntax,
       }),
-    ).toThrow("expected 4");
+    ).toThrow("expected 5");
   });
 
   test("keeps wasmtex UTF-16 ranges without translating them", () => {
@@ -50,6 +50,25 @@ describe("wasmtex adapter", () => {
     });
     expect(snapshot.documents[0]?.includes).toEqual([]);
     expect(snapshot.documents[0]?.macros).toEqual([]);
+  });
+
+  test("preserves neutral citation annotations without interpreting them", () => {
+    const content = "Prior work \\parencite{study} might define $A$.";
+    const syntax = new LatexSyntaxService().upsert({
+      fileId: "citation",
+      path: "main.tex",
+      content,
+      documentVersion: 1,
+      language: "latex",
+    });
+    const document = adaptWasmtexDocument({ content, language: "latex", syntax });
+
+    expect(document.proseAnnotations).toEqual(syntax.proseAnnotations);
+    expect(document.proseAnnotations[0]).toMatchObject({
+      kind: "citation",
+      name: "parencite",
+      state: "complete",
+    });
   });
 
   test("keeps only wasmtex-approved real-world math regions", () => {

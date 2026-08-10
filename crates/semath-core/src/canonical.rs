@@ -1800,7 +1800,8 @@ mod tests {
     #[test]
     fn snapshot_lowering_preserves_delimiters_and_ignores_spacing_commands() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 4,
+            "schemaVersion": 5,
+            "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
             "language": "latex",
@@ -1842,7 +1843,8 @@ mod tests {
     #[test]
     fn snapshot_lowering_consumes_composite_macro_notation_without_parsing_surface_tex() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 4,
+            "schemaVersion": 5,
+            "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
             "language": "latex",

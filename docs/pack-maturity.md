@@ -14,7 +14,7 @@ holds approved support policy; GitHub issues hold planned work.
   source-linked evidence, and refusal preservation.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
   unit, dimension, propagation diagnostics, notation, prose, and role evidence.
-- The shared scientific-kernel and scientific-prose foundations pass 66 of 66
+- The shared scientific-kernel and scientific-prose foundations pass 166 of 166
   positive and refusal cases across explicit operators, typed application,
   namespaced concepts, include order, and transparent or opaque prose macros.
 - Every formula pack meets evaluated policy for its declared vertical.
@@ -42,7 +42,7 @@ field completeness.
 | Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
 | Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
 | Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
-| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 8 and the core use pack-qualified concept identities without a legacy role field |
+| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 9 and the core use pack-qualified concept identities without a legacy role field |
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 | Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |

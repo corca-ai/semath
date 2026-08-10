@@ -6,7 +6,7 @@ use crate::consistency::{RoleObservations, observe_roles};
 use crate::domain::{DomainObservations, observe_domains};
 use crate::law::{ExternalTypeEnvironment, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
-use crate::prose::{ScientificSemanticEvidence, observe_prose};
+use crate::prose::{ProseMatchStats, ScientificSemanticEvidence, observe_prose};
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
 use crate::semantic_index::EntityId;
@@ -180,6 +180,7 @@ pub(crate) struct DocumentSemanticObservations {
     pub laws: LawObservations,
     pub domains: DomainObservations,
     semantic_evidence: ScientificSemanticEvidence,
+    prose_match_stats: ProseMatchStats,
     assumptions: Vec<AssumptionInfo>,
     assumption_scopes: ScopeGraph,
 }
@@ -191,6 +192,7 @@ impl DocumentSemanticObservations {
         canonical_expressions: &[SemanticExpr],
     ) -> Self {
         let prose = observe_prose(document, parsed, canonical_expressions);
+        let prose_match_stats = prose.match_stats;
         let shapes = observe_shapes(document, parsed, &prose.shapes);
         let quantities = observe_quantities(document, parsed, &prose.definitions);
         let roles = observe_roles(document, &prose.definitions, &shapes);
@@ -212,6 +214,7 @@ impl DocumentSemanticObservations {
             laws,
             domains,
             semantic_evidence: prose.semantic_evidence,
+            prose_match_stats,
             assumptions: prose.assumptions,
             assumption_scopes,
         }
@@ -312,6 +315,10 @@ impl DocumentSemanticObservations {
             + self.quantities.exported().len()
             + self.roles.exported().len()
             + self.laws.all().len()) as u32
+    }
+
+    pub fn prose_match_stats(&self) -> ProseMatchStats {
+        self.prose_match_stats
     }
 }
 

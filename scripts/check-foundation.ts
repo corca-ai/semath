@@ -55,6 +55,7 @@ const observations = planned.map((item, index): FoundationObservation => {
     symbols: [...new Set([
       ...quantities.map((entry) => entry.symbol),
       ...(view?.symbol ? [view.symbol.symbol] : []),
+      ...(view?.symbol?.definitions ?? []).map((entry) => entry.symbol),
     ])],
     unitIds: [...new Set(quantities.flatMap((entry) => entry.unitId ? [entry.unitId] : []))],
   };

@@ -826,12 +826,13 @@ mod tests {
     fn analyze(source: &str) -> super::ShapeObservations {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -881,12 +882,13 @@ mod tests {
         let source = "# First\n$x \\in \\mathbb{R}^{n}$\n$x$\n# Second\n$x \\in \\mathbb{R}^{m \\times n}$\n$x$";
         let regions = test_math_regions(source, DocumentLanguage::Markdown);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.md".into(),
             language: DocumentLanguage::Markdown,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

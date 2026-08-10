@@ -1308,6 +1308,28 @@ impl SemathEngine {
                 semantic_dependency_edges: semantic_stats.dependency_edges,
                 invalidated_semantic_claims: semantic_stats.invalidated_claims,
                 semantic_candidates: semantic_stats.candidates,
+                prose_clauses: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| self.index.observations(file_id).prose_match_stats().clauses)
+                    .sum(),
+                prose_construction_candidates: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| {
+                        self.index
+                            .observations(file_id)
+                            .prose_match_stats()
+                            .construction_candidates
+                    })
+                    .sum(),
+                prose_matcher_work: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| {
+                        self.index
+                            .observations(file_id)
+                            .prose_match_stats()
+                            .matcher_work
+                    })
+                    .sum(),
             },
             analyzed_file_ids,
         }

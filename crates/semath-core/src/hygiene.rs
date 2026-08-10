@@ -224,12 +224,13 @@ mod tests {
         for case in corpus.cases {
             let regions = test_math_regions(&case.content, DocumentLanguage::Markdown);
             let document = ProjectDocument {
+                prose_annotations: vec![],
                 file_id: "main".into(),
                 path: "main.md".into(),
                 language: DocumentLanguage::Markdown,
                 content: case.content.clone(),
                 document_version: 1,
-                schema_version: 4,
+                schema_version: 5,
                 nodes: Vec::new(),
                 math_roots: Vec::new(),
                 visible_prose: Vec::new(),

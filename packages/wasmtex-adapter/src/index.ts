@@ -38,7 +38,8 @@ export function adaptNonLatexDocument(input: {
     macros: [],
     mathRoots: [],
     nodes: [],
-    schemaVersion: 4,
+    proseAnnotations: [],
+    schemaVersion: 5,
     scopes: [
       {
         kind: "document",

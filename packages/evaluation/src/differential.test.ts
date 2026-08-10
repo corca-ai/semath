@@ -20,10 +20,13 @@ describe("semantic differential planning", () => {
     expect(traces).toEqual(planSemanticLifecycleTraces(20));
     expect(traces.map((trace) => trace.family)).toEqual([
       "declaration-retraction",
+      "citation-retraction",
+      "conditional-retraction",
       "include-order",
       "macro-retraction",
       "malformed-recovery",
       "polarity-retraction",
+      "negation-retraction",
       "typed-conflict-recovery",
     ]);
     for (const trace of traces) {

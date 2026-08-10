@@ -25,9 +25,12 @@ export interface EditTrace {
 
 export const SEMANTIC_LIFECYCLE_FAMILIES = [
   "declaration-retraction",
+  "citation-retraction",
+  "conditional-retraction",
   "include-order",
   "macro-retraction",
   "malformed-recovery",
+  "negation-retraction",
   "polarity-retraction",
   "typed-conflict-recovery",
 ] as const;
@@ -110,6 +113,46 @@ export function planSemanticLifecycleTraces(seed: number): readonly SemanticLife
           changes: [{ content: probabilityDefinitions, fileId: "definitions", kind: "upsert", path: "definitions.tex" }],
           expectedDecision: "established",
           id: "restore-evidence",
+        },
+      ],
+    },
+    {
+      family: "citation-retraction",
+      id: `lifecycle-${suffix}-citation`,
+      initialDocuments: [{ content: localProbability, fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "Prior work \\parencite{study} reports that $A$ and $B$ are events.\n$A \\cap B$.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          id: "attribute-declaration",
+        },
+        {
+          changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "restore-author-assertion",
+        },
+      ],
+    },
+    {
+      family: "conditional-retraction",
+      id: `lifecycle-${suffix}-conditional`,
+      initialDocuments: [{ content: localProbability, fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "If $A$ and $B$ were events, the operation would be defined.\n$A \\cap B$.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          id: "condition-declaration",
+        },
+        {
+          changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "restore-unconditional-declaration",
         },
       ],
     },
@@ -197,6 +240,26 @@ export function planSemanticLifecycleTraces(seed: number): readonly SemanticLife
           changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
           expectedDecision: "established",
           id: "restore-assertion",
+        },
+      ],
+    },
+    {
+      family: "negation-retraction",
+      id: `lifecycle-${suffix}-negation`,
+      initialDocuments: [{ content: localProbability, fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "established",
+      query: { fileId: "main", needle: "A \\cap B" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "$A$ and $B$ are not events in the same probability space.\n$A \\cap B$.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          id: "negate-declaration",
+        },
+        {
+          changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "established",
+          id: "restore-positive-declaration",
         },
       ],
     },

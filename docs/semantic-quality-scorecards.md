@@ -34,10 +34,12 @@ the separate exhaustive-evidence judgment defined by the public protocol.
 The current baseline has 3,106 checked-in synthetic law cases and 249
 deterministic runtime variants. It includes 56 independently scored unknown,
 cross-pack, and cross-field collision cases. Separate foundation suites contain
-118 cases for the scientific kernel, quantities and units, and English
-scientific prose. The prose suite reports association, classification,
-assumption, evidence, refusal, and scope independently instead of blending them
-into one recognition number.
+218 cases for the scientific kernel, quantities and units, and English
+scientific prose. The 150-case prose suite includes 40 independently authored
+construction cases and 60 one-feature discourse mutations. It reports association,
+classification, assumption, evidence, refusal, and scope independently; variation
+tags keep voice, arity, coordination, polarity, modality, attribution, and
+conditionality visible instead of blending them into one recognition number.
 
 The frozen recognition challenge is separate from those development and
 diversity fixtures. Version 3 preserves the 48 independently authored v2

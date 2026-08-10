@@ -2119,12 +2119,13 @@ mod tests {
         let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$";
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2156,12 +2157,13 @@ mod tests {
         let source = "Let $x$ be an n-dimensional state vector. Let $u$ be an m-dimensional control input vector. Let $A$ be an n by n state matrix. Let $B$ be an n by m input matrix. $\\dot{x}=Ax+Bu$";
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2446,12 +2448,13 @@ mod tests {
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

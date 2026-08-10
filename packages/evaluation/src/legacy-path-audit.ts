@@ -113,6 +113,24 @@ export const LEGACY_SEMANTIC_PATHS = [
     path: "packages/evaluation/src/scorecard.ts",
     markers: ["establishedLawIds"],
   },
+  {
+    id: "mutually-exclusive-clause-disposition",
+    ownerIssue: 218,
+    path: "crates/semath-core/src/scientific_prose.rs",
+    markers: ["ClauseDisposition"],
+  },
+  {
+    id: "sentence-regex-definition-runtime",
+    ownerIssue: 222,
+    path: "crates/semath-core/src/prose.rs",
+    markers: ["COORDINATED_MAPPING_SUFFIX"],
+  },
+  {
+    id: "raw-tex-citation-policy",
+    ownerIssue: 217,
+    path: "crates/semath-core/src/scientific_prose.rs",
+    markers: ["contains(\"\\\\cite\")"],
+  },
 ] as const;
 
 export type LegacySemanticPathId = (typeof LEGACY_SEMANTIC_PATHS)[number]["id"];

@@ -5,7 +5,7 @@
     "": {
       "name": "semath",
       "dependencies": {
-        "wasmtex": "github:corca-ai/wasmtex#0d34708807528f15f1898839acfe89c037b404ca",
+        "wasmtex": "github:corca-ai/wasmtex#b1c1c0316939a8d95b04c760ac04385140453e78",
       },
       "devDependencies": {
         "@types/bun": "^1.3.14",
@@ -98,6 +98,6 @@
 
     "undici-types": ["undici-types@8.3.0", "", {}, "sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ=="],
 
-    "wasmtex": ["wasmtex@github:corca-ai/wasmtex#0d34708", { "peerDependencies": { "monaco-editor": "^0.55.1", "pdf-lib": "^1.17.1", "pdfjs-dist": "^5.4.624" }, "optionalPeers": ["pdf-lib"] }, "corca-ai-wasmtex-0d34708", "sha512-dvkt7LqnRwrmA6h+Ciz1hO4BU92u722/KrIjvnRJWR7Terxb3Am9hQFgqal74ufjjyiravKr+ch1RuZvHVVzSQ=="],
+    "wasmtex": ["wasmtex@github:corca-ai/wasmtex#b1c1c03", { "peerDependencies": { "monaco-editor": "^0.55.1", "pdf-lib": "^1.17.1", "pdfjs-dist": "^5.4.624" }, "optionalPeers": ["pdf-lib"] }, "corca-ai-wasmtex-b1c1c03", "sha512-TYPo3g/zSKita0D94hbJbMNeY7Bcx/Fi0aKqv1DuRgQI+K7bUOE+3voG6e4W0os6k+aZQOXNMa7O5NdHPPZ9Yg=="],
   }
 }

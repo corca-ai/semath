@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 
 use crate::pack::built_in_packs;
 use crate::prose::ScientificSemanticEvidence;
-use crate::scientific_prose::ClauseDisposition;
 use crate::scope::ScopeGraph;
 use crate::{DomainActivation, Evidence, LawRecognition, SourceRange};
 
@@ -175,7 +174,7 @@ fn collect_priors(
     semantic_evidence
         .domain_priors
         .iter()
-        .filter(|prior| prior.disposition == ClauseDisposition::Establishing)
+        .filter(|prior| prior.frame.establishes())
         .take(MAX_PRIOR_MATCHES)
         .map(|prior| ScopedPrior {
             pack_id: prior.pack_id.clone(),
@@ -205,12 +204,13 @@ mod tests {
     fn analyze(source: &str, language: DocumentLanguage) -> super::DomainObservations {
         let regions = test_math_regions(source, language);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.md".into(),
             language,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

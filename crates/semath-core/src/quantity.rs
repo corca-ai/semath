@@ -730,12 +730,13 @@ mod tests {
     fn explicit_prose_drives_product_propagation_and_mismatch_diagnostics() {
         let content = "Let $m$ be mass in kilograms. Let $a$ be acceleration in metres per second squared. Let $F$ be force in newtons.\n$F = m a$\n$F = m + a$";
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -774,12 +775,13 @@ mod tests {
         let call_start = content.find("\\velocity").unwrap() as u32;
         let call_end = call_start + "\\velocity".len() as u32;
         let mut document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

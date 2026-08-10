@@ -549,12 +549,13 @@ mod tests {
     fn analyze(source: &str) -> super::RoleObservations {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
+            prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 4,
+            schema_version: 5,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
