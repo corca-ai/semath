@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::ProjectInclude;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ProjectOrderDocument {
     pub file_id: String,
     pub includes: Vec<ProjectInclude>,
@@ -13,7 +13,7 @@ pub(crate) struct ProjectOrderDocument {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ProjectOrder {
     component_by_file: HashMap<String, String>,
-    positions: HashMap<(String, u32), Option<u64>>,
+    positions: HashMap<String, HashMap<u32, Option<u64>>>,
     reverse_dependencies: HashMap<String, HashSet<String>>,
 }
 
@@ -56,12 +56,14 @@ impl ProjectOrder {
     ) -> bool {
         let definition = self
             .positions
-            .get(&(definition_file_id.to_string(), definition_offset))
+            .get(definition_file_id)
+            .and_then(|positions| positions.get(&definition_offset))
             .copied()
             .flatten();
         let occurrence = self
             .positions
-            .get(&(occurrence_file_id.to_string(), occurrence_offset))
+            .get(occurrence_file_id)
+            .and_then(|positions| positions.get(&occurrence_offset))
             .copied()
             .flatten();
         matches!((definition, occurrence), (Some(left), Some(right)) if left <= right)
@@ -196,7 +198,7 @@ fn source_positions(
     directed: &HashMap<String, Vec<IncludeEdge>>,
     component_by_file: &HashMap<String, String>,
     main_file_id: Option<&str>,
-) -> HashMap<(String, u32), Option<u64>> {
+) -> HashMap<String, HashMap<u32, Option<u64>>> {
     let mut roots_by_component: HashMap<String, Vec<String>> = HashMap::new();
     let mut incoming = HashMap::<String, usize>::new();
     for edges in directed.values() {
@@ -246,7 +248,7 @@ fn visit(
     documents: &HashMap<String, ProjectOrderDocument>,
     directed: &HashMap<String, Vec<IncludeEdge>>,
     active: &mut HashSet<String>,
-    positions: &mut HashMap<(String, u32), Option<u64>>,
+    positions: &mut HashMap<String, HashMap<u32, Option<u64>>>,
     sequence: &mut u64,
 ) {
     if !active.insert(file_id.to_string()) {
@@ -282,9 +284,10 @@ fn visit(
     for event in events {
         match event {
             Event::Occurrence(offset) => {
-                let key = (file_id.to_string(), offset);
                 positions
-                    .entry(key)
+                    .entry(file_id.to_owned())
+                    .or_default()
+                    .entry(offset)
                     .and_modify(|position| *position = None)
                     .or_insert(Some(*sequence));
                 *sequence += 1;

@@ -55,6 +55,16 @@ enum ExportedTypeFact {
     Shape(ShapeInfo),
 }
 
+impl ExportedTypeFact {
+    fn symbol(&self) -> &str {
+        match self {
+            Self::Role(fact) => &fact.symbol,
+            Self::Quantity(fact) => &fact.symbol,
+            Self::Shape(fact) => &fact.symbol,
+        }
+    }
+}
+
 #[derive(Clone)]
 struct IndexedTypeFact {
     component_id: String,
@@ -93,7 +103,19 @@ struct ProjectSemanticIndex {
 impl ProjectSemanticIndex {
     fn replace(&mut self, document: ProjectDocument) {
         let file_id = document.file_id.clone();
-        let (document, facts) = AnalyzedDocument::analyze(document);
+        let previous_component = self
+            .documents
+            .get(&file_id)
+            .map(|current| current.component_id.clone());
+        let (mut document, mut facts) = AnalyzedDocument::analyze(document);
+        if let Some(component_id) = previous_component {
+            document.component_id.clone_from(&component_id);
+            for definition in &mut facts.definitions {
+                if let Some(identity) = &mut definition.semantic_id {
+                    identity.component_id.clone_from(&component_id);
+                }
+            }
+        }
         self.documents.insert(file_id.clone(), document);
         self.facts.insert(file_id, facts);
     }
@@ -114,6 +136,51 @@ impl ProjectSemanticIndex {
         self.facts
             .get_mut(file_id)
             .expect("every analyzed document must have one semantic fact store")
+    }
+
+    fn order_document(&self, file_id: &str) -> Option<ProjectOrderDocument> {
+        let document = self.documents.get(file_id)?;
+        let facts = self.facts(file_id);
+        Some(ProjectOrderDocument {
+            file_id: file_id.to_owned(),
+            includes: document.document.includes.clone(),
+            occurrence_offsets: document
+                .parsed
+                .iter()
+                .flat_map(|math| math.symbols.iter().map(|(_, range)| range.start_offset))
+                .chain(
+                    facts
+                        .definitions
+                        .iter()
+                        .map(|definition| definition.location.range.start_offset),
+                )
+                .chain(
+                    facts
+                        .roles
+                        .exported()
+                        .into_iter()
+                        .flat_map(|role| role.evidence.source_ranges)
+                        .map(|range| range.start_offset),
+                )
+                .chain(
+                    facts
+                        .quantities
+                        .exported()
+                        .into_iter()
+                        .flat_map(|quantity| quantity.evidence.source_ranges)
+                        .map(|range| range.start_offset),
+                )
+                .chain(
+                    facts
+                        .shapes
+                        .exported()
+                        .into_iter()
+                        .flat_map(|shape| shape.evidence.source_ranges)
+                        .map(|range| range.start_offset),
+                )
+                .collect(),
+            path: document.document.path.clone(),
+        })
     }
 }
 
@@ -171,7 +238,8 @@ impl SemathEngine {
             .collect::<HashSet<_>>();
         let mut affected = self.index.order.affected_by(&requested);
         let mut changed = Vec::new();
-        let mut analyzed_directly = HashSet::new();
+        let mut order_changed = false;
+        let mut semantic_changed = false;
         for change in envelope.changes {
             match change {
                 ProjectChange::Upsert { document } => {
@@ -180,17 +248,27 @@ impl SemathEngine {
                         document.document_version > current.document.document_version
                     });
                     if accept {
-                        self.index.replace(document);
-                        analyzed_directly.insert(file_id.clone());
+                        let previous_order = self.index.order_document(&file_id);
+                        if self.can_reuse_analysis(&document) {
+                            self.index.documents.get_mut(&file_id).unwrap().document = document;
+                        } else {
+                            self.index.replace(document);
+                            semantic_changed = true;
+                        }
+                        order_changed |= previous_order != self.index.order_document(&file_id);
                         changed.push(file_id);
                     }
                 }
                 ProjectChange::PathChange { file_id, path } => {
                     let document = self.index.documents.get_mut(&file_id).unwrap();
+                    order_changed |= document.document.path != path;
+                    semantic_changed = true;
                     document.document.path = path;
                     changed.push(file_id);
                 }
                 ProjectChange::Remove { file_id } => {
+                    order_changed = true;
+                    semantic_changed = true;
                     self.index.remove(&file_id);
                     changed.push(file_id);
                 }
@@ -198,28 +276,22 @@ impl SemathEngine {
         }
         self.inventory_version = envelope.inventory_version;
         self.analysis_generation = envelope.analysis_generation;
-        self.refresh_semantic_identities();
-        affected.extend(self.index.order.affected_by(&requested));
-        let dependents = affected
-            .iter()
-            .filter(|file_id| !analyzed_directly.contains(*file_id))
-            .filter_map(|file_id| {
-                self.index
-                    .documents
-                    .get(file_id)
-                    .map(|document| (file_id.clone(), document.document.clone()))
-            })
-            .collect::<Vec<_>>();
-        for (_, document) in dependents {
-            self.index.replace(document);
+        if order_changed {
+            self.refresh_semantic_identities();
+            affected.extend(self.index.order.affected_by(&requested));
         }
-        self.refresh_semantic_identities();
-        let mut analyzed = affected
-            .into_iter()
-            .filter(|file_id| self.index.documents.contains_key(file_id))
-            .collect::<Vec<_>>();
+        let mut analyzed = if semantic_changed || order_changed {
+            affected
+                .into_iter()
+                .filter(|file_id| self.index.documents.contains_key(file_id))
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
         analyzed.sort();
-        self.refresh_project_laws(&analyzed.iter().cloned().collect());
+        if !analyzed.is_empty() {
+            self.refresh_project_laws(&analyzed.iter().cloned().collect());
+        }
         changed.sort();
         Ok(self.update_result(changed, analyzed))
     }
@@ -411,6 +483,19 @@ impl SemathEngine {
             }
         }
         Ok(())
+    }
+
+    fn can_reuse_analysis(&self, next: &ProjectDocument) -> bool {
+        let Some(current) = self.index.documents.get(&next.file_id) else {
+            return false;
+        };
+        let current = &current.document;
+        current.path == next.path
+            && current.language == next.language
+            && current.math_regions == next.math_regions
+            && current.macros == next.macros
+            && current.includes == next.includes
+            && appended_comments_only(&current.content, &next.content)
     }
 
     fn definitions_for(&self, symbol: &str) -> Vec<DefinitionInfo> {
@@ -765,6 +850,13 @@ impl SemathEngine {
                 roles.chain(quantities).chain(shapes)
             })
             .collect::<Vec<_>>();
+        let mut facts_by_symbol = HashMap::<String, Vec<IndexedTypeFact>>::new();
+        for fact in facts {
+            facts_by_symbol
+                .entry(fact.fact.symbol().to_owned())
+                .or_default()
+                .push(fact);
+        }
 
         let environments = targets
             .iter()
@@ -777,27 +869,34 @@ impl SemathEngine {
                         .symbols
                         .first()
                         .map_or(semantic_offset, |(_, range)| range.start_offset);
-                    for fact in &facts {
-                        if fact.file_id == *file_id
-                            || fact.component_id != target.component_id
-                            || !self.index.order.precedes(
-                                &fact.file_id,
-                                fact.source_offset,
-                                file_id,
-                                order_offset,
-                            )
-                        {
-                            continue;
-                        }
-                        match &fact.fact {
-                            ExportedTypeFact::Role(role) => {
-                                environment.add_role(semantic_offset, role.clone());
+                    let symbols = math
+                        .symbols
+                        .iter()
+                        .map(|(symbol, _)| symbol.as_str())
+                        .collect::<HashSet<_>>();
+                    for symbol in symbols {
+                        for fact in facts_by_symbol.get(symbol).into_iter().flatten() {
+                            if fact.file_id == *file_id
+                                || fact.component_id != target.component_id
+                                || !self.index.order.precedes(
+                                    &fact.file_id,
+                                    fact.source_offset,
+                                    file_id,
+                                    order_offset,
+                                )
+                            {
+                                continue;
                             }
-                            ExportedTypeFact::Quantity(quantity) => {
-                                environment.add_quantity(semantic_offset, quantity.clone());
-                            }
-                            ExportedTypeFact::Shape(shape) => {
-                                environment.add_shape(semantic_offset, shape.clone());
+                            match &fact.fact {
+                                ExportedTypeFact::Role(role) => {
+                                    environment.add_role(semantic_offset, role.clone());
+                                }
+                                ExportedTypeFact::Quantity(quantity) => {
+                                    environment.add_quantity(semantic_offset, quantity.clone());
+                                }
+                                ExportedTypeFact::Shape(shape) => {
+                                    environment.add_shape(semantic_offset, shape.clone());
+                                }
                             }
                         }
                     }
@@ -820,52 +919,8 @@ impl SemathEngine {
         let project_order = ProjectOrder::new(
             self.index
                 .documents
-                .values()
-                .map(|document| {
-                    let facts = self.index.facts(&document.document.file_id);
-                    ProjectOrderDocument {
-                        file_id: document.document.file_id.clone(),
-                        includes: document.document.includes.clone(),
-                        occurrence_offsets: document
-                            .parsed
-                            .iter()
-                            .flat_map(|math| {
-                                math.symbols.iter().map(|(_, range)| range.start_offset)
-                            })
-                            .chain(
-                                facts
-                                    .definitions
-                                    .iter()
-                                    .map(|definition| definition.location.range.start_offset),
-                            )
-                            .chain(
-                                facts
-                                    .roles
-                                    .exported()
-                                    .into_iter()
-                                    .flat_map(|role| role.evidence.source_ranges)
-                                    .map(|range| range.start_offset),
-                            )
-                            .chain(
-                                facts
-                                    .quantities
-                                    .exported()
-                                    .into_iter()
-                                    .flat_map(|quantity| quantity.evidence.source_ranges)
-                                    .map(|range| range.start_offset),
-                            )
-                            .chain(
-                                facts
-                                    .shapes
-                                    .exported()
-                                    .into_iter()
-                                    .flat_map(|shape| shape.evidence.source_ranges)
-                                    .map(|range| range.start_offset),
-                            )
-                            .collect(),
-                        path: document.document.path.clone(),
-                    }
-                })
+                .keys()
+                .filter_map(|file_id| self.index.order_document(file_id))
                 .collect(),
             self.main_file_id.as_deref(),
         );
@@ -894,6 +949,17 @@ fn evidence_anchor(evidence: &Evidence) -> u32 {
         .map(|range| range.start_offset)
         .max()
         .unwrap_or_default()
+}
+
+fn appended_comments_only(current: &str, next: &str) -> bool {
+    let Some(appended) = next.strip_prefix(current) else {
+        return false;
+    };
+    !appended.is_empty()
+        && appended.starts_with(char::is_whitespace)
+        && appended
+            .lines()
+            .all(|line| line.trim().is_empty() || line.trim_start().starts_with('%'))
 }
 
 fn scope_visible(definition: &[u32], occurrence: &[u32]) -> bool {

@@ -181,14 +181,10 @@ impl SemanticFactStore {
         let shapes = observe_shapes(document, parsed, &prose.shapes);
         let quantities = observe_quantities(document, parsed, &prose.definitions);
         let roles = observe_roles(document, &prose.definitions, &shapes);
-        let laws = observe_laws(
-            document,
-            parsed,
-            &shapes,
-            &quantities,
-            &roles,
-            &ExternalTypeEnvironment::default(),
-        );
+        // Project analysis always supplies the source-ordered external type
+        // environment immediately after base observations are built. Running
+        // every compiled law here would duplicate the dominant analysis pass.
+        let laws = LawObservations::default();
         let domains = observe_domains(document, laws.all());
         let assumption_scopes = ScopeGraph::new(document);
         Self {

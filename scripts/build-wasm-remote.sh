@@ -20,6 +20,8 @@ trap cleanup EXIT
 
 rsync --archive --delete \
   --exclude .git \
+  --exclude .artifacts \
+  --exclude node_modules \
   --exclude target \
   ./ "$build_host:$remote_dir/"
 ssh -- "$build_host" "cd '$remote_dir' && bash -lc scripts/build-wasm.sh"

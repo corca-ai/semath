@@ -96,7 +96,7 @@ if (refused?.kind !== "semanticView" || refused.view.status === "established") {
 
 const updatedSource = {
   ...sources[1],
-  content: `${sources[1].content}\n% incremental edit`,
+  content: sources[1].content.replace("event.", "Event."),
   documentVersion: 2,
 };
 const updatedSnapshot = makeSnapshot([sources[0], updatedSource, sources[2], sources[3]], 2);
