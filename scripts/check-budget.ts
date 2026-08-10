@@ -85,6 +85,7 @@ const snapshot: ProjectSnapshot = {
   projectId: "quality-budget",
   protocolVersion: SEMATH_PROTOCOL_VERSION,
 };
+const initialTransferBytes = encodedLength(snapshot);
 
 const worker = createWorkerHost(async () => {
   await init({ module_or_path: wasm });
@@ -260,6 +261,7 @@ const queryP95 = Math.max(...Object.values(queryP95ByKind));
 const peakRssGrowth = Math.max(0, Math.max(peakRss, rssAfterDispose) - rssBefore);
 const syntaxStats = syntax.getStats() as ReturnType<LatexSyntaxService["getStats"]> & {
   lastInvalidatedDocuments?: number;
+  lastTransferBytes?: number;
   notationNodes?: number;
   recoveredNodes?: number;
   snapshotBytes?: number;
@@ -274,14 +276,26 @@ const report = {
   documents: DOCUMENT_COUNT + 1,
   engineColdMs,
   fixtureFamilies: [...new Set(sources.map((source) => source.family))],
+  initialTransferBytes,
   peakRssGrowthBytes: peakRssGrowth,
   queryP95ByKind,
   retainedRssGrowthBytes: retainedRssGrowth,
   semanticDeltaMs,
   syntax: {
+    bytesPerNode:
+      syntaxStats.notationNodes === undefined || syntaxStats.notationNodes === 0
+        ? null
+        : syntaxStats.snapshotBytes / syntaxStats.notationNodes,
     coldMs: syntaxColdMs,
     deltaP95Ms: syntaxP95,
+    documents: syntaxStats.documents,
+    lastInvalidatedDocuments: syntaxStats.lastInvalidatedDocuments ?? null,
+    lastTransferBytes: syntaxStats.lastTransferBytes ?? null,
     notationNodes: syntaxStats.notationNodes ?? null,
+    nodesPerDocument:
+      syntaxStats.notationNodes === undefined || syntaxStats.documents === 0
+        ? null
+        : syntaxStats.notationNodes / syntaxStats.documents,
     parseCount: syntaxStats.parseCount,
     recoveredNodes: syntaxStats.recoveredNodes ?? null,
     snapshotBytes: syntaxStats.snapshotBytes ?? null,

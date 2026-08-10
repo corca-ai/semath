@@ -4,37 +4,21 @@ import { createProjectSnapshot } from "./index";
 
 describe("wasmtex adapter", () => {
   test("keeps wasmtex UTF-16 ranges without translating them", () => {
-    const region = {
-      closed: true,
-      contentRange: { endOffset: 9, startOffset: 6 },
-      delimiter: "$",
-      fullRange: { endOffset: 10, startOffset: 5 },
-    };
+    const content = "😀 한 $x_i$";
+    const syntax = new LatexSyntaxService().upsert({
+      fileId: "f1",
+      path: "main.md",
+      content,
+      documentVersion: 2,
+      language: "markdown",
+    });
+    const region = syntax.mathRegions[0]!;
     const snapshot = createProjectSnapshot({
       documents: [
         {
-          content: "😀 한 $x_i$",
+          content,
           language: "markdown",
-          syntax: {
-            documentVersion: 2,
-            fileId: "f1",
-            includes: [
-              {
-                path: "chapter",
-                type: "input",
-                source: {
-                  fileId: "f1",
-                  path: "main.md",
-                  range: { endOffset: 4, startOffset: 1 },
-                },
-              },
-            ],
-            diagnostics: [],
-            macros: [],
-            mathRegions: [region],
-            path: "main.md",
-            schemaVersion: 3,
-          },
+          syntax,
         },
       ],
       epoch: "p:1",
@@ -42,9 +26,7 @@ describe("wasmtex adapter", () => {
       projectId: "p",
     });
     expect(snapshot.documents[0]?.mathRegions?.[0]).toEqual(region);
-    expect(snapshot.documents[0]?.includes).toEqual([
-      { path: "chapter", sourceRange: { endOffset: 4, startOffset: 1 } },
-    ]);
+    expect(snapshot.documents[0]?.includes).toEqual([]);
     expect(snapshot.documents[0]?.macros).toEqual([]);
   });
 

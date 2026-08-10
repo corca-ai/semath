@@ -41,6 +41,7 @@
     "foundation": "bun scripts/check-foundation.ts",
     "foundation:generate": "bun scripts/generate-foundation-corpus.ts",
     "foundation:generate:check": "bun scripts/generate-foundation-corpus.ts --check",
+    "notation:conformance": "bun test packages/evaluation/src/notation-conformance.test.ts",
     "package:smoke": "node scripts/check-package-smoke.mjs",
     "pack:authoring": "bun packages/authoring/cli.mjs validate packs/*/v1.json && bun packages/authoring/cli.mjs audit-runtime packs/*/v1.json",
     "pack:conformance": "bun scripts/check-pack-conformance.ts",
@@ -51,7 +52,7 @@
     "verify": "bun run check"
   },
   "dependencies": {
-    "wasmtex": "github:corca-ai/wasmtex#0cdea2cba85b879ff1f2a61145414c024d1d4268"
+    "wasmtex": "github:corca-ai/wasmtex#f28d9ac086167665cedae493d8a98f7ccc06ce63"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",

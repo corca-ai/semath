@@ -2,6 +2,7 @@ export * from "./conformance";
 export * from "./foundation";
 export * from "./metamorphic";
 export * from "./model";
+export * from "./notation-conformance";
 export * from "./observation";
 export * from "./runner";
 export * from "./scorecard";

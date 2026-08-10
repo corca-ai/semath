@@ -22,11 +22,14 @@ semantic analysis; a separate real notation mutation must analyze only its
 reverse-include closure and complete within 50ms. An empty delta must also do no
 analysis. Clean and incremental summaries must agree.
 
-Every report separates cold reset, syntax update, total edit latency, each query
-kind, peak and retained RSS growth, adapter transfer bytes, syntax nodes and
-bytes, affected documents, and the WASM artifact size. These are code defaults,
-not live production telemetry. The dependency lock pins the wasmtex input used
-for a report; record the Semath and wasmtex commits when comparing reports.
+Every report separates syntax construction, adapter lowering, engine
+decode/ingestion, total cold reset, syntax update, total edit latency, and each
+query kind. It also records peak/retained RSS growth, initial and delta transfer
+bytes, CST nodes/recovery/bytes per document and per node, invalidated
+documents, semantic nodes/rules visited, and the WASM artifact size. These are
+code defaults, not live production telemetry. The dependency lock pins the
+wasmtex input used for a report; record the Semath and wasmtex commits when
+comparing reports.
 
 Ordinary CI runs both document counts to catch deterministic scope, transfer,
 memory, and artifact regressions. It enforces latency on the smaller fixture,
