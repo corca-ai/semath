@@ -163,6 +163,102 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
 }
 
 #[test]
+fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() {
+    let content = "Let $A$ be an $m$ by $n$ matrix. Let $x$ be an $n$-dimensional vector. Let $y$ denote the output. $y=Ax$. Inspect $y$.";
+    let offset = content.rfind("$y$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    let update = engine.reset(snapshot(content)).unwrap();
+    assert!(update.stats.semantic_derived_claims > 0);
+    assert!(update.stats.semantic_constraint_work > 0);
+    assert!(!update.stats.semantic_constraint_truncated);
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context.claims.iter().any(|claim| {
+            claim.predicate == "shape"
+                && claim.value == "Vector[m]"
+                && claim
+                    .evidence
+                    .iter()
+                    .any(|evidence| evidence.rule_id == "semath/constraint/equality")
+        }),
+        "{:?}",
+        view.context.claims
+    );
+
+    let without_relation = "Let $A$ be an $m$ by $n$ matrix. Let $x$ be an $n$-dimensional vector. Let $y$ denote the output. Inspect $y$.";
+    let retracted = engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", without_relation, 2)),
+            }],
+        })
+        .unwrap();
+    assert_eq!(retracted.stats.semantic_derived_claims, 0);
+}
+
+#[test]
+fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
+    let content = "Let $A$ be a $2$ by $3$ matrix. Let $x$ be a $4$-dimensional vector. Let $y$ denote the output. $y=Ax$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = result.value else {
+        panic!("expected diagnostics")
+    };
+    let conflict = diagnostics
+        .iter()
+        .find(|diagnostic| diagnostic.code == "constraint-product-shape-conflict")
+        .expect("numeric inner dimensions prove a product conflict");
+    assert!(conflict.evidence.len() >= 3, "{:?}", conflict.evidence);
+
+    let symbolic = "Let $A$ be an $m$ by $n$ matrix. Let $x$ be a $k$-dimensional vector. Let $y$ denote the output. $y=Ax$.";
+    let mut symbolic_engine = SemathEngine::default();
+    symbolic_engine.reset(snapshot(symbolic)).unwrap();
+    let symbolic_result = symbolic_engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = symbolic_result.value else {
+        panic!("expected diagnostics")
+    };
+    assert!(
+        !diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == "constraint-product-shape-conflict" })
+    );
+}
+
+#[test]
 fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
     let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}$.";
     let offsets = [

@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 11 is a deliberate
+Semath is a library and language-service runtime. Protocol 12 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -42,7 +42,7 @@ unsupported law conditions and truncated evidence cannot produce `established`.
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 11 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 12 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.

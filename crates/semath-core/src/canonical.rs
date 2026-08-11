@@ -152,9 +152,9 @@ pub(crate) fn lower_document_region(
     #[cfg(test)]
     if document.nodes.is_empty() {
         let chunks = expanded_surface(document, range);
-        return Parser::new(tokenize(&chunks, false)).parse_relation();
+        return Parser::new(tokenize(&chunks, false)).parse_document();
     }
-    Parser::new(snapshot_tokens(document, range)).parse_relation()
+    Parser::new(snapshot_tokens(document, range)).parse_document()
 }
 
 fn snapshot_tokens(document: &ProjectDocument, range: &SourceRange) -> Vec<Token> {
@@ -464,7 +464,7 @@ fn lower_source_node(document: &ProjectDocument, node_id: u32) -> Option<Semanti
     ) {
         tokens.pop();
     }
-    (!tokens.is_empty()).then(|| Parser::new(coalesce_numbers(tokens)).parse_relation())
+    (!tokens.is_empty()).then(|| Parser::new(coalesce_numbers(tokens)).parse_document())
 }
 
 fn semantic_token_kind(text: &str, lexical_class: Option<LexicalClass>) -> Option<TokenKind> {
@@ -639,14 +639,14 @@ pub(crate) fn lower_template(source: &str) -> SemanticExpr {
         }],
         true,
     ))
-    .parse_relation()
+    .parse_document()
 }
 
 pub(crate) fn canonical_template(source: &str) -> String {
     render_canonical(&lower_template(source))
 }
 
-fn render_canonical(expression: &SemanticExpr) -> String {
+pub(crate) fn render_canonical(expression: &SemanticExpr) -> String {
     match &expression.kind {
         SemanticExprKind::Symbol(value) => format!("symbol({value})"),
         SemanticExprKind::Number(value) => format!("number({value})"),
@@ -1005,6 +1005,60 @@ struct Parser {
 impl Parser {
     fn new(tokens: Vec<Token>) -> Self {
         Self { tokens, cursor: 0 }
+    }
+
+    fn parse_document(mut self) -> SemanticExpr {
+        let mut depth = 0_u32;
+        let mut separators = Vec::new();
+        for (index, token) in self.tokens.iter().enumerate() {
+            match token.kind {
+                TokenKind::Open(_) => depth += 1,
+                TokenKind::Close(_) => depth = depth.saturating_sub(1),
+                TokenKind::Operator(',') if depth == 0 => separators.push(index),
+                _ => {}
+            }
+        }
+        let mut bounds = separators
+            .iter()
+            .copied()
+            .chain(std::iter::once(self.tokens.len()));
+        let mut start = 0_usize;
+        let relation_segments = bounds
+            .by_ref()
+            .filter(|end| {
+                let segment_start = start;
+                start = *end + 1;
+                self.tokens[segment_start..*end].iter().any(|token| {
+                    matches!(token.kind, TokenKind::Operator('=' | '<' | '>'))
+                        || matches!(&token.kind, TokenKind::Command(command) if is_relation_command(command))
+                })
+            })
+            .count();
+        if relation_segments < 2 {
+            return self.parse_relation();
+        }
+
+        let mut expressions = Vec::new();
+        let mut start = 0;
+        for end in separators
+            .into_iter()
+            .chain(std::iter::once(self.tokens.len()))
+        {
+            if start < end {
+                expressions.push(Parser::new(self.tokens[start..end].to_vec()).parse_relation());
+            }
+            start = end + 1;
+        }
+        let first = expressions.first().expect("multiple relation segments");
+        let last = expressions.last().expect("multiple relation segments");
+        SemanticExpr {
+            range: merge_range(&first.range, &last.range),
+            provenance: expressions
+                .iter()
+                .flat_map(|expression| expression.provenance.clone())
+                .collect(),
+            kind: SemanticExprKind::System(expressions),
+        }
     }
 
     fn parse_relation(&mut self) -> SemanticExpr {
@@ -1624,6 +1678,8 @@ impl Parser {
             Some(self.previous_reference("less-or-equal"))
         } else if self.consume_command("ge") || self.consume_command("geq") {
             Some(self.previous_reference("greater-or-equal"))
+        } else if self.consume_command("ne") || self.consume_command("neq") {
+            Some(self.previous_reference("not-equals"))
         } else if self.consume_command("in") {
             Some(self.previous_reference("member-of"))
         } else if self.consume_command("notin") {
@@ -1841,6 +1897,8 @@ fn starts_atom(token: &TokenKind) -> bool {
                 | "le"
                 | "leq"
                 | "notin"
+                | "ne"
+                | "neq"
                 | "right"
                 | "subset"
                 | "subseteq"
@@ -1871,6 +1929,8 @@ fn is_relation_command(name: &str) -> bool {
             | "in"
             | "le"
             | "leq"
+            | "ne"
+            | "neq"
             | "notin"
             | "subset"
             | "subseteq"
@@ -2077,6 +2137,16 @@ mod tests {
                 SemanticExprKind::Symbol(ref name) if name == "x"
             ));
         }
+    }
+
+    #[test]
+    fn lowers_comma_separated_relations_as_one_structural_system() {
+        assert_eq!(
+            render_canonical(&lower_template(
+                "A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}, k \\ne n"
+            )),
+            "system(relation(member-of,symbol(A),power(symbol(R),cross(symbol(m),symbol(n)))),relation(member-of,symbol(x),power(symbol(R),symbol(k))),relation(not-equals,symbol(k),symbol(n)))"
+        );
     }
 
     #[test]

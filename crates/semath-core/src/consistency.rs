@@ -110,6 +110,7 @@ pub(crate) struct RoleObservations {
     entries: Vec<DiagnosticEntry>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     scopes: ScopeGraph,
+    notation_families: BTreeMap<String, String>,
 }
 
 impl RoleObservations {
@@ -130,7 +131,7 @@ impl RoleObservations {
             .roles
             .iter()
             .filter(|claim| {
-                semantic_symbol_eq(&claim.info.symbol, symbol)
+                self.symbols_equivalent(&claim.info.symbol, symbol)
                     && (self.scopes.depth(claim.scope_id) == 0
                         || claim.available_from <= offset
                         || claim.symbol_range.contains(offset))
@@ -159,7 +160,7 @@ impl RoleObservations {
             .entries
             .iter()
             .filter(|entry| {
-                semantic_symbol_eq(&entry.symbol, symbol)
+                self.symbols_equivalent(&entry.symbol, symbol)
                     && entry.diagnostic.range.start_offset <= offset
                     && self.scopes.visible(entry.scope_id, offset)
             })
@@ -181,14 +182,17 @@ impl RoleObservations {
             .find(|diagnostic| diagnostic.code == code && diagnostic.range.contains(offset))
             .cloned()
     }
-}
 
-fn semantic_symbol_eq(left: &str, right: &str) -> bool {
-    let left = left.trim_start_matches('\\');
-    let right = right.trim_start_matches('\\');
-    left == right
-        || ((left.contains('_') || right.contains('_'))
-            && left.split('_').next() == right.split('_').next())
+    fn symbols_equivalent(&self, left: &str, right: &str) -> bool {
+        let left = left.trim_start_matches('\\');
+        let right = right.trim_start_matches('\\');
+        left == right
+            || self
+                .notation_families
+                .get(left)
+                .zip(self.notation_families.get(right))
+                .is_some_and(|(left_family, right_family)| left_family == right_family)
+    }
 }
 
 pub(crate) fn observe_roles(
@@ -259,6 +263,7 @@ pub(crate) fn observe_roles(
         entries,
         diagnostics,
         scopes,
+        notation_families: shapes.notation_families(),
     }
 }
 
@@ -594,7 +599,7 @@ mod tests {
             .map(|math| lower_document_region(&document, &math.region.content_range))
             .collect::<Vec<_>>();
         let prose = observe_prose(&document, &parsed, &canonical);
-        let shapes = observe_shapes(&document, &parsed, &prose.shapes);
+        let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         observe_roles(&document, &prose.definitions, &shapes)
     }
 

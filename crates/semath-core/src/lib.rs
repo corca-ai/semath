@@ -2,6 +2,7 @@ mod binder;
 mod candidate;
 mod canonical;
 mod consistency;
+mod constraint;
 mod construction;
 mod cross_modal;
 mod cursor;

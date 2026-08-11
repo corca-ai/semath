@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 11;
+pub const PROTOCOL_VERSION: u32 = 12;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1056,6 +1056,9 @@ pub struct AnalysisStats {
     pub semantic_dependency_edges: u32,
     pub invalidated_semantic_claims: u32,
     pub semantic_candidates: u32,
+    pub semantic_constraint_work: u32,
+    pub semantic_derived_claims: u32,
+    pub semantic_constraint_truncated: bool,
     pub prose_clauses: u32,
     pub prose_construction_candidates: u32,
     pub prose_matcher_work: u32,

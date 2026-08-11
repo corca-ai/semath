@@ -190,6 +190,10 @@ impl DocumentSemanticObservations {
         &self.semantic_evidence.law_activations
     }
 
+    pub fn assumptions(&self) -> &[AssumptionInfo] {
+        &self.assumptions
+    }
+
     pub fn build(
         document: &ProjectDocument,
         parsed: &[ParsedMath],
@@ -197,7 +201,7 @@ impl DocumentSemanticObservations {
     ) -> Self {
         let prose = observe_prose(document, parsed, canonical_expressions);
         let prose_match_stats = prose.match_stats;
-        let shapes = observe_shapes(document, parsed, &prose.shapes);
+        let shapes = observe_shapes(document, parsed, canonical_expressions, &prose.shapes);
         let quantities = observe_quantities(document, parsed, &prose.definitions);
         let roles = observe_roles(document, &prose.definitions, &shapes);
         // Project analysis always supplies the source-ordered external type
