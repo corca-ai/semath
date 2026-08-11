@@ -936,6 +936,38 @@ mod tests {
     }
 
     #[test]
+    fn keeps_semicolon_anaphora_composable() {
+        let source = "Let $x$ and $u$ be introduced. The former is the state vector; the latter is the control input.";
+        let mentions = vec![
+            ScientificMention {
+                symbol: "x".into(),
+                start: 4,
+                end: 7,
+                math_index: 0,
+            },
+            ScientificMention {
+                symbol: "u".into(),
+                start: 12,
+                end: 15,
+                math_index: 1,
+            },
+        ];
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let events = normalize_prose_events(source, &clauses, &mentions);
+        assert_eq!(
+            clauses.iter().map(|clause| clause.text).collect::<Vec<_>>(),
+            vec![
+                "Let $x$ and $u$ be introduced.",
+                "The former is the state vector;",
+                "the latter is the control input.",
+            ]
+        );
+        assert!(events.has_anaphor(1));
+        assert!(events.has_anaphor(2));
+        assert_eq!(events.mentions_in_clause(0), &[0, 1]);
+    }
+
+    #[test]
     fn extracts_bounded_assumptions_with_subject_spans_and_refuses_negation() {
         let source = "Assume $A$ is symmetric and positive definite.";
         let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])

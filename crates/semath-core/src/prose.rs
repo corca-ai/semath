@@ -549,12 +549,17 @@ fn collect_anaphoric_definitions(
             continue;
         }
 
-        let antecedents = events
+        let mut antecedents = events
             .mentions_in_clause(symbols_index)
             .iter()
             .filter_map(|mention_index| mentions.get(*mention_index))
             .filter(|mention| is_definition_slot_math(&parsed[mention.math_index]))
             .collect::<Vec<_>>();
+        let mut seen_symbols = std::collections::BTreeSet::new();
+        antecedents.retain(|mention| {
+            primary_symbol(document, &parsed[mention.math_index])
+                .is_some_and(|(symbol, _)| seen_symbols.insert(symbol))
+        });
         if antecedents.is_empty() || antecedents.len() > 8 {
             continue;
         }
@@ -580,9 +585,35 @@ fn collect_anaphoric_definitions(
             if antecedents.len() != 2 {
                 continue;
             }
-            let Some((former, latter)) = former_latter_descriptions(text) else {
+            let paired = former_latter_descriptions(text).map(|(former, latter)| {
+                (former.to_owned(), latter.to_owned(), description_clause.end)
+            });
+            let split = paired.or_else(|| {
+                let next = clauses.get(description_index + 1)?;
+                if !lower.contains("the former")
+                    || next.start.saturating_sub(description_clause.end) > 160
+                    || !next.frame.establishes()
+                {
+                    return None;
+                }
+                let former = single_anaphor_description(text, "the former")?;
+                let latter = single_anaphor_description(next.text.trim(), "the latter")?;
+                Some((former.to_owned(), latter.to_owned(), next.end))
+            });
+            let Some((former, latter, evidence_end)) = split else {
                 continue;
             };
+            let expanded_description_range = SourceRange {
+                start_offset: description_range.start_offset,
+                end_offset: index.utf16_for_byte(evidence_end),
+            };
+            if !output
+                .semantic_evidence
+                .attachment
+                .permits(&antecedent_range, &expanded_description_range)
+            {
+                continue;
+            }
             for (mention, description) in antecedents.into_iter().zip([former, latter]) {
                 let math = &parsed[mention.math_index];
                 let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
@@ -594,10 +625,10 @@ fn collect_anaphoric_definitions(
                     index,
                     &symbol,
                     &symbol_range,
-                    description,
+                    &description,
                     "english-former-latter-definition",
                     symbols_clause.start,
-                    description_clause.end,
+                    evidence_end,
                 );
             }
             continue;
@@ -667,6 +698,11 @@ fn anaphoric_description_body(text: &str, arity: usize) -> Option<(&str, bool)> 
     .into_iter()
     .find(|action| tail_lower.starts_with(action))?;
     let mut body = tail[action.len()..].trim();
+    if arity == 1
+        && let Some((primary, _)) = body.split_once(", while ")
+    {
+        body = primary.trim();
+    }
     let ordered = body.to_ascii_lowercase().contains("respectively")
         || body.to_ascii_lowercase().contains("in that order");
     body = trim_order_marker(body);
@@ -690,6 +726,15 @@ fn former_latter_descriptions(text: &str) -> Option<(&str, &str)> {
         strip_description_article(trim_terminal_punctuation(former)),
         strip_description_article(trim_terminal_punctuation(latter)),
     ))
+}
+
+fn single_anaphor_description<'a>(text: &'a str, marker: &str) -> Option<&'a str> {
+    let lower = text.to_ascii_lowercase();
+    let start = lower.find(marker)? + marker.len();
+    let description = strip_definition_action(text[start..].trim())?;
+    Some(strip_description_article(trim_terminal_punctuation(
+        description,
+    )))
 }
 
 fn strip_definition_action(value: &str) -> Option<&str> {
@@ -1765,6 +1810,18 @@ fn push_claim(
     evidence_start: usize,
     evidence_end: usize,
 ) {
+    let description = description
+        .trim()
+        .strip_suffix(" and let")
+        .unwrap_or(description.trim())
+        .trim();
+    let description = if rule_id == "english-construction-definition"
+        && let Some(coordinated) = description.strip_suffix(" and")
+    {
+        strip_description_article(coordinated.trim())
+    } else {
+        description
+    };
     if rule_id.contains("definition") {
         analysis.match_stats.construction_candidates += 1;
     }
@@ -1774,7 +1831,10 @@ fn push_claim(
     };
     let attached = matches!(
         rule_id,
-        "english-clause-definition" | "english-clause-ordered-definition"
+        "english-anaphoric-definition"
+            | "english-clause-definition"
+            | "english-clause-ordered-definition"
+            | "english-former-latter-definition"
     ) && evidence_range.start_offset < symbol_range.start_offset;
     let definition_evidence = Evidence {
         rule_id: rule_id.into(),
@@ -1820,16 +1880,17 @@ fn push_claim(
 fn shape_claim(description: &str) -> Option<(ProseShape, Vec<String>)> {
     let description = description
         .split_once(", and let")
+        .or_else(|| description.split_once(" and let "))
         .map_or(description, |(description, _)| description);
     let shape_source = description.replace('$', "");
     let normalized = shape_source.to_ascii_lowercase().replace('-', " ");
     let shape = if let Some(captures) = MATRIX_DIMENSIONS.captures(&shape_source) {
         ProseShape::Matrix(
-            captures.get(1).unwrap().as_str().into(),
-            captures.get(2).unwrap().as_str().into(),
+            normalized_extent(captures.get(1).unwrap().as_str()),
+            normalized_extent(captures.get(2).unwrap().as_str()),
         )
     } else if let Some(captures) = VECTOR_DIMENSION.captures(&shape_source) {
-        ProseShape::Vector(captures.get(1).unwrap().as_str().into())
+        ProseShape::Vector(normalized_extent(captures.get(1).unwrap().as_str()))
     } else if let Some(captures) = SQUARE_DIMENSION.captures(&shape_source) {
         let dimension = captures.get(1).unwrap().as_str().to_owned();
         if matches!(dimension.as_str(), "size" | "order" | "dimension") {
@@ -1863,6 +1924,23 @@ fn shape_claim(description: &str) -> Option<(ProseShape, Vec<String>)> {
     .map(|(_, refinement)| refinement.into())
     .collect();
     Some((shape, refinements))
+}
+
+fn normalized_extent(value: &str) -> String {
+    match value.to_ascii_lowercase().as_str() {
+        "one" => "1",
+        "two" => "2",
+        "three" => "3",
+        "four" => "4",
+        "five" => "5",
+        "six" => "6",
+        "seven" => "7",
+        "eight" => "8",
+        "nine" => "9",
+        "ten" => "10",
+        _ => value,
+    }
+    .to_owned()
 }
 
 fn last_word(value: &str) -> Option<&str> {
@@ -1962,11 +2040,14 @@ fn bounded_end(source: &str, start: usize, characters: usize) -> usize {
 }
 
 fn deduplicate(analysis: &mut ProseObservations) {
-    analysis.definitions.sort_by_key(|definition| {
-        (
-            definition.location.range.start_offset,
-            definition.evidence.rule_id.clone(),
-        )
+    analysis.definitions.sort_by(|left, right| {
+        left.location
+            .range
+            .start_offset
+            .cmp(&right.location.range.start_offset)
+            .then_with(|| definition_priority(right).cmp(&definition_priority(left)))
+            .then_with(|| left.evidence.rule_id.cmp(&right.evidence.rule_id))
+            .then_with(|| left.description.len().cmp(&right.description.len()))
     });
     analysis
         .definitions
@@ -1980,6 +2061,17 @@ fn deduplicate(analysis: &mut ProseObservations) {
     analysis
         .shapes
         .dedup_by(|left, right| left.symbol_range == right.symbol_range);
+}
+
+fn definition_priority(definition: &DefinitionInfo) -> u8 {
+    let rule = definition.evidence.rule_id.as_str();
+    if rule.contains("former-latter") || rule.contains("anaphoric") {
+        3
+    } else if rule.contains("apposition") || rule.contains("equation-flow") {
+        2
+    } else {
+        1
+    }
 }
 
 #[cfg(test)]
@@ -2089,6 +2181,45 @@ mod tests {
         assert!(singular.definitions.iter().any(|definition| {
             definition.symbol == "r" && definition.description == "residual norm"
         }));
+
+        let semicolon = analyze(
+            "Let $x$ and $u$ be introduced. The former is the state vector; the latter is the control input.",
+        );
+        assert!(
+            semicolon.definitions.iter().any(|definition| {
+                definition.symbol == "u" && definition.description == "control input"
+            }),
+            "{:?}",
+            semicolon.definitions
+        );
+
+        let equation = analyze(
+            "Let $J$ be defined by $J=-D\\nabla c$. This quantity represents species flux, while $D$ is diffusivity and $c$ concentration.",
+        );
+        assert!(
+            equation.definitions.iter().any(|definition| {
+                definition.symbol == "J"
+                    && definition.description.starts_with("species flux")
+                    && definition.evidence.kind == "attached-prose"
+            }),
+            "{:?}",
+            equation.definitions
+        );
+    }
+
+    #[test]
+    fn normalizes_spelled_numeric_extents_before_a_following_clause() {
+        let analysis = analyze(
+            "Let $x$ be a three-dimensional vector and let $x=y$. Inspect $y$ after the equality.",
+        );
+        assert!(
+            analysis.shapes.iter().any(|claim| {
+                claim.symbol == "x" && claim.shape == ProseShape::Vector("3".into())
+            }),
+            "definitions={:?}, shapes={:?}",
+            analysis.definitions,
+            analysis.shapes
+        );
     }
 
     #[test]

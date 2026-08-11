@@ -13,7 +13,7 @@ use crate::shape::ShapeObservations;
 use crate::{
     AssumptionInfo, ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition,
     LawRecognitionStatus, QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo,
-    ScientificConstraintKind, SemanticConstraint, SemanticConstraintKind, ShapeInfo,
+    ScientificConstraintKind, SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -635,7 +635,57 @@ pub(crate) fn observe_laws(
             let relevance = context
                 .domains
                 .relevance(compiled.pack_id, actual.range.start_offset);
-            let latent = relevance.is_none() && !is_capability_pack(compiled.pack_id);
+            let activation = semantic_evidence
+                .law_activation(compiled.pack_id, &compiled.law.id, &actual.range)
+                .or_else(|| {
+                    context.external.law_activation(
+                        actual.range.start_offset,
+                        compiled.pack_id,
+                        &compiled.law.id,
+                    )
+                });
+            equivalence_states += compiled.forms.len() as u32;
+            let candidates = compiled
+                .forms
+                .iter()
+                .flat_map(|form| {
+                    unify_all(
+                        &form.expression,
+                        actual,
+                        &compiled.placeholders,
+                        &BTreeMap::new(),
+                    )
+                    .into_iter()
+                    .map(move |bindings| (Some(form), bindings))
+                })
+                .chain(variadic_balance(compiled, actual).map(|bindings| (None, bindings)))
+                .collect::<Vec<_>>();
+            let attached_role_support = candidates.iter().any(|(_, bindings)| {
+                bindings_have_formula_attached_declared_roles(
+                    &compiled.law.roles,
+                    bindings,
+                    &actual.range,
+                    context.consistency,
+                    context.external,
+                )
+            });
+            if !compiled.law.activation_phrases.is_empty()
+                && activation.is_none()
+                && (!attached_role_support
+                    || recognitions[recognition_start..].iter().any(|recognized| {
+                        laws_share_collision(
+                            &recognized.pack_id,
+                            &recognized.law_id,
+                            compiled.pack_id,
+                            &compiled.law.id,
+                        )
+                    }))
+            {
+                continue;
+            }
+            let latent = relevance.is_none()
+                && !is_capability_pack(compiled.pack_id)
+                && !attached_role_support;
             if latent
                 && recognitions[recognition_start..].iter().all(|recognized| {
                     !laws_share_collision(
@@ -657,34 +707,6 @@ pub(crate) fn observe_laws(
                     traversed_latent = true;
                 }
             }
-            let activation = semantic_evidence
-                .law_activation(compiled.pack_id, &compiled.law.id, &actual.range)
-                .or_else(|| {
-                    context.external.law_activation(
-                        actual.range.start_offset,
-                        compiled.pack_id,
-                        &compiled.law.id,
-                    )
-                });
-            if !compiled.law.activation_phrases.is_empty() && activation.is_none() {
-                continue;
-            }
-            equivalence_states += compiled.forms.len() as u32;
-            let candidates = compiled
-                .forms
-                .iter()
-                .flat_map(|form| {
-                    unify_all(
-                        &form.expression,
-                        actual,
-                        &compiled.placeholders,
-                        &BTreeMap::new(),
-                    )
-                    .into_iter()
-                    .map(move |bindings| (Some(form), bindings))
-                })
-                .chain(variadic_balance(compiled, actual).map(|bindings| (None, bindings)))
-                .collect::<Vec<_>>();
             let Some((matched_form, bindings)) = candidates.into_iter().find(|(_, bindings)| {
                 let supported = roles_are_supported(
                     &compiled.law.roles,
@@ -1812,6 +1834,47 @@ fn roles_are_supported(
                 })
         })
     })
+}
+
+fn bindings_have_formula_attached_declared_roles(
+    roles: &[PackLawRole],
+    bindings: &BTreeMap<String, SemanticExpr>,
+    formula_range: &SourceRange,
+    consistency: &RoleObservations,
+    external: &ExternalTypeEnvironment,
+) -> bool {
+    if roles.is_empty() {
+        return false;
+    }
+    let offset = formula_range.start_offset;
+    let all_roles_are_declared = roles.iter().all(|role| {
+        bindings.get(&role.id).is_some_and(|expression| {
+            let symbols = semantic_symbols(expression);
+            !symbols.is_empty()
+                && symbols.into_iter().all(|symbol| {
+                    consistency
+                        .roles_at(&symbol, offset)
+                        .0
+                        .iter()
+                        .any(|claim| claim.concept_id == role.concept)
+                        || external.has_role(offset, &symbol, &role.concept)
+                })
+        })
+    });
+    let one_role_is_attached_to_formula = roles.iter().any(|role| {
+        bindings.get(&role.id).is_some_and(|expression| {
+            semantic_symbols(expression).into_iter().any(|symbol| {
+                consistency.roles_at(&symbol, offset).0.iter().any(|claim| {
+                    claim.concept_id == role.concept
+                        && claim.evidence.source_ranges.iter().any(|range| {
+                            range.start_offset <= formula_range.start_offset
+                                && formula_range.end_offset <= range.end_offset
+                        })
+                })
+            })
+        })
+    });
+    all_roles_are_declared && one_role_is_attached_to_formula
 }
 
 fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {

@@ -113,6 +113,7 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
             work_items += 1;
             apply_relation(&mut known, relation_id, relation, evidence, &mut truncated);
         }
+        apply_composed_relations(&mut known, &relations, &mut truncated);
         if known.len() == before || truncated {
             break;
         }
@@ -145,6 +146,73 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
         conflicts,
         work_items,
         truncated,
+    }
+}
+
+fn apply_composed_relations(
+    known: &mut BTreeMap<FactKey, Proof>,
+    relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    truncated: &mut bool,
+) {
+    for (derivative_id, derivative, derivative_evidence) in relations {
+        let ClaimRelation::Derivative {
+            result,
+            operand,
+            variable: Some(_),
+            ..
+        } = derivative
+        else {
+            continue;
+        };
+        for (application_id, application, application_evidence) in relations {
+            let ClaimRelation::Application {
+                result: application_result,
+                function,
+                arguments,
+                ..
+            } = application
+            else {
+                continue;
+            };
+            if application_result != operand || arguments.is_empty() {
+                continue;
+            }
+            let Some((shape, proof)) = first_fact(known, function, &ClaimPredicate::HasShape)
+            else {
+                continue;
+            };
+            if matches!(
+                shape,
+                ClaimValue::Shape(ClaimShape::Function { .. } | ClaimShape::Unknown)
+            ) {
+                continue;
+            }
+            let bridge = Proof {
+                parents: BTreeSet::from([application_id.clone()]),
+                provenance: application_evidence
+                    .provenance
+                    .iter()
+                    .cloned()
+                    .chain(std::iter::once(application_evidence.source.clone()))
+                    .collect(),
+                available_after: application_evidence.available_after,
+                rule_id: "semath/constraint/application-trajectory".into(),
+                derived: true,
+            };
+            insert_derived(
+                known,
+                FactKey {
+                    subject: result.clone(),
+                    predicate: ClaimPredicate::HasShape,
+                    value: shape,
+                },
+                &[proof, bridge],
+                derivative_id,
+                derivative_evidence,
+                "semath/constraint/trajectory-derivative-shape",
+                truncated,
+            );
+        }
     }
 }
 
@@ -1273,6 +1341,48 @@ mod tests {
                             denominator: 1,
                         },
                     ])
+        }));
+    }
+
+    #[test]
+    fn derivative_of_a_vector_valued_trajectory_preserves_its_shape() {
+        let (trajectory, argument, applied, derivative, variable) =
+            (entity(1), entity(2), entity(3), entity(4), entity(5));
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "trajectory-shape",
+                trajectory.clone(),
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Vector(vec!["n".into()])),
+            ),
+            input_claim(
+                "application",
+                applied.clone(),
+                ClaimPredicate::Relates,
+                ClaimValue::Relation(Box::new(ClaimRelation::Application {
+                    result: applied.clone(),
+                    function: trajectory,
+                    arguments: vec![argument],
+                    canonical_digest: "application".into(),
+                })),
+            ),
+            input_claim(
+                "derivative",
+                derivative.clone(),
+                ClaimPredicate::Relates,
+                ClaimValue::Relation(Box::new(ClaimRelation::Derivative {
+                    result: derivative.clone(),
+                    operand: applied,
+                    variable: Some(variable),
+                    order: 1,
+                    canonical_digest: "derivative".into(),
+                })),
+            ),
+        ]);
+        assert!(plan.derivations.iter().any(|derived| {
+            derived.subject == derivative
+                && derived.predicate == ClaimPredicate::HasShape
+                && derived.value == ClaimValue::Shape(ClaimShape::Vector(vec!["n".into()]))
         }));
     }
 

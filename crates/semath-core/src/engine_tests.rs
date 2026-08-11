@@ -117,6 +117,33 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
 }
 
 #[test]
+fn projects_vector_shape_through_a_trajectory_derivative() {
+    let content =
+        "Let $x(t)$ be an n-dimensional state vector. Inspect its derivative $\\dot{x}(t)$.";
+    let offset = content.find("dot{x}").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let symbol = view.symbol.expect("expected derivative symbol information");
+    assert!(
+        symbol.shapes.iter().any(|shape| shape.kind == "vector"),
+        "expected a propagated vector shape; symbol={symbol:?}",
+    );
+}
+
+#[test]
 fn coalesces_overlapping_prose_definitions_into_one_entity() {
     let content = "The declarations $x_r\\in\\mathbb R^n$, $u_r\\in\\mathbb R^m$, $A_r\\in\\mathbb R^{n\\times n}$, and $B_r\\in\\mathbb R^{n\\times m}$ apply throughout.\nLet $x_r$, $A_r$, $B_r$, and $u_r$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n\\[\\dot{x_r} = A_r{x_r}+B_r{u_r}\\]";
     let mut engine = SemathEngine::default();
@@ -874,5 +901,35 @@ fn incremental_project_type_refresh_matches_a_clean_rebuild() {
     assert_eq!(
         serde_json::to_value(incremental_value).unwrap(),
         serde_json::to_value(clean_value).unwrap()
+    );
+}
+
+#[test]
+fn equality_rhs_identity_projects_the_transferred_shape_at_later_uses() {
+    let content =
+        "Let $x$ be a three-dimensional vector and let $x=y$. Inspect $y$ after the equality.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.rfind("$y$").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let symbol = view.symbol.expect("expected y symbol information");
+    assert!(
+        symbol
+            .shapes
+            .iter()
+            .any(|shape| { shape.kind == "vector" && shape.dimensions == ["3".to_owned()] }),
+        "{:?}",
+        symbol.shapes
     );
 }
