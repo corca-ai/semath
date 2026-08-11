@@ -47,6 +47,33 @@ holds approved support policy; GitHub issues hold planned work.
   eight notation, discourse, lifecycle, safety, mathematics, and engineering
   families. The current engine passes 32 of 32 with zero false establishment,
   false conflict, or missed-coverage risk under the reviewed targets.
+- The v0.27 authored document baseline was run manually against Semath commit
+  `0380421` after its 96 development scenarios were reviewed and its 48 holdout
+  scenarios were separately reviewed and frozen before engine execution.
+  Development passes 7 of 115 probes
+  with risk 484; the now-exposed historical holdout passes 4 of 97 with risk
+  732. Both splits have zero false establishment and zero false conflict. The
+  failures localize as follows:
+
+  | First loss | Development | Holdout |
+  | --- | ---: | ---: |
+  | Neutral syntax | 0 | 0 |
+  | Prose attachment | 28 | 18 |
+  | Identity or scope | 30 | 49 |
+  | Canonical IR | 11 | 1 |
+  | Typed fact or condition | 6 | 0 |
+  | Local-to-observation propagation | 0 | 0 |
+  | Pack unification | 29 | 24 |
+  | Decision | 4 | 1 |
+  | Host projection | Not exercised | Not exercised |
+
+  The baseline reuses the existing recognition-frontier signals and queries
+  each reviewed relation at its original equation. A zero propagation count
+  therefore means no failing expected relation survived local recognition; it
+  does not prove that propagation is complete. The measured order of work is
+  identity/scope, local pack and prose recognition, then canonical or typed
+  gaps. Host parity remains release evidence rather than a native-baseline
+  inference.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -87,6 +114,9 @@ field completeness.
 | Category | Current limitation | Affected evidence |
 | --- | --- | --- |
 | Coverage | Evaluated vertical slices do not yet provide broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
+| Document identity | Realistic symbol boundaries, declarations, edits, and scoped reuse frequently lose the intended entity | 79 of 201 failed authored probes localize first to identity or scope |
+| Local recognition | Existing prose events and pack unification do not yet retain enough evidence from realistic exposition | 105 of 201 failed authored probes localize to attachment, typed facts, or pack unification |
+| Canonical structure | A smaller set of reviewed formulas loses reusable structure before matching | 12 of 201 failed authored probes localize to canonical IR |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by
