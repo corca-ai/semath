@@ -10,7 +10,6 @@ import {
 } from "./recognition-frontier";
 
 const signals: RecognitionFrontierSignals = {
-  canonicalAvailable: true,
   decision: "partial",
   discourseEvidence: true,
   engineLimited: false,
@@ -46,7 +45,7 @@ describe("recognition frontier", () => {
       classifyRecognitionFrontier({ ...signals, syntaxAvailable: false }),
     ).toBe("syntax-unavailable");
     expect(
-      classifyRecognitionFrontier({ ...signals, canonicalAvailable: false }),
+      classifyRecognitionFrontier({ ...signals, engineLimited: true }),
     ).toBe("canonical-unsupported");
     expect(
       classifyRecognitionFrontier({ ...signals, discourseEvidence: false }),
@@ -81,7 +80,6 @@ describe("recognition frontier", () => {
   test("derives evidence signals without a second matcher", () => {
     const view = semanticView();
     expect(frontierSignals(view, true)).toEqual({
-      canonicalAvailable: true,
       decision: "partial",
       discourseEvidence: true,
       engineLimited: false,
@@ -91,6 +89,39 @@ describe("recognition frontier", () => {
       syntaxAvailable: true,
       typeOrConditionEvidence: true,
     });
+  });
+
+  test("does not mistake an empty public projection for a canonical loss", () => {
+    const populated = semanticView();
+    const view: SemanticViewInfo = {
+      context: {
+        candidates: [],
+        claims: [],
+        concepts: populated.context.concepts,
+        quantities: populated.context.quantities,
+        relations: populated.context.relations,
+        truncated: populated.context.truncated,
+      },
+      decision: {
+        reasons: [
+          {
+            evidence: [],
+            kind: "uncertainty",
+            label: "No source-supported interpretation is currently available.",
+          },
+        ],
+        status: "unsupported",
+      },
+      declarations: populated.declarations,
+      diagnostics: populated.diagnostics,
+      domains: populated.domains,
+      truncated: populated.truncated,
+    };
+    const emptyProjection = frontierSignals(view, true);
+    expect(emptyProjection.engineLimited).toBeFalse();
+    expect(classifyRecognitionFrontier(emptyProjection)).toBe(
+      "discourse-evidence-missing",
+    );
   });
 
   test("weights false certainty above missed coverage", () => {

@@ -18,7 +18,6 @@ export type RecognitionFrontierStage =
 export type RecognitionDecision = SemanticViewInfo["decision"]["status"];
 
 export interface RecognitionFrontierSignals {
-  readonly canonicalAvailable: boolean;
   readonly decision: RecognitionDecision;
   readonly discourseEvidence: boolean;
   readonly engineLimited: boolean;
@@ -89,7 +88,7 @@ export function classifyRecognitionFrontier(
   }
   if (signals.decision === "ambiguous") return "genuine-ambiguity";
   if (signals.decision === "established") return "established";
-  if (!signals.canonicalAvailable || signals.engineLimited) {
+  if (signals.engineLimited) {
     return "canonical-unsupported";
   }
   if (!signals.discourseEvidence) return "discourse-evidence-missing";
@@ -111,10 +110,6 @@ export function frontierSignals(
       conflict.evidence.some((evidence) => evidence.sourceRanges.length > 0),
     );
   return {
-    canonicalAvailable:
-      Boolean(view.symbol) ||
-      view.context.candidates.length > 0 ||
-      view.context.relations.length > 0,
     decision: view.decision.status,
     discourseEvidence:
       view.context.claims.length > 0 ||
