@@ -15,6 +15,7 @@ export interface SemanticEvaluationCase {
     readonly edge?: "after" | "before";
     readonly fileId: string;
     readonly needle: string;
+    readonly occurrence?: number;
     readonly offset?: number;
   };
   readonly documents: readonly CorpusDocument[];
@@ -25,10 +26,25 @@ export function semanticEvaluationCursorOffset(
   content: string,
   cursor: SemanticEvaluationCase["cursor"],
 ): number {
-  const first = content.indexOf(cursor.needle);
-  const last = content.lastIndexOf(cursor.needle);
-  if (first < 0 || first !== last) {
-    throw new Error("cursor needle must occur exactly once");
+  const matches: number[] = [];
+  for (
+    let offset = content.indexOf(cursor.needle);
+    offset >= 0;
+    offset = content.indexOf(
+      cursor.needle,
+      offset + Math.max(cursor.needle.length, 1),
+    )
+  ) {
+    matches.push(offset);
+  }
+  const first = matches[cursor.occurrence ?? 0];
+  if (
+    first === undefined ||
+    (matches.length > 1 && cursor.occurrence === undefined)
+  ) {
+    throw new Error(
+      "cursor needle must be unique or select a valid occurrence",
+    );
   }
   if (cursor.offset !== undefined) return first + cursor.offset;
   return cursor.edge === "after" ? first + cursor.needle.length : first;
