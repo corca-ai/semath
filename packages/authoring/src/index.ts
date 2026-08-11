@@ -24,6 +24,12 @@ export interface PackCanonicalForm {
 }
 
 export interface PackAuthoringReport {
+  archetypes: readonly {
+    adoptedLaws: readonly string[];
+    archetypeId: string;
+    matchingLaws: readonly string[];
+    parameterSlots: readonly string[];
+  }[];
   collisions: readonly {
     distinguishingEvidence: readonly string[];
     leftRelationId: string;
@@ -40,7 +46,7 @@ export interface PackAuthoringReport {
     quantityKinds: number;
     units: number;
   }[];
-  schemaVersion: 2;
+  schemaVersion: 3;
   signatures: readonly {
     capabilities: readonly string[];
     dependencies: readonly string[];
@@ -54,7 +60,7 @@ export interface PackAuthoringReport {
 }
 
 export interface PackAuthoringRequest {
-  schemaVersion: 2;
+  schemaVersion: 3;
   sources: readonly { path: string; source: string }[];
 }
 
@@ -102,7 +108,10 @@ export interface ScorecardComparison {
   unchanged: readonly string[];
 }
 
-export function projectValidatedPack(value: unknown): AuthoringPack {
+export function projectValidatedPack(
+  value: unknown,
+  compiledForms: readonly PackCanonicalForm[] = [],
+): AuthoringPack {
   if (!isRecord(value)) throw new Error("validated pack must be an object");
   const packId = requiredString(value.packId, "validated pack.packId");
   const title = requiredString(value.title, "validated pack.title");
@@ -133,7 +142,12 @@ export function projectValidatedPack(value: unknown): AuthoringPack {
         activationPhrases: (candidate.activationPhrases ?? []).map((phrase, phraseIndex) =>
           requiredString(phrase, `${path}.activationPhrases[${phraseIndex}]`),
         ),
-        canonicalRelation: requiredString(candidate.canonicalRelation, `${path}.canonicalRelation`),
+        canonicalRelation: requiredString(
+          candidate.canonicalRelation ?? compiledForms.find(
+            (form) => form.packId === packId && form.lawId === candidate.id && form.formIndex === 0,
+          )?.source,
+          `${path}.canonicalRelation`,
+        ),
         id: requiredString(candidate.id, `${path}.id`),
         representations: (candidate.representations ?? []).map((form, formIndex) =>
           requiredString(form, `${path}.representations[${formIndex}]`),

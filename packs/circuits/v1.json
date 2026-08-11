@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "circuits",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -118,7 +118,14 @@
       "references": [
         "engineering-circuits"
       ],
-      "canonicalRelation": "voltage = resistance current"
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "voltage",
+          "left-factor": "resistance",
+          "right-factor": "current"
+        }
+      }
     },
     {
       "id": "kirchhoff-current-law",

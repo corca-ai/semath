@@ -162,7 +162,7 @@ opaque, and a command name is never treated as its expansion meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 8 describes namespaced concepts and reviewed English aliases, typed law
+Schema 9 describes namespaced concepts and reviewed English aliases, typed law
 roles, one canonical relation with optional surface representations, conditions,
 activation evidence, quantities, units, and references. Activation evidence is
 either a reviewed prose phrase or a closed
@@ -180,6 +180,15 @@ sorted catalog discovers versioned pack JSON without a handwritten Rust
 registry; the same compiler report is exposed through WASM to authoring tools.
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
+
+The authoring compiler owns a small closed catalog of relation archetypes that
+are admitted only after the catalog demonstrates the same structural skeleton
+in at least two independently named laws and fields. A law may bind every one
+of its roles exactly once to an archetype slot instead of repeating the
+canonical relation. Compilation expands that use immediately into an ordinary
+`PackLaw`; archetype IDs, slots, and branches never enter the runtime IR. The
+compiler report lists structural matches and adopted laws so abstractions stay
+evidence-driven and reviewable.
 
 The compiler also derives two reviewable artifacts from the same catalog. A
 domain signature contains normalized terms with their originating concept,

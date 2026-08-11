@@ -391,7 +391,10 @@ pub(crate) fn laws_share_collision(
     COLLISION_PAIRS.contains(&(pair[0].clone(), pair[1].clone()))
 }
 
-fn expression_shape_key(expression: &SemanticExpr, placeholders: &BTreeSet<String>) -> String {
+pub(crate) fn expression_shape_key(
+    expression: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+) -> String {
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => {
             if placeholders.contains(symbol) {

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "linear-algebra",
   "packVersion": "1.2.0",
   "packKind": "field",
@@ -87,7 +87,14 @@
       "references": [
         "matrix-computations"
       ],
-      "canonicalRelation": "result = operator vector"
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "result",
+          "left-factor": "operator",
+          "right-factor": "vector"
+        }
+      }
     },
     {
       "id": "matrix-matrix-product",
@@ -127,7 +134,14 @@
       "references": [
         "matrix-computations"
       ],
-      "canonicalRelation": "result = left right"
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "result",
+          "left-factor": "left",
+          "right-factor": "right"
+        }
+      }
     },
     {
       "id": "matrix-transpose-definition",

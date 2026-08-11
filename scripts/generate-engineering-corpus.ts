@@ -1,10 +1,11 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, readdir, writeFile } from "node:fs/promises";
 import {
   generateLawDiversityCorpus,
   parseSyntheticDiversitySpec,
   type Corpus,
 } from "../packages/evaluation/src/index";
 import {
+  type PackAuthoringReport,
   projectValidatedPack,
   scaffoldPackWorkspace,
 } from "../packages/authoring/src/index";
@@ -62,11 +63,38 @@ const suites: readonly EngineeringSuite[] = [
   },
 ];
 
+const packDirectories = (await readdir(new URL("packs/", root), { withFileTypes: true }))
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
+const packSources = new Map(await Promise.all(
+  packDirectories.map(async (directory) => {
+    const path = `packs/${directory}/v1.json`;
+    return [
+    path,
+    await readFile(new URL(path, root), "utf8"),
+    ] as const;
+  }),
+));
+const wasm = await import("../lib/wasm/semath_wasm.js");
+const wasmBytes = await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url));
+await wasm.default({ module_or_path: wasmBytes });
+const authoringReport = JSON.parse(new TextDecoder().decode(wasm.inspectPackCatalog(
+  new TextEncoder().encode(JSON.stringify({
+    schemaVersion: 3,
+    sources: [...packSources].map(([path, source]) => ({ path, source })),
+  })),
+))) as PackAuthoringReport;
+if (authoringReport.diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
+  throw new Error("pack compiler rejected the engineering catalog");
+}
+
 let total = 0;
 for (const suite of suites) {
-  const pack = projectValidatedPack(JSON.parse(
-    await readFile(new URL(suite.packPath, root), "utf8"),
-  ));
+  const pack = projectValidatedPack(
+    JSON.parse(packSources.get(suite.packPath)!),
+    authoringReport.forms,
+  );
   const seed = scaffoldPackWorkspace(pack).corpus.cases.filter((item) =>
     !suite.lawIds || ("lawId" in item && suite.lawIds.includes(item.lawId))
   );

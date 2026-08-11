@@ -9,6 +9,7 @@ import {
   compareScorecards,
   findCorpusTagProblems,
   findForbiddenRuntimeBranches,
+  projectValidatedPack,
   scaffoldPackWorkspace,
 } from "./index";
 
@@ -35,6 +36,25 @@ const pack = {
 } as const;
 
 describe("pack authoring policies", () => {
+  test("projects authoring archetypes only from Rust-compiled law forms", () => {
+    const source = {
+      ...pack,
+      laws: [{
+        ...pack.laws[0],
+        archetype: { id: "binary-product", slots: {} },
+        canonicalRelation: undefined,
+      }],
+    };
+    const projected = projectValidatedPack(source, [{
+      canonical: "relation(equals,symbol(output),product(symbol(coefficient),symbol(input)))",
+      formIndex: 0,
+      lawId: "scaled-output",
+      packId: "sample-field",
+      source: "output = coefficient input",
+    }]);
+    expect(projected.laws[0]!.canonicalRelation).toBe("output = coefficient input");
+  });
+
   test("scaffolds balanced, varied, strict probe evidence", () => {
     const workspace = scaffoldPackWorkspace(pack);
     expect(workspace.corpus.cases).toHaveLength(10);
