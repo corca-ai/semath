@@ -64,7 +64,7 @@ async function initialize([directory, packId]) {
   const source = wasm.createPackTemplate(packId);
   const report = inspect(wasm, [{ path: "pack.json", source }]);
   assertCompilerClean(report);
-  const workspace = scaffoldPackWorkspace(projectValidatedPack(JSON.parse(source)));
+  const workspace = scaffoldPackWorkspace(projectValidatedPack(JSON.parse(source), report.forms));
   await writeNew(join(target, "pack.json"), source);
   await writeNew(join(target, "corpus.json"), pretty(workspace.corpus));
   await writeNew(join(target, "manifest.json"), pretty(workspace.manifest));
@@ -80,7 +80,7 @@ async function validateCommand(paths) {
   printCompilerReport(report);
   assertCompilerClean(report);
   const properties = planPackPropertyCells(
-    sources.map((source) => projectValidatedPack(JSON.parse(source.source))),
+    sources.map((source) => projectValidatedPack(JSON.parse(source.source), report.forms)),
     20,
   );
   console.log(`semantic property plan OK: ${properties.length} required law cells`);
@@ -93,7 +93,9 @@ async function scaffoldCommand([packPath, directory]) {
   const report = inspect(wasm, [source]);
   printCompilerReport(report);
   assertCompilerClean(report);
-  const workspace = scaffoldPackWorkspace(projectValidatedPack(JSON.parse(source.source)));
+  const workspace = scaffoldPackWorkspace(
+    projectValidatedPack(JSON.parse(source.source), report.forms),
+  );
   const target = resolve(directory);
   await mkdir(target, { recursive: true });
   await writeNew(join(target, "corpus.json"), pretty(workspace.corpus));
@@ -188,7 +190,7 @@ async function loadWasm() {
 }
 
 function inspect(wasm, sources) {
-  const payload = new TextEncoder().encode(JSON.stringify({ schemaVersion: 2, sources }));
+  const payload = new TextEncoder().encode(JSON.stringify({ schemaVersion: 3, sources }));
   return JSON.parse(new TextDecoder().decode(wasm.inspectPackCatalog(payload)));
 }
 
@@ -255,6 +257,11 @@ function printCompilerReport(report) {
   }
   for (const form of report.forms) {
     console.log(`${form.packId}/${form.lawId}[${form.formIndex}]: ${form.canonical}`);
+  }
+  for (const archetype of report.archetypes) {
+    console.log(
+      `archetype ${archetype.archetypeId}: ${archetype.adoptedLaws.length}/${archetype.matchingLaws.length} matching laws adopted`,
+    );
   }
   console.log(
     `compiler OK: ${report.packs.length} pack(s), ${report.signatures.length} domain signature(s), ${report.collisions.length} structural collision(s), ${report.forms.length} canonical form(s), ${report.diagnostics.length} diagnostic(s)`,

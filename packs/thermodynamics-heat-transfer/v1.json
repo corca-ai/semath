@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "thermodynamics-heat-transfer",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -275,7 +275,15 @@
       "references": [
         "heat-transfer"
       ],
-      "canonicalRelation": "heat-transfer = mass specific-heat temperature-change"
+      "archetype": {
+        "id": "ternary-product",
+        "slots": {
+          "result": "heat-transfer",
+          "first-factor": "mass",
+          "second-factor": "specific-heat",
+          "third-factor": "temperature-change"
+        }
+      }
     },
     {
       "id": "plane-wall-conduction-rate",
@@ -349,7 +357,16 @@
       "references": [
         "heat-transfer"
       ],
-      "canonicalRelation": "heat-transfer-rate = conductivity area temperature-change / length"
+      "archetype": {
+        "id": "ternary-product-ratio",
+        "slots": {
+          "result": "heat-transfer-rate",
+          "first-factor": "conductivity",
+          "second-factor": "area",
+          "third-factor": "temperature-change",
+          "denominator": "length"
+        }
+      }
     },
     {
       "id": "closed-system-first-law",
@@ -460,7 +477,15 @@
       "references": [
         "heat-transfer"
       ],
-      "canonicalRelation": "heat-transfer-rate = coefficient area temperature-change"
+      "archetype": {
+        "id": "ternary-product",
+        "slots": {
+          "result": "heat-transfer-rate",
+          "first-factor": "coefficient",
+          "second-factor": "area",
+          "third-factor": "temperature-change"
+        }
+      }
     },
     {
       "id": "thermal-resistance-rate",
@@ -501,7 +526,14 @@
       "references": [
         "heat-transfer"
       ],
-      "canonicalRelation": "temperature-change = heat-transfer-rate resistance"
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "temperature-change",
+          "left-factor": "heat-transfer-rate",
+          "right-factor": "resistance"
+        }
+      }
     },
     {
       "id": "fourier-conduction",
@@ -541,7 +573,14 @@
       "references": [
         "heat-transfer"
       ],
-      "canonicalRelation": "flux = -conductivity \\nabla temperature"
+      "archetype": {
+        "id": "negative-gradient-transport",
+        "slots": {
+          "flux": "flux",
+          "coefficient": "conductivity",
+          "field": "temperature"
+        }
+      }
     },
     {
       "id": "ideal-gas",

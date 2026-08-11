@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "classical-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -107,7 +107,14 @@
       "references": [
         "classical-mechanics"
       ],
-      "canonicalRelation": "net-force = mass acceleration",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "net-force",
+          "left-factor": "mass",
+          "right-factor": "acceleration"
+        }
+      },
       "representations": [
         "net-force = mass \\cdot acceleration"
       ]
@@ -262,7 +269,14 @@
       "references": [
         "classical-mechanics"
       ],
-      "canonicalRelation": "momentum = mass velocity",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "momentum",
+          "left-factor": "mass",
+          "right-factor": "velocity"
+        }
+      },
       "representations": [
         "momentum = mass \\cdot velocity"
       ]

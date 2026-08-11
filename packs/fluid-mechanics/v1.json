@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "fluid-mechanics",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -266,7 +266,14 @@
       "references": [
         "fluid-mechanics"
       ],
-      "canonicalRelation": "flow-rate = area velocity",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "flow-rate",
+          "left-factor": "area",
+          "right-factor": "velocity"
+        }
+      },
       "representations": [
         "flow-rate = area \\cdot velocity"
       ]
@@ -332,7 +339,15 @@
       "references": [
         "fluid-mechanics"
       ],
-      "canonicalRelation": "mass-flow-rate = density area velocity"
+      "archetype": {
+        "id": "ternary-product",
+        "slots": {
+          "result": "mass-flow-rate",
+          "first-factor": "density",
+          "second-factor": "area",
+          "third-factor": "velocity"
+        }
+      }
     },
     {
       "id": "hydrostatic-pressure",
@@ -396,7 +411,15 @@
       "references": [
         "fluid-mechanics"
       ],
-      "canonicalRelation": "pressure = density acceleration height"
+      "archetype": {
+        "id": "ternary-product",
+        "slots": {
+          "result": "pressure",
+          "first-factor": "density",
+          "second-factor": "acceleration",
+          "third-factor": "height"
+        }
+      }
     },
     {
       "id": "steady-incompressible-continuity",
@@ -547,7 +570,16 @@
       "references": [
         "fluid-mechanics"
       ],
-      "canonicalRelation": "reynolds-number = density velocity length / viscosity"
+      "archetype": {
+        "id": "ternary-product-ratio",
+        "slots": {
+          "result": "reynolds-number",
+          "first-factor": "density",
+          "second-factor": "velocity",
+          "third-factor": "length",
+          "denominator": "viscosity"
+        }
+      }
     },
     {
       "id": "steady-momentum-flux",
@@ -588,7 +620,14 @@
       "references": [
         "fluid-mechanics"
       ],
-      "canonicalRelation": "force = mass-flow-rate velocity-change"
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "force",
+          "left-factor": "mass-flow-rate",
+          "right-factor": "velocity-change"
+        }
+      }
     },
     {
       "id": "fick-diffusion",
@@ -631,7 +670,14 @@
       "references": [
         "fluid-mechanics"
       ],
-      "canonicalRelation": "flux = -diffusivity \\nabla concentration"
+      "archetype": {
+        "id": "negative-gradient-transport",
+        "slots": {
+          "flux": "flux",
+          "coefficient": "diffusivity",
+          "field": "concentration"
+        }
+      }
     },
     {
       "id": "newtonian-shear",

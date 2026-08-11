@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath compiles schema-8 JSON packs into one bounded Rust semantic
+Semath compiles schema-9 JSON packs into one bounded Rust semantic
 runtime. Packs contain concepts, roles, laws, canonical relations, optional
 representations, conditions,
 quantities, units, activation evidence, and references. They contain no
@@ -24,7 +24,7 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 8`, stable identity and SemVer, dependencies,
+Each pack declares `schemaVersion: 9`, stable identity and SemVer, dependencies,
 concepts, and typed laws. Concepts may declare reviewed English aliases. A law
 supplies exactly one `canonicalRelation`, optional presentation
 `representations`, and roles with a required semantic concept
@@ -36,13 +36,21 @@ and unsupported conditions without interpreting free-form prose. Activation
 rules carry reviewed prose `phrases` and closed structural kinds; the removed
 `patterns` field is not accepted as a compatibility alias.
 
+For relation skeletons repeated across independent laws and fields, a law may
+replace `canonicalRelation` with one reviewed `archetype` and an exact
+role-to-slot binding. Slots must bind every law role once. The Rust authoring
+compiler expands the specialization to the same `PackLaw` IR before runtime;
+there is no archetype runtime, fallback, or second matcher. The compiler report
+shows matching and adopted laws, and duplicate or incomplete expansions fail
+validation.
+
 The Rust compiler rejects unknown fields, duplicate identities, dependency
 cycles, missing or wrong-kind targets, invalid capability edges, inconsistent
 dimensions, and malformed law forms. Diagnostics identify the source file and
 JSON path. All laws enter the same generic unifier. A pack or law ID branch in
 analysis code indicates a missing core abstraction.
 
-The authoring report schema is version 2. Alongside diagnostics and canonical
+The authoring report schema is version 3. Alongside diagnostics and canonical
 forms it exposes catalog-derived domain signatures and a deterministic
 cross-pack collision atlas. Authors review ambiguity and refusal ownership from
 this report; generated reports remain build artifacts rather than checked-in
@@ -75,7 +83,7 @@ automatic; no Rust registry or recognizer branch is edited. Then use
 reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of editable positive and refusal seeds,
-not evidence of maturity by itself. The checked-in schema-8 pack files and the
+not evidence of maturity by itself. The checked-in schema-9 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

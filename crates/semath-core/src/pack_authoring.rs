@@ -3,14 +3,16 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::canonical::canonical_template;
-use crate::domain_signature::{compile_collision_atlas, compile_domain_signatures};
+use crate::domain_signature::{
+    compile_collision_atlas, compile_domain_signatures, expression_shape_key,
+};
 use crate::pack::{
-    DomainPack, PackActivationRule, PackCapabilities, PackConcept, PackConditionKind, PackKind,
-    PackLaw, PackLawCondition, PackLawRole, PackReference, PackValidationError, compile_pack,
-    validate_catalog,
+    DomainPack, LAW_ARCHETYPES, PackActivationRule, PackCapabilities, PackConcept,
+    PackConditionKind, PackKind, PackLaw, PackLawCondition, PackLawRole, PackReference,
+    PackValidationError, authored_law_archetypes, compile_pack, validate_catalog,
 };
 
-pub const PACK_AUTHORING_SCHEMA_VERSION: u32 = 2;
+pub const PACK_AUTHORING_SCHEMA_VERSION: u32 = 3;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -90,6 +92,15 @@ pub struct PackLawCollision {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct PackArchetypeReport {
+    pub archetype_id: String,
+    pub parameter_slots: Vec<String>,
+    pub matching_laws: Vec<String>,
+    pub adopted_laws: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct PackAuthoringReport {
     pub schema_version: u32,
     pub diagnostics: Vec<PackAuthoringDiagnostic>,
@@ -97,6 +108,7 @@ pub struct PackAuthoringReport {
     pub packs: Vec<PackAuthoringSummary>,
     pub signatures: Vec<PackDomainSignature>,
     pub collisions: Vec<PackLawCollision>,
+    pub archetypes: Vec<PackArchetypeReport>,
 }
 
 pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringReport {
@@ -204,6 +216,7 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
             distinguishing_evidence: collision.distinguishing_evidence,
         })
         .collect();
+    let archetypes = compile_archetype_report(&compiled, &request.sources);
     let packs = compiled
         .into_iter()
         .map(|(_, pack)| PackAuthoringSummary {
@@ -222,7 +235,96 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
         packs,
         signatures,
         collisions,
+        archetypes,
     }
+}
+
+fn compile_archetype_report(
+    compiled: &[(String, DomainPack)],
+    sources: &[PackSource],
+) -> Vec<PackArchetypeReport> {
+    let adopted = compiled
+        .iter()
+        .flat_map(|(path, pack)| {
+            sources
+                .iter()
+                .find(|source| source.path == *path)
+                .into_iter()
+                .flat_map(move |source| {
+                    authored_law_archetypes(&source.source)
+                        .into_iter()
+                        .map(move |use_| {
+                            (
+                                use_.archetype_id,
+                                format!("{}:{}", pack.pack_id, use_.law_id),
+                            )
+                        })
+                })
+        })
+        .fold(
+            BTreeMap::<String, BTreeSet<String>>::new(),
+            |mut by_id, (id, law)| {
+                by_id.entry(id).or_default().insert(law);
+                by_id
+            },
+        );
+    LAW_ARCHETYPES
+        .iter()
+        .map(|archetype| {
+            let role_names = archetype
+                .slots
+                .iter()
+                .enumerate()
+                .map(|(index, slot)| (*slot, format!("slot{index}")))
+                .collect::<BTreeMap<_, _>>();
+            let relation = archetype
+                .slots
+                .iter()
+                .fold(archetype.canonical_relation.to_owned(), |relation, slot| {
+                    relation.replace(&format!("{{{slot}}}"), &role_names[slot])
+                });
+            let placeholders = role_names.values().cloned().collect::<BTreeSet<_>>();
+            let structural_key =
+                expression_shape_key(&canonical_template_expression(&relation), &placeholders);
+            let matching_laws = compiled
+                .iter()
+                .flat_map(|(_, pack)| {
+                    pack.laws.iter().filter_map(|law| {
+                        let roles = law
+                            .roles
+                            .iter()
+                            .map(|role| role.id.clone())
+                            .collect::<BTreeSet<_>>();
+                        law.relations()
+                            .any(|relation| {
+                                expression_shape_key(
+                                    &canonical_template_expression(relation),
+                                    &roles,
+                                ) == structural_key
+                            })
+                            .then(|| format!("{}:{}", pack.pack_id, law.id))
+                    })
+                })
+                .collect::<BTreeSet<_>>()
+                .into_iter()
+                .collect();
+            PackArchetypeReport {
+                archetype_id: archetype.id.into(),
+                parameter_slots: archetype.slots.iter().map(|slot| (*slot).into()).collect(),
+                matching_laws,
+                adopted_laws: adopted
+                    .get(archetype.id)
+                    .into_iter()
+                    .flatten()
+                    .cloned()
+                    .collect(),
+            }
+        })
+        .collect()
+}
+
+fn canonical_template_expression(source: &str) -> crate::canonical::SemanticExpr {
+    crate::canonical::lower_template(source)
 }
 
 pub fn inspect_pack_catalog_json(payload: &[u8]) -> Result<Vec<u8>, serde_json::Error> {
@@ -459,7 +561,15 @@ fn diagnostic_entity(error: &PackValidationError) -> Option<String> {
 }
 
 fn diagnostic_code(error: &PackValidationError) -> &'static str {
-    if error.message.contains("unknown field") {
+    if error
+        .message
+        .contains("duplicates another canonical law form")
+        || error
+            .message
+            .contains("duplicates the archetype-expanded canonical law form")
+    {
+        "form.duplicate-canonical"
+    } else if error.message.contains("unknown field") {
         "schema.unknown-field"
     } else if error.message.contains("duplicate id") {
         "schema.duplicate-id"
@@ -556,17 +666,17 @@ fn valid_id_part(value: &str, first_part: bool) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pack::built_in_packs;
+    use crate::pack::{built_in_pack_sources, built_in_packs};
 
     #[test]
     fn inspects_the_authoritative_catalog_and_canonical_forms() {
         let report = inspect_pack_catalog(PackAuthoringRequest {
             schema_version: PACK_AUTHORING_SCHEMA_VERSION,
-            sources: built_in_packs()
+            sources: built_in_pack_sources()
                 .iter()
-                .map(|pack| PackSource {
-                    path: format!("packs/{}/v1.json", pack.pack_id),
-                    source: serde_json::to_string(pack).unwrap(),
+                .map(|(pack_id, source)| PackSource {
+                    path: format!("packs/{pack_id}/v1.json"),
+                    source: (*source).into(),
                 })
                 .collect(),
         });
@@ -592,6 +702,21 @@ mod tests {
                 .iter()
                 .all(|signature| !signature.terms.is_empty())
         );
+        assert!(report.archetypes.iter().all(|archetype| {
+            archetype.matching_laws.len() >= 2
+                && !archetype.adopted_laws.is_empty()
+                && archetype
+                    .adopted_laws
+                    .iter()
+                    .all(|law| archetype.matching_laws.contains(law))
+                && archetype
+                    .matching_laws
+                    .iter()
+                    .filter_map(|law| law.split_once(':').map(|(pack, _)| pack))
+                    .collect::<BTreeSet<_>>()
+                    .len()
+                    >= 2
+        }));
         assert!(report.collisions.iter().any(|collision| {
             collision.left_relation_id != collision.right_relation_id
                 && collision

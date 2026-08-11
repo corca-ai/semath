@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 8;
+pub const PACK_SCHEMA_VERSION: u32 = 9;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -158,6 +158,61 @@ pub struct PackLaw {
     pub references: Vec<String>,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct PackLawArchetypeUse {
+    id: String,
+    slots: BTreeMap<String, String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct AuthoredLawArchetype {
+    pub law_id: String,
+    pub archetype_id: String,
+    pub slots: BTreeMap<String, String>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct LawArchetype {
+    pub id: &'static str,
+    pub canonical_relation: &'static str,
+    pub slots: &'static [&'static str],
+}
+
+pub(crate) const LAW_ARCHETYPES: &[LawArchetype] = &[
+    LawArchetype {
+        id: "binary-product",
+        canonical_relation: "{result} = {left-factor} {right-factor}",
+        slots: &["result", "left-factor", "right-factor"],
+    },
+    LawArchetype {
+        id: "ternary-product",
+        canonical_relation: "{result} = {first-factor} {second-factor} {third-factor}",
+        slots: &["result", "first-factor", "second-factor", "third-factor"],
+    },
+    LawArchetype {
+        id: "reciprocal",
+        canonical_relation: "{result} = 1 / {denominator}",
+        slots: &["result", "denominator"],
+    },
+    LawArchetype {
+        id: "negative-gradient-transport",
+        canonical_relation: "{flux} = -{coefficient} \\nabla {field}",
+        slots: &["flux", "coefficient", "field"],
+    },
+    LawArchetype {
+        id: "ternary-product-ratio",
+        canonical_relation: "{result} = {first-factor} {second-factor} {third-factor} / {denominator}",
+        slots: &[
+            "result",
+            "first-factor",
+            "second-factor",
+            "third-factor",
+            "denominator",
+        ],
+    },
+];
+
 impl PackLaw {
     pub fn relations(&self) -> impl Iterator<Item = &str> {
         std::iter::once(self.canonical_relation.as_str())
@@ -268,7 +323,12 @@ pub fn compile_pack(source: &str) -> Result<DomainPack, PackValidationError> {
     if source.len() > MAX_PACK_BYTES {
         return Err(error("pack", "source exceeds the 256 KiB limit"));
     }
-    let mut deserializer = serde_json::Deserializer::from_str(source);
+    let mut value = serde_json::from_str::<serde_json::Value>(source)
+        .map_err(|cause| error("pack", format!("invalid JSON: {cause}")))?;
+    expand_law_archetypes(&mut value)?;
+    let expanded = serde_json::to_string(&value)
+        .map_err(|cause| error("pack", format!("cannot encode expanded pack: {cause}")))?;
+    let mut deserializer = serde_json::Deserializer::from_str(&expanded);
     let pack =
         serde_path_to_error::deserialize::<_, DomainPack>(&mut deserializer).map_err(|cause| {
             let path = cause.path().to_string();
@@ -279,6 +339,116 @@ pub fn compile_pack(source: &str) -> Result<DomainPack, PackValidationError> {
         })?;
     validate_pack(&pack)?;
     Ok(pack)
+}
+
+fn expand_law_archetypes(value: &mut serde_json::Value) -> Result<(), PackValidationError> {
+    let Some(laws) = value
+        .get_mut("laws")
+        .and_then(serde_json::Value::as_array_mut)
+    else {
+        return Ok(());
+    };
+    for (law_index, law) in laws.iter_mut().enumerate() {
+        let Some(object) = law.as_object_mut() else {
+            continue;
+        };
+        let Some(authored) = object.remove("archetype") else {
+            continue;
+        };
+        let path = format!("laws[{law_index}].archetype");
+        if object.contains_key("canonicalRelation") {
+            return Err(error(
+                path,
+                "must replace canonicalRelation rather than coexist with it",
+            ));
+        }
+        let authored: PackLawArchetypeUse = serde_json::from_value(authored)
+            .map_err(|cause| error(path.clone(), format!("invalid archetype use: {cause}")))?;
+        let Some(archetype) = LAW_ARCHETYPES
+            .iter()
+            .find(|archetype| archetype.id == authored.id)
+        else {
+            return Err(error(path, format!("unknown archetype {}", authored.id)));
+        };
+        let expected = archetype.slots.iter().copied().collect::<BTreeSet<_>>();
+        let actual = authored
+            .slots
+            .keys()
+            .map(String::as_str)
+            .collect::<BTreeSet<_>>();
+        if actual != expected {
+            return Err(error(
+                format!("laws[{law_index}].archetype.slots"),
+                format!("must bind exactly [{}]", archetype.slots.join(", ")),
+            ));
+        }
+        let role_ids = object
+            .get("roles")
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|role| role.get("id").and_then(serde_json::Value::as_str))
+            .collect::<BTreeSet<_>>();
+        let bindings = authored
+            .slots
+            .values()
+            .map(String::as_str)
+            .collect::<BTreeSet<_>>();
+        if bindings.len() != authored.slots.len() || bindings != role_ids {
+            return Err(error(
+                format!("laws[{law_index}].archetype.slots"),
+                "must bind every law role exactly once",
+            ));
+        }
+        let mut relation = archetype.canonical_relation.to_owned();
+        for slot in archetype.slots {
+            let role = &authored.slots[*slot];
+            validate_id(&format!("laws[{law_index}].archetype.slots.{slot}"), role)?;
+            relation = relation.replace(&format!("{{{slot}}}"), role);
+        }
+        let canonical = crate::canonical::canonical_template(&relation);
+        if object
+            .get("representations")
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(serde_json::Value::as_str)
+            .any(|representation| crate::canonical::canonical_template(representation) == canonical)
+        {
+            return Err(error(
+                format!("laws[{law_index}].representations"),
+                "duplicates the archetype-expanded canonical law form",
+            ));
+        }
+        object.insert(
+            "canonicalRelation".into(),
+            serde_json::Value::String(relation),
+        );
+    }
+    Ok(())
+}
+
+pub(crate) fn authored_law_archetypes(source: &str) -> Vec<AuthoredLawArchetype> {
+    let Ok(value) = serde_json::from_str::<serde_json::Value>(source) else {
+        return Vec::new();
+    };
+    value
+        .get("laws")
+        .and_then(serde_json::Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|law| {
+            let law_id = law.get("id")?.as_str()?.to_owned();
+            let authored =
+                serde_json::from_value::<PackLawArchetypeUse>(law.get("archetype")?.clone())
+                    .ok()?;
+            Some(AuthoredLawArchetype {
+                law_id,
+                archetype_id: authored.id,
+                slots: authored.slots,
+            })
+        })
+        .collect()
 }
 
 pub fn validate_pack(pack: &DomainPack) -> Result<(), PackValidationError> {
@@ -463,6 +633,11 @@ fn same_dimension(left: &[PackDimensionExponent], right: &[PackDimensionExponent
 
 pub fn built_in_packs() -> &'static [DomainPack] {
     &BUILTIN_PACKS
+}
+
+#[cfg(test)]
+pub(crate) fn built_in_pack_sources() -> &'static [(&'static str, &'static str)] {
+    BUILTIN_PACK_SOURCES
 }
 
 fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
@@ -796,7 +971,7 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 8);
+        assert_eq!(PACK_SCHEMA_VERSION, 9);
         assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }
@@ -838,6 +1013,68 @@ mod tests {
             assert_eq!(
                 compile_pack(&source).unwrap(),
                 compile_pack(&source).unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn archetypes_expand_once_into_the_existing_law_ir() {
+        let source = super::built_in_pack_sources()
+            .iter()
+            .find(|(pack_id, _)| *pack_id == "circuits")
+            .unwrap()
+            .1;
+        let pack = compile_pack(source).unwrap();
+        let law = pack.laws.iter().find(|law| law.id == "ohm-law").unwrap();
+        assert_eq!(law.canonical_relation, "voltage = resistance current");
+        assert!(!serde_json::to_string(law).unwrap().contains("archetype"));
+
+        let mut invalid = serde_json::from_str::<serde_json::Value>(source).unwrap();
+        invalid["laws"][0]["archetype"]["slots"]
+            .as_object_mut()
+            .unwrap()
+            .remove("result");
+        let error = compile_pack(&serde_json::to_string(&invalid).unwrap()).unwrap_err();
+        assert!(error.message.contains("must bind exactly"));
+
+        let mut duplicate = serde_json::from_str::<serde_json::Value>(source).unwrap();
+        duplicate["laws"][0]["representations"] =
+            serde_json::json!(["voltage = resistance current"]);
+        let error = compile_pack(&serde_json::to_string(&duplicate).unwrap()).unwrap_err();
+        assert!(error.message.contains("archetype-expanded canonical"));
+
+        let mut unknown = serde_json::from_str::<serde_json::Value>(source).unwrap();
+        unknown["laws"][0]["archetype"]["id"] = serde_json::json!("unknown-archetype");
+        let error = compile_pack(&serde_json::to_string(&unknown).unwrap()).unwrap_err();
+        assert!(error.message.contains("unknown archetype"));
+    }
+
+    #[test]
+    fn authored_and_manually_expanded_archetype_laws_compile_identically() {
+        for (_, source) in super::built_in_pack_sources() {
+            let compiled = compile_pack(source).unwrap();
+            let mut expanded_source = serde_json::from_str::<serde_json::Value>(source).unwrap();
+            let Some(laws) = expanded_source["laws"].as_array_mut() else {
+                continue;
+            };
+            for law in laws {
+                if law.get("archetype").is_none() {
+                    continue;
+                }
+                let law_id = law["id"].as_str().unwrap();
+                let canonical = compiled
+                    .laws
+                    .iter()
+                    .find(|candidate| candidate.id == law_id)
+                    .unwrap()
+                    .canonical_relation
+                    .clone();
+                law.as_object_mut().unwrap().remove("archetype");
+                law["canonicalRelation"] = serde_json::Value::String(canonical);
+            }
+            assert_eq!(
+                compiled,
+                compile_pack(&serde_json::to_string(&expanded_source).unwrap()).unwrap()
             );
         }
     }

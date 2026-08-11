@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "electromagnetism",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -234,7 +234,14 @@
       "references": [
         "electrodynamics"
       ],
-      "canonicalRelation": "force = charge electric-field",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "force",
+          "left-factor": "charge",
+          "right-factor": "electric-field"
+        }
+      },
       "representations": [
         "force = charge \\cdot electric-field"
       ]
@@ -290,7 +297,14 @@
       "references": [
         "electrodynamics"
       ],
-      "canonicalRelation": "energy = charge voltage",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "energy",
+          "left-factor": "charge",
+          "right-factor": "voltage"
+        }
+      },
       "representations": [
         "energy = charge \\cdot voltage"
       ]
@@ -345,7 +359,14 @@
       "references": [
         "electrodynamics"
       ],
-      "canonicalRelation": "power = voltage current",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "power",
+          "left-factor": "voltage",
+          "right-factor": "current"
+        }
+      },
       "representations": [
         "power = voltage \\cdot current"
       ]
@@ -389,7 +410,14 @@
       "references": [
         "electrodynamics"
       ],
-      "canonicalRelation": "displacement = permittivity electric-field"
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "displacement",
+          "left-factor": "permittivity",
+          "right-factor": "electric-field"
+        }
+      }
     },
     {
       "id": "electromagnetic-wave-speed",
@@ -423,7 +451,13 @@
       "references": [
         "electrodynamics"
       ],
-      "canonicalRelation": "wave-speed = 1 / medium-factor"
+      "archetype": {
+        "id": "reciprocal",
+        "slots": {
+          "result": "wave-speed",
+          "denominator": "medium-factor"
+        }
+      }
     },
     {
       "id": "gauss-electric",

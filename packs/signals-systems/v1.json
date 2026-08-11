@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "packId": "signals-systems",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -173,7 +173,13 @@
       "references": [
         "signals-systems"
       ],
-      "canonicalRelation": "frequency = 1 / period",
+      "archetype": {
+        "id": "reciprocal",
+        "slots": {
+          "result": "frequency",
+          "denominator": "period"
+        }
+      },
       "representations": [
         "period = 1 / frequency"
       ]
@@ -283,7 +289,14 @@
       "references": [
         "signals-systems"
       ],
-      "canonicalRelation": "wave-speed = frequency wavelength",
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "wave-speed",
+          "left-factor": "frequency",
+          "right-factor": "wavelength"
+        }
+      },
       "representations": [
         "wave-speed = frequency \\cdot wavelength"
       ]
