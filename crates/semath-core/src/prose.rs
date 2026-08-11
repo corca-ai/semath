@@ -4,10 +4,11 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use crate::canonical::{SemanticExpr, SemanticExprKind, declared_symbols};
+use crate::concept::classify_role;
 use crate::construction::{
     coordinated_descriptions, coordination_lead, defines_by_formula, fronted_labeled_descriptions,
     fronted_shared_description, is_declaration_lead, match_apposition, match_definition,
-    match_fronted_single, match_parenthetical, match_passive_definition, match_quantified,
+    match_parenthetical, match_passive_definition, match_quantified, role_first_nominal_candidates,
 };
 use crate::pack::{PackActivationStructure, built_in_packs};
 use crate::parser::ParsedMath;
@@ -238,6 +239,18 @@ pub(crate) fn observe_prose(
     let events = normalize_prose_events(source, &clauses, &mentions);
     collect_assumptions(&index, &clauses, &mentions, &mut analysis);
 
+    collect_role_first_nominal_definitions(
+        document,
+        source,
+        parsed,
+        canonical_expressions,
+        &index,
+        &clauses,
+        &mentions,
+        &events,
+        &mut analysis,
+    );
+
     collect_coordinated_definitions(document, source, parsed, &index, &clauses, &mut analysis);
     collect_anaphoric_definitions(
         document,
@@ -418,18 +431,6 @@ pub(crate) fn observe_prose(
                 before_start + quantified.prefix_start,
                 end_byte + quantified.suffix_end,
             );
-        } else if let Some(fronted) = match_fronted_single(before, after) {
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                fronted.description,
-                fronted.rule_id,
-                before_start + fronted.prefix_start,
-                end_byte + fronted.suffix_end,
-            );
         } else if is_declaration_lead(before) && math.symbols.len() > 1 {
             push_claim(
                 &mut analysis,
@@ -465,6 +466,82 @@ pub(crate) fn observe_prose(
     );
     deduplicate(&mut analysis);
     analysis
+}
+
+#[allow(clippy::too_many_arguments)]
+fn collect_role_first_nominal_definitions(
+    document: &ProjectDocument,
+    source: &str,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    events: &ProseEventStream,
+    output: &mut ProseObservations,
+) {
+    for (clause_index, clause) in clauses.iter().enumerate() {
+        if !clause.frame.establishes() {
+            continue;
+        }
+        for mention_index in events.mentions_in_clause(clause_index) {
+            output.match_stats.matcher_work += 1;
+            let Some(mention) = mentions.get(*mention_index) else {
+                continue;
+            };
+            let Some(math) = parsed
+                .get(mention.math_index)
+                .filter(|math| is_definition_slot_math(math))
+            else {
+                continue;
+            };
+            if !canonical_expressions
+                .get(mention.math_index)
+                .is_some_and(is_nominal_mention)
+            {
+                continue;
+            }
+            let Some((span_start, span_end)) =
+                events.description_before(clause_index, mention.start)
+            else {
+                continue;
+            };
+            let candidates = role_first_nominal_candidates(&source[span_start..span_end]);
+            let Some(base) = candidates.last() else {
+                continue;
+            };
+            let Some(role) = classify_role(base.description) else {
+                continue;
+            };
+            let selected = candidates
+                .iter()
+                .find(|candidate| classify_role(candidate.description).as_deref() == Some(&role))
+                .unwrap_or(base);
+            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                continue;
+            };
+            push_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                selected.description,
+                "english-role-first-nominal-definition",
+                span_start + selected.relative_start,
+                mention.end,
+            );
+        }
+    }
+}
+
+fn is_nominal_mention(expression: &SemanticExpr) -> bool {
+    matches!(
+        expression.kind,
+        SemanticExprKind::Symbol(_)
+            | SemanticExprKind::Index { .. }
+            | SemanticExprKind::Apply { .. }
+    )
 }
 
 fn attach_equation_reference_definitions(
@@ -2066,9 +2143,25 @@ fn deduplicate(analysis: &mut ProseObservations) {
 fn definition_priority(definition: &DefinitionInfo) -> u8 {
     let rule = definition.evidence.rule_id.as_str();
     if rule.contains("former-latter") || rule.contains("anaphoric") {
-        3
+        4
     } else if rule.contains("apposition") || rule.contains("equation-flow") {
+        3
+    } else if rule.contains("role-first-nominal") {
         2
+    } else if rule.contains("construction")
+        || rule.contains("relational")
+        || rule.contains("passive")
+        || rule.contains("imperative")
+        || rule.contains("contextual")
+        || rule.contains("write-for")
+        || rule.contains("use-definition")
+        || rule.contains("formula-definition")
+        || rule.contains("math-assignment")
+        || rule.contains("clause-definition")
+        || rule.contains("respectively")
+        || rule.contains("coordinated-definition")
+    {
+        3
     } else {
         1
     }
@@ -2451,6 +2544,59 @@ mod tests {
         assert!(definitions.contains(&("b", "bias")), "{definitions:?}");
         assert!(definitions.contains(&("c", "scale")), "{definitions:?}");
         assert!(definitions.contains(&("d", "offset")), "{definitions:?}");
+    }
+
+    #[test]
+    fn composes_role_first_nominals_from_shared_description_events() {
+        let source = concat!(
+            "For a segment of mass $m$ moving at speed $v$, the review continues. ",
+            "A charge packet with signed charge $q_b$ enters a region held at electric potential $V_b$. ",
+            "The saline density $\\rho$ was measured. For each nozzle, the optical diameter ",
+            "supplied the area $A$, while particle tracking supplied the area-mean exit speed $v_e$."
+        );
+        let analysis = analyze(source);
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        for expected in [
+            ("m", "mass"),
+            ("v", "speed"),
+            ("q_b", "signed charge"),
+            ("V_b", "electric potential"),
+            ("rho", "saline density"),
+            ("A", "area"),
+            ("v_e", "area-mean exit speed"),
+        ] {
+            assert!(
+                definitions.contains(&expected),
+                "{expected:?}: {definitions:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn nominal_composition_refuses_untyped_incidental_neighbors() {
+        let analysis = analyze(
+            "Compare plain $y$ with $z$. The archived channel $r$ is mentioned without a scientific role.",
+        );
+        assert!(
+            analysis.definitions.is_empty(),
+            "{:?}",
+            analysis.definitions
+        );
+    }
+
+    #[test]
+    fn role_first_nominals_refuse_a_clause_that_ends_in_a_relation_word() {
+        let source = "At any settled observation write this depth simply as $h$.";
+        let analysis = analyze(source);
+        assert!(
+            analysis.definitions.is_empty(),
+            "{:#?}",
+            analysis.definitions
+        );
     }
 
     #[test]

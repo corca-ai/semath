@@ -1,7 +1,7 @@
 {
   "schemaVersion": 9,
   "packId": "quantities-units",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "capability",
   "namespace": "quantities-units",
   "title": "Scientific quantities and SI units",
@@ -134,6 +134,7 @@
         "velocity vector",
         "wave speed",
         "propagation speed",
+        "exit speed",
         "mean normal velocity"
       ],
       "dimension": [
@@ -372,6 +373,10 @@
       "id": "electric-charge",
       "title": "Electric charge",
       "description": "Time integral of electric current.",
+      "aliases": [
+        "charge",
+        "signed charge"
+      ],
       "dimension": [
         {
           "base": "electric-current",

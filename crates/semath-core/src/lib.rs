@@ -1,6 +1,7 @@
 mod binder;
 mod candidate;
 mod canonical;
+mod concept;
 mod consistency;
 mod constraint;
 mod construction;
