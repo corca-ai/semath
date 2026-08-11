@@ -50,7 +50,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -62,7 +62,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -77,7 +77,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-02",
       "lawId": "bernoulli-head-decomposition",
@@ -143,7 +143,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -155,7 +155,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -170,7 +170,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-04",
       "lawId": "bernoulli-head-decomposition",
@@ -662,7 +662,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -674,7 +674,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -689,7 +689,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-15",
       "lawId": "bernoulli-head-decomposition",
@@ -760,7 +760,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -772,7 +772,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -787,7 +787,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-17",
       "lawId": "bernoulli-head-decomposition",
@@ -852,7 +852,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -864,7 +864,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -874,7 +874,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-19",
       "lawId": "bernoulli-head-decomposition",
@@ -1377,7 +1377,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -1389,7 +1389,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -1404,7 +1404,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-30",
       "lawId": "bernoulli-head-decomposition",
@@ -1475,7 +1475,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -1487,7 +1487,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -1497,7 +1497,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-32",
       "lawId": "bernoulli-head-decomposition",
@@ -1562,7 +1562,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -1574,7 +1574,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -1589,7 +1589,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-34",
       "lawId": "bernoulli-head-decomposition",
@@ -2087,7 +2087,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -2099,7 +2099,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -2114,7 +2114,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-45",
       "lawId": "bernoulli-head-decomposition",
@@ -2185,7 +2185,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b + n"
+        "needle": "r = a + b + j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -2197,7 +2197,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n\\begin{equation}r = a + b + n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n\\begin{equation}r = a + b + j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -2212,7 +2212,7 @@
         "total-head": "r",
         "pressure-head": "a",
         "velocity-head": "b",
-        "elevation-head": "n"
+        "elevation-head": "j"
       },
       "id": "synthetic-bernoulli-head-decomposition-recognized-47",
       "lawId": "bernoulli-head-decomposition",
@@ -2283,7 +2283,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2745,7 +2745,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2819,7 +2819,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2906,7 +2906,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3362,7 +3362,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3442,7 +3442,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3528,7 +3528,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $n$ is head component scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is head component scalar, $b$ is head component scalar, and $j$ is head component scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -7198,7 +7198,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -7210,7 +7210,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7225,7 +7225,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-02",
       "lawId": "hydrostatic-pressure",
@@ -7291,7 +7291,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -7303,7 +7303,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7318,7 +7318,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-04",
       "lawId": "hydrostatic-pressure",
@@ -7810,7 +7810,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -7822,7 +7822,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7837,7 +7837,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-15",
       "lawId": "hydrostatic-pressure",
@@ -7908,7 +7908,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -7920,7 +7920,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7935,7 +7935,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-17",
       "lawId": "hydrostatic-pressure",
@@ -8000,7 +8000,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -8012,7 +8012,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -8022,7 +8022,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-19",
       "lawId": "hydrostatic-pressure",
@@ -8525,7 +8525,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -8537,7 +8537,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -8552,7 +8552,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-30",
       "lawId": "hydrostatic-pressure",
@@ -8623,7 +8623,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -8635,7 +8635,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -8645,7 +8645,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-32",
       "lawId": "hydrostatic-pressure",
@@ -8710,7 +8710,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -8722,7 +8722,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -8737,7 +8737,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-34",
       "lawId": "hydrostatic-pressure",
@@ -9235,7 +9235,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -9247,7 +9247,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -9262,7 +9262,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-45",
       "lawId": "hydrostatic-pressure",
@@ -9333,7 +9333,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -9345,7 +9345,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -9360,7 +9360,7 @@
         "pressure": "r",
         "density": "a",
         "acceleration": "b",
-        "height": "n"
+        "height": "j"
       },
       "id": "synthetic-hydrostatic-pressure-recognized-47",
       "lawId": "hydrostatic-pressure",
@@ -9431,7 +9431,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -9893,7 +9893,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -9967,7 +9967,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10054,7 +10054,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10510,7 +10510,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10590,7 +10590,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10676,7 +10676,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $n$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Hydrostatic pressure difference, suppose $r$ is hydrostatic pressure difference scalar, $a$ is constant fluid density scalar, $b$ is gravitational acceleration magnitude scalar, and $j$ is signed height or depth difference scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10796,7 +10796,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -10808,7 +10808,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -10823,7 +10823,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-02",
       "lawId": "mass-flow-rate",
@@ -10889,7 +10889,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -10901,7 +10901,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -10916,7 +10916,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-04",
       "lawId": "mass-flow-rate",
@@ -11408,7 +11408,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -11420,7 +11420,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11435,7 +11435,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-15",
       "lawId": "mass-flow-rate",
@@ -11506,7 +11506,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -11518,7 +11518,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11533,7 +11533,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-17",
       "lawId": "mass-flow-rate",
@@ -11598,7 +11598,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -11610,7 +11610,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -11620,7 +11620,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-19",
       "lawId": "mass-flow-rate",
@@ -12123,7 +12123,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -12135,7 +12135,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12150,7 +12150,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-30",
       "lawId": "mass-flow-rate",
@@ -12221,7 +12221,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -12233,7 +12233,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -12243,7 +12243,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-32",
       "lawId": "mass-flow-rate",
@@ -12308,7 +12308,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -12320,7 +12320,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12335,7 +12335,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-34",
       "lawId": "mass-flow-rate",
@@ -12833,7 +12833,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -12845,7 +12845,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12860,7 +12860,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-45",
       "lawId": "mass-flow-rate",
@@ -12931,7 +12931,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n"
+        "needle": "r = a b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -12943,7 +12943,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n\\begin{equation}r = a b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12958,7 +12958,7 @@
         "mass-flow-rate": "r",
         "density": "a",
         "area": "b",
-        "velocity": "n"
+        "velocity": "j"
       },
       "id": "synthetic-mass-flow-rate-recognized-47",
       "lawId": "mass-flow-rate",
@@ -13029,7 +13029,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13491,7 +13491,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13565,7 +13565,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13652,7 +13652,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14108,7 +14108,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14188,7 +14188,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14274,7 +14274,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $n$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Mass flow rate, suppose $r$ is mass flow rate scalar, $a$ is fluid density scalar, $b$ is flow cross-sectional area scalar, and $j$ is mean normal flow velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -17945,7 +17945,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -17957,7 +17957,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -17972,7 +17972,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-02",
@@ -18040,7 +18040,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -18052,7 +18052,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -18067,7 +18067,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-04",
@@ -18570,7 +18570,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "project-scope",
@@ -18582,7 +18582,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -18597,7 +18597,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-15",
@@ -18670,7 +18670,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -18682,7 +18682,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -18697,7 +18697,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-17",
@@ -18764,7 +18764,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -18776,7 +18776,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -18786,7 +18786,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-19",
@@ -19300,7 +19300,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -19312,7 +19312,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -19327,7 +19327,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-30",
@@ -19400,7 +19400,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -19412,7 +19412,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -19422,7 +19422,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-32",
@@ -19489,7 +19489,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -19501,7 +19501,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -19516,7 +19516,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-34",
@@ -20025,7 +20025,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -20037,7 +20037,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -20052,7 +20052,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-45",
@@ -20125,7 +20125,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b n / p"
+        "needle": "r = a b j / p"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -20137,7 +20137,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b n / p\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n\\begin{equation}r = a b j / p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -20152,7 +20152,7 @@
         "reynolds-number": "r",
         "density": "a",
         "velocity": "b",
-        "length": "n",
+        "length": "j",
         "viscosity": "p"
       },
       "id": "synthetic-reynolds-number-definition-recognized-47",
@@ -20225,7 +20225,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -20687,7 +20687,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -20761,7 +20761,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -20848,7 +20848,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21304,7 +21304,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21384,7 +21384,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21470,7 +21470,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $n$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Reynolds number definition, suppose $r$ is reynolds number scalar, $a$ is fluid density scalar, $b$ is characteristic velocity scalar, $j$ is characteristic length scalar, and $p$ is dynamic viscosity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21590,7 +21590,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -21602,7 +21602,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -21617,7 +21617,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-02",
       "lawId": "steady-incompressible-continuity",
@@ -21683,7 +21683,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -21695,7 +21695,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -21710,7 +21710,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-04",
       "lawId": "steady-incompressible-continuity",
@@ -22202,7 +22202,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -22214,7 +22214,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -22229,7 +22229,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-15",
       "lawId": "steady-incompressible-continuity",
@@ -22300,7 +22300,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -22312,7 +22312,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -22327,7 +22327,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-17",
       "lawId": "steady-incompressible-continuity",
@@ -22392,7 +22392,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -22404,7 +22404,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -22414,7 +22414,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-19",
       "lawId": "steady-incompressible-continuity",
@@ -22917,7 +22917,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -22929,7 +22929,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -22944,7 +22944,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-30",
       "lawId": "steady-incompressible-continuity",
@@ -23015,7 +23015,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -23027,7 +23027,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -23037,7 +23037,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-32",
       "lawId": "steady-incompressible-continuity",
@@ -23102,7 +23102,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -23114,7 +23114,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -23129,7 +23129,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-34",
       "lawId": "steady-incompressible-continuity",
@@ -23627,7 +23627,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -23639,7 +23639,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -23654,7 +23654,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-45",
       "lawId": "steady-incompressible-continuity",
@@ -23725,7 +23725,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r a = b n"
+        "needle": "r a = b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -23737,7 +23737,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n\\begin{equation}r a = b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n\\begin{equation}r a = b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -23752,7 +23752,7 @@
         "area-one": "r",
         "velocity-one": "a",
         "area-two": "b",
-        "velocity-two": "n"
+        "velocity-two": "j"
       },
       "id": "synthetic-steady-incompressible-continuity-recognized-47",
       "lawId": "steady-incompressible-continuity",
@@ -23823,7 +23823,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -24285,7 +24285,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -24359,7 +24359,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -24446,7 +24446,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -24902,7 +24902,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -24982,7 +24982,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -25068,7 +25068,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $n$ is second mean velocity scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Steady incompressible continuity, suppose $r$ is first section area scalar, $a$ is first mean velocity scalar, $b$ is second section area scalar, and $j$ is second mean velocity scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },

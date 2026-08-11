@@ -18,7 +18,7 @@ use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
-use crate::prose::LawActivationEvidence;
+use crate::prose::{LawActivationEvidence, definition_available_from};
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
@@ -26,19 +26,21 @@ use crate::semantic_index::{
     ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, DocumentSemanticFacts, EntityId,
     EvidenceId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier,
     Mention, MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex,
-    ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
+    ResolutionStatus, SourceOccurrence, SourceOccurrenceId, occurrence_binding_key,
 };
 use crate::{
-    AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
-    ProjectChange, ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query,
-    QueryEnvelope, QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticCandidateInfo,
-    SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
-    SourceRange, SymbolInfo, UpdateResult,
+    AnalysisStats, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo, Evidence, Location,
+    PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
+    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue,
+    RenamePreparation, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
+    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
+    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
+    UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
 const MAX_SYMBOL_DIAGNOSTICS: usize = 8;
+const MAX_SYMBOL_QUANTITIES: usize = 8;
 const MAX_VIEW_DIAGNOSTICS: usize = 8;
 const MAX_VIEW_DECLARATIONS: usize = 16;
 const MAX_VIEW_CANDIDATES: usize = 16;
@@ -361,7 +363,7 @@ impl ProjectState {
                     observations
                         .definitions
                         .iter()
-                        .map(|definition| definition.location.range.start_offset),
+                        .map(definition_available_from),
                 )
                 .chain(
                     observations
@@ -696,14 +698,21 @@ fn lower_semantic_document(
     let mut claims = Vec::new();
     let mut definitions = BTreeMap::new();
     for (definition_index, definition) in observations.definitions.iter().enumerate() {
-        let key = (
-            source.file_id.clone(),
-            definition.location.range.start_offset,
-            definition.location.range.end_offset,
-        );
-        let Some(anchor) = occurrences_by_range.get(&key).cloned() else {
+        let Some(anchor) = definition_anchor(
+            definition,
+            &source.file_id,
+            &occurrences,
+            &occurrences_by_range,
+        ) else {
             continue;
         };
+        let anchor_occurrence = occurrences
+            .iter()
+            .find(|occurrence| occurrence.id == anchor)
+            .expect("definition anchor belongs to the lowered occurrence set");
+        let availability_offset = definition_available_from(definition);
+        let mut definition = definition.clone();
+        definition.location.range = anchor_occurrence.range.clone();
         let scope_path = document
             .scopes
             .path_at(definition.location.range.start_offset);
@@ -722,14 +731,9 @@ fn lower_semantic_document(
             source.file_id, source.document_version, definition_index
         ));
         let availability = order
-            .position(&source.file_id, definition.location.range.start_offset)
+            .position(&source.file_id, availability_offset)
             .unwrap_or(u64::MAX)
-            .max(
-                occurrences
-                    .iter()
-                    .find(|occurrence| occurrence.id == anchor)
-                    .map_or(0, |occurrence| occurrence.availability_order),
-            );
+            .max(anchor_occurrence.availability_order);
         evidence.push(EvidenceRecord {
             id: evidence_id.clone(),
             source: anchor.clone(),
@@ -769,11 +773,18 @@ fn lower_semantic_document(
                 derivation_depth: 0,
             });
         }
-        definitions.insert(entity.clone(), definition.clone());
+        definitions.insert(entity.clone(), definition);
         if !entities.contains(&entity) {
             entities.push(entity);
         }
     }
+    let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
+    definitions.extend(
+        cross_modal
+            .definitions
+            .iter()
+            .map(|(entity, definition)| (entity.clone(), definition.clone())),
+    );
     let typed = lower_typed_observation_facts(source, observations, &occurrences, &definitions);
     evidence.extend(typed.evidence);
     claims.extend(typed.claims);
@@ -786,11 +797,9 @@ fn lower_semantic_document(
     entities.extend(relations.entities);
     evidence.extend(relations.evidence);
     claims.extend(relations.claims);
-    let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
     entities.extend(cross_modal.entities);
     evidence.extend(cross_modal.evidence);
     claims.extend(cross_modal.claims);
-    definitions.extend(cross_modal.definitions);
     entities.sort();
     entities.dedup();
     let mentions = occurrences
@@ -820,6 +829,64 @@ fn lower_semantic_document(
         definitions,
         occurrences: occurrences_by_range,
     }
+}
+
+fn definition_anchor(
+    definition: &DefinitionInfo,
+    file_id: &str,
+    occurrences: &[SourceOccurrence],
+    occurrences_by_range: &HashMap<(String, u32, u32), SourceOccurrenceId>,
+) -> Option<SourceOccurrenceId> {
+    let range = &definition.location.range;
+    if let Some(exact) =
+        occurrences_by_range.get(&(file_id.to_owned(), range.start_offset, range.end_offset))
+    {
+        return Some(exact.clone());
+    }
+    let mut candidates = occurrences
+        .iter()
+        .filter(|occurrence| occurrence.kind == OccurrenceKind::Notation)
+        .filter(|occurrence| {
+            occurrence.range.start_offset <= range.start_offset
+                && range.end_offset <= occurrence.range.end_offset
+        })
+        .filter(|occurrence| occurrence_declared_name(occurrence) == definition.symbol)
+        .collect::<Vec<_>>();
+    candidates.sort_by_key(|occurrence| {
+        (
+            occurrence.range.end_offset - occurrence.range.start_offset,
+            occurrence.selection_range.end_offset - occurrence.selection_range.start_offset,
+            occurrence.id.local_id,
+        )
+    });
+    let selected = *candidates.first()?;
+    if candidates.get(1).is_some_and(|next| {
+        next.range == selected.range && next.selection_range == selected.selection_range
+    }) {
+        return None;
+    }
+    Some(selected.id.clone())
+}
+
+fn occurrence_declared_name(occurrence: &SourceOccurrence) -> String {
+    occurrence
+        .notation
+        .iter()
+        .find_map(|component| match component {
+            NotationComponent::Subscript { base, index } => Some(format!("{base}_{index}")),
+            _ => None,
+        })
+        .or_else(|| {
+            occurrence
+                .notation
+                .iter()
+                .find_map(|component| match component {
+                    NotationComponent::NamedSurface { value }
+                    | NotationComponent::Identifier { value } => Some(value.clone()),
+                    _ => None,
+                })
+        })
+        .unwrap_or_else(|| occurrence.surface.clone())
 }
 
 #[derive(Default)]
@@ -1009,6 +1076,7 @@ struct RelationLowerer<'a> {
     definitions: &'a BTreeMap<EntityId, DefinitionInfo>,
     output: LoweredRelationFacts,
     entities_by_expression: BTreeMap<(u32, u32, String), EntityId>,
+    implicit_entities_by_identity: BTreeMap<(Vec<u32>, String), EntityId>,
 }
 
 fn lower_canonical_relation_facts(
@@ -1023,6 +1091,7 @@ fn lower_canonical_relation_facts(
         definitions,
         output: LoweredRelationFacts::default(),
         entities_by_expression: BTreeMap::new(),
+        implicit_entities_by_identity: BTreeMap::new(),
     };
     for expression in expressions {
         lowerer.lower_expression(expression);
@@ -1043,7 +1112,7 @@ impl RelationLowerer<'_> {
                 left,
                 right,
             } if operator.as_str() == "equals" => ClaimRelation::Equality {
-                left: self.lower_expression(left)?,
+                left: self.lower_assignment_expression(left)?,
                 right: self.lower_expression(right)?,
                 canonical_digest: digest,
             },
@@ -1196,12 +1265,73 @@ impl RelationLowerer<'_> {
             .collect()
     }
 
+    fn lower_assignment_expression(&mut self, expression: &SemanticExpr) -> Option<EntityId> {
+        if !matches!(
+            expression.kind,
+            SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
+        ) {
+            return self.lower_expression(expression);
+        }
+
+        let occurrence = self.occurrence_for_range(&expression.range)?.clone();
+        if self.explicit_entity_for_occurrence(&occurrence).is_some()
+            || crate::canonical::expression_name(expression)
+                .and_then(|name| self.definition_entity(&name, &expression.range))
+                .is_some()
+        {
+            return self.lower_expression(expression);
+        }
+        let identity = occurrence_binding_key(&occurrence);
+        let key = (occurrence.scope_path.clone(), identity.clone());
+        let entity = self
+            .implicit_entities_by_identity
+            .get(&key)
+            .cloned()
+            .unwrap_or_else(|| EntityId {
+                component_id: occurrence.component_id.clone(),
+                scope_path: occurrence.scope_path.clone(),
+                kind: "implicit-symbol".to_owned(),
+                anchor: occurrence.id.clone(),
+            });
+        self.implicit_entities_by_identity
+            .insert(key, entity.clone());
+        if !self.output.entities.contains(&entity) {
+            self.output.entities.push(entity.clone());
+        }
+        self.entities_by_expression.insert(
+            (
+                expression.range.start_offset,
+                expression.range.end_offset,
+                render_canonical(expression),
+            ),
+            entity.clone(),
+        );
+        self.emit_implicit_symbol_binding(&entity, &occurrence);
+        Some(entity)
+    }
+
     fn entity_for(&mut self, expression: &SemanticExpr) -> Option<EntityId> {
+        if matches!(
+            expression.kind,
+            SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
+        ) && let Some(occurrence) = self.occurrence_for_range(&expression.range)
+            && let Some(entity) = self.explicit_entity_for_occurrence(occurrence)
+        {
+            return Some(entity);
+        }
         if matches!(
             expression.kind,
             SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
         ) && let Some(name) = crate::canonical::expression_name(expression)
             && let Some(entity) = self.definition_entity(&name, &expression.range)
+        {
+            return Some(entity);
+        }
+        if matches!(
+            expression.kind,
+            SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
+        ) && let Some(occurrence) = self.occurrence_for_range(&expression.range)
+            && let Some(entity) = self.implicit_entity_for_occurrence(occurrence)
         {
             return Some(entity);
         }
@@ -1214,27 +1344,7 @@ impl RelationLowerer<'_> {
         if let Some(entity) = self.entities_by_expression.get(&key) {
             return Some(entity.clone());
         }
-        let anchor = self
-            .occurrences
-            .iter()
-            .find(|occurrence| occurrence.range == expression.range)
-            .or_else(|| {
-                self.occurrences.iter().find(|occurrence| {
-                    expression.range.start_offset <= occurrence.range.start_offset
-                        && occurrence.range.end_offset <= expression.range.end_offset
-                })
-            })
-            .or_else(|| {
-                self.occurrences
-                    .iter()
-                    .filter(|occurrence| {
-                        occurrence.range.start_offset <= expression.range.start_offset
-                            && expression.range.end_offset <= occurrence.range.end_offset
-                    })
-                    .min_by_key(|occurrence| {
-                        occurrence.range.end_offset - occurrence.range.start_offset
-                    })
-            })?;
+        let anchor = self.occurrence_for_range(&expression.range)?;
         let entity = EntityId {
             component_id: anchor.component_id.clone(),
             scope_path: anchor.scope_path.clone(),
@@ -1244,6 +1354,109 @@ impl RelationLowerer<'_> {
         self.output.entities.push(entity.clone());
         self.entities_by_expression.insert(key, entity.clone());
         Some(entity)
+    }
+
+    fn occurrence_for_range(&self, range: &SourceRange) -> Option<&SourceOccurrence> {
+        self.occurrences
+            .iter()
+            .find(|occurrence| occurrence.range == *range)
+            .or_else(|| {
+                self.occurrences.iter().find(|occurrence| {
+                    range.start_offset <= occurrence.range.start_offset
+                        && occurrence.range.end_offset <= range.end_offset
+                })
+            })
+            .or_else(|| {
+                self.occurrences
+                    .iter()
+                    .filter(|occurrence| {
+                        occurrence.range.start_offset <= range.start_offset
+                            && range.end_offset <= occurrence.range.end_offset
+                    })
+                    .min_by_key(|occurrence| {
+                        occurrence.range.end_offset - occurrence.range.start_offset
+                    })
+            })
+    }
+
+    fn implicit_entity_for_occurrence(&self, occurrence: &SourceOccurrence) -> Option<EntityId> {
+        let identity = occurrence_binding_key(occurrence);
+        self.implicit_entities_by_identity
+            .iter()
+            .filter(|((scope_path, binding), entity)| {
+                binding == &identity
+                    && entity.component_id == occurrence.component_id
+                    && scope_path.len() <= occurrence.scope_path.len()
+                    && scope_path
+                        .iter()
+                        .zip(&occurrence.scope_path)
+                        .all(|(left, right)| left == right)
+            })
+            .max_by_key(|((scope_path, _), _)| scope_path.len())
+            .map(|(_, entity)| entity.clone())
+    }
+
+    fn explicit_entity_for_occurrence(&self, occurrence: &SourceOccurrence) -> Option<EntityId> {
+        let identity = occurrence_binding_key(occurrence);
+        self.definitions
+            .iter()
+            .filter_map(|(entity, definition)| {
+                let anchor = self
+                    .occurrences
+                    .iter()
+                    .find(|candidate| candidate.id == entity.anchor)?;
+                (occurrence_binding_key(anchor) == identity
+                    && entity.component_id == occurrence.component_id
+                    && entity.scope_path.len() <= occurrence.scope_path.len()
+                    && entity
+                        .scope_path
+                        .iter()
+                        .zip(&occurrence.scope_path)
+                        .all(|(left, right)| left == right)
+                    && definition_available_from(definition) <= occurrence.range.start_offset)
+                    .then_some(entity.clone())
+            })
+            .max_by_key(|entity| entity.scope_path.len())
+    }
+
+    fn emit_implicit_symbol_binding(&mut self, entity: &EntityId, occurrence: &SourceOccurrence) {
+        if self.output.claims.iter().any(|claim| {
+            claim.subject == *entity
+                && claim.predicate == ClaimPredicate::Names
+                && claim.object == ClaimObject::Occurrence(occurrence.id.clone())
+        }) {
+            return;
+        }
+        let ordinal = self.output.claims.len();
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:canonical-symbol-identity-evidence:{ordinal}",
+            self.source.file_id, self.source.document_version
+        ));
+        self.output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: occurrence.id.clone(),
+            scope_path: occurrence.scope_path.clone(),
+            available_after: occurrence.availability_order,
+            polarity: EvidencePolarity::Positive,
+            modality: EvidenceModality::Asserted,
+            origin: EvidenceOrigin::Explicit,
+            provenance: vec![occurrence.id.clone()],
+            parent_claims: Vec::new(),
+            rule_id: "semath/canonical-symbol-identity".into(),
+            rule_version: 1,
+        });
+        self.output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:canonical-symbol-identity-claim:{ordinal}",
+                self.source.file_id, self.source.document_version
+            )),
+            subject: entity.clone(),
+            predicate: ClaimPredicate::Names,
+            object: ClaimObject::Occurrence(occurrence.id.clone()),
+            evidence_id,
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
     }
 
     fn entity_for_reference(&mut self, value: &str, range: &SourceRange) -> Option<EntityId> {
@@ -1273,6 +1486,7 @@ impl RelationLowerer<'_> {
             .iter()
             .filter(|(entity, definition)| {
                 definition.symbol.trim_start_matches('\\') == symbol.trim_start_matches('\\')
+                    && definition_available_from(definition) <= range.start_offset
                     && occurrence.is_none_or(|occurrence| {
                         entity.component_id == occurrence.component_id
                             && entity.scope_path.len() <= occurrence.scope_path.len()
@@ -2410,6 +2624,13 @@ impl SemathEngine {
             self.index.external_types.get(file_id),
         );
         if let Some(entity) = &entity_id {
+            let context_symbol = context.symbol.clone();
+            context.quantities.extend(derived_quantity_infos(
+                &self.index.semantic,
+                entity,
+                context_symbol.as_deref(),
+            ));
+            normalize_quantities(&mut context.quantities);
             append_index_claims(&self.index.semantic, entity, &mut context);
         }
         if let Some((_, occurrence)) = symbol
@@ -2494,6 +2715,14 @@ impl SemathEngine {
         .filter(|diagnostic| {
             parsed.is_some_and(|math| ranges_overlap(&diagnostic.range, &math.region.content_range))
                 || diagnostic.range.contains(offset)
+                || diagnostic.evidence.iter().any(|evidence| {
+                    evidence.source_ranges.iter().any(|range| {
+                        range.contains(offset)
+                            || parsed.is_some_and(|math| {
+                                ranges_overlap(range, &math.region.content_range)
+                            })
+                    })
+                })
         })
         .collect::<Vec<_>>();
         diagnostics.extend(
@@ -2580,12 +2809,23 @@ impl SemathEngine {
             occurrence.end_offset,
         ))?;
         let semantic_occurrence = self.index.semantic.occurrence(occurrence_id)?;
+        let entity_id = self.resolved_entity(&document.document.file_id, occurrence);
+        if let Some(entity) = &entity_id {
+            quantities.extend(derived_quantity_infos(
+                &self.index.semantic,
+                entity,
+                Some(&semantic_occurrence.surface),
+            ));
+        }
+        normalize_quantities(&mut quantities);
+        let semantic_quantities_truncated = quantities.len() > MAX_SYMBOL_QUANTITIES;
+        quantities.truncate(MAX_SYMBOL_QUANTITIES);
         Some(SymbolInfo {
             symbol: semantic_occurrence.surface.clone(),
             occurrence_id: occurrence_id.clone(),
             notation: semantic_occurrence.notation.clone(),
             source_notation: semantic_occurrence.source_text.clone(),
-            entity_id: self.resolved_entity(&document.document.file_id, occurrence),
+            entity_id,
             location: Location {
                 file_id: document.document.file_id.clone(),
                 path: document.document.path.clone(),
@@ -2599,14 +2839,31 @@ impl SemathEngine {
             truncated: definitions_truncated
                 || shapes_truncated
                 || quantities_truncated
+                || semantic_quantities_truncated
                 || roles_truncated
                 || diagnostics_truncated,
         })
     }
 
     fn refresh_project_laws(&mut self, targets: &HashSet<String>) {
+        let target_components = targets
+            .iter()
+            .filter_map(|file_id| self.index.documents.get(file_id))
+            .map(|document| document.component_id.clone())
+            .collect::<HashSet<_>>();
+        let target_symbols = targets
+            .iter()
+            .filter_map(|file_id| self.index.documents.get(file_id))
+            .flat_map(|document| document.parsed.iter())
+            .flat_map(|math| math.symbols.iter().map(|(symbol, _)| symbol.clone()))
+            .collect::<HashSet<_>>();
         let mut activations = HashMap::<String, Vec<IndexedLawActivation>>::new();
-        for (file_id, document) in &self.index.documents {
+        for (file_id, document) in self
+            .index
+            .documents
+            .iter()
+            .filter(|(_, document)| target_components.contains(&document.component_id))
+        {
             for activation in document.observations.law_activations() {
                 activations
                     .entry(document.component_id.clone())
@@ -2622,23 +2879,31 @@ impl SemathEngine {
             .index
             .documents
             .iter()
+            .filter(|(_, document)| target_components.contains(&document.component_id))
             .flat_map(|(file_id, document)| {
                 let component_id = document.component_id.clone();
-                let roles = document.observations.roles.exported().into_iter().map({
-                    let component_id = component_id.clone();
-                    let file_id = file_id.clone();
-                    move |role| IndexedTypeFact {
-                        component_id: component_id.clone(),
-                        source_offset: evidence_anchor(&role.evidence),
-                        file_id: file_id.clone(),
-                        fact: ExportedTypeFact::Role(role),
-                    }
-                });
+                let roles = document
+                    .observations
+                    .roles
+                    .exported()
+                    .into_iter()
+                    .filter(|role| target_symbols.contains(role.symbol.as_str()))
+                    .map({
+                        let component_id = component_id.clone();
+                        let file_id = file_id.clone();
+                        move |role| IndexedTypeFact {
+                            component_id: component_id.clone(),
+                            source_offset: evidence_anchor(&role.evidence),
+                            file_id: file_id.clone(),
+                            fact: ExportedTypeFact::Role(role),
+                        }
+                    });
                 let quantities = document
                     .observations
                     .quantities
                     .exported()
                     .into_iter()
+                    .filter(|quantity| target_symbols.contains(quantity.symbol.as_str()))
                     .map({
                         let component_id = component_id.clone();
                         let file_id = file_id.clone();
@@ -2649,16 +2914,22 @@ impl SemathEngine {
                             fact: ExportedTypeFact::Quantity(quantity),
                         }
                     });
-                let shapes = document.observations.shapes.exported().into_iter().map({
-                    let component_id = component_id.clone();
-                    let file_id = file_id.clone();
-                    move |shape| IndexedTypeFact {
-                        component_id: component_id.clone(),
-                        source_offset: evidence_anchor(&shape.evidence),
-                        file_id: file_id.clone(),
-                        fact: ExportedTypeFact::Shape(shape),
-                    }
-                });
+                let shapes = document
+                    .observations
+                    .shapes
+                    .exported()
+                    .into_iter()
+                    .filter(|shape| target_symbols.contains(shape.symbol.as_str()))
+                    .map({
+                        let component_id = component_id.clone();
+                        let file_id = file_id.clone();
+                        move |shape| IndexedTypeFact {
+                            component_id: component_id.clone(),
+                            source_offset: evidence_anchor(&shape.evidence),
+                            file_id: file_id.clone(),
+                            fact: ExportedTypeFact::Shape(shape),
+                        }
+                    });
                 roles.chain(quantities).chain(shapes)
             })
             .collect::<Vec<_>>();
@@ -2912,6 +3183,125 @@ fn candidate_status(supporting: &[ClaimId], rejecting: &[ClaimId]) -> SemanticCa
     }
 }
 
+fn derived_quantity_infos(
+    index: &ProjectSemanticIndex,
+    entity: &EntityId,
+    symbol: Option<&str>,
+) -> Vec<QuantityInfo> {
+    let claims = index.claims_for_entity(entity);
+    let quantity_kind_id = claims.iter().find_map(|claim| match &claim.object {
+        ClaimObject::Value(ClaimValue::QuantityKind(value))
+            if claim.predicate == ClaimPredicate::HasQuantity =>
+        {
+            Some(value.clone())
+        }
+        _ => None,
+    });
+    let unit_id = claims.iter().find_map(|claim| match &claim.object {
+        ClaimObject::Value(ClaimValue::Unit(value))
+            if claim.predicate == ClaimPredicate::HasUnit =>
+        {
+            Some(value.clone())
+        }
+        _ => None,
+    });
+    claims
+        .into_iter()
+        .filter(|claim| claim.tier == InferenceTier::Constraint)
+        .filter_map(|claim| {
+            let ClaimObject::Value(ClaimValue::Dimension(exponents)) = &claim.object else {
+                return None;
+            };
+            let evidence = index.evidence(&claim.evidence_id)?;
+            let dimension = physical_dimension_info(exponents);
+            let mut derived_from = evidence
+                .provenance
+                .iter()
+                .filter_map(|source| index.occurrence(source))
+                .map(|occurrence| occurrence.surface.clone())
+                .collect::<Vec<_>>();
+            derived_from.sort();
+            derived_from.dedup();
+            Some(QuantityInfo {
+                symbol: symbol.unwrap_or_default().to_owned(),
+                quantity_kind_id: quantity_kind_id.clone(),
+                quantity_kind: None,
+                unit_id: unit_id.clone(),
+                unit: None,
+                display: dimension.display.clone(),
+                dimension,
+                evidence: semantic_evidence(index, evidence, "derived-constraint", "strong"),
+                derived_from,
+            })
+        })
+        .collect()
+}
+
+fn physical_dimension_info(exponents: &[DimensionExponent]) -> PhysicalDimensionInfo {
+    let exponents = exponents
+        .iter()
+        .map(|exponent| DimensionExponentInfo {
+            base: exponent.base.clone(),
+            numerator: i32::from(exponent.numerator),
+            denominator: u32::from(exponent.denominator),
+        })
+        .collect::<Vec<_>>();
+    let display = if exponents.is_empty() {
+        "dimensionless".to_owned()
+    } else {
+        exponents
+            .iter()
+            .map(
+                |exponent| match (exponent.numerator, exponent.denominator) {
+                    (1, 1) => exponent.base.clone(),
+                    (numerator, 1) => format!("{}^{numerator}", exponent.base),
+                    (numerator, denominator) => {
+                        format!("{}^({numerator}/{denominator})", exponent.base)
+                    }
+                },
+            )
+            .collect::<Vec<_>>()
+            .join(" · ")
+    };
+    PhysicalDimensionInfo { exponents, display }
+}
+
+fn normalize_quantities(quantities: &mut Vec<QuantityInfo>) {
+    quantities.sort_by(|left, right| {
+        left.display
+            .cmp(&right.display)
+            .then(left.quantity_kind_id.cmp(&right.quantity_kind_id))
+            .then(left.unit_id.cmp(&right.unit_id))
+    });
+    quantities.dedup_by(|left, right| {
+        left.dimension == right.dimension
+            && left.quantity_kind_id == right.quantity_kind_id
+            && left.unit_id == right.unit_id
+    });
+}
+
+fn semantic_evidence(
+    index: &ProjectSemanticIndex,
+    evidence: &EvidenceRecord,
+    kind: &str,
+    strength: &str,
+) -> Evidence {
+    let mut source_ranges = evidence
+        .provenance
+        .iter()
+        .filter_map(|source| index.occurrence(source))
+        .map(|occurrence| occurrence.range.clone())
+        .collect::<Vec<_>>();
+    source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    source_ranges.dedup();
+    Evidence {
+        rule_id: evidence.rule_id.clone(),
+        kind: kind.to_owned(),
+        strength: strength.to_owned(),
+        source_ranges,
+    }
+}
+
 fn append_index_claims(
     index: &ProjectSemanticIndex,
     entity: &EntityId,
@@ -2926,25 +3316,17 @@ fn append_index_claims(
                 return None;
             };
             let evidence = index.evidence(&claim.evidence_id)?;
-            let mut source_ranges = evidence
-                .provenance
-                .iter()
-                .filter_map(|source| index.occurrence(source))
-                .map(|occurrence| occurrence.range.clone())
-                .collect::<Vec<_>>();
-            source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
-            source_ranges.dedup();
             Some(crate::SemanticClaimInfo {
                 claim_id: claim.id.0.clone(),
                 predicate: claim_predicate_name(&claim.predicate).into(),
                 value: claim_value_display(value)?,
                 status: SemanticClaimStatus::Supported,
-                evidence: vec![Evidence {
-                    rule_id: evidence.rule_id.clone(),
-                    kind: "derived-constraint".into(),
-                    strength: "strong".into(),
-                    source_ranges,
-                }],
+                evidence: vec![semantic_evidence(
+                    index,
+                    evidence,
+                    "derived-constraint",
+                    "strong",
+                )],
                 conflicts: Vec::new(),
             })
         })

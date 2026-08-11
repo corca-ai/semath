@@ -470,6 +470,20 @@ pub struct ProjectSemanticIndex {
     constraint_conflicts: Vec<PlannedConflict>,
 }
 
+struct SemanticRollback {
+    document_versions: BTreeMap<String, u64>,
+    occurrences: BTreeMap<SourceOccurrenceId, SourceOccurrence>,
+    entities: BTreeSet<EntityId>,
+    mentions: BTreeMap<SourceOccurrenceId, Mention>,
+    evidence: BTreeMap<EvidenceId, EvidenceRecord>,
+    claims: BTreeMap<ClaimId, Claim>,
+    candidates: BTreeMap<SourceOccurrenceId, Vec<SemanticCandidateClaim>>,
+    invalidated_claims: u32,
+    constraint_work: u32,
+    constraint_truncated: bool,
+    constraint_conflicts: Vec<PlannedConflict>,
+}
+
 impl ProjectSemanticIndex {
     pub fn replace_document(&mut self, facts: DocumentSemanticFacts) -> Result<(), String> {
         self.replace_documents(vec![facts])
@@ -479,21 +493,34 @@ impl ProjectSemanticIndex {
         &mut self,
         documents: Vec<DocumentSemanticFacts>,
     ) -> Result<(), String> {
-        let mut next = self.clone();
+        let affected_files = documents
+            .iter()
+            .map(|facts| facts.file_id.clone())
+            .collect::<BTreeSet<_>>();
+        let mut rollback = Some(self.snapshot_affected(&affected_files));
         for facts in documents {
-            next.retract_document(&facts.file_id);
-            next.validate_and_insert(facts)?;
+            self.retract_document(&facts.file_id);
+            if let Err(error) = self.validate_and_insert(facts) {
+                self.restore_affected(
+                    &affected_files,
+                    rollback.take().expect("rollback state is available"),
+                );
+                return Err(error);
+            }
         }
-        next.rebuild_indexes();
-        next.recompute_constraints()?;
-        *self = next;
+        if let Err(error) = self.recompute_constraints(&affected_files) {
+            self.restore_affected(
+                &affected_files,
+                rollback.take().expect("rollback state is available"),
+            );
+            return Err(error);
+        }
         Ok(())
     }
 
     pub fn remove_document(&mut self, file_id: &str) {
         self.retract_document(file_id);
-        self.rebuild_indexes();
-        self.recompute_constraints()
+        self.recompute_constraints(&BTreeSet::from([file_id.to_owned()]))
             .expect("existing semantic facts must produce valid constraints");
     }
 
@@ -504,7 +531,7 @@ impl ProjectSemanticIndex {
         if !self.mentions.contains_key(occurrence_id) {
             return unsupported(occurrence_id.clone());
         }
-        let normalized = binding_key(occurrence);
+        let normalized = occurrence_binding_key(occurrence);
         let mut by_entity = BTreeMap::<EntityId, ResolutionCandidate>::new();
         let mut visible = self
             .binding_claims
@@ -515,7 +542,8 @@ impl ProjectSemanticIndex {
                 let claim = &self.claims[claim_id];
                 let evidence = &self.evidence[&claim.evidence_id];
                 if !scope_visible(&evidence.scope_path, &occurrence.scope_path)
-                    || evidence.available_after > occurrence.availability_order
+                    || (evidence.available_after > occurrence.availability_order
+                        && claim.subject.anchor != occurrence.id)
                     || evidence.modality != EvidenceModality::Asserted
                     || claim.subject.component_id != occurrence.component_id
                 {
@@ -738,12 +766,6 @@ impl ProjectSemanticIndex {
                 return Err("duplicate source occurrence identity".to_owned());
             }
         }
-        let known_occurrences = self
-            .occurrences
-            .keys()
-            .cloned()
-            .chain(occurrence_ids.iter().cloned())
-            .collect::<BTreeSet<_>>();
         let mut new_entities = BTreeSet::new();
         for entity in &facts.entities {
             if !new_entities.insert(entity.clone()) {
@@ -754,7 +776,9 @@ impl ProjectSemanticIndex {
             if entity.anchor.file_id != facts.file_id {
                 return Err("document cannot re-own an entity anchored in another file".to_owned());
             }
-            if !known_occurrences.contains(&entity.anchor) {
+            if !self.occurrences.contains_key(&entity.anchor)
+                && !occurrence_ids.contains(&entity.anchor)
+            {
                 return Err("entity anchor is not a source occurrence".to_owned());
             }
             let anchor = self
@@ -775,18 +799,14 @@ impl ProjectSemanticIndex {
                 return Err("entity identity has an empty component or kind".to_owned());
             }
         }
-        let known_entities = self
-            .entities
-            .iter()
-            .cloned()
-            .chain(facts.entities.iter().cloned())
-            .collect::<BTreeSet<_>>();
         let mut mention_ids = BTreeSet::new();
         for mention in &facts.mentions {
             if mention.occurrence_id.file_id != facts.file_id {
                 return Err("document cannot re-own a mention in another file".to_owned());
             }
-            if !known_occurrences.contains(&mention.occurrence_id) {
+            if !self.occurrences.contains_key(&mention.occurrence_id)
+                && !occurrence_ids.contains(&mention.occurrence_id)
+            {
                 return Err("mention is not source-linked".to_owned());
             }
             if !mention_ids.insert(mention.occurrence_id.clone()) {
@@ -819,11 +839,11 @@ impl ProjectSemanticIndex {
             if evidence.source.file_id != facts.file_id {
                 return Err("document cannot re-own evidence from another file".to_owned());
             }
-            if !known_occurrences.contains(&evidence.source)
-                || evidence
-                    .provenance
-                    .iter()
-                    .any(|source| !known_occurrences.contains(source))
+            if (!self.occurrences.contains_key(&evidence.source)
+                && !occurrence_ids.contains(&evidence.source))
+                || evidence.provenance.iter().any(|source| {
+                    !self.occurrences.contains_key(source) && !occurrence_ids.contains(source)
+                })
             {
                 return Err("evidence provenance is not source-linked".to_owned());
             }
@@ -858,7 +878,7 @@ impl ProjectSemanticIndex {
             }
         }
         for claim in &facts.claims {
-            if !known_entities.contains(&claim.subject) {
+            if !self.entities.contains(&claim.subject) && !new_entities.contains(&claim.subject) {
                 return Err("claim subject is not a known entity".to_owned());
             }
             if claim.derivation_depth > MAX_DERIVATION_DEPTH {
@@ -870,20 +890,21 @@ impl ProjectSemanticIndex {
                 .or_else(|| self.evidence.get(&claim.evidence_id))
                 .ok_or_else(|| "claim evidence is missing".to_owned())?;
             if let ClaimObject::Occurrence(occurrence) = &claim.object
-                && !known_occurrences.contains(occurrence)
+                && !self.occurrences.contains_key(occurrence)
+                && !occurrence_ids.contains(occurrence)
             {
                 return Err("claim object is not a source occurrence".to_owned());
             }
             if let ClaimObject::Entity(entity) = &claim.object
-                && !known_entities.contains(entity)
+                && !self.entities.contains(entity)
+                && !new_entities.contains(entity)
             {
                 return Err("claim object is not a known entity".to_owned());
             }
             if let ClaimObject::Value(ClaimValue::Relation(relation)) = &claim.object
-                && relation
-                    .entities()
-                    .iter()
-                    .any(|entity| !known_entities.contains(*entity))
+                && relation.entities().iter().any(|entity| {
+                    !self.entities.contains(*entity) && !new_entities.contains(*entity)
+                })
             {
                 return Err("relation references an unknown entity".to_owned());
             }
@@ -917,12 +938,6 @@ impl ProjectSemanticIndex {
                 }
             }
         }
-        let known_claims = self
-            .claims
-            .keys()
-            .chain(new_claims.keys())
-            .cloned()
-            .collect::<BTreeSet<_>>();
         let mut candidate_ids = BTreeSet::new();
         for candidate in &facts.candidates {
             if !candidate_ids.insert(candidate.id.clone()) {
@@ -947,7 +962,9 @@ impl ProjectSemanticIndex {
                     .supporting_claims
                     .iter()
                     .chain(&candidate.rejecting_claims)
-                    .any(|claim| !known_claims.contains(claim))
+                    .any(|claim| {
+                        !self.claims.contains_key(claim) && !new_claims.contains_key(claim)
+                    })
             {
                 return Err("semantic candidate has an invalid source or claim".to_owned());
             }
@@ -1022,6 +1039,102 @@ impl ProjectSemanticIndex {
         self.occurrences.retain(|id, _| id.file_id != file_id);
     }
 
+    fn snapshot_affected(&self, affected_files: &BTreeSet<String>) -> SemanticRollback {
+        let mut queue = self
+            .claims
+            .values()
+            .filter(|claim| {
+                affected_files
+                    .iter()
+                    .any(|file_id| claim_depends_on_file(claim, &self.evidence, file_id))
+            })
+            .map(|claim| claim.id.clone())
+            .collect::<VecDeque<_>>();
+        let mut claim_ids = BTreeSet::new();
+        while let Some(claim_id) = queue.pop_front() {
+            if !claim_ids.insert(claim_id.clone()) {
+                continue;
+            }
+            queue.extend(
+                self.dependents
+                    .get(&claim_id)
+                    .into_iter()
+                    .flatten()
+                    .cloned(),
+            );
+        }
+        SemanticRollback {
+            document_versions: self
+                .document_versions
+                .iter()
+                .filter(|(file_id, _)| affected_files.contains(*file_id))
+                .map(|(file_id, version)| (file_id.clone(), *version))
+                .collect(),
+            occurrences: self
+                .occurrences
+                .iter()
+                .filter(|(id, _)| affected_files.contains(&id.file_id))
+                .map(|(id, occurrence)| (id.clone(), occurrence.clone()))
+                .collect(),
+            entities: self
+                .entities
+                .iter()
+                .filter(|entity| affected_files.contains(&entity.anchor.file_id))
+                .cloned()
+                .collect(),
+            mentions: self
+                .mentions
+                .iter()
+                .filter(|(id, _)| affected_files.contains(&id.file_id))
+                .map(|(id, mention)| (id.clone(), mention.clone()))
+                .collect(),
+            evidence: self
+                .evidence
+                .iter()
+                .filter(|(_, evidence)| {
+                    affected_files.contains(&evidence.source.file_id)
+                        || evidence
+                            .provenance
+                            .iter()
+                            .any(|source| affected_files.contains(&source.file_id))
+                })
+                .map(|(id, evidence)| (id.clone(), evidence.clone()))
+                .collect(),
+            claims: claim_ids
+                .into_iter()
+                .filter_map(|id| self.claims.get(&id).cloned().map(|claim| (id, claim)))
+                .collect(),
+            candidates: self
+                .candidates
+                .iter()
+                .filter(|(id, _)| affected_files.contains(&id.file_id))
+                .map(|(id, candidates)| (id.clone(), candidates.clone()))
+                .collect(),
+            invalidated_claims: self.invalidated_claims,
+            constraint_work: self.constraint_work,
+            constraint_truncated: self.constraint_truncated,
+            constraint_conflicts: self.constraint_conflicts.clone(),
+        }
+    }
+
+    fn restore_affected(&mut self, affected_files: &BTreeSet<String>, rollback: SemanticRollback) {
+        for file_id in affected_files {
+            self.retract_document(file_id);
+        }
+        self.document_versions.extend(rollback.document_versions);
+        self.occurrences.extend(rollback.occurrences);
+        self.entities.extend(rollback.entities);
+        self.mentions.extend(rollback.mentions);
+        self.evidence.extend(rollback.evidence);
+        self.claims.extend(rollback.claims);
+        self.candidates.extend(rollback.candidates);
+        self.invalidated_claims = rollback.invalidated_claims;
+        self.constraint_work = rollback.constraint_work;
+        self.constraint_truncated = rollback.constraint_truncated;
+        self.constraint_conflicts = rollback.constraint_conflicts;
+        self.rebuild_indexes();
+    }
+
     fn rebuild_indexes(&mut self) {
         self.dependents.clear();
         self.binding_claims.clear();
@@ -1049,29 +1162,32 @@ impl ProjectSemanticIndex {
                 && let Some(occurrence) = self.occurrences.get(occurrence_id)
             {
                 self.binding_claims
-                    .entry(binding_key(occurrence))
+                    .entry(occurrence_binding_key(occurrence))
                     .or_default()
                     .insert(claim.id.clone());
             }
         }
     }
 
-    fn recompute_constraints(&mut self) -> Result<(), String> {
+    fn recompute_constraints(&mut self, affected_files: &BTreeSet<String>) -> Result<(), String> {
         let generated_evidence = self
             .evidence
             .iter()
-            .filter(|(_, evidence)| evidence.rule_id.starts_with("semath/constraint/"))
+            .filter(|(_, evidence)| {
+                evidence.rule_id.starts_with("semath/constraint/")
+                    && affected_files.contains(&evidence.source.file_id)
+            })
             .map(|(id, _)| id.clone())
             .collect::<BTreeSet<_>>();
         self.claims
             .retain(|_, claim| !generated_evidence.contains(&claim.evidence_id));
         self.evidence
             .retain(|id, _| !generated_evidence.contains(id));
-        self.rebuild_indexes();
 
         let input = self
             .claims
             .values()
+            .filter(|claim| affected_files.contains(&claim.subject.anchor.file_id))
             .filter_map(|claim| {
                 Some(ConstraintInputClaim {
                     claim: claim.clone(),
@@ -1082,7 +1198,11 @@ impl ProjectSemanticIndex {
         let plan = plan_constraint_derivations(&input);
         self.constraint_work = plan.work_items;
         self.constraint_truncated = plan.truncated;
-        self.constraint_conflicts = plan.conflicts;
+        self.constraint_conflicts
+            .retain(|conflict| !affected_files.contains(&conflict.subject.anchor.file_id));
+        self.constraint_conflicts.extend(plan.conflicts);
+        self.constraint_conflicts.sort();
+        self.constraint_conflicts.dedup();
         for derivation in plan.derivations {
             let digest = constraint_digest(
                 &derivation.subject,
@@ -1278,7 +1398,7 @@ fn claim_depends_on_file(
         })
 }
 
-fn binding_key(occurrence: &SourceOccurrence) -> String {
+pub(crate) fn occurrence_binding_key(occurrence: &SourceOccurrence) -> String {
     if occurrence.notation.is_empty() {
         return occurrence.surface.trim().to_owned();
     }
@@ -1675,6 +1795,57 @@ mod tests {
     }
 
     #[test]
+    fn a_declaration_anchor_owns_its_entity_before_trailing_prose_finishes() {
+        let declaration = occurrence("main.tex", 1, 1, 1, 1, &[], "x", Vec::new());
+        let premature = occurrence("main.tex", 1, 2, 20, 1, &[], "x", Vec::new());
+        let usage = occurrence("main.tex", 1, 3, 40, 3, &[], "x", Vec::new());
+        let declared_entity = entity(&declaration, "x");
+        let mut declaration_evidence = evidence(
+            "declaration",
+            &declaration,
+            EvidencePolarity::Positive,
+            EvidenceModality::Asserted,
+        );
+        declaration_evidence.available_after = 2;
+        let binding = claim(
+            "binding",
+            &declared_entity,
+            ClaimPredicate::Defines,
+            ClaimObject::Occurrence(declaration.id.clone()),
+            "declaration",
+        );
+        let mut semantic_index = ProjectSemanticIndex::default();
+        semantic_index
+            .replace_document(facts(
+                "main.tex",
+                1,
+                vec![declaration.clone(), premature.clone(), usage.clone()],
+                vec![declared_entity.clone()],
+                vec![
+                    declaration.id.clone(),
+                    premature.id.clone(),
+                    usage.id.clone(),
+                ],
+                vec![declaration_evidence],
+                vec![binding],
+            ))
+            .unwrap();
+
+        assert_eq!(
+            semantic_index.resolve(&declaration.id).candidates[0].entity_id,
+            declared_entity
+        );
+        assert_eq!(
+            semantic_index.resolve(&premature.id).status,
+            ResolutionStatus::Unsupported
+        );
+        assert_eq!(
+            semantic_index.resolve(&usage.id).status,
+            ResolutionStatus::Established
+        );
+    }
+
+    #[test]
     fn removing_source_evidence_retracts_the_minimal_derived_closure() {
         let source = occurrence("definitions.tex", 1, 1, 0, 1, &[], "x", Vec::new());
         let source_entity = entity(&source, "x");
@@ -1854,6 +2025,67 @@ mod tests {
         );
         assert!(index.occurrence(&original.id).is_some());
         assert_eq!(index.stats().occurrences, 1);
+    }
+
+    #[test]
+    fn invalid_late_batch_document_restores_every_affected_document() {
+        let original_a = occurrence("a.tex", 1, 1, 0, 1, &[], "a", Vec::new());
+        let original_b = occurrence("b.tex", 1, 1, 0, 2, &[], "b", Vec::new());
+        let mut index = ProjectSemanticIndex::default();
+        index
+            .replace_documents(vec![
+                facts(
+                    "a.tex",
+                    1,
+                    vec![original_a.clone()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+                facts(
+                    "b.tex",
+                    1,
+                    vec![original_b.clone()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ])
+            .unwrap();
+        let before = index.stats();
+        let replacement_a = occurrence("a.tex", 2, 1, 0, 3, &[], "x", Vec::new());
+        let mut invalid_b = occurrence("b.tex", 2, 1, 0, 4, &[], "y", Vec::new());
+        invalid_b.range.end_offset = 20_000;
+
+        assert!(
+            index
+                .replace_documents(vec![
+                    facts(
+                        "a.tex",
+                        2,
+                        vec![replacement_a],
+                        Vec::new(),
+                        Vec::new(),
+                        Vec::new(),
+                        Vec::new(),
+                    ),
+                    facts(
+                        "b.tex",
+                        2,
+                        vec![invalid_b],
+                        Vec::new(),
+                        Vec::new(),
+                        Vec::new(),
+                        Vec::new(),
+                    ),
+                ])
+                .is_err()
+        );
+        assert!(index.occurrence(&original_a.id).is_some());
+        assert!(index.occurrence(&original_b.id).is_some());
+        assert_eq!(index.stats(), before);
     }
 
     #[test]

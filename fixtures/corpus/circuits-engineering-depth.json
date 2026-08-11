@@ -50,7 +50,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -62,7 +62,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -77,7 +77,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-02",
       "lawId": "inductor-voltage-law",
@@ -143,7 +143,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -155,7 +155,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -170,7 +170,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-04",
       "lawId": "inductor-voltage-law",
@@ -662,7 +662,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "project-scope",
@@ -674,7 +674,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -689,7 +689,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-15",
       "lawId": "inductor-voltage-law",
@@ -760,7 +760,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -772,7 +772,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -787,7 +787,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-17",
       "lawId": "inductor-voltage-law",
@@ -852,7 +852,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -864,7 +864,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -874,7 +874,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-19",
       "lawId": "inductor-voltage-law",
@@ -1377,7 +1377,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -1389,7 +1389,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -1404,7 +1404,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-30",
       "lawId": "inductor-voltage-law",
@@ -1475,7 +1475,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -1487,7 +1487,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -1497,7 +1497,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-32",
       "lawId": "inductor-voltage-law",
@@ -1562,7 +1562,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -1574,7 +1574,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -1589,7 +1589,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-34",
       "lawId": "inductor-voltage-law",
@@ -2087,7 +2087,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -2099,7 +2099,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -2114,7 +2114,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-45",
       "lawId": "inductor-voltage-law",
@@ -2185,7 +2185,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a \\frac{d b}{d n}"
+        "needle": "r = a \\frac{d b}{d j}"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -2197,7 +2197,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d n}\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n\\begin{equation}r = a \\frac{d b}{d j}\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -2212,7 +2212,7 @@
         "voltage": "r",
         "inductance": "a",
         "current": "b",
-        "time": "n"
+        "time": "j"
       },
       "id": "synthetic-inductor-voltage-law-recognized-47",
       "lawId": "inductor-voltage-law",
@@ -2283,7 +2283,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2745,7 +2745,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2819,7 +2819,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2906,7 +2906,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3362,7 +3362,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3442,7 +3442,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3528,7 +3528,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $n$ is time variable scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Inductor voltage law, suppose $r$ is inductor terminal voltage scalar, $a$ is inductance scalar, $b$ is inductor current scalar, and $j$ is time variable scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },

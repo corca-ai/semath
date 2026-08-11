@@ -7102,7 +7102,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -7114,7 +7114,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7129,7 +7129,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-02",
       "lawId": "gradient-descent-update",
@@ -7195,7 +7195,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -7207,7 +7207,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7222,7 +7222,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-04",
       "lawId": "gradient-descent-update",
@@ -7714,7 +7714,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -7726,7 +7726,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7741,7 +7741,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-15",
       "lawId": "gradient-descent-update",
@@ -7812,7 +7812,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -7824,7 +7824,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7839,7 +7839,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-17",
       "lawId": "gradient-descent-update",
@@ -7904,7 +7904,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -7916,7 +7916,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -7926,7 +7926,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-19",
       "lawId": "gradient-descent-update",
@@ -8429,7 +8429,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -8441,7 +8441,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -8456,7 +8456,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-30",
       "lawId": "gradient-descent-update",
@@ -8527,7 +8527,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -8539,7 +8539,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -8549,7 +8549,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-32",
       "lawId": "gradient-descent-update",
@@ -8614,7 +8614,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -8626,7 +8626,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -8641,7 +8641,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-34",
       "lawId": "gradient-descent-update",
@@ -9139,7 +9139,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -9151,7 +9151,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -9166,7 +9166,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-45",
       "lawId": "gradient-descent-update",
@@ -9237,7 +9237,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a - b n"
+        "needle": "r = a - b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -9249,7 +9249,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n\\begin{equation}r = a - b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -9264,7 +9264,7 @@
         "next": "r",
         "current": "a",
         "step": "b",
-        "gradient": "n"
+        "gradient": "j"
       },
       "id": "synthetic-gradient-descent-update-recognized-47",
       "lawId": "gradient-descent-update",
@@ -9335,7 +9335,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -9797,7 +9797,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -9871,7 +9871,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -9958,7 +9958,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10414,7 +10414,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10494,7 +10494,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10580,7 +10580,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $n$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Gradient descent update, suppose $r$ is n-dimensional optimization iterate vector, $a$ is n-dimensional optimization iterate vector, $b$ is step size scalar, and $j$ is n-dimensional objective gradient vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -17752,7 +17752,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -17764,7 +17764,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -17779,7 +17779,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-02",
       "lawId": "regularized-objective",
@@ -17845,7 +17845,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -17857,7 +17857,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -17872,7 +17872,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-04",
       "lawId": "regularized-objective",
@@ -18364,7 +18364,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -18376,7 +18376,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -18391,7 +18391,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-15",
       "lawId": "regularized-objective",
@@ -18462,7 +18462,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -18474,7 +18474,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -18489,7 +18489,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-17",
       "lawId": "regularized-objective",
@@ -18554,7 +18554,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -18566,7 +18566,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -18576,7 +18576,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-19",
       "lawId": "regularized-objective",
@@ -19079,7 +19079,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -19091,7 +19091,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -19106,7 +19106,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-30",
       "lawId": "regularized-objective",
@@ -19177,7 +19177,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -19189,7 +19189,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -19199,7 +19199,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-32",
       "lawId": "regularized-objective",
@@ -19264,7 +19264,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -19276,7 +19276,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -19291,7 +19291,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-34",
       "lawId": "regularized-objective",
@@ -19789,7 +19789,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -19801,7 +19801,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -19816,7 +19816,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-45",
       "lawId": "regularized-objective",
@@ -19887,7 +19887,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a + b n"
+        "needle": "r = a + b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -19899,7 +19899,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n\\begin{equation}r = a + b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n\\begin{equation}r = a + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -19914,7 +19914,7 @@
         "total": "r",
         "data-loss": "a",
         "weight": "b",
-        "penalty": "n"
+        "penalty": "j"
       },
       "id": "synthetic-regularized-objective-recognized-47",
       "lawId": "regularized-objective",
@@ -19985,7 +19985,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -20447,7 +20447,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -20521,7 +20521,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -20608,7 +20608,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21064,7 +21064,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21144,7 +21144,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -21230,7 +21230,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $n$ is penalty value scalar.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Regularized objective, suppose $r$ is loss value scalar, $a$ is loss value scalar, $b$ is step size scalar, and $j$ is penalty value scalar.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },

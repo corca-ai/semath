@@ -440,10 +440,10 @@ fn lower_structured_environment(
             (!branches.is_empty()).then_some(SemanticExprKind::Piecewise(branches))?
         }
         Some("aligned" | "align" | "align*" | "gathered" | "split") => {
-            let equations = rows
-                .iter()
-                .filter_map(|row_id| lower_source_node(document, *row_id))
-                .collect::<Vec<_>>();
+            let mut equations = lower_aligned_rows(document, &rows);
+            if equations.len() == 1 {
+                return equations.pop();
+            }
             (!equations.is_empty()).then_some(SemanticExprKind::System(equations))?
         }
         _ => return None,
@@ -452,6 +452,35 @@ fn lower_structured_environment(
         kind,
         range: environment.ranges.full.clone(),
         provenance: syntax_provenance(environment),
+    })
+}
+
+fn lower_aligned_rows(document: &ProjectDocument, rows: &[u32]) -> Vec<SemanticExpr> {
+    let mut equations = Vec::new();
+    let mut pending = Vec::new();
+    let mut pending_has_relation = false;
+    for row_id in rows {
+        let mut row = Vec::new();
+        emit_notation_node(&NotationArena::Source(document), *row_id, &mut row);
+        let row_has_relation = tokens_contain_relation(&row);
+        if pending_has_relation && row_has_relation {
+            equations
+                .push(Parser::new(coalesce_numbers(std::mem::take(&mut pending))).parse_document());
+            pending_has_relation = false;
+        }
+        pending.extend(row);
+        pending_has_relation |= row_has_relation;
+    }
+    if !pending.is_empty() {
+        equations.push(Parser::new(coalesce_numbers(pending)).parse_document());
+    }
+    equations
+}
+
+fn tokens_contain_relation(tokens: &[Token]) -> bool {
+    tokens.iter().any(|token| {
+        matches!(token.kind, TokenKind::Operator('=' | '<' | '>'))
+            || matches!(&token.kind, TokenKind::Command(command) if is_relation_command(command))
     })
 }
 
@@ -745,18 +774,8 @@ pub(crate) fn declared_symbols(
     range: &SourceRange,
 ) -> Vec<(String, SourceRange)> {
     let expression = lower_document_region(document, range);
-    if let SemanticExprKind::Symbol(name) = &expression.kind {
-        return vec![(name.clone(), expression.range.clone())];
-    }
-    if let SemanticExprKind::Index { .. } = &expression.kind
-        && let Some(name) = expression_name(&expression)
-    {
-        return vec![(name, expression.range.clone())];
-    }
-    if let SemanticExprKind::Derivative { expression, .. } = &expression.kind
-        && let SemanticExprKind::Symbol(name) = &expression.kind
-    {
-        return vec![(name.clone(), expression.range.clone())];
+    if let Some(declaration) = declaration_head(&expression) {
+        return vec![declaration];
     }
     if let SemanticExprKind::Relation { operator, left, .. } = &expression.kind
         && matches!(operator.as_str(), "member-of" | "not-member-of")
@@ -788,6 +807,20 @@ pub(crate) fn declared_symbols(
             _ => None,
         })
         .collect()
+}
+
+fn declaration_head(expression: &SemanticExpr) -> Option<(String, SourceRange)> {
+    match &expression.kind {
+        SemanticExprKind::Symbol(name) => Some((name.clone(), expression.range.clone())),
+        SemanticExprKind::Index { .. } => {
+            Some((expression_name(expression)?, expression.range.clone()))
+        }
+        SemanticExprKind::Apply { operator, .. } => {
+            Some((operator.value.clone(), operator.range.clone()))
+        }
+        SemanticExprKind::Derivative { expression, .. } => declaration_head(expression),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -1181,6 +1214,10 @@ impl Parser {
                 )];
                 continue;
             }
+            if self.consume_operator('*') {
+                factors.push(self.parse_power());
+                continue;
+            }
             if matches!(self.peek(), TokenKind::Open('(')) {
                 let argument = self.parse_power();
                 if let Some(previous) = factors.last().cloned()
@@ -1213,9 +1250,11 @@ impl Parser {
         }
         let mut index = 0;
         while index + 1 < factors.len() {
-            if matches!(symbol_name(&factors[index]), Some("D_t")) {
+            if expression_name(&factors[index]).as_deref() == Some("D_t") {
                 let operator = factors.remove(index);
                 let expression = factors.remove(index);
+                let variable = indexed_operator_variable(&operator, "t")
+                    .unwrap_or_else(|| SemanticReference::from_expression("t", &operator));
                 factors.insert(
                     index,
                     SemanticExpr {
@@ -1223,7 +1262,7 @@ impl Parser {
                         provenance: merge_provenance(&operator, &expression),
                         kind: SemanticExprKind::Derivative {
                             expression: Box::new(expression),
-                            variable: SemanticReference::from_expression("t", &operator),
+                            variable,
                             order: 1,
                         },
                     },
@@ -1299,10 +1338,7 @@ impl Parser {
                     },
                 };
             } else if matches!(self.peek(), TokenKind::Open('('))
-                && matches!(
-                    &expression.kind,
-                    SemanticExprKind::Symbol(_) | SemanticExprKind::Derivative { .. }
-                )
+                && is_callable_expression(&expression)
             {
                 let argument = self.parse_prefix();
                 expression = apply_argument(expression.clone(), argument)
@@ -1803,6 +1839,19 @@ fn apply_subscript(expression: SemanticExpr, subscript: &SemanticExpr) -> Semant
     }
 }
 
+fn indexed_operator_variable(
+    expression: &SemanticExpr,
+    expected: &str,
+) -> Option<SemanticReference> {
+    let SemanticExprKind::Index { indices, .. } = &expression.kind else {
+        return None;
+    };
+    let index = indices
+        .iter()
+        .find(|index| expression_name(index).as_deref() == Some(expected))?;
+    Some(SemanticReference::from_expression(expected, index))
+}
+
 fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<SemanticExpr> {
     match expression.kind.clone() {
         SemanticExprKind::Symbol(operator) => Some(SemanticExpr {
@@ -1810,6 +1859,17 @@ fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<Se
             provenance: merge_provenance(&expression, &argument),
             kind: SemanticExprKind::Apply {
                 operator: SemanticReference::from_expression(operator, &expression),
+                arguments: split_arguments(argument),
+            },
+        }),
+        SemanticExprKind::Index { .. } => Some(SemanticExpr {
+            range: merge_range(&expression.range, &argument.range),
+            provenance: merge_provenance(&expression, &argument),
+            kind: SemanticExprKind::Apply {
+                operator: SemanticReference::from_expression(
+                    expression_name(&expression)?,
+                    &expression,
+                ),
                 arguments: split_arguments(argument),
             },
         }),
@@ -1830,6 +1890,17 @@ fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<Se
             })
         }
         _ => None,
+    }
+}
+
+fn is_callable_expression(expression: &SemanticExpr) -> bool {
+    match &expression.kind {
+        SemanticExprKind::Symbol(_) => true,
+        SemanticExprKind::Derivative { expression, .. } => matches!(
+            expression.kind,
+            SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
+        ),
+        _ => false,
     }
 }
 
@@ -2126,7 +2197,9 @@ fn merge_provenance(left: &SemanticExpr, right: &SemanticExpr) -> Vec<SourceRang
 
 #[cfg(test)]
 mod tests {
-    use super::{SemanticExprKind, lower_document_region, lower_template, render_canonical};
+    use super::{
+        SemanticExprKind, declared_symbols, lower_document_region, lower_template, render_canonical,
+    };
     use crate::{ProjectDocument, SourceRange};
 
     #[test]
@@ -2157,6 +2230,10 @@ mod tests {
         assert!(matches!(lyapunov.kind, SemanticExprKind::Relation { .. }));
         let capacitor = lower_template("i=C\\frac{d v}{d t}");
         assert!(matches!(capacitor.kind, SemanticExprKind::Relation { .. }));
+        assert_eq!(
+            render_canonical(&lower_template("F=m*a")),
+            "relation(equals,symbol(F),product(symbol(m),symbol(a)))"
+        );
     }
 
     #[test]
@@ -2214,6 +2291,25 @@ mod tests {
             render_canonical(&lower_template("\\nabla^2 u")),
             "apply(laplacian,symbol(u))"
         );
+        assert_eq!(
+            render_canonical(&lower_template("\\dot v_s(t)")),
+            "derivative(apply(v_s,symbol(t)),t,1)"
+        );
+        let operator_derivative = lower_template("D_t v");
+        assert_eq!(
+            render_canonical(&operator_derivative),
+            "derivative(symbol(v),t,1)"
+        );
+        let SemanticExprKind::Derivative { variable, .. } = operator_derivative.kind else {
+            panic!("expected derivative")
+        };
+        assert_eq!(
+            variable.range,
+            SourceRange {
+                start_offset: 2,
+                end_offset: 3,
+            }
+        );
     }
 
     #[test]
@@ -2242,6 +2338,71 @@ mod tests {
             lower_template("\\int").kind,
             SemanticExprKind::Unknown(ref reason) if reason == "incomplete-integral"
         ));
+    }
+
+    #[test]
+    fn snapshot_declarations_keep_indexed_time_surfaces_distinct() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
+            "language": "latex", "content": "$i_1(t)$", "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":2}},"state":"complete","text":"i","lexicalClass":"identifier"},
+                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":3,"endOffset":4}},"state":"complete","text":"1","lexicalClass":"number"},
+                {"kind":"script","parent":5,"children":[0,1],"ranges":{"full":{"startOffset":1,"endOffset":4}},"state":"complete","name":"subscript"},
+                {"kind":"token","parent":4,"children":[],"ranges":{"full":{"startOffset":5,"endOffset":6}},"state":"complete","text":"t","lexicalClass":"identifier"},
+                {"kind":"delimiter","parent":5,"children":[3],"ranges":{"full":{"startOffset":4,"endOffset":7}},"state":"complete","name":"()"},
+                {"kind":"sequence","parent":null,"children":[2,4],"ranges":{"full":{"startOffset":1,"endOffset":7}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":5,"delimiter":"$","fullRange":{"startOffset":0,"endOffset":8},"contentRange":{"startOffset":1,"endOffset":7},"state":"complete"}],
+            "visibleProse": [], "scopes": [], "blocks": [], "declarations": [], "mathRegions": [], "macros": [], "includes": []
+        })).unwrap();
+
+        assert_eq!(
+            declared_symbols(
+                &document,
+                &SourceRange {
+                    start_offset: 1,
+                    end_offset: 7,
+                },
+            ),
+            vec![(
+                "i_1".into(),
+                SourceRange {
+                    start_offset: 1,
+                    end_offset: 4,
+                },
+            )]
+        );
+    }
+
+    #[test]
+    fn snapshot_products_preserve_discrete_state_structure() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
+            "language": "latex", "content": "r = a b + j p", "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"r","lexicalClass":"identifier"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":4,"endOffset":5}},"state":"complete","text":"a","lexicalClass":"identifier"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":6,"endOffset":7}},"state":"complete","text":"b","lexicalClass":"identifier"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":8,"endOffset":9}},"state":"complete","text":"+","lexicalClass":"operator"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":10,"endOffset":11}},"state":"complete","text":"j","lexicalClass":"identifier"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":12,"endOffset":13}},"state":"complete","text":"p","lexicalClass":"identifier"},
+                {"kind":"sequence","parent":null,"children":[0,1,2,3,4,5,6],"ranges":{"full":{"startOffset":0,"endOffset":13}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":7,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":13},"contentRange":{"startOffset":0,"endOffset":13},"state":"complete"}],
+            "visibleProse": [], "scopes": [], "declarations": [], "macros": [], "includes": []
+        })).unwrap();
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &document,
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 13,
+                }
+            )),
+            "relation(equals,symbol(r),sum(product(symbol(a),symbol(b)),product(symbol(j),symbol(p))))"
+        );
     }
 
     #[test]
@@ -2376,6 +2537,34 @@ mod tests {
                 }
             )),
             "system(relation(equals,symbol(x),symbol(y)),relation(equals,symbol(y),symbol(z)))"
+        );
+
+        let continued: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
+            "language": "latex", "content": "", "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"a","lexicalClass":"identifier"},
+                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":2}},"state":"complete","text":"+","lexicalClass":"operator"},
+                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"b","lexicalClass":"identifier"},
+                {"kind":"alignment","parent":7,"children":[0,1,2],"ranges":{"full":{"startOffset":0,"endOffset":3}},"state":"complete","name":"row"},
+                {"kind":"token","parent":6,"children":[],"ranges":{"full":{"startOffset":4,"endOffset":5}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":6,"children":[],"ranges":{"full":{"startOffset":5,"endOffset":6}},"state":"complete","text":"c","lexicalClass":"identifier"},
+                {"kind":"alignment","parent":7,"children":[4,5],"ranges":{"full":{"startOffset":4,"endOffset":6}},"state":"complete","name":"row"},
+                {"kind":"environment","parent":8,"children":[3,6],"ranges":{"full":{"startOffset":0,"endOffset":6}},"state":"complete","name":"aligned"},
+                {"kind":"sequence","parent":null,"children":[7],"ranges":{"full":{"startOffset":0,"endOffset":6}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":8,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":6},"contentRange":{"startOffset":0,"endOffset":6},"state":"complete"}],
+            "visibleProse": [], "scopes": [], "declarations": [], "macros": [], "includes": []
+        })).unwrap();
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &continued,
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 6,
+                }
+            )),
+            "relation(equals,sum(symbol(a),symbol(b)),symbol(c))"
         );
     }
 

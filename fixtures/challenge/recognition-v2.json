@@ -128,7 +128,7 @@
       "outcome": "positive",
       "documents": [{ "fileId": "main", "path": "main.tex", "content": "Compare the observation $y$ with its estimate $\\widehat{y}$." }],
       "cursor": { "fileId": "main", "needle": "\\widehat{y}", "edge": "after" },
-      "expectation": { "symbol": "y", "sourceNotation": "\\widehat{y}", "candidateFamily": "decoration", "candidateInterpretation": "estimate" },
+      "expectation": { "symbol": "\\widehat{y}", "sourceNotation": "\\widehat{y}", "candidateFamily": "decoration", "candidateInterpretation": "estimate" },
       "variationTags": ["decorated", "source-preserving", "widehat"]
     },
     {
@@ -374,7 +374,7 @@
       "outcome": "positive",
       "documents": [{ "fileId": "main", "path": "main.tex", "content": "The estimator returns $\\hat y$ for observation $y$." }],
       "cursor": { "fileId": "main", "needle": "\\hat y", "edge": "after" },
-      "expectation": { "symbol": "y", "sourceNotation": "\\hat y", "candidateFamily": "decoration", "candidateInterpretation": "estimate" },
+      "expectation": { "symbol": "\\hat y", "sourceNotation": "\\hat y", "candidateFamily": "decoration", "candidateInterpretation": "estimate" },
       "variationTags": ["hat", "source-preserving", "boundary-pair:decorated-styled-surface"]
     },
     {
@@ -384,7 +384,7 @@
       "outcome": "refusal",
       "documents": [{ "fileId": "main", "path": "main.tex", "content": "The bold display $\\mathbf{y}$ is typographic emphasis, not an estimator." }],
       "cursor": { "fileId": "main", "needle": "\\mathbf{y}", "edge": "before" },
-      "expectation": { "symbol": "y", "sourceNotation": "\\mathbf{y}", "excludedCandidateFamily": "decoration" },
+      "expectation": { "symbol": "\\mathbf{y}", "sourceNotation": "\\mathbf{y}", "excludedCandidateFamily": "decoration" },
       "variationTags": ["style", "safe-separation", "boundary-pair:decorated-styled-surface"]
     },
     {
