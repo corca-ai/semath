@@ -18,7 +18,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "$q$ here"
+        "needle": "$q$ here",
+        "offset": 1
       },
       "baseline": {
         "decision": "unsupported",
@@ -50,7 +51,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "latter $q"
+        "needle": "latter $q",
+        "offset": 8
       },
       "baseline": {
         "decision": "unsupported",
@@ -82,7 +84,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "global $x"
+        "needle": "global $x",
+        "offset": 8
       },
       "baseline": {
         "decision": "unsupported",
@@ -114,7 +117,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "second $z"
+        "needle": "second $z",
+        "offset": 8
       },
       "baseline": {
         "decision": "unsupported",
@@ -146,7 +150,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "updates $s"
+        "needle": "updates $s",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -177,7 +182,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Use $u"
+        "needle": "Use $u",
+        "offset": 5
       },
       "baseline": {
         "decision": "unsupported",
@@ -212,7 +218,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Use $A"
+        "needle": "Use $A",
+        "offset": 5
       },
       "baseline": {
         "decision": "unsupported",
@@ -248,7 +255,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Use $B"
+        "needle": "Use $B",
+        "offset": 5
       },
       "baseline": {
         "decision": "unsupported",
@@ -279,7 +287,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "y}$ with"
+        "needle": "y}$ with",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -310,7 +319,8 @@
       "cursor": {
         "fileId": "main",
         "needle": "r}$ against",
-        "edge": "after"
+        "edge": "after",
+        "offset": 0
       },
       "baseline": {
         "decision": "unsupported",
@@ -340,7 +350,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "F}$ here"
+        "needle": "F}$ here",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -370,7 +381,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "x_{k+1}"
+        "needle": "x_{k+1}",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -400,7 +412,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "T_{ij}$ again"
+        "needle": "T_{ij}$ again",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -431,7 +444,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "ECE}(p)"
+        "needle": "ECE}(p)",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -461,7 +475,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "estimate{v}"
+        "needle": "estimate{v}",
+        "offset": 9
       },
       "baseline": {
         "decision": "partial",
@@ -491,7 +506,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "x}$ drives"
+        "needle": "x}$ drives",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -521,7 +537,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "m\\ddot{x}=F"
+        "needle": "m\\ddot{x}=F",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -551,7 +568,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "q=-k\\nabla T"
+        "needle": "q=-k\\nabla T",
+        "offset": 0
       },
       "baseline": {
         "decision": "established",
@@ -581,7 +599,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "J=-D\\nabla c"
+        "needle": "J=-D\\nabla c",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -611,7 +630,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "$u$ here"
+        "needle": "$u$ here",
+        "offset": 1
       },
       "baseline": {
         "decision": "unsupported",
@@ -642,7 +662,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $T"
+        "needle": "Inspect $T",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -673,7 +694,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "inspect $x"
+        "needle": "inspect $x",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -705,7 +727,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "uses $c"
+        "needle": "uses $c",
+        "offset": 6
       },
       "baseline": {
         "decision": "unsupported",
@@ -736,7 +759,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $q"
+        "needle": "Inspect $q",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -767,7 +791,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "lVert x"
+        "needle": "lVert x",
+        "offset": 6
       },
       "baseline": {
         "decision": "partial",
@@ -797,7 +822,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "mathbb{E}"
+        "needle": "mathbb{E}",
+        "offset": 0
       },
       "baseline": {
         "decision": "ambiguous",
@@ -826,7 +852,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "T_{ij}u_j"
+        "needle": "T_{ij}u_j",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -855,7 +882,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "dot{x}&=Ax"
+        "needle": "dot{x}&=Ax",
+        "offset": 0
       },
       "baseline": {
         "decision": "ambiguous",
@@ -884,7 +912,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "begin{cases}"
+        "needle": "begin{cases}",
+        "offset": 0
       },
       "baseline": {
         "decision": "unsupported",
@@ -913,7 +942,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "lim_{n"
+        "needle": "lim_{n",
+        "offset": 0
       },
       "baseline": {
         "decision": "ambiguous",
@@ -942,7 +972,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "arg\\min_x"
+        "needle": "arg\\min_x",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -971,7 +1002,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "nabla^2u=0"
+        "needle": "nabla^2u=0",
+        "offset": 0
       },
       "baseline": {
         "decision": "ambiguous",
@@ -1000,7 +1032,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $y"
+        "needle": "Inspect $y",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1031,7 +1064,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "derived $y"
+        "needle": "derived $y",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1062,7 +1096,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $y"
+        "needle": "Inspect $y",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1093,7 +1128,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $y"
+        "needle": "Inspect $y",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1124,7 +1160,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $v"
+        "needle": "Inspect $v",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1154,7 +1191,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "dot{x}(t)"
+        "needle": "dot{x}(t)",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -1184,7 +1222,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Ax$ is"
+        "needle": "Ax$ is",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -1213,7 +1252,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $y"
+        "needle": "Inspect $y",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1244,7 +1284,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "q=-k\\nabla T"
+        "needle": "q=-k\\nabla T",
+        "offset": 0
       },
       "baseline": {
         "decision": "partial",
@@ -1273,7 +1314,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $x"
+        "needle": "Inspect $x",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1304,7 +1346,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $p"
+        "needle": "Inspect $p",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1335,7 +1378,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $a"
+        "needle": "Inspect $a",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1366,7 +1410,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "begin{cases}"
+        "needle": "begin{cases}",
+        "offset": 0
       },
       "baseline": {
         "decision": "unsupported",
@@ -1395,7 +1440,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "dynamic{state}"
+        "needle": "dynamic{state}",
+        "offset": 0
       },
       "baseline": {
         "decision": "unsupported",
@@ -1429,7 +1475,8 @@
       ],
       "cursor": {
         "fileId": "two",
-        "needle": "inspect $r"
+        "needle": "inspect $r",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",
@@ -1460,7 +1507,8 @@
       ],
       "cursor": {
         "fileId": "main",
-        "needle": "Inspect $t"
+        "needle": "Inspect $t",
+        "offset": 9
       },
       "baseline": {
         "decision": "unsupported",

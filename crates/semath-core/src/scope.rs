@@ -1,6 +1,7 @@
 #[cfg(test)]
 use crate::{DocumentLanguage, SourceIndex};
-use crate::{ProjectDocument, SourceRange};
+use crate::{ProjectDocument, SourceRange, SyntaxBlockKind};
+use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
 struct Scope {
@@ -38,13 +39,13 @@ impl ScopeGraph {
                     visited[parent_index] = true;
                     let ancestor = &document.scopes[parent_index];
                     if ancestor.kind != "document" {
-                        ancestors.push(ancestor.range.start_offset);
+                        ancestors.push(parent_id);
                     }
                     parent = ancestor.parent;
                 }
                 ancestors.reverse();
                 if syntax.kind != "document" {
-                    ancestors.push(syntax.range.start_offset);
+                    ancestors.push(id as u32);
                 }
                 Scope {
                     id,
@@ -68,6 +69,7 @@ impl ScopeGraph {
                 },
             );
         }
+        append_equation_cluster_scopes(document, &mut scopes);
         Self { scopes }
     }
 
@@ -110,6 +112,145 @@ impl ScopeGraph {
             .max_by_key(|scope| scope.depth)
             .unwrap_or(&self.scopes[0])
     }
+}
+
+fn append_equation_cluster_scopes(document: &ProjectDocument, scopes: &mut Vec<Scope>) {
+    let mut starts = document
+        .blocks
+        .iter()
+        .enumerate()
+        .filter(|(_, block)| block.kind == SyntaxBlockKind::Paragraph)
+        .filter(|(_, block)| block_contains_relation(document, &block.range))
+        .map(|(block_id, block)| {
+            (
+                block_id as u32,
+                block.parent_scope,
+                block.range.start_offset,
+            )
+        })
+        .collect::<Vec<_>>();
+    starts.sort_by_key(|(_, parent, start)| (*parent, *start));
+    let counts = starts
+        .iter()
+        .fold(BTreeMap::new(), |mut counts, (_, parent, _)| {
+            *counts.entry(*parent).or_insert(0usize) += 1;
+            counts
+        });
+    for (position, (block_id, parent_id, start_offset)) in starts.iter().enumerate() {
+        if counts.get(parent_id).copied().unwrap_or_default() < 2 {
+            continue;
+        }
+        let Some((parent_range, mut path, parent_depth)) = scopes
+            .iter()
+            .find(|scope| scope.id == *parent_id as usize)
+            .map(|scope| (scope.range.clone(), scope.path.clone(), scope.depth))
+        else {
+            continue;
+        };
+        let end_offset = starts[position + 1..]
+            .iter()
+            .find(|(_, next_parent, _)| next_parent == parent_id)
+            .map_or(parent_range.end_offset, |(_, _, next_start)| *next_start);
+        if *start_offset >= end_offset {
+            continue;
+        }
+        path.push(0x8000_0000 | *block_id);
+        scopes.push(Scope {
+            id: scopes.len(),
+            depth: parent_depth + 1,
+            range: SourceRange {
+                start_offset: *start_offset,
+                end_offset,
+            },
+            path,
+        });
+    }
+}
+
+fn block_contains_relation(document: &ProjectDocument, block: &SourceRange) -> bool {
+    document.math_roots.iter().any(|root| {
+        block.start_offset <= root.full_range.start_offset
+            && root.full_range.end_offset <= block.end_offset
+            && document.nodes.iter().any(|node| {
+                node.math_class.as_deref() == Some("relation")
+                    && root.full_range.start_offset <= node.ranges.full.start_offset
+                    && node.ranges.full.end_offset <= root.full_range.end_offset
+            })
+    })
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct AttachmentGraph {
+    regions: Vec<AttachmentRegion>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct AttachmentRegion {
+    order: usize,
+    parent_scope: u32,
+    kind: SyntaxBlockKind,
+    range: SourceRange,
+}
+
+impl AttachmentGraph {
+    pub fn new(document: &ProjectDocument) -> Self {
+        let regions = document
+            .blocks
+            .iter()
+            .enumerate()
+            .map(|(order, block)| AttachmentRegion {
+                order,
+                parent_scope: block.parent_scope,
+                kind: block.kind,
+                range: block.range.clone(),
+            })
+            .collect();
+        Self { regions }
+    }
+
+    pub fn permits(&self, left: &SourceRange, right: &SourceRange) -> bool {
+        if self.regions.is_empty() {
+            return true;
+        }
+        let Some(left) = self.region_for(left) else {
+            return false;
+        };
+        let Some(right) = self.region_for(right) else {
+            return false;
+        };
+        if left.parent_scope != right.parent_scope || left.order.abs_diff(right.order) > 2 {
+            return false;
+        }
+        if left.order == right.order {
+            return true;
+        }
+        let (start, end) = if left.order <= right.order {
+            (left.order, right.order)
+        } else {
+            (right.order, left.order)
+        };
+        !self.regions[start + 1..end]
+            .iter()
+            .any(|region| region.kind == SyntaxBlockKind::Heading)
+    }
+
+    pub fn candidate_edges(&self) -> u32 {
+        self.regions
+            .windows(2)
+            .filter(|pair| pair[0].parent_scope == pair[1].parent_scope)
+            .count() as u32
+    }
+
+    fn region_for(&self, range: &SourceRange) -> Option<&AttachmentRegion> {
+        self.regions
+            .iter()
+            .filter(|region| ranges_overlap(&region.range, range))
+            .min_by_key(|region| region.range.end_offset - region.range.start_offset)
+    }
+}
+
+fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
+    left.start_offset < right.end_offset && right.start_offset < left.end_offset
 }
 
 #[cfg(test)]
@@ -210,8 +351,11 @@ fn test_latex_headings(source: &str, index: &SourceIndex) -> Vec<(usize, u32)> {
 
 #[cfg(test)]
 mod tests {
-    use super::ScopeGraph;
-    use crate::{DocumentLanguage, ProjectDocument};
+    use super::{AttachmentGraph, ScopeGraph};
+    use crate::{
+        DocumentLanguage, MathRootState, ProjectDocument, SourceRange, SyntaxBlock,
+        SyntaxBlockKind, SyntaxScope,
+    };
 
     fn document(content: &str, language: DocumentLanguage) -> ProjectDocument {
         ProjectDocument {
@@ -221,11 +365,12 @@ mod tests {
             language,
             content: content.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: Vec::new(),
             macros: Vec::new(),
@@ -246,5 +391,70 @@ mod tests {
         assert_ne!(section_a, section_c);
         assert!(scopes.visible(section_a, source.find("b\n```").unwrap() as u32));
         assert!(!scopes.visible(section_a, source.rfind('c').unwrap() as u32));
+    }
+
+    #[test]
+    fn scope_paths_use_structure_instead_of_source_offsets() {
+        let mut first = document("# A\ntext", DocumentLanguage::Markdown);
+        first.scopes = vec![
+            syntax_scope("document", None, 0, 8),
+            syntax_scope("section", Some(0), 0, 8),
+        ];
+        let mut shifted = document("prefix\n# A\ntext", DocumentLanguage::Markdown);
+        shifted.scopes = vec![
+            syntax_scope("document", None, 0, 15),
+            syntax_scope("section", Some(0), 7, 15),
+        ];
+
+        assert_eq!(ScopeGraph::new(&first).path_at(4), vec![1]);
+        assert_eq!(ScopeGraph::new(&shifted).path_at(11), vec![1]);
+    }
+
+    #[test]
+    fn attachment_is_bounded_by_parent_scope_and_block_distance() {
+        let mut source = document("lead\n$$x=y$$\nwhere\nfar", DocumentLanguage::Latex);
+        source.scopes = vec![syntax_scope("document", None, 0, 24)];
+        source.blocks = vec![
+            syntax_block(SyntaxBlockKind::Paragraph, 0, 0, 4),
+            syntax_block(SyntaxBlockKind::DisplayMath, 0, 5, 12),
+            syntax_block(SyntaxBlockKind::Paragraph, 0, 13, 18),
+            syntax_block(SyntaxBlockKind::Paragraph, 0, 19, 22),
+        ];
+        let graph = AttachmentGraph::new(&source);
+
+        assert!(graph.permits(&range(0, 4), &range(5, 12)));
+        assert!(graph.permits(&range(5, 12), &range(13, 18)));
+        assert!(!graph.permits(&range(0, 4), &range(19, 22)));
+        assert_eq!(graph.candidate_edges(), 3);
+    }
+
+    fn range(start_offset: u32, end_offset: u32) -> SourceRange {
+        SourceRange {
+            start_offset,
+            end_offset,
+        }
+    }
+
+    fn syntax_scope(kind: &str, parent: Option<u32>, start: u32, end: u32) -> SyntaxScope {
+        SyntaxScope {
+            kind: kind.into(),
+            parent,
+            range: range(start, end),
+            state: MathRootState::Complete,
+            name: None,
+            level: None,
+            source: None,
+        }
+    }
+
+    fn syntax_block(kind: SyntaxBlockKind, parent_scope: u32, start: u32, end: u32) -> SyntaxBlock {
+        SyntaxBlock {
+            kind,
+            parent_scope,
+            range: range(start, end),
+            state: MathRootState::Complete,
+            content_range: None,
+            name: None,
+        }
     }
 }

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
 pub const PROTOCOL_VERSION: u32 = 11;
-pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 7;
+pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -41,6 +41,8 @@ pub struct ProjectDocument {
     pub visible_prose: Vec<VisibleProseSpan>,
     pub prose_annotations: Vec<ProseAnnotation>,
     pub scopes: Vec<SyntaxScope>,
+    #[serde(default)]
+    pub blocks: Vec<SyntaxBlock>,
     pub declarations: Vec<StructuralDeclaration>,
     #[cfg(test)]
     #[serde(default)]
@@ -186,6 +188,29 @@ pub struct SyntaxScope {
     pub name: Option<String>,
     pub level: Option<String>,
     pub source: Option<ProjectSourceRef>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum SyntaxBlockKind {
+    Heading,
+    Paragraph,
+    DisplayMath,
+    ListItem,
+    Caption,
+    TableRow,
+    ResourceEntry,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SyntaxBlock {
+    pub kind: SyntaxBlockKind,
+    pub parent_scope: u32,
+    pub range: SourceRange,
+    pub state: MathRootState,
+    pub content_range: Option<SourceRange>,
+    pub name: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

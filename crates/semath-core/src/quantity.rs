@@ -247,6 +247,14 @@ pub(crate) struct QuantityObservations {
 }
 
 impl QuantityObservations {
+    pub fn explicit(&self) -> Vec<QuantityInfo> {
+        self.facts
+            .iter()
+            .filter(|fact| fact.derived_from.is_empty())
+            .map(QuantityFact::info)
+            .collect()
+    }
+
     pub fn exported(&self) -> Vec<QuantityInfo> {
         self.facts
             .iter()
@@ -731,11 +739,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: test_math_regions(content, DocumentLanguage::Latex),
             macros: Vec::new(),
@@ -776,11 +785,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: test_math_regions(content, DocumentLanguage::Latex),
             macros: vec![ProjectMacro {

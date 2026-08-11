@@ -123,6 +123,7 @@ pub(crate) struct ShapeObservations {
 pub(crate) struct ExplicitShapeClaim {
     pub symbol: String,
     pub kind: String,
+    pub dimensions: Vec<String>,
     pub display: String,
     pub symbol_range: SourceRange,
     pub evidence: Evidence,
@@ -150,6 +151,10 @@ impl ShapeObservations {
             .map(|fact| ExplicitShapeClaim {
                 symbol: fact.symbol.clone(),
                 kind: fact.shape.kind_name().into(),
+                dimensions: fact
+                    .shape
+                    .info("", fact.evidence.clone(), Vec::new())
+                    .dimensions,
                 display: fact.shape.display(),
                 symbol_range: fact.symbol_range.clone(),
                 evidence: fact.evidence.clone(),
@@ -840,11 +845,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),
@@ -896,11 +902,12 @@ mod tests {
             language: DocumentLanguage::Markdown,
             content: source.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),

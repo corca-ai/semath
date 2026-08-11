@@ -22,10 +22,11 @@ use crate::prose::LawActivationEvidence;
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
-    CandidateFamily, Claim, ClaimId, ClaimObject, ClaimPredicate, DocumentSemanticFacts, EntityId,
-    EvidenceId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier,
-    Mention, MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex,
-    ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
+    CandidateFamily, Claim, ClaimId, ClaimObject, ClaimPredicate, ClaimShape, ClaimValue,
+    DimensionExponent, DocumentSemanticFacts, EntityId, EvidenceId, EvidenceModality,
+    EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier, Mention, MentionModality,
+    NotationComponent, OccurrenceKind, ProjectSemanticIndex, ResolutionStatus, SourceOccurrence,
+    SourceOccurrenceId,
 };
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
@@ -620,7 +621,7 @@ fn lower_semantic_document(
                 )),
                 subject: entity.clone(),
                 predicate: ClaimPredicate::HasType,
-                object: ClaimObject::Text(candidate_type.to_owned()),
+                object: ClaimObject::Value(ClaimValue::Type(candidate_type.to_owned())),
                 evidence_id: evidence_id.clone(),
                 tier: InferenceTier::ExplicitClaim,
                 derivation_depth: 0,
@@ -631,6 +632,9 @@ fn lower_semantic_document(
             entities.push(entity);
         }
     }
+    let typed = lower_typed_observation_facts(source, observations, &occurrences, &definitions);
+    evidence.extend(typed.evidence);
+    claims.extend(typed.claims);
     let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
     entities.extend(cross_modal.entities);
     evidence.extend(cross_modal.evidence);
@@ -662,6 +666,162 @@ fn lower_semantic_document(
         },
         definitions,
         occurrences: occurrences_by_range,
+    }
+}
+
+#[derive(Default)]
+struct LoweredTypedFacts {
+    evidence: Vec<EvidenceRecord>,
+    claims: Vec<Claim>,
+}
+
+fn lower_typed_observation_facts(
+    source: &ProjectDocument,
+    observations: &DocumentSemanticObservations,
+    occurrences: &[SourceOccurrence],
+    definitions: &BTreeMap<EntityId, DefinitionInfo>,
+) -> LoweredTypedFacts {
+    let mut output = LoweredTypedFacts::default();
+    let mut append = |symbol: &str,
+                      evidence: &Evidence,
+                      predicate: ClaimPredicate,
+                      value: ClaimValue,
+                      category: &str| {
+        let Some((entity, _)) = closest_definition(definitions, symbol, evidence) else {
+            return;
+        };
+        let Some(anchor) = occurrences
+            .iter()
+            .find(|occurrence| occurrence.id == entity.anchor)
+        else {
+            return;
+        };
+        let ordinal = output.claims.len();
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:typed-{category}-evidence:{ordinal}",
+            source.file_id, source.document_version
+        ));
+        output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: entity.anchor.clone(),
+            scope_path: entity.scope_path.clone(),
+            available_after: anchor.availability_order,
+            polarity: EvidencePolarity::Positive,
+            modality: EvidenceModality::Asserted,
+            origin: EvidenceOrigin::Explicit,
+            provenance: vec![entity.anchor.clone()],
+            parent_claims: Vec::new(),
+            rule_id: evidence.rule_id.clone(),
+            rule_version: 1,
+        });
+        output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:typed-{category}-claim:{ordinal}",
+                source.file_id, source.document_version
+            )),
+            subject: entity.clone(),
+            predicate,
+            object: ClaimObject::Value(value),
+            evidence_id,
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
+    };
+
+    for role in observations.roles.all() {
+        append(
+            &role.symbol,
+            &role.evidence,
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept(role.concept_id),
+            "role",
+        );
+    }
+    for shape in observations.shapes.explicit_claims() {
+        append(
+            &shape.symbol,
+            &shape.evidence,
+            ClaimPredicate::HasShape,
+            ClaimValue::Shape(claim_shape(&shape.kind, shape.dimensions)),
+            "shape",
+        );
+    }
+    for quantity in observations.quantities.explicit() {
+        if let Some(quantity_kind) = quantity.quantity_kind_id {
+            append(
+                &quantity.symbol,
+                &quantity.evidence,
+                ClaimPredicate::HasQuantity,
+                ClaimValue::QuantityKind(quantity_kind),
+                "quantity",
+            );
+        }
+        if let Some(unit) = quantity.unit_id {
+            append(
+                &quantity.symbol,
+                &quantity.evidence,
+                ClaimPredicate::HasUnit,
+                ClaimValue::Unit(unit),
+                "unit",
+            );
+        }
+        if !quantity.dimension.exponents.is_empty() {
+            let exponents = quantity
+                .dimension
+                .exponents
+                .into_iter()
+                .filter_map(|exponent| {
+                    Some(DimensionExponent {
+                        base: exponent.base,
+                        numerator: i16::try_from(exponent.numerator).ok()?,
+                        denominator: u16::try_from(exponent.denominator).ok()?,
+                    })
+                })
+                .collect();
+            append(
+                &quantity.symbol,
+                &quantity.evidence,
+                ClaimPredicate::HasDimension,
+                ClaimValue::Dimension(exponents),
+                "dimension",
+            );
+        }
+    }
+    output
+}
+
+fn closest_definition<'a>(
+    definitions: &'a BTreeMap<EntityId, DefinitionInfo>,
+    symbol: &str,
+    evidence: &Evidence,
+) -> Option<(&'a EntityId, &'a DefinitionInfo)> {
+    let evidence_start = evidence
+        .source_ranges
+        .iter()
+        .map(|range| range.start_offset)
+        .min()
+        .unwrap_or(u32::MAX);
+    definitions
+        .iter()
+        .filter(|(_, definition)| {
+            definition.symbol.trim_start_matches('\\') == symbol.trim_start_matches('\\')
+        })
+        .min_by_key(|(_, definition)| {
+            definition
+                .location
+                .range
+                .start_offset
+                .abs_diff(evidence_start)
+        })
+}
+
+fn claim_shape(kind: &str, dimensions: Vec<String>) -> ClaimShape {
+    match kind {
+        "scalar" => ClaimShape::Scalar,
+        "vector" => ClaimShape::Vector(dimensions),
+        "matrix" => ClaimShape::Matrix(dimensions),
+        "tensor" => ClaimShape::Tensor(dimensions),
+        _ => ClaimShape::Unknown,
     }
 }
 
@@ -776,7 +936,7 @@ fn lower_cross_modal_facts(
                 )),
                 subject: entity.clone(),
                 predicate: ClaimPredicate::HasType,
-                object: ClaimObject::Text(candidate_type.to_owned()),
+                object: ClaimObject::Value(ClaimValue::Type(candidate_type.to_owned())),
                 evidence_id: evidence_id.clone(),
                 tier: InferenceTier::ExplicitClaim,
                 derivation_depth: 0,

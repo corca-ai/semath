@@ -38,6 +38,7 @@ export interface SemanticContinuityCase {
     readonly edge?: "after" | "before";
     readonly fileId: string;
     readonly needle: string;
+    readonly offset: number;
   };
   readonly documents: readonly CorpusDocument[];
   readonly family: SemanticContinuityFamily;
@@ -291,7 +292,7 @@ function parseCase(value: unknown, index: number): SemanticContinuityCase {
     };
   });
   const cursor = record(item.cursor, `${path}.cursor`);
-  exact(cursor, ["fileId", "needle", "edge"], `${path}.cursor`);
+  exact(cursor, ["fileId", "needle", "offset", "edge"], `${path}.cursor`);
   const edge = cursor.edge === undefined ? undefined : text(cursor.edge, `${path}.cursor.edge`);
   if (edge !== undefined && edge !== "before" && edge !== "after") {
     throw new Error(`${path}.cursor.edge: invalid edge`);
@@ -311,6 +312,7 @@ function parseCase(value: unknown, index: number): SemanticContinuityCase {
       ...(edge ? { edge } : {}),
       fileId: text(cursor.fileId, `${path}.cursor.fileId`),
       needle: text(cursor.needle, `${path}.cursor.needle`),
+      offset: integer(cursor.offset, `${path}.cursor.offset`),
     },
     documents,
     family: family as SemanticContinuityFamily,

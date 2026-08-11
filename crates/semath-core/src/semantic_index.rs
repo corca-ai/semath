@@ -180,10 +180,68 @@ pub enum ClaimPredicate {
     HasRole,
     HasType,
     HasShape,
+    HasDimension,
     HasQuantity,
     HasUnit,
     Assumes,
     Relates,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(tag = "kind", content = "value", rename_all = "kebab-case")]
+pub enum ClaimShape {
+    Scalar,
+    Vector(Vec<String>),
+    Matrix(Vec<String>),
+    Tensor(Vec<String>),
+    Function {
+        domain: Box<ClaimShape>,
+        codomain: Box<ClaimShape>,
+    },
+    Unknown,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "camelCase")]
+pub struct DimensionExponent {
+    pub base: String,
+    pub numerator: i16,
+    pub denominator: u16,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(tag = "kind", content = "value", rename_all = "kebab-case")]
+pub enum ClaimCondition {
+    Nonzero(EntityId),
+    Positive(EntityId),
+    Nonnegative(EntityId),
+    Invertible(EntityId),
+    Member { entity: EntityId, set: EntityId },
+    Named(String),
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "camelCase")]
+pub struct ClaimRelation {
+    pub operator: String,
+    pub operands: Vec<EntityId>,
+    pub canonical_digest: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(tag = "kind", content = "value", rename_all = "kebab-case")]
+pub enum ClaimValue {
+    Concept(String),
+    Role(String),
+    Type(String),
+    Shape(ClaimShape),
+    Dimension(Vec<DimensionExponent>),
+    Unit(String),
+    QuantityKind(String),
+    Condition(ClaimCondition),
+    Relation(ClaimRelation),
+    Scalar(String),
+    Text(String),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -191,7 +249,7 @@ pub enum ClaimPredicate {
 pub enum ClaimObject {
     Entity(EntityId),
     Occurrence(SourceOccurrenceId),
-    Text(String),
+    Value(ClaimValue),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -650,6 +708,7 @@ impl ProjectSemanticIndex {
             {
                 return Err("claim object is not a known entity".to_owned());
             }
+            validate_claim_object(claim)?;
             if evidence.origin == EvidenceOrigin::Explicit
                 && claim.tier != InferenceTier::ExplicitClaim
             {
@@ -820,8 +879,16 @@ impl ProjectSemanticIndex {
 }
 
 fn candidate_claim_matches(candidate: &SemanticCandidateClaim, claim: &Claim) -> bool {
-    let ClaimObject::Text(value) = &claim.object else {
+    let ClaimObject::Value(value) = &claim.object else {
         return false;
+    };
+    let value = match value {
+        ClaimValue::Concept(value)
+        | ClaimValue::Role(value)
+        | ClaimValue::Type(value)
+        | ClaimValue::Scalar(value)
+        | ClaimValue::Text(value) => value,
+        _ => return false,
     };
     let normalized = value.trim().to_ascii_lowercase().replace(['_', ' '], "-");
     if normalized == candidate.interpretation {
@@ -846,6 +913,90 @@ fn candidate_claim_matches(candidate: &SemanticCandidateClaim, claim: &Claim) ->
             normalized == candidate.interpretation
         }
     }
+}
+
+fn validate_claim_object(claim: &Claim) -> Result<(), String> {
+    let valid = matches!(
+        (&claim.predicate, &claim.object),
+        (
+            ClaimPredicate::Defines
+                | ClaimPredicate::Names
+                | ClaimPredicate::Abbreviates
+                | ClaimPredicate::Aliases,
+            ClaimObject::Occurrence(_) | ClaimObject::Entity(_),
+        ) | (
+            ClaimPredicate::HasRole,
+            ClaimObject::Value(ClaimValue::Role(_))
+        ) | (
+            ClaimPredicate::HasRole,
+            ClaimObject::Value(ClaimValue::Concept(_))
+        ) | (
+            ClaimPredicate::HasType,
+            ClaimObject::Value(ClaimValue::Type(_))
+        ) | (
+            ClaimPredicate::HasShape,
+            ClaimObject::Value(ClaimValue::Shape(_))
+        ) | (
+            ClaimPredicate::HasDimension,
+            ClaimObject::Value(ClaimValue::Dimension(_))
+        ) | (
+            ClaimPredicate::HasQuantity,
+            ClaimObject::Value(ClaimValue::QuantityKind(_))
+        ) | (
+            ClaimPredicate::HasUnit,
+            ClaimObject::Value(ClaimValue::Unit(_))
+        ) | (
+            ClaimPredicate::Assumes,
+            ClaimObject::Value(ClaimValue::Condition(_))
+        ) | (
+            ClaimPredicate::Relates,
+            ClaimObject::Value(ClaimValue::Relation(_))
+        ) | (ClaimPredicate::Relates, ClaimObject::Entity(_))
+    );
+    if !valid {
+        return Err("claim predicate and typed object are incompatible".to_owned());
+    }
+    if let ClaimObject::Value(value) = &claim.object {
+        validate_claim_value(value)?;
+    }
+    Ok(())
+}
+
+fn validate_claim_value(value: &ClaimValue) -> Result<(), String> {
+    const MAX_TEXT_LENGTH: usize = 256;
+    let text = match value {
+        ClaimValue::Concept(value)
+        | ClaimValue::Role(value)
+        | ClaimValue::Type(value)
+        | ClaimValue::Unit(value)
+        | ClaimValue::QuantityKind(value)
+        | ClaimValue::Scalar(value)
+        | ClaimValue::Text(value) => Some(value),
+        ClaimValue::Condition(ClaimCondition::Named(value)) => Some(value),
+        ClaimValue::Relation(value) => Some(&value.canonical_digest),
+        _ => None,
+    };
+    if text.is_some_and(|value| value.trim().is_empty() || value.len() > MAX_TEXT_LENGTH) {
+        return Err("typed claim value is empty or exceeds its bound".to_owned());
+    }
+    if let ClaimValue::Dimension(exponents) = value
+        && (exponents.len() > 16
+            || exponents.iter().any(|exponent| {
+                exponent.base.trim().is_empty()
+                    || exponent.denominator == 0
+                    || exponent.base.len() > 64
+            }))
+    {
+        return Err("dimension claim is invalid or exceeds its bound".to_owned());
+    }
+    if let ClaimValue::Relation(relation) = value
+        && (relation.operator.trim().is_empty()
+            || relation.operands.len() > 32
+            || relation.canonical_digest.trim().is_empty())
+    {
+        return Err("relation claim is invalid or exceeds its bound".to_owned());
+    }
+    Ok(())
 }
 
 fn claim_depends_on_file(
@@ -1310,7 +1461,7 @@ mod tests {
             id: ClaimId("derived-claim".to_owned()),
             subject: derived_entity.clone(),
             predicate: ClaimPredicate::HasType,
-            object: ClaimObject::Text("real".to_owned()),
+            object: ClaimObject::Value(ClaimValue::Type("real".to_owned())),
             evidence_id: derived_evidence.id.clone(),
             tier: InferenceTier::Constraint,
             derivation_depth: 1,
@@ -1389,7 +1540,7 @@ mod tests {
             id: ClaimId("bad-claim".to_owned()),
             subject: declared_entity,
             predicate: ClaimPredicate::HasType,
-            object: ClaimObject::Text("real".to_owned()),
+            object: ClaimObject::Value(ClaimValue::Type("real".to_owned())),
             evidence_id: bad_evidence.id.clone(),
             tier: InferenceTier::ExplicitClaim,
             derivation_depth: 0,
@@ -1547,7 +1698,7 @@ mod tests {
                     "metric-type",
                     &metric,
                     ClaimPredicate::HasType,
-                    ClaimObject::Text("metric".into()),
+                    ClaimObject::Value(ClaimValue::Type("metric".into())),
                     "type-evidence",
                 ),
             ],
@@ -1571,5 +1722,80 @@ mod tests {
             [ClaimId("metric-type".into())]
         );
         assert!(candidates[0].rejecting_claims.is_empty());
+    }
+
+    #[test]
+    fn typed_claim_values_serialize_deterministically_and_validate_by_predicate() {
+        let source = occurrence("typed.tex", 1, 1, 0, 1, &[], "x", Vec::new());
+        let subject = entity(&source, "x");
+        let value = ClaimObject::Value(ClaimValue::Shape(ClaimShape::Vector(vec!["n".into()])));
+        assert_eq!(
+            serde_json::to_string(&value).unwrap(),
+            r#"{"kind":"value","value":{"kind":"shape","value":{"kind":"vector","value":["n"]}}}"#
+        );
+        let mut index = ProjectSemanticIndex::default();
+        let invalid = claim(
+            "wrong-kind",
+            &subject,
+            ClaimPredicate::HasUnit,
+            value,
+            "typed-evidence",
+        );
+        let error = index
+            .replace_document(facts(
+                "typed.tex",
+                1,
+                vec![source.clone()],
+                vec![subject],
+                vec![source.id.clone()],
+                vec![evidence(
+                    "typed-evidence",
+                    &source,
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
+                )],
+                vec![invalid],
+            ))
+            .unwrap_err();
+        assert_eq!(error, "claim predicate and typed object are incompatible");
+        assert_eq!(index.stats(), SemanticIndexStats::default());
+    }
+
+    #[test]
+    fn typed_dimensions_reject_zero_denominators_atomically() {
+        let source = occurrence("dimension.tex", 1, 1, 0, 1, &[], "x", Vec::new());
+        let subject = entity(&source, "x");
+        let invalid = claim(
+            "invalid-dimension",
+            &subject,
+            ClaimPredicate::HasDimension,
+            ClaimObject::Value(ClaimValue::Dimension(vec![DimensionExponent {
+                base: "length".into(),
+                numerator: 1,
+                denominator: 0,
+            }])),
+            "dimension-evidence",
+        );
+        let mut index = ProjectSemanticIndex::default();
+        assert_eq!(
+            index
+                .replace_document(facts(
+                    "dimension.tex",
+                    1,
+                    vec![source.clone()],
+                    vec![subject],
+                    vec![source.id.clone()],
+                    vec![evidence(
+                        "dimension-evidence",
+                        &source,
+                        EvidencePolarity::Positive,
+                        EvidenceModality::Asserted,
+                    )],
+                    vec![invalid],
+                ))
+                .unwrap_err(),
+            "dimension claim is invalid or exceeds its bound"
+        );
+        assert_eq!(index.stats(), SemanticIndexStats::default());
     }
 }

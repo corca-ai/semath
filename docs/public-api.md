@@ -60,7 +60,7 @@ the exact end of a complete following argument. Cursor queries therefore do
 not rescan TeX, retain the frontend tree, or snap a callable across unrelated
 trailing syntax.
 
-Project documents contain the complete wasmtex syntax schema 7 snapshot, including
+Project documents contain the complete wasmtex syntax schema 8 snapshot, including
 neutral lexical classes, document fields, and citation annotations alongside visible prose and
 structural scopes. The
 adapter validates the schema and forwards the arena, roots, visible prose,

@@ -15,6 +15,7 @@ use crate::scientific_prose::{
     DiscourseFrame, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
     extract_assumptions, segment_scientific_clauses,
 };
+use crate::scope::AttachmentGraph;
 use crate::{
     AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, SourceIndex, SourceRange,
 };
@@ -125,6 +126,7 @@ pub(crate) struct ScientificSemanticEvidence {
     pub domain_priors: Vec<DomainPriorEvidence>,
     pub law_activations: Vec<LawActivationEvidence>,
     pub formula_operations: Vec<FormulaOperationEvidence>,
+    attachment: AttachmentGraph,
 }
 
 impl ScientificSemanticEvidence {
@@ -148,7 +150,10 @@ impl ScientificSemanticEvidence {
             .law_activations
             .iter()
             .filter(matching)
-            .find(|activation| ranges_overlap(&activation.clause_range, range))
+            .find(|activation| {
+                ranges_overlap(&activation.clause_range, range)
+                    && self.attachment.permits(&activation.clause_range, range)
+            })
         {
             return Some(activation);
         }
@@ -169,6 +174,7 @@ impl ScientificSemanticEvidence {
             .find(|activation| {
                 activation.clause_range == previous_clause.range
                     && previous_clause.frame.establishes()
+                    && self.attachment.permits(&activation.clause_range, range)
             })
     }
 
@@ -214,6 +220,7 @@ pub(crate) fn observe_prose(
     analysis.match_stats.clauses = clauses.len() as u32;
     analysis.semantic_evidence =
         collect_semantic_evidence(document, source, &index, &clauses, canonical_expressions);
+    analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     let mentions = parsed
         .iter()
         .filter_map(|math| {
@@ -679,6 +686,7 @@ fn collect_semantic_evidence(
         domain_priors,
         law_activations,
         formula_operations,
+        attachment: AttachmentGraph::new(document),
     }
 }
 
@@ -1653,11 +1661,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),
