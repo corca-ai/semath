@@ -3,7 +3,6 @@ import type { RecognitionFrontierSignals } from "./recognition-frontier";
 import { classifyAuthoredFirstLoss } from "./authored-first-loss";
 
 const signals: RecognitionFrontierSignals = {
-  canonicalAvailable: true,
   decision: "partial",
   discourseEvidence: true,
   engineLimited: false,
