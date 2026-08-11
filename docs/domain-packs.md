@@ -82,8 +82,9 @@ automatic; no Rust registry or recognizer branch is edited. Then use
 `semath-pack explain <manifest> <pack-id> <case-id>` for one decision. Compare
 reviewed results with `semath-pack compare <baseline> <candidate>`.
 
-The generated corpus is a balanced set of editable positive and refusal seeds,
-not evidence of maturity by itself. The checked-in schema-9 pack files and the
+The generated corpus is a balanced set of positive and refusal observations
+materialized from compact editable seeds, not independently authored evidence
+or evidence of maturity by itself. The checked-in schema-9 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

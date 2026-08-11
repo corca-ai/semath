@@ -7,8 +7,8 @@ thresholds.
 
 | Signal | Meaning | It does not mean |
 | --- | --- | --- |
-| Recall | authored positive cases that recognize one target law | field-wide notation coverage |
-| Precision | target recognitions absent from authored refusal cases | probabilistic confidence |
+| Recall | reviewed positive cases that recognize one target law | field-wide notation coverage |
+| Precision | target recognitions absent from reviewed refusal cases | probabilistic confidence |
 | Role accuracy | expected roles bind the intended symbols | universal validity of the formula |
 | Evidence integrity | conclusions retain conditions and source ranges | sufficiency outside the source context |
 | Refusal preservation | negative cases avoid recognizing the target law | proof that the input is false |
@@ -88,8 +88,9 @@ live production telemetry. It contains no imported real-world corpus, so it must
 not be used to claim field completeness or real-world frequency.
 
 Semantic corpus execution is a deliberate manual/release gate, not a default
-pull-request check. Default CI still parses schemas, verifies generated fixture
-integrity, tests the pure scorers, and enforces pack conformance. This keeps
+pull-request check. Default CI still parses schemas, verifies the compact
+materialization ledger and generator determinism, tests the pure scorers, and
+enforces pack conformance. This keeps
 ordinary feedback fast without presenting an expensive synthetic evaluation as
 continuous production evidence.
 
@@ -121,8 +122,12 @@ version-controlled. Fix labels or behavior before changing a threshold; never
 lower one solely to make a gate pass.
 
 The checked-in generation specification separates declaration, prose,
-presentation, project, macro, constraint, mutation, and cursor batches. Pure
-generation and integrity checks reject stale output, normalized duplicates,
+presentation, project, macro, constraint, mutation, and cursor batches. The
+5,406 deterministic cases are materialized in memory for evaluation rather
+than checked in as expanded JSON. The compact
+[materialization ledger](../fixtures/corpus-materialization.json) freezes suite
+counts and canonical digests and rejects tracked expansions. Pure generation
+and integrity checks reject nondeterminism, normalized duplicates,
 duplicate semantic/syntax/prose/tag profiles, malformed delimiters, invalid
 environment nesting, ambiguous cursors, and leaked fixture identities.
 Pack validation also derives a deterministic bounded property plan from the
@@ -133,6 +138,27 @@ fixed sample run in default CI. A separate cursor plan exercises 102
 native/WASM queries across eight neutral structural families and compares
 semantic view, definition, references, and rename preparation at every reviewed
 edge.
+
+## v0.27 corpus compaction evidence
+
+On 2026-08-12, baseline commit
+`f8431e8ef967471a913fd1de0e53c289658d39c1` stored 33 corpus files containing
+251,298 lines and 9,545,100 bytes. The compact representation keeps five
+reviewable fixture files containing 14,878 lines and 560,138 bytes, a reduction
+of 94.1% in both tracked lines and bytes. It still materializes all 5,406
+deterministic cases, and the 420 retained fixture cases keep the scored total at
+5,826. The materialization ledger records the canonical case count, byte count,
+and SHA-256 digest of every removed expansion.
+
+Before removing the expanded files, each materialized suite was compared
+byte-for-byte with its tracked baseline output. Full corpus execution remains a
+manual release measurement because it is expensive and does not provide useful
+pull-request latency. A same-machine development run after compaction took
+881.04 seconds and reached 3,981,983,744 bytes of peak resident memory. It
+reproduced the baseline's four existing `event-intersection` precision and
+refusal failures exactly; compaction changed neither inputs nor observations.
+These local measurements are diagnostic evidence, not the stable x86_64 release
+budget measurement.
 
 Native/WASM parity, full-path incremental latency and memory, package integrity,
 and documentation are separate gates so failures remain actionable. The normal

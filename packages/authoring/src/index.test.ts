@@ -141,11 +141,10 @@ function scorecard(recall: number, precision: number): QualityScorecard {
   const metric = (percent: number) => ({ denominator: 100, numerator: percent, percent });
   return {
     adversarialRefusal: metric(100),
-    authoredCases: 10,
     coverage: [],
     diversity: [],
     failures: [],
-    generatedCases: 0,
+    fixtureCases: 10,
     laws: [{
       evidenceIntegrity: metric(100),
       falsePositives: 0,
@@ -158,9 +157,12 @@ function scorecard(recall: number, precision: number): QualityScorecard {
       roleAccuracy: metric(100),
       suiteId: "sample",
     }],
+    materializedCases: 0,
     metamorphic: metric(100),
+    metamorphicCases: 0,
     refusalCategories: 5,
-    schemaVersion: 2,
+    schemaVersion: 3,
+    scoredCases: 10,
     variations: [],
   };
 }

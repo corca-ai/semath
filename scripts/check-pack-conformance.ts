@@ -18,7 +18,7 @@ const report = checkPackConformance(
 );
 for (const pack of report.packs) {
   console.log(
-    `${pack.packId}: summary=${pack.summary} laws=${pack.coveredLaws}/${pack.laws} authoredCases=${pack.authoredCases} capabilities=${Object.entries(pack.capabilities).map(([id, maturity]) => `${id}:${maturity}`).join(",")}`,
+    `${pack.packId}: summary=${pack.summary} laws=${pack.coveredLaws}/${pack.laws} scoredCases=${pack.scoredCases} capabilities=${Object.entries(pack.capabilities).map(([id, maturity]) => `${id}:${maturity}`).join(",")}`,
   );
 }
 if (report.failures.length) {

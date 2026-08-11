@@ -92,12 +92,13 @@ export interface PackSupport {
 export interface QualityManifest {
   dimensions: readonly CoverageDimension[];
   foundationSuites: readonly FoundationSuiteConfig[];
+  materializedSuiteIds: readonly string[];
   metamorphic: {
     casesPerLaw: number;
     transforms: readonly MetamorphicTransform[];
   };
   packs: readonly PackSupport[];
-  schemaVersion: 3;
+  schemaVersion: 4;
   suites: readonly CorpusSuiteConfig[];
   thresholds: QualityThresholds;
 }
@@ -175,14 +176,15 @@ export function parseQualityManifest(value: unknown): QualityManifest {
       "thresholds",
       "dimensions",
       "metamorphic",
+      "materializedSuiteIds",
       "packs",
       "suites",
       "foundationSuites",
     ],
     "manifest",
   );
-  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 3) {
-    fail("manifest.schemaVersion", "must be 3");
+  if (integer(root.schemaVersion, "manifest.schemaVersion") !== 4) {
+    fail("manifest.schemaVersion", "must be 4");
   }
   const thresholds = parseThresholds(root.thresholds);
   const dimensions = array(root.dimensions, "manifest.dimensions").map(
@@ -200,6 +202,16 @@ export function parseQualityManifest(value: unknown): QualityManifest {
   );
   unique(suites.map((item) => item.id), "manifest.suites");
   unique(suites.map((item) => item.path), "manifest.suites paths");
+  const materializedSuiteIds = strings(
+    root.materializedSuiteIds,
+    "manifest.materializedSuiteIds",
+  );
+  unique(materializedSuiteIds, "manifest.materializedSuiteIds");
+  for (const suiteId of materializedSuiteIds) {
+    if (!suites.some((suite) => suite.id === suiteId)) {
+      fail("manifest.materializedSuiteIds", `unknown suite ${suiteId}`);
+    }
+  }
   const foundationSuites = array(
     root.foundationSuites,
     "manifest.foundationSuites",
@@ -230,9 +242,10 @@ export function parseQualityManifest(value: unknown): QualityManifest {
   return {
     dimensions,
     foundationSuites,
+    materializedSuiteIds,
     metamorphic,
     packs,
-    schemaVersion: 3,
+    schemaVersion: 4,
     suites,
     thresholds,
   };

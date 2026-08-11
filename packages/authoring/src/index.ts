@@ -224,6 +224,7 @@ export function scaffoldPackWorkspace(pack: AuthoringPack): PackWorkspaceScaffol
       },
     ],
     foundationSuites: [],
+    materializedSuiteIds: [],
     metamorphic: {
       casesPerLaw: 1,
       transforms: ["neutral-prose", "trailing-comment", "document-order"],
@@ -242,7 +243,7 @@ export function scaffoldPackWorkspace(pack: AuthoringPack): PackWorkspaceScaffol
         packId: pack.packId,
       },
     ],
-    schemaVersion: 3,
+    schemaVersion: 4,
     suites: [
       {
         id: suiteId,

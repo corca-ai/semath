@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import {
   annotateCorpus,
   buildPromotionSeedCorpus,
@@ -10,7 +10,6 @@ import {
 } from "../packages/evaluation/src/index";
 
 const root = new URL("../", import.meta.url);
-const check = process.argv.includes("--check");
 const evidenceStart = "% semath-recognition-evidence:start";
 const evidenceEnd = "% semath-recognition-evidence:end";
 const texCommandSymbols = new Set([
@@ -20,88 +19,104 @@ const texCommandSymbols = new Set([
   "varphi", "chi", "psi", "omega", "Gamma", "Delta", "Theta", "Lambda", "Xi", "Pi",
   "Sigma", "Upsilon", "Phi", "Psi", "Omega", "nabla",
 ]);
-const spec = parseSyntheticDiversitySpec(
-  JSON.parse(await readFile(new URL("fixtures/synthetic-diversity-spec.json", root), "utf8")),
-);
-const promotionSeeds = parsePromotionSeedSpec(
-  JSON.parse(await readFile(new URL("fixtures/promotion-law-seeds.json", root), "utf8")),
-);
-
 const groups = [
   {
-    base: "fixtures/corpus/circuits.json",
-    generated: "fixtures/corpus/circuits-diversity.json",
+    base: "corpus/circuits.json",
+    generated: "corpus/circuits-diversity.json",
     generatedDomain: "circuits-diversity",
     pack: "packs/circuits/v1.json",
   },
   {
-    base: "fixtures/corpus/control-systems.json",
-    generated: "fixtures/corpus/control-systems-diversity.json",
+    base: "corpus/control-systems.json",
+    generated: "corpus/control-systems-diversity.json",
     generatedDomain: "control-systems-diversity",
     pack: "packs/control-systems/v1.json",
   },
   {
-    base: "fixtures/corpus/mechanics.json",
-    generated: "fixtures/corpus/mechanics-diversity.json",
+    base: "corpus/mechanics.json",
+    generated: "corpus/mechanics-diversity.json",
     generatedDomain: "mechanics-diversity",
     pack: "packs/classical-mechanics/v1.json",
   },
   {
-    base: "fixtures/corpus/linear-algebra-probe.json",
-    generated: "fixtures/corpus/linear-algebra-diversity.json",
+    base: "corpus/linear-algebra-probe.json",
+    generated: "corpus/linear-algebra-diversity.json",
     generatedDomain: "linear-algebra-diversity",
     pack: "packs/linear-algebra/v1.json",
   },
   {
-    base: "fixtures/corpus/probability-probe.json",
-    generated: "fixtures/corpus/probability-diversity.json",
+    base: "corpus/probability-probe.json",
+    generated: "corpus/probability-diversity.json",
     generatedDomain: "probability-diversity",
     pack: "packs/probability/v1.json",
   },
 ] as const;
 
-const outputs = new Map<string, Corpus>();
-for (const group of groups) {
-  const raw = JSON.parse(await readFile(new URL(group.base, root), "utf8")) as Corpus;
-  const pack = JSON.parse(await readFile(new URL(group.pack, root), "utf8")) as PackSource;
-  const baseline = annotateCorpus(withRecognitionEvidence(raw, pack));
-  outputs.set(group.base, baseline);
-  outputs.set(
-    group.generated,
-    generateLawDiversityCorpus(group.generatedDomain, baseline.cases, spec),
+export async function materializeSyntheticCorpora(): Promise<Map<string, Corpus>> {
+  const spec = parseSyntheticDiversitySpec(
+    JSON.parse(await readFile(new URL("fixtures/synthetic-diversity-spec.json", root), "utf8")),
   );
-}
-outputs.set(
-  "fixtures/corpus/global-adversarial.json",
-  generateGlobalRefusalCorpus("global-adversarial", spec),
-);
-for (const suite of promotionSeeds.suites) {
-  const pack = JSON.parse(
-    await readFile(new URL(`packs/${suite.packId}/v1.json`, root), "utf8"),
-  ) as PackSource;
-  const baseline = annotateCorpus(withRecognitionEvidence(buildPromotionSeedCorpus(suite), pack));
-  const diversityDomain = suite.id.replace(/-probe$/u, "-diversity");
-  outputs.set(`fixtures/corpus/${suite.id}.json`, baseline);
-  outputs.set(
-    `fixtures/corpus/${diversityDomain}.json`,
-    generateLawDiversityCorpus(diversityDomain, baseline.cases, spec),
+  const promotionSeeds = parsePromotionSeedSpec(
+    JSON.parse(await readFile(new URL("fixtures/promotion-law-seeds.json", root), "utf8")),
   );
-}
-
-for (const [path, corpus] of outputs) {
-  const next = `${JSON.stringify(corpus, null, 2)}\n`;
-  const url = new URL(path, root);
-  if (check) {
-    const current = await readFile(url, "utf8").catch(() => "");
-    if (current !== next) throw new Error(`${path}: generated corpus is stale`);
-  } else {
-    await writeFile(url, next);
+  const outputs = new Map<string, Corpus>();
+  for (const group of groups) {
+    const raw = JSON.parse(
+      await readFile(new URL(`fixtures/${group.base}`, root), "utf8"),
+    ) as Corpus;
+    const pack = JSON.parse(await readFile(new URL(group.pack, root), "utf8")) as PackSource;
+    const baseline = annotateCorpus(withRecognitionEvidence(raw, pack));
+    outputs.set(
+      group.generated,
+      generateLawDiversityCorpus(group.generatedDomain, baseline.cases, spec),
+    );
   }
+  outputs.set(
+    "corpus/global-adversarial.json",
+    generateGlobalRefusalCorpus("global-adversarial", spec),
+  );
+  for (const suite of promotionSeeds.suites) {
+    const pack = JSON.parse(
+      await readFile(new URL(`packs/${suite.packId}/v1.json`, root), "utf8"),
+    ) as PackSource;
+    const baseline = annotateCorpus(
+      withRecognitionEvidence(buildPromotionSeedCorpus(suite), pack),
+    );
+    const diversityDomain = suite.id.replace(/-probe$/u, "-diversity");
+    outputs.set(`corpus/${suite.id}.json`, baseline);
+    outputs.set(
+      `corpus/${diversityDomain}.json`,
+      generateLawDiversityCorpus(diversityDomain, baseline.cases, spec),
+    );
+  }
+  return outputs;
 }
 
-console.log(
-  `${check ? "verified" : "generated"} ${outputs.size} corpus files (${[...outputs.values()].reduce((sum, corpus) => sum + corpus.cases.length, 0)} cases)`,
-);
+async function run(): Promise<void> {
+  const check = process.argv.includes("--check");
+  const outputs = await materializeSyntheticCorpora();
+  if (check) {
+    const repeated = await materializeSyntheticCorpora();
+    for (const [path, corpus] of outputs) {
+      if (JSON.stringify(corpus) !== JSON.stringify(repeated.get(path))) {
+        throw new Error(`${path}: generated corpus is not deterministic`);
+      }
+    }
+  } else {
+    const outputRoot = new URL(".artifacts/generated-corpus/", root);
+    await mkdir(outputRoot, { recursive: true });
+    for (const [path, corpus] of outputs) {
+      const url = new URL(path, outputRoot);
+      await mkdir(new URL("./", url), { recursive: true });
+      await writeFile(url, `${JSON.stringify(corpus, null, 2)}\n`);
+    }
+  }
+  console.log(
+    `${check ? "verified" : "materialized"} ${outputs.size} corpus suites (${[...outputs.values()].reduce((sum, corpus) => sum + corpus.cases.length, 0)} cases)`,
+  );
+}
+
+if (import.meta.main) await run();
 
 interface PackSource {
   laws: readonly {
