@@ -188,7 +188,7 @@ async function loadWasm() {
 }
 
 function inspect(wasm, sources) {
-  const payload = new TextEncoder().encode(JSON.stringify({ schemaVersion: 1, sources }));
+  const payload = new TextEncoder().encode(JSON.stringify({ schemaVersion: 2, sources }));
   return JSON.parse(new TextDecoder().decode(wasm.inspectPackCatalog(payload)));
 }
 
@@ -257,7 +257,7 @@ function printCompilerReport(report) {
     console.log(`${form.packId}/${form.lawId}[${form.formIndex}]: ${form.canonical}`);
   }
   console.log(
-    `compiler OK: ${report.packs.length} pack(s), ${report.forms.length} canonical form(s), ${report.diagnostics.length} diagnostic(s)`,
+    `compiler OK: ${report.packs.length} pack(s), ${report.signatures.length} domain signature(s), ${report.collisions.length} structural collision(s), ${report.forms.length} canonical form(s), ${report.diagnostics.length} diagnostic(s)`,
   );
 }
 

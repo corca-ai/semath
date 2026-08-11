@@ -5,6 +5,7 @@ export const PROPERTY_FAMILIES = [
   "mutation",
   "macro-project",
   "cursor",
+  "attachment",
 ] as const;
 
 export type PropertyFamily = (typeof PROPERTY_FAMILIES)[number];
@@ -70,6 +71,14 @@ const FAMILY_TRANSFORMS: Readonly<
     { oracle: { kind: "cursor-equal" }, transform: "decorated-components" },
     { oracle: { kind: "cursor-equal" }, transform: "application-edge" },
   ],
+  attachment: [
+    { oracle: { kind: "decision-equal" }, transform: "prose-before-formula" },
+    { oracle: { kind: "decision-equal" }, transform: "formula-before-where-clause" },
+    { oracle: { kind: "decision-equal" }, transform: "formula-before-neighbor-sentence" },
+    { oracle: { kind: "must-refuse" }, transform: "attachment-retraction" },
+    { oracle: { kind: "must-refuse" }, transform: "sibling-section-attachment" },
+    { oracle: { kind: "must-refuse" }, transform: "cited-or-hedged-attachment" },
+  ],
 };
 
 /**
@@ -94,19 +103,23 @@ export function planPackPropertyCells(
       }
       for (const [familyIndex, family] of PROPERTY_FAMILIES.entries()) {
         const variants = FAMILY_TRANSFORMS[family];
-        const variant = stableIndex(seed, `${pack.packId}/${law.id}/${family}`, variants.length);
-        const selected = variants[variant]!;
-        const semanticForm = forms[(variant + familyIndex) % forms.length]!;
-        cells.push({
-          family,
-          id: `${pack.packId}/${law.id}/${family}/${selected.transform}`,
-          lawId: law.id,
-          oracle: selected.oracle,
-          packId: pack.packId,
-          semanticForm,
-          transform: selected.transform,
-          variant,
-        });
+        const selectedVariants = family === "attachment"
+          ? variants.map((_, index) => index)
+          : [stableIndex(seed, `${pack.packId}/${law.id}/${family}`, variants.length)];
+        for (const variant of selectedVariants) {
+          const selected = variants[variant]!;
+          const semanticForm = forms[(variant + familyIndex) % forms.length]!;
+          cells.push({
+            family,
+            id: `${pack.packId}/${law.id}/${family}/${selected.transform}`,
+            lawId: law.id,
+            oracle: selected.oracle,
+            packId: pack.packId,
+            semanticForm,
+            transform: selected.transform,
+            variant,
+          });
+        }
       }
     }
   }

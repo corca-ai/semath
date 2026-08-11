@@ -5,6 +5,7 @@ use regex::Regex;
 
 use crate::pack::{PackDimensionExponent, built_in_packs};
 use crate::parser::ParsedMath;
+use crate::prose::definition_available_from;
 use crate::scope::ScopeGraph;
 use crate::{
     DefinitionInfo, DimensionExponentInfo, Evidence, PhysicalDimensionInfo, ProjectDocument,
@@ -332,13 +333,7 @@ fn explicit_facts(
             let dimension = unit
                 .map(|unit| unit.dimension.clone())
                 .or_else(|| kind.map(|kind| kind.dimension.clone()))?;
-            let available_from = definition
-                .evidence
-                .source_ranges
-                .iter()
-                .map(|range| range.end_offset)
-                .max()
-                .unwrap_or(definition.location.range.end_offset);
+            let available_from = definition_available_from(definition);
             Some(QuantityFact {
                 symbol: definition.symbol.clone(),
                 symbol_range: definition.location.range.clone(),
@@ -736,7 +731,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -781,7 +776,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: content.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

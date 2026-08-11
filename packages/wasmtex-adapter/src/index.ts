@@ -39,7 +39,7 @@ export function adaptNonLatexDocument(input: {
     mathRoots: [],
     nodes: [],
     proseAnnotations: [],
-    schemaVersion: 6,
+    schemaVersion: 7,
     scopes: [
       {
         kind: "document",

@@ -176,6 +176,7 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
                 label: relation.title.clone(),
                 range: relation.range.clone(),
                 evidence: relation.evidence.clone(),
+                relevance: formula.relevance.clone(),
             })
         })
         .chain(
@@ -192,11 +193,12 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
                     label: candidate.interpretation.clone(),
                     range: candidate.range.clone(),
                     evidence: vec![candidate_evidence(candidate)],
+                    relevance: None,
                 }),
         )
         .collect::<Vec<_>>();
-    alternatives.sort_by(|left, right| left.alternative_id.cmp(&right.alternative_id));
-    alternatives.dedup_by(|left, right| left.alternative_id == right.alternative_id);
+    let mut seen = std::collections::BTreeSet::new();
+    alternatives.retain(|alternative| seen.insert(alternative.alternative_id.clone()));
     alternatives.truncate(MAX_DECISION_ITEMS);
     alternatives
 }
@@ -515,6 +517,7 @@ mod tests {
                 evidence: vec![evidence.clone()],
             }],
             evidence: vec![evidence.clone()],
+            relevance: None,
             relation: Some(RelationInfo {
                 relation_id: id.into(),
                 title: id.into(),

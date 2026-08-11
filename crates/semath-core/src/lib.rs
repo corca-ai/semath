@@ -7,6 +7,7 @@ mod cross_modal;
 mod cursor;
 mod decision;
 mod domain;
+mod domain_signature;
 mod engine;
 mod equivalence;
 mod hygiene;

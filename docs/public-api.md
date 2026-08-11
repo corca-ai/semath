@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 10 is a deliberate
+Semath is a library and language-service runtime. Protocol 11 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -42,7 +42,7 @@ unsupported law conditions and truncated evidence cannot produce `established`.
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 10 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 11 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
@@ -60,13 +60,21 @@ the exact end of a complete following argument. Cursor queries therefore do
 not rescan TeX, retain the frontend tree, or snap a callable across unrelated
 trailing syntax.
 
-Project documents contain the complete wasmtex syntax schema 6 snapshot, including
-neutral lexical classes and citation annotations alongside visible prose and
+Project documents contain the complete wasmtex syntax schema 7 snapshot, including
+neutral lexical classes, document fields, and citation annotations alongside visible prose and
 structural scopes. The
 adapter validates the schema and forwards the arena, roots, visible prose,
 scopes, declarations, and provenance without reconstructing or selectively
 copying structural facts. Corrupt top-level contracts fail explicitly;
 incomplete or opaque subtrees remain local unsupported evidence.
+
+`semanticView.domains` reports bounded scoped hypotheses with `explicit`,
+`supported`, or `tentative` support and exact source evidence. Formula and
+meaning alternatives may carry the same relevance projection. Relevance orders
+alternatives but never changes a decision from unsupported to established.
+`AnalysisStats` exposes domain evidence/hypothesis and frontier/latent work so
+hosts and release gates can detect routing regressions without reimplementing
+policy.
 
 Core semantic behavior belongs to Rust. Packages own transport and lifecycle;
 applications own presentation, permissions, review, apply, and undo.

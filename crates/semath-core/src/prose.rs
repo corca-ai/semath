@@ -55,6 +55,17 @@ pub(crate) struct ProseShapeClaim {
     pub refinements: Vec<String>,
 }
 
+pub(crate) fn definition_available_from(definition: &DefinitionInfo) -> u32 {
+    let attached = definition.evidence.kind == "attached-prose";
+    let ranges = definition.evidence.source_ranges.iter();
+    if attached {
+        ranges.map(|range| range.start_offset).min()
+    } else {
+        ranges.map(|range| range.end_offset).max()
+    }
+    .unwrap_or(definition.location.range.end_offset)
+}
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
@@ -682,6 +693,7 @@ fn collect_clause_definitions(
                 let start = index.byte_for_utf16(math.region.full_range.start_offset);
                 sentence_start <= start
                     && start < sentence_end
+                    && is_definition_slot_math(math)
                     && !is_description_parameter(source, math, sentence_start, sentence_end, index)
             })
             .collect::<Vec<_>>();
@@ -753,6 +765,7 @@ fn collect_ordered_clause_definition(
             let start = index.byte_for_utf16(math.region.full_range.start_offset);
             sentence_start <= start
                 && start < sentence_end
+                && is_definition_slot_math(math)
                 && !is_description_parameter(source, math, sentence_start, sentence_end, index)
         })
         .filter(|math| primary_symbol(document, math).is_some())
@@ -940,6 +953,19 @@ fn contains_assignment(node: &crate::EquationNode) -> bool {
     let mut labels = Vec::new();
     collect_equation_labels(node, &mut labels);
     labels.windows(2).any(|pair| pair == [Some(":"), Some("=")])
+}
+
+fn is_definition_slot_math(math: &ParsedMath) -> bool {
+    fn contains_formula_relation(node: &crate::EquationNode) -> bool {
+        node.label.as_deref().is_some_and(|label| {
+            matches!(
+                label,
+                "=" | "equals" | "<" | ">" | "≤" | "≥" | "≠" | "≈" | "equation" | "relation"
+            )
+        }) || node.children.iter().any(contains_formula_relation)
+    }
+
+    !contains_formula_relation(&math.root)
 }
 
 fn collect_equation_labels<'a>(node: &'a crate::EquationNode, output: &mut Vec<Option<&'a str>>) {
@@ -1133,9 +1159,18 @@ fn push_claim(
         start_offset: index.utf16_for_byte(evidence_start),
         end_offset: index.utf16_for_byte(evidence_end),
     };
+    let attached = matches!(
+        rule_id,
+        "english-clause-definition" | "english-clause-ordered-definition"
+    ) && evidence_range.start_offset < symbol_range.start_offset;
     let definition_evidence = Evidence {
         rule_id: rule_id.into(),
-        kind: "explicit-prose".into(),
+        kind: if attached {
+            "attached-prose"
+        } else {
+            "explicit-prose"
+        }
+        .into(),
         strength: "strong".into(),
         source_ranges: vec![evidence_range.clone()],
     };
@@ -1154,7 +1189,11 @@ fn push_claim(
         analysis.shapes.push(ProseShapeClaim {
             symbol: symbol.into(),
             symbol_range: symbol_range.clone(),
-            available_from: evidence_range.end_offset,
+            available_from: if attached {
+                evidence_range.start_offset
+            } else {
+                evidence_range.end_offset
+            },
             evidence: Evidence {
                 source_ranges: vec![evidence_range],
                 ..definition_evidence
@@ -1346,7 +1385,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -1427,7 +1466,7 @@ mod tests {
         assert!(descriptions.contains(&("x", "input")));
         assert!(descriptions.contains(&("y", "state")));
         assert!(descriptions.contains(&("z", "output")));
-        assert!(descriptions.contains(&("p", "$d$")));
+        assert!(descriptions.contains(&("p", "$d$")), "{descriptions:?}");
         assert!(descriptions.contains(&("q", "$e$")));
         assert!(descriptions.contains(&("r", "$f$")));
         assert!(
@@ -1512,7 +1551,7 @@ mod tests {
     #[test]
     fn maps_fronted_plural_types_without_domain_specific_grammar() {
         let analysis = analyze(
-            "Events $C$ and $D$ belong to one probability space. Sets $S$ and $T$ are defined on a common universe. Vectors $u$ and $v$ share one coordinate frame.",
+            "Events $C$ and $D$ belong to one probability space. Sets $S$ and $T$ are defined on a common universe. Vectors $u$ and $v$ share one coordinate frame. For two events $A$ and $B$, consider their joint occurrence. Given matrices $M$ and $N$, compare their spectra. Take $U$ and $V$ as sets.",
         );
         let definitions = analysis
             .definitions
@@ -1526,6 +1565,12 @@ mod tests {
             ("T", "Sets"),
             ("u", "Vectors"),
             ("v", "Vectors"),
+            ("A", "events"),
+            ("B", "events"),
+            ("M", "matrices"),
+            ("N", "matrices"),
+            ("U", "sets"),
+            ("V", "sets"),
         ] {
             assert!(definitions.contains(&expected), "{definitions:?}");
         }

@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 10;
-pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 6;
+pub const PROTOCOL_VERSION: u32 = 11;
+pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 7;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -165,6 +165,8 @@ pub struct ProseAnnotation {
     pub kind: String,
     pub name: String,
     pub range: SourceRange,
+    #[serde(default)]
+    pub value_range: Option<SourceRange>,
     pub state: MathRootState,
 }
 
@@ -520,13 +522,28 @@ pub struct RoleInfo {
     pub evidence: Evidence,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum DomainSupportTier {
+    Explicit,
+    Supported,
+    Tentative,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DomainRelevance {
+    pub support: DomainSupportTier,
+    pub evidence: Vec<Evidence>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct DomainActivation {
     pub pack_id: String,
     pub pack_version: String,
     pub title: String,
-    pub strength: String,
+    pub support: DomainSupportTier,
     pub scope_kind: String,
     pub scope_range: SourceRange,
     pub evidence: Vec<Evidence>,
@@ -778,6 +795,8 @@ pub struct LawRecognition {
     pub conditions: Vec<LawConditionInfo>,
     pub evidence: Vec<Evidence>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relevance: Option<DomainRelevance>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relation: Option<RelationInfo>,
     pub rank: u32,
 }
@@ -899,6 +918,8 @@ pub struct MeaningAlternative {
     pub label: String,
     pub range: SourceRange,
     pub evidence: Vec<Evidence>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relevance: Option<DomainRelevance>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -996,6 +1017,11 @@ pub struct AnalysisStats {
     pub semantic_nodes: u32,
     pub constraints: u32,
     pub law_rules_visited: u32,
+    pub pack_frontier_candidates: u32,
+    pub pack_latent_candidates: u32,
+    pub pack_latent_fallbacks: u32,
+    pub domain_hypotheses: u32,
+    pub domain_evidence: u32,
     pub equivalence_states: u32,
     pub equivalence_guard_checks: u32,
     pub semantic_occurrences: u32,

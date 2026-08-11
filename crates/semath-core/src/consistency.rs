@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
 use crate::pack::built_in_packs;
+use crate::prose::definition_available_from;
 use crate::scope::ScopeGraph;
 use crate::shape::{ExplicitShapeClaim, ShapeObservations};
 use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnostic, SourceRange};
@@ -239,13 +240,7 @@ pub(crate) fn observe_roles(
 fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<ScopedRoleClaim> {
     let role = classify_role(&definition.description)?;
     let symbol_range = definition.location.range.clone();
-    let available_from = definition
-        .evidence
-        .source_ranges
-        .iter()
-        .map(|range| range.end_offset)
-        .max()
-        .unwrap_or(symbol_range.end_offset);
+    let available_from = definition_available_from(definition);
     Some(ScopedRoleClaim {
         info: RoleInfo {
             symbol: definition.symbol.clone(),
@@ -555,7 +550,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

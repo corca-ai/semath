@@ -347,6 +347,7 @@ pub(crate) fn coordinated_descriptions(
         let shared = consume_any(
             trimmed,
             &[
+                "as",
                 "denote",
                 "denotes",
                 "represent",
@@ -378,7 +379,8 @@ pub(crate) fn fronted_shared_description<'a>(
     after: &str,
 ) -> Option<(&'a str, usize, usize)> {
     let clause = current_clause(before);
-    let description = clause.trim();
+    let phrase = clause.trim();
+    let description = strip_fronted_modifiers(phrase);
     let words = description.split_whitespace().collect::<Vec<_>>();
     if words.is_empty()
         || words.len() > 4
@@ -387,8 +389,9 @@ pub(crate) fn fronted_shared_description<'a>(
     {
         return None;
     }
-    let suffix = after.trim_start().to_ascii_lowercase();
-    if ![
+    let trimmed_suffix = after.trim_start();
+    let suffix = trimmed_suffix.to_ascii_lowercase();
+    let relational_suffix = [
         "belong to",
         "belongs to",
         "are in",
@@ -400,18 +403,46 @@ pub(crate) fn fronted_shared_description<'a>(
         "share",
     ]
     .iter()
-    .any(|prefix| suffix.starts_with(prefix))
-    {
+    .any(|prefix| suffix.starts_with(prefix));
+    let nominal_suffix = trimmed_suffix.starts_with(',') && !suffix.starts_with(", and");
+    if !relational_suffix && !nominal_suffix {
         return None;
     }
-    let suffix_end = after
-        .find(['.', ';', '\n'])
-        .map_or(after.len(), |offset| offset + 1);
+    let suffix_end = if nominal_suffix {
+        after.find(',').map_or(0, |offset| offset + 1)
+    } else {
+        after
+            .find(['.', ';', '\n'])
+            .map_or(after.len(), |offset| offset + 1)
+    };
     Some((
         description,
         before.len() - clause.len() + clause.find(description)?,
         suffix_end,
     ))
+}
+
+fn strip_fronted_modifiers(value: &str) -> &str {
+    let mut remaining = value;
+    if let Some((first, rest)) = split_first_word(remaining)
+        && ["for", "given"].contains(&first.to_ascii_lowercase().as_str())
+    {
+        remaining = rest;
+    }
+    if let Some((first, rest)) = split_first_word(remaining)
+        && [
+            "a", "an", "the", "both", "two", "three", "four", "five", "six", "seven", "eight",
+        ]
+        .contains(&first.to_ascii_lowercase().as_str())
+    {
+        remaining = rest;
+    }
+    remaining.trim()
+}
+
+fn split_first_word(value: &str) -> Option<(&str, &str)> {
+    let split = value.find(char::is_whitespace)?;
+    Some((&value[..split], value[split..].trim_start()))
 }
 
 fn current_clause(value: &str) -> &str {

@@ -32,6 +32,12 @@ holds approved support policy; GitHub issues hold planned work.
   refusal cases. The pre-change `a978d2e` baseline passed 21; the current engine
   passes 24. Schema and coverage checks remain fast CI tests, while full engine
   execution is a manual release gate.
+- The scoped-domain challenge freezes 30 independently authored document cases
+  covering neutral fields, section scope, mixed fields, non-evidence,
+  formula-before/after attachment, ambiguity, conflict, and retraction. Protocol
+  10 could not represent tiered domain relevance or relevance-ordered
+  alternatives; protocol 11 passes all 30 cases. Six cases independently cover
+  every current structural collision component with typed formula contexts.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -47,19 +53,21 @@ field completeness.
 | Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
 | Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
 | Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
-| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 10 and the core use pack-qualified concept identities without a legacy role field |
+| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 11 and the core use pack-qualified concept identities without a legacy role field |
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 | Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |
 | Pack vocabulary | Natural concept paraphrases required runtime vocabulary edits | Schema 8 retains reviewed concept aliases consumed by the generic classifier |
-| Constraints | Side conditions were free-form strings without machine-checkable subjects or evidence | Schema 6 uses closed constraint kinds, validated law roles, bound symbols, source evidence, and explicit resolution status |
+| Constraints | Side conditions were free-form strings without machine-checkable subjects or evidence | Schema 8 uses closed constraint kinds, validated law roles, bound symbols, source evidence, and explicit resolution status |
 | Generic calculus IR | Integrals, partial derivatives, nabla applications, and indexed families lost operator structure | The shared structural path now keeps explicit differential variables, derivative order, integral bounds, and base/index components without command-specific pack logic |
 | Source notation | Styled, decorated, and declared operator surfaces collapsed to a leaf or failed at a trailing application edge | Exact wasmtex identity ranges and precomputed complete-application boundaries preserve source notation without retaining the syntax arena at query time |
 | Prose declarations | Elided parallel declarations such as “let h be heat transfer, m mass, …” lost later role evidence | One bounded clause grammar maps arbitrary-arity copula elision without pack-specific phrases |
 | Typed role shape | A strongly typed quantity could be rejected only because no redundant scalar word was present | Quantity evidence admits an absent shape while explicit incompatible shape evidence still refuses the law |
 | Section scope | Markdown sibling headings could leak acronym and prose evidence | wasmtex emits nested Markdown scopes; Semath resolves evidence only inside the structural scope graph |
 | Equation equivalence | Solved and coefficient variants were ad-hoc unguarded law rewrites | Schema 8 provides one canonical relation; a bounded typed compiler emits guarded derived forms and proof evidence without commuting matrix/operator products |
-| Structural token identity | Semath inferred token kinds again from source text, splitting decorated and named notation | wasmtex syntax 6 supplies neutral lexical classes for source and expanded notation; Semath consumes them without TeX re-lexing |
+| Structural token identity | Semath inferred token kinds again from source text, splitting decorated and named notation | wasmtex syntax 7 supplies neutral lexical classes and document fields; Semath consumes them without TeX re-lexing or interpreting domains |
+| Domain routing | Global weak/strong activations could neither express scoped relevance nor order cross-pack collisions | Catalog-derived signatures and collision reports feed explicit/supported/tentative hypotheses; relevance orders a bounded frontier without becoming proof or a diagnostic |
+| Formula/prose order | Typed descriptions after an equation arrived too late to support that equation | One bounded math-slot construction attaches formula-first and prose-first declarations with exact evidence and deterministic retraction |
 
 ## Remaining measured gaps
 

@@ -4,8 +4,8 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 10 as const;
-export const WASMTEX_SYNTAX_SCHEMA_VERSION = 6 as const;
+export const SEMATH_PROTOCOL_VERSION = 11 as const;
+export const WASMTEX_SYNTAX_SCHEMA_VERSION = 7 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -173,13 +173,20 @@ export interface RoleInfo {
   symbol: string;
 }
 
+export type DomainSupportTier = "explicit" | "supported" | "tentative";
+
+export interface DomainRelevance {
+  evidence: readonly Evidence[];
+  support: DomainSupportTier;
+}
+
 export interface DomainActivation {
   evidence: readonly Evidence[];
   packId: string;
   packVersion: string;
   scopeKind: "document" | "equation" | "section";
   scopeRange: SourceRange;
-  strength: "strong" | "weak";
+  support: DomainSupportTier;
   title: string;
 }
 
@@ -314,6 +321,7 @@ export interface LawRecognition {
   lawId: string;
   range: SourceRange;
   rank: number;
+  relevance?: DomainRelevance;
   relation?: RelationInfo;
   result: SemanticConstraint;
   status: "condition-missing" | "conflicting" | "recognized" | "verified";
@@ -399,6 +407,7 @@ export interface MeaningAlternative {
   evidence: readonly Evidence[];
   label: string;
   range: SourceRange;
+  relevance?: DomainRelevance;
 }
 
 export interface MeaningConflict {
@@ -461,6 +470,11 @@ export interface AnalysisStats {
   analyzedDocuments: number;
   constraints: number;
   lawRulesVisited: number;
+  packFrontierCandidates: number;
+  packLatentCandidates: number;
+  packLatentFallbacks: number;
+  domainHypotheses: number;
+  domainEvidence: number;
   equivalenceStates: number;
   equivalenceGuardChecks: number;
   recognizedLaws: number;

@@ -940,11 +940,27 @@ fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {
 }
 
 fn analysis_fingerprint(document: &ProjectDocument) -> u64 {
+    let scopes = document
+        .scopes
+        .iter()
+        .map(|scope| {
+            (
+                &scope.kind,
+                scope.parent,
+                scope.range.start_offset,
+                &scope.name,
+                &scope.level,
+                &scope.source,
+            )
+        })
+        .collect::<Vec<_>>();
     let encoded = serde_json::to_vec(&(
         document.schema_version,
         document.language,
         &document.nodes,
         &document.math_roots,
+        &document.prose_annotations,
+        scopes,
         &document.declarations,
         &document.macros,
         &document.includes,
@@ -959,7 +975,6 @@ fn compact_analyzed_document(document: &mut ProjectDocument) {
     document.nodes.clear();
     document.math_roots.clear();
     document.visible_prose.clear();
-    document.scopes.clear();
     document.declarations.clear();
     document.macros.clear();
     #[cfg(test)]
@@ -1300,6 +1315,41 @@ impl SemathEngine {
                 law_rules_visited: analyzed_file_ids
                     .iter()
                     .map(|file_id| self.index.observations(file_id).laws.visited_rules())
+                    .sum(),
+                pack_frontier_candidates: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| {
+                        self.index
+                            .observations(file_id)
+                            .laws
+                            .pack_frontier_candidates()
+                    })
+                    .sum(),
+                pack_latent_candidates: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| {
+                        self.index
+                            .observations(file_id)
+                            .laws
+                            .pack_latent_candidates()
+                    })
+                    .sum(),
+                pack_latent_fallbacks: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| {
+                        self.index
+                            .observations(file_id)
+                            .laws
+                            .pack_latent_fallbacks()
+                    })
+                    .sum(),
+                domain_hypotheses: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| self.index.observations(file_id).domains.hypothesis_count())
+                    .sum(),
+                domain_evidence: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| self.index.observations(file_id).domains.evidence_count())
                     .sum(),
                 equivalence_states: analyzed_file_ids
                     .iter()

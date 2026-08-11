@@ -19,6 +19,8 @@ describe("semantic differential planning", () => {
     const traces = planSemanticLifecycleTraces(20);
     expect(traces).toEqual(planSemanticLifecycleTraces(20));
     expect(traces.map((trace) => trace.family)).toEqual([
+      "domain-retraction",
+      "formula-attachment-retraction",
       "declaration-retraction",
       "citation-retraction",
       "conditional-retraction",
@@ -30,9 +32,14 @@ describe("semantic differential planning", () => {
       "typed-conflict-recovery",
     ]);
     for (const trace of traces) {
-      expect(trace.initialExpectedDecision).toBe("established");
-      expect(trace.stages.at(-1)?.expectedDecision).toBe("established");
-      expect(trace.stages.some((stage) => stage.expectedDecision !== "established")).toBe(true);
+      expect(trace.stages.at(-1)?.expectedDecision).toBe(trace.initialExpectedDecision);
+      expect(
+        trace.stages.some(
+          (stage) =>
+            stage.expectedDecision !== trace.initialExpectedDecision ||
+            JSON.stringify(stage.expectedDomains) !== JSON.stringify(trace.initialExpectedDomains),
+        ),
+      ).toBe(true);
     }
   });
 

@@ -24,7 +24,8 @@ describe("pack-derived semantic properties", () => {
   test("gives every law every required family deterministically", () => {
     const first = planPackPropertyCells(packs, 20);
     expect(first).toEqual(planPackPropertyCells(packs, 20));
-    expect(first.map((cell) => cell.family)).toEqual([...PROPERTY_FAMILIES]);
+    expect(new Set(first.map((cell) => cell.family))).toEqual(new Set(PROPERTY_FAMILIES));
+    expect(first.filter((cell) => cell.family === "attachment")).toHaveLength(6);
     expect(new Set(first.map((cell) => cell.id)).size).toBe(first.length);
   });
 
