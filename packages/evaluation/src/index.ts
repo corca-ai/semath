@@ -1,3 +1,5 @@
+export * from "./authored-integrity";
+export * from "./authored-scientific";
 export * from "./conformance";
 export * from "./differential";
 export * from "./challenge";

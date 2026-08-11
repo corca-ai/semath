@@ -37,12 +37,24 @@ describe("semantic evaluation cursor offsets", () => {
         fileId: "main",
         needle: "x",
       }),
-    ).toThrow("exactly once");
+    ).toThrow("unique or select a valid occurrence");
     expect(() =>
       semanticEvaluationCursorOffset("$x$", {
         fileId: "main",
         needle: "y",
       }),
-    ).toThrow("exactly once");
+    ).toThrow("unique or select a valid occurrence");
+  });
+
+  test("selects a reviewed occurrence without rewriting the source", () => {
+    const content = "$x$ and $x$";
+    expect(
+      semanticEvaluationCursorOffset(content, {
+        fileId: "main",
+        needle: "x",
+        occurrence: 1,
+        offset: 1,
+      }),
+    ).toBe(content.lastIndexOf("x") + 1);
   });
 });

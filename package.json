@@ -29,6 +29,9 @@
   ],
   "scripts": {
     "architecture": "bun scripts/check-architecture.ts",
+    "authored": "bun scripts/check-authored-scientific.ts",
+    "authored:baseline": "SEMATH_AUTHORED_ALLOW_FAILURES=1 SEMATH_AUTHORED_REPORT=.artifacts/document-reasoning-baseline.json bun scripts/check-authored-scientific.ts",
+    "authored:fixture": "bun scripts/check-authored-scientific-fixture.ts",
     "budget": "bun scripts/check-budget.ts",
     "budget:report": "SEMATH_BUDGET_REPORT=.artifacts/performance-budget.json bun scripts/check-budget.ts",
     "budget:scale": "SEMATH_BUDGET_DOCUMENTS=500 SEMATH_BUDGET_DELTA_RUNS=10 bun scripts/check-budget.ts",
@@ -47,7 +50,7 @@
     "continuity": "bun scripts/check-semantic-continuity.ts",
     "continuity:baseline": "SEMATH_CONTINUITY_ALLOW_FAILURES=1 SEMATH_CONTINUITY_REPORT=.artifacts/semantic-continuity.json bun scripts/check-semantic-continuity.ts",
     "continuity:fixture": "bun scripts/check-semantic-continuity-fixture.ts && bun test packages/evaluation/src/semantic-continuity.test.ts",
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run legacy:audit:check && bun run corpus:generate:check && bun run engineering:generate:check && bun run corpus:materialization && bun run foundation:generate:check && bun run domain:fixture && bun run frontier:fixture && bun run continuity:fixture && bun run pack:authoring && bun run pack:conformance && bun run parity && bun run budget && bun run package:smoke",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run legacy:audit:check && bun run corpus:generate:check && bun run engineering:generate:check && bun run corpus:materialization && bun run foundation:generate:check && bun run authored:fixture && bun run domain:fixture && bun run frontier:fixture && bun run continuity:fixture && bun run pack:authoring && bun run pack:conformance && bun run parity && bun run budget && bun run package:smoke",
     "corpus": "bun scripts/check-corpus.ts",
     "corpus:generate": "bun scripts/generate-synthetic-corpus.ts",
     "corpus:generate:check": "bun scripts/generate-synthetic-corpus.ts --check",

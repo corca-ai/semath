@@ -48,6 +48,20 @@ export function rolesMatch(
   );
 }
 
+export function roleInstancesMatch(
+  actualRoles: readonly ObservedRole[],
+  expectedRoles: readonly ObservedRole[],
+  macros: readonly CorpusMacro[] | undefined,
+): boolean {
+  if (actualRoles.length !== expectedRoles.length) return false;
+  const actual = groupedRoleSymbols(actualRoles, macros);
+  const expected = groupedRoleSymbols(expectedRoles, macros);
+  if (actual.size !== expected.size) return false;
+  return [...expected].every(([role, symbols]) =>
+    sameMultiset(actual.get(role) ?? [], symbols),
+  );
+}
+
 export function evidenceIsSourceLinked(
   evidence: readonly ObservedEvidence[],
   conditions: readonly unknown[],
@@ -99,4 +113,18 @@ function sameMultiset(left: readonly string[], right: readonly string[]): boolea
   const sortedLeft = [...left].sort();
   const sortedRight = [...right].sort();
   return sortedLeft.every((value, index) => value === sortedRight[index]);
+}
+
+function groupedRoleSymbols(
+  roles: readonly ObservedRole[],
+  macros: readonly CorpusMacro[] | undefined,
+): Map<string, string[]> {
+  const grouped = new Map<string, string[]>();
+  for (const role of roles) {
+    const key = normalizeIdentifier(role.role);
+    const symbols = grouped.get(key) ?? [];
+    symbols.push(normalizeSymbol(role.symbol, macros));
+    grouped.set(key, symbols);
+  }
+  return grouped;
 }

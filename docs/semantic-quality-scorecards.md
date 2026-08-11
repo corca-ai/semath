@@ -81,6 +81,22 @@ Normalized holdout documents must not occur in development or generated
 fixtures. `bun run continuity:fixture` checks schema, diversity, leakage, and
 the pure scorer in ordinary CI; `bun run continuity` executes the engine only
 as a deliberate manual release gate.
+
+The v0.27 authored scientific tranche adds 96 editable development scenarios
+and 48 separately authored frozen holdout scenarios. Its 212 probes observe
+meaning, definition, references, rename preparation, rename, and Problems at
+reviewed source positions across all 61 current laws. Exactly eight holdout
+scenarios cover each document-reasoning family: scope-bound comparisons,
+derivation chains, guarded conditions, discourse references, collisions or
+unsupported input, and edit lifecycles. Every source and expectation was
+written engine-blind, independently critiqued, fully reviewed and corrected by
+the main agent, then sealed before its first engine run. Alpha-renaming-aware
+wasmtex CST fingerprints and math-masked five-word prose shingles guard split
+lineage without introducing another parser. `bun run authored:fixture` performs
+only schema, provenance, digest, coverage, anchor, and leakage checks in normal
+CI. `bun run authored:baseline` and `bun run authored` execute the six public
+query surfaces only as deliberate manual evidence gates.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
@@ -107,6 +123,8 @@ mkdir -p .artifacts && bun run domain:baseline
 bun run domain:challenge
 mkdir -p .artifacts && bun run continuity:baseline
 bun run continuity
+mkdir -p .artifacts && bun run authored:baseline
+bun run authored
 bun run corpus
 bun run corpus:generate:check
 bun run foundation
