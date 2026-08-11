@@ -31,15 +31,9 @@ means that one typed relation is present in the result; it does not require the
 whole cursor view to have an `established` meaning decision. Decision status is
 the separate exhaustive-evidence judgment defined by the public protocol.
 
-The current baseline has 3,106 checked-in synthetic law cases and 249
-deterministic runtime variants. It includes 56 independently scored unknown,
-cross-pack, and cross-field collision cases. Separate foundation suites contain
-218 cases for the scientific kernel, quantities and units, and English
-scientific prose. The 150-case prose suite includes 40 independently authored
-construction cases and 60 one-feature discourse mutations. It reports association,
-classification, assumption, evidence, refusal, and scope independently; variation
-tags keep voice, arity, coordination, polarity, modality, attribution, and
-conditionality visible instead of blending them into one recognition number.
+Current measured counts live only in the dated
+[pack maturity report](pack-maturity.md). This guide defines signals and policy,
+not a second baseline that can silently go stale.
 
 The frozen recognition challenge is separate from those development and
 diversity fixtures. Version 3 preserves the 48 independently authored v2
@@ -53,6 +47,18 @@ evidence, refusal, scope, and navigation. Exact IDs and normalized document
 sources must not occur in development or foundation fixtures. Default CI
 validates the schema, pure composition, and coverage matrix but does not execute
 the engine over the holdout.
+
+The independent scoped-domain challenge adds 30 document-shaped cases across
+neutral document fields, section scope, mixed domains, non-evidence,
+formula-before/after attachment, ambiguity, conflict, and retraction. It
+declares ordered domain tiers, final decision state, and Problems policy. Six
+additional cases exercise every current cross-law collision component with
+independently typed formula contexts; the fixture records why unsupported or
+conflicting cells belong to refusal or source-conflict policy rather than
+domain ranking. Normalized challenge documents
+must not occur in development or generated fixtures. `bun run domain:fixture`
+is a fast schema/leakage gate; `bun run domain:challenge` is a manual release
+gate.
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
@@ -72,6 +78,8 @@ machine-readable artifact with:
 bun run quality
 bun run challenge
 bun run challenge:report
+mkdir -p .artifacts && bun run domain:baseline
+bun run domain:challenge
 bun run corpus
 bun run corpus:generate:check
 bun run foundation

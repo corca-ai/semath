@@ -9,37 +9,13 @@ executable code.
 ## Capability maturity
 
 The checked-in [quality manifest](../fixtures/corpus-manifest.json) is the
-authoritative approved support policy. Maturity is declared per capability;
-the summary is only a compact view and never replaces the detailed contract.
-
-| Pack | Summary | Evaluated capabilities | Probe capabilities | Unsupported | Laws / authored cases |
-| --- | --- | --- | --- | --- | ---: |
-| Circuits | evaluated | all seven | — | — | 4 / 470 |
-| Classical mechanics | evaluated | all seven | — | — | 4 / 470 |
-| Control systems | evaluated | all seven | — | — | 3 / 340 |
-| Signals and systems | evaluated | all seven | — | — | 3 / 240 |
-| Linear algebra | evaluated | all seven | — | — | 3 / 270 |
-| Probability | evaluated | all seven | — | — | 2 / 180 |
-| Electromagnetism | evaluated | all seven | — | — | 5 / 400 |
-| Thermodynamics and heat transfer | evaluated | all seven | — | — | 5 / 400 |
-| Fluid mechanics | evaluated | all seven | — | — | 7 / 560 |
-| Calculus and analysis | evaluated | all seven | — | — | 2 / 170 |
-| Discrete mathematics | evaluated | all seven | — | — | 4 / 340 |
-| Optimization and ML | evaluated | all seven | — | — | 3 / 250 |
-| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 218 foundation |
-
-The seven capabilities are concept vocabulary, English declarations and roles,
-shape/quantity/unit typing, law recognition, diagnostic refusal,
-project/macro provenance, and navigation/explanation. The dated
-[maturity report](pack-maturity.md) records the evidence and remaining gaps.
-Evaluated means the declared vertical passes its capability contract; it never
-implies field-wide coverage.
-
-Evaluated law suites require at least 30 positive and 20 refusal cases per law
-across six dimensions; current diversity suites cover all seven. Probe suites
-require at least 5 and 5 across three dimensions. The quantities foundation is
-measured with a separate non-law suite because law count is not meaningful for
-quantity, unit, dimension, and diagnostic behavior.
+authoritative approved support policy. Maturity is declared separately for
+concept vocabulary, English declarations and roles, shape/quantity/unit
+typing, law recognition, diagnostic refusal, project/macro provenance, and
+navigation/explanation. The dated [maturity report](pack-maturity.md) records
+measured state without duplicating volatile counts here. Evaluated means only
+that the declared vertical passes its capability contract; it never implies
+field-wide coverage.
 
 English prose is shared infrastructure rather than duplicated per pack. Its
 foundation suite covers declarations, coordinated alignment, assumptions,
@@ -65,6 +41,12 @@ cycles, missing or wrong-kind targets, invalid capability edges, inconsistent
 dimensions, and malformed law forms. Diagnostics identify the source file and
 JSON path. All laws enter the same generic unifier. A pack or law ID branch in
 analysis code indicates a missing core abstraction.
+
+The authoring report schema is version 2. Alongside diagnostics and canonical
+forms it exposes catalog-derived domain signatures and a deterministic
+cross-pack collision atlas. Authors review ambiguity and refusal ownership from
+this report; generated reports remain build artifacts rather than checked-in
+documentation.
 
 Every new law must have an owning corpus suite with positive, refusal, role,
 notation, constraint, and project-context evidence appropriate to its maturity.

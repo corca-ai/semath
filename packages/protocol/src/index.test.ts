@@ -14,7 +14,7 @@ describe("protocol", () => {
       projectId: "project",
       protocolVersion: SEMATH_PROTOCOL_VERSION,
     };
-    expect(snapshot.protocolVersion).toBe(10);
+    expect(snapshot.protocolVersion).toBe(11);
   });
 
   test("allows omitted empty role collections from the wire format", () => {

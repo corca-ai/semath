@@ -4,7 +4,7 @@ use crate::canonical::SemanticExpr;
 use crate::consistency::roles_conflict;
 use crate::consistency::{RoleObservations, observe_roles};
 use crate::domain::{DomainObservations, observe_domains};
-use crate::law::{ExternalTypeEnvironment, LawObservations, observe_laws};
+use crate::law::{ExternalTypeEnvironment, LawAnalysisContext, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
 use crate::prose::{ProseMatchStats, ScientificSemanticEvidence, observe_prose};
 use crate::quantity::{QuantityObservations, observe_quantities};
@@ -201,6 +201,7 @@ impl DocumentSemanticObservations {
         // every compiled law here would duplicate the dominant analysis pass.
         let laws = LawObservations::default();
         let domains = observe_domains(
+            document,
             ScopeGraph::new(document),
             &prose.semantic_evidence,
             laws.all(),
@@ -229,13 +230,17 @@ impl DocumentSemanticObservations {
         self.laws = observe_laws(
             canonical_expressions,
             &self.semantic_evidence,
-            &self.shapes,
-            &self.quantities,
-            &self.roles,
-            &self.assumptions,
-            external,
+            &LawAnalysisContext {
+                shapes: &self.shapes,
+                quantities: &self.quantities,
+                consistency: &self.roles,
+                assumptions: &self.assumptions,
+                external,
+                domains: &self.domains,
+            },
         );
         self.domains = observe_domains(
+            document,
             ScopeGraph::new(document),
             &self.semantic_evidence,
             self.laws.all(),

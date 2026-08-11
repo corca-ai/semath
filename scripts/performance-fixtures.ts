@@ -11,6 +11,8 @@ export const PERFORMANCE_FIXTURE_FAMILIES = [
   "construction-heavy-prose",
   "document-shaped-report",
   "scoped-neighbor",
+  "mixed-domain-section",
+  "formula-prose-attachment",
 ] as const;
 
 export type PerformanceFixtureFamily = (typeof PERFORMANCE_FIXTURE_FAMILIES)[number];
@@ -115,6 +117,19 @@ function fixtureBody(family: PerformanceFixtureFamily, index: number, symbol: st
         "\\section{Current result}",
         `\$${symbol}=\\widehat{y}_{t+1}+\\operatorname{loss}(x)\$`,
         "$\\frac{1}{$",
+      ].join("\n");
+    case "mixed-domain-section":
+      return [
+        "\\section{Electric circuits}",
+        "A resistor is driven by a random variable from the calibration model.",
+        `\$${symbol}=V_${index}/R_${index}\$`,
+        "\\section{Control systems}",
+        "$\\dot{x}=Ax+Bu$",
+      ].join("\n");
+    case "formula-prose-attachment":
+      return [
+        `\$${symbol}=V_${index}=I_${index}R_${index}\$`,
+        `where $V_${index}$ denotes voltage, $I_${index}$ electric current, and $R_${index}$ resistance.`,
       ].join("\n");
   }
 }

@@ -23,7 +23,8 @@ present and act on the result.
 
 ## Structural boundary
 
-Semath accepts wasmtex syntax-contract v5. Math regions, prose annotations, includes, project
+Semath accepts wasmtex syntax contract v7. Math regions, neutral document-field and citation
+annotations, includes, project
 macros, call-site ranges, expansion provenance, and ambiguity are supplied once
 at this boundary. Semath does not rescan TeX to construct a competing syntax
 model. Direct syntax, shallow call-site shapes, and range-free generated
@@ -138,11 +139,37 @@ registry; the same compiler report is exposed through WASM to authoring tools.
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
 
+The compiler also derives two reviewable artifacts from the same catalog. A
+domain signature contains normalized terms with their originating concept,
+quantity, role, law, or activation declaration. A collision atlas groups
+canonical and guarded law forms that can share structure and states which
+independent domain, concept, quantity, shape, or condition evidence can
+distinguish them. Neither artifact duplicates pack facts or introduces a
+pack-specific runtime branch.
+
 Law dispatch compiles root operators, operand shapes, and mandatory canonical
 structure into an immutable index. Inference sends only structurally compatible candidates to
 the generic unifier; a bounded generic bucket exists only for forms such as
 variadic balances that have no sound discriminator. The exhaustive scan is a
 test oracle, not a production path.
+
+## Scoped domain routing
+
+Domain relevance is an explainable routing hypothesis, never semantic proof.
+One pure transformation combines positive asserted body evidence, complete
+title or keyword fields, structural section names, and independently recognized
+equations at project/document, section, or equation scope. Author fields,
+citations, comments, hedges, conditions, alternatives, and negation cannot
+establish a domain. Results use the ordinal tiers `explicit`, `supported`, and
+`tentative`; there is no opaque confidence score.
+
+Capability packs remain universal. Structural dispatch opens a bounded
+candidate frontier, then scoped hypotheses order field and application packs.
+An absent domain never removes a structurally compatible law, produces a
+diagnostic, or establishes meaning. Genuine collisions therefore remain
+bounded alternatives, in relevance order, until independent typed evidence
+resolves or contradicts them. Law-derived equation relevance is computed only
+after law matching and cannot feed back to activate the same law.
 
 Authoring keeps a functional core and an effectful shell. Rust owns schema,
 catalog, dependency, canonical-form, unit, and dimension validation. Pure
@@ -191,7 +218,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 10 exposes selection, `semanticView`, definition, references, rename,
+Protocol 11 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is
@@ -223,6 +250,8 @@ leave old and new semantic runtimes in parallel.
 - Every conclusion retains source evidence and bounded uncertainty.
 - Equivalent-form compilation is deterministic, capped, type-directed, and
   observable through state and guard-check budget counters.
+- Domain signatures, scoped hypotheses, frontier ordering, and prose/formula
+  attachment are pure bounded transformations with explicit work counters.
 - Pure transformations contain normalization, inference, ranking, and view
   construction wherever practical.
 - Pack declarations automatically plan positive, refusal, scope, mutation,

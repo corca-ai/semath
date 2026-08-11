@@ -2,6 +2,7 @@ export * from "./conformance";
 export * from "./differential";
 export * from "./challenge";
 export * from "./equivalence-challenge";
+export * from "./domain-routing-challenge";
 export * from "./cursor-invariants";
 export * from "./foundation";
 export * from "./legacy-path-audit";

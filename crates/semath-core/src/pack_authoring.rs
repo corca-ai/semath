@@ -3,13 +3,14 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::canonical::canonical_template;
+use crate::domain_signature::{compile_collision_atlas, compile_domain_signatures};
 use crate::pack::{
     DomainPack, PackActivationRule, PackCapabilities, PackConcept, PackConditionKind, PackKind,
     PackLaw, PackLawCondition, PackLawRole, PackReference, PackValidationError, compile_pack,
     validate_catalog,
 };
 
-pub const PACK_AUTHORING_SCHEMA_VERSION: u32 = 1;
+pub const PACK_AUTHORING_SCHEMA_VERSION: u32 = 2;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -60,11 +61,42 @@ pub struct PackAuthoringSummary {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct PackDomainTerm {
+    pub text: String,
+    pub source: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackDomainSignature {
+    pub pack_id: String,
+    pub pack_version: String,
+    pub title: String,
+    pub pack_kind: String,
+    pub terms: Vec<PackDomainTerm>,
+    pub dependencies: Vec<String>,
+    pub capabilities: Vec<String>,
+    pub structural_keys: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackLawCollision {
+    pub left_relation_id: String,
+    pub right_relation_id: String,
+    pub structural_key: String,
+    pub distinguishing_evidence: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct PackAuthoringReport {
     pub schema_version: u32,
     pub diagnostics: Vec<PackAuthoringDiagnostic>,
     pub forms: Vec<PackCanonicalForm>,
     pub packs: Vec<PackAuthoringSummary>,
+    pub signatures: Vec<PackDomainSignature>,
+    pub collisions: Vec<PackLawCollision>,
 }
 
 pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringReport {
@@ -134,6 +166,44 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
             })
         })
         .collect();
+    let catalog = compiled
+        .iter()
+        .map(|(_, pack)| pack.clone())
+        .collect::<Vec<_>>();
+    let signatures = compile_domain_signatures(&catalog)
+        .into_iter()
+        .map(|signature| PackDomainSignature {
+            pack_id: signature.pack_id,
+            pack_version: signature.pack_version,
+            title: signature.title,
+            pack_kind: match signature.pack_kind {
+                PackKind::Capability => "capability",
+                PackKind::Field => "field",
+                PackKind::Application => "application",
+            }
+            .into(),
+            terms: signature
+                .terms
+                .into_iter()
+                .map(|term| PackDomainTerm {
+                    text: term.text,
+                    source: term.source,
+                })
+                .collect(),
+            dependencies: signature.dependencies,
+            capabilities: signature.capabilities,
+            structural_keys: signature.structural_keys,
+        })
+        .collect();
+    let collisions = compile_collision_atlas(&catalog)
+        .into_iter()
+        .map(|collision| PackLawCollision {
+            left_relation_id: format!("{}:{}", collision.left_pack_id, collision.left_law_id),
+            right_relation_id: format!("{}:{}", collision.right_pack_id, collision.right_law_id),
+            structural_key: collision.structural_key,
+            distinguishing_evidence: collision.distinguishing_evidence,
+        })
+        .collect();
     let packs = compiled
         .into_iter()
         .map(|(_, pack)| PackAuthoringSummary {
@@ -150,6 +220,8 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
         diagnostics,
         forms,
         packs,
+        signatures,
+        collisions,
     }
 }
 
@@ -513,6 +585,20 @@ mod tests {
             .sum::<usize>();
         assert_eq!(report.forms.len(), expected_forms);
         assert!(report.forms.iter().all(|form| !form.canonical.is_empty()));
+        assert_eq!(report.signatures.len(), built_in_packs().len());
+        assert!(
+            report
+                .signatures
+                .iter()
+                .all(|signature| !signature.terms.is_empty())
+        );
+        assert!(report.collisions.iter().any(|collision| {
+            collision.left_relation_id != collision.right_relation_id
+                && collision
+                    .distinguishing_evidence
+                    .iter()
+                    .any(|value| value == "domain")
+        }));
     }
 
     #[test]

@@ -24,6 +24,12 @@ export interface PackCanonicalForm {
 }
 
 export interface PackAuthoringReport {
+  collisions: readonly {
+    distinguishingEvidence: readonly string[];
+    leftRelationId: string;
+    rightRelationId: string;
+    structuralKey: string;
+  }[];
   diagnostics: readonly PackAuthoringDiagnostic[];
   forms: readonly PackCanonicalForm[];
   packs: readonly {
@@ -34,11 +40,21 @@ export interface PackAuthoringReport {
     quantityKinds: number;
     units: number;
   }[];
-  schemaVersion: 1;
+  schemaVersion: 2;
+  signatures: readonly {
+    capabilities: readonly string[];
+    dependencies: readonly string[];
+    packId: string;
+    packKind: "application" | "capability" | "field";
+    packVersion: string;
+    terms: readonly { source: string; text: string }[];
+    structuralKeys: readonly string[];
+    title: string;
+  }[];
 }
 
 export interface PackAuthoringRequest {
-  schemaVersion: 1;
+  schemaVersion: 2;
   sources: readonly { path: string; source: string }[];
 }
 
@@ -323,7 +339,7 @@ export function packagePackAssets(
       path: source.path,
       value: JSON.parse(source.source) as unknown,
     })),
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 }
 

@@ -2,7 +2,7 @@
 
 | Semath | Protocol | Pack schema | wasmtex syntax |
 | --- | ---: | ---: | ---: |
-| current `main` code | 9 | 7 | 5 |
+| current `main` code | 11 | 8 | 7 |
 
 `package.json` pins the reviewed wasmtex commit. That commit, the generated
 WASM declarations, protocol version, and pack schema are one tested set.

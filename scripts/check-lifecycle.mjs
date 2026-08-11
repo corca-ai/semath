@@ -33,11 +33,13 @@ for (const trace of traces) {
   let analysisGeneration = 0;
   const engine = new SemathEngine();
   resetEngine(engine, snapshotFrom(sources, syntax, inventoryVersion));
+  const initialResult = queryEngine(engine, trace.query, sources, inventoryVersion, analysisGeneration);
   assertDecision(
-    queryEngine(engine, trace.query, sources, inventoryVersion, analysisGeneration),
+    initialResult,
     trace.initialExpectedDecision,
     `${trace.id}/initial`,
   );
+  assertDomains(initialResult, trace.initialExpectedDomains, `${trace.id}/initial`);
 
   for (const stage of trace.stages) {
     inventoryVersion += 1;
@@ -127,6 +129,7 @@ for (const trace of traces) {
       );
     }
     assertDecision(incremental, stage.expectedDecision, `${trace.id}/${stage.id}`);
+    assertDomains(incremental, stage.expectedDomains, `${trace.id}/${stage.id}`);
     clean.free();
     comparedStages += 1;
   }
@@ -182,6 +185,17 @@ function assertDecision(result, expected, label) {
   const status = value?.kind === "semanticView" ? value.view.decision.status : "missing";
   const matches = expected === "not-established" ? status !== "established" : status === expected;
   if (!matches) throw new Error(`${label}: expected ${expected}, observed ${status}`);
+}
+
+function assertDomains(result, expected, label) {
+  if (expected === undefined) return;
+  const value = result?.value;
+  const domains = value?.kind === "semanticView"
+    ? value.view.domains.map(({ packId, support }) => ({ packId, support })).slice(0, expected.length)
+    : [];
+  if (JSON.stringify(domains) !== JSON.stringify(expected)) {
+    throw new Error(`${label}: expected domains ${JSON.stringify(expected)}, observed ${JSON.stringify(domains)}`);
+  }
 }
 
 function resetEngine(engine, snapshot) {

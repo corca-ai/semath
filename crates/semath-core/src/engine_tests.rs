@@ -16,7 +16,7 @@ fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDo
         language: DocumentLanguage::Latex,
         content: content.into(),
         document_version: version,
-        schema_version: 6,
+        schema_version: 7,
         nodes: Vec::new(),
         math_roots: Vec::new(),
         visible_prose: Vec::new(),

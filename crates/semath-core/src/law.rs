@@ -3,6 +3,8 @@ use std::sync::LazyLock;
 
 use crate::canonical::{SemanticExpr, SemanticExprKind, lower_template};
 use crate::consistency::{RoleObservations, roles_conflict};
+use crate::domain::{DomainObservations, support_rank};
+use crate::domain_signature::{is_capability_pack, laws_share_collision};
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
 use crate::pack::{PackConditionKind, PackLaw, PackLawRole, built_in_packs};
 use crate::prose::{FormulaOperationKind, ScientificSemanticEvidence};
@@ -359,6 +361,9 @@ pub(crate) struct LawObservations {
     equivalence_states: u32,
     guard_checks: u32,
     visited_rules: u32,
+    pack_frontier_candidates: u32,
+    pack_latent_candidates: u32,
+    pack_latent_fallbacks: u32,
 }
 
 struct RecognitionContext<'a> {
@@ -367,6 +372,15 @@ struct RecognitionContext<'a> {
     consistency: &'a RoleObservations,
     assumptions: &'a [AssumptionInfo],
     external: &'a ExternalTypeEnvironment,
+}
+
+pub(crate) struct LawAnalysisContext<'a> {
+    pub(crate) shapes: &'a ShapeObservations,
+    pub(crate) quantities: &'a QuantityObservations,
+    pub(crate) consistency: &'a RoleObservations,
+    pub(crate) assumptions: &'a [AssumptionInfo],
+    pub(crate) external: &'a ExternalTypeEnvironment,
+    pub(crate) domains: &'a DomainObservations,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -471,32 +485,84 @@ impl LawObservations {
     pub fn guard_checks(&self) -> u32 {
         self.guard_checks
     }
+
+    pub fn pack_frontier_candidates(&self) -> u32 {
+        self.pack_frontier_candidates
+    }
+
+    pub fn pack_latent_candidates(&self) -> u32 {
+        self.pack_latent_candidates
+    }
+
+    pub fn pack_latent_fallbacks(&self) -> u32 {
+        self.pack_latent_fallbacks
+    }
 }
 
 pub(crate) fn observe_laws(
     canonical_expressions: &[SemanticExpr],
     semantic_evidence: &ScientificSemanticEvidence,
-    shapes: &ShapeObservations,
-    quantities: &QuantityObservations,
-    consistency: &RoleObservations,
-    assumptions: &[AssumptionInfo],
-    external: &ExternalTypeEnvironment,
+    context: &LawAnalysisContext<'_>,
 ) -> LawObservations {
-    let mut recognitions = Vec::new();
+    let mut recognitions = Vec::<LawRecognition>::new();
     let mut equivalence_states = 0;
     let mut guard_checks = 0;
     let mut visited_rules = 0;
+    let mut pack_frontier_candidates = 0;
+    let mut pack_latent_candidates = 0;
+    let mut pack_latent_fallbacks = 0;
     for actual in canonical_expressions {
         if !semantic_evidence.formula_is_asserted(&actual.range)
-            || !formula_operations_are_well_typed(actual, semantic_evidence, shapes)
+            || !formula_operations_are_well_typed(actual, semantic_evidence, context.shapes)
         {
             continue;
         }
-        for compiled in LAW_DISPATCH.candidates(actual) {
+        let mut frontier = LAW_DISPATCH.candidates(actual);
+        let recognition_start = recognitions.len();
+        let mut traversed_latent = false;
+        pack_frontier_candidates += frontier.len() as u32;
+        frontier.sort_by_key(|compiled| {
+            context
+                .domains
+                .relevance(compiled.pack_id, actual.range.start_offset)
+                .map_or(
+                    if is_capability_pack(compiled.pack_id) {
+                        25
+                    } else {
+                        30
+                    },
+                    |relevance| support_rank(relevance.support),
+                )
+        });
+        for compiled in frontier {
             if recognitions.len() >= MAX_LAW_MATCHES {
                 break;
             }
+            let relevance = context
+                .domains
+                .relevance(compiled.pack_id, actual.range.start_offset);
+            let latent = relevance.is_none() && !is_capability_pack(compiled.pack_id);
+            if latent
+                && recognitions[recognition_start..].iter().all(|recognized| {
+                    !laws_share_collision(
+                        &recognized.pack_id,
+                        &recognized.law_id,
+                        compiled.pack_id,
+                        &compiled.law.id,
+                    )
+                })
+                && recognitions.len() > recognition_start
+            {
+                continue;
+            }
             visited_rules += 1;
+            if latent {
+                pack_latent_candidates += 1;
+                if !traversed_latent {
+                    pack_latent_fallbacks += 1;
+                    traversed_latent = true;
+                }
+            }
             let activation =
                 semantic_evidence.law_activation(compiled.pack_id, &compiled.law.id, &actual.range);
             if !compiled.law.activation_phrases.is_empty() && activation.is_none() {
@@ -523,12 +589,12 @@ pub(crate) fn observe_laws(
                     &compiled.law.roles,
                     bindings,
                     actual.range.start_offset,
-                    shapes,
-                    quantities,
-                    consistency,
-                    external,
+                    context.shapes,
+                    context.quantities,
+                    context.consistency,
+                    context.external,
                 );
-                let typed = expression_is_well_typed(actual, shapes);
+                let typed = expression_is_well_typed(actual, context.shapes);
                 supported && typed
             }) else {
                 continue;
@@ -540,22 +606,32 @@ pub(crate) fn observe_laws(
                 bindings,
                 matched_form,
                 &RecognitionContext {
-                    shapes,
-                    quantities,
-                    consistency,
-                    assumptions,
-                    external,
+                    shapes: context.shapes,
+                    quantities: context.quantities,
+                    consistency: context.consistency,
+                    assumptions: context.assumptions,
+                    external: context.external,
                 },
             );
             if let Some(activation) = activation {
                 recognized.evidence.push(activation.evidence.clone());
             }
+            recognized.rank = relevance.as_ref().map_or(
+                if is_capability_pack(compiled.pack_id) {
+                    25
+                } else {
+                    30
+                },
+                |value| support_rank(value.support),
+            );
+            recognized.relevance = relevance;
             recognitions.push(recognized);
         }
     }
     recognitions.sort_by_key(|recognition| {
         (
             recognition.range.start_offset,
+            recognition.rank,
             recognition.pack_id.clone(),
             recognition.law_id.clone(),
         )
@@ -565,6 +641,9 @@ pub(crate) fn observe_laws(
         equivalence_states,
         guard_checks,
         visited_rules,
+        pack_frontier_candidates,
+        pack_latent_candidates,
+        pack_latent_fallbacks,
     }
 }
 
@@ -920,7 +999,7 @@ fn collect_balance_terms(expression: &SemanticExpr, output: &mut Vec<SemanticExp
     }
 }
 
-fn unify_all(
+pub(crate) fn unify_all(
     template: &SemanticExpr,
     actual: &SemanticExpr,
     placeholders: &BTreeSet<String>,
@@ -1829,6 +1908,7 @@ fn recognition(
             range: actual.range.clone(),
         }),
         evidence,
+        relevance: None,
         rank: 100,
     }
 }
@@ -2104,9 +2184,13 @@ fn variadic_labels(expression: &SemanticExpr) -> Vec<String> {
 mod tests {
     use std::collections::{BTreeMap, BTreeSet};
 
-    use super::{COMPILED_LAWS, LAW_DISPATCH, LawDispatch, observe_laws, unify, unify_all};
+    use super::{
+        COMPILED_LAWS, ExternalTypeEnvironment, LAW_DISPATCH, LawAnalysisContext, LawDispatch,
+        LawObservations, observe_laws, unify, unify_all,
+    };
     use crate::canonical::{SemanticExpr, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
+    use crate::domain_signature::laws_share_collision;
     use crate::parser::{ParsedMath, parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::quantity::observe_quantities;
@@ -2167,12 +2251,31 @@ mod tests {
                     })
                     .collect::<BTreeSet<_>>();
                 assert_eq!(indexed, exhaustive, "{}", compiled.law.id);
+                for index in exhaustive {
+                    let candidate = &COMPILED_LAWS[index];
+                    if candidate.pack_id != compiled.pack_id || candidate.law.id != compiled.law.id
+                    {
+                        assert!(
+                            laws_share_collision(
+                                compiled.pack_id,
+                                &compiled.law.id,
+                                candidate.pack_id,
+                                &candidate.law.id,
+                            ),
+                            "collision atlas omitted {}:{} and {}:{}",
+                            compiled.pack_id,
+                            compiled.law.id,
+                            candidate.pack_id,
+                            candidate.law.id,
+                        );
+                    }
+                }
             }
         }
     }
 
     #[test]
-    fn dispatch_stays_structurally_bounded_at_hundreds_of_synthetic_packs() {
+    fn dispatch_covers_unique_and_collision_heavy_hundreds_of_synthetic_packs() {
         for pack_count in [100, 500] {
             let forms = (0..pack_count)
                 .map(|index| lower_template(&format!("synthetic{index}(x)")))
@@ -2193,6 +2296,37 @@ mod tests {
             for (index, form) in forms.iter().enumerate() {
                 assert_eq!(dispatch.candidate_indices(form), [index]);
             }
+
+            let collision_forms = (0..pack_count)
+                .map(|index| lower_template(&format!("out{index} = factor{index} input{index}")))
+                .collect::<Vec<_>>();
+            let mut collision_dispatch = LawDispatch::default();
+            for (index, form) in collision_forms.iter().enumerate() {
+                let placeholders = [
+                    format!("out{index}"),
+                    format!("factor{index}"),
+                    format!("input{index}"),
+                ]
+                .into_iter()
+                .collect::<BTreeSet<_>>();
+                collision_dispatch.insert(
+                    index,
+                    &[crate::equivalence::GuardedForm {
+                        expression: form.clone(),
+                        guards: Vec::new(),
+                        steps: Vec::new(),
+                    }],
+                    &placeholders,
+                    false,
+                );
+            }
+            assert_eq!(
+                collision_dispatch
+                    .candidate_indices(&collision_forms[pack_count - 1])
+                    .len(),
+                pack_count,
+                "the collision fixture must not accidentally become uniquely keyed",
+            );
         }
     }
 
@@ -2305,7 +2439,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2321,16 +2455,48 @@ mod tests {
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
+        let external = ExternalTypeEnvironment::default();
+        let domains = crate::domain::observe_domains(
+            &document,
+            crate::scope::ScopeGraph::new(&document),
+            &prose.semantic_evidence,
+            &[],
+        );
         let laws = observe_laws(
             &canonical,
             &prose.semantic_evidence,
-            &shapes,
-            &quantities,
-            &roles,
-            &prose.assumptions,
-            &Default::default(),
+            &LawAnalysisContext {
+                shapes: &shapes,
+                quantities: &quantities,
+                consistency: &roles,
+                assumptions: &prose.assumptions,
+                external: &external,
+                domains: &domains,
+            },
         );
         assert_eq!(laws.all()[0].law_id, "mechanical-power");
+    }
+
+    #[test]
+    fn formula_first_where_clause_supplies_typed_roles_to_the_attached_equation() {
+        let source = "$V=IR$, where $V$ denotes voltage, $I$ electric current, and $R$ resistance.";
+        assert_eq!(recognized_laws(source), ["ohm-law"]);
+    }
+
+    #[test]
+    fn domain_ordering_prunes_only_noncolliding_latent_laws_after_a_match() {
+        let source = "In control systems, $\\dot{x}=Ax+Bu$, where $x$ is the state vector, $u$ is the control input vector, $A$ is the state matrix, and $B$ is the input matrix.";
+        let observations = law_observations(source);
+        assert_eq!(
+            observations
+                .all()
+                .iter()
+                .map(|recognition| recognition.law_id.as_str())
+                .collect::<Vec<_>>(),
+            ["continuous-state-equation"]
+        );
+        assert_eq!(observations.pack_latent_fallbacks(), 1);
+        assert!(observations.visited_rules() < observations.pack_frontier_candidates());
     }
 
     #[test]
@@ -2344,7 +2510,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2360,14 +2526,24 @@ mod tests {
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
+        let external = ExternalTypeEnvironment::default();
+        let domains = crate::domain::observe_domains(
+            &document,
+            crate::scope::ScopeGraph::new(&document),
+            &prose.semantic_evidence,
+            &[],
+        );
         let laws = observe_laws(
             &canonical,
             &prose.semantic_evidence,
-            &shapes,
-            &quantities,
-            &roles,
-            &prose.assumptions,
-            &Default::default(),
+            &LawAnalysisContext {
+                shapes: &shapes,
+                quantities: &quantities,
+                consistency: &roles,
+                assumptions: &prose.assumptions,
+                external: &external,
+                domains: &domains,
+            },
         );
         assert_eq!(laws.all()[0].law_id, "continuous-state-equation");
     }
@@ -2628,6 +2804,10 @@ mod tests {
     }
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {
+        law_observations(source).all().to_vec()
+    }
+
+    fn law_observations(source: &str) -> LawObservations {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             prose_annotations: vec![],
@@ -2636,7 +2816,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 6,
+            schema_version: 7,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2652,16 +2832,24 @@ mod tests {
         let shapes = observe_shapes(&document, &parsed, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
+        let external = ExternalTypeEnvironment::default();
+        let domains = crate::domain::observe_domains(
+            &document,
+            crate::scope::ScopeGraph::new(&document),
+            &prose.semantic_evidence,
+            &[],
+        );
         observe_laws(
             &canonical,
             &prose.semantic_evidence,
-            &shapes,
-            &quantities,
-            &roles,
-            &prose.assumptions,
-            &Default::default(),
+            &LawAnalysisContext {
+                shapes: &shapes,
+                quantities: &quantities,
+                consistency: &roles,
+                assumptions: &prose.assumptions,
+                external: &external,
+                domains: &domains,
+            },
         )
-        .all()
-        .to_vec()
     }
 }

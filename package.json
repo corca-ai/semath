@@ -38,7 +38,10 @@
     "challenge:report": "SEMATH_CHALLENGE_REPORT=.artifacts/recognition-challenge.json bun scripts/check-challenge.ts",
     "equivalence:challenge": "bun scripts/check-equivalence-challenge.ts",
     "equivalence:baseline": "SEMATH_EQUIVALENCE_ALLOW_FAILURES=1 SEMATH_EQUIVALENCE_REPORT=.artifacts/equivalence-challenge.json bun scripts/check-equivalence-challenge.ts",
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run legacy:audit:check && bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run parity && bun run budget && bun run package:smoke",
+    "domain:challenge": "bun scripts/check-domain-routing-challenge.ts",
+    "domain:baseline": "SEMATH_DOMAIN_ALLOW_FAILURES=1 SEMATH_DOMAIN_REPORT=.artifacts/domain-routing-challenge.json bun scripts/check-domain-routing-challenge.ts",
+    "domain:fixture": "bun scripts/check-domain-routing-fixture.ts",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run legacy:audit:check && bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run domain:fixture && bun run pack:authoring && bun run pack:conformance && bun run parity && bun run budget && bun run package:smoke",
     "corpus": "bun scripts/check-corpus.ts",
     "corpus:generate": "bun scripts/generate-synthetic-corpus.ts",
     "corpus:generate:check": "bun scripts/generate-synthetic-corpus.ts --check",
@@ -55,13 +58,13 @@
     "pack:conformance": "bun scripts/check-pack-conformance.ts",
     "parity": "bun scripts/check-parity.mjs && bun scripts/check-lifecycle.mjs",
     "scorecard": "SEMATH_SCORECARD_PATH=.artifacts/semantic-scorecard.json bun scripts/check-corpus.ts",
-    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run equivalence:challenge && bun run corpus && bun run foundation && SEMATH_LIFECYCLE_FULL=1 bun run parity && bun run budget:stable && bun run package:smoke",
+    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run equivalence:challenge && bun run domain:challenge && bun run corpus && bun run foundation && SEMATH_LIFECYCLE_FULL=1 bun run parity && bun run budget:stable && bun run package:smoke",
     "test": "cargo test --workspace && bun test",
     "typecheck": "tsc --noEmit",
     "verify": "bun run check"
   },
   "dependencies": {
-    "wasmtex": "github:corca-ai/wasmtex#cd8c2d97ffa6db1cf62135de7b715df66e4e708f"
+    "wasmtex": "github:corca-ai/wasmtex#2efd5a22b1e2680b7392fcba36cff9471faff62c"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",

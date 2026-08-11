@@ -33,6 +33,8 @@ export const SEMANTIC_LIFECYCLE_FAMILIES = [
   "negation-retraction",
   "polarity-retraction",
   "typed-conflict-recovery",
+  "domain-retraction",
+  "formula-attachment-retraction",
 ] as const;
 
 export type SemanticLifecycleFamily = (typeof SEMANTIC_LIFECYCLE_FAMILIES)[number];
@@ -48,6 +50,7 @@ export interface SemanticLifecycleStage {
   readonly expectedDecision: "conflicting" | "established" | "not-established";
   readonly id: string;
   readonly queryNeedle?: string;
+  readonly expectedDomains?: readonly { readonly packId: string; readonly support: string }[];
 }
 
 export interface SemanticLifecycleTrace {
@@ -55,6 +58,7 @@ export interface SemanticLifecycleTrace {
   readonly id: string;
   readonly initialDocuments: readonly SemanticLifecycleDocument[];
   readonly initialExpectedDecision: SemanticLifecycleStage["expectedDecision"];
+  readonly initialExpectedDomains?: SemanticLifecycleStage["expectedDomains"];
   readonly query: { readonly fileId: string; readonly needle: string };
   readonly seed: number;
   readonly stages: readonly SemanticLifecycleStage[];
@@ -93,6 +97,52 @@ export function planSemanticLifecycleTraces(seed: number): readonly SemanticLife
   const probabilityMain = "\\input{definitions}\n$A \\cap B$.";
   const localProbability = `${probabilityDefinitions}\n$A \\cap B$.`;
   const traces: SemanticLifecycleTrace[] = [
+    {
+      family: "domain-retraction",
+      id: `lifecycle-${suffix}-domain`,
+      initialDocuments: [{ content: "A probability distribution is considered.\n$q$", fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "not-established",
+      initialExpectedDomains: [{ packId: "probability", support: "tentative" }],
+      query: { fileId: "main", needle: "q" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "Only editorial notation remains.\n$q$", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          expectedDomains: [],
+          id: "remove-domain-evidence",
+        },
+        {
+          changes: [{ content: "A probability distribution is considered.\n$q$", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          expectedDomains: [{ packId: "probability", support: "tentative" }],
+          id: "restore-domain-evidence",
+        },
+      ],
+    },
+    {
+      family: "formula-attachment-retraction",
+      id: `lifecycle-${suffix}-attachment`,
+      initialDocuments: [{ content: "$V=IR$, where $V$ denotes voltage, $I$ electric current, and $R$ resistance.", fileId: "main", path: "main.tex" }],
+      initialExpectedDecision: "not-established",
+      initialExpectedDomains: [{ packId: "circuits", support: "explicit" }],
+      query: { fileId: "main", needle: "V=IR" },
+      seed,
+      stages: [
+        {
+          changes: [{ content: "$V=IR$.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          expectedDomains: [],
+          id: "remove-attached-prose",
+        },
+        {
+          changes: [{ content: "$V=IR$, where $V$ denotes voltage, $I$ electric current, and $R$ resistance.", fileId: "main", kind: "upsert", path: "main.tex" }],
+          expectedDecision: "not-established",
+          expectedDomains: [{ packId: "circuits", support: "explicit" }],
+          id: "restore-attached-prose",
+        },
+      ],
+    },
     {
       family: "declaration-retraction",
       id: `lifecycle-${suffix}-declaration`,
