@@ -10556,7 +10556,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -10568,7 +10568,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -10583,7 +10583,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-02",
       "lawId": "expectation-linearity",
@@ -10649,7 +10649,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -10661,7 +10661,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -10676,7 +10676,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-04",
       "lawId": "expectation-linearity",
@@ -11168,7 +11168,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "project-scope",
@@ -11180,7 +11180,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11195,7 +11195,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-15",
       "lawId": "expectation-linearity",
@@ -11266,7 +11266,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -11278,7 +11278,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11293,7 +11293,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-17",
       "lawId": "expectation-linearity",
@@ -11358,7 +11358,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -11370,7 +11370,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -11380,7 +11380,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-19",
       "lawId": "expectation-linearity",
@@ -11883,7 +11883,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -11895,7 +11895,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11910,7 +11910,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-30",
       "lawId": "expectation-linearity",
@@ -11981,7 +11981,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -11993,7 +11993,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -12003,7 +12003,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-32",
       "lawId": "expectation-linearity",
@@ -12068,7 +12068,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -12080,7 +12080,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12095,7 +12095,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-34",
       "lawId": "expectation-linearity",
@@ -12593,7 +12593,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -12605,7 +12605,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12620,7 +12620,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-45",
       "lawId": "expectation-linearity",
@@ -12691,7 +12691,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)"
+        "needle": "\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -12703,7 +12703,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b n) = r \\operatorname{E}(a) + b \\operatorname{E}(n)\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n\\begin{equation}\\operatorname{E}(r a + b j) = r \\operatorname{E}(a) + b \\operatorname{E}(j)\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12718,7 +12718,7 @@
         "left-coefficient": "r",
         "left-variable": "a",
         "right-coefficient": "b",
-        "right-variable": "n"
+        "right-variable": "j"
       },
       "id": "synthetic-expectation-linearity-recognized-47",
       "lawId": "expectation-linearity",
@@ -12789,7 +12789,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13251,7 +13251,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13325,7 +13325,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13412,7 +13412,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13868,7 +13868,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13948,7 +13948,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14034,7 +14034,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $n$ is random variable.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor linearity of expectation, suppose $r$ is scalar coefficient, $a$ is random variable, $b$ is scalar coefficient, and $j$ is random variable.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },

@@ -30,9 +30,10 @@ query kind. Cold timing includes WebAssembly module initialization. RSS growth
 starts after module initialization so host-specific compiled-code caches are not
 misreported as document or editor state; it records syntax and engine growth
 separately and collects unreachable buffers between timed edit lifecycles. The
-report also records peak/retained RSS growth, initial and delta transfer
-bytes, CST nodes/recovery/bytes per document and per node, invalidated
-documents, semantic nodes/rules visited, and the WASM artifact size. These are
+report also records peak/retained RSS growth, the lifecycle stage that set the
+RSS peak, initial and delta transfer bytes, CST nodes/recovery/bytes per document
+and per node, invalidated documents, semantic nodes/rules visited, and the WASM
+artifact size. These are
 augmented by occurrence, entity, claim, evidence, dependency-edge, and
 invalidation counters from the authoritative semantic index. These are code
 defaults, not live production telemetry. The dependency lock pins the
@@ -75,3 +76,7 @@ p95 limits of 25ms at 61 documents and 50ms at 501 documents, plus the existing
 cold, semantic-edit, and cursor-query limits. The ordinary hosted-runner gate
 allows 75ms at 61 documents solely for scheduler jitter; it does not replace the
 stable release gate.
+
+RSS samples settle full garbage collection across finalizer-reachable WASM
+wrappers before measuring retained state. The peak remains tied to its named
+lifecycle stage, so transient editor-state growth stays visible.

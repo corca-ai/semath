@@ -393,7 +393,7 @@ function scaffoldLawCases(
   const symbolSets = [
     ["y", "c", "x", "t", "z"],
     ["q", "k", "u", "s", "w"],
-    ["r", "a", "b", "n", "p"],
+    ["r", "a", "b", "j", "p"],
     ["v", "h", "g", "j", "d"],
     ["o", "m", "i", "e", "f"],
   ] as const;

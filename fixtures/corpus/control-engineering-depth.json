@@ -3600,7 +3600,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -3612,7 +3612,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -3627,7 +3627,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-02",
       "lawId": "continuous-state-equation",
@@ -3693,7 +3693,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -3705,7 +3705,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -3720,7 +3720,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-04",
       "lawId": "continuous-state-equation",
@@ -4212,7 +4212,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "project-scope",
@@ -4224,7 +4224,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -4239,7 +4239,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-15",
       "lawId": "continuous-state-equation",
@@ -4310,7 +4310,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -4322,7 +4322,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -4337,7 +4337,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-17",
       "lawId": "continuous-state-equation",
@@ -4402,7 +4402,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -4414,7 +4414,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -4424,7 +4424,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-19",
       "lawId": "continuous-state-equation",
@@ -4927,7 +4927,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -4939,7 +4939,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -4954,7 +4954,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-30",
       "lawId": "continuous-state-equation",
@@ -5025,7 +5025,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -5037,7 +5037,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -5047,7 +5047,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-32",
       "lawId": "continuous-state-equation",
@@ -5112,7 +5112,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -5124,7 +5124,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -5139,7 +5139,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-34",
       "lawId": "continuous-state-equation",
@@ -5637,7 +5637,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -5649,7 +5649,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -5664,7 +5664,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-45",
       "lawId": "continuous-state-equation",
@@ -5735,7 +5735,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "\\dot{r} = a r + b n"
+        "needle": "\\dot{r} = a r + b j"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -5747,7 +5747,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b n\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n\\begin{equation}\\dot{r} = a r + b j\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -5762,7 +5762,7 @@
         "state": "r",
         "state-matrix": "a",
         "input-matrix": "b",
-        "control-input": "n"
+        "control-input": "j"
       },
       "id": "synthetic-continuous-state-equation-recognized-47",
       "lawId": "continuous-state-equation",
@@ -5833,7 +5833,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -6295,7 +6295,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -6369,7 +6369,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -6456,7 +6456,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -6912,7 +6912,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -6992,7 +6992,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -7078,7 +7078,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $n$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Continuous-time state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n by n input matrix, and $j$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -7199,7 +7199,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -7211,7 +7211,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7226,7 +7226,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-02",
@@ -7294,7 +7294,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -7306,7 +7306,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7321,7 +7321,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-04",
@@ -7824,7 +7824,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "project-scope",
@@ -7836,7 +7836,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7851,7 +7851,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-15",
@@ -7924,7 +7924,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -7936,7 +7936,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -7951,7 +7951,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-17",
@@ -8018,7 +8018,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -8030,7 +8030,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -8040,7 +8040,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-19",
@@ -8554,7 +8554,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -8566,7 +8566,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -8581,7 +8581,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-30",
@@ -8654,7 +8654,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -8666,7 +8666,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -8676,7 +8676,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-32",
@@ -8743,7 +8743,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -8755,7 +8755,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -8770,7 +8770,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-34",
@@ -9279,7 +9279,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -9291,7 +9291,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -9306,7 +9306,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-45",
@@ -9379,7 +9379,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -9391,7 +9391,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -9406,7 +9406,7 @@
         "next-state": "r",
         "state-matrix": "a",
         "state": "b",
-        "input-matrix": "n",
+        "input-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-discrete-state-equation-recognized-47",
@@ -9479,7 +9479,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -9941,7 +9941,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10015,7 +10015,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10102,7 +10102,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10558,7 +10558,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10638,7 +10638,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10724,7 +10724,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $n$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -10845,7 +10845,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -10857,7 +10857,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -10872,7 +10872,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-02",
@@ -10940,7 +10940,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "roles-and-constraints",
@@ -10952,7 +10952,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -10967,7 +10967,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-04",
@@ -11470,7 +11470,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "project-scope",
@@ -11482,7 +11482,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11497,7 +11497,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-15",
@@ -11570,7 +11570,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "english-paraphrases",
@@ -11582,7 +11582,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -11597,7 +11597,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-17",
@@ -11664,7 +11664,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -11676,7 +11676,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -11686,7 +11686,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-19",
@@ -12200,7 +12200,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "semantic-mutations",
@@ -12212,7 +12212,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12227,7 +12227,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-30",
@@ -12300,7 +12300,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "macro-provenance",
@@ -12312,7 +12312,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -12322,7 +12322,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-32",
@@ -12389,7 +12389,7 @@
       "cursor": {
         "edge": "after",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "math-presentation",
@@ -12401,7 +12401,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12416,7 +12416,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-34",
@@ -12925,7 +12925,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "declaration-cardinality",
@@ -12937,7 +12937,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -12952,7 +12952,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-45",
@@ -13025,7 +13025,7 @@
       "cursor": {
         "edge": "before",
         "fileId": "main",
-        "needle": "r = a b + n p"
+        "needle": "r = a b + j p"
       },
       "diversity": {
         "batch": "cursor-boundaries",
@@ -13037,7 +13037,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + n p\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n\\begin{equation}r = a b + j p\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -13052,7 +13052,7 @@
         "output": "r",
         "output-matrix": "a",
         "state": "b",
-        "feedthrough-matrix": "n",
+        "feedthrough-matrix": "j",
         "control-input": "p"
       },
       "id": "synthetic-linear-output-equation-recognized-47",
@@ -13125,7 +13125,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13587,7 +13587,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13661,7 +13661,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -13748,7 +13748,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14204,7 +14204,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14284,7 +14284,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -14370,7 +14370,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $n$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Linear output equation, suppose $r$ is n-dimensional system output vector, $a$ is n by n output matrix, $b$ is n-dimensional system state vector, $j$ is n by n feedthrough matrix, and $p$ is n-dimensional control input vector.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },

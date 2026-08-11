@@ -420,8 +420,8 @@
       "caseId": "syntax-complete-sum-binder",
       "documentShape": "project-neighbor",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },

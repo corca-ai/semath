@@ -129,6 +129,7 @@ const deltaDurations: number[] = [];
 const syntaxDurations: number[] = [];
 const queryDurations = new Map<SemathQuery["kind"], number[]>();
 let peakRss = residentBytes();
+let peakRssStage = "initial";
 let maxAffected = 0;
 let maxTransferBytes = 0;
 let inventoryVersion = snapshot.inventoryVersion;
@@ -190,7 +191,11 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
     durations.push(performance.now() - queryStarted);
     queryDurations.set(query.kind, durations);
   }
-  peakRss = Math.max(peakRss, residentBytes());
+  const editRss = residentBytes();
+  if (editRss > peakRss) {
+    peakRss = editRss;
+    peakRssStage = `comment-edit-${run + 1}`;
+  }
 }
 
 inventoryVersion += 1;
@@ -218,7 +223,11 @@ const semanticUpdate = await worker.request<UpdateResult>({
   kind: "change",
 });
 const semanticDeltaMs = performance.now() - semanticStarted;
-peakRss = Math.max(peakRss, residentBytes());
+const semanticEditRss = residentBytes();
+if (semanticEditRss > peakRss) {
+  peakRss = semanticEditRss;
+  peakRssStage = "semantic-edit";
+}
 maxAffected = semanticUpdate.analyzedFileIds.length;
 if (maxAffected > MAX_AFFECTED_DOCUMENTS) {
   throw new Error(
@@ -286,6 +295,10 @@ if (
 clean.free();
 collectGarbage();
 const rssAfterDispose = residentBytes();
+if (rssAfterDispose > peakRss) {
+  peakRss = rssAfterDispose;
+  peakRssStage = "clean-rebuild-disposed";
+}
 const retainedRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
 
 const deltaP95 = percentile(deltaDurations, 0.95);
@@ -329,6 +342,7 @@ const report = {
   fixtureFamilies: [...new Set(sources.map((source) => source.family))],
   initialTransferBytes,
   peakRssGrowthBytes: peakRssGrowth,
+  peakRssStage,
   queryP95ByKind,
   semanticViewP95Ms: queryP95ByKind.semanticView ?? null,
   lifecycleFamilies: planSemanticLifecycleTraces(0x5e_21).map((trace) => trace.family),
@@ -532,7 +546,10 @@ function residentBytes(): number {
 }
 
 function collectGarbage(): void {
-  Bun.gc(true);
+  // A single full collection can leave finalizer-reachable WASM wrappers for
+  // the next cycle. Settle the heap before comparing retained editor state so
+  // allocator scheduling is not mistaken for a semantic memory regression.
+  for (let pass = 0; pass < 3; pass += 1) Bun.gc(true);
 }
 
 function assertCounters(update: UpdateResult, analyzedDocuments: number) {

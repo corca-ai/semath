@@ -200,7 +200,7 @@ impl AttachmentGraph {
             .enumerate()
             .map(|(order, block)| AttachmentRegion {
                 order,
-                parent_scope: block.parent_scope,
+                parent_scope: attachment_scope(document, block.parent_scope),
                 kind: block.kind,
                 range: block.range.clone(),
             })
@@ -247,6 +247,37 @@ impl AttachmentGraph {
             .filter(|region| ranges_overlap(&region.range, range))
             .min_by_key(|region| region.range.end_offset - region.range.start_offset)
     }
+}
+
+fn attachment_scope(document: &ProjectDocument, mut scope_id: u32) -> u32 {
+    while let Some(scope) = document.scopes.get(scope_id as usize) {
+        if scope.kind != "environment" || !scope.name.as_deref().is_some_and(is_math_environment) {
+            break;
+        }
+        let Some(parent) = scope.parent else {
+            break;
+        };
+        scope_id = parent;
+    }
+    scope_id
+}
+
+fn is_math_environment(name: &str) -> bool {
+    matches!(
+        name,
+        "equation"
+            | "equation*"
+            | "align"
+            | "align*"
+            | "aligned"
+            | "gather"
+            | "gather*"
+            | "gathered"
+            | "multline"
+            | "multline*"
+            | "split"
+            | "cases"
+    )
 }
 
 fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
@@ -426,6 +457,25 @@ mod tests {
         assert!(graph.permits(&range(5, 12), &range(13, 18)));
         assert!(!graph.permits(&range(0, 4), &range(19, 22)));
         assert_eq!(graph.candidate_edges(), 3);
+    }
+
+    #[test]
+    fn math_environment_scope_is_transparent_to_prose_attachment() {
+        let mut source = document(
+            "roles\n\\begin{equation}x=y\\end{equation}",
+            DocumentLanguage::Latex,
+        );
+        let mut equation = syntax_scope("environment", Some(0), 6, 42);
+        equation.name = Some("equation".into());
+        source.scopes = vec![syntax_scope("document", None, 0, 42), equation];
+        source.blocks = vec![
+            syntax_block(SyntaxBlockKind::Paragraph, 0, 0, 5),
+            syntax_block(SyntaxBlockKind::DisplayMath, 1, 6, 42),
+        ];
+
+        let graph = AttachmentGraph::new(&source);
+        assert!(graph.permits(&range(0, 5), &range(6, 42)));
+        assert_eq!(graph.candidate_edges(), 1);
     }
 
     fn range(start_offset: u32, end_offset: u32) -> SourceRange {

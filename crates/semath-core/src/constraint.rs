@@ -174,6 +174,18 @@ fn collect_conflicts(
                 subject: left.subject.clone(),
                 code: match left.predicate {
                     ClaimPredicate::HasShape => "constraint-shape-conflict",
+                    ClaimPredicate::HasDimension
+                        if left_proof.rule_id == "semath/constraint/sum-compatibility"
+                            || right_proof.rule_id == "semath/constraint/sum-compatibility" =>
+                    {
+                        "quantity-addition-dimension-mismatch"
+                    }
+                    ClaimPredicate::HasDimension
+                        if left_proof.rule_id == "semath/constraint/equality"
+                            || right_proof.rule_id == "semath/constraint/equality" =>
+                    {
+                        "quantity-assignment-dimension-mismatch"
+                    }
                     ClaimPredicate::HasDimension => "constraint-dimension-conflict",
                     _ => continue,
                 }
@@ -625,6 +637,42 @@ fn apply_operation(
             "semath/constraint/operation-dimension",
             truncated,
         );
+    }
+    if matches!(operator, ClaimOperation::Dot | ClaimOperation::Cross) {
+        let dimensions = operands
+            .iter()
+            .map(|operand| first_fact(known, operand, &ClaimPredicate::HasDimension))
+            .collect::<Option<Vec<_>>>();
+        if let Some(dimensions) = dimensions {
+            let exponents = dimensions
+                .iter()
+                .filter_map(|(value, _)| match value {
+                    ClaimValue::Dimension(exponents) => Some(exponents.as_slice()),
+                    _ => None,
+                })
+                .collect::<Vec<_>>();
+            if exponents.len() == dimensions.len()
+                && let Some(combined) = combine_dimensions(&exponents, 1)
+            {
+                let proofs = dimensions
+                    .iter()
+                    .map(|(_, proof)| proof.clone())
+                    .collect::<Vec<_>>();
+                insert_derived(
+                    known,
+                    FactKey {
+                        subject: result.clone(),
+                        predicate: ClaimPredicate::HasDimension,
+                        value: ClaimValue::Dimension(combined),
+                    },
+                    &proofs,
+                    relation_id,
+                    evidence,
+                    "semath/constraint/vector-product-dimension",
+                    truncated,
+                );
+            }
+        }
     }
 }
 

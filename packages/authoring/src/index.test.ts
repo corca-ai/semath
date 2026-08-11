@@ -83,6 +83,32 @@ describe("pack authoring policies", () => {
     ).failures).toEqual([]);
   });
 
+  test("keeps generated role symbols distinct from shape extents", () => {
+    const shaped = {
+      ...pack,
+      laws: [{
+        ...pack.laws[0],
+        canonicalRelation: "next = left state + right input",
+        roles: [
+          { concept: "sample-field:output", id: "next", shape: "vector" },
+          { concept: "sample-field:coefficient", id: "left", shape: "matrix" },
+          { concept: "sample-field:input", id: "state", shape: "vector" },
+          { concept: "sample-field:coefficient", id: "right", shape: "matrix" },
+          { concept: "sample-field:input", id: "input", shape: "vector" },
+        ],
+      }],
+    } as const;
+    const positives = scaffoldPackWorkspace(shaped).corpus.cases.filter(
+      (item) => item.expectation === "recognized",
+    );
+
+    for (const item of positives) {
+      expect(Object.values(item.expectedRoles)).not.toContain("n");
+      expect(item.documents.map((document) => document.content).join("\n"))
+        .toContain("n-dimensional");
+    }
+  });
+
   test("finds pack-specific runtime decisions but ignores tests and data mentions", () => {
     expect(findForbiddenRuntimeBranches([
       { path: "src/infer.rs", source: 'if pack_id == "sample-field" { specialize(); }' },

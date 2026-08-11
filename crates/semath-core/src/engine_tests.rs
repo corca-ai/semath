@@ -197,7 +197,6 @@ fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() 
         "{:?}",
         view.context.claims
     );
-
     let without_relation = "Let $A$ be an $m$ by $n$ matrix. Let $x$ be an $n$-dimensional vector. Let $y$ denote the output. Inspect $y$.";
     let retracted = engine
         .apply(ChangeEnvelope {
@@ -211,6 +210,67 @@ fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() 
         })
         .unwrap();
     assert_eq!(retracted.stats.semantic_derived_claims, 0);
+}
+
+#[test]
+fn equality_lhs_establishes_source_ordered_symbol_identity_for_later_uses() {
+    let content = "Let $d$ be length and $t$ duration. $v=d/t$. The derived value is $v$.";
+    let later = content.rfind("$v$").unwrap() as u32 + 1;
+    let earlier = content.find("$v=").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: later,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context.claims.iter().any(|claim| {
+            claim.predicate == "dimension"
+                && claim.value == "length^1 · time^-1"
+                && claim
+                    .evidence
+                    .iter()
+                    .any(|evidence| evidence.rule_id == "semath/constraint/equality")
+        }),
+        "{:?}",
+        view.context.claims
+    );
+    assert!(
+        view.context
+            .quantities
+            .iter()
+            .any(|quantity| quantity.dimension.display == "length · time^-1"),
+        "{:?}",
+        view.context.quantities
+    );
+
+    let definition = engine
+        .query(query(
+            Query::Definition {
+                file_id: "main".into(),
+                offset: earlier,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Locations { locations } = definition.value else {
+        panic!("expected locations")
+    };
+    assert!(
+        locations.is_empty(),
+        "an assignment is identity, not a prose definition"
+    );
 }
 
 #[test]

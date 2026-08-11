@@ -2975,6 +2975,12 @@ mod tests {
     }
 
     #[test]
+    fn recognizes_a_discrete_state_equation_with_arbitrary_role_symbols() {
+        let source = "For discrete state equation, suppose $r$ is n-dimensional system state vector, $a$ is n by n state matrix, $b$ is n-dimensional system state vector, $j$ is n by n input matrix, and $p$ is n-dimensional control input vector. $r = a b + j p$";
+        assert_eq!(recognized_laws(source), ["discrete-state-equation"]);
+    }
+
+    #[test]
     fn recognizes_reordered_kinetic_energy() {
         let source = "Here $K$ denotes kinetic energy, $m$ denotes mass, and $v$ denotes speed. $\\frac{1}{2}mv^2=K$";
         assert_eq!(recognized_laws(source), ["kinetic-energy-definition"]);

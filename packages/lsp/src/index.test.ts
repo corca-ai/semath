@@ -228,6 +228,58 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("resolves equivalent braced and unbraced indexed declarations", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///indexed-definition.tex";
+    const content =
+      "Let $T_{ij}$ denote the stress tensor component and $u_j$ a vector component. Consider $T_{ij}u_j$.";
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { languageId: "latex", text: content, uri, version: 1 },
+      },
+    });
+    const use = content.lastIndexOf("T_{ij}");
+    await server.handle({
+      id: 66,
+      method: "semath/semanticView",
+      params: {
+        position: positionAt(content, use),
+        textDocument: { uri },
+      },
+    });
+    await server.handle({
+      id: 67,
+      method: "textDocument/definition",
+      params: {
+        position: positionAt(content, use),
+        textDocument: { uri },
+      },
+    });
+
+    expect(response(messages, 66).view).toMatchObject({
+      decision: {
+        meaning: { label: "stress tensor component" },
+        status: "partial",
+      },
+      symbol: {
+        definitions: [
+          expect.objectContaining({ description: "stress tensor component" }),
+        ],
+        sourceNotation: "T_{ij}",
+        symbol: "T_{ij}",
+      },
+    });
+    expect(response(messages, 67)).toMatchObject({
+      range: {
+        end: positionAt(content, content.indexOf("T_{ij}") + "T_{ij}".length),
+        start: positionAt(content, content.indexOf("T_{ij}")),
+      },
+      uri,
+    });
+    server.dispose();
+  });
+
   test("maps three-way English declarations through hover and definition", async () => {
     const { messages, server } = await setup();
     const uri = "file:///declarations.md";

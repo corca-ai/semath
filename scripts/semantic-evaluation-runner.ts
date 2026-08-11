@@ -21,6 +21,19 @@ export interface SemanticEvaluationCase {
   readonly id: string;
 }
 
+export function semanticEvaluationCursorOffset(
+  content: string,
+  cursor: SemanticEvaluationCase["cursor"],
+): number {
+  const first = content.indexOf(cursor.needle);
+  const last = content.lastIndexOf(cursor.needle);
+  if (first < 0 || first !== last) {
+    throw new Error("cursor needle must occur exactly once");
+  }
+  if (cursor.offset !== undefined) return first + cursor.offset;
+  return cursor.edge === "after" ? first + cursor.needle.length : first;
+}
+
 export function runSemanticEvaluation(
   cases: readonly SemanticEvaluationCase[],
   epoch: string,
@@ -36,11 +49,15 @@ export function runSemanticEvaluation(
     }));
     const syntax = new LatexSyntaxService();
     syntax.reset({
-      documents: inputs.map((document) => ({ ...document, documentVersion: 1 })),
+      documents: inputs.map((document) => ({
+        ...document,
+        documentVersion: 1,
+      })),
     });
     for (const input of inputs) {
       const snapshot = syntax.getFile(input.fileId);
-      if (!snapshot) throw new Error(`${item.id}: missing syntax for ${input.fileId}`);
+      if (!snapshot)
+        throw new Error(`${item.id}: missing syntax for ${input.fileId}`);
       documents.push(
         adaptWasmtexDocument({
           content: input.content,
@@ -53,9 +70,15 @@ export function runSemanticEvaluation(
       (document) => document.fileId === prefix + item.cursor.fileId,
     );
     if (!cursorDocument) throw new Error(`${item.id}: unknown cursor document`);
-    const first = cursorDocument.content.indexOf(item.cursor.needle);
-    const last = cursorDocument.content.lastIndexOf(item.cursor.needle);
-    if (first < 0 || first !== last) throw new Error(`${item.id}: ambiguous cursor needle`);
+    let offset: number;
+    try {
+      offset = semanticEvaluationCursorOffset(
+        cursorDocument.content,
+        item.cursor,
+      );
+    } catch {
+      throw new Error(`${item.id}: ambiguous cursor needle`);
+    }
     queries.push({
       analysisGeneration: 0,
       documentVersion: 1,
@@ -65,10 +88,7 @@ export function runSemanticEvaluation(
       query: {
         fileId: prefix + item.cursor.fileId,
         kind: "semanticView",
-        offset:
-          first +
-          (item.cursor.offset ?? 0) +
-          (item.cursor.edge === "after" ? 1 : 0),
+        offset,
       },
     });
   }
