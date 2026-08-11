@@ -89,13 +89,17 @@ fingerprint differs. This retracts generated meaning without admitting stale or
 rewritten text under an old document version.
 
 English scientific prose follows the same functional-core boundary. A bounded
-construction engine composes declarative lemma classes, voice, math-mention slots,
-coordination, and generic arity rather than selecting sentence-shaped regular
-expressions. Its typed discourse frame keeps communicative act, polarity, modality,
-attribution, and conditionality independent, with exact evidence for every detected
-feature. Recognition and establishment are separate pure steps: only positive,
-asserted, unconditional author claims establish meaning. Cited, hedged, hypothetical,
-alternative, and negative observations remain source-grounded without promotion.
+normalizer emits one source-ordered `ProseEvent` stream containing clause
+boundaries, math mentions, declarative lemma classes, description spans,
+coordination, connectives, anaphora, and discourse features. Construction
+composition consumes that stream and bounded attachment edges; it does not
+rescan the document for sentence-shaped templates. Its typed discourse frame
+keeps communicative act, polarity, modality, attribution, and conditionality
+independent, with exact evidence for every detected feature. Recognition,
+attachment, and establishment are separate pure steps: only positive, asserted,
+unconditional author claims establish meaning. Cited, hedged, hypothetical,
+alternative, ambiguous-anaphoric, and negative observations remain
+source-grounded without promotion.
 Parenthetical and explicit acronym
 forms, glossary/acronym resources, and named-operator declarations therefore
 share one resolution path. Non-asserting and negative claims remain

@@ -100,6 +100,302 @@ pub(crate) struct ScientificMention {
     pub symbol: String,
     pub start: usize,
     pub end: usize,
+    pub math_index: usize,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DefinitionAction {
+    Define,
+    Denote,
+    Represent,
+    Mean,
+    Write,
+    Call,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DiscourseConnective {
+    Where,
+    Here,
+    Thus,
+    Hence,
+    Therefore,
+    Respectively,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum AnaphorKind {
+    SingularDemonstrative,
+    PluralDemonstrative,
+    Former,
+    Latter,
+    PluralPronoun,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ProseEventKind {
+    ClauseStart,
+    ClauseEnd,
+    MathMention(usize),
+    DefinitionAction(DefinitionAction),
+    DescriptionSpan,
+    Coordination,
+    Connective(DiscourseConnective),
+    Anaphor(AnaphorKind),
+    DiscourseFeature(DiscourseFeatureKind),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ProseEvent {
+    pub clause_index: usize,
+    pub start: usize,
+    pub end: usize,
+    pub kind: ProseEventKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ProseEventStream {
+    pub events: Vec<ProseEvent>,
+    pub clause_mentions: Vec<Vec<usize>>,
+    clause_anaphors: Vec<Vec<AnaphorKind>>,
+    clause_has_definition_action: Vec<bool>,
+}
+
+impl ProseEventStream {
+    pub(crate) fn mentions_in_clause(&self, clause_index: usize) -> &[usize] {
+        self.clause_mentions
+            .get(clause_index)
+            .map(Vec::as_slice)
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn has_anaphor(&self, clause_index: usize) -> bool {
+        self.clause_anaphors
+            .get(clause_index)
+            .is_some_and(|items| !items.is_empty())
+    }
+
+    pub(crate) fn has_definition_action(&self, clause_index: usize) -> bool {
+        self.clause_has_definition_action
+            .get(clause_index)
+            .copied()
+            .unwrap_or(false)
+    }
+}
+
+pub(crate) fn normalize_prose_events(
+    source: &str,
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+) -> ProseEventStream {
+    let mut events = Vec::new();
+    let mut clause_mentions = vec![Vec::new(); clauses.len()];
+    for (clause_index, clause) in clauses.iter().enumerate() {
+        events.push(ProseEvent {
+            clause_index,
+            start: clause.start,
+            end: clause.start,
+            kind: ProseEventKind::ClauseStart,
+        });
+        for feature in &clause.frame.evidence {
+            events.push(ProseEvent {
+                clause_index,
+                start: feature.start,
+                end: feature.end,
+                kind: ProseEventKind::DiscourseFeature(feature.kind),
+            });
+        }
+        for (mention_index, mention) in mentions
+            .iter()
+            .enumerate()
+            .filter(|(_, mention)| clause.start <= mention.start && mention.end <= clause.end)
+        {
+            clause_mentions[clause_index].push(mention_index);
+            events.push(ProseEvent {
+                clause_index,
+                start: mention.start,
+                end: mention.end,
+                kind: ProseEventKind::MathMention(mention_index),
+            });
+        }
+        emit_lexical_events(clause_index, clause, &mut events);
+        emit_description_spans(source, clause_index, clause, mentions, &mut events);
+        events.push(ProseEvent {
+            clause_index,
+            start: clause.end,
+            end: clause.end,
+            kind: ProseEventKind::ClauseEnd,
+        });
+    }
+    events.sort_by_key(|event| (event.start, event.end, event_kind_order(event.kind)));
+    let mut clause_anaphors = vec![Vec::new(); clauses.len()];
+    let mut clause_has_definition_action = vec![false; clauses.len()];
+    for event in &events {
+        match event.kind {
+            ProseEventKind::Anaphor(kind) => clause_anaphors[event.clause_index].push(kind),
+            ProseEventKind::DefinitionAction(_) => {
+                clause_has_definition_action[event.clause_index] = true;
+            }
+            _ => {}
+        }
+    }
+    ProseEventStream {
+        events,
+        clause_mentions,
+        clause_anaphors,
+        clause_has_definition_action,
+    }
+}
+
+fn emit_lexical_events(
+    clause_index: usize,
+    clause: &ScientificClause<'_>,
+    output: &mut Vec<ProseEvent>,
+) {
+    const ACTIONS: &[(&str, DefinitionAction)] = &[
+        ("defines", DefinitionAction::Define),
+        ("defined", DefinitionAction::Define),
+        ("define", DefinitionAction::Define),
+        ("denotes", DefinitionAction::Denote),
+        ("denote", DefinitionAction::Denote),
+        ("represents", DefinitionAction::Represent),
+        ("represent", DefinitionAction::Represent),
+        ("means", DefinitionAction::Mean),
+        ("mean", DefinitionAction::Mean),
+        ("write", DefinitionAction::Write),
+        ("call", DefinitionAction::Call),
+    ];
+    const CONNECTIVES: &[(&str, DiscourseConnective)] = &[
+        ("where", DiscourseConnective::Where),
+        ("here", DiscourseConnective::Here),
+        ("thus", DiscourseConnective::Thus),
+        ("hence", DiscourseConnective::Hence),
+        ("therefore", DiscourseConnective::Therefore),
+        ("respectively", DiscourseConnective::Respectively),
+    ];
+    const ANAPHORS: &[(&str, AnaphorKind)] = &[
+        ("these quantities", AnaphorKind::PluralDemonstrative),
+        ("these symbols", AnaphorKind::PluralDemonstrative),
+        ("those quantities", AnaphorKind::PluralDemonstrative),
+        ("those symbols", AnaphorKind::PluralDemonstrative),
+        ("this quantity", AnaphorKind::SingularDemonstrative),
+        ("this symbol", AnaphorKind::SingularDemonstrative),
+        ("this variable", AnaphorKind::SingularDemonstrative),
+        ("this equation", AnaphorKind::SingularDemonstrative),
+        ("the former", AnaphorKind::Former),
+        ("the latter", AnaphorKind::Latter),
+        ("they", AnaphorKind::PluralPronoun),
+    ];
+    for (phrase, kind) in ACTIONS {
+        emit_phrase_events(
+            clause_index,
+            clause,
+            phrase,
+            ProseEventKind::DefinitionAction(*kind),
+            output,
+        );
+    }
+    for (phrase, kind) in CONNECTIVES {
+        emit_phrase_events(
+            clause_index,
+            clause,
+            phrase,
+            ProseEventKind::Connective(*kind),
+            output,
+        );
+    }
+    for (phrase, kind) in ANAPHORS {
+        emit_phrase_events(
+            clause_index,
+            clause,
+            phrase,
+            ProseEventKind::Anaphor(*kind),
+            output,
+        );
+    }
+    for phrase in ["and", "while", "whereas"] {
+        emit_phrase_events(
+            clause_index,
+            clause,
+            phrase,
+            ProseEventKind::Coordination,
+            output,
+        );
+    }
+}
+
+fn emit_phrase_events(
+    clause_index: usize,
+    clause: &ScientificClause<'_>,
+    phrase: &str,
+    kind: ProseEventKind,
+    output: &mut Vec<ProseEvent>,
+) {
+    let lower = clause.text.to_ascii_lowercase();
+    let mut search_from = 0;
+    while let Some(relative) = lower[search_from..].find(phrase) {
+        let local_start = search_from + relative;
+        let local_end = local_start + phrase.len();
+        let bounded = (local_start == 0
+            || !lower.as_bytes()[local_start - 1].is_ascii_alphanumeric())
+            && (local_end == lower.len() || !lower.as_bytes()[local_end].is_ascii_alphanumeric());
+        if bounded {
+            let start = clause.start + local_start;
+            output.push(ProseEvent {
+                clause_index,
+                start,
+                end: start + phrase.len(),
+                kind,
+            });
+        }
+        search_from = local_end;
+    }
+}
+
+fn emit_description_spans(
+    source: &str,
+    clause_index: usize,
+    clause: &ScientificClause<'_>,
+    mentions: &[ScientificMention],
+    output: &mut Vec<ProseEvent>,
+) {
+    let mut boundaries = vec![clause.start, clause.end];
+    for mention in mentions
+        .iter()
+        .filter(|mention| clause.start <= mention.start && mention.end <= clause.end)
+    {
+        boundaries.extend([mention.start, mention.end]);
+    }
+    boundaries.sort_unstable();
+    boundaries.dedup();
+    for pair in boundaries.windows(2) {
+        let (start, end) = (pair[0], pair[1]);
+        let is_math = mentions
+            .iter()
+            .any(|mention| mention.start <= start && end <= mention.end);
+        if !is_math && source[start..end].chars().any(char::is_alphabetic) {
+            output.push(ProseEvent {
+                clause_index,
+                start,
+                end,
+                kind: ProseEventKind::DescriptionSpan,
+            });
+        }
+    }
+}
+
+fn event_kind_order(kind: ProseEventKind) -> u8 {
+    match kind {
+        ProseEventKind::ClauseStart => 0,
+        ProseEventKind::DiscourseFeature(_) => 1,
+        ProseEventKind::Connective(_) => 2,
+        ProseEventKind::Anaphor(_) => 3,
+        ProseEventKind::DefinitionAction(_) => 4,
+        ProseEventKind::MathMention(_) => 5,
+        ProseEventKind::Coordination => 6,
+        ProseEventKind::DescriptionSpan => 7,
+        ProseEventKind::ClauseEnd => 8,
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -600,6 +896,46 @@ mod tests {
     }
 
     #[test]
+    fn normalizes_mentions_actions_anaphora_and_boundaries_once() {
+        let source = "$x$ and $y$. The former denotes input and the latter output.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let mentions = vec![
+            ScientificMention {
+                symbol: "x".into(),
+                start: 0,
+                end: 3,
+                math_index: 0,
+            },
+            ScientificMention {
+                symbol: "y".into(),
+                start: 8,
+                end: 11,
+                math_index: 1,
+            },
+        ];
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+        assert_eq!(stream.mentions_in_clause(0), &[0, 1]);
+        assert!(
+            stream
+                .events
+                .iter()
+                .any(|event| matches!(event.kind, ProseEventKind::Anaphor(AnaphorKind::Former)))
+        );
+        assert!(stream.events.iter().any(|event| matches!(
+            event.kind,
+            ProseEventKind::DefinitionAction(DefinitionAction::Denote)
+        )));
+        assert_eq!(
+            stream
+                .events
+                .iter()
+                .filter(|event| event.kind == ProseEventKind::ClauseStart)
+                .count(),
+            2
+        );
+    }
+
+    #[test]
     fn extracts_bounded_assumptions_with_subject_spans_and_refuses_negation() {
         let source = "Assume $A$ is symmetric and positive definite.";
         let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
@@ -610,6 +946,7 @@ mod tests {
             symbol: "A".into(),
             start: 7,
             end: 10,
+            math_index: 0,
         }];
         let assumptions = extract_assumptions(&clause, &mentions);
         assert_eq!(assumptions.len(), 2);

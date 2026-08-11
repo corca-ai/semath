@@ -12,8 +12,9 @@ use crate::construction::{
 use crate::pack::{PackActivationStructure, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
-    DiscourseFrame, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
-    extract_assumptions, segment_scientific_clauses,
+    DiscourseFrame, ProseEventStream, ScientificClause, ScientificMention,
+    align_ordered_descriptions, clause_at, extract_assumptions, normalize_prose_events,
+    segment_scientific_clauses,
 };
 use crate::scope::AttachmentGraph;
 use crate::{
@@ -223,19 +224,39 @@ pub(crate) fn observe_prose(
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     let mentions = parsed
         .iter()
-        .filter_map(|math| {
+        .enumerate()
+        .filter_map(|(math_index, math)| {
             let (symbol, _) = primary_symbol(document, math)?;
             Some(ScientificMention {
                 symbol,
                 start: index.byte_for_utf16(math.region.full_range.start_offset),
                 end: index.byte_for_utf16(math.region.full_range.end_offset),
+                math_index,
             })
         })
         .collect::<Vec<_>>();
+    let events = normalize_prose_events(source, &clauses, &mentions);
     collect_assumptions(&index, &clauses, &mentions, &mut analysis);
 
     collect_coordinated_definitions(document, source, parsed, &index, &clauses, &mut analysis);
-    collect_cross_clause_ordered_definitions(document, parsed, &index, &clauses, &mut analysis);
+    collect_anaphoric_definitions(
+        document,
+        parsed,
+        &index,
+        &clauses,
+        &mentions,
+        &events,
+        &mut analysis,
+    );
+    collect_equation_flow_definitions(
+        document,
+        parsed,
+        &index,
+        &clauses,
+        &mentions,
+        &events,
+        &mut analysis,
+    );
     collect_clause_definitions(document, source, parsed, &index, &clauses, &mut analysis);
     for math in parsed {
         analysis.match_stats.matcher_work += 1;
@@ -506,45 +527,97 @@ fn attach_equation_reference_definitions(
     }
 }
 
-fn collect_cross_clause_ordered_definitions(
+#[allow(clippy::too_many_arguments)]
+fn collect_anaphoric_definitions(
     document: &ProjectDocument,
     parsed: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    events: &ProseEventStream,
     output: &mut ProseObservations,
 ) {
-    for pair in clauses.windows(2) {
-        let [symbols_clause, description_clause] = pair else {
-            continue;
-        };
-        if !symbols_clause.frame.establishes() || !description_clause.frame.establishes() {
+    for description_index in 1..clauses.len() {
+        let symbols_index = description_index - 1;
+        let symbols_clause = &clauses[symbols_index];
+        let description_clause = &clauses[description_index];
+        if !symbols_clause.frame.establishes()
+            || !description_clause.frame.establishes()
+            || description_clause.start.saturating_sub(symbols_clause.end) > 160
+            || !events.has_anaphor(description_index)
+        {
             continue;
         }
+
+        let antecedents = events
+            .mentions_in_clause(symbols_index)
+            .iter()
+            .filter_map(|mention_index| mentions.get(*mention_index))
+            .filter(|mention| is_definition_slot_math(&parsed[mention.math_index]))
+            .collect::<Vec<_>>();
+        if antecedents.is_empty() || antecedents.len() > 8 {
+            continue;
+        }
+        let description_range = SourceRange {
+            start_offset: index.utf16_for_byte(description_clause.start),
+            end_offset: index.utf16_for_byte(description_clause.end),
+        };
+        let antecedent_range = SourceRange {
+            start_offset: index.utf16_for_byte(symbols_clause.start),
+            end_offset: index.utf16_for_byte(symbols_clause.end),
+        };
+        if !output
+            .semantic_evidence
+            .attachment
+            .permits(&antecedent_range, &description_range)
+        {
+            continue;
+        }
+
         let text = description_clause.text.trim();
         let lower = text.to_ascii_lowercase();
-        let Some(lead) = ["they denote ", "these denote ", "they represent "]
-            .into_iter()
-            .find(|lead| lower.starts_with(lead))
-        else {
+        if lower.contains("the former") || lower.contains("the latter") {
+            if antecedents.len() != 2 {
+                continue;
+            }
+            let Some((former, latter)) = former_latter_descriptions(text) else {
+                continue;
+            };
+            for (mention, description) in antecedents.into_iter().zip([former, latter]) {
+                let math = &parsed[mention.math_index];
+                let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                    continue;
+                };
+                push_claim(
+                    output,
+                    document,
+                    index,
+                    &symbol,
+                    &symbol_range,
+                    description,
+                    "english-former-latter-definition",
+                    symbols_clause.start,
+                    description_clause.end,
+                );
+            }
+            continue;
+        }
+
+        let Some((body, ordered)) = anaphoric_description_body(text, antecedents.len()) else {
             continue;
         };
-        let Some(marker) = lower.find("respectively") else {
+        let descriptions = if antecedents.len() == 1 {
+            vec![strip_description_article(body)]
+        } else if ordered {
+            let Some(descriptions) = align_ordered_descriptions(body, antecedents.len()) else {
+                continue;
+            };
+            descriptions
+        } else {
             continue;
         };
-        let body = text[lead.len()..marker].trim().trim_end_matches(',').trim();
-        let symbols = parsed
-            .iter()
-            .filter(|math| {
-                let start = index.byte_for_utf16(math.region.full_range.start_offset);
-                symbols_clause.start <= start
-                    && start < symbols_clause.end
-                    && is_definition_slot_math(math)
-            })
-            .collect::<Vec<_>>();
-        let Some(descriptions) = align_ordered_descriptions(body, symbols.len()) else {
-            continue;
-        };
-        for (math, description) in symbols.into_iter().zip(descriptions) {
+        for (mention, description) in antecedents.into_iter().zip(descriptions) {
+            let math = &parsed[mention.math_index];
             let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
                 continue;
             };
@@ -555,12 +628,252 @@ fn collect_cross_clause_ordered_definitions(
                 &symbol,
                 &symbol_range,
                 description,
-                "english-cross-clause-respectively-definition",
+                "english-anaphoric-definition",
                 symbols_clause.start,
                 description_clause.end,
             );
         }
     }
+}
+
+fn anaphoric_description_body(text: &str, arity: usize) -> Option<(&str, bool)> {
+    let trimmed = text.trim();
+    let lower = trimmed.to_ascii_lowercase();
+    let leads: &[&str] = if arity == 1 {
+        &["this quantity", "this symbol", "this variable"]
+    } else {
+        &[
+            "they",
+            "these",
+            "these quantities",
+            "these symbols",
+            "those quantities",
+            "those symbols",
+        ]
+    };
+    let lead = leads.iter().find(|lead| lower.starts_with(**lead))?;
+    let tail = trimmed[lead.len()..].trim_start();
+    let tail_lower = tail.to_ascii_lowercase();
+    let action = [
+        "denotes ",
+        "denote ",
+        "represents ",
+        "represent ",
+        "means ",
+        "mean ",
+        "is ",
+        "are ",
+    ]
+    .into_iter()
+    .find(|action| tail_lower.starts_with(action))?;
+    let mut body = tail[action.len()..].trim();
+    let ordered = body.to_ascii_lowercase().contains("respectively")
+        || body.to_ascii_lowercase().contains("in that order");
+    body = trim_order_marker(body);
+    (!body.is_empty()).then_some((body, ordered))
+}
+
+fn former_latter_descriptions(text: &str) -> Option<(&str, &str)> {
+    let lower = text.to_ascii_lowercase();
+    let former_start = lower.find("the former")? + "the former".len();
+    let latter_marker = lower[former_start..].find("the latter")? + former_start;
+    let mut former = text[former_start..latter_marker]
+        .trim()
+        .trim_end_matches([',', ';'])
+        .trim_end();
+    former = former.strip_suffix("and").map_or(former, str::trim_end);
+    let latter_start = latter_marker + "the latter".len();
+    let latter = text[latter_start..].trim();
+    let former = strip_definition_action(former)?;
+    let latter = strip_definition_action(latter).unwrap_or(latter);
+    Some((
+        strip_description_article(trim_terminal_punctuation(former)),
+        strip_description_article(trim_terminal_punctuation(latter)),
+    ))
+}
+
+fn strip_definition_action(value: &str) -> Option<&str> {
+    let lower = value.to_ascii_lowercase();
+    [
+        "denotes ",
+        "denote ",
+        "represents ",
+        "represent ",
+        "means ",
+        "mean ",
+        "is ",
+        "are ",
+    ]
+    .into_iter()
+    .find_map(|action| {
+        lower
+            .starts_with(action)
+            .then(|| value[action.len()..].trim())
+    })
+}
+
+fn trim_order_marker(value: &str) -> &str {
+    let value = trim_terminal_punctuation(value);
+    let lower = value.to_ascii_lowercase();
+    for marker in [
+        ", respectively",
+        " respectively",
+        ", in that order",
+        " in that order",
+    ] {
+        if lower.ends_with(marker) {
+            return value[..value.len() - marker.len()].trim_end();
+        }
+    }
+    value
+}
+
+fn trim_terminal_punctuation(value: &str) -> &str {
+    value
+        .trim()
+        .trim_end_matches(|character: char| {
+            character.is_whitespace() || matches!(character, '.' | ';' | ':')
+        })
+        .trim()
+}
+
+fn strip_description_article(value: &str) -> &str {
+    let lower = value.to_ascii_lowercase();
+    ["a ", "an ", "the "]
+        .into_iter()
+        .find_map(|article| {
+            lower
+                .starts_with(article)
+                .then(|| value[article.len()..].trim())
+        })
+        .unwrap_or(value)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn collect_equation_flow_definitions(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    events: &ProseEventStream,
+    output: &mut ProseObservations,
+) {
+    for (prose_index, prose_clause) in clauses.iter().enumerate() {
+        if !prose_clause.frame.establishes()
+            || !events.mentions_in_clause(prose_index).is_empty()
+            || !events.has_definition_action(prose_index)
+        {
+            continue;
+        }
+        let Some(description) = equation_flow_description(prose_clause.text) else {
+            continue;
+        };
+        for formula_index in [prose_index.checked_sub(1), prose_index.checked_add(1)]
+            .into_iter()
+            .flatten()
+            .filter(|formula_index| *formula_index < clauses.len())
+        {
+            let formula_clause = &clauses[formula_index];
+            if prose_clause
+                .start
+                .max(formula_clause.start)
+                .saturating_sub(prose_clause.end.min(formula_clause.end))
+                > 160
+            {
+                continue;
+            }
+            let formula_mentions = events.mentions_in_clause(formula_index);
+            if formula_mentions.len() != 1 {
+                continue;
+            }
+            let Some(mention) = formula_mentions
+                .first()
+                .and_then(|mention_index| mentions.get(*mention_index))
+            else {
+                continue;
+            };
+            let math = &parsed[mention.math_index];
+            if is_definition_slot_math(math) {
+                continue;
+            }
+            let prose_range = SourceRange {
+                start_offset: index.utf16_for_byte(prose_clause.start),
+                end_offset: index.utf16_for_byte(prose_clause.end),
+            };
+            let formula_range = SourceRange {
+                start_offset: index.utf16_for_byte(formula_clause.start),
+                end_offset: index.utf16_for_byte(formula_clause.end),
+            };
+            if !output
+                .semantic_evidence
+                .attachment
+                .permits(&prose_range, &formula_range)
+            {
+                continue;
+            }
+            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                continue;
+            };
+            push_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                description,
+                "english-equation-flow-definition",
+                prose_clause.start.min(formula_clause.start),
+                prose_clause.end.max(formula_clause.end),
+            );
+            break;
+        }
+    }
+}
+
+fn equation_flow_description(text: &str) -> Option<&str> {
+    let trimmed = trim_terminal_punctuation(text);
+    let lower = trimmed.to_ascii_lowercase();
+    for lead in [
+        "the following equation defines ",
+        "the following formula defines ",
+        "this equation defines ",
+        "this formula defines ",
+    ] {
+        if lower.starts_with(lead) {
+            let description = strip_description_article(trimmed[lead.len()..].trim());
+            return valid_flow_description(description).then_some(description);
+        }
+    }
+    for lead in ["we define ", "define "] {
+        if lower.starts_with(lead) {
+            let tail = &trimmed[lead.len()..];
+            let tail_lower = tail.to_ascii_lowercase();
+            let marker = [" by the following", " by", " as follows"]
+                .into_iter()
+                .filter_map(|marker| tail_lower.find(marker))
+                .min()?;
+            let description = strip_description_article(tail[..marker].trim());
+            return valid_flow_description(description).then_some(description);
+        }
+    }
+    for marker in [
+        " is defined by the following equation",
+        " is defined by the following formula",
+    ] {
+        if let Some(end) = lower.find(marker) {
+            let description = strip_description_article(trimmed[..end].trim());
+            return valid_flow_description(description).then_some(description);
+        }
+    }
+    None
+}
+
+fn valid_flow_description(value: &str) -> bool {
+    !value.is_empty()
+        && value.len() <= 120
+        && value.split_whitespace().count() <= 12
+        && !value.contains(['$', '=', '\\'])
 }
 
 fn collect_semantic_evidence(
@@ -1751,6 +2064,71 @@ mod tests {
         for expected in [("p", "pressure"), ("V", "volume"), ("T", "temperature")] {
             assert!(definitions.contains(&expected), "{definitions:?}");
         }
+    }
+
+    #[test]
+    fn resolves_bounded_former_latter_and_demonstrative_definitions() {
+        let former_latter = analyze(
+            "We compare $u$ and $v$. The former denotes the input vector and the latter the output vector.",
+        );
+        let definitions = former_latter
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        assert!(
+            definitions.contains(&("u", "input vector")),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.contains(&("v", "output vector")),
+            "{definitions:?}"
+        );
+
+        let singular = analyze("Let $r$ be fixed. This quantity represents the residual norm.");
+        assert!(singular.definitions.iter().any(|definition| {
+            definition.symbol == "r" && definition.description == "residual norm"
+        }));
+    }
+
+    #[test]
+    fn refuses_ambiguous_or_nonasserted_anaphora() {
+        let ambiguous = analyze(
+            "$a$, $b$, and $c$ are compared. The former denotes the input and the latter the output.",
+        );
+        assert!(!ambiguous.definitions.iter().any(|definition| {
+            definition.evidence.rule_id == "english-former-latter-definition"
+        }));
+
+        let hedged =
+            analyze("We compare $u$ and $v$. The former might denote input and the latter output.");
+        assert!(!hedged.definitions.iter().any(|definition| {
+            definition.evidence.rule_id == "english-former-latter-definition"
+        }));
+    }
+
+    #[test]
+    fn attaches_asserted_equation_leads_and_followups() {
+        for source in [
+            "We define total energy by the following equation.\n$E=mc^2$",
+            "$J=J_d+J_r$. This equation defines the total objective.",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis.definitions.iter().any(|definition| {
+                    definition.evidence.rule_id == "english-equation-flow-definition"
+                        && matches!(definition.symbol.as_str(), "E" | "J")
+                }),
+                "{source}: {:?}",
+                analysis.definitions
+            );
+        }
+
+        let cited =
+            analyze("$J=J_d+J_r$. According to [1], this equation defines the total objective.");
+        assert!(!cited.definitions.iter().any(|definition| {
+            definition.evidence.rule_id == "english-equation-flow-definition"
+        }));
     }
 
     #[test]
