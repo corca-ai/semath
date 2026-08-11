@@ -11,7 +11,7 @@ const MAX_DOCUMENT_CANDIDATES: usize = 50_000;
 #[derive(Clone, Debug)]
 pub(crate) struct StructuralCandidateOption {
     pub(crate) family: CandidateFamily,
-    pub(crate) interpretation: String,
+    pub(crate) interpretation: &'static str,
 }
 
 /// Produces structural possibilities without promoting conventions to meaning.
@@ -42,7 +42,7 @@ pub(crate) fn structural_candidate_options(
     occurrence_range: &crate::SourceRange,
     surface: &str,
 ) -> Vec<StructuralCandidateOption> {
-    let mut options = BTreeSet::<(CandidateFamily, String)>::new();
+    let mut options = BTreeSet::<(CandidateFamily, &'static str)>::new();
     for node_id in structural_path {
         let Some(node) = document.nodes.get(*node_id as usize) else {
             continue;
@@ -151,7 +151,7 @@ pub(crate) fn append_semantic_candidates(
             )),
             occurrence_id: occurrence.id.clone(),
             family: option.family,
-            interpretation: option.interpretation.clone(),
+            interpretation: option.interpretation.to_owned(),
             range: occurrence.range.clone(),
             supporting_claims: Vec::new(),
             rejecting_claims: Vec::new(),
@@ -159,8 +159,12 @@ pub(crate) fn append_semantic_candidates(
     }
 }
 
-fn add(options: &mut BTreeSet<(CandidateFamily, String)>, family: CandidateFamily, value: &str) {
-    options.insert((family, value.to_owned()));
+fn add(
+    options: &mut BTreeSet<(CandidateFamily, &'static str)>,
+    family: CandidateFamily,
+    value: &'static str,
+) {
+    options.insert((family, value));
 }
 
 fn followed_by_argument_structure(document: &ProjectDocument, node_id: u32) -> bool {
@@ -201,7 +205,7 @@ fn next_meaningful_sibling(
         })
 }
 
-fn modifier_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)>) {
+fn modifier_options(name: &str, options: &mut BTreeSet<(CandidateFamily, &'static str)>) {
     let values: &[&str] = match name {
         "hat" | "widehat" => &["estimate", "transform", "unit-vector"],
         "bar" | "overline" => &["mean", "conjugate", "closure"],
@@ -216,7 +220,7 @@ fn modifier_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)
     }
 }
 
-fn style_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)>) {
+fn style_options(name: &str, options: &mut BTreeSet<(CandidateFamily, &'static str)>) {
     let values: &[&str] = match name {
         "mathbf" | "bm" | "boldsymbol" => &["vector", "tensor"],
         "mathbb" => &["set", "number-system"],
@@ -232,7 +236,7 @@ fn style_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)>) 
 fn script_options(
     document: &ProjectDocument,
     node: &crate::NotationNode,
-    options: &mut BTreeSet<(CandidateFamily, String)>,
+    options: &mut BTreeSet<(CandidateFamily, &'static str)>,
 ) {
     match node.name.as_deref() {
         Some("subscript") => {
@@ -288,7 +292,10 @@ fn bounded_node_text(document: &ProjectDocument, node_id: u32, depth: u8) -> Str
         .collect()
 }
 
-fn surface_operator_options(surface: &str, options: &mut BTreeSet<(CandidateFamily, String)>) {
+fn surface_operator_options(
+    surface: &str,
+    options: &mut BTreeSet<(CandidateFamily, &'static str)>,
+) {
     let values: &[&str] = match surface {
         "|" => &["absolute-value", "conditional", "restriction", "evaluation"],
         ":" => &["type-ascription", "ratio", "such-that", "map-domain"],
@@ -301,7 +308,7 @@ fn surface_operator_options(surface: &str, options: &mut BTreeSet<(CandidateFami
     }
 }
 
-fn delimiter_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)>) {
+fn delimiter_options(name: &str, options: &mut BTreeSet<(CandidateFamily, &'static str)>) {
     let values: &[&str] = match name {
         "()" => &["grouping", "application", "tuple"],
         "[]" => &["list", "interval", "commutator", "evaluation"],
@@ -315,7 +322,7 @@ fn delimiter_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String
     }
 }
 
-fn command_options(name: &str, options: &mut BTreeSet<(CandidateFamily, String)>) {
+fn command_options(name: &str, options: &mut BTreeSet<(CandidateFamily, &'static str)>) {
     match name {
         "sum" | "prod" | "int" | "iint" | "iiint" | "lim" | "forall" | "exists" => {
             add(options, CandidateFamily::Binder, "binder");

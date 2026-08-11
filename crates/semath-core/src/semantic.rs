@@ -186,6 +186,10 @@ pub(crate) struct DocumentSemanticObservations {
 }
 
 impl DocumentSemanticObservations {
+    pub fn law_activations(&self) -> &[crate::prose::LawActivationEvidence] {
+        &self.semantic_evidence.law_activations
+    }
+
     pub fn build(
         document: &ProjectDocument,
         parsed: &[ParsedMath],

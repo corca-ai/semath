@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "electromagnetism",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "electromagnetism",
   "title": "Electromagnetism",
@@ -134,6 +134,49 @@
       "aliases": [
         "wave medium factor",
         "root mu epsilon"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "charge-density",
+      "conceptKind": "quantity",
+      "title": "Charge density",
+      "description": "Electric charge per unit volume.",
+      "aliases": [
+        "charge density",
+        "electric charge density"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "scalar-field",
+      "conceptKind": "quantity",
+      "title": "Scalar wave field",
+      "description": "A scalar field satisfying a stated wave model.",
+      "aliases": [
+        "scalar wave field",
+        "time-harmonic scalar field",
+        "scalar field"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "wave-number",
+      "conceptKind": "quantity",
+      "title": "Wave number",
+      "description": "Spatial angular frequency of a wave mode.",
+      "aliases": [
+        "wave number",
+        "wavenumber"
       ],
       "parents": [],
       "references": [
@@ -381,6 +424,169 @@
         "electrodynamics"
       ],
       "canonicalRelation": "wave-speed = 1 / medium-factor"
+    },
+    {
+      "id": "gauss-electric",
+      "title": "Gauss electric law",
+      "description": "The divergence of electric field equals charge density divided by permittivity in differential form.",
+      "roles": [
+        {
+          "id": "electric-field",
+          "concept": "quantities-units:electric-field",
+          "description": "Electric field."
+        },
+        {
+          "id": "charge-density",
+          "concept": "electromagnetism:charge-density",
+          "description": "Charge density.",
+          "shape": "scalar"
+        },
+        {
+          "id": "permittivity",
+          "concept": "electromagnetism:permittivity",
+          "description": "Permittivity.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-field-model",
+          "kind": "domain-membership",
+          "subjects": [
+            "electric-field",
+            "charge-density",
+            "permittivity"
+          ],
+          "label": "The field and material quantities are explicitly bound to one electromagnetic model."
+        }
+      ],
+      "activationPhrases": [
+        "Gauss's law"
+      ],
+      "references": [
+        "electrodynamics"
+      ],
+      "canonicalRelation": "\\nabla \\cdot electric-field = charge-density / permittivity"
+    },
+    {
+      "id": "faraday-law",
+      "title": "Faraday induction law",
+      "description": "The curl of electric field equals the negative time derivative of magnetic flux density.",
+      "roles": [
+        {
+          "id": "electric-field",
+          "concept": "quantities-units:electric-field",
+          "description": "Electric field."
+        },
+        {
+          "id": "magnetic-field",
+          "concept": "electromagnetism:magnetic-field",
+          "description": "Magnetic flux density."
+        },
+        {
+          "id": "time",
+          "concept": "quantities-units:duration",
+          "description": "Time."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-field-model",
+          "kind": "domain-membership",
+          "subjects": [
+            "electric-field",
+            "magnetic-field",
+            "time"
+          ],
+          "label": "Both fields and the independent time variable belong to the same model."
+        }
+      ],
+      "activationPhrases": [
+        "Faraday's law"
+      ],
+      "references": [
+        "electrodynamics"
+      ],
+      "canonicalRelation": "\\nabla \\times electric-field = -\\frac{\\partial magnetic-field}{\\partial time}"
+    },
+    {
+      "id": "scalar-wave-equation",
+      "title": "Scalar wave equation",
+      "description": "A homogeneous scalar wave field has Laplacian equal to inverse-speed-squared times its second time derivative.",
+      "roles": [
+        {
+          "id": "field",
+          "concept": "electromagnetism:scalar-field",
+          "description": "Scalar wave field."
+        },
+        {
+          "id": "speed",
+          "concept": "quantities-units:velocity",
+          "description": "Wave speed.",
+          "shape": "scalar"
+        },
+        {
+          "id": "time",
+          "concept": "quantities-units:duration",
+          "description": "Time."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "homogeneous-medium",
+          "kind": "domain-membership",
+          "subjects": [
+            "field",
+            "speed",
+            "time"
+          ],
+          "label": "The field, speed, and independent time variable are explicitly bound to one homogeneous wave model."
+        }
+      ],
+      "activationPhrases": [
+        "homogeneous wave equation",
+        "scalar wave equation"
+      ],
+      "references": [
+        "electrodynamics"
+      ],
+      "canonicalRelation": "\\nabla^2 field = \\frac{1}{speed^2} \\frac{\\partial^2 field}{\\partial time^2}"
+    },
+    {
+      "id": "helmholtz-equation",
+      "title": "Helmholtz equation",
+      "description": "A time-harmonic scalar field satisfies a Laplacian plus wave-number-squared relation.",
+      "roles": [
+        {
+          "id": "field",
+          "concept": "electromagnetism:scalar-field",
+          "description": "Time-harmonic scalar field."
+        },
+        {
+          "id": "wave-number",
+          "concept": "electromagnetism:wave-number",
+          "description": "Wave number.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "time-harmonic-model",
+          "kind": "domain-membership",
+          "subjects": [
+            "field",
+            "wave-number"
+          ],
+          "label": "The field and wave number are explicitly bound to the same time-harmonic model."
+        }
+      ],
+      "activationPhrases": [
+        "Helmholtz equation"
+      ],
+      "references": [
+        "electrodynamics"
+      ],
+      "canonicalRelation": "\\nabla^2 field + wave-number^2 field = 0"
     }
   ],
   "activationRules": [

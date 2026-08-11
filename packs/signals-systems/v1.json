@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "signals-systems",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "signals-systems",
   "title": "Signals and systems",
@@ -72,6 +72,48 @@
       "conceptKind": "quantity",
       "title": "Angular frequency",
       "description": "Phase angle rate in radians per unit time.",
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "transfer-function",
+      "conceptKind": "entity",
+      "title": "Transfer function",
+      "description": "A Laplace-domain input-output ratio for a stated linear system.",
+      "aliases": [
+        "transfer function",
+        "system transfer function"
+      ],
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "output-transform",
+      "conceptKind": "quantity",
+      "title": "Output transform",
+      "description": "Laplace transform of the system output.",
+      "aliases": [
+        "output transform",
+        "Laplace transform of the output"
+      ],
+      "parents": [],
+      "references": [
+        "signals-systems"
+      ]
+    },
+    {
+      "id": "input-transform",
+      "conceptKind": "quantity",
+      "title": "Input transform",
+      "description": "Laplace transform of the system input.",
+      "aliases": [
+        "input transform",
+        "Laplace transform of the input"
+      ],
       "parents": [],
       "references": [
         "signals-systems"
@@ -245,6 +287,47 @@
       "representations": [
         "wave-speed = frequency \\cdot wavelength"
       ]
+    },
+    {
+      "id": "transfer-function",
+      "title": "Transfer-function relation",
+      "description": "A transfer function is the output transform divided by the input transform in the Laplace domain.",
+      "roles": [
+        {
+          "id": "transfer",
+          "concept": "signals-systems:transfer-function",
+          "description": "Transfer function."
+        },
+        {
+          "id": "output",
+          "concept": "signals-systems:output-transform",
+          "description": "Output transform."
+        },
+        {
+          "id": "input",
+          "concept": "signals-systems:input-transform",
+          "description": "Input transform."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-laplace-domain",
+          "kind": "same-context",
+          "subjects": [
+            "transfer",
+            "output",
+            "input"
+          ],
+          "label": "All three functions use the same Laplace variable and zero-state input-output model."
+        }
+      ],
+      "activationPhrases": [
+        "transfer function"
+      ],
+      "references": [
+        "signals-systems"
+      ],
+      "canonicalRelation": "transfer(s) = output(s) / input(s)"
     }
   ],
   "activationRules": [

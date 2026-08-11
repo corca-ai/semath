@@ -33,7 +33,6 @@ const suites: readonly EngineeringSuite[] = [
   },
   {
     id: "control-engineering-depth",
-    lawIds: ["linear-output-equation"],
     packPath: "packs/control-systems/v1.json",
   },
   { id: "signals-systems", packPath: "packs/signals-systems/v1.json" },
@@ -55,8 +54,11 @@ const suites: readonly EngineeringSuite[] = [
   },
   {
     id: "optimization-ml-clusters",
-    lawIds: ["regularized-objective", "inequality-feasibility"],
     packPath: "packs/optimization-ml/v1.json",
+  },
+  {
+    id: "probability-statistics-depth",
+    packPath: "packs/probability/v1.json",
   },
 ];
 

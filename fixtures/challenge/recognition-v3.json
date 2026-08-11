@@ -132,8 +132,8 @@
       "caseId": "presentation-named-surface",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },
@@ -348,8 +348,8 @@
       "caseId": "presentation-declared-ece-command",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },

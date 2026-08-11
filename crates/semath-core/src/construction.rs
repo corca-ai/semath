@@ -283,6 +283,35 @@ pub(crate) fn match_quantified<'a>(
     })
 }
 
+pub(crate) fn match_fronted_single<'a>(
+    before: &'a str,
+    after: &str,
+) -> Option<DefinitionConstruction<'a>> {
+    let suffix_end = leading_punctuation_end(after)?;
+    let clause = current_clause(before).trim();
+    let lower = clause.to_ascii_lowercase();
+    let lead = ["for ", "given ", "with "]
+        .into_iter()
+        .find(|lead| lower.starts_with(lead))?;
+    let description = strip_article(clause[lead.len()..].trim());
+    (valid_plain_description(description)
+        && (1..=6).contains(&description.split_whitespace().count()))
+    .then_some(DefinitionConstruction {
+        description,
+        rule_id: "english-fronted-single-definition",
+        prefix_start: before.len() - current_clause(before).len(),
+        suffix_end,
+    })
+}
+
+pub(crate) fn defines_by_formula(before: &str, after: &str) -> bool {
+    current_clause(before).trim().eq_ignore_ascii_case("define")
+        && after
+            .trim_start()
+            .get(..2)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("by"))
+}
+
 pub(crate) fn coordination_lead(before: &str) -> Option<(CoordinationLead, usize)> {
     let clause = current_clause(before);
     let whole = clause.trim();
@@ -359,7 +388,9 @@ pub(crate) fn coordinated_descriptions(
                 "are",
             ],
         )?;
-        let end = shared.find([',', ';', '.', '\n']).unwrap_or(shared.len());
+        let end = shared
+            .find([',', ';', '.', '\n', '$'])
+            .unwrap_or(shared.len());
         let description = shared[..end].trim();
         if valid_plain_description(description)
             && !description.to_ascii_lowercase().contains(" and ")
@@ -379,7 +410,21 @@ pub(crate) fn fronted_shared_description<'a>(
     after: &str,
 ) -> Option<(&'a str, usize, usize)> {
     let clause = current_clause(before);
-    let phrase = clause.trim();
+    let phrase = clause
+        .rsplit_once('$')
+        .map_or(clause, |(_, tail)| tail)
+        .trim()
+        .trim_start_matches([',', ';'])
+        .trim_start()
+        .strip_prefix("and ")
+        .unwrap_or_else(|| {
+            clause
+                .rsplit_once('$')
+                .map_or(clause, |(_, tail)| tail)
+                .trim()
+                .trim_start_matches([',', ';'])
+                .trim_start()
+        });
     let description = strip_fronted_modifiers(phrase);
     let words = description.split_whitespace().collect::<Vec<_>>();
     if words.is_empty()
@@ -405,10 +450,13 @@ pub(crate) fn fronted_shared_description<'a>(
     .iter()
     .any(|prefix| suffix.starts_with(prefix));
     let nominal_suffix = trimmed_suffix.starts_with(',') && !suffix.starts_with(", and");
-    if !relational_suffix && !nominal_suffix {
+    let next_group_suffix = suffix.starts_with("and ") && trimmed_suffix.contains('$');
+    if !relational_suffix && !nominal_suffix && !next_group_suffix {
         return None;
     }
-    let suffix_end = if nominal_suffix {
+    let suffix_end = if next_group_suffix {
+        0
+    } else if nominal_suffix {
         after.find(',').map_or(0, |offset| offset + 1)
     } else {
         after
@@ -420,6 +468,36 @@ pub(crate) fn fronted_shared_description<'a>(
         before.len() - clause.len() + clause.find(description)?,
         suffix_end,
     ))
+}
+
+pub(crate) fn fronted_labeled_descriptions<'a>(segments: &[&'a str]) -> Option<Vec<&'a str>> {
+    let (first, rest) = segments.split_first()?;
+    let first = first.trim();
+    let lower = first.to_ascii_lowercase();
+    let lead = ["for ", "given ", "with ", "at "]
+        .into_iter()
+        .find(|lead| lower.starts_with(lead))?;
+    let mut descriptions = vec![strip_article(first[lead.len()..].trim())];
+    descriptions.extend(rest.iter().map(|segment| {
+        let value = segment.trim().trim_start_matches([',', ';']).trim_start();
+        let value = value
+            .strip_prefix("and ")
+            .or_else(|| value.strip_prefix("And "))
+            .unwrap_or(value);
+        let value = value
+            .strip_prefix("of ")
+            .or_else(|| value.strip_prefix("Of "))
+            .unwrap_or(value);
+        strip_article(value.trim())
+    }));
+    descriptions
+        .iter()
+        .all(|description| {
+            valid_plain_description(description)
+                && !matches!(description.to_ascii_lowercase().as_str(), "and" | "or")
+                && (1..=6).contains(&description.split_whitespace().count())
+        })
+        .then_some(descriptions)
 }
 
 fn strip_fronted_modifiers(value: &str) -> &str {
@@ -569,7 +647,10 @@ fn valid_plain_description(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{CoordinationLead, coordinated_descriptions, match_definition};
+    use super::{
+        CoordinationLead, coordinated_descriptions, defines_by_formula,
+        fronted_labeled_descriptions, match_definition, match_fronted_single,
+    };
 
     #[test]
     fn composes_lemmas_without_recognizer_branches() {
@@ -620,5 +701,35 @@ mod tests {
             match_definition("", " is the state.", false).map(|item| item.description),
             Some("the state"),
         );
+    }
+
+    #[test]
+    fn aligns_fronted_labels_before_symbols() {
+        assert_eq!(
+            fronted_labeled_descriptions(&[
+                "For label ",
+                ", predicted probability ",
+                ", and binary cross-entropy loss ",
+            ]),
+            Some(vec![
+                "label",
+                "predicted probability",
+                "binary cross-entropy loss",
+            ])
+        );
+        assert_eq!(
+            fronted_labeled_descriptions(&["For comparison, inspect ", ","]),
+            None
+        );
+    }
+
+    #[test]
+    fn recognizes_single_fronted_and_formula_definitions() {
+        assert_eq!(
+            match_fronted_single("For an antiderivative ", ", continue.")
+                .map(|item| item.description),
+            Some("antiderivative")
+        );
+        assert!(defines_by_formula("Define ", " by the following relation."));
     }
 }

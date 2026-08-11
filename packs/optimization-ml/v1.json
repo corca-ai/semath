@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "optimization-ml",
-  "packVersion": "1.1.0",
+  "packVersion": "1.2.0",
   "packKind": "field",
   "namespace": "optimization-ml",
   "title": "Optimization and machine learning",
@@ -20,6 +20,7 @@
       "title": "Objective function",
       "description": "A function optimized over an explicitly declared variable.",
       "aliases": [
+        "objective",
         "loss function",
         "cost function",
         "optimization objective"
@@ -52,7 +53,9 @@
       "aliases": [
         "current iterate",
         "next iterate",
-        "parameter iterate"
+        "parameter iterate",
+        "optimum",
+        "optimal point"
       ],
       "parents": [],
       "references": [
@@ -109,6 +112,8 @@
       "title": "Loss value",
       "description": "A scalar data-fit or total objective value.",
       "aliases": [
+        "binary cross-entropy loss",
+        "cross-entropy loss",
         "data-fit loss",
         "training loss",
         "objective value"
@@ -155,6 +160,36 @@
       "aliases": [
         "constraint tolerance",
         "feasibility threshold"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "binary-label",
+      "conceptKind": "quantity",
+      "title": "Binary label",
+      "description": "A binary target label used by a classification loss.",
+      "aliases": [
+        "label",
+        "target label",
+        "binary target"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "predicted-probability",
+      "conceptKind": "quantity",
+      "title": "Predicted probability",
+      "description": "A model probability assigned to the positive class.",
+      "aliases": [
+        "predicted probability",
+        "class probability",
+        "confidence"
       ],
       "parents": [],
       "references": [
@@ -314,6 +349,129 @@
         "convex-optimization"
       ],
       "canonicalRelation": "residual \\le tolerance"
+    },
+    {
+      "id": "binary-cross-entropy",
+      "title": "Binary cross-entropy",
+      "description": "Binary cross-entropy combines a binary label and predicted probability into a scalar loss.",
+      "roles": [
+        {
+          "id": "loss",
+          "concept": "optimization-ml:loss-value",
+          "description": "Binary cross-entropy loss.",
+          "shape": "scalar"
+        },
+        {
+          "id": "label",
+          "concept": "optimization-ml:binary-label",
+          "description": "Binary label.",
+          "shape": "scalar"
+        },
+        {
+          "id": "probability",
+          "concept": "optimization-ml:predicted-probability",
+          "description": "Predicted probability.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "probability-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "label",
+            "probability"
+          ],
+          "label": "The label is binary and the predicted probability belongs to the unit interval."
+        }
+      ],
+      "activationPhrases": [
+        "binary cross-entropy"
+      ],
+      "references": [
+        "convex-optimization"
+      ],
+      "canonicalRelation": "loss = -label log probability - (1 - label) log (1 - probability)"
+    },
+    {
+      "id": "first-order-stationarity",
+      "title": "First-order stationarity",
+      "description": "The gradient of a differentiable unconstrained objective vanishes at a stationary point.",
+      "roles": [
+        {
+          "id": "objective",
+          "concept": "optimization-ml:objective-function",
+          "description": "Differentiable objective function."
+        },
+        {
+          "id": "variable",
+          "concept": "optimization-ml:iterate",
+          "description": "Unconstrained optimum.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "differentiable-objective",
+          "kind": "differentiable",
+          "subjects": [
+            "objective",
+            "variable"
+          ],
+          "label": "The objective is differentiable at an unconstrained interior point."
+        }
+      ],
+      "activationPhrases": [
+        "first-order stationarity"
+      ],
+      "references": [
+        "convex-optimization"
+      ],
+      "canonicalRelation": "\\nabla objective(variable) = 0"
+    },
+    {
+      "id": "least-squares-normal-equation",
+      "title": "Least-squares normal equation",
+      "description": "The normal equation characterizes an unconstrained linear least-squares solution.",
+      "roles": [
+        {
+          "id": "design",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Design matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "parameter",
+          "concept": "linear-algebra:vector",
+          "description": "Parameter vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "observation",
+          "concept": "linear-algebra:vector",
+          "description": "Observation vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-shapes",
+          "kind": "shape-compatible",
+          "subjects": [
+            "design",
+            "parameter",
+            "observation"
+          ],
+          "label": "The design, parameter, and observation dimensions are compatible."
+        }
+      ],
+      "activationPhrases": [
+        "normal equation"
+      ],
+      "references": [
+        "convex-optimization"
+      ],
+      "canonicalRelation": "design^T design parameter = design^T observation"
     }
   ],
   "activationRules": [

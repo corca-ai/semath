@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "fluid-mechanics",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "fluid-mechanics",
   "title": "Fluid mechanics",
@@ -134,6 +134,78 @@
       "aliases": [
         "outlet minus inlet velocity",
         "flow velocity change"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "species-flux",
+      "conceptKind": "quantity",
+      "title": "Species flux",
+      "description": "Diffusive transport rate of a species per unit area.",
+      "aliases": [
+        "species flux",
+        "diffusive flux",
+        "mass flux"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "diffusivity",
+      "conceptKind": "quantity",
+      "title": "Diffusivity",
+      "description": "Scalar diffusion coefficient in an isotropic constitutive model.",
+      "aliases": [
+        "diffusivity",
+        "diffusion coefficient",
+        "mass diffusivity"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "concentration",
+      "conceptKind": "quantity",
+      "title": "Concentration",
+      "description": "Species concentration field.",
+      "aliases": [
+        "concentration",
+        "species concentration"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "shear-stress",
+      "conceptKind": "quantity",
+      "title": "Shear stress",
+      "description": "Tangential stress in a fluid.",
+      "aliases": [
+        "shear stress",
+        "viscous shear stress"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "shear-rate",
+      "conceptKind": "quantity",
+      "title": "Shear rate",
+      "description": "Rate of shear deformation.",
+      "aliases": [
+        "shear rate",
+        "rate of shear"
       ],
       "parents": [],
       "references": [
@@ -517,6 +589,92 @@
         "fluid-mechanics"
       ],
       "canonicalRelation": "force = mass-flow-rate velocity-change"
+    },
+    {
+      "id": "fick-diffusion",
+      "title": "Fick diffusion law",
+      "description": "Diffusive species flux opposes the concentration gradient.",
+      "roles": [
+        {
+          "id": "flux",
+          "concept": "fluid-mechanics:species-flux",
+          "description": "Species flux."
+        },
+        {
+          "id": "diffusivity",
+          "concept": "fluid-mechanics:diffusivity",
+          "description": "Diffusivity.",
+          "shape": "scalar"
+        },
+        {
+          "id": "concentration",
+          "concept": "fluid-mechanics:concentration",
+          "description": "Concentration."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-transport-model",
+          "kind": "domain-membership",
+          "subjects": [
+            "flux",
+            "diffusivity",
+            "concentration"
+          ],
+          "label": "Flux, diffusivity, and concentration are explicitly bound in one transport model."
+        }
+      ],
+      "activationPhrases": [
+        "Fick's law",
+        "diffusive mass transport"
+      ],
+      "references": [
+        "fluid-mechanics"
+      ],
+      "canonicalRelation": "flux = -diffusivity \\nabla concentration"
+    },
+    {
+      "id": "newtonian-shear",
+      "title": "Newtonian shear relation",
+      "description": "Newtonian shear stress equals dynamic viscosity times shear rate.",
+      "roles": [
+        {
+          "id": "stress",
+          "concept": "fluid-mechanics:shear-stress",
+          "description": "Shear stress."
+        },
+        {
+          "id": "viscosity",
+          "concept": "fluid-mechanics:dynamic-viscosity",
+          "description": "Dynamic viscosity.",
+          "shape": "scalar"
+        },
+        {
+          "id": "rate",
+          "concept": "fluid-mechanics:shear-rate",
+          "description": "Shear rate."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "newtonian-fluid",
+          "kind": "domain-membership",
+          "subjects": [
+            "stress",
+            "viscosity",
+            "rate"
+          ],
+          "label": "The quantities are explicitly related in a Newtonian-fluid model."
+        }
+      ],
+      "activationPhrases": [
+        "Newtonian fluid",
+        "Newtonian shear"
+      ],
+      "references": [
+        "fluid-mechanics"
+      ],
+      "canonicalRelation": "stress = viscosity \\dot{rate}"
     }
   ],
   "activationRules": [

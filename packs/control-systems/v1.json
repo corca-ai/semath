@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "control-systems",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "control-systems",
   "title": "Control systems",
@@ -392,6 +392,65 @@
         "linear-system-theory"
       ],
       "canonicalRelation": "output = output-matrix state + feedthrough-matrix control-input"
+    },
+    {
+      "id": "discrete-state-equation",
+      "title": "Discrete state equation",
+      "description": "The next state equals the state-transition contribution plus the input contribution.",
+      "roles": [
+        {
+          "id": "next-state",
+          "concept": "control-systems:state",
+          "description": "Next state.",
+          "shape": "vector"
+        },
+        {
+          "id": "state-matrix",
+          "concept": "control-systems:state-matrix",
+          "description": "State matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "state",
+          "concept": "control-systems:state",
+          "description": "Current state.",
+          "shape": "vector"
+        },
+        {
+          "id": "input-matrix",
+          "concept": "control-systems:input-matrix",
+          "description": "Input matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "control-input",
+          "concept": "control-systems:control-input",
+          "description": "Control input.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-shapes",
+          "kind": "shape-compatible",
+          "subjects": [
+            "next-state",
+            "state-matrix",
+            "state",
+            "input-matrix",
+            "control-input"
+          ],
+          "label": "State, input, and matrix dimensions are explicitly compatible."
+        }
+      ],
+      "activationPhrases": [
+        "discrete state equation",
+        "discrete-time state equation"
+      ],
+      "references": [
+        "linear-system-theory"
+      ],
+      "canonicalRelation": "next-state = state-matrix state + input-matrix control-input"
     }
   ],
   "activationRules": [

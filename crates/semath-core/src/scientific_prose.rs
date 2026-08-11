@@ -373,8 +373,17 @@ fn classify_discourse_frame(
         .iter()
         .copied()
         .find(|(start, end)| *start < clause_end && clause_start < *end);
-    let lexical_attribution =
-        first_marker(&lower, &["according to", "as reported"]).or_else(|| {
+    // Sentence-initial “According to …” is attribution.  A predicate such as
+    // “x evolves according to <formula>” instead introduces the author's own
+    // model and must remain assertive.
+    let according_to = lower
+        .trim_start()
+        .starts_with("according to")
+        .then(|| first_marker(&lower, &["according to"]))
+        .flatten();
+    let lexical_attribution = first_marker(&lower, &["as reported"])
+        .or(according_to)
+        .or_else(|| {
             starts_with_any(&lower, &["the citation ", "the reference "])
                 .then(|| first_marker(&lower, &["the citation", "the reference"]))
                 .flatten()

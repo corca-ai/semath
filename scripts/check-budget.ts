@@ -102,6 +102,7 @@ const snapshot: ProjectSnapshot = {
   protocolVersion: SEMATH_PROTOCOL_VERSION,
 };
 const initialTransferBytes = encodedLength(snapshot);
+let current = documents[1]!;
 collectGarbage();
 const rssAfterSyntax = residentBytes();
 
@@ -116,6 +117,10 @@ const initial = await worker.request<UpdateResult>({
 });
 const engineColdMs = wasmInitMs + performance.now() - engineColdStarted;
 const coldMs = wasmInitMs + performance.now() - coldStarted;
+// A real worker transfer releases the sender's serialized semantic snapshot.
+// The in-process budget host does not, so drop those adapter documents once
+// reset has consumed them instead of charging the engine for a test-only copy.
+documents.length = 0;
 collectGarbage();
 const rssAfterEngine = residentBytes();
 assertCounters(initial, DOCUMENT_COUNT + 1);
@@ -128,7 +133,6 @@ let maxAffected = 0;
 let maxTransferBytes = 0;
 let inventoryVersion = snapshot.inventoryVersion;
 let currentSource: PerformanceFixtureDocument = sources[0]!;
-let current = documents[1]!;
 
 for (let run = 0; run < DELTA_RUNS; run += 1) {
   // Keep the memory sample about one edit/query lifecycle. Without collecting
@@ -253,14 +257,26 @@ if (incremental.analyzedFileIds.length !== 0) {
 // of either valid lifecycle instead of an artificial overlap of both.
 await worker.dispose();
 const clean = new SemathEngine();
-const finalDocuments = documents.map((document) =>
-  document.fileId === current.fileId ? current : document,
+const { documents: _discardedDocuments, ...cleanMetadata } = snapshot;
+clean.beginReset(
+  encoder.encode(
+    JSON.stringify({ ...cleanMetadata, inventoryVersion: inventoryVersion + 1 }),
+  ),
 );
-const cleanUpdate = resetEngine(clean, {
-  ...snapshot,
-  documents: finalDocuments,
-  inventoryVersion: inventoryVersion + 1,
-});
+for (const source of [main, ...sources]) {
+  const document = (() => {
+    if (source.fileId === current.fileId) return current;
+    const fileSyntax = syntax.getFile(source.fileId);
+    if (!fileSyntax) throw new Error(`missing syntax for ${source.fileId}`);
+    return adaptWasmtexDocument({
+      content: source.content,
+      language: source.language ?? "latex",
+      syntax: fileSyntax,
+    });
+  })();
+  clean.ingestResetDocument(encoder.encode(JSON.stringify(document)));
+}
+const cleanUpdate = decodeUpdate(clean.finishReset());
 if (
   initial.stats.totalDocuments !== cleanUpdate.stats.totalDocuments ||
   initial.stats.recognizedLaws !== cleanUpdate.stats.recognizedLaws

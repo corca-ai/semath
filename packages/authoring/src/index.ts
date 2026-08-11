@@ -59,16 +59,23 @@ export interface PackAuthoringRequest {
 }
 
 export interface AuthoringPack {
+  concepts: readonly AuthoringConcept[];
   laws: readonly AuthoringLaw[];
   packId: string;
   title: string;
 }
 
+export interface AuthoringConcept {
+  id: string;
+  title: string;
+}
+
 export interface AuthoringLaw {
+  activationPhrases: readonly string[];
   canonicalRelation: string;
   id: string;
   representations: readonly string[];
-  roles: readonly { description?: string; id: string; shape?: string }[];
+  roles: readonly { concept: string; description?: string; id: string; shape?: string }[];
   title: string;
 }
 
@@ -99,16 +106,33 @@ export function projectValidatedPack(value: unknown): AuthoringPack {
   if (!isRecord(value)) throw new Error("validated pack must be an object");
   const packId = requiredString(value.packId, "validated pack.packId");
   const title = requiredString(value.title, "validated pack.title");
+  if (!Array.isArray(value.concepts)) {
+    throw new Error("validated pack.concepts must be an array");
+  }
   if (!Array.isArray(value.laws)) throw new Error("validated pack.laws must be an array");
   return {
+    concepts: value.concepts.map((candidate, conceptIndex) => {
+      const path = `validated pack.concepts[${conceptIndex}]`;
+      if (!isRecord(candidate)) throw new Error(`${path} must be an object`);
+      return {
+        id: requiredString(candidate.id, `${path}.id`),
+        title: requiredString(candidate.title, `${path}.title`),
+      };
+    }),
     laws: value.laws.map((candidate, lawIndex) => {
       const path = `validated pack.laws[${lawIndex}]`;
       if (!isRecord(candidate)) throw new Error(`${path} must be an object`);
       if (!Array.isArray(candidate.roles)) throw new Error(`${path}.roles must be an array`);
+      if (candidate.activationPhrases !== undefined && !Array.isArray(candidate.activationPhrases)) {
+        throw new Error(`${path}.activationPhrases must be an array`);
+      }
       if (candidate.representations !== undefined && !Array.isArray(candidate.representations)) {
         throw new Error(`${path}.representations must be an array`);
       }
       return {
+        activationPhrases: (candidate.activationPhrases ?? []).map((phrase, phraseIndex) =>
+          requiredString(phrase, `${path}.activationPhrases[${phraseIndex}]`),
+        ),
         canonicalRelation: requiredString(candidate.canonicalRelation, `${path}.canonicalRelation`),
         id: requiredString(candidate.id, `${path}.id`),
         representations: (candidate.representations ?? []).map((form, formIndex) =>
@@ -120,6 +144,7 @@ export function projectValidatedPack(value: unknown): AuthoringPack {
           const description = optionalString(role.description, `${rolePath}.description`);
           const shape = optionalString(role.shape, `${rolePath}.shape`);
           return {
+            concept: requiredString(role.concept, `${rolePath}.concept`),
             id: requiredString(role.id, `${rolePath}.id`),
             ...(description ? { description } : {}),
             ...(shape ? { shape } : {}),
@@ -151,8 +176,11 @@ function optionalString(value: unknown, path: string): string | undefined {
 
 export function scaffoldPackWorkspace(pack: AuthoringPack): PackWorkspaceScaffold {
   const suiteId = `${pack.packId}-probe`;
+  const conceptTitles = new Map(
+    pack.concepts.map((concept) => [`${pack.packId}:${concept.id}`, concept.title]),
+  );
   const corpus: Corpus = {
-    cases: pack.laws.flatMap((law) => scaffoldLawCases(law)),
+    cases: pack.laws.flatMap((law) => scaffoldLawCases(law, conceptTitles)),
     domain: suiteId,
     schemaVersion: 2,
   };
@@ -343,7 +371,10 @@ export function packagePackAssets(
   };
 }
 
-function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
+function scaffoldLawCases(
+  law: AuthoringLaw,
+  conceptTitles: ReadonlyMap<string, string>,
+): CorpusCase[] {
   const relations = [law.canonicalRelation, ...law.representations];
   const symbolSets = [
     ["y", "c", "x", "t", "z"],
@@ -355,7 +386,7 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
   const positives = symbolSets.map((symbols, index) => {
     const bindings = bindSymbols(law, symbols);
     const formula = renderFormula(relations[index % relations.length]!, bindings);
-    return recognizedCase(law, bindings, formula, index);
+    return recognizedCase(law, bindings, formula, index, conceptTitles);
   });
   const negativeMutations = [
     { category: "wrong-operator", mutate: wrongOperator },
@@ -371,19 +402,30 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
     const symbols = symbolSets[index]!;
     const bindings = bindSymbols(law, symbols);
     const formula = renderFormula(law.canonicalRelation, bindings);
-    const mutated = mutation.mutate(formula, [...bindings.values()]);
-    const declarationBindings = mutation.category === "role-swap"
+    const shapedRole = law.roles.find((role) => role.shape);
+    const effectiveCategory = mutation.category === "shape-mismatch" && !shapedRole
+      ? "missing-role"
+      : mutation.category;
+    const mutated = effectiveCategory === "missing-role"
+      ? `${[...bindings.values()][0]}_{probe}=0`
+      : mutation.mutate(formula, [...bindings.values()]);
+    const declarationBindings = effectiveCategory === "role-swap"
       ? conflictFirstTwoBindings(bindings)
       : bindings;
-    const shapedRole = law.roles.find((role) => role.shape);
-    const shapeOverrides = mutation.category === "shape-mismatch" && shapedRole
+    const shapeOverrides = effectiveCategory === "shape-mismatch" && shapedRole
       ? new Map([[shapedRole.id, incompatibleShape(shapedRole.shape)]])
       : undefined;
-    const prose = declaration(law, declarationBindings, index, shapeOverrides);
+    const prose = declaration(
+      law,
+      declarationBindings,
+      index,
+      conceptTitles,
+      shapeOverrides,
+    );
     const twoDocument = (index + 5) % 3 === 0;
     return {
       cursor: { edge: index % 2 ? "after" : "before", fileId: "main", needle: mutated },
-      diversity: diversity(index + 5, mutation.category),
+      diversity: diversity(index + 5, effectiveCategory),
       documents: twoDocument
         ? [
             {
@@ -402,12 +444,12 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
       id: `${law.id}-refusal-${index + 1}`,
       lawId: law.id,
       ...(twoDocument ? { mainFileId: "main" } : {}),
-      refusalCategory: mutation.category,
+      refusalCategory: effectiveCategory,
       variationTags: [
         "hard-negative",
         "role-prose",
-        mutation.category,
-        ...(mutation.category === "role-swap" ? ["role-conflict"] : []),
+        effectiveCategory,
+        ...(effectiveCategory === "role-swap" ? ["role-conflict"] : []),
       ],
     } satisfies CorpusCase;
   });
@@ -419,6 +461,7 @@ function recognizedCase(
   bindings: ReadonlyMap<string, string>,
   formula: string,
   index: number,
+  conceptTitles: ReadonlyMap<string, string>,
 ): CorpusCase {
   const wrappers = [
     `$${formula}$`,
@@ -427,7 +470,7 @@ function recognizedCase(
     `$ {${formula}} $`,
     `\\[\\left(${formula}\\right)\\]`,
   ];
-  const prose = declaration(law, bindings, index);
+  const prose = declaration(law, bindings, index, conceptTitles);
   const twoDocument = index % 3 === 0;
   return {
     cursor: { edge: index % 2 ? "after" : "before", fileId: "main", needle: formula },
@@ -472,27 +515,36 @@ function renderFormula(source: string, bindings: ReadonlyMap<string, string>): s
   for (const [role, symbol] of [...bindings].sort(
     ([left], [right]) => right.length - left.length,
   )) {
-    result = result.replace(new RegExp(escapeRegExp(role), "gu"), symbol);
+    result = result.replace(
+      new RegExp(`(?<![A-Za-z0-9])${escapeRegExp(role)}(?![A-Za-z0-9])`, "gu"),
+      symbol,
+    );
   }
-  return result;
+  return result
+    .replace(/\bVar(?=\s*\()/gu, "\\operatorname{Var}")
+    .replace(/\bE(?=\s*\()/gu, "\\operatorname{E}")
+    .replace(/\bP(?=\s*\()/gu, "\\mathbb{P}")
+    .replace(/\blog\b/gu, "\\log");
 }
 
 function declaration(
   law: AuthoringLaw,
   bindings: ReadonlyMap<string, string>,
   index: number,
+  conceptTitles: ReadonlyMap<string, string>,
   shapeOverrides?: ReadonlyMap<string, string>,
 ): string {
+  const lawPhrase = law.activationPhrases[0] ?? law.title;
   const entries = [...bindings].map(([roleId, symbol]) => {
     const role = law.roles.find((candidate) => candidate.id === roleId);
-    const words = (role?.description ?? roleId.replaceAll("-", " "))
+    const words = (conceptTitles.get(role?.concept ?? "") ??
+      role?.description ??
+      roleId.replaceAll("-", " "))
       .trim()
       .replace(/[.!?]+$/u, "")
       .toLocaleLowerCase("en-US");
     const shape = shapeOverrides?.get(roleId) ?? role?.shape;
-    const description = shape && !words.includes(shape)
-      ? `${words} ${shape}`
-      : words;
+    const description = shape ? descriptionWithShape(words, shape) : words;
     return { description, symbol: `$${symbol}$` };
   });
   const clauses = entries.map(({ description, symbol }) => `${symbol} denotes ${description}`);
@@ -501,13 +553,28 @@ function declaration(
   const symbols = englishList(entries.map((entry) => entry.symbol));
   const descriptions = englishList(entries.map((entry) => entry.description));
   const variants = [
-    `For ${law.title}, let ${englishList(letClauses)}.`,
-    `In ${law.title}, let ${symbols} denote ${descriptions}, respectively.`,
-    `For ${law.title}, suppose ${englishList(predicates)}.`,
-    `${entries.map(({ description, symbol }) => `We write ${symbol} for ${description}.`).join(" ")} This notation is used in ${law.title}.`,
-    `For ${law.title}, here ${englishList(clauses)}.`,
+    `For ${lawPhrase}, let ${englishList(letClauses)}.`,
+    `In ${lawPhrase}, let ${symbols} denote ${descriptions}, respectively.`,
+    `For ${lawPhrase}, suppose ${englishList(predicates)}.`,
+    `${entries.map(({ description, symbol }) => `We write ${symbol} for ${description}.`).join(" ")} This notation is used in ${lawPhrase}.`,
+    `For ${lawPhrase}, here ${englishList(clauses)}.`,
   ];
   return variants[index % variants.length]!;
+}
+
+function descriptionWithShape(description: string, shape: string): string {
+  if (shape === "vector") {
+    return description.endsWith("vector")
+      ? `n-dimensional ${description}`
+      : `n-dimensional ${description} vector`;
+  }
+  if (shape === "matrix") {
+    return description.endsWith("matrix")
+      ? `n by n ${description}`
+      : `n by n ${description} matrix`;
+  }
+  if (description.includes(shape)) return description;
+  return `${description} ${shape}`;
 }
 
 function diversity(index: number, mutationFamily: string) {

@@ -7,7 +7,7 @@ use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{is_capability_pack, laws_share_collision};
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
 use crate::pack::{PackConditionKind, PackLaw, PackLawRole, built_in_packs};
-use crate::prose::{FormulaOperationKind, ScientificSemanticEvidence};
+use crate::prose::{FormulaOperationKind, LawActivationEvidence, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
@@ -200,6 +200,9 @@ fn dispatch_operand(expression: &SemanticExpr, placeholders: &BTreeSet<String>) 
         SemanticExprKind::Symbol(_)
         | SemanticExprKind::Number(_)
         | SemanticExprKind::Unknown(_) => DispatchOperand::Atom,
+        SemanticExprKind::Apply { operator, .. } if placeholders.contains(operator) => {
+            DispatchOperand::Any
+        }
         SemanticExprKind::Apply { operator, .. } => DispatchOperand::Apply(operator.clone()),
         SemanticExprKind::Cross(_, _) => DispatchOperand::Cross,
         SemanticExprKind::Derivative { .. } => DispatchOperand::Derivative,
@@ -277,6 +280,9 @@ fn strongest_dispatch_feature(
 fn expression_dispatch_features(expression: &SemanticExpr) -> BTreeSet<DispatchFeature> {
     let mut features = BTreeSet::new();
     collect_dispatch_features(expression, &BTreeSet::new(), &mut features);
+    if let Some(expanded) = expand_ambiguous_juxtaposition(expression) {
+        collect_dispatch_features(&expanded, &BTreeSet::new(), &mut features);
+    }
     features
 }
 
@@ -301,6 +307,19 @@ fn collect_dispatch_features(
         }
         SemanticExprKind::Product(items) => {
             output.insert(DispatchFeature::Product(items.len()));
+            let ambiguous_applications = items
+                .iter()
+                .filter(|item| {
+                    matches!(
+                        &item.kind,
+                        SemanticExprKind::Apply { operator, arguments }
+                            if arguments.len() == 1 && !is_structural_application(operator)
+                    )
+                })
+                .count();
+            for additional in 1..=ambiguous_applications {
+                output.insert(DispatchFeature::Product(items.len() + additional));
+            }
             for item in items {
                 collect_dispatch_features(item, placeholders, output);
             }
@@ -328,7 +347,9 @@ fn collect_dispatch_features(
             operator,
             arguments,
         } => {
-            output.insert(DispatchFeature::Apply(operator.clone()));
+            if !placeholders.contains(operator) {
+                output.insert(DispatchFeature::Apply(operator.clone()));
+            }
             if arguments.len() == 1 {
                 output.insert(DispatchFeature::Product(2));
             }
@@ -385,12 +406,36 @@ pub(crate) struct LawAnalysisContext<'a> {
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ExternalTypeEnvironment {
+    law_activations: BTreeMap<u32, Vec<LawActivationEvidence>>,
     roles: BTreeMap<u32, BTreeMap<String, Vec<RoleInfo>>>,
     quantities: BTreeMap<u32, BTreeMap<String, Vec<QuantityInfo>>>,
     shapes: BTreeMap<u32, BTreeMap<String, Vec<ShapeInfo>>>,
 }
 
 impl ExternalTypeEnvironment {
+    pub fn add_law_activation(&mut self, offset: u32, activation: LawActivationEvidence) {
+        self.law_activations
+            .entry(offset)
+            .or_default()
+            .push(activation);
+    }
+
+    fn law_activation(
+        &self,
+        offset: u32,
+        pack_id: &str,
+        law_id: &str,
+    ) -> Option<&LawActivationEvidence> {
+        self.law_activations
+            .get(&offset)?
+            .iter()
+            .find(|activation| {
+                activation.pack_id == pack_id
+                    && activation.law_id == law_id
+                    && activation.frame.establishes()
+            })
+    }
+
     pub fn add_role(&mut self, offset: u32, role: RoleInfo) {
         self.roles
             .entry(offset)
@@ -563,8 +608,15 @@ pub(crate) fn observe_laws(
                     traversed_latent = true;
                 }
             }
-            let activation =
-                semantic_evidence.law_activation(compiled.pack_id, &compiled.law.id, &actual.range);
+            let activation = semantic_evidence
+                .law_activation(compiled.pack_id, &compiled.law.id, &actual.range)
+                .or_else(|| {
+                    context.external.law_activation(
+                        actual.range.start_offset,
+                        compiled.pack_id,
+                        &compiled.law.id,
+                    )
+                });
             if !compiled.law.activation_phrases.is_empty() && activation.is_none() {
                 continue;
             }
@@ -589,6 +641,7 @@ pub(crate) fn observe_laws(
                     &compiled.law.roles,
                     bindings,
                     actual.range.start_offset,
+                    activation.is_some(),
                     context.shapes,
                     context.quantities,
                     context.consistency,
@@ -1141,13 +1194,22 @@ pub(crate) fn unify_all(
                 operator: right_operator,
                 arguments: right,
             },
-        ) if left_operator == right_operator && left.len() == right.len() => {
+        ) if left.len() == right.len() => bind_name_all(
+            left_operator,
+            right_operator,
+            placeholders,
+            actual,
+            bindings,
+        )
+        .into_iter()
+        .flat_map(|candidate| {
             if matches!(left_operator.as_str(), "intersection" | "union") {
-                commutative_unify_all(left, right, placeholders, bindings)
+                commutative_unify_all(left, right, placeholders, &candidate)
             } else {
-                unify_sequence(left.iter(), right.iter(), placeholders, bindings)
+                unify_sequence(left.iter(), right.iter(), placeholders, &candidate)
             }
-        }
+        })
+        .collect(),
         (
             SemanticExprKind::Product(template),
             SemanticExprKind::Apply {
@@ -1256,7 +1318,19 @@ fn ambiguous_factor(expression: &SemanticExpr) -> Option<Vec<SemanticExpr>> {
 fn is_structural_application(operator: &str) -> bool {
     matches!(
         operator,
-        "compose" | "intersection" | "norm" | "sum" | "transpose" | "union"
+        "compose"
+            | "condition"
+            | "curl"
+            | "divergence"
+            | "gradient"
+            | "integral"
+            | "intersection"
+            | "laplacian"
+            | "norm"
+            | "partial-derivative"
+            | "sum"
+            | "transpose"
+            | "union"
     )
 }
 
@@ -1456,8 +1530,14 @@ fn unify(
                 arguments: right,
             },
         ) => {
-            left_operator == right_operator
-                && left.len() == right.len()
+            left.len() == right.len()
+                && bind_name(
+                    left_operator,
+                    right_operator,
+                    placeholders,
+                    actual,
+                    bindings,
+                )
                 && if matches!(left_operator.as_str(), "intersection" | "union") {
                     commutative_unify(left, right, placeholders, bindings)
                 } else {
@@ -1582,6 +1662,7 @@ fn roles_are_supported(
     roles: &[PackLawRole],
     bindings: &BTreeMap<String, SemanticExpr>,
     offset: u32,
+    law_activated: bool,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -1597,6 +1678,7 @@ fn roles_are_supported(
                         role,
                         symbol,
                         offset,
+                        law_activated,
                         shapes,
                         quantities,
                         consistency,
@@ -1610,6 +1692,9 @@ fn roles_are_supported(
 fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
     match &expression.kind {
         SemanticExprKind::Symbol(_) => true,
+        SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
+            role_expression_is_atomic(base)
+        }
         SemanticExprKind::Derivative { expression, .. } => role_expression_is_atomic(expression),
         SemanticExprKind::Apply { arguments, .. } => {
             arguments.iter().all(role_expression_is_atomic)
@@ -1623,6 +1708,7 @@ fn role_symbol_is_supported(
     role: &PackLawRole,
     symbol: &str,
     offset: u32,
+    law_activated: bool,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -1642,6 +1728,9 @@ fn role_symbol_is_supported(
         return false;
     }
     let declared_roles = consistency.roles_at(symbol, offset).0;
+    let has_exact_role = declared_roles
+        .iter()
+        .any(|claim| claim.concept_id == role.concept);
     let comparable_roles = declared_roles
         .iter()
         .filter(|claim| concepts_are_comparable(&role.concept, &claim.concept_id))
@@ -1675,8 +1764,10 @@ fn role_symbol_is_supported(
         {
             Some(shape) if shape.kind != expected_shape => return false,
             Some(_) => {}
-            None if !(role.quantity.is_some()
+            None if !(has_exact_role
+                || role.quantity.is_some()
                 || role.concept.starts_with("quantities-units:")
+                || external.has_role(offset, symbol, &role.concept)
                 || external.has_shape(offset, symbol, expected_shape)) =>
             {
                 return false;
@@ -1684,6 +1775,14 @@ fn role_symbol_is_supported(
             None => {}
         }
         if role.concept.split(':').next_back() == Some(expected_shape) {
+            return true;
+        }
+        if law_activated
+            && shapes
+                .shape_at(symbol, offset)
+                .or_else(|| shapes.shape_at(notation_symbol, offset))
+                .is_some_and(|shape| shape.kind == expected_shape)
+        {
             return true;
         }
     }
@@ -2005,7 +2104,9 @@ fn condition_status(
         return ConstraintStatus::Unsupported;
     }
     match kind {
-        PackConditionKind::DomainMembership | PackConditionKind::ShapeCompatible
+        PackConditionKind::DomainMembership
+        | PackConditionKind::SameContext
+        | PackConditionKind::ShapeCompatible
             if mechanically_verified =>
         {
             ConstraintStatus::Verified
@@ -2053,6 +2154,7 @@ fn condition_evidence(
                 let facts = match kind {
                     PackConditionKind::ShapeCompatible => shapes
                         .shape_at(symbol, offset)
+                        .filter(|shape| shape.dimensions.iter().all(|dimension| dimension != "?"))
                         .into_iter()
                         .map(|shape| shape.evidence)
                         .chain(
@@ -2087,6 +2189,17 @@ fn condition_evidence(
                                 .map(|quantity| quantity.evidence),
                         )
                         .collect(),
+                    PackConditionKind::SameContext
+                        if same_context_is_supported(subjects, bindings) =>
+                    {
+                        vec![Evidence {
+                            rule_id: "canonical-shared-argument".into(),
+                            kind: "canonical-binding".into(),
+                            strength: "hard".into(),
+                            source_ranges: vec![expression.range.clone()],
+                        }]
+                    }
+                    PackConditionKind::SameContext => Vec::new(),
                     _ => Vec::new(),
                 };
                 let has_facts = !facts.is_empty();
@@ -2098,6 +2211,35 @@ fn condition_evidence(
         proved_subjects += usize::from(proved);
     }
     (evidence, proved_subjects == subjects.len())
+}
+
+fn same_context_is_supported(
+    subjects: &[String],
+    bindings: &BTreeMap<String, SemanticExpr>,
+) -> bool {
+    let Some(argument_lists) = subjects
+        .iter()
+        .map(|subject| {
+            let expression = bindings.get(subject)?;
+            let SemanticExprKind::Apply { arguments, .. } = &expression.kind else {
+                return None;
+            };
+            (!arguments.is_empty()).then_some(arguments)
+        })
+        .collect::<Option<Vec<_>>>()
+    else {
+        return false;
+    };
+    let Some((first, rest)) = argument_lists.split_first() else {
+        return false;
+    };
+    rest.iter().all(|arguments| {
+        arguments.len() == first.len()
+            && arguments
+                .iter()
+                .zip(first.iter())
+                .all(|(left, right)| equivalent(left, right))
+    })
 }
 
 fn push_evidence(items: &mut Vec<Evidence>, evidence: Evidence) {
@@ -2134,6 +2276,9 @@ fn semantic_symbols(expression: &SemanticExpr) -> Vec<&str> {
                 .collect()
         }
         SemanticExprKind::Negate(inner) => semantic_symbols(inner),
+        SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
+            semantic_symbols(base)
+        }
         SemanticExprKind::Power(base, _) if contains_sum_operator(base) => Vec::new(),
         _ => semantic_symbol(expression).into_iter().collect(),
     }
@@ -2142,6 +2287,9 @@ fn semantic_symbols(expression: &SemanticExpr) -> Vec<&str> {
 fn expression_label(expression: &SemanticExpr) -> Option<String> {
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => Some(symbol.clone()),
+        SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
+            Some(format!("{}^*", expression_label(base)?))
+        }
         SemanticExprKind::Derivative { expression, .. } => expression_label(expression),
         SemanticExprKind::Sum(items) => Some(
             items
@@ -2165,6 +2313,13 @@ fn expression_label(expression: &SemanticExpr) -> Option<String> {
         )),
         _ => None,
     }
+}
+
+fn is_decorative_star(expression: &SemanticExpr) -> bool {
+    matches!(
+        &expression.kind,
+        SemanticExprKind::Symbol(value) | SemanticExprKind::Unknown(value) if value == "*"
+    )
 }
 
 fn variadic_labels(expression: &SemanticExpr) -> Vec<String> {
@@ -2212,6 +2367,133 @@ mod tests {
                 expression
             })
             .collect()
+    }
+
+    #[test]
+    fn callable_role_placeholders_bind_the_operator_and_arguments_once() {
+        let template = lower_template("objective(variable) = value");
+        let actual = lower_template("f(x) = y");
+        let placeholders = ["objective", "variable", "value"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        let bindings = unify_all(&template, &actual, &placeholders, &BTreeMap::new());
+
+        assert_eq!(bindings.len(), 1);
+        assert!(bindings[0].contains_key("objective"));
+        assert!(bindings[0].contains_key("variable"));
+        assert!(bindings[0].contains_key("value"));
+    }
+
+    #[test]
+    fn attaches_an_explicit_law_name_to_the_immediately_following_formula() {
+        let source = "For diffusive mass transport, let $J$ denote species flux, $D$ diffusivity, and $c$ concentration. Then $J=-D\\nabla c$.";
+        let template = lower_template("flux = -diffusivity \\nabla concentration");
+        let actual = lower_template("J = -D \\nabla c");
+        let placeholders = ["flux", "diffusivity", "concentration"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
+            "template={template:?} actual={actual:?}"
+        );
+        assert_eq!(recognized_laws(source), ["fick-diffusion"]);
+
+        let unrelated = "Fick's law is one diffusion model. This paragraph changes topic. Let $J$ denote species flux, $D$ diffusivity, and $c$ concentration. Then $J=-D\\nabla c$.";
+        assert!(
+            !recognized_laws(unrelated)
+                .iter()
+                .any(|law| law == "fick-diffusion")
+        );
+    }
+
+    #[test]
+    fn recognizes_new_probability_and_learning_relations_from_explicit_roles() {
+        assert_eq!(
+            recognized_laws(
+                "Let $A$ and $B$ be events. Conditional probability is $P(A\\mid B)=P(A\\cap B)/P(B)$."
+            ),
+            ["conditional-probability"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Let $A$ and $B$ be events. Conditional probability is $\\mathbb{P}(A\\mid B)=\\frac{\\mathbb{P}(A\\cap B)}{\\mathbb{P}(B)}$."
+            ),
+            ["conditional-probability"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "For label $y$, predicted probability $p$, and binary cross-entropy loss $L$, use $L=-y\\log p-(1-y)\\log(1-p)$."
+            ),
+            ["binary-cross-entropy"]
+        );
+    }
+
+    #[test]
+    fn recognizes_v025_vertical_relations() {
+        let wave_template = lower_template(
+            "\\nabla^2 field = \\frac{1}{speed^2} \\frac{\\partial^2 field}{\\partial time^2}",
+        );
+        let wave_actual =
+            lower_template("\\nabla^2 u = \\frac{1}{c^2} \\frac{\\partial^2 u}{\\partial t^2}");
+        let wave_placeholders = ["field", "speed", "time"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            !unify_all(
+                &wave_template,
+                &wave_actual,
+                &wave_placeholders,
+                &BTreeMap::new()
+            )
+            .is_empty(),
+            "wave template={wave_template:?} actual={wave_actual:?}"
+        );
+        for (source, expected) in [
+            (
+                "For integrable random variables $X$ and $Y$ and scalars $a,b$, expectation obeys $\\operatorname{E}(aX+bY)=a\\operatorname{E}(X)+b\\operatorname{E}(Y)$.",
+                "expectation-linearity",
+            ),
+            (
+                "For a Newtonian fluid, let $\\tau$ be shear stress, $\\mu$ dynamic viscosity, and $\\dot{\\gamma}$ shear rate. The constitutive relation is $\\tau=\\mu\\dot{\\gamma}$.",
+                "newtonian-shear",
+            ),
+            (
+                "Let $u$ denote a scalar wave field, $c$ wave speed, and $t$ time. The homogeneous wave equation is $\\nabla^2u=\\frac{1}{c^2}\\frac{\\partial^2u}{\\partial t^2}$.",
+                "scalar-wave-equation",
+            ),
+            (
+                "Let $x_k$ be state, $u_k$ control input, $A$ state matrix, and $B$ input matrix. The discrete state equation is $x_{k+1}=Ax_k+Bu_k$.",
+                "discrete-state-equation",
+            ),
+        ] {
+            assert!(
+                recognized_laws(source).iter().any(|law| law == expected),
+                "{expected}: {source}"
+            );
+        }
+    }
+
+    #[test]
+    fn recognizes_stationarity_with_a_decorated_optimum() {
+        let template = lower_template("\\nabla objective(variable) = 0");
+        let actual = lower_template("\\nabla f(x^*) = 0");
+        let placeholders = ["objective", "variable"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
+            "template={template:?} actual={actual:?}"
+        );
+        let source = "At an unconstrained differentiable optimum $x^*$ of objective $f$, first-order stationarity requires $\\nabla f(x^*)=0$.";
+        assert!(
+            recognized_laws(source)
+                .iter()
+                .any(|law| law == "first-order-stationarity")
+        );
     }
 
     #[test]
@@ -2474,7 +2756,13 @@ mod tests {
                 domains: &domains,
             },
         );
-        assert_eq!(laws.all()[0].law_id, "mechanical-power");
+        let recognition = &laws.all()[0];
+        assert_eq!(recognition.law_id, "mechanical-power");
+        assert_eq!(recognition.status, LawRecognitionStatus::ConditionMissing);
+        assert!(recognition.conditions.iter().any(|condition| {
+            condition.kind == ScientificConstraintKind::SameContext
+                && condition.status == ConstraintStatus::Required
+        }));
     }
 
     #[test]
@@ -2794,6 +3082,14 @@ mod tests {
         let json = serde_json::to_value(&matrix[0].conditions[0]).unwrap();
         assert_eq!(json["kind"], "shape-compatible");
         assert_eq!(json["status"], "verified");
+
+        let unspecified = recognized_law_observations(
+            "Let $x$ be a state vector, $u$ a control input vector, $A$ a state matrix, and $B$ an input matrix. The state-space equation is $\\dot{x}=Ax+Bu$.",
+        );
+        assert_eq!(
+            unspecified[0].conditions[0].status,
+            ConstraintStatus::Required
+        );
     }
 
     fn recognized_laws(source: &str) -> Vec<String> {
