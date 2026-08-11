@@ -1,11 +1,11 @@
 use super::{SemathEngine, notation_occurrence_range};
 use crate::parser::test_math_regions;
 use crate::{
-    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree,
+    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, MathRootState,
     MeaningDecision, NotationArgument, NotationNode, NotationNodeKind, NotationNodeRanges,
     PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectInclude, ProjectMacro,
     ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot,
-    ProjectSourceRef, Query, QueryEnvelope, QueryValue, SourceRange, SyntaxState,
+    ProjectSourceRef, Query, QueryEnvelope, QueryValue, SourceRange, SyntaxScope, SyntaxState,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -374,6 +374,111 @@ fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
         conflict
             .explanation
             .contains("Matrix multiplication requires the left inner dimension")
+    );
+
+    let without_comparison = "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}$\n$y=Ax$";
+    proven_symbolic_engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", without_comparison, 2)),
+            }],
+        })
+        .unwrap();
+    let retracted = proven_symbolic_engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            2,
+            2,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = retracted.value else {
+        panic!("expected diagnostics")
+    };
+    assert!(
+        !diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.code == "constraint-product-shape-conflict")
+    );
+}
+
+#[test]
+fn symbolic_comparisons_do_not_cross_sibling_document_scopes() {
+    let content = [
+        "# North",
+        "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}$",
+        "$y=Ax$",
+        "# South",
+        "$k \\ne n$",
+    ]
+    .join("\n");
+    let south = content.find("# South").unwrap() as u32;
+    let mut input = document("main", "main.md", &content, 1);
+    input.language = DocumentLanguage::Markdown;
+    input.scopes = vec![
+        SyntaxScope {
+            kind: "document".into(),
+            parent: None,
+            range: range(0, content.len() as u32),
+            state: MathRootState::Complete,
+            name: None,
+            level: None,
+            source: None,
+        },
+        SyntaxScope {
+            kind: "section".into(),
+            parent: Some(0),
+            range: range(0, south),
+            state: MathRootState::Complete,
+            name: Some("North".into()),
+            level: None,
+            source: None,
+        },
+        SyntaxScope {
+            kind: "section".into(),
+            parent: Some(0),
+            range: range(south, content.len() as u32),
+            state: MathRootState::Complete,
+            name: Some("South".into()),
+            level: None,
+            source: None,
+        },
+    ];
+    input.math_regions = test_math_regions(&content, DocumentLanguage::Markdown);
+
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![input],
+        })
+        .unwrap();
+    let result = engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = result.value else {
+        panic!("expected diagnostics")
+    };
+    assert!(
+        diagnostics
+            .iter()
+            .all(|diagnostic| diagnostic.code != "constraint-product-shape-conflict"),
+        "{diagnostics:?}"
     );
 }
 

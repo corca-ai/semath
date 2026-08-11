@@ -1,9 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use crate::semantic_index::{
-    Claim, ClaimCondition, ClaimId, ClaimObject, ClaimOperation, ClaimPredicate, ClaimRelation,
-    ClaimShape, ClaimValue, DimensionExponent, EntityId, EvidenceModality, EvidenceOrigin,
-    EvidencePolarity, EvidenceRecord,
+    Claim, ClaimComparison, ClaimCondition, ClaimExtent, ClaimId, ClaimObject, ClaimOperation,
+    ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, EntityId,
+    EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord,
 };
 
 const MAX_DERIVED_FACTS: usize = 50_000;
@@ -55,6 +55,7 @@ struct Proof {
     parents: BTreeSet<ClaimId>,
     provenance: BTreeSet<crate::semantic_index::SourceOccurrenceId>,
     available_after: u64,
+    scope_path: Vec<u32>,
     rule_id: String,
     derived: bool,
 }
@@ -93,6 +94,7 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
                         .chain(std::iter::once(item.evidence.source.clone()))
                         .collect(),
                     available_after: item.evidence.available_after,
+                    scope_path: item.evidence.scope_path.clone(),
                     rule_id: "semath/constraint/source".into(),
                     derived: false,
                 });
@@ -196,6 +198,7 @@ fn apply_composed_relations(
                     .chain(std::iter::once(application_evidence.source.clone()))
                     .collect(),
                 available_after: application_evidence.available_after,
+                scope_path: application_evidence.scope_path.clone(),
                 rule_id: "semath/constraint/application-trajectory".into(),
                 derived: true,
             };
@@ -220,24 +223,23 @@ fn collect_conflicts(
     known: &BTreeMap<FactKey, Proof>,
     relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
 ) -> Vec<PlannedConflict> {
-    let inequalities = relations
-        .iter()
-        .filter_map(|(_, relation, _)| match relation {
-            ClaimRelation::Inequality {
-                left_label,
-                right_label,
-                ..
-            } => Some((left_label.clone(), right_label.clone())),
-            _ => None,
-        })
-        .collect::<BTreeSet<_>>();
     let mut conflicts = BTreeSet::new();
     let facts = known.iter().collect::<Vec<_>>();
     for (position, (left, left_proof)) in facts.iter().enumerate() {
         for (right, right_proof) in facts.iter().skip(position + 1) {
             if left.subject != right.subject
                 || left.predicate != right.predicate
-                || !values_conflict(&left.value, &right.value, &inequalities)
+                || !values_conflict(
+                    &left.value,
+                    &right.value,
+                    relations,
+                    &ConstraintBoundary {
+                        available_after: left_proof
+                            .available_after
+                            .max(right_proof.available_after),
+                        scope_path: left.subject.scope_path.clone(),
+                    },
+                )
             {
                 continue;
             }
@@ -274,7 +276,7 @@ fn collect_conflicts(
             });
         }
     }
-    for (relation_id, relation, _) in relations {
+    for (relation_id, relation, evidence) in relations {
         let ClaimRelation::Product {
             result, factors, ..
         } = relation
@@ -283,7 +285,7 @@ fn collect_conflicts(
         };
         let Some(factor_shapes) = factors
             .iter()
-            .map(|factor| first_fact(known, factor, &ClaimPredicate::HasShape))
+            .map(|factor| first_fact_at(known, factor, &ClaimPredicate::HasShape, evidence))
             .collect::<Option<Vec<_>>>()
         else {
             continue;
@@ -295,7 +297,14 @@ fn collect_conflicts(
                 _ => None,
             })
             .collect::<Vec<_>>();
-        if !product_is_demonstrably_incompatible(&shapes, &inequalities) {
+        if !product_is_demonstrably_incompatible(
+            &shapes,
+            relations,
+            &ConstraintBoundary {
+                available_after: evidence.available_after,
+                scope_path: evidence.scope_path.clone(),
+            },
+        ) {
             continue;
         }
         let mut parents = factor_shapes
@@ -318,11 +327,12 @@ fn collect_conflicts(
 fn values_conflict(
     left: &ClaimValue,
     right: &ClaimValue,
-    inequalities: &BTreeSet<(String, String)>,
+    relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    boundary: &ConstraintBoundary,
 ) -> bool {
     match (left, right) {
         (ClaimValue::Shape(left), ClaimValue::Shape(right)) => {
-            shapes_conflict(left, right, inequalities)
+            shapes_conflict(left, right, relations, boundary)
         }
         (ClaimValue::Dimension(left), ClaimValue::Dimension(right)) => left != right,
         _ => false,
@@ -332,7 +342,8 @@ fn values_conflict(
 fn shapes_conflict(
     left: &ClaimShape,
     right: &ClaimShape,
-    inequalities: &BTreeSet<(String, String)>,
+    relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    boundary: &ConstraintBoundary,
 ) -> bool {
     match (left, right) {
         (ClaimShape::Unknown, _) | (_, ClaimShape::Unknown) => false,
@@ -342,7 +353,7 @@ fn shapes_conflict(
         | (ClaimShape::Tensor(left), ClaimShape::Tensor(right)) => {
             left.len() != right.len()
                 || left.iter().zip(right).any(|(left, right)| {
-                    demonstrably_incompatible_extent(left, right, inequalities)
+                    demonstrably_incompatible_extent(left, right, relations, boundary)
                 })
         }
         (
@@ -355,8 +366,8 @@ fn shapes_conflict(
                 codomain: right_codomain,
             },
         ) => {
-            shapes_conflict(left_domain, right_domain, inequalities)
-                || shapes_conflict(left_codomain, right_codomain, inequalities)
+            shapes_conflict(left_domain, right_domain, relations, boundary)
+                || shapes_conflict(left_codomain, right_codomain, relations, boundary)
         }
         _ => true,
     }
@@ -364,18 +375,19 @@ fn shapes_conflict(
 
 fn product_is_demonstrably_incompatible(
     shapes: &[ClaimShape],
-    inequalities: &BTreeSet<(String, String)>,
+    relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    boundary: &ConstraintBoundary,
 ) -> bool {
     shapes.windows(2).any(|pair| match (&pair[0], &pair[1]) {
         (ClaimShape::Matrix(left), ClaimShape::Vector(right))
             if left.len() == 2 && right.len() == 1 =>
         {
-            demonstrably_incompatible_extent(&left[1], &right[0], inequalities)
+            demonstrably_incompatible_extent(&left[1], &right[0], relations, boundary)
         }
         (ClaimShape::Matrix(left), ClaimShape::Matrix(right))
             if left.len() == 2 && right.len() == 2 =>
         {
-            demonstrably_incompatible_extent(&left[1], &right[0], inequalities)
+            demonstrably_incompatible_extent(&left[1], &right[0], relations, boundary)
         }
         _ => false,
     })
@@ -410,7 +422,13 @@ fn close_equalities(
 ) {
     let mut adjacency = BTreeMap::<EntityId, Vec<(EntityId, ClaimId, EvidenceRecord)>>::new();
     for (claim_id, relation, evidence) in relations {
-        if let ClaimRelation::Equality { left, right, .. } = relation {
+        if let ClaimRelation::Comparison {
+            operator: ClaimComparison::Equal,
+            left,
+            right,
+            ..
+        } = relation
+        {
             adjacency.entry(left.clone()).or_default().push((
                 right.clone(),
                 claim_id.clone(),
@@ -464,7 +482,7 @@ fn apply_relation(
     truncated: &mut bool,
 ) {
     match relation {
-        ClaimRelation::Equality { .. } => {}
+        ClaimRelation::Comparison { .. } => {}
         ClaimRelation::Sum { result, terms, .. } => {
             let participants = std::iter::once(result)
                 .chain(terms)
@@ -501,7 +519,6 @@ fn apply_relation(
         ClaimRelation::Product {
             result, factors, ..
         } => apply_product(known, result, factors, relation_id, evidence, truncated),
-        ClaimRelation::Inequality { .. } => {}
         ClaimRelation::Quotient {
             result,
             numerator,
@@ -916,6 +933,29 @@ fn first_fact(
         .map(|(key, proof)| (key.value.clone(), proof.clone()))
 }
 
+fn first_fact_at(
+    known: &BTreeMap<FactKey, Proof>,
+    entity: &EntityId,
+    predicate: &ClaimPredicate,
+    boundary: &EvidenceRecord,
+) -> Option<(ClaimValue, Proof)> {
+    known
+        .iter()
+        .filter(|(key, proof)| {
+            &key.subject == entity
+                && &key.predicate == predicate
+                && proof.available_after <= boundary.available_after
+                && proof.scope_path.len() <= boundary.scope_path.len()
+                && proof
+                    .scope_path
+                    .iter()
+                    .zip(&boundary.scope_path)
+                    .all(|(left, right)| left == right)
+        })
+        .min_by_key(|(_, proof)| std::cmp::Reverse(proof.available_after))
+        .map(|(key, proof)| (key.value.clone(), proof.clone()))
+}
+
 fn insert_derived(
     known: &mut BTreeMap<FactKey, Proof>,
     key: FactKey,
@@ -958,6 +998,7 @@ fn extend_proof(
         parents,
         provenance,
         available_after,
+        scope_path: evidence.scope_path.clone(),
         rule_id: rule_id.into(),
         derived: true,
     }
@@ -1001,18 +1042,68 @@ fn product_shape(shapes: &[ClaimShape]) -> Option<ClaimShape> {
     Some(result)
 }
 
-fn compatible(left: &str, right: &str) -> bool {
-    left == right || left == "?" || right == "?"
+fn compatible(left: &ClaimExtent, right: &ClaimExtent) -> bool {
+    match (left, right) {
+        (ClaimExtent::Known { value: left }, ClaimExtent::Known { value: right }) => left == right,
+        (
+            ClaimExtent::Symbolic { entity: left, .. },
+            ClaimExtent::Symbolic { entity: right, .. },
+        ) => left == right,
+        (ClaimExtent::Unknown { .. }, _) | (_, ClaimExtent::Unknown { .. }) => true,
+        _ => false,
+    }
 }
 
 fn demonstrably_incompatible_extent(
-    left: &str,
-    right: &str,
-    inequalities: &BTreeSet<(String, String)>,
+    left: &ClaimExtent,
+    right: &ClaimExtent,
+    relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    boundary: &ConstraintBoundary,
 ) -> bool {
-    (left != right && left.parse::<u64>().is_ok() && right.parse::<u64>().is_ok())
-        || inequalities.contains(&(left.to_owned(), right.to_owned()))
-        || inequalities.contains(&(right.to_owned(), left.to_owned()))
+    match (left, right) {
+        (ClaimExtent::Known { value: left }, ClaimExtent::Known { value: right }) => left != right,
+        (
+            ClaimExtent::Symbolic { entity: left, .. },
+            ClaimExtent::Symbolic { entity: right, .. },
+        ) if left != right => relations.iter().any(|(_, relation, evidence)| {
+            let ClaimRelation::Comparison {
+                operator,
+                left: comparison_left,
+                right: comparison_right,
+                ..
+            } = relation
+            else {
+                return false;
+            };
+            comparison_proves_distinct(operator)
+                && evidence_visible_at(evidence, boundary)
+                && ((comparison_left == left && comparison_right == right)
+                    || (comparison_left == right && comparison_right == left))
+        }),
+        _ => false,
+    }
+}
+
+struct ConstraintBoundary {
+    available_after: u64,
+    scope_path: Vec<u32>,
+}
+
+fn comparison_proves_distinct(operator: &ClaimComparison) -> bool {
+    matches!(
+        operator,
+        ClaimComparison::NotEqual | ClaimComparison::LessThan | ClaimComparison::GreaterThan
+    )
+}
+
+fn evidence_visible_at(evidence: &EvidenceRecord, boundary: &ConstraintBoundary) -> bool {
+    evidence.available_after <= boundary.available_after
+        && evidence.scope_path.len() <= boundary.scope_path.len()
+        && evidence
+            .scope_path
+            .iter()
+            .zip(&boundary.scope_path)
+            .all(|(left, right)| left == right)
 }
 
 fn combine_dimensions(
@@ -1107,6 +1198,12 @@ mod tests {
         }
     }
 
+    fn entity_in(local_id: u32, scope_path: &[u32]) -> EntityId {
+        let mut entity = entity(local_id);
+        entity.scope_path = scope_path.to_vec();
+        entity
+    }
+
     fn input_claim(
         id: &str,
         subject: EntityId,
@@ -1146,7 +1243,8 @@ mod tests {
             id,
             left.clone(),
             ClaimPredicate::Relates,
-            ClaimValue::Relation(Box::new(ClaimRelation::Equality {
+            ClaimValue::Relation(Box::new(ClaimRelation::Comparison {
+                operator: ClaimComparison::Equal,
                 left,
                 right,
                 canonical_digest: id.into(),
@@ -1261,30 +1359,38 @@ mod tests {
             entity(3),
             entity(4),
             entity(5),
-            entity(6),
+            entity(0),
         );
         let plan = plan_constraint_derivations(&[
             input_claim(
                 "matrix-shape",
                 matrix.clone(),
                 ClaimPredicate::HasShape,
-                ClaimValue::Shape(ClaimShape::Matrix(vec!["m".into(), "n".into()])),
+                ClaimValue::Shape(ClaimShape::Matrix(vec![
+                    "m".into(),
+                    ClaimExtent::Symbolic {
+                        entity: right_extent.clone(),
+                        display: "n".into(),
+                    },
+                ])),
             ),
             input_claim(
                 "vector-shape",
                 vector.clone(),
                 ClaimPredicate::HasShape,
-                ClaimValue::Shape(ClaimShape::Vector(vec!["k".into()])),
+                ClaimValue::Shape(ClaimShape::Vector(vec![ClaimExtent::Symbolic {
+                    entity: left_extent.clone(),
+                    display: "k".into(),
+                }])),
             ),
             input_claim(
                 "inequality",
                 comparison,
                 ClaimPredicate::Relates,
-                ClaimValue::Relation(Box::new(ClaimRelation::Inequality {
+                ClaimValue::Relation(Box::new(ClaimRelation::Comparison {
+                    operator: ClaimComparison::NotEqual,
                     left: left_extent,
                     right: right_extent,
-                    left_label: "k".into(),
-                    right_label: "n".into(),
                     canonical_digest: "not-equals(k,n)".into(),
                 })),
             ),
@@ -1304,6 +1410,170 @@ mod tests {
                 .iter()
                 .any(|conflict| conflict.code == "constraint-product-shape-conflict")
         );
+    }
+
+    fn symbolic_product_conflicts(
+        matrix_extent: ClaimExtent,
+        vector_extent: ClaimExtent,
+        comparison_left: EntityId,
+        comparison_right: EntityId,
+        operator: ClaimComparison,
+        comparison_subject: EntityId,
+        product_subject: EntityId,
+    ) -> bool {
+        let scope_path = product_subject.scope_path.clone();
+        let matrix = entity_in(1, &scope_path);
+        let vector = entity_in(2, &scope_path);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "matrix-shape",
+                matrix.clone(),
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Matrix(vec!["rows".into(), matrix_extent])),
+            ),
+            input_claim(
+                "vector-shape",
+                vector.clone(),
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Vector(vec![vector_extent])),
+            ),
+            input_claim(
+                "comparison",
+                comparison_subject,
+                ClaimPredicate::Relates,
+                ClaimValue::Relation(Box::new(ClaimRelation::Comparison {
+                    operator,
+                    left: comparison_left,
+                    right: comparison_right,
+                    canonical_digest: "reviewed-comparison".into(),
+                })),
+            ),
+            input_claim(
+                "product",
+                product_subject.clone(),
+                ClaimPredicate::Relates,
+                ClaimValue::Relation(Box::new(ClaimRelation::Product {
+                    result: product_subject,
+                    factors: vec![matrix, vector],
+                    canonical_digest: "product(A,x)".into(),
+                })),
+            ),
+        ]);
+        plan.conflicts
+            .iter()
+            .any(|conflict| conflict.code == "constraint-product-shape-conflict")
+    }
+
+    #[test]
+    fn comparison_authority_is_entity_bound_not_display_bound() {
+        let (left, right) = (entity(4), entity(5));
+        assert!(symbolic_product_conflicts(
+            ClaimExtent::Symbolic {
+                entity: right.clone(),
+                display: "renamed-right".into(),
+            },
+            ClaimExtent::Symbolic {
+                entity: left.clone(),
+                display: "renamed-left".into(),
+            },
+            left,
+            right,
+            ClaimComparison::NotEqual,
+            entity(0),
+            entity(20),
+        ));
+
+        let (mut unrelated_left, mut unrelated_right) = (entity_in(6, &[2]), entity_in(7, &[2]));
+        unrelated_left.anchor.file_id = "other.tex".into();
+        unrelated_right.anchor.file_id = "other.tex".into();
+        assert!(!symbolic_product_conflicts(
+            ClaimExtent::Symbolic {
+                entity: entity(5),
+                display: "n".into(),
+            },
+            ClaimExtent::Symbolic {
+                entity: entity(4),
+                display: "k".into(),
+            },
+            unrelated_left,
+            unrelated_right,
+            ClaimComparison::NotEqual,
+            entity_in(0, &[2]),
+            entity(20),
+        ));
+    }
+
+    #[test]
+    fn comparison_authority_is_source_ordered_and_scope_visible() {
+        let (left, right) = (entity(4), entity(5));
+        let matrix_extent = ClaimExtent::Symbolic {
+            entity: right.clone(),
+            display: "n".into(),
+        };
+        let vector_extent = ClaimExtent::Symbolic {
+            entity: left.clone(),
+            display: "k".into(),
+        };
+        assert!(!symbolic_product_conflicts(
+            matrix_extent.clone(),
+            vector_extent.clone(),
+            left.clone(),
+            right.clone(),
+            ClaimComparison::NotEqual,
+            entity(30),
+            entity(20),
+        ));
+        assert!(!symbolic_product_conflicts(
+            matrix_extent,
+            vector_extent,
+            left,
+            right,
+            ClaimComparison::NotEqual,
+            entity_in(0, &[2]),
+            entity_in(20, &[1]),
+        ));
+    }
+
+    #[test]
+    fn strict_order_proves_distinctness_but_weak_order_does_not() {
+        for operator in [
+            ClaimComparison::NotEqual,
+            ClaimComparison::LessThan,
+            ClaimComparison::GreaterThan,
+        ] {
+            let (left, right) = (entity(4), entity(5));
+            assert!(symbolic_product_conflicts(
+                ClaimExtent::Symbolic {
+                    entity: right.clone(),
+                    display: "n".into(),
+                },
+                ClaimExtent::Symbolic {
+                    entity: left.clone(),
+                    display: "k".into(),
+                },
+                right,
+                left,
+                operator,
+                entity(0),
+                entity(20),
+            ));
+        }
+        let (left, right) = (entity(4), entity(5));
+        assert!(!symbolic_product_conflicts(
+            ClaimExtent::Symbolic {
+                entity: right.clone(),
+                display: "n".into(),
+            },
+            ClaimExtent::Symbolic {
+                entity: left.clone(),
+                display: "k".into(),
+            },
+            left,
+            right,
+            ClaimComparison::LessOrEqual,
+            entity(0),
+            entity(20),
+        ));
     }
 
     #[test]
