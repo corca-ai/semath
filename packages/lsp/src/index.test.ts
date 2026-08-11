@@ -749,6 +749,61 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 
+  test("keeps symbolic comparisons inside their entity scope and retracts them", async () => {
+    const { messages, server } = await setup();
+    const uri = "file:///scoped-shapes.md";
+    const separated = [
+      "# North",
+      "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}$",
+      "$y=Ax$",
+      "# South",
+      "$k \\ne n$",
+    ].join("\n");
+    await server.handle({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          languageId: "markdown",
+          text: separated,
+          uri,
+          version: 1,
+        },
+      },
+    });
+    expect(latestDiagnostics(messages, uri)).toEqual([]);
+
+    const local = separated.replace(
+      "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}$",
+      "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}, k \\ne n$",
+    );
+    await server.handle({
+      method: "textDocument/didChange",
+      params: {
+        contentChanges: [{ text: local }],
+        textDocument: { uri, version: 2 },
+      },
+    });
+    expect(latestDiagnostics(messages, uri)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "constraint-product-shape-conflict" }),
+      ]),
+    );
+
+    await server.handle({
+      method: "textDocument/didChange",
+      params: {
+        contentChanges: [{ text: separated }],
+        textDocument: { uri, version: 3 },
+      },
+    });
+    expect(latestDiagnostics(messages, uri)).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "constraint-product-shape-conflict" }),
+      ]),
+    );
+    server.dispose();
+  });
+
   test("refuses definitions that occur later in include expansion order", async () => {
     const { messages, server } = await setup();
     const mainUri = "file:///main.tex";
@@ -991,6 +1046,19 @@ describe("SemathLspServer", () => {
     server.dispose();
   });
 });
+
+function latestDiagnostics(
+  messages: JsonRpcMessage[],
+  uri: string,
+): unknown[] {
+  const published = messages.filter(
+    (message) =>
+      message.method === "textDocument/publishDiagnostics" &&
+      (message.params as { uri?: string }).uri === uri,
+  );
+  return (published.at(-1)?.params as { diagnostics?: unknown[] } | undefined)
+    ?.diagnostics ?? [];
+}
 
 test("offset/position conversion is UTF-16 and clamps malformed positions", () => {
   const content = "한😀\nabc";

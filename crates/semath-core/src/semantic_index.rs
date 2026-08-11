@@ -192,14 +192,48 @@ pub enum ClaimPredicate {
 #[serde(tag = "kind", content = "value", rename_all = "kebab-case")]
 pub enum ClaimShape {
     Scalar,
-    Vector(Vec<String>),
-    Matrix(Vec<String>),
-    Tensor(Vec<String>),
+    Vector(Vec<ClaimExtent>),
+    Matrix(Vec<ClaimExtent>),
+    Tensor(Vec<ClaimExtent>),
     Function {
         domain: Box<ClaimShape>,
         codomain: Box<ClaimShape>,
     },
     Unknown,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub enum ClaimExtent {
+    Known { value: u64 },
+    Symbolic { entity: EntityId, display: String },
+    Unknown { display: String },
+}
+
+impl ClaimExtent {
+    pub(crate) fn display(&self) -> String {
+        match self {
+            Self::Known { value } => value.to_string(),
+            Self::Symbolic { display, .. } | Self::Unknown { display } => display.clone(),
+        }
+    }
+}
+
+impl From<&str> for ClaimExtent {
+    fn from(display: &str) -> Self {
+        display.parse::<u64>().map_or_else(
+            |_| Self::Unknown {
+                display: display.to_owned(),
+            },
+            |value| Self::Known { value },
+        )
+    }
+}
+
+impl From<String> for ClaimExtent {
+    fn from(display: String) -> Self {
+        Self::from(display.as_str())
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -222,18 +256,23 @@ pub enum ClaimCondition {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "kebab-case")]
+pub enum ClaimComparison {
+    Equal,
+    NotEqual,
+    LessThan,
+    LessOrEqual,
+    GreaterThan,
+    GreaterOrEqual,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
 pub enum ClaimRelation {
-    Equality {
+    Comparison {
+        operator: ClaimComparison,
         left: EntityId,
         right: EntityId,
-        canonical_digest: String,
-    },
-    Inequality {
-        left: EntityId,
-        right: EntityId,
-        left_label: String,
-        right_label: String,
         canonical_digest: String,
     },
     Sum {
@@ -282,10 +321,7 @@ pub enum ClaimRelation {
 impl ClaimRelation {
     fn canonical_digest(&self) -> &str {
         match self {
-            Self::Equality {
-                canonical_digest, ..
-            }
-            | Self::Inequality {
+            Self::Comparison {
                 canonical_digest, ..
             }
             | Self::Sum {
@@ -314,9 +350,7 @@ impl ClaimRelation {
 
     pub(crate) fn entities(&self) -> Vec<&EntityId> {
         match self {
-            Self::Equality { left, right, .. } | Self::Inequality { left, right, .. } => {
-                vec![left, right]
-            }
+            Self::Comparison { left, right, .. } => vec![left, right],
             Self::Sum { result, terms, .. } => std::iter::once(result).chain(terms).collect(),
             Self::Product {
                 result, factors, ..
@@ -685,6 +719,26 @@ impl ProjectSemanticIndex {
             .into_iter()
             .flatten()
             .filter_map(|claim_id| self.claims.get(claim_id))
+            .collect()
+    }
+
+    pub fn claims_for_entity_at(
+        &self,
+        entity: &EntityId,
+        occurrence: &SourceOccurrence,
+    ) -> Vec<&Claim> {
+        self.claims_for_entity(entity)
+            .into_iter()
+            .filter(|claim| {
+                self.evidence
+                    .get(&claim.evidence_id)
+                    .is_some_and(|evidence| {
+                        (evidence.available_after <= occurrence.availability_order
+                            || evidence.provenance.contains(&occurrence.id))
+                            && scope_visible(&evidence.scope_path, &occurrence.scope_path)
+                            && claim.subject.component_id == occurrence.component_id
+                    })
+            })
             .collect()
     }
 
@@ -1394,20 +1448,31 @@ fn validate_claim_value(value: &ClaimValue) -> Result<(), String> {
     {
         return Err("relation claim is invalid or exceeds its bound".to_owned());
     }
-    if let ClaimValue::Relation(relation) = value
-        && let ClaimRelation::Inequality {
-            left_label,
-            right_label,
-            ..
-        } = relation.as_ref()
-        && (left_label.trim().is_empty()
-            || right_label.trim().is_empty()
-            || left_label.len() > MAX_TEXT_LENGTH
-            || right_label.len() > MAX_TEXT_LENGTH)
+    if let ClaimValue::Shape(shape) = value
+        && !valid_claim_shape(shape, MAX_TEXT_LENGTH)
     {
-        return Err("inequality labels are invalid or exceed their bound".to_owned());
+        return Err("shape extents are invalid or exceed their bound".to_owned());
     }
     Ok(())
+}
+
+fn valid_claim_shape(shape: &ClaimShape, max_text_length: usize) -> bool {
+    match shape {
+        ClaimShape::Scalar | ClaimShape::Unknown => true,
+        ClaimShape::Vector(extents) | ClaimShape::Matrix(extents) | ClaimShape::Tensor(extents) => {
+            extents.len() <= 16
+                && extents.iter().all(|extent| match extent {
+                    ClaimExtent::Known { .. } => true,
+                    ClaimExtent::Symbolic { display, .. } | ClaimExtent::Unknown { display } => {
+                        !display.trim().is_empty() && display.len() <= max_text_length
+                    }
+                })
+        }
+        ClaimShape::Function { domain, codomain } => {
+            valid_claim_shape(domain, max_text_length)
+                && valid_claim_shape(codomain, max_text_length)
+        }
+    }
 }
 
 fn claim_depends_on_file(
@@ -1418,6 +1483,7 @@ fn claim_depends_on_file(
     claim.subject.anchor.file_id == file_id
         || matches!(&claim.object, ClaimObject::Occurrence(id) if id.file_id == file_id)
         || matches!(&claim.object, ClaimObject::Entity(id) if id.anchor.file_id == file_id)
+        || matches!(&claim.object, ClaimObject::Value(value) if claim_value_depends_on_file(value, file_id))
         || evidence.get(&claim.evidence_id).is_some_and(|item| {
             item.source.file_id == file_id
                 || item
@@ -1425,6 +1491,42 @@ fn claim_depends_on_file(
                     .iter()
                     .any(|source| source.file_id == file_id)
         })
+}
+
+fn claim_value_depends_on_file(value: &ClaimValue, file_id: &str) -> bool {
+    match value {
+        ClaimValue::Condition(condition) => match condition {
+            ClaimCondition::Nonzero(entity)
+            | ClaimCondition::Positive(entity)
+            | ClaimCondition::Nonnegative(entity)
+            | ClaimCondition::Invertible(entity) => entity.anchor.file_id == file_id,
+            ClaimCondition::Member { entity, set } => {
+                entity.anchor.file_id == file_id || set.anchor.file_id == file_id
+            }
+            ClaimCondition::Named(_) => false,
+        },
+        ClaimValue::Relation(relation) => relation
+            .entities()
+            .into_iter()
+            .any(|entity| entity.anchor.file_id == file_id),
+        ClaimValue::Shape(shape) => claim_shape_depends_on_file(shape, file_id),
+        _ => false,
+    }
+}
+
+fn claim_shape_depends_on_file(shape: &ClaimShape, file_id: &str) -> bool {
+    match shape {
+        ClaimShape::Vector(extents)
+        | ClaimShape::Matrix(extents)
+        | ClaimShape::Tensor(extents) => extents.iter().any(|extent| {
+            matches!(extent, ClaimExtent::Symbolic { entity, .. } if entity.anchor.file_id == file_id)
+        }),
+        ClaimShape::Function { domain, codomain } => {
+            claim_shape_depends_on_file(domain, file_id)
+                || claim_shape_depends_on_file(codomain, file_id)
+        }
+        ClaimShape::Scalar | ClaimShape::Unknown => false,
+    }
 }
 
 pub(crate) fn occurrence_binding_key(occurrence: &SourceOccurrence) -> String {
@@ -2254,7 +2356,7 @@ mod tests {
         let value = ClaimObject::Value(ClaimValue::Shape(ClaimShape::Vector(vec!["n".into()])));
         assert_eq!(
             serde_json::to_string(&value).unwrap(),
-            r#"{"kind":"value","value":{"kind":"shape","value":{"kind":"vector","value":["n"]}}}"#
+            r#"{"kind":"value","value":{"kind":"shape","value":{"kind":"vector","value":[{"kind":"unknown","display":"n"}]}}}"#
         );
         let mut index = ProjectSemanticIndex::default();
         let invalid = claim(

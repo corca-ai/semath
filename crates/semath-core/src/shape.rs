@@ -65,14 +65,6 @@ struct ShapeFact {
 }
 
 #[derive(Clone, Debug)]
-struct Inequality {
-    left: String,
-    right: String,
-    range: SourceRange,
-    scope_id: usize,
-}
-
-#[derive(Clone, Debug)]
 pub(crate) struct ShapeObservations {
     facts: Vec<ShapeFact>,
     pub diagnostics: Vec<SemanticDiagnostic>,
@@ -234,7 +226,6 @@ pub(crate) fn observe_shapes(
     prose_claims: &[ProseShapeClaim],
 ) -> ShapeObservations {
     let scopes = ScopeGraph::new(document);
-    let inequalities = collect_inequalities(canonical_expressions, &scopes);
     let mut analysis = ShapeObservations {
         facts: Vec::new(),
         diagnostics: Vec::new(),
@@ -259,7 +250,7 @@ pub(crate) fn observe_shapes(
         collect_shape_declarations(expression, &mut analysis);
     }
 
-    add_explicit_conflict_diagnostics(&mut analysis, &inequalities);
+    add_explicit_conflict_diagnostics(&mut analysis);
 
     analysis
         .diagnostics
@@ -353,10 +344,7 @@ fn notation_families(expressions: &[SemanticExpr]) -> BTreeMap<String, String> {
     output
 }
 
-fn add_explicit_conflict_diagnostics(
-    analysis: &mut ShapeObservations,
-    inequalities: &[Inequality],
-) {
+fn add_explicit_conflict_diagnostics(analysis: &mut ShapeObservations) {
     let mut facts = analysis
         .facts
         .iter()
@@ -370,13 +358,7 @@ fn add_explicit_conflict_diagnostics(
             .iter()
             .filter(|previous| previous.symbol == fact.symbol && previous.scope_id == fact.scope_id)
             .max_by_key(|previous| previous.available_from)
-            && shapes_conflict(
-                &previous.shape,
-                &fact.shape,
-                inequalities,
-                &analysis.scopes,
-                fact.symbol_range.start_offset,
-            )
+            && shapes_conflict(&previous.shape, &fact.shape)
         {
             analysis.diagnostics.push(SemanticDiagnostic {
                 code: "notation-shape-conflict".into(),
@@ -504,87 +486,30 @@ fn dimension_label(expression: &SemanticExpr) -> String {
     }
 }
 
-fn collect_inequalities(expressions: &[SemanticExpr], scopes: &ScopeGraph) -> Vec<Inequality> {
-    fn collect(expression: &SemanticExpr, scopes: &ScopeGraph, output: &mut Vec<Inequality>) {
-        match &expression.kind {
-            SemanticExprKind::System(expressions) => {
-                for expression in expressions {
-                    collect(expression, scopes, output);
-                }
-            }
-            SemanticExprKind::Relation {
-                operator,
-                left,
-                right,
-            } if operator.as_str() == "not-equals" => {
-                let (Some(left), Some(right)) = (expression_name(left), expression_name(right))
-                else {
-                    return;
-                };
-                output.push(Inequality {
-                    left,
-                    right,
-                    range: expression.range.clone(),
-                    scope_id: scopes.id_at(expression.range.start_offset),
-                });
-            }
-            _ => {}
-        }
-    }
-
-    let mut output = Vec::new();
-    for expression in expressions {
-        collect(expression, scopes, &mut output);
-    }
-    output
-}
-
-fn shapes_conflict(
-    left: &Shape,
-    right: &Shape,
-    inequalities: &[Inequality],
-    scopes: &ScopeGraph,
-    at: u32,
-) -> bool {
+fn shapes_conflict(left: &Shape, right: &Shape) -> bool {
     match (left, right) {
-        (Shape::Vector(left), Shape::Vector(right)) => {
-            dimensions_conflict(left, right, inequalities, scopes, at)
-        }
+        (Shape::Vector(left), Shape::Vector(right)) => dimensions_conflict(left, right),
         (Shape::Matrix(left_rows, left_columns), Shape::Matrix(right_rows, right_columns)) => {
-            dimensions_conflict(left_rows, right_rows, inequalities, scopes, at)
-                || dimensions_conflict(left_columns, right_columns, inequalities, scopes, at)
+            dimensions_conflict(left_rows, right_rows)
+                || dimensions_conflict(left_columns, right_columns)
         }
         (Shape::Scalar, Shape::Scalar) => false,
         (Shape::Tensor(left), Shape::Tensor(right)) if left.len() == right.len() => left
             .iter()
             .zip(right)
-            .any(|(left, right)| dimensions_conflict(left, right, inequalities, scopes, at)),
+            .any(|(left, right)| dimensions_conflict(left, right)),
         _ => true,
     }
 }
 
-fn dimensions_conflict(
-    left: &str,
-    right: &str,
-    inequalities: &[Inequality],
-    scopes: &ScopeGraph,
-    at: u32,
-) -> bool {
+fn dimensions_conflict(left: &str, right: &str) -> bool {
     if left == right {
         return false;
     }
     if left.parse::<u64>().is_ok() && right.parse::<u64>().is_ok() {
         return true;
     }
-    inequalities
-        .iter()
-        .filter(|inequality| {
-            inequality.range.end_offset <= at && scopes.visible(inequality.scope_id, at)
-        })
-        .any(|inequality| {
-            (inequality.left == left && inequality.right == right)
-                || (inequality.left == right && inequality.right == left)
-        })
+    false
 }
 
 #[cfg(test)]

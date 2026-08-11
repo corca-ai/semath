@@ -22,11 +22,12 @@ use crate::prose::{LawActivationEvidence, definition_available_from};
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
-    CandidateFamily, Claim, ClaimCondition, ClaimId, ClaimObject, ClaimOperation, ClaimPredicate,
-    ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, DocumentSemanticFacts, EntityId,
-    EvidenceId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier,
-    Mention, MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex,
-    ResolutionStatus, SourceOccurrence, SourceOccurrenceId, occurrence_binding_key,
+    CandidateFamily, Claim, ClaimComparison, ClaimCondition, ClaimExtent, ClaimId, ClaimObject,
+    ClaimOperation, ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent,
+    DocumentSemanticFacts, EntityId, EvidenceId, EvidenceModality, EvidenceOrigin,
+    EvidencePolarity, EvidenceRecord, InferenceTier, Mention, MentionModality, NotationComponent,
+    OccurrenceKind, ProjectSemanticIndex, ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
+    occurrence_binding_key,
 };
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo, Evidence, Location,
@@ -969,11 +970,19 @@ fn lower_typed_observation_facts(
             );
         }
         for shape in observations.shapes.explicit_claims() {
+            let value = ClaimValue::Shape(claim_shape(
+                &shape.kind,
+                shape.dimensions,
+                definitions,
+                relation_entities,
+                occurrences,
+                &shape.evidence,
+            ));
             append(
                 &shape.symbol,
                 &shape.evidence,
                 ClaimPredicate::HasShape,
-                ClaimValue::Shape(claim_shape(&shape.kind, shape.dimensions)),
+                value,
                 "shape",
             );
         }
@@ -1121,30 +1130,24 @@ impl RelationLowerer<'_> {
                 operator,
                 left,
                 right,
-            } if operator.as_str() == "equals" => ClaimRelation::Equality {
-                left: self.lower_assignment_expression(left)?,
-                right: self.lower_assignment_expression(right)?,
-                canonical_digest: digest,
-            },
-            SemanticExprKind::Relation {
-                operator,
-                left,
-                right,
-            } if operator.as_str() == "not-equals" => ClaimRelation::Inequality {
-                left: self.lower_expression(left)?,
-                right: self.lower_expression(right)?,
-                left_label: crate::canonical::expression_name(left)
-                    .unwrap_or_else(|| render_canonical(left)),
-                right_label: crate::canonical::expression_name(right)
-                    .unwrap_or_else(|| render_canonical(right)),
-                canonical_digest: digest,
-            },
+            } if comparison_operator(operator.as_str()).is_some() => {
+                let comparison = comparison_operator(operator.as_str())?;
+                let left = self.lower_assignment_expression(left)?;
+                let right = self.lower_assignment_expression(right)?;
+                ClaimRelation::Comparison {
+                    operator: comparison,
+                    left,
+                    right,
+                    canonical_digest: digest,
+                }
+            }
             SemanticExprKind::Relation {
                 operator,
                 left,
                 right,
             } if matches!(operator.as_str(), "member-of" | "not-member-of") => {
                 let _ = self.lower_assignment_expression(left);
+                self.establish_extent_entities(right);
                 let _ = self.lower_expression(right);
                 return Some(result);
             }
@@ -1316,6 +1319,33 @@ impl RelationLowerer<'_> {
         Some(self.establish_implicit_entity(expression, occurrence))
     }
 
+    fn establish_extent_entities(&mut self, expression: &SemanticExpr) {
+        let SemanticExprKind::Power(_, dimensions) = &expression.kind else {
+            return;
+        };
+        self.establish_extent_terms(dimensions);
+    }
+
+    fn establish_extent_terms(&mut self, expression: &SemanticExpr) {
+        match &expression.kind {
+            SemanticExprKind::Cross(left, right) => {
+                self.establish_extent_terms(left);
+                self.establish_extent_terms(right);
+            }
+            SemanticExprKind::Product(items) => {
+                for item in items {
+                    self.establish_extent_terms(item);
+                }
+            }
+            SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. } => {
+                let _ = self.lower_assignment_expression(expression);
+            }
+            _ => {
+                let _ = self.lower_expression(expression);
+            }
+        }
+    }
+
     fn entity_for(&mut self, expression: &SemanticExpr) -> Option<EntityId> {
         if matches!(
             expression.kind,
@@ -1337,7 +1367,7 @@ impl RelationLowerer<'_> {
             expression.kind,
             SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
         ) && let Some(occurrence) = self.occurrence_for_range(&expression.range)
-            && let Some(entity) = self.implicit_entity_for_occurrence(occurrence)
+            && let Some(entity) = self.implicit_entity_for_expression(expression, occurrence)
         {
             return Some(entity);
         }
@@ -1367,7 +1397,7 @@ impl RelationLowerer<'_> {
         expression: &SemanticExpr,
         occurrence: SourceOccurrence,
     ) -> EntityId {
-        let identity = occurrence_binding_key(&occurrence);
+        let identity = canonical_expression_binding_key(expression, &occurrence);
         let key = (occurrence.scope_path.clone(), identity);
         let entity = self
             .implicit_entities_by_identity
@@ -1419,8 +1449,12 @@ impl RelationLowerer<'_> {
             })
     }
 
-    fn implicit_entity_for_occurrence(&self, occurrence: &SourceOccurrence) -> Option<EntityId> {
-        let identity = occurrence_binding_key(occurrence);
+    fn implicit_entity_for_expression(
+        &self,
+        expression: &SemanticExpr,
+        occurrence: &SourceOccurrence,
+    ) -> Option<EntityId> {
+        let identity = canonical_expression_binding_key(expression, occurrence);
         self.implicit_entities_by_identity
             .iter()
             .filter(|((scope_path, binding), entity)| {
@@ -1648,6 +1682,29 @@ impl RelationLowerer<'_> {
     }
 }
 
+fn canonical_expression_binding_key(
+    expression: &SemanticExpr,
+    occurrence: &SourceOccurrence,
+) -> String {
+    match &expression.kind {
+        SemanticExprKind::Symbol(name)
+            if !occurrence.notation.iter().any(|component| {
+                matches!(
+                    component,
+                    NotationComponent::Modifier { .. }
+                        | NotationComponent::Style { .. }
+                        | NotationComponent::NamedSurface { .. }
+                )
+            }) =>
+        {
+            format!("symbol:{name}")
+        }
+        SemanticExprKind::Symbol(_) => occurrence_binding_key(occurrence),
+        SemanticExprKind::Index { .. } => format!("index:{}", render_canonical(expression)),
+        _ => occurrence_binding_key(occurrence),
+    }
+}
+
 fn stable_text_digest(value: &str) -> String {
     let mut hash = 0xcbf29ce484222325_u64;
     for byte in value.as_bytes() {
@@ -1714,7 +1771,32 @@ fn closest_relation_entity(
         .map(|(entity, _)| entity.clone())
 }
 
-fn claim_shape(kind: &str, dimensions: Vec<String>) -> ClaimShape {
+fn claim_shape(
+    kind: &str,
+    dimensions: Vec<String>,
+    definitions: &BTreeMap<EntityId, DefinitionInfo>,
+    relation_entities: &[EntityId],
+    occurrences: &[SourceOccurrence],
+    evidence: &Evidence,
+) -> ClaimShape {
+    let dimensions = dimensions
+        .into_iter()
+        .map(|display| {
+            if let Ok(value) = display.parse::<u64>() {
+                return ClaimExtent::Known { value };
+            }
+            let entity =
+                closest_relation_entity(relation_entities, occurrences, &display, evidence)
+                    .or_else(|| {
+                        closest_definition(definitions, &display, evidence)
+                            .map(|(entity, _)| entity.clone())
+                    });
+            match entity {
+                Some(entity) => ClaimExtent::Symbolic { entity, display },
+                None => ClaimExtent::Unknown { display },
+            }
+        })
+        .collect();
     match kind {
         "scalar" => ClaimShape::Scalar,
         "vector" => ClaimShape::Vector(dimensions),
@@ -1722,6 +1804,18 @@ fn claim_shape(kind: &str, dimensions: Vec<String>) -> ClaimShape {
         "tensor" => ClaimShape::Tensor(dimensions),
         _ => ClaimShape::Unknown,
     }
+}
+
+fn comparison_operator(operator: &str) -> Option<ClaimComparison> {
+    Some(match operator {
+        "equals" => ClaimComparison::Equal,
+        "not-equals" => ClaimComparison::NotEqual,
+        "less-than" => ClaimComparison::LessThan,
+        "less-or-equal" => ClaimComparison::LessOrEqual,
+        "greater-than" => ClaimComparison::GreaterThan,
+        "greater-or-equal" => ClaimComparison::GreaterOrEqual,
+        _ => return None,
+    })
 }
 
 #[derive(Default)]
@@ -2681,6 +2775,7 @@ impl SemathEngine {
             range.start_offset,
             range.end_offset,
         ))?;
+        let occurrence = self.index.semantic.occurrence(occurrence_id)?;
         self.index
             .semantic
             .entities()
@@ -2697,7 +2792,7 @@ impl SemathEngine {
                 let occurrence_is_provenance = self
                     .index
                     .semantic
-                    .claims_for_entity(entity)
+                    .claims_for_entity_at(entity, occurrence)
                     .iter()
                     .filter(|claim| claim.tier == InferenceTier::Constraint)
                     .filter_map(|claim| self.index.semantic.evidence(&claim.evidence_id))
@@ -2707,7 +2802,7 @@ impl SemathEngine {
             .filter(|entity| {
                 self.index
                     .semantic
-                    .claims_for_entity(entity)
+                    .claims_for_entity_at(entity, occurrence)
                     .iter()
                     .any(|claim| claim.tier == InferenceTier::Constraint)
             })
@@ -2716,7 +2811,7 @@ impl SemathEngine {
                 let provenance = self
                     .index
                     .semantic
-                    .claims_for_entity(entity)
+                    .claims_for_entity_at(entity, occurrence)
                     .iter()
                     .filter(|claim| claim.tier == InferenceTier::Constraint)
                     .filter_map(|claim| self.index.semantic.evidence(&claim.evidence_id))
@@ -2757,15 +2852,31 @@ impl SemathEngine {
             offset,
             self.index.external_types.get(file_id),
         );
-        if let Some(entity) = &entity_id {
+        let semantic_occurrence = symbol.and_then(|(_, occurrence)| {
+            self.index
+                .occurrences_by_range
+                .get(&(
+                    file_id.to_owned(),
+                    occurrence.start_offset,
+                    occurrence.end_offset,
+                ))
+                .and_then(|id| self.index.semantic.occurrence(id))
+        });
+        if let (Some(entity), Some(semantic_occurrence)) = (&entity_id, semantic_occurrence) {
             let context_symbol = context.symbol.clone();
             context.quantities.extend(derived_quantity_infos(
                 &self.index.semantic,
                 entity,
                 context_symbol.as_deref(),
+                semantic_occurrence,
             ));
             normalize_quantities(&mut context.quantities);
-            append_index_claims(&self.index.semantic, entity, &mut context);
+            append_index_claims(
+                &self.index.semantic,
+                entity,
+                semantic_occurrence,
+                &mut context,
+            );
         }
         if let Some((_, occurrence)) = symbol
             && let Some(occurrence_id) = self.index.occurrences_by_range.get(&(
@@ -2950,11 +3061,13 @@ impl SemathEngine {
                 &self.index.semantic,
                 entity,
                 &semantic_occurrence.surface,
+                semantic_occurrence,
             ));
             quantities.extend(derived_quantity_infos(
                 &self.index.semantic,
                 entity,
                 Some(&semantic_occurrence.surface),
+                semantic_occurrence,
             ));
         }
         shapes.sort_by(|left, right| {
@@ -3334,8 +3447,9 @@ fn derived_quantity_infos(
     index: &ProjectSemanticIndex,
     entity: &EntityId,
     symbol: Option<&str>,
+    occurrence: &SourceOccurrence,
 ) -> Vec<QuantityInfo> {
-    let claims = index.claims_for_entity(entity);
+    let claims = index.claims_for_entity_at(entity, occurrence);
     let quantity_kind_id = claims.iter().find_map(|claim| match &claim.object {
         ClaimObject::Value(ClaimValue::QuantityKind(value))
             if claim.predicate == ClaimPredicate::HasQuantity =>
@@ -3388,9 +3502,10 @@ fn derived_shape_infos(
     index: &ProjectSemanticIndex,
     entity: &EntityId,
     symbol: &str,
+    occurrence: &SourceOccurrence,
 ) -> Vec<ShapeInfo> {
     index
-        .claims_for_entity(entity)
+        .claims_for_entity_at(entity, occurrence)
         .into_iter()
         .filter(|claim| claim.tier == InferenceTier::Constraint)
         .filter_map(|claim| {
@@ -3401,18 +3516,39 @@ fn derived_shape_infos(
                 ClaimShape::Scalar => ("scalar", Vec::new(), "Scalar".to_owned()),
                 ClaimShape::Vector(dimensions) => (
                     "vector",
-                    dimensions.clone(),
-                    format!("Vector[{}]", dimensions.join(" × ")),
+                    dimensions.iter().map(ClaimExtent::display).collect(),
+                    format!(
+                        "Vector[{}]",
+                        dimensions
+                            .iter()
+                            .map(ClaimExtent::display)
+                            .collect::<Vec<_>>()
+                            .join(" × ")
+                    ),
                 ),
                 ClaimShape::Matrix(dimensions) => (
                     "matrix",
-                    dimensions.clone(),
-                    format!("Matrix[{}]", dimensions.join(" × ")),
+                    dimensions.iter().map(ClaimExtent::display).collect(),
+                    format!(
+                        "Matrix[{}]",
+                        dimensions
+                            .iter()
+                            .map(ClaimExtent::display)
+                            .collect::<Vec<_>>()
+                            .join(" × ")
+                    ),
                 ),
                 ClaimShape::Tensor(dimensions) => (
                     "tensor",
-                    dimensions.clone(),
-                    format!("Tensor[{}]", dimensions.join(" × ")),
+                    dimensions.iter().map(ClaimExtent::display).collect(),
+                    format!(
+                        "Tensor[{}]",
+                        dimensions
+                            .iter()
+                            .map(ClaimExtent::display)
+                            .collect::<Vec<_>>()
+                            .join(" × ")
+                    ),
                 ),
                 ClaimShape::Function { .. } | ClaimShape::Unknown => return None,
             };
@@ -3497,10 +3633,11 @@ fn semantic_evidence(
 fn append_index_claims(
     index: &ProjectSemanticIndex,
     entity: &EntityId,
+    occurrence: &SourceOccurrence,
     context: &mut SemanticContextInfo,
 ) {
     let mut claims = index
-        .claims_for_entity(entity)
+        .claims_for_entity_at(entity, occurrence)
         .into_iter()
         .filter(|claim| claim.tier == InferenceTier::Constraint)
         .filter_map(|claim| {
@@ -3571,9 +3708,30 @@ fn claim_value_display(value: &ClaimValue) -> Option<String> {
         | ClaimValue::Text(value) => Some(value.clone()),
         ClaimValue::Shape(shape) => Some(match shape {
             ClaimShape::Scalar => "Scalar".into(),
-            ClaimShape::Vector(dimensions) => format!("Vector[{}]", dimensions.join(" × ")),
-            ClaimShape::Matrix(dimensions) => format!("Matrix[{}]", dimensions.join(" × ")),
-            ClaimShape::Tensor(dimensions) => format!("Tensor[{}]", dimensions.join(" × ")),
+            ClaimShape::Vector(dimensions) => format!(
+                "Vector[{}]",
+                dimensions
+                    .iter()
+                    .map(ClaimExtent::display)
+                    .collect::<Vec<_>>()
+                    .join(" × ")
+            ),
+            ClaimShape::Matrix(dimensions) => format!(
+                "Matrix[{}]",
+                dimensions
+                    .iter()
+                    .map(ClaimExtent::display)
+                    .collect::<Vec<_>>()
+                    .join(" × ")
+            ),
+            ClaimShape::Tensor(dimensions) => format!(
+                "Tensor[{}]",
+                dimensions
+                    .iter()
+                    .map(ClaimExtent::display)
+                    .collect::<Vec<_>>()
+                    .join(" × ")
+            ),
             ClaimShape::Function { domain, codomain } => format!(
                 "Function[{} → {}]",
                 claim_value_display(&ClaimValue::Shape(*domain.clone()))?,

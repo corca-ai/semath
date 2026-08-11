@@ -137,7 +137,7 @@ remain uncertainty. Equation metadata such as labels and tags is excluded from
 the relation while its source range remains available for discourse attachment.
 These gaps are never filled in by guesswork.
 
-Canonical relations lower into closed typed equality, sum, product, quotient,
+Canonical relations lower into closed typed comparison, sum, product, quotient,
 operation, application, derivative, and integral claims. A pure capped worklist
 plans equality compatibility, shape, function, physical-dimension, unit,
 quantity, and guard consequences. Its adjacency maps are transient: accepted
@@ -146,6 +146,12 @@ with stable IDs and exact source parents. Replacing source facts discards and
 recomputes that closure atomically. Shape and quantity observation code does not
 parse presentation TeX or keep a parallel propagation graph. Structural index
 families come from canonical `Index` nodes, never from splitting symbol strings.
+
+Equality, inequality, and ordered comparisons share one closed operator algebra
+over scoped `EntityId` operands. Symbolic shape extents likewise retain their
+entity identity; source spelling is display metadata only. A comparison may
+justify a result only when its evidence precedes the operation and its scope is
+visible there, so same-spelling dimensions in sibling scopes never become proof.
 
 Constraint conflicts require incompatible established values or a demonstrably
 invalid typed operation. Missing operands, unresolved symbolic extents, and
