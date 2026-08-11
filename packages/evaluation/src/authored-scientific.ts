@@ -359,7 +359,7 @@ export function validateAuthoredScientificTranche(
   }
   for (const fixture of [development, holdout]) {
     for (const probe of fixture.probes) {
-      const scenario = scenarioFor(fixture, probe);
+      const scenario = authoredScenarioFor(fixture, probe);
       for (const relation of probe.expected.relations) {
         if (!knownLaws.has(relation.relationId)) {
           throw new Error(`${probe.id}: unknown expected relation ${relation.relationId}`);
@@ -456,10 +456,6 @@ export function scoreAuthoredScientificFixture(
         observed.decision === "conflicting" && probe.expected.decision !== "conflicting";
       caseMissedCoverage = !caseFalseEstablishment && !caseFalseConflict;
     }
-    if (probe.expected.symbol && observed.symbol !== probe.expected.symbol) {
-      caseFailures.push(`symbol ${observed.symbol ?? "null"}; expected ${probe.expected.symbol}`);
-      caseNavigation = true;
-    }
     if (observed.proofGrounded !== probe.expected.proofGrounded) {
       caseFailures.push(
         `proof grounding ${observed.proofGrounded}; expected ${probe.expected.proofGrounded}`,
@@ -468,7 +464,10 @@ export function scoreAuthoredScientificFixture(
       else caseMissedCoverage = true;
     }
     for (const expected of probe.expected.relations) {
-      const expectedAnchor = resolveAnchor(snapshotFor(scenarioFor(fixture, probe), probe), expected.anchor);
+      const expectedAnchor = resolveAuthoredAnchor(
+        authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe),
+        expected.anchor,
+      );
       const relation = observed.relations.find(
         (item) =>
           item.relationId === expected.relationId &&
@@ -495,58 +494,15 @@ export function scoreAuthoredScientificFixture(
         caseFalseEstablishment = true;
       }
     }
-    const scenario = scenarioFor(fixture, probe);
-    const snapshot = snapshotFor(scenario, probe);
-    caseNavigation =
-      checkLocationExpectation(
-        "definition",
-        probe.expected.navigation.definition,
-        observed.definitions,
-        snapshot,
-        caseFailures,
-      ) || caseNavigation;
-    caseNavigation =
-      checkLocationExpectation(
-        "references",
-        probe.expected.navigation.references,
-        observed.references,
-        snapshot,
-        caseFailures,
-      ) || caseNavigation;
-    const renameLocations = observed.renameEdits.map((edit) => ({
-      fileId: edit.fileId,
-      path: edit.path,
-      range: edit.range,
-    }));
-    caseNavigation =
-      checkLocationExpectation(
-        "rename",
-        probe.expected.navigation.rename,
-        renameLocations,
-        snapshot,
-        caseFailures,
-      ) || caseNavigation;
-    const preparation = probe.expected.navigation.prepareRename;
-    const preparationAvailable = Boolean(observed.prepareRename.range);
-    if (preparationAvailable !== (preparation.status === "available")) {
-      caseFailures.push(`prepareRename availability differs`);
-      caseNavigation = true;
-    }
-    if (
-      preparation.range &&
-      (!observed.prepareRename.range ||
-        !sameRange(observed.prepareRename.range, resolveAnchor(snapshot, preparation.range).range))
-    ) {
-      caseFailures.push("prepareRename range differs");
-      caseNavigation = true;
-    }
-    if (
-      preparation.placeholder !== undefined &&
-      observed.prepareRename.placeholder !== preparation.placeholder
-    ) {
-      caseFailures.push("prepareRename placeholder differs");
-      caseNavigation = true;
-    }
+    const scenario = authoredScenarioFor(fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    const identityFailures = authoredProbeIdentityFailures(
+      fixture,
+      probe,
+      observed,
+    );
+    caseFailures.push(...identityFailures);
+    caseNavigation = identityFailures.length > 0;
     const problems = observed.diagnostics.filter(
       (item) => item.severity === "error" || item.severity === "warning",
     );
@@ -557,7 +513,7 @@ export function scoreAuthoredScientificFixture(
       caseFalseConflict = true;
     }
     for (const expected of probe.expected.diagnostics.required) {
-      const anchor = resolveAnchor(snapshot, expected.anchor);
+      const anchor = resolveAuthoredAnchor(snapshot, expected.anchor);
       if (
         !problems.some(
           (problem) =>
@@ -1046,8 +1002,8 @@ function validateProbe(
   probe: AuthoredScientificProbe,
   scenario: AuthoredScientificScenario,
 ): void {
-  const snapshot = snapshotFor(scenario, probe);
-  const cursor = resolveAnchor(snapshot, probe.cursor);
+  const snapshot = authoredSnapshotFor(scenario, probe);
+  const cursor = resolveAuthoredAnchor(snapshot, probe.cursor);
   const cursorOffset =
     probe.cursor.offset === undefined
       ? probe.cursor.edge === "after"
@@ -1066,17 +1022,20 @@ function validateProbe(
     probe.expected.navigation.rename,
   ]) {
     for (const anchor of [...location.required, ...location.excluded]) {
-      resolveAnchor(snapshot, anchor);
+      resolveAuthoredAnchor(snapshot, anchor);
     }
   }
   if (probe.expected.navigation.prepareRename.range) {
-    resolveAnchor(snapshot, probe.expected.navigation.prepareRename.range);
+    resolveAuthoredAnchor(
+      snapshot,
+      probe.expected.navigation.prepareRename.range,
+    );
   }
   for (const diagnostic of probe.expected.diagnostics.required) {
-    resolveAnchor(snapshot, diagnostic.anchor);
+    resolveAuthoredAnchor(snapshot, diagnostic.anchor);
   }
   for (const relation of probe.expected.relations) {
-    const anchor = resolveAnchor(snapshot, relation.anchor);
+    const anchor = resolveAuthoredAnchor(snapshot, relation.anchor);
     if (
       anchor.fileId === cursor.fileId &&
       anchor.range.startOffset > cursorOffset
@@ -1142,7 +1101,7 @@ function normalizedProject(scenario: AuthoredScientificScenario): string {
     .join("\n");
 }
 
-function scenarioFor(
+export function authoredScenarioFor(
   fixture: AuthoredScientificFixture,
   probe: AuthoredScientificProbe,
 ): AuthoredScientificScenario {
@@ -1151,7 +1110,7 @@ function scenarioFor(
   return scenario;
 }
 
-function snapshotFor(
+export function authoredSnapshotFor(
   scenario: AuthoredScientificScenario,
   probe: AuthoredScientificProbe,
 ): AuthoredScientificSnapshot {
@@ -1160,7 +1119,7 @@ function snapshotFor(
   return snapshot;
 }
 
-function resolveAnchor(
+export function resolveAuthoredAnchor(
   snapshot: AuthoredScientificSnapshot,
   anchor: AuthoredSourceAnchor,
 ): { readonly fileId: string; readonly path: string; readonly range: SourceRange } {
@@ -1193,6 +1152,73 @@ function resolveAnchor(
   };
 }
 
+export function authoredProbeIdentityMatches(
+  fixture: AuthoredScientificFixture,
+  probe: AuthoredScientificProbe,
+  observation: AuthoredScientificObservation,
+): boolean {
+  return authoredProbeIdentityFailures(fixture, probe, observation).length === 0;
+}
+
+function authoredProbeIdentityFailures(
+  fixture: AuthoredScientificFixture,
+  probe: AuthoredScientificProbe,
+  observation: AuthoredScientificObservation,
+): string[] {
+  const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
+  const failures: string[] = [];
+  if (probe.expected.symbol && observation.symbol !== probe.expected.symbol) {
+    failures.push(
+      `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
+    );
+  }
+  checkLocationExpectation(
+    "definition",
+    probe.expected.navigation.definition,
+    observation.definitions,
+    snapshot,
+    failures,
+  );
+  checkLocationExpectation(
+    "references",
+    probe.expected.navigation.references,
+    observation.references,
+    snapshot,
+    failures,
+  );
+  checkLocationExpectation(
+    "rename",
+    probe.expected.navigation.rename,
+    observation.renameEdits,
+    snapshot,
+    failures,
+  );
+  const preparation = probe.expected.navigation.prepareRename;
+  if (
+    Boolean(observation.prepareRename.range) !==
+    (preparation.status === "available")
+  ) {
+    failures.push("prepareRename availability differs");
+  }
+  if (
+    preparation.range &&
+    (!observation.prepareRename.range ||
+      !sameRange(
+        observation.prepareRename.range,
+        resolveAuthoredAnchor(snapshot, preparation.range).range,
+      ))
+  ) {
+    failures.push("prepareRename range differs");
+  }
+  if (
+    preparation.placeholder !== undefined &&
+    observation.prepareRename.placeholder !== preparation.placeholder
+  ) {
+    failures.push("prepareRename placeholder differs");
+  }
+  return failures;
+}
+
 function checkLocationExpectation(
   name: string,
   expected: AuthoredLocationExpectation,
@@ -1210,7 +1236,7 @@ function checkLocationExpectation(
     failed = true;
   }
   for (const anchor of expected.required) {
-    const resolved = resolveAnchor(snapshot, anchor);
+    const resolved = resolveAuthoredAnchor(snapshot, anchor);
     if (
       !actual.some(
         (item) =>
@@ -1224,7 +1250,7 @@ function checkLocationExpectation(
     }
   }
   for (const anchor of expected.excluded) {
-    const resolved = resolveAnchor(snapshot, anchor);
+    const resolved = resolveAuthoredAnchor(snapshot, anchor);
     if (
       actual.some(
         (item) =>
