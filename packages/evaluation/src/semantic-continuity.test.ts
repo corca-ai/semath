@@ -48,7 +48,7 @@ function fixtureValue(): unknown {
     ].flatMap((family) =>
       Array.from({ length: 8 }, (_, index) => ({
         baseline: { decision: "partial", problems: 0 },
-        cursor: { fileId: "main", needle: "x" },
+        cursor: { fileId: "main", needle: "x", offset: 0 },
         documents: [
           {
             content: `${family} ${index} $x$`,

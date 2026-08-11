@@ -33,13 +33,14 @@ export function adaptNonLatexDocument(input: {
 }): ProjectDocument {
   return {
     ...input,
+    blocks: [],
     declarations: [],
     includes: [],
     macros: [],
     mathRoots: [],
     nodes: [],
     proseAnnotations: [],
-    schemaVersion: 7,
+    schemaVersion: 8,
     scopes: [
       {
         kind: "document",

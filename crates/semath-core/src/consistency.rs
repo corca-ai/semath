@@ -113,6 +113,10 @@ pub(crate) struct RoleObservations {
 }
 
 impl RoleObservations {
+    pub fn all(&self) -> Vec<RoleInfo> {
+        self.roles.iter().map(|claim| claim.info.clone()).collect()
+    }
+
     pub fn exported(&self) -> Vec<RoleInfo> {
         self.roles
             .iter()
@@ -573,11 +577,12 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 7,
+            schema_version: 8,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
             scopes: Vec::new(),
+            blocks: Vec::new(),
             declarations: Vec::new(),
             math_regions: regions.clone(),
             macros: Vec::new(),

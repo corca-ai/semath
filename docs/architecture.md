@@ -23,7 +23,8 @@ present and act on the result.
 
 ## Structural boundary
 
-Semath accepts wasmtex syntax contract v7. Math regions, neutral document-field and citation
+Semath accepts wasmtex syntax contract v8. Math regions, neutral source-order blocks,
+document-field and citation
 annotations, includes, project
 macros, call-site ranges, expansion provenance, and ambiguity are supplied once
 at this boundary. Semath does not rescan TeX to construct a competing syntax
@@ -50,6 +51,20 @@ Typed claims retain explicit polarity, modality, source provenance, extraction
 rule version, and strictly increasing derivation tiers. Alias resolution is
 scope- and source-order-aware and retracts with its evidence; strings are never
 permanently unioned.
+
+The syntax projection has three independent consumers. `ScopeGraph` owns
+visibility lifetimes and structural shadowing; a bounded attachment graph owns
+which neighboring blocks may exchange discourse evidence; scoped domain
+hypotheses only order candidates. A paragraph alone is not a lifetime boundary,
+and none of these projections may substitute for another. Repeated relational
+paragraphs form neutral equation clusters without changing wasmtex's syntax
+contract.
+
+Claims use a closed value algebra for concepts, roles, types, shapes,
+dimensions, units, quantity kinds, conditions, relations, and bounded literals.
+Predicate/value compatibility is validated at the index boundary. Presentation
+strings are projections of these values and are never parsed back into semantic
+facts.
 
 Structural ambiguity is represented as bounded candidate claims attached to a
 real source occurrence. Candidate construction reads only the wasmtex CST and

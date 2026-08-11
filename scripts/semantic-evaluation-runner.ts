@@ -15,6 +15,7 @@ export interface SemanticEvaluationCase {
     readonly edge?: "after" | "before";
     readonly fileId: string;
     readonly needle: string;
+    readonly offset?: number;
   };
   readonly documents: readonly CorpusDocument[];
   readonly id: string;
@@ -65,9 +66,9 @@ export function runSemanticEvaluation(
         fileId: prefix + item.cursor.fileId,
         kind: "semanticView",
         offset:
-          item.cursor.edge === "after"
-            ? first + item.cursor.needle.length
-            : first,
+          first +
+          (item.cursor.offset ?? 0) +
+          (item.cursor.edge === "after" ? 1 : 0),
       },
     });
   }

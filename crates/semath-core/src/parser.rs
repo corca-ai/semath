@@ -1005,7 +1005,7 @@ mod tests {
     #[test]
     fn v7_named_operator_is_one_occurrence_and_incomplete_nodes_degrade_locally() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 7,
+            "schemaVersion": 8,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -1061,7 +1061,7 @@ mod tests {
     #[test]
     fn v5_rejects_a_corrupt_arena_root() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 7, "proseAnnotations": [], "fileId": "main", "path": "main.tex", "language": "latex",
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex", "language": "latex",
             "content": "$x$", "documentVersion": 1, "nodes": [],
             "mathRoots": [{"node": 4, "delimiter": "$", "fullRange": {"startOffset": 0, "endOffset": 3}, "contentRange": {"startOffset": 1, "endOffset": 2}, "state": "complete"}],
             "visibleProse": [],

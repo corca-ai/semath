@@ -17,7 +17,7 @@ describe("wasmtex adapter", () => {
         language: "latex",
         syntax: { ...syntax, schemaVersion: 3 } as unknown as typeof syntax,
       }),
-    ).toThrow("expected 7");
+    ).toThrow("expected 8");
   });
 
   test("keeps wasmtex UTF-16 ranges without translating them", () => {
