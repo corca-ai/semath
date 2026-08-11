@@ -137,6 +137,21 @@ remain uncertainty. Equation metadata such as labels and tags is excluded from
 the relation while its source range remains available for discourse attachment.
 These gaps are never filled in by guesswork.
 
+Canonical relations lower into closed typed equality, sum, product, quotient,
+operation, application, derivative, and integral claims. A pure capped worklist
+plans equality compatibility, shape, function, physical-dimension, unit,
+quantity, and guard consequences. Its adjacency maps are transient: accepted
+results become ordinary derived claims and evidence in `ProjectSemanticIndex`,
+with stable IDs and exact source parents. Replacing source facts discards and
+recomputes that closure atomically. Shape and quantity observation code does not
+parse presentation TeX or keep a parallel propagation graph. Structural index
+families come from canonical `Index` nodes, never from splitting symbol strings.
+
+Constraint conflicts require incompatible established values or a demonstrably
+invalid typed operation. Missing operands, unresolved symbolic extents, and
+work limits remain partial evidence rather than Problems. Work and truncation
+counters are part of protocol 12 so hosts can enforce performance budgets.
+
 Transparent macro structure supplied by wasmtex may contribute meaning in both
 formulas and prose declarations. Generated nodes inherit only the real call
 and definition provenance and are never editable locations. Opaque generated
@@ -247,7 +262,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 11 exposes selection, `semanticView`, definition, references, rename,
+Protocol 12 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is

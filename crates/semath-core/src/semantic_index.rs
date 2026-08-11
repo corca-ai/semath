@@ -3,6 +3,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde::{Deserialize, Serialize};
 
 use crate::SourceRange;
+use crate::constraint::{ConstraintInputClaim, PlannedConflict, plan_constraint_derivations};
 
 const MAX_DOCUMENT_OCCURRENCES: usize = 100_000;
 const MAX_DOCUMENT_CLAIMS: usize = 50_000;
@@ -221,11 +222,141 @@ pub enum ClaimCondition {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "camelCase")]
-pub struct ClaimRelation {
-    pub operator: String,
-    pub operands: Vec<EntityId>,
-    pub canonical_digest: String,
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub enum ClaimRelation {
+    Equality {
+        left: EntityId,
+        right: EntityId,
+        canonical_digest: String,
+    },
+    Sum {
+        result: EntityId,
+        terms: Vec<EntityId>,
+        canonical_digest: String,
+    },
+    Product {
+        result: EntityId,
+        factors: Vec<EntityId>,
+        canonical_digest: String,
+    },
+    Quotient {
+        result: EntityId,
+        numerator: EntityId,
+        denominator: EntityId,
+        canonical_digest: String,
+    },
+    Operation {
+        result: EntityId,
+        operator: ClaimOperation,
+        operands: Vec<EntityId>,
+        canonical_digest: String,
+    },
+    Application {
+        result: EntityId,
+        function: EntityId,
+        arguments: Vec<EntityId>,
+        canonical_digest: String,
+    },
+    Derivative {
+        result: EntityId,
+        operand: EntityId,
+        variable: Option<EntityId>,
+        order: u8,
+        canonical_digest: String,
+    },
+    Integral {
+        result: EntityId,
+        integrand: EntityId,
+        variable: Option<EntityId>,
+        canonical_digest: String,
+    },
+}
+
+impl ClaimRelation {
+    fn canonical_digest(&self) -> &str {
+        match self {
+            Self::Equality {
+                canonical_digest, ..
+            }
+            | Self::Sum {
+                canonical_digest, ..
+            }
+            | Self::Product {
+                canonical_digest, ..
+            }
+            | Self::Quotient {
+                canonical_digest, ..
+            }
+            | Self::Operation {
+                canonical_digest, ..
+            }
+            | Self::Application {
+                canonical_digest, ..
+            }
+            | Self::Derivative {
+                canonical_digest, ..
+            }
+            | Self::Integral {
+                canonical_digest, ..
+            } => canonical_digest,
+        }
+    }
+
+    pub(crate) fn entities(&self) -> Vec<&EntityId> {
+        match self {
+            Self::Equality { left, right, .. } => vec![left, right],
+            Self::Sum { result, terms, .. } => std::iter::once(result).chain(terms).collect(),
+            Self::Product {
+                result, factors, ..
+            } => std::iter::once(result).chain(factors).collect(),
+            Self::Quotient {
+                result,
+                numerator,
+                denominator,
+                ..
+            } => vec![result, numerator, denominator],
+            Self::Operation {
+                result, operands, ..
+            } => std::iter::once(result).chain(operands).collect(),
+            Self::Application {
+                result,
+                function,
+                arguments,
+                ..
+            } => std::iter::once(result)
+                .chain(std::iter::once(function))
+                .chain(arguments)
+                .collect(),
+            Self::Derivative {
+                result,
+                operand,
+                variable,
+                ..
+            } => std::iter::once(result)
+                .chain(std::iter::once(operand))
+                .chain(variable)
+                .collect(),
+            Self::Integral {
+                result,
+                integrand,
+                variable,
+                ..
+            } => std::iter::once(result)
+                .chain(std::iter::once(integrand))
+                .chain(variable)
+                .collect(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "kebab-case")]
+pub enum ClaimOperation {
+    Negate,
+    Transpose,
+    Dot,
+    Cross,
+    Power,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -239,7 +370,7 @@ pub enum ClaimValue {
     Unit(String),
     QuantityKind(String),
     Condition(ClaimCondition),
-    Relation(ClaimRelation),
+    Relation(Box<ClaimRelation>),
     Scalar(String),
     Text(String),
 }
@@ -316,6 +447,9 @@ pub struct SemanticIndexStats {
     pub dependency_edges: u32,
     pub invalidated_claims: u32,
     pub candidates: u32,
+    pub constraint_work: u32,
+    pub derived_claims: u32,
+    pub constraint_truncated: bool,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -331,6 +465,9 @@ pub struct ProjectSemanticIndex {
     binding_claims: BTreeMap<String, BTreeSet<ClaimId>>,
     claims_by_entity: BTreeMap<EntityId, BTreeSet<ClaimId>>,
     invalidated_claims: u32,
+    constraint_work: u32,
+    constraint_truncated: bool,
+    constraint_conflicts: Vec<PlannedConflict>,
 }
 
 impl ProjectSemanticIndex {
@@ -348,6 +485,7 @@ impl ProjectSemanticIndex {
             next.validate_and_insert(facts)?;
         }
         next.rebuild_indexes();
+        next.recompute_constraints()?;
         *self = next;
         Ok(())
     }
@@ -355,6 +493,8 @@ impl ProjectSemanticIndex {
     pub fn remove_document(&mut self, file_id: &str) {
         self.retract_document(file_id);
         self.rebuild_indexes();
+        self.recompute_constraints()
+            .expect("existing semantic facts must produce valid constraints");
     }
 
     pub fn resolve(&self, occurrence_id: &SourceOccurrenceId) -> Resolution {
@@ -469,6 +609,13 @@ impl ProjectSemanticIndex {
             dependency_edges: self.dependents.values().map(BTreeSet::len).sum::<usize>() as u32,
             invalidated_claims: self.invalidated_claims,
             candidates: self.candidates.values().map(Vec::len).sum::<usize>() as u32,
+            constraint_work: self.constraint_work,
+            derived_claims: self
+                .evidence
+                .values()
+                .filter(|evidence| evidence.rule_id.starts_with("semath/constraint/"))
+                .count() as u32,
+            constraint_truncated: self.constraint_truncated,
         }
     }
 
@@ -486,6 +633,22 @@ impl ProjectSemanticIndex {
 
     pub fn evidence(&self, id: &EvidenceId) -> Option<&EvidenceRecord> {
         self.evidence.get(id)
+    }
+
+    pub fn claims_for_entity(&self, entity: &EntityId) -> Vec<&Claim> {
+        self.claims_by_entity
+            .get(entity)
+            .into_iter()
+            .flatten()
+            .filter_map(|claim_id| self.claims.get(claim_id))
+            .collect()
+    }
+
+    pub(crate) fn constraint_conflicts_for(&self, file_id: &str) -> Vec<&PlannedConflict> {
+        self.constraint_conflicts
+            .iter()
+            .filter(|conflict| conflict.subject.anchor.file_id == file_id)
+            .collect()
     }
 
     pub fn candidates_for(
@@ -677,7 +840,15 @@ impl ProjectSemanticIndex {
             if evidence.scope_path != source.scope_path
                 || evidence.available_after < source.availability_order
             {
-                return Err("evidence scope or availability precedes its source".to_owned());
+                return Err(format!(
+                    "evidence {} scope or availability precedes source {:?}: evidence {:?}/{} source {:?}/{}",
+                    evidence.id.0,
+                    evidence.source,
+                    evidence.scope_path,
+                    evidence.available_after,
+                    source.scope_path,
+                    source.availability_order
+                ));
             }
             if evidence.rule_id.trim().is_empty() || evidence.rule_version == 0 {
                 return Err("evidence extraction rule must be versioned".to_owned());
@@ -707,6 +878,14 @@ impl ProjectSemanticIndex {
                 && !known_entities.contains(entity)
             {
                 return Err("claim object is not a known entity".to_owned());
+            }
+            if let ClaimObject::Value(ClaimValue::Relation(relation)) = &claim.object
+                && relation
+                    .entities()
+                    .iter()
+                    .any(|entity| !known_entities.contains(*entity))
+            {
+                return Err("relation references an unknown entity".to_owned());
             }
             validate_claim_object(claim)?;
             if evidence.origin == EvidenceOrigin::Explicit
@@ -876,6 +1055,91 @@ impl ProjectSemanticIndex {
             }
         }
     }
+
+    fn recompute_constraints(&mut self) -> Result<(), String> {
+        let generated_evidence = self
+            .evidence
+            .iter()
+            .filter(|(_, evidence)| evidence.rule_id.starts_with("semath/constraint/"))
+            .map(|(id, _)| id.clone())
+            .collect::<BTreeSet<_>>();
+        self.claims
+            .retain(|_, claim| !generated_evidence.contains(&claim.evidence_id));
+        self.evidence
+            .retain(|id, _| !generated_evidence.contains(id));
+        self.rebuild_indexes();
+
+        let input = self
+            .claims
+            .values()
+            .filter_map(|claim| {
+                Some(ConstraintInputClaim {
+                    claim: claim.clone(),
+                    evidence: self.evidence.get(&claim.evidence_id)?.clone(),
+                })
+            })
+            .collect::<Vec<_>>();
+        let plan = plan_constraint_derivations(&input);
+        self.constraint_work = plan.work_items;
+        self.constraint_truncated = plan.truncated;
+        self.constraint_conflicts = plan.conflicts;
+        for derivation in plan.derivations {
+            let digest = constraint_digest(
+                &derivation.subject,
+                &derivation.predicate,
+                &derivation.value,
+            );
+            let evidence_id = EvidenceId(format!("semath:constraint:evidence:{digest}"));
+            let claim_id = ClaimId(format!("semath:constraint:claim:{digest}"));
+            if self.claims.contains_key(&claim_id) || self.evidence.contains_key(&evidence_id) {
+                return Err("stable constraint identity collision".into());
+            }
+            validate_claim_value(&derivation.value)?;
+            if derivation
+                .parent_claims
+                .iter()
+                .any(|parent| !self.claims.contains_key(parent))
+            {
+                return Err("constraint proof parent is missing".into());
+            }
+            let evidence = EvidenceRecord {
+                id: evidence_id.clone(),
+                source: derivation.subject.anchor.clone(),
+                scope_path: derivation.subject.scope_path.clone(),
+                available_after: derivation.available_after,
+                polarity: EvidencePolarity::Positive,
+                modality: EvidenceModality::Asserted,
+                origin: EvidenceOrigin::Derived,
+                provenance: derivation.provenance,
+                parent_claims: derivation.parent_claims,
+                rule_id: derivation.rule_id,
+                rule_version: 1,
+            };
+            let claim = Claim {
+                id: claim_id.clone(),
+                subject: derivation.subject,
+                predicate: derivation.predicate,
+                object: ClaimObject::Value(derivation.value),
+                evidence_id: evidence_id.clone(),
+                tier: InferenceTier::Constraint,
+                derivation_depth: 1,
+            };
+            self.evidence.insert(evidence_id, evidence);
+            self.claims.insert(claim_id, claim);
+        }
+        self.rebuild_indexes();
+        Ok(())
+    }
+}
+
+fn constraint_digest(subject: &EntityId, predicate: &ClaimPredicate, value: &ClaimValue) -> String {
+    let identity = format!("{subject:?}|{predicate:?}|{value:?}");
+    let mut hash = 0xcbf2_9ce4_8422_2325u64;
+    for byte in identity.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100_0000_01b3);
+    }
+    format!("{hash:016x}")
 }
 
 fn candidate_claim_matches(candidate: &SemanticCandidateClaim, claim: &Claim) -> bool {
@@ -971,9 +1235,9 @@ fn validate_claim_value(value: &ClaimValue) -> Result<(), String> {
         | ClaimValue::Unit(value)
         | ClaimValue::QuantityKind(value)
         | ClaimValue::Scalar(value)
-        | ClaimValue::Text(value) => Some(value),
-        ClaimValue::Condition(ClaimCondition::Named(value)) => Some(value),
-        ClaimValue::Relation(value) => Some(&value.canonical_digest),
+        | ClaimValue::Text(value) => Some(value.as_str()),
+        ClaimValue::Condition(ClaimCondition::Named(value)) => Some(value.as_str()),
+        ClaimValue::Relation(value) => Some(value.canonical_digest()),
         _ => None,
     };
     if text.is_some_and(|value| value.trim().is_empty() || value.len() > MAX_TEXT_LENGTH) {
@@ -990,9 +1254,7 @@ fn validate_claim_value(value: &ClaimValue) -> Result<(), String> {
         return Err("dimension claim is invalid or exceeds its bound".to_owned());
     }
     if let ClaimValue::Relation(relation) = value
-        && (relation.operator.trim().is_empty()
-            || relation.operands.len() > 32
-            || relation.canonical_digest.trim().is_empty())
+        && (relation.entities().len() > 32 || relation.canonical_digest().trim().is_empty())
     {
         return Err("relation claim is invalid or exceeds its bound".to_owned());
     }

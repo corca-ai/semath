@@ -2859,7 +2859,7 @@ mod tests {
         let parsed = parse_regions(source, &regions);
         let canonical = canonical_expressions(&document, &parsed);
         let prose = observe_prose(&document, &parsed, &canonical);
-        let shapes = observe_shapes(&document, &parsed, &prose.shapes);
+        let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let external = ExternalTypeEnvironment::default();
@@ -2937,7 +2937,7 @@ mod tests {
         let parsed = parse_regions(source, &regions);
         let canonical = canonical_expressions(&document, &parsed);
         let prose = observe_prose(&document, &parsed, &canonical);
-        let shapes = observe_shapes(&document, &parsed, &prose.shapes);
+        let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let external = ExternalTypeEnvironment::default();
@@ -3252,7 +3252,7 @@ mod tests {
         let parsed = parse_regions(source, &regions);
         let canonical = canonical_expressions(&document, &parsed);
         let prose = observe_prose(&document, &parsed, &canonical);
-        let shapes = observe_shapes(&document, &parsed, &prose.shapes);
+        let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
         let roles = observe_roles(&document, &prose.definitions, &shapes);
         let external = ExternalTypeEnvironment::default();

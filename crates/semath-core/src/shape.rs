@@ -1,36 +1,10 @@
-use std::sync::LazyLock;
+use std::collections::BTreeMap;
 
-use regex::Regex;
-
-use crate::canonical::declared_symbols;
+use crate::canonical::{SemanticExpr, SemanticExprKind, expression_name, render_canonical};
 use crate::parser::ParsedMath;
 use crate::prose::{ProseShape, ProseShapeClaim};
 use crate::scope::ScopeGraph;
-use crate::{Evidence, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceIndex, SourceRange};
-
-static DIMENSION_PRODUCT: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\s*(?:\\times|×)\s*").unwrap());
-static REAL_SPACE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\\in\s*\\mathbb\s*(?:\{\s*R\s*\}|R)(?:\s*\^\s*(?:\{([^}]*)\}|([A-Za-z0-9]+)))?")
-        .unwrap()
-});
-static INEQUALITY: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"([A-Za-z0-9]+)\s*(?:\\(?:ne|neq)|!=)\s*([A-Za-z0-9]+)").unwrap());
-static ASSIGNMENT: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?m)([A-Za-z])\s*=\s*([^,\n]+)").unwrap());
-static ALIAS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*$").unwrap());
-static ADDITION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*\+\s*([A-Za-z])\s*$").unwrap());
-static PRODUCT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*([A-Za-z])\s*(\^\s*(?:\{\s*\\top\s*\}|\\top))?\s*(?:\\cdot\s*)?([A-Za-z])\s*$")
-        .unwrap()
-});
-static TRANSPOSE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*$").unwrap());
-static QUADRATIC_FORM: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*([A-Za-z])\s*\^\s*(?:\{\s*\\top\s*\}|\\top)\s*([A-Za-z])\s*([A-Za-z])\s*$")
-        .unwrap()
-});
+use crate::{Evidence, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceRange};
 const MAX_SYMBOL_CLAIMS: usize = 8;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -76,13 +50,6 @@ impl Shape {
             evidence,
         }
     }
-
-    fn transpose(&self) -> Self {
-        match self {
-            Self::Matrix(rows, columns) => Self::Matrix(columns.clone(), rows.clone()),
-            other => other.clone(),
-        }
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -106,17 +73,11 @@ struct Inequality {
 }
 
 #[derive(Clone, Debug)]
-struct DimensionMismatch {
-    left: String,
-    right: String,
-    evidence_range: Option<SourceRange>,
-}
-
-#[derive(Clone, Debug)]
 pub(crate) struct ShapeObservations {
     facts: Vec<ShapeFact>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     scopes: ScopeGraph,
+    notation_families: BTreeMap<String, String>,
 }
 
 #[derive(Clone, Debug)]
@@ -166,7 +127,7 @@ impl ShapeObservations {
         self.facts
             .iter()
             .filter(|fact| {
-                semantic_symbol_eq(&fact.symbol, symbol)
+                self.symbols_equivalent(&fact.symbol, symbol)
                     && (self.scopes.depth(fact.scope_id) == 0
                         || fact.available_from <= offset
                         || fact.symbol_range.contains(offset))
@@ -191,7 +152,7 @@ impl ShapeObservations {
             .facts
             .iter()
             .filter(|fact| {
-                semantic_symbol_eq(&fact.symbol, symbol)
+                self.symbols_equivalent(&fact.symbol, symbol)
                     && (self.scopes.depth(fact.scope_id) == 0
                         || fact.available_from <= offset
                         || fact.symbol_range.contains(offset))
@@ -249,28 +210,36 @@ impl ShapeObservations {
             truncated,
         )
     }
-}
 
-fn semantic_symbol_eq(left: &str, right: &str) -> bool {
-    let left = left.trim_start_matches('\\');
-    let right = right.trim_start_matches('\\');
-    left == right
-        || ((left.contains('_') || right.contains('_'))
-            && left.split('_').next() == right.split('_').next())
+    pub(crate) fn symbols_equivalent(&self, left: &str, right: &str) -> bool {
+        let left = left.trim_start_matches('\\');
+        let right = right.trim_start_matches('\\');
+        left == right
+            || self
+                .notation_families
+                .get(left)
+                .zip(self.notation_families.get(right))
+                .is_some_and(|(left_family, right_family)| left_family == right_family)
+    }
+
+    pub(crate) fn notation_families(&self) -> BTreeMap<String, String> {
+        self.notation_families.clone()
+    }
 }
 
 pub(crate) fn observe_shapes(
     document: &ProjectDocument,
-    parsed: &[ParsedMath],
+    _parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     prose_claims: &[ProseShapeClaim],
 ) -> ShapeObservations {
-    let index = SourceIndex::new(&document.content);
     let scopes = ScopeGraph::new(document);
-    let inequalities = collect_inequalities(document, parsed, &index, &scopes);
+    let inequalities = collect_inequalities(canonical_expressions, &scopes);
     let mut analysis = ShapeObservations {
         facts: Vec::new(),
         diagnostics: Vec::new(),
         scopes,
+        notation_families: notation_families(canonical_expressions),
     };
 
     for claim in prose_claims {
@@ -286,103 +255,11 @@ pub(crate) fn observe_shapes(
         });
     }
 
-    for math in parsed {
-        let Some((content, content_start)) = math_content(document, math, &index) else {
-            continue;
-        };
-        let mut previous_space_end = 0;
-        for captures in REAL_SPACE.captures_iter(content) {
-            let declaration = captures.get(0).unwrap();
-            let dimensions = captures
-                .get(1)
-                .or_else(|| captures.get(2))
-                .map(|found| found.as_str());
-            let Some(shape) = declared_shape(dimensions) else {
-                continue;
-            };
-            let in_offset = index.utf16_for_byte(content_start + declaration.start());
-            let segment_offset = index.utf16_for_byte(content_start + previous_space_end);
-            let declaration_range =
-                absolute_range(&index, content_start, content_start + declaration.end());
-            let mut symbols = declared_symbols(document, &math.region.content_range);
-            let canonical_ranges = symbols
-                .iter()
-                .map(|(_, range)| range.clone())
-                .collect::<Vec<_>>();
-            symbols.extend(
-                math.symbols
-                    .iter()
-                    .filter(|(_, range)| {
-                        !canonical_ranges.iter().any(|canonical| {
-                            canonical.start_offset <= range.start_offset
-                                && range.end_offset <= canonical.end_offset
-                        })
-                    })
-                    .cloned(),
-            );
-            symbols.sort_by_key(|(symbol, range)| (range.start_offset, symbol.clone()));
-            symbols.dedup();
-            for (symbol, symbol_range) in symbols.into_iter().filter(|(_, range)| {
-                segment_offset <= range.start_offset && range.start_offset < in_offset
-            }) {
-                let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
-                analysis.facts.push(ShapeFact {
-                    symbol,
-                    shape: shape.clone(),
-                    symbol_range,
-                    available_from: declaration_range.end_offset,
-                    evidence: Evidence {
-                        rule_id: "explicit-real-space-declaration".into(),
-                        kind: "explicit-math".into(),
-                        strength: "hard".into(),
-                        source_ranges: vec![declaration_range.clone()],
-                    },
-                    refinements: Vec::new(),
-                    explicit: true,
-                    scope_id,
-                });
-            }
-            previous_space_end = declaration.end();
-        }
+    for expression in canonical_expressions {
+        collect_shape_declarations(expression, &mut analysis);
     }
 
     add_explicit_conflict_diagnostics(&mut analysis, &inequalities);
-
-    for math in parsed {
-        let Some((content, content_start)) = math_content(document, math, &index) else {
-            continue;
-        };
-        for captures in ASSIGNMENT.captures_iter(content) {
-            let whole = captures.get(0).unwrap();
-            let left = captures.get(1).unwrap();
-            let right = captures.get(2).unwrap();
-            let expression_range = absolute_range(
-                &index,
-                content_start + right.start(),
-                content_start + right.end(),
-            );
-            let left_range = absolute_range(
-                &index,
-                content_start + left.start(),
-                content_start + left.end(),
-            );
-            let available_from = absolute_range(
-                &index,
-                content_start + whole.start(),
-                content_start + whole.end(),
-            )
-            .end_offset;
-            analyze_assignment(
-                &mut analysis,
-                &inequalities,
-                right.as_str(),
-                expression_range,
-                left.as_str(),
-                left_range,
-                available_from,
-            );
-        }
-    }
 
     analysis
         .diagnostics
@@ -397,6 +274,83 @@ fn prose_shape(shape: &ProseShape) -> Shape {
         ProseShape::Matrix(rows, columns) => Shape::Matrix(rows.clone(), columns.clone()),
         ProseShape::Tensor(dimensions) => Shape::Tensor(dimensions.clone()),
     }
+}
+
+fn notation_families(expressions: &[SemanticExpr]) -> BTreeMap<String, String> {
+    fn collect(expression: &SemanticExpr, output: &mut BTreeMap<String, String>) {
+        match &expression.kind {
+            SemanticExprKind::Index { base, indices } => {
+                if let Some(name) = expression_name(expression) {
+                    output.insert(name, render_canonical(base));
+                }
+                collect(base, output);
+                for index in indices {
+                    collect(index, output);
+                }
+            }
+            SemanticExprKind::Sum(items)
+            | SemanticExprKind::Product(items)
+            | SemanticExprKind::System(items) => {
+                for item in items {
+                    collect(item, output);
+                }
+            }
+            SemanticExprKind::Dot(left, right)
+            | SemanticExprKind::Cross(left, right)
+            | SemanticExprKind::Fraction(left, right)
+            | SemanticExprKind::Power(left, right)
+            | SemanticExprKind::Relation { left, right, .. } => {
+                collect(left, output);
+                collect(right, output);
+            }
+            SemanticExprKind::Negate(value) => collect(value, output),
+            SemanticExprKind::Derivative { expression, .. } => collect(expression, output),
+            SemanticExprKind::Apply { arguments, .. } => {
+                for argument in arguments {
+                    collect(argument, output);
+                }
+            }
+            SemanticExprKind::Condition { value, predicate } => {
+                collect(value, output);
+                collect(predicate, output);
+            }
+            SemanticExprKind::Binder {
+                variables,
+                lower,
+                upper,
+                body,
+                ..
+            } => {
+                for variable in variables {
+                    collect(variable, output);
+                }
+                if let Some(lower) = lower {
+                    collect(lower, output);
+                }
+                if let Some(upper) = upper {
+                    collect(upper, output);
+                }
+                collect(body, output);
+            }
+            SemanticExprKind::Piecewise(branches) => {
+                for branch in branches {
+                    collect(&branch.value, output);
+                    if let Some(condition) = &branch.condition {
+                        collect(condition, output);
+                    }
+                }
+            }
+            SemanticExprKind::Symbol(_)
+            | SemanticExprKind::Number(_)
+            | SemanticExprKind::Unknown(_) => {}
+        }
+    }
+
+    let mut output = BTreeMap::new();
+    for expression in expressions {
+        collect(expression, &mut output);
+    }
+    output
 }
 
 fn add_explicit_conflict_diagnostics(
@@ -445,271 +399,70 @@ fn add_explicit_conflict_diagnostics(
     }
 }
 
-fn analyze_assignment(
-    analysis: &mut ShapeObservations,
-    inequalities: &[Inequality],
-    expression: &str,
-    expression_range: SourceRange,
-    target: &str,
-    target_range: SourceRange,
-    available_from: u32,
-) {
-    let at = expression_range.start_offset;
-    if let Some(captures) = QUADRATIC_FORM.captures(expression) {
-        let vector_symbol = captures.get(1).unwrap().as_str();
-        let matrix_symbol = captures.get(2).unwrap().as_str();
-        let trailing_symbol = captures.get(3).unwrap().as_str();
-        if vector_symbol != trailing_symbol {
-            return;
-        }
-        let Some(vector) = latest_fact(analysis, vector_symbol, at).cloned() else {
-            return;
-        };
-        let Some(matrix) = latest_fact(analysis, matrix_symbol, at).cloned() else {
-            return;
-        };
-        let (Shape::Vector(length), Shape::Matrix(rows, columns)) = (&vector.shape, &matrix.shape)
-        else {
-            return;
-        };
-        if dimension_mismatch(length, rows, inequalities, &analysis.scopes, at).is_some()
-            || dimension_mismatch(length, columns, inequalities, &analysis.scopes, at).is_some()
-        {
-            return;
-        }
-        push_derived_fact(
-            analysis,
-            target,
-            target_range,
-            available_from,
-            Shape::Scalar,
-            "linear-algebra/quadratic-form",
-            evidence_ranges(&[&vector, &matrix]),
-        );
-        return;
-    }
-
-    if let Some(captures) = TRANSPOSE.captures(expression) {
-        let source_symbol = captures.get(1).unwrap().as_str();
-        if let Some(source) = latest_fact(analysis, source_symbol, at).cloned() {
-            push_derived_fact(
-                analysis,
-                target,
-                target_range,
-                available_from,
-                source.shape.transpose(),
-                "linear-algebra/matrix-transpose",
-                evidence_ranges(&[&source]),
-            );
-        }
-        return;
-    }
-    if let Some(captures) = ADDITION.captures(expression) {
-        let left_symbol = captures.get(1).unwrap().as_str();
-        let right_symbol = captures.get(2).unwrap().as_str();
-        let Some(left) = latest_fact(analysis, left_symbol, at).cloned() else {
-            return;
-        };
-        let Some(right) = latest_fact(analysis, right_symbol, at).cloned() else {
-            return;
-        };
-        if shapes_conflict(
-            &left.shape,
-            &right.shape,
-            inequalities,
-            &analysis.scopes,
-            at,
-        ) {
-            analysis.diagnostics.push(SemanticDiagnostic {
-                code: "shape-incompatible-addition".into(),
-                severity: "warning".into(),
-                message: format!(
-                    "Cannot add {} and {} with the declared dimensions.",
-                    left.shape.display(),
-                    right.shape.display()
-                ),
-                explanation: "Addition requires both operands to have the same shape, but their explicit declarations prove that they differ.".into(),
-                range: expression_range,
-                evidence: vec![left.evidence, right.evidence],
-            });
-            return;
-        }
-        push_derived_fact(
-            analysis,
-            target,
-            target_range,
-            available_from,
-            left.shape.clone(),
-            "derived-shape-addition",
-            evidence_ranges(&[&left, &right]),
-        );
-        return;
-    }
-
-    if let Some(captures) = PRODUCT.captures(expression) {
-        let left_symbol = captures.get(1).unwrap().as_str();
-        let right_symbol = captures.get(3).unwrap().as_str();
-        let Some(mut left) = latest_fact(analysis, left_symbol, at).cloned() else {
-            return;
-        };
-        let Some(right) = latest_fact(analysis, right_symbol, at).cloned() else {
-            return;
-        };
-        if captures.get(2).is_some() {
-            left.shape = left.shape.transpose();
-        }
-        let (result, mismatch) = match (&left.shape, &right.shape) {
-            (Shape::Matrix(rows, inner), Shape::Vector(dimension)) => (
-                Some(Shape::Vector(rows.clone())),
-                dimension_mismatch(inner, dimension, inequalities, &analysis.scopes, at),
-            ),
-            (Shape::Matrix(rows, inner), Shape::Matrix(right_rows, columns)) => (
-                Some(Shape::Matrix(rows.clone(), columns.clone())),
-                dimension_mismatch(inner, right_rows, inequalities, &analysis.scopes, at),
-            ),
-            (Shape::Vector(left_dimension), Shape::Vector(right_dimension))
-                if captures.get(2).is_some() =>
-            {
-                (
-                    Some(Shape::Scalar),
-                    dimension_mismatch(
-                        left_dimension,
-                        right_dimension,
-                        inequalities,
-                        &analysis.scopes,
-                        at,
-                    ),
-                )
+fn collect_shape_declarations(expression: &SemanticExpr, analysis: &mut ShapeObservations) {
+    match &expression.kind {
+        SemanticExprKind::System(expressions) => {
+            for expression in expressions {
+                collect_shape_declarations(expression, analysis);
             }
-            _ => (None, None),
-        };
-        let Some(result) = result else {
-            return;
-        };
-        if let Some(mismatch) = mismatch {
-            let mut evidence = vec![left.evidence, right.evidence];
-            if let Some(range) = mismatch.evidence_range {
-                evidence.push(Evidence {
-                    rule_id: "explicit-dimension-inequality".into(),
-                    kind: "explicit-math".into(),
-                    strength: "hard".into(),
-                    source_ranges: vec![range],
+        }
+        SemanticExprKind::Relation {
+            operator,
+            left,
+            right,
+        } if operator.as_str() == "member-of" => {
+            let Some(shape) = real_coordinate_shape(right) else {
+                return;
+            };
+            for (symbol, symbol_range) in declaration_symbols(left) {
+                let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
+                analysis.facts.push(ShapeFact {
+                    symbol,
+                    shape: shape.clone(),
+                    symbol_range,
+                    available_from: expression.range.end_offset,
+                    evidence: Evidence {
+                        rule_id: "explicit-real-space-declaration".into(),
+                        kind: "explicit-math".into(),
+                        strength: "hard".into(),
+                        source_ranges: vec![expression.range.clone()],
+                    },
+                    refinements: Vec::new(),
+                    explicit: true,
+                    scope_id,
                 });
             }
-            analysis.diagnostics.push(SemanticDiagnostic {
-                code: "shape-incompatible-product".into(),
-                severity: "warning".into(),
-                message: format!(
-                    "Cannot multiply {} by {}: inner dimensions {} and {} are explicitly unequal.",
-                    left.shape.display(),
-                    right.shape.display(),
-                    mismatch.left,
-                    mismatch.right
-                ),
-                explanation: "Matrix multiplication requires the left inner dimension to equal the right leading dimension; the declarations and dimension constraints prove that this requirement is false.".into(),
-                range: expression_range,
-                evidence,
-            });
-            return;
         }
-        push_derived_fact(
-            analysis,
-            target,
-            target_range,
-            available_from,
-            result,
-            "derived-shape-product",
-            evidence_ranges(&[&left, &right]),
-        );
-        return;
-    }
-
-    if let Some(captures) = ALIAS.captures(expression) {
-        let source_symbol = captures.get(1).unwrap().as_str();
-        if let Some(source) = latest_fact(analysis, source_symbol, at).cloned() {
-            push_derived_fact(
-                analysis,
-                target,
-                target_range,
-                available_from,
-                source.shape.clone(),
-                "derived-shape-alias",
-                evidence_ranges(&[&source]),
-            );
-        }
+        _ => {}
     }
 }
 
-fn push_derived_fact(
-    analysis: &mut ShapeObservations,
-    symbol: &str,
-    symbol_range: SourceRange,
-    available_from: u32,
-    shape: Shape,
-    rule_id: &str,
-    source_ranges: Vec<SourceRange>,
-) {
-    let scope_id = analysis.scopes.id_at(symbol_range.start_offset);
-    analysis.facts.push(ShapeFact {
-        symbol: symbol.into(),
-        shape,
-        symbol_range,
-        available_from,
-        evidence: Evidence {
-            rule_id: rule_id.into(),
-            kind: "derived-constraint".into(),
-            strength: "strong".into(),
-            source_ranges,
-        },
-        refinements: Vec::new(),
-        explicit: false,
-        scope_id,
-    });
+fn declaration_symbols(expression: &SemanticExpr) -> Vec<(String, SourceRange)> {
+    if let Some(symbol) = expression_name(expression) {
+        return vec![(symbol, expression.range.clone())];
+    }
+    match &expression.kind {
+        SemanticExprKind::Product(items) => items
+            .iter()
+            .filter(|item| !matches!(&item.kind, SemanticExprKind::Symbol(value) if value == ","))
+            .flat_map(declaration_symbols)
+            .collect(),
+        _ => Vec::new(),
+    }
 }
 
-fn collect_inequalities(
-    document: &ProjectDocument,
-    parsed: &[ParsedMath],
-    index: &SourceIndex,
-    scopes: &ScopeGraph,
-) -> Vec<Inequality> {
-    parsed
-        .iter()
-        .flat_map(|math| {
-            let Some((content, content_start)) = math_content(document, math, index) else {
-                return Vec::new();
-            };
-            INEQUALITY
-                .captures_iter(content)
-                .map(|captures| {
-                    let whole = captures.get(0).unwrap();
-                    Inequality {
-                        left: normalize_dimension(captures.get(1).unwrap().as_str()),
-                        right: normalize_dimension(captures.get(2).unwrap().as_str()),
-                        range: absolute_range(
-                            index,
-                            content_start + whole.start(),
-                            content_start + whole.end(),
-                        ),
-                        scope_id: scopes.id_at(index.utf16_for_byte(content_start + whole.start())),
-                    }
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect()
-}
-
-fn declared_shape(dimensions: Option<&str>) -> Option<Shape> {
-    let Some(dimensions) = dimensions else {
+fn real_coordinate_shape(expression: &SemanticExpr) -> Option<Shape> {
+    if matches!(&expression.kind, SemanticExprKind::Symbol(symbol) if symbol == "R") {
         return Some(Shape::Scalar);
+    }
+    let SemanticExprKind::Power(base, dimensions) = &expression.kind else {
+        return None;
     };
-    let dimensions = dimensions.trim();
-    let parts: Vec<_> = DIMENSION_PRODUCT
-        .split(dimensions)
-        .map(normalize_dimension)
-        .filter(|part| !part.is_empty())
-        .collect();
-    match parts.as_slice() {
+    if !matches!(&base.kind, SemanticExprKind::Symbol(symbol) if symbol == "R") {
+        return None;
+    }
+    let dimensions = dimension_terms(dimensions);
+    match dimensions.as_slice() {
         [dimension] => Some(Shape::Vector(dimension.clone())),
         [rows, columns] => Some(Shape::Matrix(rows.clone(), columns.clone())),
         dimensions if dimensions.len() >= 3 => Some(Shape::Tensor(dimensions.to_vec())),
@@ -717,27 +470,73 @@ fn declared_shape(dimensions: Option<&str>) -> Option<Shape> {
     }
 }
 
-fn normalize_dimension(value: &str) -> String {
-    value
-        .chars()
-        .filter(|character| !character.is_whitespace() && !matches!(character, '{' | '}'))
-        .collect()
+fn dimension_terms(expression: &SemanticExpr) -> Vec<String> {
+    match &expression.kind {
+        SemanticExprKind::Cross(left, right) => {
+            let mut dimensions = dimension_terms(left);
+            dimensions.extend(dimension_terms(right));
+            dimensions
+        }
+        _ => vec![dimension_label(expression)],
+    }
 }
 
-fn latest_fact<'a>(
-    analysis: &'a ShapeObservations,
-    symbol: &str,
-    at: u32,
-) -> Option<&'a ShapeFact> {
-    analysis
-        .facts
-        .iter()
-        .filter(|fact| {
-            fact.symbol == symbol
-                && fact.available_from <= at
-                && analysis.scopes.visible(fact.scope_id, at)
-        })
-        .max_by_key(|fact| (analysis.scopes.depth(fact.scope_id), fact.available_from))
+fn dimension_label(expression: &SemanticExpr) -> String {
+    if let Some(name) = expression_name(expression) {
+        return name;
+    }
+    match &expression.kind {
+        SemanticExprKind::Number(value) => value.clone(),
+        SemanticExprKind::Sum(items) => items
+            .iter()
+            .map(dimension_label)
+            .collect::<Vec<_>>()
+            .join(" + "),
+        SemanticExprKind::Product(items) => items
+            .iter()
+            .map(dimension_label)
+            .collect::<Vec<_>>()
+            .join("·"),
+        SemanticExprKind::Power(base, exponent) => {
+            format!("{}^{}", dimension_label(base), dimension_label(exponent))
+        }
+        _ => render_canonical(expression),
+    }
+}
+
+fn collect_inequalities(expressions: &[SemanticExpr], scopes: &ScopeGraph) -> Vec<Inequality> {
+    fn collect(expression: &SemanticExpr, scopes: &ScopeGraph, output: &mut Vec<Inequality>) {
+        match &expression.kind {
+            SemanticExprKind::System(expressions) => {
+                for expression in expressions {
+                    collect(expression, scopes, output);
+                }
+            }
+            SemanticExprKind::Relation {
+                operator,
+                left,
+                right,
+            } if operator.as_str() == "not-equals" => {
+                let (Some(left), Some(right)) = (expression_name(left), expression_name(right))
+                else {
+                    return;
+                };
+                output.push(Inequality {
+                    left,
+                    right,
+                    range: expression.range.clone(),
+                    scope_id: scopes.id_at(expression.range.start_offset),
+                });
+            }
+            _ => {}
+        }
+    }
+
+    let mut output = Vec::new();
+    for expression in expressions {
+        collect(expression, scopes, &mut output);
+    }
+    output
 }
 
 fn shapes_conflict(
@@ -749,90 +548,49 @@ fn shapes_conflict(
 ) -> bool {
     match (left, right) {
         (Shape::Vector(left), Shape::Vector(right)) => {
-            dimension_mismatch(left, right, inequalities, scopes, at).is_some()
+            dimensions_conflict(left, right, inequalities, scopes, at)
         }
         (Shape::Matrix(left_rows, left_columns), Shape::Matrix(right_rows, right_columns)) => {
-            dimension_mismatch(left_rows, right_rows, inequalities, scopes, at).is_some()
-                || dimension_mismatch(left_columns, right_columns, inequalities, scopes, at)
-                    .is_some()
+            dimensions_conflict(left_rows, right_rows, inequalities, scopes, at)
+                || dimensions_conflict(left_columns, right_columns, inequalities, scopes, at)
         }
         (Shape::Scalar, Shape::Scalar) => false,
-        (Shape::Tensor(left), Shape::Tensor(right)) if left.len() == right.len() => {
-            left.iter().zip(right).any(|(left, right)| {
-                dimension_mismatch(left, right, inequalities, scopes, at).is_some()
-            })
-        }
+        (Shape::Tensor(left), Shape::Tensor(right)) if left.len() == right.len() => left
+            .iter()
+            .zip(right)
+            .any(|(left, right)| dimensions_conflict(left, right, inequalities, scopes, at)),
         _ => true,
     }
 }
 
-fn evidence_ranges(facts: &[&ShapeFact]) -> Vec<SourceRange> {
-    let mut ranges = Vec::new();
-    for fact in facts {
-        ranges.extend(fact.evidence.source_ranges.iter().cloned());
-        ranges.push(fact.symbol_range.clone());
-    }
-    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
-    ranges.dedup();
-    ranges
-}
-
-fn dimension_mismatch(
+fn dimensions_conflict(
     left: &str,
     right: &str,
     inequalities: &[Inequality],
     scopes: &ScopeGraph,
     at: u32,
-) -> Option<DimensionMismatch> {
+) -> bool {
     if left == right {
-        return None;
+        return false;
     }
     if left.parse::<u64>().is_ok() && right.parse::<u64>().is_ok() {
-        return Some(DimensionMismatch {
-            left: left.into(),
-            right: right.into(),
-            evidence_range: None,
-        });
+        return true;
     }
     inequalities
         .iter()
         .filter(|inequality| {
             inequality.range.end_offset <= at && scopes.visible(inequality.scope_id, at)
         })
-        .find(|inequality| {
+        .any(|inequality| {
             (inequality.left == left && inequality.right == right)
                 || (inequality.left == right && inequality.right == left)
         })
-        .map(|inequality| DimensionMismatch {
-            left: left.into(),
-            right: right.into(),
-            evidence_range: Some(inequality.range.clone()),
-        })
-}
-
-fn math_content<'a>(
-    document: &'a ProjectDocument,
-    math: &ParsedMath,
-    index: &SourceIndex,
-) -> Option<(&'a str, usize)> {
-    let start = index.byte_for_utf16(math.region.content_range.start_offset);
-    let end = index.byte_for_utf16(math.region.content_range.end_offset);
-    document
-        .content
-        .get(start..end)
-        .map(|content| (content, start))
-}
-
-fn absolute_range(index: &SourceIndex, start: usize, end: usize) -> SourceRange {
-    SourceRange {
-        start_offset: index.utf16_for_byte(start),
-        end_offset: index.utf16_for_byte(end),
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::observe_shapes;
+    use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{DocumentLanguage, ProjectDocument};
 
@@ -856,31 +614,21 @@ mod tests {
             macros: Vec::new(),
             includes: Vec::new(),
         };
-        observe_shapes(&document, &parse_regions(source, &regions), &[])
+        let parsed = parse_regions(source, &regions);
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        observe_shapes(&document, &parsed, &canonical, &[])
     }
 
     #[test]
-    fn reports_only_a_proven_matrix_vector_mismatch() {
+    fn does_not_reparse_formula_text_for_derived_shapes_or_diagnostics() {
         let source =
             "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}, k \\ne n$\n$y = Ax$";
         let analysis = analyze(source);
-        assert_eq!(analysis.diagnostics.len(), 1);
-        assert_eq!(analysis.diagnostics[0].code, "shape-incompatible-product");
-        assert!(analysis.diagnostics[0].message.contains("n and k"));
-
-        let uncertain =
-            analyze("$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}$\n$y = Ax$");
-        assert!(uncertain.diagnostics.is_empty());
-    }
-
-    #[test]
-    fn propagates_a_product_shape_to_hover() {
-        let source = "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{n}$\n$y = Ax$\n$y$";
-        let analysis = analyze(source);
-        let offset = source.rfind("$y$").unwrap() as u32 + 1;
-        let shape = analysis.shape_at("y", offset).unwrap();
-        assert_eq!(shape.display, "Vector[m]");
-        assert_eq!(shape.evidence.rule_id, "derived-shape-product");
+        assert!(analysis.diagnostics.is_empty());
+        assert!(analysis.shape_at("y", source.len() as u32).is_none());
     }
 
     #[test]
@@ -913,7 +661,12 @@ mod tests {
             macros: Vec::new(),
             includes: Vec::new(),
         };
-        let analysis = observe_shapes(&document, &parse_regions(source, &regions), &[]);
+        let parsed = parse_regions(source, &regions);
+        let canonical = parsed
+            .iter()
+            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .collect::<Vec<_>>();
+        let analysis = observe_shapes(&document, &parsed, &canonical, &[]);
         assert!(analysis.diagnostics.is_empty());
         let first_use = source.find("$x$\n#").unwrap() as u32 + 1;
         let second_use = source.rfind("$x$").unwrap() as u32 + 1;

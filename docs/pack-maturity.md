@@ -36,7 +36,7 @@ holds approved support policy; GitHub issues hold planned work.
   covering neutral fields, section scope, mixed fields, non-evidence,
   formula-before/after attachment, ambiguity, conflict, and retraction. Protocol
   10 could not represent tiered domain relevance or relevance-ordered
-  alternatives; protocol 11 passes all 30 cases. Six cases independently cover
+  alternatives; protocol 12 passes all 30 cases. Six cases independently cover
   every current structural collision component with typed formula contexts.
 - The recognition-frontier v1 fixture freezes 32 stage-labeled cases across
   eight notation, discourse, lifecycle, safety, mathematics, and engineering
@@ -57,7 +57,7 @@ field completeness.
 | Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
 | Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
 | Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
-| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 11 and the core use pack-qualified concept identities without a legacy role field |
+| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 12 and the core use pack-qualified concept identities without a legacy role field |
 | Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
 | Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
 | Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |

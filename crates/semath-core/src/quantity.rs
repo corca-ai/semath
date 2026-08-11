@@ -1,7 +1,5 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::sync::LazyLock;
-
-use regex::Regex;
 
 use crate::pack::{PackDimensionExponent, built_in_packs};
 use crate::parser::ParsedMath;
@@ -9,21 +7,10 @@ use crate::prose::definition_available_from;
 use crate::scope::ScopeGraph;
 use crate::{
     DefinitionInfo, DimensionExponentInfo, Evidence, PhysicalDimensionInfo, ProjectDocument,
-    ProjectMacroExpansionStatus, ProjectMacroKind, QuantityInfo, SemanticDiagnostic, SourceIndex,
-    SourceRange,
+    ProjectMacroExpansionStatus, ProjectMacroKind, QuantityInfo, SemanticDiagnostic, SourceRange,
 };
 
 const MAX_QUANTITY_CLAIMS: usize = 8;
-
-static ASSIGNMENT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*([A-Za-z])\s*=\s*(.+?)\s*$").expect("quantity assignment regex")
-});
-static ALIAS: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\s*([A-Za-z])\s*$").expect("quantity alias regex"));
-static BINARY: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*([A-Za-z])\s*(\+|/|\*|\\cdot)?\s*([A-Za-z])\s*$")
-        .expect("quantity binary regex")
-});
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct Exponent {
@@ -46,16 +33,6 @@ impl Exponent {
             denominator: denominator / divisor,
         }
     }
-
-    fn add(self, other: Self) -> Self {
-        let numerator =
-            self.numerator * other.denominator as i32 + other.numerator * self.denominator as i32;
-        Self::new(numerator, self.denominator * other.denominator)
-    }
-
-    fn negate(self) -> Self {
-        Self::new(-self.numerator, self.denominator)
-    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -72,36 +49,6 @@ impl Dimension {
                 )
             })
             .collect();
-        Self(values)
-    }
-
-    fn multiply(&self, other: &Self) -> Self {
-        self.combine(other, false)
-    }
-
-    fn divide(&self, other: &Self) -> Self {
-        self.combine(other, true)
-    }
-
-    fn combine(&self, other: &Self, subtract: bool) -> Self {
-        let mut values = self.0.clone();
-        for (base, exponent) in &other.0 {
-            let right = if subtract {
-                exponent.negate()
-            } else {
-                *exponent
-            };
-            let combined = values
-                .get(base)
-                .copied()
-                .unwrap_or_else(|| Exponent::new(0, 1))
-                .add(right);
-            if combined.numerator == 0 {
-                values.remove(base);
-            } else {
-                values.insert(base.clone(), combined);
-            }
-        }
         Self(values)
     }
 
@@ -303,13 +250,12 @@ impl QuantityObservations {
 
 pub(crate) fn observe_quantities(
     document: &ProjectDocument,
-    parsed: &[ParsedMath],
+    _parsed: &[ParsedMath],
     definitions: &[DefinitionInfo],
 ) -> QuantityObservations {
     let scopes = ScopeGraph::new(document);
     let mut facts = explicit_facts(document, definitions, &scopes);
     let mut diagnostics = explicit_diagnostics(&facts);
-    propagate_formula_dimensions(document, parsed, &scopes, &mut facts, &mut diagnostics);
     facts.sort_by_key(|fact| fact.available_from);
     diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
     QuantityObservations {
@@ -437,145 +383,6 @@ fn explicit_diagnostics(facts: &[QuantityFact]) -> Vec<SemanticDiagnostic> {
     diagnostics
 }
 
-fn propagate_formula_dimensions(
-    document: &ProjectDocument,
-    parsed: &[ParsedMath],
-    scopes: &ScopeGraph,
-    facts: &mut Vec<QuantityFact>,
-    diagnostics: &mut Vec<SemanticDiagnostic>,
-) {
-    let index = SourceIndex::new(&document.content);
-    let mut formulas = parsed
-        .iter()
-        .filter(|math| math.region.closed)
-        .collect::<Vec<_>>();
-    formulas.sort_by_key(|math| math.region.content_range.start_offset);
-    for math in formulas {
-        let start_byte = index.byte_for_utf16(math.region.content_range.start_offset);
-        let end_byte = index.byte_for_utf16(math.region.content_range.end_offset);
-        let Some(content) = document.content.get(start_byte..end_byte) else {
-            continue;
-        };
-        let Some(captures) = ASSIGNMENT.captures(content) else {
-            continue;
-        };
-        let left = captures.get(1).expect("assignment lhs").as_str();
-        let right = captures.get(2).expect("assignment rhs").as_str();
-        let scope_id = scopes.id_at(math.region.content_range.start_offset);
-        let known = known_facts(facts, scopes, math.region.content_range.start_offset);
-        let derived = if let Some(alias) = ALIAS.captures(right) {
-            let source = alias.get(1).expect("alias source").as_str();
-            known
-                .get(source)
-                .map(|fact| (fact.dimension.clone(), vec![source.into()]))
-        } else if let Some(binary) = BINARY.captures(right) {
-            let first = binary.get(1).expect("binary lhs").as_str();
-            let second = binary.get(3).expect("binary rhs").as_str();
-            let operator = binary.get(2).map_or("", |found| found.as_str());
-            match (known.get(first), known.get(second), operator) {
-                (Some(left_fact), Some(right_fact), "+")
-                    if left_fact.dimension == right_fact.dimension =>
-                {
-                    Some((
-                        left_fact.dimension.clone(),
-                        vec![first.into(), second.into()],
-                    ))
-                }
-                (Some(left_fact), Some(right_fact), "+") => {
-                    diagnostics.push(dimension_diagnostic(
-                        "quantity-addition-dimension-mismatch",
-                        format!("Cannot add {first} and {second} with different dimensions."),
-                        format!(
-                            "Addition requires equal dimensions; {} has {}, while {} has {}.",
-                            first,
-                            left_fact.dimension.info().display,
-                            second,
-                            right_fact.dimension.info().display
-                        ),
-                        math.region.content_range.clone(),
-                        vec![left_fact.evidence.clone(), right_fact.evidence.clone()],
-                    ));
-                    None
-                }
-                (Some(left_fact), Some(right_fact), "/") => Some((
-                    left_fact.dimension.divide(&right_fact.dimension),
-                    vec![first.into(), second.into()],
-                )),
-                (Some(left_fact), Some(right_fact), "" | "*" | "\\cdot") => Some((
-                    left_fact.dimension.multiply(&right_fact.dimension),
-                    vec![first.into(), second.into()],
-                )),
-                _ => None,
-            }
-        } else {
-            None
-        };
-        let Some((dimension, derived_from)) = derived else {
-            continue;
-        };
-        if let Some(existing) = known.get(left)
-            && existing.dimension != dimension
-        {
-            diagnostics.push(dimension_diagnostic(
-                "quantity-assignment-dimension-mismatch",
-                format!("The expression assigned to {left} has an incompatible dimension."),
-                format!(
-                    "{left} is declared as {}, but the right-hand side derives {}.",
-                    existing.dimension.info().display,
-                    dimension.info().display
-                ),
-                math.region.content_range.clone(),
-                vec![
-                    existing.evidence.clone(),
-                    derived_evidence(math.region.content_range.clone()),
-                ],
-            ));
-            continue;
-        }
-        let symbol_range = math
-            .symbols
-            .iter()
-            .find(|(symbol, _)| symbol == left)
-            .map(|(_, range)| range.clone())
-            .unwrap_or_else(|| math.region.content_range.clone());
-        facts.push(QuantityFact {
-            symbol: left.into(),
-            symbol_range,
-            available_from: math.region.content_range.end_offset,
-            scope_id,
-            quantity_kind_id: None,
-            quantity_kind: None,
-            unit_id: None,
-            unit: None,
-            dimension,
-            evidence: derived_evidence(math.region.content_range.clone()),
-            derived_from,
-        });
-    }
-}
-
-fn known_facts<'a>(
-    facts: &'a [QuantityFact],
-    scopes: &ScopeGraph,
-    offset: u32,
-) -> HashMap<&'a str, &'a QuantityFact> {
-    let mut known = HashMap::new();
-    for fact in facts {
-        if fact.available_from <= offset
-            && scopes.visible(fact.scope_id, offset)
-            && known
-                .get(fact.symbol.as_str())
-                .is_none_or(|current: &&QuantityFact| {
-                    (scopes.depth(current.scope_id), current.available_from)
-                        < (scopes.depth(fact.scope_id), fact.available_from)
-                })
-        {
-            known.insert(fact.symbol.as_str(), fact);
-        }
-    }
-    known
-}
-
 fn find_quantity_kind(description: &str) -> Option<&'static QuantityKindSpec> {
     let mut semantic_description = description;
     for separator in [" along ", " through ", " across ", " normal to "] {
@@ -642,15 +449,6 @@ fn explicit_symbol(description: &str, symbol: &str) -> bool {
         .any(|prefix| description.contains(&format!("{prefix}{symbol}")))
 }
 
-fn derived_evidence(range: SourceRange) -> Evidence {
-    Evidence {
-        rule_id: "semath/dimensional-propagation".into(),
-        kind: "derived-constraint".into(),
-        strength: "strong".into(),
-        source_ranges: vec![range],
-    }
-}
-
 fn dimension_diagnostic(
     code: &str,
     message: String,
@@ -690,14 +488,13 @@ mod tests {
     };
 
     #[test]
-    fn dimension_algebra_is_exact_and_canonical() {
+    fn dimension_values_are_reduced_and_displayed_canonically() {
         let velocity = Dimension(BTreeMap::from([
             ("length".into(), Exponent::new(1, 1)),
             ("time".into(), Exponent::new(-1, 1)),
         ]));
-        let duration = Dimension(BTreeMap::from([("time".into(), Exponent::new(1, 1))]));
 
-        assert_eq!(velocity.multiply(&duration).info().display, "length");
+        assert_eq!(velocity.info().display, "length · time^-1");
         assert_eq!(Exponent::new(2, 4), Exponent::new(1, 2));
     }
 
@@ -730,7 +527,7 @@ mod tests {
     }
 
     #[test]
-    fn explicit_prose_drives_product_propagation_and_mismatch_diagnostics() {
+    fn explicit_quantity_extraction_does_not_reparse_formula_text() {
         let content = "Let $m$ be mass in kilograms. Let $a$ be acceleration in metres per second squared. Let $F$ be force in newtons.\n$F = m a$\n$F = m + a$";
         let document = ProjectDocument {
             prose_annotations: vec![],
@@ -760,17 +557,11 @@ mod tests {
         let force_offset = content.find("$F = m a$").unwrap() as u32 + 1;
         let claims = analysis.at("F", force_offset).0;
 
-        assert!(
-            claims.iter().any(|claim| {
-                claim.quantity_kind_id.as_deref() == Some("quantities-units:force")
-            })
-        );
-        assert!(
-            analysis
-                .diagnostics
-                .iter()
-                .any(|diagnostic| diagnostic.code == "quantity-addition-dimension-mismatch")
-        );
+        assert!(claims.iter().any(|claim| {
+            claim.quantity_kind_id.as_deref() == Some("quantities-units:force")
+                && claim.derived_from.is_empty()
+        }));
+        assert!(analysis.diagnostics.is_empty());
     }
 
     #[test]

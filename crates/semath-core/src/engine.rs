@@ -8,7 +8,7 @@ use crate::candidate::{
     StructuralCandidateOption, append_semantic_candidates, application_end_offset,
     structural_candidate_options,
 };
-use crate::canonical::{SemanticExpr, lower_document_region};
+use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, render_canonical};
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
 use crate::cursor::{
     CursorOccurrence, interior_offset, item_at_cursor_with_trailing_edge, occurrence_at_cursor,
@@ -22,19 +22,19 @@ use crate::prose::LawActivationEvidence;
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
-    CandidateFamily, Claim, ClaimId, ClaimObject, ClaimPredicate, ClaimShape, ClaimValue,
-    DimensionExponent, DocumentSemanticFacts, EntityId, EvidenceId, EvidenceModality,
-    EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier, Mention, MentionModality,
-    NotationComponent, OccurrenceKind, ProjectSemanticIndex, ResolutionStatus, SourceOccurrence,
-    SourceOccurrenceId,
+    CandidateFamily, Claim, ClaimCondition, ClaimId, ClaimObject, ClaimOperation, ClaimPredicate,
+    ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, DocumentSemanticFacts, EntityId,
+    EvidenceId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, InferenceTier,
+    Mention, MentionModality, NotationComponent, OccurrenceKind, ProjectSemanticIndex,
+    ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
 };
 use crate::{
     AnalysisStats, ChangeEnvelope, DefinitionInfo, Evidence, Location, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query,
     QueryEnvelope, QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticCandidateInfo,
-    SemanticCandidateStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
+    SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -42,6 +42,7 @@ const MAX_SYMBOL_DIAGNOSTICS: usize = 8;
 const MAX_VIEW_DIAGNOSTICS: usize = 8;
 const MAX_VIEW_DECLARATIONS: usize = 16;
 const MAX_VIEW_CANDIDATES: usize = 16;
+const MAX_VIEW_CLAIMS: usize = 32;
 
 #[derive(Debug, Error)]
 pub enum EngineError {
@@ -461,6 +462,138 @@ struct LoweredSemanticDocument {
     occurrences: HashMap<(String, u32, u32), SourceOccurrenceId>,
 }
 
+fn append_relation_occurrences(
+    document: &ProjectDocument,
+    expressions: &[SemanticExpr],
+    component_id: &str,
+    scopes: &ScopeGraph,
+    order: &ProjectOrder,
+    output: &mut Vec<(SourceOccurrence, Vec<StructuralCandidateOption>)>,
+) {
+    let mut ranges = Vec::new();
+    for expression in expressions {
+        collect_relation_ranges(expression, &mut ranges);
+    }
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
+    for range in ranges {
+        if range.start_offset >= range.end_offset
+            || output
+                .iter()
+                .any(|(occurrence, _)| occurrence.range == range)
+        {
+            continue;
+        }
+        let id = SourceOccurrenceId {
+            file_id: document.file_id.clone(),
+            document_version: document.document_version,
+            local_id: output.len() as u32,
+        };
+        output.push((
+            SourceOccurrence {
+                id,
+                component_id: component_id.into(),
+                kind: OccurrenceKind::Notation,
+                range: range.clone(),
+                selection_range: range.clone(),
+                scope_path: scopes.path_at(range.start_offset),
+                structural_path: Vec::new(),
+                availability_order: order
+                    .position(&document.file_id, range.start_offset)
+                    .unwrap_or(u64::MAX),
+                surface: source_text(document, &range),
+                source_text: source_text(document, &range),
+                notation: Vec::new(),
+            },
+            Vec::new(),
+        ));
+    }
+}
+
+fn collect_relation_ranges(expression: &SemanticExpr, output: &mut Vec<SourceRange>) {
+    match &expression.kind {
+        SemanticExprKind::Relation { left, right, .. } => {
+            output.push(expression.range.clone());
+            collect_relation_ranges(left, output);
+            collect_relation_ranges(right, output);
+        }
+        SemanticExprKind::Sum(items)
+        | SemanticExprKind::Product(items)
+        | SemanticExprKind::System(items) => {
+            output.push(expression.range.clone());
+            for item in items {
+                collect_relation_ranges(item, output);
+            }
+        }
+        SemanticExprKind::Dot(left, right)
+        | SemanticExprKind::Cross(left, right)
+        | SemanticExprKind::Fraction(left, right)
+        | SemanticExprKind::Power(left, right) => {
+            output.push(expression.range.clone());
+            collect_relation_ranges(left, output);
+            collect_relation_ranges(right, output);
+        }
+        SemanticExprKind::Negate(value) => {
+            output.push(expression.range.clone());
+            collect_relation_ranges(value, output);
+        }
+        SemanticExprKind::Derivative {
+            expression: operand,
+            ..
+        } => {
+            output.push(expression.range.clone());
+            collect_relation_ranges(operand, output);
+        }
+        SemanticExprKind::Apply { arguments, .. } => {
+            output.push(expression.range.clone());
+            for argument in arguments {
+                collect_relation_ranges(argument, output);
+            }
+        }
+        SemanticExprKind::Binder {
+            variables,
+            lower,
+            upper,
+            body,
+            ..
+        } => {
+            output.push(expression.range.clone());
+            for variable in variables {
+                collect_relation_ranges(variable, output);
+            }
+            if let Some(lower) = lower {
+                collect_relation_ranges(lower, output);
+            }
+            if let Some(upper) = upper {
+                collect_relation_ranges(upper, output);
+            }
+            collect_relation_ranges(body, output);
+        }
+        SemanticExprKind::Index { base, indices } => {
+            collect_relation_ranges(base, output);
+            for index in indices {
+                collect_relation_ranges(index, output);
+            }
+        }
+        SemanticExprKind::Condition { value, predicate } => {
+            collect_relation_ranges(value, output);
+            collect_relation_ranges(predicate, output);
+        }
+        SemanticExprKind::Piecewise(branches) => {
+            output.push(expression.range.clone());
+            for branch in branches {
+                collect_relation_ranges(&branch.value, output);
+                if let Some(condition) = &branch.condition {
+                    collect_relation_ranges(condition, output);
+                }
+            }
+        }
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Number(_)
+        | SemanticExprKind::Unknown(_) => {}
+    }
+}
+
 fn lower_semantic_document(
     document: &AnalyzedDocument,
     observations: &DocumentSemanticObservations,
@@ -513,6 +646,14 @@ fn lower_semantic_document(
             seed.candidate_options.clone(),
         ));
     }
+    append_relation_occurrences(
+        source,
+        &document.canonical_expressions,
+        &document.component_id,
+        &document.scopes,
+        order,
+        &mut occurrences,
+    );
     occurrences.sort_by_key(|(item, _)| {
         (
             item.range.start_offset,
@@ -636,11 +777,22 @@ fn lower_semantic_document(
     let typed = lower_typed_observation_facts(source, observations, &occurrences, &definitions);
     evidence.extend(typed.evidence);
     claims.extend(typed.claims);
+    let relations = lower_canonical_relation_facts(
+        source,
+        &document.canonical_expressions,
+        &occurrences,
+        &definitions,
+    );
+    entities.extend(relations.entities);
+    evidence.extend(relations.evidence);
+    claims.extend(relations.claims);
     let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
     entities.extend(cross_modal.entities);
     evidence.extend(cross_modal.evidence);
     claims.extend(cross_modal.claims);
     definitions.extend(cross_modal.definitions);
+    entities.sort();
+    entities.dedup();
     let mentions = occurrences
         .iter()
         .map(|occurrence| Mention {
@@ -683,112 +835,572 @@ fn lower_typed_observation_facts(
     definitions: &BTreeMap<EntityId, DefinitionInfo>,
 ) -> LoweredTypedFacts {
     let mut output = LoweredTypedFacts::default();
-    let mut append = |symbol: &str,
-                      evidence: &Evidence,
-                      predicate: ClaimPredicate,
-                      value: ClaimValue,
-                      category: &str| {
-        let Some((entity, _)) = closest_definition(definitions, symbol, evidence) else {
-            return;
+    {
+        let mut append = |symbol: &str,
+                          evidence: &Evidence,
+                          predicate: ClaimPredicate,
+                          value: ClaimValue,
+                          category: &str| {
+            let Some((entity, _)) = closest_definition(definitions, symbol, evidence) else {
+                return;
+            };
+            let Some(anchor) = occurrences
+                .iter()
+                .find(|occurrence| occurrence.id == entity.anchor)
+            else {
+                return;
+            };
+            let ordinal = output.claims.len();
+            let evidence_id = EvidenceId(format!(
+                "{}:{}:typed-{category}-evidence:{ordinal}",
+                source.file_id, source.document_version
+            ));
+            output.evidence.push(EvidenceRecord {
+                id: evidence_id.clone(),
+                source: entity.anchor.clone(),
+                scope_path: entity.scope_path.clone(),
+                available_after: anchor.availability_order,
+                polarity: EvidencePolarity::Positive,
+                modality: EvidenceModality::Asserted,
+                origin: EvidenceOrigin::Explicit,
+                provenance: vec![entity.anchor.clone()],
+                parent_claims: Vec::new(),
+                rule_id: evidence.rule_id.clone(),
+                rule_version: 1,
+            });
+            output.claims.push(Claim {
+                id: ClaimId(format!(
+                    "{}:{}:typed-{category}-claim:{ordinal}",
+                    source.file_id, source.document_version
+                )),
+                subject: entity.clone(),
+                predicate,
+                object: ClaimObject::Value(value),
+                evidence_id,
+                tier: InferenceTier::ExplicitClaim,
+                derivation_depth: 0,
+            });
         };
-        let Some(anchor) = occurrences
+
+        for role in observations.roles.all() {
+            append(
+                &role.symbol,
+                &role.evidence,
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept(role.concept_id),
+                "role",
+            );
+        }
+        for shape in observations.shapes.explicit_claims() {
+            append(
+                &shape.symbol,
+                &shape.evidence,
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(claim_shape(&shape.kind, shape.dimensions)),
+                "shape",
+            );
+        }
+        for quantity in observations.quantities.explicit() {
+            if let Some(quantity_kind) = quantity.quantity_kind_id {
+                append(
+                    &quantity.symbol,
+                    &quantity.evidence,
+                    ClaimPredicate::HasQuantity,
+                    ClaimValue::QuantityKind(quantity_kind),
+                    "quantity",
+                );
+            }
+            if let Some(unit) = quantity.unit_id {
+                append(
+                    &quantity.symbol,
+                    &quantity.evidence,
+                    ClaimPredicate::HasUnit,
+                    ClaimValue::Unit(unit),
+                    "unit",
+                );
+            }
+            if !quantity.dimension.exponents.is_empty() {
+                let exponents = quantity
+                    .dimension
+                    .exponents
+                    .into_iter()
+                    .filter_map(|exponent| {
+                        Some(DimensionExponent {
+                            base: exponent.base,
+                            numerator: i16::try_from(exponent.numerator).ok()?,
+                            denominator: u16::try_from(exponent.denominator).ok()?,
+                        })
+                    })
+                    .collect();
+                append(
+                    &quantity.symbol,
+                    &quantity.evidence,
+                    ClaimPredicate::HasDimension,
+                    ClaimValue::Dimension(exponents),
+                    "dimension",
+                );
+            }
+        }
+    }
+    for assumption in observations.assumptions() {
+        for subject in &assumption.subjects {
+            let Some((entity, _)) = closest_definition(definitions, subject, &assumption.evidence)
+            else {
+                continue;
+            };
+            let condition = match (assumption.kind.as_str(), assumption.value.as_str()) {
+                ("sign", "nonzero") => ClaimCondition::Nonzero(entity.clone()),
+                ("sign", "positive" | "strictly-positive") => {
+                    ClaimCondition::Positive(entity.clone())
+                }
+                ("sign", "nonnegative") => ClaimCondition::Nonnegative(entity.clone()),
+                ("algebraic-property", "invertible") => ClaimCondition::Invertible(entity.clone()),
+                _ => ClaimCondition::Named(format!("{}:{}", assumption.kind, assumption.value)),
+            };
+            let ordinal = output.claims.len();
+            let evidence_id = EvidenceId(format!(
+                "{}:{}:typed-assumption-evidence:{ordinal}",
+                source.file_id, source.document_version
+            ));
+            let anchor = occurrences
+                .iter()
+                .find(|occurrence| occurrence.id == entity.anchor)
+                .expect("definition entity has a source anchor");
+            output.evidence.push(EvidenceRecord {
+                id: evidence_id.clone(),
+                source: entity.anchor.clone(),
+                scope_path: entity.scope_path.clone(),
+                available_after: anchor.availability_order,
+                polarity: EvidencePolarity::Positive,
+                modality: EvidenceModality::Asserted,
+                origin: EvidenceOrigin::Explicit,
+                provenance: vec![entity.anchor.clone()],
+                parent_claims: Vec::new(),
+                rule_id: assumption.evidence.rule_id.clone(),
+                rule_version: 1,
+            });
+            output.claims.push(Claim {
+                id: ClaimId(format!(
+                    "{}:{}:typed-assumption-claim:{ordinal}",
+                    source.file_id, source.document_version
+                )),
+                subject: entity.clone(),
+                predicate: ClaimPredicate::Assumes,
+                object: ClaimObject::Value(ClaimValue::Condition(condition)),
+                evidence_id,
+                tier: InferenceTier::ExplicitClaim,
+                derivation_depth: 0,
+            });
+        }
+    }
+    output
+}
+
+#[derive(Default)]
+struct LoweredRelationFacts {
+    entities: Vec<EntityId>,
+    evidence: Vec<EvidenceRecord>,
+    claims: Vec<Claim>,
+}
+
+struct RelationLowerer<'a> {
+    source: &'a ProjectDocument,
+    occurrences: &'a [SourceOccurrence],
+    definitions: &'a BTreeMap<EntityId, DefinitionInfo>,
+    output: LoweredRelationFacts,
+    entities_by_expression: BTreeMap<(u32, u32, String), EntityId>,
+}
+
+fn lower_canonical_relation_facts(
+    source: &ProjectDocument,
+    expressions: &[SemanticExpr],
+    occurrences: &[SourceOccurrence],
+    definitions: &BTreeMap<EntityId, DefinitionInfo>,
+) -> LoweredRelationFacts {
+    let mut lowerer = RelationLowerer {
+        source,
+        occurrences,
+        definitions,
+        output: LoweredRelationFacts::default(),
+        entities_by_expression: BTreeMap::new(),
+    };
+    for expression in expressions {
+        lowerer.lower_expression(expression);
+    }
+    lowerer.output.entities.sort();
+    lowerer.output.entities.dedup();
+    lowerer.output
+}
+
+impl RelationLowerer<'_> {
+    fn lower_expression(&mut self, expression: &SemanticExpr) -> Option<EntityId> {
+        let result = self.entity_for(expression)?;
+        let canonical = render_canonical(expression);
+        let digest = stable_text_digest(&canonical);
+        let relation = match &expression.kind {
+            SemanticExprKind::Relation {
+                operator,
+                left,
+                right,
+            } if operator.as_str() == "equals" => ClaimRelation::Equality {
+                left: self.lower_expression(left)?,
+                right: self.lower_expression(right)?,
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Sum(terms) => ClaimRelation::Sum {
+                result: result.clone(),
+                terms: self.lower_many(terms)?,
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Product(factors) => ClaimRelation::Product {
+                result: result.clone(),
+                factors: self.lower_many(factors)?,
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Fraction(numerator, denominator) => ClaimRelation::Quotient {
+                result: result.clone(),
+                numerator: self.lower_expression(numerator)?,
+                denominator: self.lower_expression(denominator)?,
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Negate(operand) => ClaimRelation::Operation {
+                result: result.clone(),
+                operator: ClaimOperation::Negate,
+                operands: vec![self.lower_expression(operand)?],
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Power(base, exponent) => ClaimRelation::Operation {
+                result: result.clone(),
+                operator: ClaimOperation::Power,
+                operands: vec![
+                    self.lower_expression(base)?,
+                    self.lower_expression(exponent)?,
+                ],
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Dot(left, right) => ClaimRelation::Operation {
+                result: result.clone(),
+                operator: ClaimOperation::Dot,
+                operands: vec![self.lower_expression(left)?, self.lower_expression(right)?],
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Cross(left, right) => ClaimRelation::Operation {
+                result: result.clone(),
+                operator: ClaimOperation::Cross,
+                operands: vec![self.lower_expression(left)?, self.lower_expression(right)?],
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Derivative {
+                expression: operand,
+                variable,
+                order,
+            } => ClaimRelation::Derivative {
+                result: result.clone(),
+                operand: self.lower_expression(operand)?,
+                variable: self.entity_for_reference(variable.as_str(), &variable.range),
+                order: *order,
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Apply {
+                operator,
+                arguments,
+            } if operator.as_str() == "transpose" && arguments.len() == 1 => {
+                ClaimRelation::Operation {
+                    result: result.clone(),
+                    operator: ClaimOperation::Transpose,
+                    operands: self.lower_many(arguments)?,
+                    canonical_digest: digest,
+                }
+            }
+            SemanticExprKind::Apply {
+                operator,
+                arguments,
+            } => ClaimRelation::Application {
+                result: result.clone(),
+                function: self.entity_for_reference(operator.as_str(), &operator.range)?,
+                arguments: self.lower_many(arguments)?,
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Binder {
+                operator,
+                variables,
+                body,
+                ..
+            } if operator.as_str() == "integral" => ClaimRelation::Integral {
+                result: result.clone(),
+                integrand: self.lower_expression(body)?,
+                variable: variables
+                    .first()
+                    .and_then(|variable| self.lower_expression(variable)),
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Relation { left, right, .. } => {
+                let _ = self.lower_expression(left);
+                let _ = self.lower_expression(right);
+                return Some(result);
+            }
+            SemanticExprKind::System(items) => {
+                let _ = self.lower_many(items);
+                return Some(result);
+            }
+            SemanticExprKind::Piecewise(branches) => {
+                for branch in branches {
+                    let _ = self.lower_expression(&branch.value);
+                    if let Some(condition) = &branch.condition {
+                        let _ = self.lower_expression(condition);
+                    }
+                }
+                return Some(result);
+            }
+            SemanticExprKind::Index { base, indices } => {
+                let _ = self.lower_expression(base);
+                let _ = self.lower_many(indices);
+                return Some(result);
+            }
+            SemanticExprKind::Condition { value, predicate } => {
+                let _ = self.lower_expression(value);
+                let _ = self.lower_expression(predicate);
+                return Some(result);
+            }
+            SemanticExprKind::Binder {
+                variables,
+                lower,
+                upper,
+                body,
+                ..
+            } => {
+                let _ = self.lower_many(variables);
+                if let Some(lower) = lower {
+                    let _ = self.lower_expression(lower);
+                }
+                if let Some(upper) = upper {
+                    let _ = self.lower_expression(upper);
+                }
+                let _ = self.lower_expression(body);
+                return Some(result);
+            }
+            SemanticExprKind::Number(_) => {
+                self.emit_scalar_constant(&result);
+                return Some(result);
+            }
+            _ => return Some(result),
+        };
+        self.emit_relation(result.clone(), relation);
+        Some(result)
+    }
+
+    fn lower_many(&mut self, expressions: &[SemanticExpr]) -> Option<Vec<EntityId>> {
+        expressions
             .iter()
-            .find(|occurrence| occurrence.id == entity.anchor)
-        else {
-            return;
+            .map(|expression| self.lower_expression(expression))
+            .collect()
+    }
+
+    fn entity_for(&mut self, expression: &SemanticExpr) -> Option<EntityId> {
+        if matches!(
+            expression.kind,
+            SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. }
+        ) && let Some(name) = crate::canonical::expression_name(expression)
+            && let Some(entity) = self.definition_entity(&name, &expression.range)
+        {
+            return Some(entity);
+        }
+        let digest = render_canonical(expression);
+        let key = (
+            expression.range.start_offset,
+            expression.range.end_offset,
+            digest.clone(),
+        );
+        if let Some(entity) = self.entities_by_expression.get(&key) {
+            return Some(entity.clone());
+        }
+        let anchor = self
+            .occurrences
+            .iter()
+            .find(|occurrence| occurrence.range == expression.range)
+            .or_else(|| {
+                self.occurrences.iter().find(|occurrence| {
+                    expression.range.start_offset <= occurrence.range.start_offset
+                        && occurrence.range.end_offset <= expression.range.end_offset
+                })
+            })
+            .or_else(|| {
+                self.occurrences
+                    .iter()
+                    .filter(|occurrence| {
+                        occurrence.range.start_offset <= expression.range.start_offset
+                            && expression.range.end_offset <= occurrence.range.end_offset
+                    })
+                    .min_by_key(|occurrence| {
+                        occurrence.range.end_offset - occurrence.range.start_offset
+                    })
+            })?;
+        let entity = EntityId {
+            component_id: anchor.component_id.clone(),
+            scope_path: anchor.scope_path.clone(),
+            kind: format!("expression:{}", stable_text_digest(&digest)),
+            anchor: anchor.id.clone(),
         };
-        let ordinal = output.claims.len();
+        self.output.entities.push(entity.clone());
+        self.entities_by_expression.insert(key, entity.clone());
+        Some(entity)
+    }
+
+    fn entity_for_reference(&mut self, value: &str, range: &SourceRange) -> Option<EntityId> {
+        if let Some(entity) = self.definition_entity(value, range) {
+            return Some(entity);
+        }
+        let expression = SemanticExpr {
+            kind: SemanticExprKind::Symbol(value.into()),
+            range: range.clone(),
+            provenance: vec![range.clone()],
+        };
+        self.entity_for(&expression)
+    }
+
+    fn definition_entity(&self, symbol: &str, range: &SourceRange) -> Option<EntityId> {
+        let occurrence = self
+            .occurrences
+            .iter()
+            .find(|occurrence| occurrence.range == *range)
+            .or_else(|| {
+                self.occurrences.iter().find(|occurrence| {
+                    occurrence.range.start_offset <= range.start_offset
+                        && range.end_offset <= occurrence.range.end_offset
+                })
+            });
+        self.definitions
+            .iter()
+            .filter(|(entity, definition)| {
+                definition.symbol.trim_start_matches('\\') == symbol.trim_start_matches('\\')
+                    && occurrence.is_none_or(|occurrence| {
+                        entity.component_id == occurrence.component_id
+                            && entity.scope_path.len() <= occurrence.scope_path.len()
+                            && entity
+                                .scope_path
+                                .iter()
+                                .zip(&occurrence.scope_path)
+                                .all(|(left, right)| left == right)
+                    })
+            })
+            .min_by_key(|(entity, definition)| {
+                let distance = definition
+                    .location
+                    .range
+                    .start_offset
+                    .abs_diff(range.start_offset);
+                (std::cmp::Reverse(entity.scope_path.len()), distance)
+            })
+            .map(|(entity, _)| entity.clone())
+    }
+
+    fn emit_relation(&mut self, subject: EntityId, relation: ClaimRelation) {
+        let ordinal = self.output.claims.len();
         let evidence_id = EvidenceId(format!(
-            "{}:{}:typed-{category}-evidence:{ordinal}",
-            source.file_id, source.document_version
+            "{}:{}:canonical-relation-evidence:{ordinal}",
+            self.source.file_id, self.source.document_version
         ));
-        output.evidence.push(EvidenceRecord {
+        let claim_id = ClaimId(format!(
+            "{}:{}:canonical-relation-claim:{ordinal}",
+            self.source.file_id, self.source.document_version
+        ));
+        let mut provenance = relation
+            .entities()
+            .into_iter()
+            .map(|entity| entity.anchor.clone())
+            .chain(std::iter::once(subject.anchor.clone()))
+            .collect::<Vec<_>>();
+        provenance.sort();
+        provenance.dedup();
+        let available_after = relation
+            .entities()
+            .into_iter()
+            .chain(std::iter::once(&subject))
+            .filter_map(|entity| {
+                self.occurrences
+                    .iter()
+                    .find(|occurrence| occurrence.id == entity.anchor)
+                    .map(|occurrence| occurrence.availability_order)
+            })
+            .max()
+            .unwrap_or(0);
+        self.output.evidence.push(EvidenceRecord {
             id: evidence_id.clone(),
-            source: entity.anchor.clone(),
-            scope_path: entity.scope_path.clone(),
-            available_after: anchor.availability_order,
+            source: subject.anchor.clone(),
+            scope_path: subject.scope_path.clone(),
+            available_after,
             polarity: EvidencePolarity::Positive,
             modality: EvidenceModality::Asserted,
             origin: EvidenceOrigin::Explicit,
-            provenance: vec![entity.anchor.clone()],
+            provenance,
             parent_claims: Vec::new(),
-            rule_id: evidence.rule_id.clone(),
+            rule_id: "semath/canonical-relation".into(),
             rule_version: 1,
         });
-        output.claims.push(Claim {
-            id: ClaimId(format!(
-                "{}:{}:typed-{category}-claim:{ordinal}",
-                source.file_id, source.document_version
-            )),
-            subject: entity.clone(),
-            predicate,
-            object: ClaimObject::Value(value),
+        self.output.claims.push(Claim {
+            id: claim_id,
+            subject,
+            predicate: ClaimPredicate::Relates,
+            object: ClaimObject::Value(ClaimValue::Relation(Box::new(relation))),
             evidence_id,
             tier: InferenceTier::ExplicitClaim,
             derivation_depth: 0,
         });
-    };
+    }
 
-    for role in observations.roles.all() {
-        append(
-            &role.symbol,
-            &role.evidence,
-            ClaimPredicate::HasRole,
-            ClaimValue::Concept(role.concept_id),
-            "role",
-        );
-    }
-    for shape in observations.shapes.explicit_claims() {
-        append(
-            &shape.symbol,
-            &shape.evidence,
-            ClaimPredicate::HasShape,
-            ClaimValue::Shape(claim_shape(&shape.kind, shape.dimensions)),
-            "shape",
-        );
-    }
-    for quantity in observations.quantities.explicit() {
-        if let Some(quantity_kind) = quantity.quantity_kind_id {
-            append(
-                &quantity.symbol,
-                &quantity.evidence,
-                ClaimPredicate::HasQuantity,
-                ClaimValue::QuantityKind(quantity_kind),
-                "quantity",
-            );
+    fn emit_scalar_constant(&mut self, subject: &EntityId) {
+        if self
+            .output
+            .claims
+            .iter()
+            .any(|claim| claim.subject == *subject && claim.predicate == ClaimPredicate::HasShape)
+        {
+            return;
         }
-        if let Some(unit) = quantity.unit_id {
-            append(
-                &quantity.symbol,
-                &quantity.evidence,
-                ClaimPredicate::HasUnit,
-                ClaimValue::Unit(unit),
-                "unit",
-            );
-        }
-        if !quantity.dimension.exponents.is_empty() {
-            let exponents = quantity
-                .dimension
-                .exponents
-                .into_iter()
-                .filter_map(|exponent| {
-                    Some(DimensionExponent {
-                        base: exponent.base,
-                        numerator: i16::try_from(exponent.numerator).ok()?,
-                        denominator: u16::try_from(exponent.denominator).ok()?,
-                    })
-                })
-                .collect();
-            append(
-                &quantity.symbol,
-                &quantity.evidence,
-                ClaimPredicate::HasDimension,
-                ClaimValue::Dimension(exponents),
-                "dimension",
-            );
-        }
+        let ordinal = self.output.claims.len();
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:canonical-constant-evidence:{ordinal}",
+            self.source.file_id, self.source.document_version
+        ));
+        self.output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: subject.anchor.clone(),
+            scope_path: subject.scope_path.clone(),
+            available_after: self
+                .occurrences
+                .iter()
+                .find(|occurrence| occurrence.id == subject.anchor)
+                .map_or(0, |occurrence| occurrence.availability_order),
+            polarity: EvidencePolarity::Positive,
+            modality: EvidenceModality::Asserted,
+            origin: EvidenceOrigin::Explicit,
+            provenance: vec![subject.anchor.clone()],
+            parent_claims: Vec::new(),
+            rule_id: "semath/canonical-scalar-constant".into(),
+            rule_version: 1,
+        });
+        self.output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:canonical-constant-claim:{ordinal}",
+                self.source.file_id, self.source.document_version
+            )),
+            subject: subject.clone(),
+            predicate: ClaimPredicate::HasShape,
+            object: ClaimObject::Value(ClaimValue::Shape(ClaimShape::Scalar)),
+            evidence_id,
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
     }
-    output
+}
+
+fn stable_text_digest(value: &str) -> String {
+    let mut hash = 0xcbf29ce484222325_u64;
+    for byte in value.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    format!("{hash:016x}")
 }
 
 fn closest_definition<'a>(
@@ -1477,17 +2089,30 @@ impl SemathEngine {
                 rename_proposal(document, parsed, cursor_offset, &new_name)
             }
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
-                diagnostics: document_diagnostics(document, observations, hygiene_enabled),
+                diagnostics: document_diagnostics(
+                    document,
+                    observations,
+                    &self.index.semantic,
+                    hygiene_enabled,
+                ),
             },
-            Query::ExplainDiagnostic { code, .. } => QueryValue::DiagnosticExplanation {
+            Query::ExplainDiagnostic { ref code, .. } => QueryValue::DiagnosticExplanation {
                 diagnostic: observations
                     .shapes
-                    .diagnostic(&code, cursor_offset)
-                    .or_else(|| observations.roles.diagnostic(&code, cursor_offset))
-                    .or_else(|| observations.quantities.diagnostic(&code, cursor_offset))
+                    .diagnostic(code, cursor_offset)
+                    .or_else(|| observations.roles.diagnostic(code, cursor_offset))
+                    .or_else(|| observations.quantities.diagnostic(code, cursor_offset))
+                    .or_else(|| {
+                        constraint_diagnostics(&self.index.semantic, file_id)
+                            .into_iter()
+                            .find(|diagnostic| {
+                                diagnostic.code == code.as_str()
+                                    && diagnostic.range.contains(cursor_offset)
+                            })
+                    })
                     .or_else(|| {
                         hygiene_enabled
-                            .then(|| document.hygiene.diagnostic(&code, cursor_offset))
+                            .then(|| document.hygiene.diagnostic(code, cursor_offset))
                             .flatten()
                     }),
             },
@@ -1615,6 +2240,9 @@ impl SemathEngine {
                 semantic_dependency_edges: semantic_stats.dependency_edges,
                 invalidated_semantic_claims: semantic_stats.invalidated_claims,
                 semantic_candidates: semantic_stats.candidates,
+                semantic_constraint_work: semantic_stats.constraint_work,
+                semantic_derived_claims: semantic_stats.derived_claims,
+                semantic_constraint_truncated: semantic_stats.constraint_truncated,
                 prose_clauses: analyzed_file_ids
                     .iter()
                     .map(|file_id| self.index.observations(file_id).prose_match_stats().clauses)
@@ -1777,10 +2405,13 @@ impl SemathEngine {
         let mut context = observations.context(
             definitions,
             symbol_name,
-            entity_id,
+            entity_id.clone(),
             offset,
             self.index.external_types.get(file_id),
         );
+        if let Some(entity) = &entity_id {
+            append_index_claims(&self.index.semantic, entity, &mut context);
+        }
         if let Some((_, occurrence)) = symbol
             && let Some(occurrence_id) = self.index.occurrences_by_range.get(&(
                 file_id.to_owned(),
@@ -1853,14 +2484,18 @@ impl SemathEngine {
             .collect::<Vec<_>>();
         let declarations_truncated = declarations.len() > MAX_VIEW_DECLARATIONS;
         declarations.truncate(MAX_VIEW_DECLARATIONS);
-        let mut diagnostics = document_diagnostics(document, observations, hygiene_enabled)
-            .into_iter()
-            .filter(|diagnostic| {
-                parsed.is_some_and(|math| {
-                    ranges_overlap(&diagnostic.range, &math.region.content_range)
-                }) || diagnostic.range.contains(offset)
-            })
-            .collect::<Vec<_>>();
+        let mut diagnostics = document_diagnostics(
+            document,
+            observations,
+            &self.index.semantic,
+            hygiene_enabled,
+        )
+        .into_iter()
+        .filter(|diagnostic| {
+            parsed.is_some_and(|math| ranges_overlap(&diagnostic.range, &math.region.content_range))
+                || diagnostic.range.contains(offset)
+        })
+        .collect::<Vec<_>>();
         diagnostics.extend(
             symbol_info
                 .as_ref()
@@ -2277,19 +2912,187 @@ fn candidate_status(supporting: &[ClaimId], rejecting: &[ClaimId]) -> SemanticCa
     }
 }
 
+fn append_index_claims(
+    index: &ProjectSemanticIndex,
+    entity: &EntityId,
+    context: &mut SemanticContextInfo,
+) {
+    let mut claims = index
+        .claims_for_entity(entity)
+        .into_iter()
+        .filter(|claim| claim.tier == InferenceTier::Constraint)
+        .filter_map(|claim| {
+            let ClaimObject::Value(value) = &claim.object else {
+                return None;
+            };
+            let evidence = index.evidence(&claim.evidence_id)?;
+            let mut source_ranges = evidence
+                .provenance
+                .iter()
+                .filter_map(|source| index.occurrence(source))
+                .map(|occurrence| occurrence.range.clone())
+                .collect::<Vec<_>>();
+            source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+            source_ranges.dedup();
+            Some(crate::SemanticClaimInfo {
+                claim_id: claim.id.0.clone(),
+                predicate: claim_predicate_name(&claim.predicate).into(),
+                value: claim_value_display(value)?,
+                status: SemanticClaimStatus::Supported,
+                evidence: vec![Evidence {
+                    rule_id: evidence.rule_id.clone(),
+                    kind: "derived-constraint".into(),
+                    strength: "strong".into(),
+                    source_ranges,
+                }],
+                conflicts: Vec::new(),
+            })
+        })
+        .collect::<Vec<_>>();
+    claims.sort_by(|left, right| {
+        left.predicate
+            .cmp(&right.predicate)
+            .then(left.value.cmp(&right.value))
+            .then(left.claim_id.cmp(&right.claim_id))
+    });
+    context.claims.extend(claims);
+    context.claims.sort_by(|left, right| {
+        left.predicate
+            .cmp(&right.predicate)
+            .then(left.value.cmp(&right.value))
+            .then(left.claim_id.cmp(&right.claim_id))
+    });
+    context
+        .claims
+        .dedup_by(|left, right| left.claim_id == right.claim_id);
+    context.truncated |= context.claims.len() > MAX_VIEW_CLAIMS;
+    context.claims.truncate(MAX_VIEW_CLAIMS);
+}
+
+fn claim_predicate_name(predicate: &ClaimPredicate) -> &'static str {
+    match predicate {
+        ClaimPredicate::Defines => "definition",
+        ClaimPredicate::Names => "name",
+        ClaimPredicate::Abbreviates => "abbreviation",
+        ClaimPredicate::Aliases => "alias",
+        ClaimPredicate::HasRole => "concept",
+        ClaimPredicate::HasType => "type",
+        ClaimPredicate::HasShape => "shape",
+        ClaimPredicate::HasDimension => "dimension",
+        ClaimPredicate::HasQuantity => "quantity",
+        ClaimPredicate::HasUnit => "unit",
+        ClaimPredicate::Assumes => "assumption",
+        ClaimPredicate::Relates => "relation",
+    }
+}
+
+fn claim_value_display(value: &ClaimValue) -> Option<String> {
+    match value {
+        ClaimValue::Concept(value)
+        | ClaimValue::Role(value)
+        | ClaimValue::Type(value)
+        | ClaimValue::Unit(value)
+        | ClaimValue::QuantityKind(value)
+        | ClaimValue::Scalar(value)
+        | ClaimValue::Text(value) => Some(value.clone()),
+        ClaimValue::Shape(shape) => Some(match shape {
+            ClaimShape::Scalar => "Scalar".into(),
+            ClaimShape::Vector(dimensions) => format!("Vector[{}]", dimensions.join(" × ")),
+            ClaimShape::Matrix(dimensions) => format!("Matrix[{}]", dimensions.join(" × ")),
+            ClaimShape::Tensor(dimensions) => format!("Tensor[{}]", dimensions.join(" × ")),
+            ClaimShape::Function { domain, codomain } => format!(
+                "Function[{} → {}]",
+                claim_value_display(&ClaimValue::Shape(*domain.clone()))?,
+                claim_value_display(&ClaimValue::Shape(*codomain.clone()))?
+            ),
+            ClaimShape::Unknown => "Unknown shape".into(),
+        }),
+        ClaimValue::Dimension(exponents) => Some(
+            exponents
+                .iter()
+                .map(|exponent| {
+                    if exponent.denominator == 1 {
+                        format!("{}^{}", exponent.base, exponent.numerator)
+                    } else {
+                        format!(
+                            "{}^{}/{}",
+                            exponent.base, exponent.numerator, exponent.denominator
+                        )
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join(" · "),
+        ),
+        ClaimValue::Condition(condition) => Some(format!("{condition:?}")),
+        ClaimValue::Relation(_) => None,
+    }
+}
+
 fn document_diagnostics(
     document: &AnalyzedDocument,
     observations: &DocumentSemanticObservations,
+    semantic: &ProjectSemanticIndex,
     hygiene_enabled: bool,
 ) -> Vec<SemanticDiagnostic> {
     let mut diagnostics = observations.shapes.diagnostics.clone();
     diagnostics.extend(observations.quantities.diagnostics.iter().cloned());
     diagnostics.extend(observations.roles.diagnostics.iter().cloned());
+    diagnostics.extend(constraint_diagnostics(semantic, &document.document.file_id));
     if hygiene_enabled {
         diagnostics.extend(document.hygiene.diagnostics.iter().cloned());
     }
     diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
     diagnostics
+}
+
+fn constraint_diagnostics(
+    semantic: &ProjectSemanticIndex,
+    file_id: &str,
+) -> Vec<SemanticDiagnostic> {
+    semantic
+        .constraint_conflicts_for(file_id)
+        .into_iter()
+        .filter_map(|conflict| {
+            let anchor = semantic.occurrence(&conflict.subject.anchor)?;
+            let mut evidence = conflict
+                .parent_claims
+                .iter()
+                .filter_map(|claim_id| semantic.claim(claim_id))
+                .filter_map(|claim| semantic.evidence(&claim.evidence_id))
+                .map(|record| {
+                    let mut source_ranges = record
+                        .provenance
+                        .iter()
+                        .filter_map(|source| semantic.occurrence(source))
+                        .map(|occurrence| occurrence.range.clone())
+                        .collect::<Vec<_>>();
+                    source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+                    source_ranges.dedup();
+                    Evidence {
+                        rule_id: record.rule_id.clone(),
+                        kind: if record.origin == EvidenceOrigin::Derived {
+                            "derived-constraint"
+                        } else {
+                            "explicit-constraint"
+                        }
+                        .into(),
+                        strength: "hard".into(),
+                        source_ranges,
+                    }
+                })
+                .collect::<Vec<_>>();
+            evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
+            evidence.dedup();
+            Some(SemanticDiagnostic {
+                code: conflict.code.clone(),
+                severity: "warning".into(),
+                message: "Established semantic constraints are incompatible.".into(),
+                explanation: conflict.summary.clone(),
+                range: anchor.range.clone(),
+                evidence,
+            })
+        })
+        .collect()
 }
 
 fn symbol_diagnostics(
