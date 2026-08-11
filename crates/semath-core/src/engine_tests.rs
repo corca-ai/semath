@@ -1070,3 +1070,80 @@ fn equality_rhs_identity_projects_the_transferred_shape_at_later_uses() {
         symbol.shapes
     );
 }
+
+#[test]
+fn equality_chain_transfers_and_retracts_typed_facts_as_one_dependency_closure() {
+    let content = "Let $x$ be a three-dimensional vector. $y=x$. $z=y$. Inspect $z$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.rfind("$z$").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.symbol.as_ref().is_some_and(|symbol| symbol
+            .shapes
+            .iter()
+            .any(|shape| { shape.kind == "vector" && shape.dimensions == ["3".to_owned()] })),
+        "{:?}",
+        view.symbol
+    );
+    assert!(view.context.claims.iter().any(|claim| {
+        claim.predicate == "shape"
+            && claim.value == "Vector[3]"
+            && claim
+                .evidence
+                .iter()
+                .any(|evidence| evidence.rule_id == "semath/constraint/equality")
+    }));
+
+    let retracted = "Let $x$ be a three-dimensional vector. $z=y$. Inspect $z$.";
+    engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", retracted, 2)),
+            }],
+        })
+        .unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: retracted.rfind("$z$").unwrap() as u32 + 1,
+            },
+            2,
+            2,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.symbol
+            .as_ref()
+            .is_some_and(|symbol| symbol.shapes.is_empty()),
+        "{:?}",
+        view.symbol
+    );
+    assert!(
+        view.context
+            .claims
+            .iter()
+            .all(|claim| claim.value != "Vector[3]"),
+        "{:?}",
+        view.context.claims
+    );
+}
