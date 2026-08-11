@@ -5,9 +5,9 @@ use regex::Regex;
 
 use crate::canonical::{SemanticExpr, SemanticExprKind, declared_symbols};
 use crate::construction::{
-    coordinated_descriptions, coordination_lead, fronted_shared_description, is_declaration_lead,
-    match_apposition, match_definition, match_parenthetical, match_passive_definition,
-    match_quantified,
+    coordinated_descriptions, coordination_lead, defines_by_formula, fronted_labeled_descriptions,
+    fronted_shared_description, is_declaration_lead, match_apposition, match_definition,
+    match_fronted_single, match_parenthetical, match_passive_definition, match_quantified,
 };
 use crate::pack::{PackActivationStructure, built_in_packs};
 use crate::parser::ParsedMath;
@@ -20,12 +20,12 @@ use crate::{
 };
 
 static VECTOR_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\b([a-z]|[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)(?:[ -]dimensional|[ -])\s*(?:(?:real|normalized)\s+)*(?:state\s+|control\s+)?(?:vectors?|states?|inputs?|controls?)(?:\s+of\s+[a-z -]+)?\s*(?:,?\s+and)?\s*$")
+    Regex::new(r"(?i)\b([a-z]|[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)[ -]dimensional\s*(?:[a-z][a-z-]*\s+){0,4}(?:vectors?|states?|inputs?|controls?)(?:\s+of\s+[a-z -]+)?\s*(?:,?\s+and)?\s*$")
         .unwrap()
 });
 static MATRIX_DIMENSIONS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r"(?i)\b([a-z0-9]+)(?:\s+by\s+|\s+x\s+|\s*×\s*|\s*\\times\s*)([a-z0-9]+)(?:\s+(?:(?:real|symmetric|diagonal|orthogonal|positive[ -]definite|positive[ -]semidefinite|state|input|system)\s+)*(?:matrix|matrices))?\s*(?:,?\s+and)?\s*$",
+        r"(?i)\b([a-z0-9]+)(?:\s+by\s+|\s+x\s+|\s*×\s*|\s*\\times\s*)([a-z0-9]+)(?:\s+(?:[a-z][a-z-]*\s+){0,4}(?:matrix|matrices))?\s*(?:,?\s+and)?\s*$",
     )
     .unwrap()
 });
@@ -139,12 +139,37 @@ impl ScientificSemanticEvidence {
         law_id: &str,
         range: &SourceRange,
     ) -> Option<&LawActivationEvidence> {
-        self.law_activations.iter().find(|activation| {
+        let matching = |activation: &&LawActivationEvidence| {
             activation.pack_id == pack_id
                 && activation.law_id == law_id
                 && activation.frame.establishes()
-                && ranges_overlap(&activation.clause_range, range)
-        })
+        };
+        if let Some(activation) = self
+            .law_activations
+            .iter()
+            .filter(matching)
+            .find(|activation| ranges_overlap(&activation.clause_range, range))
+        {
+            return Some(activation);
+        }
+
+        // Scientific prose commonly names a law or model, declares its roles,
+        // and puts the asserted equation in the immediately following clause.
+        // Keep this attachment local: do not let a law name leak across another
+        // clause, section, or unrelated formula later in the document.
+        let formula_clause = self.clause_for(range)?;
+        let previous_clause = self
+            .clauses
+            .iter()
+            .filter(|clause| clause.range.end_offset <= formula_clause.range.start_offset)
+            .max_by_key(|clause| clause.range.end_offset)?;
+        self.law_activations
+            .iter()
+            .filter(matching)
+            .find(|activation| {
+                activation.clause_range == previous_clause.range
+                    && previous_clause.frame.establishes()
+            })
     }
 
     pub fn formula_operations(
@@ -168,7 +193,11 @@ fn primary_symbol(document: &ProjectDocument, math: &ParsedMath) -> Option<(Stri
     declared_symbols(document, &math.region.content_range)
         .into_iter()
         .next()
-        .or_else(|| math.symbols.first().cloned())
+        .or_else(|| {
+            math.symbols
+                .first()
+                .map(|(symbol, range)| (symbol.trim_start_matches('\\').to_owned(), range.clone()))
+        })
 }
 
 pub(crate) fn observe_prose(
@@ -199,6 +228,7 @@ pub(crate) fn observe_prose(
     collect_assumptions(&index, &clauses, &mentions, &mut analysis);
 
     collect_coordinated_definitions(document, source, parsed, &index, &clauses, &mut analysis);
+    collect_cross_clause_ordered_definitions(document, parsed, &index, &clauses, &mut analysis);
     collect_clause_definitions(document, source, parsed, &index, &clauses, &mut analysis);
     for math in parsed {
         analysis.match_stats.matcher_work += 1;
@@ -266,7 +296,24 @@ pub(crate) fn observe_prose(
             continue;
         }
 
-        if let Some(passive) = match_passive_definition(before, after) {
+        if defines_by_formula(before, after) {
+            let evidence_end = end_byte
+                + after
+                    .to_ascii_lowercase()
+                    .find("by")
+                    .map_or(0, |offset| offset + 2);
+            push_claim(
+                &mut analysis,
+                document,
+                &index,
+                &symbol,
+                &symbol_range,
+                "function",
+                "english-formula-definition",
+                before_start,
+                evidence_end,
+            );
+        } else if let Some(passive) = match_passive_definition(before, after) {
             push_claim(
                 &mut analysis,
                 document,
@@ -278,6 +325,23 @@ pub(crate) fn observe_prose(
                 before_start + passive.prefix_start,
                 end_byte + passive.suffix_end,
             );
+        } else if math.symbols.len() > 1
+            && let Some((description, prefix_start, suffix_end)) =
+                fronted_shared_description(before, after)
+        {
+            for (listed_symbol, listed_range) in &math.symbols {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    listed_symbol,
+                    listed_range,
+                    description,
+                    "english-fronted-inline-list-definition",
+                    before_start + prefix_start,
+                    end_byte + suffix_end,
+                );
+            }
         } else if let Some(explicit) = explicit_single_definition(before, after, math) {
             push_claim(
                 &mut analysis,
@@ -326,6 +390,18 @@ pub(crate) fn observe_prose(
                 before_start + quantified.prefix_start,
                 end_byte + quantified.suffix_end,
             );
+        } else if let Some(fronted) = match_fronted_single(before, after) {
+            push_claim(
+                &mut analysis,
+                document,
+                &index,
+                &symbol,
+                &symbol_range,
+                fronted.description,
+                fronted.rule_id,
+                before_start + fronted.prefix_start,
+                end_byte + fronted.suffix_end,
+            );
         } else if is_declaration_lead(before) && math.symbols.len() > 1 {
             push_claim(
                 &mut analysis,
@@ -351,8 +427,133 @@ pub(crate) fn observe_prose(
             &mut analysis,
         );
     }
+    let document_index = SourceIndex::new(&document.content);
+    attach_equation_reference_definitions(
+        &document.content,
+        &document_index,
+        parsed,
+        &clauses,
+        &mut analysis,
+    );
     deduplicate(&mut analysis);
     analysis
+}
+
+fn attach_equation_reference_definitions(
+    source: &str,
+    index: &SourceIndex,
+    parsed: &[ParsedMath],
+    clauses: &[ScientificClause<'_>],
+    analysis: &mut ProseObservations,
+) {
+    let mut search_from = 0;
+    while let Some(relative) = source[search_from..].find("\\label{") {
+        let label_start = search_from + relative;
+        let key_start = label_start + "\\label{".len();
+        let Some(relative_end) = source[key_start..].find('}') else {
+            break;
+        };
+        let key_end = key_start + relative_end;
+        let key = &source[key_start..key_end];
+        search_from = key_end + 1;
+        let label_offset = index.utf16_for_byte(label_start);
+        let Some(formula) = parsed.iter().find(|math| {
+            math.region.full_range.start_offset <= label_offset
+                && label_offset < math.region.full_range.end_offset
+        }) else {
+            continue;
+        };
+        let reference = format!("\\ref{{{key}}}");
+        let Some(reference_relative) = source[search_from..].find(&reference) else {
+            continue;
+        };
+        let reference_start = search_from + reference_relative;
+        let Some(clause) = clause_at(clauses, reference_start) else {
+            continue;
+        };
+        let clause_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        for definition in &mut analysis.definitions {
+            if !definition
+                .evidence
+                .source_ranges
+                .iter()
+                .any(|range| ranges_overlap(range, &clause_range))
+            {
+                continue;
+            }
+            definition.evidence.rule_id = "english-equation-reference-definition".into();
+            definition.evidence.kind = "attached-prose".into();
+            definition
+                .evidence
+                .source_ranges
+                .push(formula.region.content_range.clone());
+            definition
+                .evidence
+                .source_ranges
+                .sort_by_key(|range| (range.start_offset, range.end_offset));
+            definition.evidence.source_ranges.dedup();
+        }
+    }
+}
+
+fn collect_cross_clause_ordered_definitions(
+    document: &ProjectDocument,
+    parsed: &[ParsedMath],
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    output: &mut ProseObservations,
+) {
+    for pair in clauses.windows(2) {
+        let [symbols_clause, description_clause] = pair else {
+            continue;
+        };
+        if !symbols_clause.frame.establishes() || !description_clause.frame.establishes() {
+            continue;
+        }
+        let text = description_clause.text.trim();
+        let lower = text.to_ascii_lowercase();
+        let Some(lead) = ["they denote ", "these denote ", "they represent "]
+            .into_iter()
+            .find(|lead| lower.starts_with(lead))
+        else {
+            continue;
+        };
+        let Some(marker) = lower.find("respectively") else {
+            continue;
+        };
+        let body = text[lead.len()..marker].trim().trim_end_matches(',').trim();
+        let symbols = parsed
+            .iter()
+            .filter(|math| {
+                let start = index.byte_for_utf16(math.region.full_range.start_offset);
+                symbols_clause.start <= start
+                    && start < symbols_clause.end
+                    && is_definition_slot_math(math)
+            })
+            .collect::<Vec<_>>();
+        let Some(descriptions) = align_ordered_descriptions(body, symbols.len()) else {
+            continue;
+        };
+        for (math, description) in symbols.into_iter().zip(descriptions) {
+            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                continue;
+            };
+            push_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                description,
+                "english-cross-clause-respectively-definition",
+                symbols_clause.start,
+                description_clause.end,
+            );
+        }
+    }
 }
 
 fn collect_semantic_evidence(
@@ -676,6 +877,14 @@ fn collect_clause_definitions(
         let sentence = clause.text;
         let sentence_lower = sentence.to_ascii_lowercase();
         if sentence_lower.contains("respectively") || sentence_lower.contains("in that order") {
+            let definitions_before = output
+                .definitions
+                .iter()
+                .filter(|definition| {
+                    let start = index.byte_for_utf16(definition.location.range.start_offset);
+                    sentence_start <= start && start < sentence_end
+                })
+                .count();
             collect_ordered_clause_definition(
                 document,
                 source,
@@ -685,7 +894,20 @@ fn collect_clause_definitions(
                 sentence_start,
                 sentence_end,
             );
-            continue;
+            let definitions_after = output
+                .definitions
+                .iter()
+                .filter(|definition| {
+                    let start = index.byte_for_utf16(definition.location.range.start_offset);
+                    sentence_start <= start && start < sentence_end
+                })
+                .count();
+            if definitions_after > definitions_before
+                || definitions_before >= 2
+                || !document.content[sentence_start..sentence_end].contains("\\ref{")
+            {
+                continue;
+            }
         }
         let regions = parsed
             .iter()
@@ -698,6 +920,43 @@ fn collect_clause_definitions(
             })
             .collect::<Vec<_>>();
         if regions.len() < 2 {
+            continue;
+        }
+        let starts = regions
+            .iter()
+            .map(|math| index.byte_for_utf16(math.region.full_range.start_offset))
+            .collect::<Vec<_>>();
+        let ends = regions
+            .iter()
+            .map(|math| index.byte_for_utf16(math.region.full_range.end_offset))
+            .collect::<Vec<_>>();
+        let label_segments = starts
+            .iter()
+            .enumerate()
+            .map(|(position, start)| {
+                let segment_start = position
+                    .checked_sub(1)
+                    .map_or(sentence_start, |previous| ends[previous]);
+                &source[segment_start..*start]
+            })
+            .collect::<Vec<_>>();
+        if let Some(descriptions) = fronted_labeled_descriptions(&label_segments) {
+            for (math, description) in regions.iter().zip(descriptions) {
+                let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                    continue;
+                };
+                push_claim(
+                    output,
+                    document,
+                    index,
+                    &symbol,
+                    &symbol_range,
+                    description,
+                    "english-fronted-labeled-definition",
+                    sentence_start,
+                    sentence_end,
+                );
+            }
             continue;
         }
         let prefix_end = index.byte_for_utf16(regions[0].region.full_range.start_offset);
@@ -720,7 +979,16 @@ fn collect_clause_definitions(
                 definition_clause(&source[end..sentence_end]).1
             })
             .count();
-        if !contextual && explicit < 2 {
+        let first_is_explicit = regions.first().is_some_and(|math| {
+            let end = index.byte_for_utf16(math.region.full_range.end_offset);
+            definition_clause(&source[end..sentence_end]).1
+        });
+        // A leading copular/definition verb scopes over a coordinated list:
+        // “q denotes heat flux, k conductivity, and T temperature”.  Requiring
+        // the elided verb to be repeated for every item rejects ordinary
+        // scientific English and also breaks definitions attached by an
+        // equation reference.
+        if !contextual && explicit < 2 && !first_is_explicit {
             continue;
         }
         for (position, math) in regions.iter().enumerate() {
@@ -1424,6 +1692,46 @@ mod tests {
     }
 
     #[test]
+    fn attaches_a_leading_apposition_before_a_later_formula() {
+        let analysis = analyze("$x$, the system state vector, evolves according to $\\dot{x}=Ax$.");
+        assert!(
+            analysis
+                .definitions
+                .iter()
+                .any(|definition| definition.symbol == "x"
+                    && definition.description == "system state vector"),
+            "{:?}",
+            analysis.definitions
+        );
+    }
+
+    #[test]
+    fn carries_an_ordered_pronoun_across_a_semicolon() {
+        let analysis = analyze(
+            "The quantities are $p$, $V$, and $T$; they denote pressure, volume, and temperature, respectively. Thus $pV/T$ is considered.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        for expected in [("p", "pressure"), ("V", "volume"), ("T", "temperature")] {
+            assert!(definitions.contains(&expected), "{definitions:?}");
+        }
+    }
+
+    #[test]
+    fn attaches_definitions_through_an_explicit_equation_reference() {
+        let source = "$q=-k\\nabla T\\label{eq:flux}$ In Equation~\\ref{eq:flux}, $q$ denotes heat flux, $k$ thermal conductivity, and $T$ temperature.";
+        let analysis = analyze(source);
+        assert_eq!(analysis.definitions.len(), 3, "{:?}", analysis.definitions);
+        assert!(analysis.definitions.iter().all(|definition| {
+            definition.evidence.kind == "attached-prose"
+                && definition.evidence.source_ranges.len() == 2
+        }));
+    }
+
+    #[test]
     fn ignores_unbounded_nearby_type_words() {
         let analysis = analyze(
             "The vector near $x$ is only an example.\nWe compare $A$ with a matrix.\n$v$ is a vector field.\n$G$ is a matrix group.",
@@ -1468,7 +1776,7 @@ mod tests {
         assert!(descriptions.contains(&("z", "output")));
         assert!(descriptions.contains(&("p", "$d$")), "{descriptions:?}");
         assert!(descriptions.contains(&("q", "$e$")));
-        assert!(descriptions.contains(&("r", "$f$")));
+        assert!(descriptions.contains(&("r", "$f$")), "{descriptions:?}");
         assert!(
             descriptions.contains(&("U", "vector spaces")),
             "{descriptions:?}"

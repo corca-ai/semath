@@ -10,7 +10,7 @@ use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnos
 const MAX_ROLE_CLAIMS: usize = 8;
 const MAX_ROLE_DIAGNOSTICS: usize = 8;
 
-static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, bool)>> = LazyLock::new(|| {
+static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, u8)>> = LazyLock::new(|| {
     let mut terms = built_in_packs()
         .iter()
         .flat_map(|pack| {
@@ -22,39 +22,52 @@ static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, bool)>> = LazyLock::n
                     (
                         entry.id.clone(),
                         format!("{}:{}", pack.namespace, entry.id),
-                        false,
+                        0,
                     )
                 })
                 .collect::<Vec<_>>();
             for concept in &pack.concepts {
                 let concept_id = format!("{}:{}", pack.namespace, concept.id);
+                entries.push((concept.title.clone(), concept_id.clone(), 2));
                 entries.extend(
                     concept
                         .aliases
                         .iter()
                         .cloned()
-                        .map(|alias| (alias, concept_id.clone(), true)),
+                        .map(|alias| (alias, concept_id.clone(), 2)),
                 );
             }
             for law in &pack.laws {
                 for role in &law.roles {
                     if let Some(concept) = role.concept.split(':').next_back() {
-                        entries.push((concept.into(), role.concept.clone(), true));
+                        entries.push((concept.into(), role.concept.clone(), 2));
                     }
                 }
             }
             entries
         })
-        .filter(|(role, _, _)| !matches!(role.as_str(), "matrix" | "scalar" | "tensor" | "vector"))
-        .map(|(role, concept_id, law_backed)| {
+        .filter(|(role, _, _)| {
+            !matches!(
+                role.trim().to_ascii_lowercase().as_str(),
+                "matrix"
+                    | "matrices"
+                    | "scalar"
+                    | "scalars"
+                    | "tensor"
+                    | "tensors"
+                    | "vector"
+                    | "vectors"
+            )
+        })
+        .map(|(role, concept_id, priority)| {
             (
                 role.to_ascii_lowercase()
-                    .replace('-', " ")
-                    .split_whitespace()
+                    .split(|character: char| !character.is_ascii_alphanumeric())
+                    .filter(|word| !word.is_empty())
                     .map(str::to_owned)
                     .collect::<Vec<_>>(),
                 concept_id,
-                law_backed,
+                priority,
             )
         })
         .collect::<Vec<_>>();
@@ -113,7 +126,7 @@ impl RoleObservations {
             .roles
             .iter()
             .filter(|claim| {
-                claim.info.symbol == symbol
+                semantic_symbol_eq(&claim.info.symbol, symbol)
                     && (self.scopes.depth(claim.scope_id) == 0
                         || claim.available_from <= offset
                         || claim.symbol_range.contains(offset))
@@ -142,7 +155,7 @@ impl RoleObservations {
             .entries
             .iter()
             .filter(|entry| {
-                entry.symbol == symbol
+                semantic_symbol_eq(&entry.symbol, symbol)
                     && entry.diagnostic.range.start_offset <= offset
                     && self.scopes.visible(entry.scope_id, offset)
             })
@@ -164,6 +177,14 @@ impl RoleObservations {
             .find(|diagnostic| diagnostic.code == code && diagnostic.range.contains(offset))
             .cloned()
     }
+}
+
+fn semantic_symbol_eq(left: &str, right: &str) -> bool {
+    let left = left.trim_start_matches('\\');
+    let right = right.trim_start_matches('\\');
+    left == right
+        || ((left.contains('_') || right.contains('_'))
+            && left.split('_').next() == right.split('_').next())
 }
 
 pub(crate) fn observe_roles(
@@ -318,13 +339,15 @@ fn classified_pack_concept(words: &[&str]) -> Option<String> {
         .filter(|(term, _, _)| contains_term(words, term))
         .collect::<Vec<_>>();
     let specificity = matches.iter().map(|(term, _, _)| term.len()).max()?;
-    let has_law_backed_match = matches
+    let priority = matches
         .iter()
-        .any(|(term, _, law_backed)| term.len() == specificity && *law_backed);
+        .filter(|(term, _, _)| term.len() == specificity)
+        .map(|(_, _, priority)| *priority)
+        .max()?;
     let concepts = matches
         .into_iter()
-        .filter(|(term, _, law_backed)| {
-            term.len() == specificity && (!has_law_backed_match || *law_backed)
+        .filter(|(term, _, candidate_priority)| {
+            term.len() == specificity && *candidate_priority == priority
         })
         .map(|(_, concept, _)| concept.as_str())
         .collect::<BTreeSet<_>>();
@@ -624,6 +647,26 @@ mod tests {
         assert!(classified.contains(&("y", "optimization-ml:iterate")));
         assert!(classified.contains(&("g", "optimization-ml:gradient")));
         assert!(classified.contains(&("a", "optimization-ml:step-size")));
+    }
+
+    #[test]
+    fn explicit_pack_concepts_outrank_generated_descriptive_phrases() {
+        for (description, expected) in [
+            ("control input vector", "control-systems:control-input"),
+            ("momentum vector", "quantities-units:momentum"),
+            ("iterate vector", "optimization-ml:iterate"),
+            ("force vector", "quantities-units:force"),
+            ("output vector", "control-systems:output"),
+            ("output matrix", "control-systems:output-matrix"),
+            ("state vector", "control-systems:state"),
+            ("feedthrough matrix", "control-systems:feedthrough-matrix"),
+        ] {
+            assert_eq!(
+                classify_role(description).as_deref(),
+                Some(expected),
+                "{description}"
+            );
+        }
     }
 
     #[test]

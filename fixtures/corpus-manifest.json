@@ -609,7 +609,9 @@
       "capabilities": {
         "concept-vocabulary": {
           "maturity": "evaluated",
-          "suiteIds": []
+          "suiteIds": [
+            "probability-statistics-depth"
+          ]
         },
         "declarations-roles": {
           "maturity": "evaluated",
@@ -617,14 +619,16 @@
             "probability-probe",
             "probability-diversity",
             "probability-union-probe",
-            "probability-union-diversity"
+            "probability-union-diversity",
+            "probability-statistics-depth"
           ]
         },
         "shape-quantity-unit": {
           "maturity": "evaluated",
           "suiteIds": [
             "probability-diversity",
-            "probability-union-diversity"
+            "probability-union-diversity",
+            "probability-statistics-depth"
           ]
         },
         "law-recognition": {
@@ -633,7 +637,8 @@
             "probability-probe",
             "probability-diversity",
             "probability-union-probe",
-            "probability-union-diversity"
+            "probability-union-diversity",
+            "probability-statistics-depth"
           ]
         },
         "diagnostics-refusal": {
@@ -642,21 +647,24 @@
             "probability-probe",
             "probability-diversity",
             "probability-union-probe",
-            "probability-union-diversity"
+            "probability-union-diversity",
+            "probability-statistics-depth"
           ]
         },
         "project-macro": {
           "maturity": "evaluated",
           "suiteIds": [
             "probability-diversity",
-            "probability-union-diversity"
+            "probability-union-diversity",
+            "probability-statistics-depth"
           ]
         },
         "navigation-explanation": {
           "maturity": "evaluated",
           "suiteIds": [
             "probability-diversity",
-            "probability-union-diversity"
+            "probability-union-diversity",
+            "probability-statistics-depth"
           ]
         }
       }
@@ -1005,6 +1013,34 @@
       "kind": "law",
       "packId": "control-systems",
       "path": "corpus/control-engineering-depth.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 6,
+          "syntaxStructure": 8,
+          "proseFamily": 16,
+          "projectTopology": 5,
+          "mutationFamily": 8
+        },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "probability-statistics-depth",
+      "kind": "law",
+      "packId": "probability",
+      "path": "corpus/probability-statistics-depth.json",
       "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,

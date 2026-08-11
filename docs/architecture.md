@@ -108,14 +108,17 @@ Normalization is layered:
 2. structural normalization applies only universally safe equivalences;
 3. a typed law may admit further forms only under its declared constraints.
 
-Unknown macros, unresolved roles, incompatible shapes, and contradictory prose
-remain uncertainty. They are never filled in by guesswork.
+Unknown meaning, unresolved roles, incompatible shapes, and contradictory prose
+remain uncertainty. Equation metadata such as labels and tags is excluded from
+the relation while its source range remains available for discourse attachment.
+These gaps are never filled in by guesswork.
 
 Transparent macro structure supplied by wasmtex may contribute meaning in both
 formulas and prose declarations. Generated nodes inherit only the real call
-and definition provenance and are never editable locations. Unresolved,
-cyclic, truncated, or otherwise opaque calls contribute no semantic tokens; a
-command name is not treated as its meaning.
+and definition provenance and are never editable locations. Opaque generated
+notation and cyclic or truncated expansions produce an explicit engine-limit
+decision; an ordinary command's macro-resolution status alone does not make it
+opaque, and a command name is never treated as its expansion meaning.
 
 ## Domain packs
 
@@ -194,7 +197,9 @@ two different physical quantities remain incompatible.
 Runtime concepts always use the pack-qualified identity
 `<namespace>:<concept>`; display labels are derived views, never an alternate
 identity system. Longer pack vocabulary terms take precedence over embedded
-generic terms, while equal-specificity collisions remain unresolved.
+generic terms, while equal-specificity collisions remain unresolved. Concept
+titles, reviewed aliases, and semantic role IDs may classify prose; descriptive
+law-role sentences do not become unreviewed global aliases.
 
 Each law owns one `canonicalRelation`; optional `representations` describe only
 surface forms. A pure, bounded equivalence compiler derives equality

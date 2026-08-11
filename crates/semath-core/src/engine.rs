@@ -18,6 +18,7 @@ use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
+use crate::prose::LawActivationEvidence;
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
@@ -72,6 +73,7 @@ struct AnalyzedDocument {
     canonical_expressions: Vec<SemanticExpr>,
     semantic_occurrences: Vec<SemanticOccurrenceSeed>,
     cross_modal_bindings: Vec<CrossModalBinding>,
+    engine_limited_ranges: Vec<SourceRange>,
     observations: DocumentSemanticObservations,
 }
 
@@ -81,8 +83,6 @@ struct SemanticOccurrenceSeed {
     surface: String,
     selection_range: SourceRange,
     range: SourceRange,
-    structural_path: Vec<u32>,
-    source_text: String,
     notation: Vec<NotationComponent>,
     candidate_options: Vec<StructuralCandidateOption>,
     application_end_offset: Option<u32>,
@@ -109,6 +109,13 @@ impl ExportedTypeFact {
 struct IndexedTypeFact {
     component_id: String,
     fact: ExportedTypeFact,
+    file_id: String,
+    source_offset: u32,
+}
+
+#[derive(Clone)]
+struct IndexedLawActivation {
+    activation: LawActivationEvidence,
     file_id: String,
     source_offset: u32,
 }
@@ -153,8 +160,6 @@ impl AnalyzedDocument {
                         &range,
                     ),
                     candidate_options,
-                    structural_path,
-                    source_text: source_text(&document, &range),
                     notation: notation_components(&document, selection_range, surface),
                     range,
                 }
@@ -171,8 +176,6 @@ impl AnalyzedDocument {
                 surface: binding.short.clone(),
                 selection_range: binding.short_range.clone(),
                 range: binding.short_range.clone(),
-                structural_path: Vec::new(),
-                source_text: source_text(&document, &binding.short_range),
                 notation: vec![NotationComponent::NamedSurface {
                     value: binding.short.clone(),
                 }],
@@ -185,8 +188,6 @@ impl AnalyzedDocument {
                     surface: binding.long.clone(),
                     selection_range: binding.long_range.clone(),
                     range: binding.long_range.clone(),
-                    structural_path: Vec::new(),
-                    source_text: source_text(&document, &binding.long_range),
                     notation: Vec::new(),
                     candidate_options: Vec::new(),
                     application_end_offset: None,
@@ -194,6 +195,31 @@ impl AnalyzedDocument {
             }
         }
         let analysis_fingerprint = analysis_fingerprint(&document);
+        let engine_limited_ranges = document
+            .macros
+            .iter()
+            .filter(|event| {
+                event.kind == crate::ProjectMacroKind::Call
+                    && (matches!(
+                        event.expansion.status,
+                        crate::ProjectMacroExpansionStatus::Cycle
+                            | crate::ProjectMacroExpansionStatus::Truncated
+                    ) || event.expansion.notation.as_ref().is_some_and(|notation| {
+                        notation.nodes.iter().any(|node| {
+                            matches!(
+                                node.state,
+                                crate::SyntaxState::Opaque
+                                    | crate::SyntaxState::Cyclic
+                                    | crate::SyntaxState::Truncated
+                            )
+                        })
+                    }))
+            })
+            .flat_map(|event| {
+                std::iter::once(event.source.range.clone())
+                    .chain(event.expansion.input_range.iter().cloned())
+            })
+            .collect();
         compact_analyzed_document(&mut document);
         Ok(Self {
             component_id: document.file_id.clone(),
@@ -205,6 +231,7 @@ impl AnalyzedDocument {
             canonical_expressions,
             semantic_occurrences,
             cross_modal_bindings,
+            engine_limited_ranges,
             observations,
         })
     }
@@ -253,8 +280,6 @@ fn structural_command_occurrences(
                     &structural_path,
                     &node.ranges.full,
                 ),
-                structural_path,
-                source_text: source_text(document, &node.ranges.full),
                 notation: vec![NotationComponent::NamedSurface { value: surface }],
                 candidate_options,
             })
@@ -357,6 +382,13 @@ impl ProjectState {
                         .exported()
                         .into_iter()
                         .flat_map(|shape| shape.evidence.source_ranges)
+                        .map(|range| range.start_offset),
+                )
+                .chain(
+                    observations
+                        .law_activations()
+                        .iter()
+                        .flat_map(|activation| activation.evidence.source_ranges.iter())
                         .map(|range| range.start_offset),
                 )
                 .collect(),
@@ -465,12 +497,15 @@ fn lower_semantic_document(
                 range: seed.range.clone(),
                 selection_range: seed.selection_range.clone(),
                 scope_path: document.scopes.path_at(seed.selection_range.start_offset),
-                structural_path: seed.structural_path.clone(),
+                // Structural alternatives are already materialized from this
+                // path in the analyzed document. Do not retain a second copy
+                // in the project index.
+                structural_path: Vec::new(),
                 availability_order: order
                     .position(&source.file_id, seed.selection_range.start_offset)
                     .unwrap_or(u64::MAX),
                 surface: seed.surface.clone(),
-                source_text: seed.source_text.clone(),
+                source_text: source_text(source, &seed.range),
                 notation: seed.notation.clone(),
             },
             seed.candidate_options.clone(),
@@ -592,7 +627,9 @@ fn lower_semantic_document(
             });
         }
         definitions.insert(entity.clone(), definition.clone());
-        entities.push(entity);
+        if !entities.contains(&entity) {
+            entities.push(entity);
+        }
     }
     let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
     entities.extend(cross_modal.entities);
@@ -1443,9 +1480,10 @@ impl SemathEngine {
         &self,
         file_id: &str,
         occurrence: &SourceRange,
-        _symbol: &str,
+        symbol: &str,
     ) -> Vec<DefinitionInfo> {
-        self.resolved_entity(file_id, occurrence)
+        let resolved = self
+            .resolved_entity(file_id, occurrence)
             .and_then(|entity| {
                 self.index
                     .definitions_by_entity
@@ -1457,7 +1495,38 @@ impl SemathEngine {
                     })
             })
             .into_iter()
-            .collect()
+            .collect::<Vec<_>>();
+        if !resolved.is_empty() {
+            return resolved;
+        }
+        let Some(document) = self.index.documents.get(file_id) else {
+            return Vec::new();
+        };
+        let mut definitions = document
+            .observations
+            .definitions
+            .iter()
+            .filter(|definition| {
+                semantic_symbol_family_eq(&definition.symbol, symbol)
+                    && definition.location.range.start_offset <= occurrence.start_offset
+                    && document.scopes.visible(
+                        document
+                            .scopes
+                            .id_at(definition.location.range.start_offset),
+                        occurrence.start_offset,
+                    )
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        definitions.sort_by_key(|definition| {
+            (
+                definition.symbol.trim_start_matches('\\') == symbol.trim_start_matches('\\'),
+                definition.location.range.start_offset,
+            )
+        });
+        definitions.reverse();
+        definitions.truncate(MAX_SYMBOL_DEFINITIONS);
+        definitions
     }
 
     fn resolve_definition(
@@ -1612,6 +1681,14 @@ impl SemathEngine {
                 }) || diagnostic.range.contains(offset)
             })
             .collect::<Vec<_>>();
+        diagnostics.extend(
+            symbol_info
+                .as_ref()
+                .into_iter()
+                .flat_map(|symbol| symbol.diagnostics.iter().cloned()),
+        );
+        diagnostics.sort_by(|left, right| left.code.cmp(&right.code));
+        diagnostics.dedup();
         let diagnostics_truncated = diagnostics.len() > MAX_VIEW_DIAGNOSTICS;
         diagnostics.truncate(MAX_VIEW_DIAGNOSTICS);
         let (domains, domains_truncated) = observations.domains.at(offset);
@@ -1621,11 +1698,16 @@ impl SemathEngine {
             || context.truncated
             || symbol_info.as_ref().is_some_and(|info| info.truncated);
         let formulas = observations.laws.at(offset);
+        let engine_limited = document
+            .engine_limited_ranges
+            .iter()
+            .any(|range| range.contains(offset));
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &formulas,
             symbol: symbol_info.as_ref(),
             candidates: &context.candidates,
             diagnostics: &diagnostics,
+            engine_limited,
             truncated,
         });
         SemanticViewInfo {
@@ -1648,18 +1730,20 @@ impl SemathEngine {
         offset: u32,
         hygiene_enabled: bool,
     ) -> Option<SymbolInfo> {
+        let semantic_name = name.trim_start_matches('\\');
         let mut definitions =
             self.visible_definitions(&document.document.file_id, occurrence, name);
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
         definitions.truncate(MAX_SYMBOL_DEFINITIONS);
         let external = self.index.external_types.get(&document.document.file_id);
-        let (mut shapes, shapes_truncated) = observations.shapes.claims_at(name, offset);
-        let (mut roles, roles_truncated) = observations.roles.roles_at(name, offset);
-        let (mut quantities, quantities_truncated) = observations.quantities.at(name, offset);
+        let (mut shapes, shapes_truncated) = observations.shapes.claims_at(semantic_name, offset);
+        let (mut roles, roles_truncated) = observations.roles.roles_at(semantic_name, offset);
+        let (mut quantities, quantities_truncated) =
+            observations.quantities.at(semantic_name, offset);
         if let Some(external) = external {
-            shapes.extend(external.shapes_at(offset, name));
-            roles.extend(external.roles_at(offset, name));
-            quantities.extend(external.quantities_at(offset, name));
+            shapes.extend(external.shapes_at(offset, semantic_name));
+            roles.extend(external.roles_at(offset, semantic_name));
+            quantities.extend(external.quantities_at(offset, semantic_name));
             shapes.sort_by(|left, right| left.kind.cmp(&right.kind));
             shapes.dedup();
             roles.sort_by(|left, right| left.concept_id.cmp(&right.concept_id));
@@ -1670,7 +1754,7 @@ impl SemathEngine {
         let (diagnostics, diagnostics_truncated) = symbol_diagnostics(
             document,
             observations,
-            name,
+            semantic_name,
             offset,
             &shapes,
             hygiene_enabled,
@@ -1706,6 +1790,19 @@ impl SemathEngine {
     }
 
     fn refresh_project_laws(&mut self, targets: &HashSet<String>) {
+        let mut activations = HashMap::<String, Vec<IndexedLawActivation>>::new();
+        for (file_id, document) in &self.index.documents {
+            for activation in document.observations.law_activations() {
+                activations
+                    .entry(document.component_id.clone())
+                    .or_default()
+                    .push(IndexedLawActivation {
+                        source_offset: evidence_anchor(&activation.evidence),
+                        activation: activation.clone(),
+                        file_id: file_id.clone(),
+                    });
+            }
+        }
         let facts = self
             .index
             .documents
@@ -1774,6 +1871,19 @@ impl SemathEngine {
                         .iter()
                         .map(|(symbol, _)| symbol.as_str())
                         .collect::<HashSet<_>>();
+                    for activation in activations.get(&target.component_id).into_iter().flatten() {
+                        if activation.file_id != *file_id
+                            && self.index.order.precedes(
+                                &activation.file_id,
+                                activation.source_offset,
+                                file_id,
+                                order_offset,
+                            )
+                        {
+                            environment
+                                .add_law_activation(semantic_offset, activation.activation.clone());
+                        }
+                    }
                     for symbol in symbols {
                         for fact in facts_by_symbol.get(symbol).into_iter().flatten() {
                             if fact.file_id == *file_id
@@ -1845,6 +1955,14 @@ fn same_order_topology(
         (Some(previous), Some(next))
             if previous.path == next.path && previous.includes == next.includes
     )
+}
+
+fn semantic_symbol_family_eq(left: &str, right: &str) -> bool {
+    let left = left.trim_start_matches('\\');
+    let right = right.trim_start_matches('\\');
+    left == right
+        || ((left.contains('_') || right.contains('_'))
+            && left.split('_').next() == right.split('_').next())
 }
 
 fn evidence_anchor(evidence: &Evidence) -> u32 {

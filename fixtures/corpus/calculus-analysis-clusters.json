@@ -21,7 +21,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         }
@@ -60,7 +60,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 2. [we write]\n\\newcommand{\\syntheticprobe}{q_{202}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -105,7 +105,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "The next formula is presented without an assumed named law (3). [define as]\nAn indexed symbol is $q_{203}$.\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -149,7 +149,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "In this local discussion, only the explicit statement below is available (4). [declaration after]\nA styled symbol is $\\mathbf{q}_{204}$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -193,7 +193,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "Suppose the notation is local to this calculation, case 5. [where clause]\nA grouped symbol is $ {q_{205}} $.\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -237,7 +237,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "The symbols below have no meaning beyond this standalone example (6). [given that]\nA grouped symbol is $ {q_{206}} $.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         }
@@ -275,7 +275,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "As a deliberately unsupported instance, examine relation 7. [separate sentences]\n\\[\\begin{aligned}q_{207}\\end{aligned}\\]\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -319,7 +319,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "No domain interpretation is asserted for the following formula (8). [where clause]\n\\begin{equation}q_{208}\\end{equation}\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -368,7 +368,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -413,7 +413,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "For comparison, inspect the displayed expression numbered 10. [separate sentences]\nA presentation-only symbol is $q_{210}$.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -462,7 +462,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         }
@@ -506,7 +506,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -557,7 +557,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -607,7 +607,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         }
@@ -646,7 +646,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 15. [suppose that]\nA grouped symbol is $ {q_{215}} $.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -695,7 +695,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -740,7 +740,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "Consider the following independently stated relation in example 17. [let series]\n\\[\\begin{aligned}q_{217}\\end{aligned}\\]\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -784,7 +784,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "For comparison, inspect the displayed expression numbered 18. [role first]\n\\begin{equation}q_{218}\\end{equation}\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -828,7 +828,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "The next formula is presented without an assumed named law (19). [throughout section]\nA presentation-only symbol follows: \\[q_{219}\\]\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -866,7 +866,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "In this local discussion, only the explicit statement below is available (20). [let paired]\nA presentation-only symbol is $q_{220}$.\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -910,7 +910,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "Suppose the notation is local to this calculation, case 21. [symbol list]\nA presentation-only symbol is $q_{221}$.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -954,7 +954,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "The symbols below have no meaning beyond this standalone example (22). [throughout section]\n\\newcommand{\\syntheticprobe}{q_{222}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -999,7 +999,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "As a deliberately unsupported instance, examine relation 23. [let paired]\nAn indexed symbol is $q_{223}$.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1048,7 +1048,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1093,7 +1093,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "Consider the following independently stated relation in example 25. [in this model]\nA grouped symbol is $ {q_{225}} $.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1142,7 +1142,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1192,7 +1192,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         }
@@ -1236,7 +1236,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1286,7 +1286,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1331,7 +1331,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "The symbols below have no meaning beyond this standalone example (30). [we write]\nA presentation-only symbol is $q_{230}$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -1380,7 +1380,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1425,7 +1425,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "No domain interpretation is asserted for the following formula (32). [declaration after]\n\\newcommand{\\syntheticprobe}{q_{232}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         }
@@ -1464,7 +1464,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "Consider the following independently stated relation in example 33. [where clause]\nAn indexed symbol is $q_{233}$.\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1508,7 +1508,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "For comparison, inspect the displayed expression numbered 34. [given that]\nA styled symbol is $\\mathbf{q}_{234}$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -1552,7 +1552,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "The next formula is presented without an assumed named law (35). [separate sentences]\nA grouped symbol is $ {q_{235}} $.\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         }
@@ -1590,7 +1590,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "In this local discussion, only the explicit statement below is available (36). [where clause]\nA grouped symbol is $ {q_{236}} $.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1634,7 +1634,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "Suppose the notation is local to this calculation, case 37. [given that]\n\\[\\begin{aligned}q_{237}\\end{aligned}\\]\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1678,7 +1678,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "The symbols below have no meaning beyond this standalone example (38). [separate sentences]\n\\begin{equation}q_{238}\\end{equation}\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         },
@@ -1727,7 +1727,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1772,7 +1772,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nIn Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.\n\n\\[q = \\nabla k\\]",
+          "content": "No domain interpretation is asserted for the following formula (40). [suppose that]\nA presentation-only symbol is $q_{240}$.\n\nIn Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.\n\n\\[q = \\nabla k\\]",
           "fileId": "main",
           "path": "main.md"
         }
@@ -1815,7 +1815,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1865,7 +1865,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1916,7 +1916,7 @@
           "path": "main.tex"
         },
         {
-          "content": "We write $v$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.",
+          "content": "We write $v$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -1966,7 +1966,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2011,7 +2011,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "Suppose the notation is local to this calculation, case 45. [let series]\nA grouped symbol is $ {q_{245}} $.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -2060,7 +2060,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.",
+          "content": "For Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2105,7 +2105,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
+          "content": "As a deliberately unsupported instance, examine relation 47. [throughout section]\n\\[\\begin{aligned}q_{247}\\end{aligned}\\]\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n\\begin{equation}r = \\nabla a\\end{equation}",
           "fileId": "main",
           "path": "main.tex"
         },
@@ -2149,7 +2149,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nFor Gradient relation, here $o$ denotes nabla result vector and $m$ denotes differentiated scalar function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
+          "content": "No domain interpretation is asserted for the following formula (48). [let paired]\n\\begin{equation}q_{248}\\end{equation}\n\nFor Gradient relation, here $o$ denotes n-dimensional nabla operator vector and $m$ denotes function.\n\n\\[\\left(o = \\nabla m\\right)\\]",
           "fileId": "main",
           "path": "main.md"
         }
@@ -2187,7 +2187,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "Consider the following independently stated relation in example 49. [symbol list]\nA presentation-only symbol follows: \\[q_{249}\\]\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2232,7 +2232,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2278,7 +2278,7 @@
           "path": "main.tex"
         },
         {
-          "content": "In Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.",
+          "content": "In Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2324,7 +2324,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2371,7 +2371,7 @@
           "path": "main.tex"
         },
         {
-          "content": "In Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.",
+          "content": "In Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.",
           "fileId": "roles",
           "path": "roles.tex"
         }
@@ -2406,7 +2406,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (54). [let singular]\nA styled symbol is $\\mathbf{q}_{254}$.\n\nWe write $h$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
+          "content": "The symbols below have no meaning beyond this standalone example (54). [let singular]\nA styled symbol is $\\mathbf{q}_{254}$.\n\nWe write $h$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2452,7 +2452,7 @@
           "path": "main.tex"
         },
         {
-          "content": "In Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.",
+          "content": "In Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2493,7 +2493,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (56). [define as]\nA grouped symbol is $ {q_{256}} $.\n\nWe write $h$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
+          "content": "No domain interpretation is asserted for the following formula (56). [define as]\nA grouped symbol is $ {q_{256}} $.\n\nWe write $h$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
           "fileId": "main",
           "path": "main.md"
         }
@@ -2528,7 +2528,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 57. [let singular]\n\\[\\begin{aligned}q_{257}\\end{aligned}\\]\n\nFor Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.\n\n$y \\neq \\nabla c$",
+          "content": "Consider the following independently stated relation in example 57. [let singular]\n\\[\\begin{aligned}q_{257}\\end{aligned}\\]\n\nFor Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.\n\n$y \\neq \\nabla c$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2568,7 +2568,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 58. [we write]\n\\begin{equation}q_{258}\\end{equation}\n\nWe write $h$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
+          "content": "For comparison, inspect the displayed expression numbered 58. [we write]\n\\begin{equation}q_{258}\\end{equation}\n\nWe write $h$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2609,7 +2609,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (59). [define as]\nA presentation-only symbol follows: \\[q_{259}\\]\n\nFor Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.\n\n$y \\neq \\nabla c$",
+          "content": "The next formula is presented without an assumed named law (59). [define as]\nA presentation-only symbol follows: \\[q_{259}\\]\n\nFor Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.\n\n$y \\neq \\nabla c$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2649,7 +2649,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "In this local discussion, only the explicit statement below is available (60). [declaration after]\nA presentation-only symbol is $q_{260}$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2689,7 +2689,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 61. [where clause]\nA presentation-only symbol is $q_{261}$.\n\nFor Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.\n\n$y \\neq \\nabla c$",
+          "content": "Suppose the notation is local to this calculation, case 61. [where clause]\nA presentation-only symbol is $q_{261}$.\n\nFor Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.\n\n$y \\neq \\nabla c$",
           "fileId": "main",
           "path": "main.md"
         }
@@ -2723,7 +2723,7 @@
       },
       "documents": [
         {
-          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "The symbols below have no meaning beyond this standalone example (62). [given that]\n\\newcommand{\\syntheticprobe}{q_{262}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2769,7 +2769,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2810,7 +2810,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "No domain interpretation is asserted for the following formula (64). [where clause]\nA styled symbol is $\\mathbf{q}_{264}$.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -2855,7 +2855,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2901,7 +2901,7 @@
           "path": "main.tex"
         },
         {
-          "content": "In Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.",
+          "content": "In Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.",
           "fileId": "roles",
           "path": "roles.tex"
         }
@@ -2941,7 +2941,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2987,7 +2987,7 @@
           "path": "main.tex"
         },
         {
-          "content": "In Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.",
+          "content": "In Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -3028,7 +3028,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 69. [compact parenthetical]\nA presentation-only symbol follows: \\[q_{269}\\]\n\nWe write $h$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
+          "content": "Suppose the notation is local to this calculation, case 69. [compact parenthetical]\nA presentation-only symbol follows: \\[q_{269}\\]\n\nWe write $h$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
           "fileId": "main",
           "path": "main.md"
         }
@@ -3068,7 +3068,7 @@
           "path": "main.tex"
         },
         {
-          "content": "In Gradient relation, let $q$ and $k$ denote nabla result vector and differentiated scalar function, respectively.",
+          "content": "In Gradient relation, let $q$ and $k$ denote n-dimensional nabla operator vector and function, respectively.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -3109,7 +3109,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 71. [suppose that]\nA presentation-only symbol is $q_{271}$.\n\nWe write $h$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
+          "content": "As a deliberately unsupported instance, examine relation 71. [suppose that]\nA presentation-only symbol is $q_{271}$.\n\nWe write $h$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3150,7 +3150,7 @@
       },
       "documents": [
         {
-          "content": "No domain interpretation is asserted for the following formula (72). [compact parenthetical]\n\\newcommand{\\syntheticprobe}{q_{272}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.\n\n$y \\neq \\nabla c$",
+          "content": "No domain interpretation is asserted for the following formula (72). [compact parenthetical]\n\\newcommand{\\syntheticprobe}{q_{272}}A macro-expanded symbol is $\\syntheticprobe$.\n\nFor Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.\n\n$y \\neq \\nabla c$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3191,7 +3191,7 @@
       },
       "documents": [
         {
-          "content": "Consider the following independently stated relation in example 73. [let series]\nAn indexed symbol is $q_{273}$.\n\nWe write $h$ for nabla result vector. We write $h$ for differentiated scalar function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
+          "content": "Consider the following independently stated relation in example 73. [let series]\nAn indexed symbol is $q_{273}$.\n\nWe write $h$ for n-dimensional nabla operator vector. We write $h$ for function. This notation is used in Gradient relation.\n\n$v = \\nabla h$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3232,7 +3232,7 @@
       },
       "documents": [
         {
-          "content": "For comparison, inspect the displayed expression numbered 74. [role first]\nA styled symbol is $\\mathbf{q}_{274}$.\n\nFor Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.\n\n$y \\neq \\nabla c$",
+          "content": "For comparison, inspect the displayed expression numbered 74. [role first]\nA styled symbol is $\\mathbf{q}_{274}$.\n\nFor Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.\n\n$y \\neq \\nabla c$",
           "fileId": "main",
           "path": "main.md"
         }
@@ -3266,7 +3266,7 @@
       },
       "documents": [
         {
-          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "The next formula is presented without an assumed named law (75). [throughout section]\nA grouped symbol is $ {q_{275}} $.\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3306,7 +3306,7 @@
       },
       "documents": [
         {
-          "content": "In this local discussion, only the explicit statement below is available (76). [let paired]\nA grouped symbol is $ {q_{276}} $.\n\nFor Gradient relation, let $y$ denote nabla result vector and $c$ denote differentiated scalar function.\n\n$y \\neq \\nabla c$",
+          "content": "In this local discussion, only the explicit statement below is available (76). [let paired]\nA grouped symbol is $ {q_{276}} $.\n\nFor Gradient relation, let $y$ denote n-dimensional nabla operator vector and $c$ denote function.\n\n$y \\neq \\nabla c$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3346,7 +3346,7 @@
       },
       "documents": [
         {
-          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "Suppose the notation is local to this calculation, case 77. [symbol list]\n\\[\\begin{aligned}q_{277}\\end{aligned}\\]\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3391,7 +3391,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -3432,7 +3432,7 @@
       },
       "documents": [
         {
-          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Gradient relation, suppose $r$ is nabla result vector and $a$ is differentiated scalar function.\n\n$r_{probe}=0$",
+          "content": "As a deliberately unsupported instance, examine relation 79. [let paired]\nA presentation-only symbol follows: \\[q_{279}\\]\n\nFor Gradient relation, suppose $r$ is n-dimensional nabla operator vector and $a$ is function.\n\n$r_{probe}=0$",
           "fileId": "main",
           "path": "main.md"
         },
@@ -3477,7 +3477,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Gradient relation, here $o$ denotes nabla result scalar and $m$ denotes differentiated scalar function.",
+          "content": "For Gradient relation, here $o$ denotes nabla operator scalar and $m$ denotes function.",
           "fileId": "roles",
           "path": "roles.tex"
         },

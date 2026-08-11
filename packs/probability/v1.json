@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "probability",
-  "packVersion": "1.2.0",
+  "packVersion": "1.3.0",
   "packKind": "field",
   "namespace": "probability",
   "title": "Probability and statistics",
@@ -40,6 +40,21 @@
       "conceptKind": "operator",
       "title": "Expectation",
       "description": "The expected-value operator for a random variable.",
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "scalar-coefficient",
+      "conceptKind": "quantity",
+      "title": "Scalar coefficient",
+      "description": "A scalar constant multiplying a random variable.",
+      "aliases": [
+        "scalar",
+        "scalar constant",
+        "constant coefficient"
+      ],
       "parents": [],
       "references": [
         "probability-theory"
@@ -112,6 +127,123 @@
         "probability-theory"
       ],
       "canonicalRelation": "left \\cup right"
+    },
+    {
+      "id": "conditional-probability",
+      "title": "Conditional probability",
+      "description": "Conditional probability is the probability of the intersection divided by the probability of the conditioning event.",
+      "roles": [
+        {
+          "id": "event",
+          "concept": "probability:event",
+          "description": "Conditioned event."
+        },
+        {
+          "id": "given",
+          "concept": "probability:event",
+          "description": "Conditioning event."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-probability-space",
+          "kind": "same-context",
+          "subjects": [
+            "event",
+            "given"
+          ],
+          "label": "Both events belong to the same probability space and the conditioning event has positive probability."
+        }
+      ],
+      "activationPhrases": [
+        "conditional probability"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "P(event \\mid given) = P(event \\cap given) / P(given)"
+    },
+    {
+      "id": "expectation-linearity",
+      "title": "Linearity of expectation",
+      "description": "Expectation is linear for explicitly declared integrable random variables and scalar coefficients.",
+      "roles": [
+        {
+          "id": "left-coefficient",
+          "concept": "probability:scalar-coefficient",
+          "description": "First scalar coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-variable",
+          "concept": "probability:random-variable",
+          "description": "First random variable."
+        },
+        {
+          "id": "right-coefficient",
+          "concept": "probability:scalar-coefficient",
+          "description": "Second scalar coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "right-variable",
+          "concept": "probability:random-variable",
+          "description": "Second random variable."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "integrable-variables",
+          "kind": "domain-membership",
+          "subjects": [
+            "left-variable",
+            "right-variable"
+          ],
+          "label": "Both random variables are integrable under the same expectation operator."
+        }
+      ],
+      "activationPhrases": [
+        "linearity of expectation",
+        "expectation obeys"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "E(left-coefficient left-variable + right-coefficient right-variable) = left-coefficient E(left-variable) + right-coefficient E(right-variable)"
+    },
+    {
+      "id": "variance-scaling",
+      "title": "Variance scaling",
+      "description": "Scaling a random variable by a scalar scales its variance by the square of that scalar.",
+      "roles": [
+        {
+          "id": "coefficient",
+          "concept": "probability:scalar-coefficient",
+          "description": "Scalar coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "variable",
+          "concept": "probability:random-variable",
+          "description": "Random variable."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-variable",
+          "kind": "domain-membership",
+          "subjects": [
+            "coefficient",
+            "variable"
+          ],
+          "label": "The coefficient is scalar and the operand is a declared random variable."
+        }
+      ],
+      "activationPhrases": [],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "Var(coefficient variable) = coefficient^2 Var(variable)"
     }
   ],
   "activationRules": [

@@ -414,6 +414,11 @@ fn is_ignorable_command(name: Option<&str>) -> bool {
                 | "scriptstyle"
                 | "scriptscriptstyle"
                 | "rm"
+                | "label"
+                | "tag"
+                | "tag*"
+                | "notag"
+                | "nonumber"
         )
     )
 }
@@ -542,8 +547,13 @@ pub(crate) fn declared_symbols(
     range: &SourceRange,
 ) -> Vec<(String, SourceRange)> {
     let expression = lower_document_region(document, range);
-    if let SemanticExprKind::Symbol(name) = expression.kind {
-        return vec![(name, expression.range)];
+    if let SemanticExprKind::Symbol(name) = &expression.kind {
+        return vec![(name.clone(), expression.range.clone())];
+    }
+    if let SemanticExprKind::Derivative { expression, .. } = &expression.kind
+        && let SemanticExprKind::Symbol(name) = &expression.kind
+    {
+        return vec![(name.clone(), expression.range.clone())];
     }
     if let SemanticExprKind::Relation { operator, left, .. } = &expression.kind
         && matches!(operator.as_str(), "member-of" | "not-member-of")
@@ -665,6 +675,16 @@ fn tokenize(chunks: &[SurfaceChunk], word_identifiers: bool) -> Vec<Token> {
                 let name = &chunk.text[name_start..cursor];
                 if matches!(name, "begin" | "end") {
                     cursor = skip_braced_argument(&chunk.text, cursor);
+                    continue;
+                }
+                if matches!(name, "label" | "tag") {
+                    if name == "tag" && chunk.text[cursor..].starts_with('*') {
+                        cursor += 1;
+                    }
+                    cursor = skip_braced_argument(&chunk.text, cursor);
+                    continue;
+                }
+                if matches!(name, "notag" | "nonumber") {
                     continue;
                 }
                 if matches!(
@@ -1010,6 +1030,15 @@ impl Parser {
                         order: 1,
                     },
                 };
+            } else if matches!(self.peek(), TokenKind::Open('('))
+                && matches!(
+                    &expression.kind,
+                    SemanticExprKind::Symbol(_) | SemanticExprKind::Derivative { .. }
+                )
+            {
+                let argument = self.parse_prefix();
+                expression = apply_argument(expression.clone(), argument)
+                    .expect("callable postfix was checked before consuming its argument");
             } else {
                 break;
             }
@@ -1031,7 +1060,7 @@ impl Parser {
         }
         if let Some(command) = self.peek_command_name().map(str::to_owned) {
             match command.as_str() {
-                "mathbf" | "mathrm" | "mathit" | "mathcal" | "mathsf" | "boldsymbol"
+                "mathbf" | "mathrm" | "mathit" | "mathbb" | "mathcal" | "mathsf" | "boldsymbol"
                 | "operatorname" | "vec" | "tilde" | "boxed" => {
                     let command = self.next();
                     let mut expression = self.parse_group_or_atom();
@@ -1066,6 +1095,20 @@ impl Parser {
                 "int" | "iint" | "iiint" => return self.parse_integral(),
                 "nabla" => {
                     let token = self.next();
+                    let operator = if self.consume_command("cdot") {
+                        "divergence"
+                    } else if self.consume_command("times") {
+                        "curl"
+                    } else if self.consume_operator('^') {
+                        let order = self.parse_group_or_atom();
+                        if matches!(&order.kind, SemanticExprKind::Number(value) if value == "2") {
+                            "laplacian"
+                        } else {
+                            "nabla-power"
+                        }
+                    } else {
+                        "gradient"
+                    };
                     let mut argument = self.parse_power();
                     if matches!(self.peek(), TokenKind::Open('(')) {
                         let application_argument = self.parse_power();
@@ -1079,7 +1122,7 @@ impl Parser {
                         range: merge_range(&token.range, &argument.range),
                         provenance: [token.provenance, argument.provenance.clone()].concat(),
                         kind: SemanticExprKind::Apply {
-                            operator: "nabla".into(),
+                            operator: operator.into(),
                             arguments: vec![argument],
                         },
                     };
@@ -1489,6 +1532,26 @@ fn split_arguments(argument: SemanticExpr) -> Vec<SemanticExpr> {
     let SemanticExprKind::Product(items) = &argument.kind else {
         return vec![argument];
     };
+    if let Some(separator) = items
+        .iter()
+        .position(|item| matches!(symbol_name(item), Some("mid")))
+        && separator > 0
+        && separator + 1 < items.len()
+        && !items[separator + 1..]
+            .iter()
+            .any(|item| matches!(symbol_name(item), Some("mid")))
+    {
+        let left = associative(items[..separator].to_vec(), SemanticExprKind::Product);
+        let right = associative(items[separator + 1..].to_vec(), SemanticExprKind::Product);
+        return vec![combined(
+            &left,
+            &right,
+            SemanticExprKind::Apply {
+                operator: "condition".into(),
+                arguments: vec![left.clone(), right.clone()],
+            },
+        )];
+    }
     if !items
         .iter()
         .any(|item| matches!(symbol_name(item), Some(",")))
@@ -1671,11 +1734,22 @@ fn symbol_name(expression: &SemanticExpr) -> Option<&str> {
 fn expression_name(expression: &SemanticExpr) -> Option<String> {
     match &expression.kind {
         SemanticExprKind::Symbol(name) | SemanticExprKind::Number(name) => Some(name.clone()),
+        SemanticExprKind::Negate(inner) => Some(format!("-{}", expression_name(inner)?)),
+        SemanticExprKind::Sum(items) => items
+            .iter()
+            .map(expression_name)
+            .collect::<Option<Vec<_>>>()
+            .map(|items| items.join("+").replace("+-", "-")),
         SemanticExprKind::Product(items) => items
             .iter()
             .map(expression_name)
             .collect::<Option<Vec<_>>>()
             .map(|items| items.concat()),
+        SemanticExprKind::Power(base, exponent) => Some(format!(
+            "{}^{}",
+            expression_name(base)?,
+            expression_name(exponent)?
+        )),
         _ => None,
     }
 }
@@ -1791,7 +1865,43 @@ mod tests {
         );
         assert_eq!(
             render_canonical(&lower_template("\\nabla f(x)")),
-            "apply(nabla,apply(f,symbol(x)))"
+            "apply(gradient,apply(f,symbol(x)))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\nabla \\cdot E")),
+            "apply(divergence,symbol(E))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\nabla \\times E")),
+            "apply(curl,symbol(E))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\nabla^2 u")),
+            "apply(laplacian,symbol(u))"
+        );
+    }
+
+    #[test]
+    fn lowers_conditional_application_without_baking_in_probability() {
+        assert_eq!(
+            render_canonical(&lower_template("P(A \\mid B)")),
+            "apply(P,apply(condition,symbol(A),symbol(B)))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("P(A) / P(B)")),
+            "fraction(apply(P,symbol(A)),apply(P,symbol(B)))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("G(s) = Y(s) / U(s)")),
+            "relation(equals,apply(G,symbol(s)),fraction(apply(Y,symbol(s)),apply(U,symbol(s))))"
+        );
+    }
+
+    #[test]
+    fn equation_metadata_does_not_change_the_semantic_relation() {
+        assert_eq!(
+            render_canonical(&lower_template("q=-k\\nabla T\\label{eq:flux}")),
+            render_canonical(&lower_template("q=-k\\nabla T"))
         );
     }
 

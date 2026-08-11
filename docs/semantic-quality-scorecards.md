@@ -48,6 +48,17 @@ sources must not occur in development or foundation fixtures. Default CI
 validates the schema, pure composition, and coverage matrix but does not execute
 the engine over the holdout.
 
+The recognition-frontier fixture is a smaller stage-specific diagnostic gate.
+Its 32 frozen cases span notation surfaces, probability/statistics/ML,
+continuum engineering, fields and waves, optimization/control/signals,
+discourse scope, project and macro lifecycle, and refusal behavior. Each case
+records both the pre-change observation and the intended decision, relation,
+and first unresolved stage. `bun run frontier:fixture` checks only schema and
+pure scoring in ordinary CI; `bun run frontier` executes the engine as a manual
+release gate. A missing type or sign convention must remain partial even when
+the relation is known, and unsupported input must not be promoted to a user
+problem.
+
 The independent scoped-domain challenge adds 30 document-shaped cases across
 neutral document fields, section scope, mixed domains, non-evidence,
 formula-before/after attachment, ambiguity, conflict, and retraction. It
@@ -78,6 +89,8 @@ machine-readable artifact with:
 bun run quality
 bun run challenge
 bun run challenge:report
+mkdir -p .artifacts && bun run frontier:baseline
+bun run frontier
 mkdir -p .artifacts && bun run domain:baseline
 bun run domain:challenge
 bun run corpus

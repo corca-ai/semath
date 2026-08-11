@@ -1,11 +1,11 @@
 use super::{SemathEngine, notation_occurrence_range};
 use crate::parser::test_math_regions;
 use crate::{
-    ChangeEnvelope, DocumentLanguage, MeaningDecision, NotationArgument, NotationNode,
-    NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION, ProjectChange, ProjectDocument,
-    ProjectInclude, ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus,
-    ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query, QueryEnvelope, QueryValue,
-    SourceRange, SyntaxState,
+    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree,
+    MeaningDecision, NotationArgument, NotationNode, NotationNodeKind, NotationNodeRanges,
+    PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectInclude, ProjectMacro,
+    ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot,
+    ProjectSourceRef, Query, QueryEnvelope, QueryValue, SourceRange, SyntaxState,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -113,6 +113,13 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
         assert_eq!(locations.len(), 1);
         assert_eq!(locations[0].range.start_offset, 5);
     }
+}
+
+#[test]
+fn coalesces_overlapping_prose_definitions_into_one_entity() {
+    let content = "The declarations $x_r\\in\\mathbb R^n$, $u_r\\in\\mathbb R^m$, $A_r\\in\\mathbb R^{n\\times n}$, and $B_r\\in\\mathbb R^{n\\times m}$ apply throughout.\nLet $x_r$, $A_r$, $B_r$, and $u_r$ denote state vector, state matrix, input matrix, and control input vector, respectively.\n\\[\\dot{x_r} = A_r{x_r}+B_r{u_r}\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
 }
 
 #[test]
@@ -299,7 +306,7 @@ fn incremental_upsert_matches_the_new_document_version() {
 }
 
 #[test]
-fn same_revision_structural_relink_reanalyzes_without_accepting_stale_text() {
+fn same_revision_opaque_relink_reanalyzes_without_accepting_stale_text() {
     let content = "Let $A$ and $B$ be events. $\\joint{A}{B}$";
     let start = content.find("\\joint").unwrap() as u32;
     let source = ProjectSourceRef {
@@ -322,19 +329,31 @@ fn same_revision_structural_relink_reanalyzes_without_accepting_stale_text() {
             notation: None,
         },
     });
-    let mut unresolved = document("main", "main.tex", content, 1);
-    unresolved.macros.push(ProjectMacro {
+    let mut opaque = document("main", "main.tex", content, 1);
+    opaque.macros.push(ProjectMacro {
         kind: ProjectMacroKind::Call,
         name: "joint".into(),
         source,
         definitions: Vec::new(),
         expansion: ProjectMacroExpansion {
-            status: ProjectMacroExpansionStatus::Unresolved,
-            depth: 0,
+            status: ProjectMacroExpansionStatus::Expanded,
+            depth: 1,
             editable: false,
-            surface: None,
-            input_range: None,
-            notation: None,
+            surface: Some("\\csname A\\endcsname".into()),
+            input_range: Some(range(start, start + "\\joint{A}{B}".len() as u32)),
+            notation: Some(GeneratedNotationTree {
+                nodes: vec![GeneratedNotationNode {
+                    kind: NotationNodeKind::Command,
+                    children: Vec::new(),
+                    state: SyntaxState::Opaque,
+                    name: Some("csname".into()),
+                    text: None,
+                    arguments: Vec::new(),
+                    lexical_class: None,
+                    math_class: None,
+                }],
+                root: 0,
+            }),
         },
     });
 
@@ -349,13 +368,36 @@ fn same_revision_structural_relink_reanalyzes_without_accepting_stale_text() {
             inventory_version: 2,
             analysis_generation: 2,
             changes: vec![ProjectChange::Upsert {
-                document: Box::new(unresolved),
+                document: Box::new(opaque),
             }],
         })
         .unwrap();
 
     assert_eq!(update.changed_file_ids, ["main"]);
     assert_eq!(update.analyzed_file_ids, ["main"]);
+    assert!(engine.index.documents["main"].engine_limited_ranges[0].contains(start + 1));
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: start,
+            },
+            2,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        matches!(
+            &view.decision,
+            MeaningDecision::Unsupported { reasons }
+                if reasons.iter().any(|reason| reason.kind == crate::DecisionReasonKind::EngineLimit)
+        ),
+        "{:#?}",
+        view.decision
+    );
 }
 
 #[test]
@@ -504,6 +546,53 @@ fn included_type_declarations_drive_project_law_inference() {
     let symbol = view.symbol.expect("expected V symbol information");
     assert_eq!(symbol.roles[0].concept_id, "quantities-units:voltage");
     assert_eq!(symbol.roles[0].evidence.source_ranges[0].start_offset, 0);
+}
+
+#[test]
+fn included_law_name_activates_the_typed_relation() {
+    let main = "\\input{roles}\n$y=cx+tz$";
+    let roles = "For Discrete state equation, let $y$ denote n-dimensional system state vector, $c$ denote n by n state matrix, $x$ denote n-dimensional system state vector, $t$ denote n by n input matrix, and $z$ denote n-dimensional control input vector.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "roles".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(0, 13),
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![main_document, document("roles", "roles.tex", roles, 1)],
+        })
+        .unwrap();
+    let formula_offset = main.find("y=").unwrap() as u32;
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: formula_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| relation.relation_id == "control-systems:discrete-state-equation")
+    );
 }
 
 #[test]

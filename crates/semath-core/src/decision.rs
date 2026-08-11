@@ -12,6 +12,7 @@ pub(crate) struct MeaningDecisionInput<'a> {
     pub symbol: Option<&'a SymbolInfo>,
     pub candidates: &'a [SemanticCandidateInfo],
     pub diagnostics: &'a [SemanticDiagnostic],
+    pub engine_limited: bool,
     pub truncated: bool,
 }
 
@@ -29,6 +30,24 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
         return MeaningDecision::Conflicting { conflicts, reasons };
     }
 
+    let has_source_meaning = !input.formulas.is_empty()
+        || input
+            .candidates
+            .iter()
+            .any(|candidate| candidate.status == SemanticCandidateStatus::Supported)
+        || input.symbol.is_some_and(|symbol| {
+            !symbol.definitions.is_empty() || !symbol.roles.is_empty() || !symbol.shapes.is_empty()
+        });
+    if input.engine_limited && !has_source_meaning {
+        return MeaningDecision::Unsupported {
+            reasons: vec![DecisionReason {
+                kind: DecisionReasonKind::EngineLimit,
+                label: "The notation is opaque to the current syntax engine.".into(),
+                evidence: Vec::new(),
+            }],
+        };
+    }
+
     let alternatives = collect_alternatives(&input);
     if alternatives.len() > 1 {
         return MeaningDecision::Ambiguous {
@@ -39,7 +58,7 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
         };
     }
 
-    if let Some(formula) = input.formulas.first() {
+    if let Some(formula) = preferred_formulas(&input).into_iter().next() {
         let missing = missing_formula_requirements(formula);
         if missing.is_empty() && !input.truncated {
             let relation = formula
@@ -162,13 +181,13 @@ fn collect_conflicts(input: &MeaningDecisionInput<'_>) -> Vec<MeaningConflict> {
 }
 
 fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternative> {
+    let formulas = preferred_formulas(input);
     let supported_candidate_exists = input
         .candidates
         .iter()
         .any(|candidate| candidate.status == SemanticCandidateStatus::Supported);
-    let mut alternatives = input
-        .formulas
-        .iter()
+    let mut alternatives = formulas
+        .into_iter()
         .filter_map(|formula| {
             let relation = formula.relation.as_ref()?;
             Some(MeaningAlternative {
@@ -183,6 +202,12 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
             input
                 .candidates
                 .iter()
+                .filter(|_| {
+                    input.formulas.is_empty()
+                        && input
+                            .symbol
+                            .is_none_or(|symbol| symbol.definitions.is_empty())
+                })
                 .filter(|candidate| {
                     candidate.status == SemanticCandidateStatus::Supported
                         || (!supported_candidate_exists
@@ -201,6 +226,21 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
     alternatives.retain(|alternative| seen.insert(alternative.alternative_id.clone()));
     alternatives.truncate(MAX_DECISION_ITEMS);
     alternatives
+}
+
+fn preferred_formulas<'a>(input: &'a MeaningDecisionInput<'a>) -> Vec<&'a LawRecognition> {
+    let explicitly_named = input.formulas.iter().any(has_law_activation);
+    input
+        .formulas
+        .iter()
+        .filter(|formula| !explicitly_named || has_law_activation(formula))
+        .collect()
+}
+
+fn has_law_activation(formula: &LawRecognition) -> bool {
+    formula.evidence.iter().any(|evidence| {
+        evidence.kind == "explicit-prose" && evidence.rule_id.ends_with("/activation-phrase")
+    })
 }
 
 fn established_evidence(formula: &LawRecognition) -> Vec<Evidence> {
@@ -371,6 +411,7 @@ mod tests {
             symbol: None,
             candidates: &[supported.clone(), unresolved.clone()],
             diagnostics: &[],
+            engine_limited: false,
             truncated: false,
         });
         assert!(matches!(
@@ -386,6 +427,7 @@ mod tests {
                 unresolved,
             ],
             diagnostics: &[],
+            engine_limited: false,
             truncated: false,
         });
         assert!(matches!(decision, MeaningDecision::Ambiguous { .. }));
@@ -398,9 +440,59 @@ mod tests {
                 SemanticCandidateStatus::Conflicting,
             )],
             diagnostics: &[],
+            engine_limited: false,
             truncated: false,
         });
         assert!(matches!(decision, MeaningDecision::Conflicting { .. }));
+    }
+
+    #[test]
+    fn a_source_typed_formula_resolves_weaker_structural_candidates() {
+        let verified = formula("verified", ConstraintStatus::Verified);
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: std::slice::from_ref(&verified),
+            symbol: None,
+            candidates: &[
+                candidate("divergence", SemanticCandidateStatus::Unresolved),
+                candidate("gradient", SemanticCandidateStatus::Unresolved),
+            ],
+            diagnostics: &[],
+            engine_limited: false,
+            truncated: false,
+        });
+        assert!(matches!(
+            decision,
+            MeaningDecision::Established { meaning, .. } if meaning.relation_id.as_deref() == Some("verified")
+        ));
+    }
+
+    #[test]
+    fn reports_an_opaque_notation_as_an_engine_limit_without_guessing() {
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[],
+            diagnostics: &[],
+            engine_limited: true,
+            truncated: false,
+        });
+        assert!(matches!(
+            decision,
+            MeaningDecision::Unsupported { reasons }
+                if reasons.len() == 1 && reasons[0].kind == DecisionReasonKind::EngineLimit
+        ));
+    }
+
+    #[test]
+    fn an_opaque_macro_child_does_not_hide_a_source_supported_formula() {
+        let verified = formula("verified", ConstraintStatus::Verified);
+        let mut input = input(std::slice::from_ref(&verified));
+        input.engine_limited = true;
+        assert!(matches!(
+            decide_meaning(input),
+            MeaningDecision::Established { meaning, .. }
+                if meaning.relation_id.as_deref() == Some("verified")
+        ));
     }
 
     #[test]
@@ -428,6 +520,7 @@ mod tests {
             symbol: None,
             candidates: &[],
             diagnostics: &[diagnostic],
+            engine_limited: false,
             truncated: false,
         });
         assert!(matches!(
@@ -443,6 +536,7 @@ mod tests {
             symbol: None,
             candidates: &[],
             diagnostics: &[],
+            engine_limited: false,
             truncated: false,
         }
     }

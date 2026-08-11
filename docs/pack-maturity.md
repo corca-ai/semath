@@ -6,7 +6,7 @@ holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 4,146 authored law cases cover 45 laws in twelve packs, including 48 positive
+- 5,770 authored law cases cover 61 laws in twelve formula packs, including 48 positive
   and 32 refusal diversity cases for every promoted law.
 - 327 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
@@ -38,6 +38,10 @@ holds approved support policy; GitHub issues hold planned work.
   10 could not represent tiered domain relevance or relevance-ordered
   alternatives; protocol 11 passes all 30 cases. Six cases independently cover
   every current structural collision component with typed formula contexts.
+- The recognition-frontier v1 fixture freezes 32 stage-labeled cases across
+  eight notation, discourse, lifecycle, safety, mathematics, and engineering
+  families. The current engine passes 32 of 32 with zero false establishment,
+  false conflict, or missed-coverage risk under the reviewed targets.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -68,6 +72,10 @@ field completeness.
 | Structural token identity | Semath inferred token kinds again from source text, splitting decorated and named notation | wasmtex syntax 7 supplies neutral lexical classes and document fields; Semath consumes them without TeX re-lexing or interpreting domains |
 | Domain routing | Global weak/strong activations could neither express scoped relevance nor order cross-pack collisions | Catalog-derived signatures and collision reports feed explicit/supported/tentative hypotheses; relevance orders a bounded frontier without becoming proof or a diagnostic |
 | Formula/prose order | Typed descriptions after an equation arrived too late to support that equation | One bounded math-slot construction attaches formula-first and prose-first declarations with exact evidence and deterministic retraction |
+| Equation references | A later “In Equation …” role list could not support the labeled display equation | Label/reference attachment links the two exact ranges; equation metadata is removed from canonical meaning |
+| Scientific operators | Gradient, divergence, curl, Laplacian, conditional arguments, and callable role placeholders lost reusable structure | One shared canonical IR and generic unifier represent them without field-specific runtime branches |
+| Decorated and indexed roles | Decorated optima and indexed state families lost identity or role evidence | Canonical decorated atoms and indexed-family lookup preserve exact source notation while sharing declared family evidence |
+| Opaque expansions | Macro resolution status conflated ordinary commands with truly opaque generated notation | Only opaque/cyclic/truncated structure yields an engine-limit decision; no Problems diagnostic is invented |
 
 ## Remaining measured gaps
 

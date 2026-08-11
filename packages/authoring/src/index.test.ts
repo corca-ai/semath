@@ -13,12 +13,18 @@ import {
 } from "./index";
 
 const pack = {
+  concepts: [
+    { id: "output", title: "Response quantity" },
+    { id: "coefficient", title: "Scale coefficient" },
+    { id: "input", title: "Input quantity" },
+  ],
   laws: [{
+    activationPhrases: [],
     id: "scaled-output",
     roles: [
-      { id: "output", shape: "scalar" },
-      { id: "coefficient", shape: "scalar" },
-      { id: "input", shape: "scalar" },
+      { concept: "sample-field:output", id: "output", shape: "scalar" },
+      { concept: "sample-field:coefficient", id: "coefficient", shape: "scalar" },
+      { concept: "sample-field:input", id: "input", shape: "scalar" },
     ],
     canonicalRelation: "output = coefficient input",
     representations: [],
@@ -34,6 +40,8 @@ describe("pack authoring policies", () => {
     expect(workspace.corpus.cases).toHaveLength(10);
     expect(workspace.corpus.cases.filter((item) => item.expectation === "recognized")).toHaveLength(5);
     expect(workspace.corpus.cases.filter((item) => item.expectation === "refused")).toHaveLength(5);
+    expect(workspace.corpus.cases[0]!.documents.map((item) => item.content).join("\n"))
+      .toContain("response quantity scalar");
     expect(new Set(workspace.corpus.cases.map((item) => item.diversity.proseFamily)).size).toBe(5);
     expect(findCorpusTagProblems(workspace.manifest, new Map([[workspace.corpus.domain, workspace.corpus]]))).toEqual([]);
     const manifest = parseQualityManifest(JSON.parse(JSON.stringify(workspace.manifest)));

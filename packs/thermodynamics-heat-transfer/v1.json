@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
   "packId": "thermodynamics-heat-transfer",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "thermodynamics-heat-transfer",
   "title": "Thermodynamics and heat transfer",
@@ -191,6 +191,21 @@
       "aliases": [
         "fourth-power temperature difference",
         "radiation temperature potential"
+      ],
+      "parents": [],
+      "references": [
+        "heat-transfer"
+      ]
+    },
+    {
+      "id": "heat-flux",
+      "conceptKind": "quantity",
+      "title": "Heat flux",
+      "description": "Heat-transfer rate per unit area with an explicit direction.",
+      "aliases": [
+        "heat flux",
+        "conductive heat flux",
+        "thermal flux"
       ],
       "parents": [],
       "references": [
@@ -487,6 +502,104 @@
         "heat-transfer"
       ],
       "canonicalRelation": "temperature-change = heat-transfer-rate resistance"
+    },
+    {
+      "id": "fourier-conduction",
+      "title": "Fourier conduction law",
+      "description": "Conductive heat flux opposes the temperature gradient in an isotropic medium.",
+      "roles": [
+        {
+          "id": "flux",
+          "concept": "thermodynamics-heat-transfer:heat-flux",
+          "description": "Heat flux."
+        },
+        {
+          "id": "conductivity",
+          "concept": "quantities-units:thermal-conductivity",
+          "description": "Thermal conductivity.",
+          "shape": "scalar"
+        },
+        {
+          "id": "temperature",
+          "concept": "quantities-units:temperature",
+          "description": "Temperature."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "isotropic-conduction",
+          "kind": "domain-membership",
+          "subjects": [
+            "flux",
+            "conductivity",
+            "temperature"
+          ],
+          "label": "Flux, conductivity, and temperature are explicitly bound in the stated conduction model."
+        }
+      ],
+      "activationPhrases": [],
+      "references": [
+        "heat-transfer"
+      ],
+      "canonicalRelation": "flux = -conductivity \\nabla temperature"
+    },
+    {
+      "id": "ideal-gas",
+      "title": "Ideal-gas equation of state",
+      "description": "Pressure times volume equals amount of substance times gas constant times absolute temperature.",
+      "roles": [
+        {
+          "id": "pressure",
+          "concept": "quantities-units:pressure",
+          "description": "Pressure.",
+          "shape": "scalar"
+        },
+        {
+          "id": "volume",
+          "concept": "quantities-units:volume",
+          "description": "Volume.",
+          "shape": "scalar"
+        },
+        {
+          "id": "amount",
+          "concept": "thermodynamics-heat-transfer:amount-of-substance",
+          "description": "Amount of substance.",
+          "shape": "scalar"
+        },
+        {
+          "id": "constant",
+          "concept": "thermodynamics-heat-transfer:gas-constant",
+          "description": "Gas constant.",
+          "shape": "scalar"
+        },
+        {
+          "id": "temperature",
+          "concept": "quantities-units:temperature",
+          "description": "Absolute temperature.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "ideal-gas-model",
+          "kind": "domain-membership",
+          "subjects": [
+            "pressure",
+            "volume",
+            "amount",
+            "constant",
+            "temperature"
+          ],
+          "label": "The document explicitly adopts an ideal-gas model and absolute temperature."
+        }
+      ],
+      "activationPhrases": [
+        "ideal gas"
+      ],
+      "references": [
+        "thermodynamics"
+      ],
+      "canonicalRelation": "pressure volume = amount constant temperature"
     }
   ],
   "activationRules": [

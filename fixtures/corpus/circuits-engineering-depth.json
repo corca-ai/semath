@@ -2328,7 +2328,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2420,7 +2420,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2865,7 +2865,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -2951,7 +2951,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -3037,7 +3037,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -3487,7 +3487,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },
@@ -3573,7 +3573,7 @@
           "path": "main.tex"
         },
         {
-          "content": "For Inductor voltage law, here $o$ denotes inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
+          "content": "For Inductor voltage law, here $o$ denotes n by n inductor terminal voltage matrix, $m$ denotes inductance scalar, $i$ denotes inductor current scalar, and $e$ denotes time variable scalar.",
           "fileId": "roles",
           "path": "roles.tex"
         },

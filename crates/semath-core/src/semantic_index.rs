@@ -523,9 +523,11 @@ impl ProjectSemanticIndex {
             .cloned()
             .chain(occurrence_ids.iter().cloned())
             .collect::<BTreeSet<_>>();
-        let new_entities = facts.entities.iter().cloned().collect::<BTreeSet<_>>();
-        if new_entities.len() != facts.entities.len() {
-            return Err("duplicate entity identity".to_owned());
+        let mut new_entities = BTreeSet::new();
+        for entity in &facts.entities {
+            if !new_entities.insert(entity.clone()) {
+                return Err(format!("duplicate entity identity: {entity:?}"));
+            }
         }
         for entity in &facts.entities {
             if entity.anchor.file_id != facts.file_id {

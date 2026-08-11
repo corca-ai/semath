@@ -161,7 +161,7 @@ impl ShapeObservations {
         self.facts
             .iter()
             .filter(|fact| {
-                fact.symbol == symbol
+                semantic_symbol_eq(&fact.symbol, symbol)
                     && (self.scopes.depth(fact.scope_id) == 0
                         || fact.available_from <= offset
                         || fact.symbol_range.contains(offset))
@@ -186,7 +186,7 @@ impl ShapeObservations {
             .facts
             .iter()
             .filter(|fact| {
-                fact.symbol == symbol
+                semantic_symbol_eq(&fact.symbol, symbol)
                     && (self.scopes.depth(fact.scope_id) == 0
                         || fact.available_from <= offset
                         || fact.symbol_range.contains(offset))
@@ -244,6 +244,14 @@ impl ShapeObservations {
             truncated,
         )
     }
+}
+
+fn semantic_symbol_eq(left: &str, right: &str) -> bool {
+    let left = left.trim_start_matches('\\');
+    let right = right.trim_start_matches('\\');
+    left == right
+        || ((left.contains('_') || right.contains('_'))
+            && left.split('_').next() == right.split('_').next())
 }
 
 pub(crate) fn observe_shapes(
