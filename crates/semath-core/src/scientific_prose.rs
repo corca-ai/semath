@@ -181,6 +181,21 @@ impl ProseEventStream {
             .copied()
             .unwrap_or(false)
     }
+
+    pub(crate) fn description_before(
+        &self,
+        clause_index: usize,
+        mention_start: usize,
+    ) -> Option<(usize, usize)> {
+        self.events
+            .iter()
+            .find(|event| {
+                event.clause_index == clause_index
+                    && event.end == mention_start
+                    && event.kind == ProseEventKind::DescriptionSpan
+            })
+            .map(|event| (event.start, event.end))
+    }
 }
 
 pub(crate) fn normalize_prose_events(
@@ -933,6 +948,21 @@ mod tests {
                 .count(),
             2
         );
+    }
+
+    #[test]
+    fn exposes_the_source_backed_description_adjacent_to_each_mention() {
+        let source = "The saline density $\\rho$ was measured.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let mention = ScientificMention {
+            symbol: "rho".into(),
+            start: 19,
+            end: 25,
+            math_index: 0,
+        };
+        let stream = normalize_prose_events(source, &clauses, std::slice::from_ref(&mention));
+        let range = stream.description_before(0, mention.start).unwrap();
+        assert_eq!(&source[range.0..range.1], "The saline density ");
     }
 
     #[test]

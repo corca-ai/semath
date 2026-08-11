@@ -18,6 +18,12 @@ pub(crate) struct DefinitionConstruction<'a> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct NominalConstruction<'a> {
+    pub description: &'a str,
+    pub relative_start: usize,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum CoordinationLead {
     Let,
     Direct,
@@ -283,25 +289,116 @@ pub(crate) fn match_quantified<'a>(
     })
 }
 
-pub(crate) fn match_fronted_single<'a>(
-    before: &'a str,
-    after: &str,
-) -> Option<DefinitionConstruction<'a>> {
-    let suffix_end = leading_punctuation_end(after)?;
-    let clause = current_clause(before).trim();
-    let lower = clause.to_ascii_lowercase();
-    let lead = ["for ", "given ", "with "]
-        .into_iter()
-        .find(|lead| lower.starts_with(lead))?;
-    let description = strip_article(clause[lead.len()..].trim());
-    (valid_plain_description(description)
-        && (1..=6).contains(&description.split_whitespace().count()))
-    .then_some(DefinitionConstruction {
-        description,
-        rule_id: "english-fronted-single-definition",
-        prefix_start: before.len() - current_clause(before).len(),
-        suffix_end,
+/// Produces a bounded set of source-backed noun-phrase candidates immediately
+/// before a math mention. Semantic vocabulary decides whether any candidate is
+/// a scientific role; this function only composes the normalized prose span.
+pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruction<'_>> {
+    let mut start = value
+        .char_indices()
+        .rev()
+        .find(|(_, character)| matches!(character, ',' | ';' | ':'))
+        .map_or(0, |(offset, character)| offset + character.len_utf8());
+    start += value[start..].len() - value[start..].trim_start().len();
+
+    let mut phrase = &value[start..];
+    for lead in ["and ", "while ", "whereas "] {
+        if phrase
+            .get(..lead.len())
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(lead))
+        {
+            start += lead.len();
+            phrase = &value[start..];
+            break;
+        }
+    }
+    for lead in ["for ", "given ", "with ", "at "] {
+        if phrase
+            .get(..lead.len())
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(lead))
+        {
+            start += lead.len();
+            phrase = &value[start..];
+            break;
+        }
+    }
+    let lower_phrase = phrase.to_ascii_lowercase();
+    if let Some((action_start, action_length)) = [
+        " reports ",
+        " reported ",
+        " determines ",
+        " determined ",
+        " supplies ",
+        " supplied ",
+        " provides ",
+        " provided ",
+        " yields ",
+        " yielded ",
+        " records ",
+        " recorded ",
+        " measures ",
+        " measured ",
+    ]
+    .iter()
+    .filter_map(|action| {
+        lower_phrase
+            .rfind(action)
+            .map(|offset| (offset, action.len()))
     })
+    .max_by_key(|(offset, _)| *offset)
+    {
+        start += action_start + action_length;
+        phrase = &value[start..];
+    }
+    let without_article = strip_article(phrase);
+    start += phrase.len() - without_article.len();
+    phrase = without_article;
+    for determiner in [
+        "both ", "two ", "three ", "four ", "five ", "six ", "seven ", "eight ",
+    ] {
+        if phrase
+            .get(..determiner.len())
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(determiner))
+        {
+            start += determiner.len();
+            phrase = &value[start..];
+            break;
+        }
+    }
+    phrase = phrase.trim_end();
+    if !valid_plain_description(phrase) || phrase.split_whitespace().count() > 8 {
+        return Vec::new();
+    }
+
+    let lower = phrase.to_ascii_lowercase();
+    if [
+        "is", "are", "was", "were", "be", "been", "at", "of", "with", "as", "for", "by", "to",
+        "in", "on", "from",
+    ]
+    .iter()
+    .any(|boundary| lower.split_whitespace().next_back() == Some(*boundary))
+    {
+        return Vec::new();
+    }
+    let mut candidates = [" of ", " with ", " at ", " as ", " having "]
+        .iter()
+        .filter_map(|separator| {
+            let offset = lower.rfind(separator)? + separator.len();
+            let tail = strip_article(phrase[offset..].trim());
+            (valid_plain_description(tail) && tail.split_whitespace().count() <= 6).then_some(
+                NominalConstruction {
+                    description: tail,
+                    relative_start: start + phrase.find(tail).unwrap_or(offset),
+                },
+            )
+        })
+        .collect::<Vec<_>>();
+    candidates.sort_by_key(|candidate| candidate.description.len());
+    candidates.dedup_by_key(|candidate| candidate.relative_start);
+    candidates.push(NominalConstruction {
+        description: phrase,
+        relative_start: start,
+    });
+    candidates
 }
 
 pub(crate) fn defines_by_formula(before: &str, after: &str) -> bool {
@@ -649,7 +746,7 @@ fn valid_plain_description(value: &str) -> bool {
 mod tests {
     use super::{
         CoordinationLead, coordinated_descriptions, defines_by_formula,
-        fronted_labeled_descriptions, match_definition, match_fronted_single,
+        fronted_labeled_descriptions, match_definition, role_first_nominal_candidates,
     };
 
     #[test]
@@ -724,11 +821,27 @@ mod tests {
     }
 
     #[test]
-    fn recognizes_single_fronted_and_formula_definitions() {
+    fn composes_role_first_nominal_candidates_and_formula_definitions() {
         assert_eq!(
-            match_fronted_single("For an antiderivative ", ", continue.")
+            role_first_nominal_candidates("For a segment of mass ")
+                .iter()
+                .map(|item| item.description)
+                .collect::<Vec<_>>(),
+            ["mass", "segment of mass"]
+        );
+        assert_eq!(
+            role_first_nominal_candidates(" was measured, and the area-mean exit speed ")
+                .last()
                 .map(|item| item.description),
-            Some("antiderivative")
+            Some("area-mean exit speed")
+        );
+        assert_eq!(
+            role_first_nominal_candidates(
+                "The ultrasonic meter reports the cross-section mean speed "
+            )
+            .last()
+            .map(|item| item.description),
+            Some("cross-section mean speed")
         );
         assert!(defines_by_formula("Define ", " by the following relation."));
     }
