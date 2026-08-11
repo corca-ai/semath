@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 9;
-pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 5;
+pub const PROTOCOL_VERSION: u32 = 10;
+pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 6;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -78,6 +78,16 @@ pub enum NotationNodeKind {
     Error,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum LexicalClass {
+    Identifier,
+    Number,
+    Operator,
+    Punctuation,
+    Other,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct NotationNodeRanges {
@@ -120,6 +130,7 @@ pub struct NotationNode {
     pub text: Option<String>,
     #[serde(default)]
     pub arguments: Vec<NotationArgument>,
+    pub lexical_class: Option<LexicalClass>,
     pub math_class: Option<String>,
     pub provenance: Option<SyntaxProvenance>,
 }
@@ -307,6 +318,7 @@ pub struct GeneratedNotationNode {
     pub text: Option<String>,
     #[serde(default)]
     pub arguments: Vec<GeneratedNotationArgument>,
+    pub lexical_class: Option<LexicalClass>,
     pub math_class: Option<String>,
 }
 
@@ -732,6 +744,7 @@ pub enum ScientificConstraintKind {
     Assumption,
     Differentiable,
     DomainMembership,
+    Nonzero,
     Positive,
     SameContext,
     ShapeCompatible,
@@ -983,6 +996,8 @@ pub struct AnalysisStats {
     pub semantic_nodes: u32,
     pub constraints: u32,
     pub law_rules_visited: u32,
+    pub equivalence_states: u32,
+    pub equivalence_guard_checks: u32,
     pub semantic_occurrences: u32,
     pub semantic_entities: u32,
     pub semantic_claims: u32,

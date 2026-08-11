@@ -10,9 +10,10 @@ export const PROPERTY_FAMILIES = [
 export type PropertyFamily = (typeof PROPERTY_FAMILIES)[number];
 
 export interface PropertyLawDeclaration {
+  readonly canonicalRelation: string;
   readonly id: string;
+  readonly representations?: readonly string[];
   readonly roles: readonly { readonly id: string }[];
-  readonly semanticForms: readonly string[];
 }
 
 export interface PropertyPackDeclaration {
@@ -87,7 +88,7 @@ export function planPackPropertyCells(
     for (const law of [...pack.laws].sort((left, right) =>
       left.id.localeCompare(right.id),
     )) {
-      const forms = law.semanticForms.filter(validSemanticForm);
+      const forms = [law.canonicalRelation, ...(law.representations ?? [])].filter(validSemanticForm);
       if (!forms.length) {
         throw new Error(`${pack.packId}/${law.id}: no renderable semantic form`);
       }

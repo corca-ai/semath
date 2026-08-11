@@ -12,7 +12,8 @@ const packs = [
       {
         id: "balance",
         roles: [{ id: "left" }, { id: "right" }],
-        semanticForms: ["left = right", "{left} = {right}"],
+        canonicalRelation: "left = right",
+        representations: ["{left} = {right}"],
       },
     ],
     packId: "test-pack",
@@ -34,7 +35,7 @@ describe("pack-derived semantic properties", () => {
     );
     expect(() =>
       planPackPropertyCells(
-        [{ packId: "broken", laws: [{ id: "law", roles: [], semanticForms: ["{x"] }] }],
+        [{ packId: "broken", laws: [{ id: "law", roles: [], canonicalRelation: "{x" }] }],
         1,
       ),
     ).toThrow("no renderable semantic form");

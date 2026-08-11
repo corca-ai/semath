@@ -1301,6 +1301,14 @@ impl SemathEngine {
                     .iter()
                     .map(|file_id| self.index.observations(file_id).laws.visited_rules())
                     .sum(),
+                equivalence_states: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| self.index.observations(file_id).laws.equivalence_states())
+                    .sum(),
+                equivalence_guard_checks: analyzed_file_ids
+                    .iter()
+                    .map(|file_id| self.index.observations(file_id).laws.guard_checks())
+                    .sum(),
                 semantic_occurrences: semantic_stats.occurrences,
                 semantic_entities: semantic_stats.entities,
                 semantic_claims: semantic_stats.claims,

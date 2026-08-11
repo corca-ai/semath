@@ -230,7 +230,7 @@ mod tests {
                 language: DocumentLanguage::Markdown,
                 content: case.content.clone(),
                 document_version: 1,
-                schema_version: 5,
+                schema_version: 6,
                 nodes: Vec::new(),
                 math_roots: Vec::new(),
                 visible_prose: Vec::new(),

@@ -122,15 +122,14 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
         .iter()
         .flat_map(|(_, pack)| {
             pack.laws.iter().flat_map(move |law| {
-                law.semantic_forms
-                    .iter()
+                law.relations()
                     .enumerate()
                     .map(move |(form_index, source)| PackCanonicalForm {
                         pack_id: pack.pack_id.clone(),
                         law_id: law.id.clone(),
                         form_index,
                         canonical: canonical_template(source),
-                        source: source.clone(),
+                        source: source.to_owned(),
                     })
             })
         })
@@ -205,7 +204,8 @@ pub fn pack_template(pack_id: &str) -> Result<String, PackValidationError> {
             id: "scaled-output".into(),
             title: "Scaled output".into(),
             description: "The output equals a scalar coefficient times the input.".into(),
-            semantic_forms: vec!["output = coefficient input".into()],
+            canonical_relation: "output = coefficient input".into(),
+            representations: Vec::new(),
             roles: vec![
                 template_role(pack_id, "output", "Output value."),
                 template_role(pack_id, "coefficient", "Scalar coefficient."),
@@ -310,13 +310,18 @@ fn audit_pack(path: &str, pack: &DomainPack, diagnostics: &mut Vec<PackAuthoring
         .collect::<BTreeMap<_, _>>();
     for (law_index, law) in pack.laws.iter().enumerate() {
         let mut canonical_forms = BTreeMap::<String, usize>::new();
-        for (form_index, form) in law.semantic_forms.iter().enumerate() {
+        for (form_index, form) in law.relations().enumerate() {
+            let form_path = if form_index == 0 {
+                format!("laws[{law_index}].canonicalRelation")
+            } else {
+                format!("laws[{law_index}].representations[{}]", form_index - 1)
+            };
             let canonical = canonical_template(form);
             if let Some(first) = canonical_forms.insert(canonical.clone(), form_index) {
                 diagnostics.push(warning(
                     "form.duplicate-canonical",
                     path,
-                    format!("laws[{law_index}].semanticForms[{form_index}]"),
+                    form_path.clone(),
                     format!("duplicates canonical form {first}: {canonical}"),
                     Some(law.id.clone()),
                 ));
@@ -325,7 +330,7 @@ fn audit_pack(path: &str, pack: &DomainPack, diagnostics: &mut Vec<PackAuthoring
                 diagnostics.push(error_diagnostic(
                     "form.unknown-lowering",
                     path,
-                    format!("laws[{law_index}].semanticForms[{form_index}]"),
+                    form_path,
                     "semantic form contains an unsupported canonical fragment".into(),
                     Some(law.id.clone()),
                 ));
@@ -504,7 +509,7 @@ mod tests {
         let expected_forms = built_in_packs()
             .iter()
             .flat_map(|pack| &pack.laws)
-            .map(|law| law.semantic_forms.len())
+            .map(|law| 1 + law.representations.len())
             .sum::<usize>();
         assert_eq!(report.forms.len(), expected_forms);
         assert!(report.forms.iter().all(|form| !form.canonical.is_empty()));
@@ -546,7 +551,7 @@ mod tests {
         let mut duplicate =
             serde_json::from_str::<DomainPack>(&pack_template("sample-field").unwrap()).unwrap();
         duplicate.laws[0]
-            .semantic_forms
+            .representations
             .push("output=(coefficient input)".into());
         duplicate.references.push(PackReference {
             id: "unused-source".into(),

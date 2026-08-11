@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "discrete-math",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -19,7 +19,11 @@
       "conceptKind": "entity",
       "title": "Set",
       "description": "A collection declared by the document.",
-      "aliases": ["finite set", "vertex set", "edge set"],
+      "aliases": [
+        "finite set",
+        "vertex set",
+        "edge set"
+      ],
       "parents": [],
       "references": [
         "concrete-mathematics"
@@ -30,7 +34,11 @@
       "conceptKind": "entity",
       "title": "Graph",
       "description": "A graph with declared vertices and edges.",
-      "aliases": ["directed graph", "undirected graph", "simple graph"],
+      "aliases": [
+        "directed graph",
+        "undirected graph",
+        "simple graph"
+      ],
       "parents": [],
       "references": [
         "graph-theory"
@@ -41,7 +49,101 @@
       "conceptKind": "operator",
       "title": "Cardinality",
       "description": "The size of a finite set.",
-      "aliases": ["set cardinality", "set size", "number of elements"],
+      "aliases": [
+        "set cardinality",
+        "set size",
+        "number of elements"
+      ],
+      "parents": [],
+      "references": [
+        "concrete-mathematics"
+      ]
+    },
+    {
+      "id": "element",
+      "conceptKind": "entity",
+      "title": "Set element",
+      "description": "An element of a declared set.",
+      "aliases": [
+        "member",
+        "set member",
+        "set element"
+      ],
+      "parents": [],
+      "references": [
+        "concrete-mathematics"
+      ]
+    },
+    {
+      "id": "edge-count",
+      "conceptKind": "quantity",
+      "title": "Edge count",
+      "description": "The number of edges in a finite graph.",
+      "aliases": [
+        "number of edges",
+        "graph size"
+      ],
+      "parents": [],
+      "references": [
+        "graph-theory"
+      ]
+    },
+    {
+      "id": "degree-sum",
+      "conceptKind": "quantity",
+      "title": "Degree sum",
+      "description": "The sum of vertex degrees in a finite graph.",
+      "aliases": [
+        "sum of degrees",
+        "sum of vertex degrees",
+        "total degree"
+      ],
+      "parents": [],
+      "references": [
+        "graph-theory"
+      ]
+    },
+    {
+      "id": "subset",
+      "conceptKind": "entity",
+      "title": "Subset operand",
+      "description": "The left-hand set in an asserted subset relation.",
+      "aliases": [
+        "subset operand",
+        "declared subset"
+      ],
+      "parents": [
+        "discrete-math:set"
+      ],
+      "references": [
+        "concrete-mathematics"
+      ]
+    },
+    {
+      "id": "superset",
+      "conceptKind": "entity",
+      "title": "Superset operand",
+      "description": "The right-hand set in an asserted subset relation.",
+      "aliases": [
+        "superset operand",
+        "declared superset"
+      ],
+      "parents": [
+        "discrete-math:set"
+      ],
+      "references": [
+        "concrete-mathematics"
+      ]
+    },
+    {
+      "id": "intersection-cardinality",
+      "conceptKind": "quantity",
+      "title": "Intersection cardinality",
+      "description": "The cardinality of an intersection of finite sets.",
+      "aliases": [
+        "overlap count",
+        "intersection size"
+      ],
       "parents": [],
       "references": [
         "concrete-mathematics"
@@ -55,9 +157,6 @@
       "id": "set-intersection",
       "title": "Set intersection",
       "description": "The intersection contains elements belonging to both sets.",
-      "semanticForms": [
-        "left \\cap right"
-      ],
       "roles": [
         {
           "id": "left",
@@ -83,15 +182,13 @@
       ],
       "references": [
         "concrete-mathematics"
-      ]
+      ],
+      "canonicalRelation": "left \\cap right"
     },
     {
       "id": "set-union",
       "title": "Set union",
       "description": "The union contains elements belonging to either set.",
-      "semanticForms": [
-        "left \\cup right"
-      ],
       "roles": [
         {
           "id": "left",
@@ -117,7 +214,90 @@
       ],
       "references": [
         "concrete-mathematics"
-      ]
+      ],
+      "canonicalRelation": "left \\cup right"
+    },
+    {
+      "id": "handshaking-degree-sum",
+      "title": "Handshaking degree sum",
+      "description": "The sum of degrees equals twice the number of edges.",
+      "roles": [
+        {
+          "id": "degree-sum",
+          "concept": "discrete-math:degree-sum",
+          "description": "Sum of vertex degrees.",
+          "shape": "scalar"
+        },
+        {
+          "id": "edge-count",
+          "concept": "discrete-math:edge-count",
+          "description": "Number of edges.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "degree-sum",
+            "edge-count"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "graph-theory"
+      ],
+      "canonicalRelation": "degree-sum = 2 edge-count"
+    },
+    {
+      "id": "two-set-inclusion-exclusion",
+      "title": "Two-set inclusion-exclusion",
+      "description": "The union cardinality equals the two cardinalities minus their intersection cardinality.",
+      "roles": [
+        {
+          "id": "union-cardinality",
+          "concept": "discrete-math:cardinality",
+          "description": "Union cardinality.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-cardinality",
+          "concept": "discrete-math:cardinality",
+          "description": "Left-set cardinality.",
+          "shape": "scalar"
+        },
+        {
+          "id": "right-cardinality",
+          "concept": "discrete-math:cardinality",
+          "description": "Right-set cardinality.",
+          "shape": "scalar"
+        },
+        {
+          "id": "intersection-cardinality",
+          "concept": "discrete-math:intersection-cardinality",
+          "description": "Intersection cardinality.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "union-cardinality",
+            "left-cardinality",
+            "right-cardinality",
+            "intersection-cardinality"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "concrete-mathematics"
+      ],
+      "canonicalRelation": "union-cardinality = left-cardinality + right-cardinality - intersection-cardinality"
     }
   ],
   "activationRules": [
@@ -139,7 +319,9 @@
     {
       "id": "discrete-notation",
       "topic": "notation",
-      "structures": ["discrete"],
+      "structures": [
+        "discrete"
+      ],
       "references": [
         "concrete-mathematics"
       ]

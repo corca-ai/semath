@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "circuits",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -70,6 +70,7 @@
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Voltage across the component.",
+          "shape": "scalar",
           "notation": [
             "V",
             "v",
@@ -83,6 +84,7 @@
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Current through the component.",
+          "shape": "scalar",
           "notation": [
             "I",
             "i",
@@ -94,15 +96,13 @@
           "id": "resistance",
           "concept": "quantities-units:resistance",
           "description": "Electrical resistance of the component.",
+          "shape": "scalar",
           "notation": [
             "R",
             "r",
             "rho"
           ]
         }
-      ],
-      "semanticForms": [
-        "voltage = resistance current"
       ],
       "conditions": [
         {
@@ -117,7 +117,8 @@
       ],
       "references": [
         "engineering-circuits"
-      ]
+      ],
+      "canonicalRelation": "voltage = resistance current"
     },
     {
       "id": "kirchhoff-current-law",
@@ -144,9 +145,6 @@
           ],
           "variadic": true
         }
-      ],
-      "semanticForms": [
-        "\\sum branch-current = 0"
       ],
       "conditions": [
         {
@@ -179,7 +177,8 @@
       ],
       "references": [
         "engineering-circuits"
-      ]
+      ],
+      "canonicalRelation": "\\sum branch-current = 0"
     },
     {
       "id": "capacitor-current-law",
@@ -190,6 +189,7 @@
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Capacitor current.",
+          "shape": "scalar",
           "notation": [
             "I",
             "i",
@@ -200,6 +200,7 @@
           "id": "capacitance",
           "concept": "quantities-units:capacitance",
           "description": "Capacitance.",
+          "shape": "scalar",
           "notation": [
             "C",
             "K",
@@ -210,6 +211,7 @@
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Capacitor voltage.",
+          "shape": "scalar",
           "notation": [
             "V",
             "v",
@@ -221,15 +223,12 @@
           "id": "time",
           "concept": "quantities-units:duration",
           "description": "Time variable.",
+          "shape": "scalar",
           "notation": [
             "t",
             "tau"
           ]
         }
-      ],
-      "semanticForms": [
-        "current = capacitance \\frac{d voltage}{d time}",
-        "current = -capacitance \\frac{d voltage}{d time}"
       ],
       "conditions": [
         {
@@ -244,6 +243,10 @@
       ],
       "references": [
         "engineering-circuits"
+      ],
+      "canonicalRelation": "current = capacitance \\frac{d voltage}{d time}",
+      "representations": [
+        "current = -capacitance \\frac{d voltage}{d time}"
       ]
     },
     {
@@ -255,6 +258,7 @@
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Inductor terminal voltage.",
+          "shape": "scalar",
           "notation": [
             "V",
             "v",
@@ -274,6 +278,7 @@
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Inductor current.",
+          "shape": "scalar",
           "notation": [
             "I",
             "i",
@@ -284,15 +289,12 @@
           "id": "time",
           "concept": "quantities-units:duration",
           "description": "Time variable.",
+          "shape": "scalar",
           "notation": [
             "t",
             "tau"
           ]
         }
-      ],
-      "semanticForms": [
-        "voltage = inductance \\frac{d current}{d time}",
-        "voltage = -inductance \\frac{d current}{d time}"
       ],
       "conditions": [
         {
@@ -307,6 +309,10 @@
       ],
       "references": [
         "engineering-circuits"
+      ],
+      "canonicalRelation": "voltage = inductance \\frac{d current}{d time}",
+      "representations": [
+        "voltage = -inductance \\frac{d current}{d time}"
       ]
     }
   ],

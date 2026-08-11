@@ -1,16 +1,17 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
-use crate::canonical::{SemanticExpr, SemanticExprKind, associative, lower_template};
+use crate::canonical::{SemanticExpr, SemanticExprKind, lower_template};
 use crate::consistency::{RoleObservations, roles_conflict};
+use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
 use crate::pack::{PackConditionKind, PackLaw, PackLawRole, built_in_packs};
 use crate::prose::{FormulaOperationKind, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::{
-    ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition, LawRecognitionStatus,
-    QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind,
-    SemanticConstraint, SemanticConstraintKind, ShapeInfo,
+    AssumptionInfo, ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition,
+    LawRecognitionStatus, QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo,
+    ScientificConstraintKind, SemanticConstraint, SemanticConstraintKind, ShapeInfo,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -20,7 +21,7 @@ struct CompiledLaw {
     pack_id: &'static str,
     pack_version: &'static str,
     law: &'static PackLaw,
-    forms: Vec<SemanticExpr>,
+    forms: Vec<GuardedForm>,
     placeholders: BTreeSet<String>,
 }
 
@@ -47,6 +48,22 @@ enum DispatchFeature {
 struct DispatchKey {
     root: DispatchRoot,
     feature: Option<DispatchFeature>,
+    operands: Option<(DispatchOperand, DispatchOperand)>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum DispatchOperand {
+    Any,
+    Apply(String),
+    Atom,
+    Cross,
+    Derivative,
+    Dot,
+    Fraction,
+    Negate,
+    Power,
+    Product(usize),
+    Sum(usize),
 }
 
 #[derive(Default)]
@@ -71,21 +88,23 @@ impl LawDispatch {
     fn insert(
         &mut self,
         index: usize,
-        forms: &[SemanticExpr],
+        forms: &[GuardedForm],
         placeholders: &BTreeSet<String>,
         variadic: bool,
     ) {
         let mut keys = forms
             .iter()
             .map(|form| DispatchKey {
-                root: dispatch_root(form),
-                feature: strongest_dispatch_feature(form, placeholders),
+                root: dispatch_root(&form.expression),
+                feature: strongest_dispatch_feature(&form.expression, placeholders),
+                operands: dispatch_template_operands(&form.expression, placeholders),
             })
             .collect::<BTreeSet<_>>();
         if variadic {
             keys.insert(DispatchKey {
                 root: DispatchRoot::Relation("equals".into()),
                 feature: None,
+                operands: None,
             });
         }
         for key in keys {
@@ -95,17 +114,21 @@ impl LawDispatch {
 
     fn candidate_indices(&self, expression: &SemanticExpr) -> Vec<usize> {
         let root = dispatch_root(expression);
-        let mut keys = expression_dispatch_features(expression)
+        let features = expression_dispatch_features(expression)
             .into_iter()
-            .map(|feature| DispatchKey {
-                root: root.clone(),
-                feature: Some(feature),
-            })
-            .collect::<Vec<_>>();
-        keys.push(DispatchKey {
-            root,
-            feature: None,
-        });
+            .map(Some)
+            .chain(std::iter::once(None));
+        let operands = dispatch_actual_operands(expression);
+        let mut keys = Vec::new();
+        for feature in features {
+            for operands in &operands {
+                keys.push(DispatchKey {
+                    root: root.clone(),
+                    feature: feature.clone(),
+                    operands: operands.clone(),
+                });
+            }
+        }
         keys.into_iter()
             .filter_map(|key| self.candidates.get(&key))
             .flatten()
@@ -123,29 +146,107 @@ impl LawDispatch {
     }
 }
 
+fn dispatch_template_operands(
+    expression: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+) -> Option<(DispatchOperand, DispatchOperand)> {
+    let SemanticExprKind::Relation { left, right, .. } = &expression.kind else {
+        return None;
+    };
+    Some((
+        dispatch_operand(left, placeholders),
+        dispatch_operand(right, placeholders),
+    ))
+}
+
+fn dispatch_actual_operands(
+    expression: &SemanticExpr,
+) -> Vec<Option<(DispatchOperand, DispatchOperand)>> {
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &expression.kind
+    else {
+        return vec![None];
+    };
+    let mut pairs = Vec::new();
+    for left in dispatch_operand_variants(left) {
+        for right in dispatch_operand_variants(right) {
+            for pair in [
+                (left.clone(), right.clone()),
+                (DispatchOperand::Any, right.clone()),
+                (left.clone(), DispatchOperand::Any),
+                (DispatchOperand::Any, DispatchOperand::Any),
+            ] {
+                pairs.push(Some(pair.clone()));
+                if operator == "equals" {
+                    pairs.push(Some((pair.1, pair.0)));
+                }
+            }
+        }
+    }
+    pairs.push(None);
+    pairs.sort();
+    pairs.dedup();
+    pairs
+}
+
+fn dispatch_operand(expression: &SemanticExpr, placeholders: &BTreeSet<String>) -> DispatchOperand {
+    match &expression.kind {
+        SemanticExprKind::Symbol(symbol) if placeholders.contains(symbol) => DispatchOperand::Any,
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Number(_)
+        | SemanticExprKind::Unknown(_) => DispatchOperand::Atom,
+        SemanticExprKind::Apply { operator, .. } => DispatchOperand::Apply(operator.clone()),
+        SemanticExprKind::Cross(_, _) => DispatchOperand::Cross,
+        SemanticExprKind::Derivative { .. } => DispatchOperand::Derivative,
+        SemanticExprKind::Dot(_, _) => DispatchOperand::Dot,
+        SemanticExprKind::Fraction(_, _) => DispatchOperand::Fraction,
+        SemanticExprKind::Negate(_) => DispatchOperand::Negate,
+        SemanticExprKind::Power(_, _) => DispatchOperand::Power,
+        SemanticExprKind::Product(items) => DispatchOperand::Product(items.len()),
+        SemanticExprKind::Sum(items) => DispatchOperand::Sum(items.len()),
+        SemanticExprKind::Relation { .. } => DispatchOperand::Atom,
+    }
+}
+
+fn dispatch_operand_variants(expression: &SemanticExpr) -> Vec<DispatchOperand> {
+    let mut variants = vec![dispatch_operand(expression, &BTreeSet::new())];
+    if let Some(expanded) = expand_ambiguous_juxtaposition(expression) {
+        variants.push(dispatch_operand(&expanded, &BTreeSet::new()));
+    }
+    variants.sort();
+    variants.dedup();
+    variants
+}
+
 static COMPILED_LAWS: LazyLock<Vec<CompiledLaw>> = LazyLock::new(|| {
     built_in_packs()
         .iter()
         .flat_map(|pack| {
             pack.laws
                 .iter()
-                .filter(|law| !law.semantic_forms.is_empty())
-                .map(|law| CompiledLaw {
-                    pack_id: &pack.pack_id,
-                    pack_version: &pack.pack_version,
-                    forms: law
-                        .semantic_forms
+                .filter(|law| !law.canonical_relation.is_empty())
+                .map(|law| {
+                    let scalar_placeholders = law
+                        .roles
                         .iter()
-                        .flat_map(|form| {
-                            let form = lower_template(form);
-                            let mut forms = vec![form.clone()];
-                            forms.extend(derived_solved_forms(&form));
-                            forms.extend(derived_coefficient_forms(&form));
-                            forms
-                        })
-                        .collect(),
-                    placeholders: law.roles.iter().map(|role| role.id.clone()).collect(),
-                    law,
+                        .filter(|role| role.shape.as_deref() == Some("scalar"))
+                        .map(|role| role.id.clone())
+                        .collect::<BTreeSet<_>>();
+                    CompiledLaw {
+                        pack_id: &pack.pack_id,
+                        pack_version: &pack.pack_version,
+                        forms: law
+                            .relations()
+                            .flat_map(|form| {
+                                compile_guarded_forms(lower_template(form), &scalar_placeholders)
+                            })
+                            .collect(),
+                        placeholders: law.roles.iter().map(|role| role.id.clone()).collect(),
+                        law,
+                    }
                 })
         })
         .collect()
@@ -252,110 +353,20 @@ fn dispatch_feature_priority(feature: &DispatchFeature) -> u8 {
     }
 }
 
-fn derived_solved_forms(form: &SemanticExpr) -> Vec<SemanticExpr> {
-    let SemanticExprKind::Relation {
-        operator,
-        left,
-        right,
-    } = &form.kind
-    else {
-        return Vec::new();
-    };
-    let SemanticExprKind::Product(factors) = &right.kind else {
-        return Vec::new();
-    };
-    if factors.len() != 2 {
-        return Vec::new();
-    }
-    (0..2)
-        .map(|index| {
-            let solved = factors[index].clone();
-            let divisor = factors[1 - index].clone();
-            let quotient = SemanticExpr {
-                kind: SemanticExprKind::Fraction(left.clone(), Box::new(divisor)),
-                range: form.range.clone(),
-                provenance: form.provenance.clone(),
-            };
-            SemanticExpr {
-                kind: SemanticExprKind::Relation {
-                    operator: operator.clone(),
-                    left: Box::new(solved),
-                    right: Box::new(quotient),
-                },
-                range: form.range.clone(),
-                provenance: form.provenance.clone(),
-            }
-        })
-        .collect()
-}
-
-fn derived_coefficient_forms(form: &SemanticExpr) -> Vec<SemanticExpr> {
-    let SemanticExprKind::Relation {
-        operator,
-        left,
-        right,
-    } = &form.kind
-    else {
-        return Vec::new();
-    };
-    let SemanticExprKind::Product(factors) = &right.kind else {
-        return Vec::new();
-    };
-    let Some((coefficient_index, denominator)) =
-        factors.iter().enumerate().find_map(|(index, factor)| {
-            let SemanticExprKind::Fraction(numerator, denominator) = &factor.kind else {
-                return None;
-            };
-            matches!(&numerator.kind, SemanticExprKind::Number(value) if value == "1")
-                .then_some((index, denominator.as_ref().clone()))
-        })
-    else {
-        return Vec::new();
-    };
-    let rest = associative(
-        factors
-            .iter()
-            .enumerate()
-            .filter(|(index, _)| *index != coefficient_index)
-            .map(|(_, factor)| factor.clone())
-            .collect(),
-        SemanticExprKind::Product,
-    );
-    let divided = SemanticExpr {
-        kind: SemanticExprKind::Fraction(Box::new(rest.clone()), Box::new(denominator.clone())),
-        range: form.range.clone(),
-        provenance: form.provenance.clone(),
-    };
-    let scaled_left = associative(
-        vec![denominator, left.as_ref().clone()],
-        SemanticExprKind::Product,
-    );
-    vec![
-        SemanticExpr {
-            kind: SemanticExprKind::Relation {
-                operator: operator.clone(),
-                left: left.clone(),
-                right: Box::new(divided),
-            },
-            range: form.range.clone(),
-            provenance: form.provenance.clone(),
-        },
-        SemanticExpr {
-            kind: SemanticExprKind::Relation {
-                operator: operator.clone(),
-                left: Box::new(scaled_left),
-                right: Box::new(rest),
-            },
-            range: form.range.clone(),
-            provenance: form.provenance.clone(),
-        },
-    ]
-}
-
 #[derive(Clone, Debug, Default)]
 pub(crate) struct LawObservations {
     recognitions: Vec<LawRecognition>,
+    equivalence_states: u32,
+    guard_checks: u32,
     visited_rules: u32,
+}
+
+struct RecognitionContext<'a> {
+    shapes: &'a ShapeObservations,
+    quantities: &'a QuantityObservations,
+    consistency: &'a RoleObservations,
+    assumptions: &'a [AssumptionInfo],
+    external: &'a ExternalTypeEnvironment,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -452,6 +463,14 @@ impl LawObservations {
     pub fn visited_rules(&self) -> u32 {
         self.visited_rules
     }
+
+    pub fn equivalence_states(&self) -> u32 {
+        self.equivalence_states
+    }
+
+    pub fn guard_checks(&self) -> u32 {
+        self.guard_checks
+    }
 }
 
 pub(crate) fn observe_laws(
@@ -460,34 +479,46 @@ pub(crate) fn observe_laws(
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> LawObservations {
     let mut recognitions = Vec::new();
+    let mut equivalence_states = 0;
+    let mut guard_checks = 0;
     let mut visited_rules = 0;
     for actual in canonical_expressions {
+        if !semantic_evidence.formula_is_asserted(&actual.range)
+            || !formula_operations_are_well_typed(actual, semantic_evidence, shapes)
+        {
+            continue;
+        }
         for compiled in LAW_DISPATCH.candidates(actual) {
             if recognitions.len() >= MAX_LAW_MATCHES {
                 break;
             }
             visited_rules += 1;
-            if !semantic_evidence.formula_is_asserted(&actual.range) {
-                continue;
-            }
-            if !formula_operations_are_well_typed(actual, semantic_evidence, shapes) {
-                continue;
-            }
             let activation =
                 semantic_evidence.law_activation(compiled.pack_id, &compiled.law.id, &actual.range);
             if !compiled.law.activation_phrases.is_empty() && activation.is_none() {
                 continue;
             }
+            equivalence_states += compiled.forms.len() as u32;
             let candidates = compiled
                 .forms
                 .iter()
-                .flat_map(|form| unify_all(form, actual, &compiled.placeholders, &BTreeMap::new()))
-                .chain(variadic_balance(compiled, actual))
+                .flat_map(|form| {
+                    unify_all(
+                        &form.expression,
+                        actual,
+                        &compiled.placeholders,
+                        &BTreeMap::new(),
+                    )
+                    .into_iter()
+                    .map(move |bindings| (Some(form), bindings))
+                })
+                .chain(variadic_balance(compiled, actual).map(|bindings| (None, bindings)))
                 .collect::<Vec<_>>();
-            let Some(bindings) = candidates.into_iter().find(|bindings| {
+            let Some((matched_form, bindings)) = candidates.into_iter().find(|(_, bindings)| {
                 let supported = roles_are_supported(
                     &compiled.law.roles,
                     bindings,
@@ -502,14 +533,19 @@ pub(crate) fn observe_laws(
             }) else {
                 continue;
             };
+            guard_checks += matched_form.map_or(0, |form| form.guards.len() as u32);
             let mut recognized = recognition(
                 compiled,
                 actual,
                 bindings,
-                shapes,
-                quantities,
-                consistency,
-                external,
+                matched_form,
+                &RecognitionContext {
+                    shapes,
+                    quantities,
+                    consistency,
+                    assumptions,
+                    external,
+                },
             );
             if let Some(activation) = activation {
                 recognized.evidence.push(activation.evidence.clone());
@@ -526,6 +562,8 @@ pub(crate) fn observe_laws(
     });
     LawObservations {
         recognitions,
+        equivalence_states,
+        guard_checks,
         visited_rules,
     }
 }
@@ -1006,10 +1044,14 @@ fn unify_all(
             direct.into_iter().chain(reversed).collect()
         }
         (SemanticExprKind::Sum(left), SemanticExprKind::Sum(right))
-        | (SemanticExprKind::Product(left), SemanticExprKind::Product(right))
             if left.len() == right.len() =>
         {
             commutative_unify_all(left, right, placeholders, bindings)
+        }
+        (SemanticExprKind::Product(left), SemanticExprKind::Product(right))
+            if left.len() == right.len() =>
+        {
+            unify_sequence(left.iter(), right.iter(), placeholders, bindings)
         }
         (
             SemanticExprKind::Apply {
@@ -1033,7 +1075,7 @@ fn unify_all(
                 operator,
                 arguments,
             },
-        ) if arguments.len() == 1 => {
+        ) if arguments.len() == 1 && !is_structural_application(operator) => {
             let operator = SemanticExpr {
                 kind: SemanticExprKind::Symbol(operator.clone()),
                 range: actual.range.clone(),
@@ -1626,10 +1668,8 @@ fn recognition(
     compiled: &CompiledLaw,
     actual: &SemanticExpr,
     bindings: BTreeMap<String, SemanticExpr>,
-    shapes: &ShapeObservations,
-    quantities: &QuantityObservations,
-    consistency: &RoleObservations,
-    external: &ExternalTypeEnvironment,
+    matched_form: Option<&GuardedForm>,
+    context: &RecognitionContext<'_>,
 ) -> LawRecognition {
     let formula_evidence = Evidence {
         rule_id: "semantic-law-unification".into(),
@@ -1686,7 +1726,7 @@ fn recognition(
         })
         .flatten()
         .collect();
-    let conditions: Vec<LawConditionInfo> = compiled
+    let mut conditions: Vec<LawConditionInfo> = compiled
         .law
         .conditions
         .iter()
@@ -1700,10 +1740,10 @@ fn recognition(
                 &condition.subjects,
                 &bindings,
                 actual.range.start_offset,
-                shapes,
-                quantities,
-                consistency,
-                external,
+                context.shapes,
+                context.quantities,
+                context.consistency,
+                context.external,
             );
             LawConditionInfo {
                 condition_id: condition.id.clone(),
@@ -1722,6 +1762,14 @@ fn recognition(
             }
         })
         .collect();
+    if let Some(form) = matched_form {
+        conditions.extend(equivalence_conditions(
+            form,
+            &bindings,
+            context.assumptions,
+            &actual.range,
+        ));
+    }
     let status = if conditions
         .iter()
         .any(|condition| condition.status == ConstraintStatus::Conflicting)
@@ -1739,7 +1787,15 @@ fn recognition(
     } else {
         LawRecognitionStatus::Verified
     };
-    let evidence = vec![formula_evidence.clone()];
+    let mut evidence = vec![formula_evidence.clone()];
+    if let Some(form) = matched_form {
+        evidence.extend(form.steps.iter().map(|step| Evidence {
+            rule_id: format!("guarded-equivalence/{}", step.id()),
+            kind: "equivalence-proof".into(),
+            strength: "hard".into(),
+            source_ranges: vec![actual.range.clone()],
+        }));
+    }
     LawRecognition {
         law_id: compiled.law.id.clone(),
         title: compiled.law.title.clone(),
@@ -1774,6 +1830,76 @@ fn recognition(
         }),
         evidence,
         rank: 100,
+    }
+}
+
+fn equivalence_conditions(
+    form: &GuardedForm,
+    bindings: &BTreeMap<String, SemanticExpr>,
+    assumptions: &[AssumptionInfo],
+    formula_range: &crate::SourceRange,
+) -> Vec<LawConditionInfo> {
+    form.guards
+        .iter()
+        .enumerate()
+        .map(|(index, guard)| match instantiate_guard(guard, bindings) {
+            EquivalenceGuard::Nonzero(subject) => {
+                let symbols = semantic_symbols(&subject)
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
+                let (status, mut evidence) = nonzero_status(&subject, &symbols, assumptions);
+                evidence.push(Evidence {
+                    rule_id: "guarded-equivalence/nonzero".into(),
+                    kind: "equivalence-guard".into(),
+                    strength: "hard".into(),
+                    source_ranges: vec![formula_range.clone()],
+                });
+                LawConditionInfo {
+                    condition_id: format!("equivalence-nonzero-{index}"),
+                    kind: ScientificConstraintKind::Nonzero,
+                    subjects: symbols.clone(),
+                    label: if symbols.is_empty() {
+                        "The isolated divisor must be nonzero.".into()
+                    } else {
+                        format!("{} must be nonzero.", symbols.join(" and "))
+                    },
+                    status,
+                    evidence,
+                }
+            }
+        })
+        .collect()
+}
+
+fn nonzero_status(
+    subject: &SemanticExpr,
+    symbols: &[String],
+    assumptions: &[AssumptionInfo],
+) -> (ConstraintStatus, Vec<Evidence>) {
+    if let SemanticExprKind::Number(value) = &subject.kind {
+        return if value.parse::<f64>().ok() == Some(0.0) {
+            (ConstraintStatus::Conflicting, Vec::new())
+        } else {
+            (ConstraintStatus::Verified, Vec::new())
+        };
+    }
+    let supporting = assumptions
+        .iter()
+        .filter(|assumption| {
+            matches!(
+                assumption.value.as_str(),
+                "nonzero" | "positive" | "strictly-positive"
+            ) && symbols
+                .iter()
+                .all(|symbol| assumption.subjects.contains(symbol))
+        })
+        .map(|assumption| assumption.evidence.clone())
+        .collect::<Vec<_>>();
+    if !symbols.is_empty() && !supporting.is_empty() {
+        (ConstraintStatus::Verified, supporting)
+    } else {
+        (ConstraintStatus::Required, supporting)
     }
 }
 
@@ -1986,7 +2112,7 @@ mod tests {
     use crate::quantity::observe_quantities;
     use crate::shape::observe_shapes;
     use crate::{
-        ConstraintStatus, DocumentLanguage, LawRecognition, ProjectDocument,
+        ConstraintStatus, DocumentLanguage, LawRecognition, LawRecognitionStatus, ProjectDocument,
         ScientificConstraintKind,
     };
 
@@ -2013,20 +2139,30 @@ mod tests {
                     .enumerate()
                     .filter(|(_, candidate)| {
                         candidate.forms.iter().any(|form| {
-                            !unify_all(form, actual, &candidate.placeholders, &BTreeMap::new())
-                                .is_empty()
+                            !unify_all(
+                                &form.expression,
+                                &actual.expression,
+                                &candidate.placeholders,
+                                &BTreeMap::new(),
+                            )
+                            .is_empty()
                         })
                     })
                     .map(|(index, _)| index)
                     .collect::<BTreeSet<_>>();
                 let indexed = LAW_DISPATCH
-                    .candidate_indices(actual)
+                    .candidate_indices(&actual.expression)
                     .into_iter()
                     .filter(|index| {
                         let candidate = &COMPILED_LAWS[*index];
                         candidate.forms.iter().any(|form| {
-                            !unify_all(form, actual, &candidate.placeholders, &BTreeMap::new())
-                                .is_empty()
+                            !unify_all(
+                                &form.expression,
+                                &actual.expression,
+                                &candidate.placeholders,
+                                &BTreeMap::new(),
+                            )
+                            .is_empty()
                         })
                     })
                     .collect::<BTreeSet<_>>();
@@ -2043,7 +2179,16 @@ mod tests {
                 .collect::<Vec<_>>();
             let mut dispatch = LawDispatch::default();
             for (index, form) in forms.iter().enumerate() {
-                dispatch.insert(index, std::slice::from_ref(form), &BTreeSet::new(), false);
+                dispatch.insert(
+                    index,
+                    &[crate::equivalence::GuardedForm {
+                        expression: form.clone(),
+                        guards: Vec::new(),
+                        steps: Vec::new(),
+                    }],
+                    &BTreeSet::new(),
+                    false,
+                );
             }
             for (index, form) in forms.iter().enumerate() {
                 assert_eq!(dispatch.candidate_indices(form), [index]);
@@ -2052,15 +2197,31 @@ mod tests {
     }
 
     #[test]
-    fn equality_and_commutative_products_are_presentation_independent() {
+    fn dispatch_indexes_the_expanded_shape_of_ambiguous_juxtaposition() {
+        let actual = lower_template("energy = 1 / 2 mass(velocity)^2");
+        let kinetic = COMPILED_LAWS
+            .iter()
+            .position(|compiled| compiled.law.id == "kinetic-energy-definition")
+            .expect("kinetic energy law");
+        assert!(LAW_DISPATCH.candidate_indices(&actual).contains(&kinetic));
+    }
+
+    #[test]
+    fn equality_and_declared_scalar_products_are_presentation_independent() {
         let template = lower_template("force = mass acceleration");
         let actual = lower_template("a m = F");
         let placeholders = ["force", "mass", "acceleration"]
             .into_iter()
             .map(str::to_owned)
             .collect::<BTreeSet<_>>();
-        let mut bindings = BTreeMap::new();
-        assert!(unify(&template, &actual, &placeholders, &mut bindings));
+        let forms = crate::equivalence::compile_guarded_forms(template, &placeholders);
+        let bindings = forms
+            .iter()
+            .find_map(|form| {
+                let mut bindings = BTreeMap::new();
+                unify(&form.expression, &actual, &placeholders, &mut bindings).then_some(bindings)
+            })
+            .expect("a guarded scalar permutation should match");
         assert_eq!(bindings.len(), 3);
     }
 
@@ -2111,7 +2272,26 @@ mod tests {
     #[test]
     fn a_capacitor_refusal_can_still_be_a_valid_resistor_law() {
         let source = "Let $i$ denote electric current, $V$ voltage, and $R$ resistance. The equation $i=V/R$ is a resistor current law, not a capacitor derivative law.";
-        assert_eq!(recognized_laws(source), ["ohm-law"]);
+        let recognized = recognized_law_observations(source);
+        assert_eq!(recognized[0].law_id, "ohm-law");
+        assert_eq!(recognized[0].status, LawRecognitionStatus::ConditionMissing);
+        assert!(recognized[0].conditions.iter().any(|condition| {
+            condition.kind == ScientificConstraintKind::Nonzero
+                && condition.status == ConstraintStatus::Required
+                && condition.subjects == ["R"]
+        }));
+    }
+
+    #[test]
+    fn explicit_nonzero_evidence_verifies_an_isolated_scalar_law() {
+        let source = "Let $i$ denote electric current, $V$ voltage, and $R$ nonzero resistance. The resistor relation is $i=V/R$.";
+        let recognized = recognized_law_observations(source);
+        assert_eq!(recognized[0].law_id, "ohm-law");
+        assert!(recognized[0].conditions.iter().any(|condition| {
+            condition.kind == ScientificConstraintKind::Nonzero
+                && condition.status == ConstraintStatus::Verified
+                && condition.subjects == ["R"]
+        }));
     }
 
     #[test]
@@ -2125,7 +2305,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 5,
+            schema_version: 6,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2147,6 +2327,7 @@ mod tests {
             &shapes,
             &quantities,
             &roles,
+            &prose.assumptions,
             &Default::default(),
         );
         assert_eq!(laws.all()[0].law_id, "mechanical-power");
@@ -2163,7 +2344,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 5,
+            schema_version: 6,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2185,6 +2366,7 @@ mod tests {
             &shapes,
             &quantities,
             &roles,
+            &prose.assumptions,
             &Default::default(),
         );
         assert_eq!(laws.all()[0].law_id, "continuous-state-equation");
@@ -2454,7 +2636,7 @@ mod tests {
             language: DocumentLanguage::Latex,
             content: source.into(),
             document_version: 1,
-            schema_version: 5,
+            schema_version: 6,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),
@@ -2476,6 +2658,7 @@ mod tests {
             &shapes,
             &quantities,
             &roles,
+            &prose.assumptions,
             &Default::default(),
         )
         .all()

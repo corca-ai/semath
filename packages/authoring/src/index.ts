@@ -49,9 +49,10 @@ export interface AuthoringPack {
 }
 
 export interface AuthoringLaw {
+  canonicalRelation: string;
   id: string;
+  representations: readonly string[];
   roles: readonly { description?: string; id: string; shape?: string }[];
-  semanticForms: readonly string[];
   title: string;
 }
 
@@ -88,11 +89,15 @@ export function projectValidatedPack(value: unknown): AuthoringPack {
       const path = `validated pack.laws[${lawIndex}]`;
       if (!isRecord(candidate)) throw new Error(`${path} must be an object`);
       if (!Array.isArray(candidate.roles)) throw new Error(`${path}.roles must be an array`);
-      if (!Array.isArray(candidate.semanticForms)) {
-        throw new Error(`${path}.semanticForms must be an array`);
+      if (candidate.representations !== undefined && !Array.isArray(candidate.representations)) {
+        throw new Error(`${path}.representations must be an array`);
       }
       return {
+        canonicalRelation: requiredString(candidate.canonicalRelation, `${path}.canonicalRelation`),
         id: requiredString(candidate.id, `${path}.id`),
+        representations: (candidate.representations ?? []).map((form, formIndex) =>
+          requiredString(form, `${path}.representations[${formIndex}]`),
+        ),
         roles: candidate.roles.map((role, roleIndex) => {
           const rolePath = `${path}.roles[${roleIndex}]`;
           if (!isRecord(role)) throw new Error(`${rolePath} must be an object`);
@@ -104,9 +109,6 @@ export function projectValidatedPack(value: unknown): AuthoringPack {
             ...(shape ? { shape } : {}),
           };
         }),
-        semanticForms: candidate.semanticForms.map((form, formIndex) =>
-          requiredString(form, `${path}.semanticForms[${formIndex}]`),
-        ),
         title: requiredString(candidate.title, `${path}.title`),
       };
     }),
@@ -326,6 +328,7 @@ export function packagePackAssets(
 }
 
 function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
+  const relations = [law.canonicalRelation, ...law.representations];
   const symbolSets = [
     ["y", "c", "x", "t", "z"],
     ["q", "k", "u", "s", "w"],
@@ -335,7 +338,7 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
   ] as const;
   const positives = symbolSets.map((symbols, index) => {
     const bindings = bindSymbols(law, symbols);
-    const formula = renderFormula(law.semanticForms[index % law.semanticForms.length]!, bindings);
+    const formula = renderFormula(relations[index % relations.length]!, bindings);
     return recognizedCase(law, bindings, formula, index);
   });
   const negativeMutations = [
@@ -351,7 +354,7 @@ function scaffoldLawCases(law: AuthoringLaw): CorpusCase[] {
   const refusals = negativeMutations.map((mutation, index) => {
     const symbols = symbolSets[index]!;
     const bindings = bindSymbols(law, symbols);
-    const formula = renderFormula(law.semanticForms[0]!, bindings);
+    const formula = renderFormula(law.canonicalRelation, bindings);
     const mutated = mutation.mutate(formula, [...bindings.values()]);
     const declarationBindings = mutation.category === "role-swap"
       ? conflictFirstTwoBindings(bindings)

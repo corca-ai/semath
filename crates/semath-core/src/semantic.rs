@@ -232,6 +232,7 @@ impl DocumentSemanticObservations {
             &self.shapes,
             &self.quantities,
             &self.roles,
+            &self.assumptions,
             external,
         );
         self.domains = observe_domains(

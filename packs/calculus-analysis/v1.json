@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "calculus-analysis",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -19,7 +19,10 @@
       "conceptKind": "entity",
       "title": "Function",
       "description": "A mapping with an explicitly declared domain and codomain.",
-      "aliases": ["scalar-valued function", "vector-valued function"],
+      "aliases": [
+        "scalar-valued function",
+        "vector-valued function"
+      ],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -30,7 +33,11 @@
       "conceptKind": "operator",
       "title": "Derivative",
       "description": "A derivative operator with an explicit variable.",
-      "aliases": ["first derivative", "higher derivative", "rate of change"],
+      "aliases": [
+        "first derivative",
+        "higher derivative",
+        "rate of change"
+      ],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -41,7 +48,10 @@
       "conceptKind": "operator",
       "title": "Integral",
       "description": "An integral operator with an explicit integrand and differential.",
-      "aliases": ["definite integral", "indefinite integral"],
+      "aliases": [
+        "definite integral",
+        "indefinite integral"
+      ],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -52,7 +62,83 @@
       "conceptKind": "entity",
       "title": "Differentiation variable",
       "description": "The explicit independent variable of a derivative.",
-      "aliases": ["independent variable", "differentiation variable"],
+      "aliases": [
+        "independent variable",
+        "differentiation variable"
+      ],
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "second-derivative",
+      "conceptKind": "operator",
+      "title": "Second derivative",
+      "description": "A second derivative with an explicit variable.",
+      "aliases": [
+        "second-order derivative",
+        "second rate of change"
+      ],
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "partial-derivative",
+      "conceptKind": "operator",
+      "title": "Partial derivative",
+      "description": "A partial derivative with an explicit variable.",
+      "aliases": [
+        "first partial derivative",
+        "partial rate of change"
+      ],
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "accumulated-value",
+      "conceptKind": "quantity",
+      "title": "Accumulated value",
+      "description": "A value defined by a definite integral.",
+      "aliases": [
+        "definite integral value",
+        "accumulation"
+      ],
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "nabla-operator",
+      "conceptKind": "operator",
+      "title": "Nabla operator",
+      "description": "The vector differential operator applied to a declared scalar function.",
+      "aliases": [
+        "nabla derivative",
+        "nabla result",
+        "vector differential operator"
+      ],
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "integration-bound",
+      "conceptKind": "entity",
+      "title": "Integration bound",
+      "description": "A lower or upper limit of integration.",
+      "aliases": [
+        "integral endpoint",
+        "integration limit",
+        "lower bound",
+        "upper bound"
+      ],
       "parents": [],
       "references": [
         "principles-analysis"
@@ -66,9 +152,6 @@
       "id": "first-derivative-relation",
       "title": "First derivative relation",
       "description": "A derivative symbol equals the first derivative of a function with respect to an explicit variable.",
-      "semanticForms": [
-        "derivative = \\frac{d function}{d variable}"
-      ],
       "roles": [
         {
           "id": "derivative",
@@ -114,7 +197,41 @@
       ],
       "references": [
         "principles-analysis"
-      ]
+      ],
+      "canonicalRelation": "derivative = \\frac{d function}{d variable}"
+    },
+    {
+      "id": "gradient-relation",
+      "title": "Gradient relation",
+      "description": "A declared gradient equals nabla applied to a function.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "calculus-analysis:nabla-operator",
+          "description": "Nabla result.",
+          "shape": "vector"
+        },
+        {
+          "id": "function",
+          "concept": "calculus-analysis:function",
+          "description": "Differentiated scalar function."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "result",
+            "function"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "result = \\nabla function"
     }
   ],
   "activationRules": [
@@ -137,7 +254,9 @@
     {
       "id": "calculus-notation",
       "topic": "notation",
-      "structures": ["calculus"],
+      "structures": [
+        "calculus"
+      ],
       "references": [
         "principles-analysis"
       ]

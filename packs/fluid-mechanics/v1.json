@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "fluid-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -32,7 +32,10 @@
       "conceptKind": "entity",
       "title": "Flow section",
       "description": "A cross-section normal to a stated mean flow velocity.",
-      "aliases": ["flow cross-section", "cross-sectional flow area"],
+      "aliases": [
+        "flow cross-section",
+        "cross-sectional flow area"
+      ],
       "parents": [],
       "references": [
         "fluid-mechanics"
@@ -43,7 +46,10 @@
       "conceptKind": "system",
       "title": "Incompressible flow",
       "description": "A flow modeled with constant density.",
-      "aliases": ["constant-density flow", "incompressible fluid flow"],
+      "aliases": [
+        "constant-density flow",
+        "incompressible fluid flow"
+      ],
       "parents": [],
       "references": [
         "fluid-mechanics"
@@ -54,7 +60,81 @@
       "conceptKind": "system",
       "title": "Hydrostatic state",
       "description": "A fluid at rest in a stated gravitational field.",
-      "aliases": ["hydrostatic equilibrium", "fluid at rest"],
+      "aliases": [
+        "hydrostatic equilibrium",
+        "fluid at rest"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "total-head",
+      "conceptKind": "quantity",
+      "title": "Total head",
+      "description": "The sum of pressure, velocity, and elevation heads.",
+      "aliases": [
+        "Bernoulli head",
+        "energy head"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "head-component",
+      "conceptKind": "quantity",
+      "title": "Head component",
+      "description": "A scalar pressure, velocity, or elevation head.",
+      "aliases": [
+        "pressure head",
+        "velocity head",
+        "elevation head"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "reynolds-number",
+      "conceptKind": "quantity",
+      "title": "Reynolds number",
+      "description": "Dimensionless ratio of inertial to viscous effects.",
+      "aliases": [
+        "Reynolds number",
+        "Re"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "dynamic-viscosity",
+      "conceptKind": "quantity",
+      "title": "Dynamic viscosity",
+      "description": "Scalar dynamic viscosity of a fluid.",
+      "aliases": [
+        "absolute viscosity",
+        "viscosity coefficient"
+      ],
+      "parents": [],
+      "references": [
+        "fluid-mechanics"
+      ]
+    },
+    {
+      "id": "velocity-change",
+      "conceptKind": "quantity",
+      "title": "Velocity change",
+      "description": "Signed velocity difference across a control volume.",
+      "aliases": [
+        "outlet minus inlet velocity",
+        "flow velocity change"
+      ],
       "parents": [],
       "references": [
         "fluid-mechanics"
@@ -100,10 +180,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "flow-rate = area velocity",
-        "flow-rate = area \\cdot velocity"
-      ],
       "conditions": [
         {
           "id": "mean-normal-velocity",
@@ -117,6 +193,10 @@
       ],
       "references": [
         "fluid-mechanics"
+      ],
+      "canonicalRelation": "flow-rate = area velocity",
+      "representations": [
+        "flow-rate = area \\cdot velocity"
       ]
     },
     {
@@ -165,9 +245,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "mass-flow-rate = density area velocity"
-      ],
       "conditions": [
         {
           "id": "uniform-section-values",
@@ -182,7 +259,8 @@
       ],
       "references": [
         "fluid-mechanics"
-      ]
+      ],
+      "canonicalRelation": "mass-flow-rate = density area velocity"
     },
     {
       "id": "hydrostatic-pressure",
@@ -230,9 +308,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "pressure = density acceleration height"
-      ],
       "conditions": [
         {
           "id": "hydrostatic-regime",
@@ -248,7 +323,200 @@
       ],
       "references": [
         "fluid-mechanics"
-      ]
+      ],
+      "canonicalRelation": "pressure = density acceleration height"
+    },
+    {
+      "id": "steady-incompressible-continuity",
+      "title": "Steady incompressible continuity",
+      "description": "Area times mean velocity is conserved between two sections.",
+      "roles": [
+        {
+          "id": "area-one",
+          "concept": "quantities-units:area",
+          "description": "First section area.",
+          "shape": "scalar"
+        },
+        {
+          "id": "velocity-one",
+          "concept": "quantities-units:velocity",
+          "description": "First mean velocity.",
+          "shape": "scalar"
+        },
+        {
+          "id": "area-two",
+          "concept": "quantities-units:area",
+          "description": "Second section area.",
+          "shape": "scalar"
+        },
+        {
+          "id": "velocity-two",
+          "concept": "quantities-units:velocity",
+          "description": "Second mean velocity.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "area-one",
+            "velocity-one",
+            "area-two",
+            "velocity-two"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "fluid-mechanics"
+      ],
+      "canonicalRelation": "area-one velocity-one = area-two velocity-two"
+    },
+    {
+      "id": "bernoulli-head-decomposition",
+      "title": "Bernoulli head decomposition",
+      "description": "Total head is the sum of declared pressure, velocity, and elevation heads.",
+      "roles": [
+        {
+          "id": "total-head",
+          "concept": "fluid-mechanics:total-head",
+          "description": "Total head.",
+          "shape": "scalar"
+        },
+        {
+          "id": "pressure-head",
+          "concept": "fluid-mechanics:head-component",
+          "description": "Pressure head.",
+          "shape": "scalar"
+        },
+        {
+          "id": "velocity-head",
+          "concept": "fluid-mechanics:head-component",
+          "description": "Velocity head.",
+          "shape": "scalar"
+        },
+        {
+          "id": "elevation-head",
+          "concept": "fluid-mechanics:head-component",
+          "description": "Elevation head.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "total-head",
+            "pressure-head",
+            "velocity-head",
+            "elevation-head"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "fluid-mechanics"
+      ],
+      "canonicalRelation": "total-head = pressure-head + velocity-head + elevation-head"
+    },
+    {
+      "id": "reynolds-number-definition",
+      "title": "Reynolds number definition",
+      "description": "Reynolds number equals density times speed times length divided by dynamic viscosity.",
+      "roles": [
+        {
+          "id": "reynolds-number",
+          "concept": "fluid-mechanics:reynolds-number",
+          "description": "Reynolds number.",
+          "shape": "scalar"
+        },
+        {
+          "id": "density",
+          "concept": "quantities-units:density",
+          "description": "Fluid density.",
+          "shape": "scalar"
+        },
+        {
+          "id": "velocity",
+          "concept": "quantities-units:velocity",
+          "description": "Characteristic velocity.",
+          "shape": "scalar"
+        },
+        {
+          "id": "length",
+          "concept": "quantities-units:length",
+          "description": "Characteristic length.",
+          "shape": "scalar"
+        },
+        {
+          "id": "viscosity",
+          "concept": "fluid-mechanics:dynamic-viscosity",
+          "description": "Dynamic viscosity.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "reynolds-number",
+            "density",
+            "velocity",
+            "length",
+            "viscosity"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "fluid-mechanics"
+      ],
+      "canonicalRelation": "reynolds-number = density velocity length / viscosity"
+    },
+    {
+      "id": "steady-momentum-flux",
+      "title": "Steady momentum flux",
+      "description": "Net force equals mass-flow rate times a signed velocity change.",
+      "roles": [
+        {
+          "id": "force",
+          "concept": "quantities-units:force",
+          "description": "Net force.",
+          "shape": "scalar"
+        },
+        {
+          "id": "mass-flow-rate",
+          "concept": "quantities-units:mass-flow-rate",
+          "description": "Mass-flow rate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "velocity-change",
+          "concept": "fluid-mechanics:velocity-change",
+          "description": "Signed velocity change.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "force",
+            "mass-flow-rate",
+            "velocity-change"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "fluid-mechanics"
+      ],
+      "canonicalRelation": "force = mass-flow-rate velocity-change"
     }
   ],
   "activationRules": [

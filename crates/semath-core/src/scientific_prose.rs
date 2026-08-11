@@ -475,6 +475,8 @@ fn push_marker_evidence(
 fn assumption_phrases() -> &'static [(&'static str, &'static str, &'static str)] {
     &[
         ("strictly positive", "sign", "strictly-positive"),
+        ("non-zero", "sign", "nonzero"),
+        ("nonzero", "sign", "nonzero"),
         ("nonnegative", "sign", "nonnegative"),
         (
             "positive semidefinite",

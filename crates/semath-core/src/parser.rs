@@ -61,6 +61,11 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
         {
             return Err(format!("notation node {id} has an invalid child"));
         }
+        if node.kind == NotationNodeKind::Token && node.lexical_class.is_none() {
+            return Err(format!(
+                "notation token {id} is missing its syntax-v6 lexical class"
+            ));
+        }
         if node
             .parent
             .is_some_and(|parent| parent as usize >= document.nodes.len())
@@ -228,25 +233,18 @@ fn lower_snapshot_node(
     let (kind, label) = match node.kind {
         NotationNodeKind::Token => {
             let text = node.text.clone().unwrap_or_default();
-            let kind = if text
-                .chars()
-                .all(|character| character.is_ascii_digit() || character == '.')
-                && text.chars().any(|character| character.is_ascii_digit())
-            {
-                "number"
-            } else if text.chars().count() == 1
-                && text
-                    .chars()
-                    .next()
-                    .is_some_and(|character| "+-=<>*/|,:&".contains(character))
-            {
-                "operator"
-            } else if text.chars().any(char::is_alphabetic) {
-                symbols.push((text.clone(), range.clone()));
-                "symbol"
-            } else {
-                "text"
+            let kind = match node.lexical_class {
+                Some(crate::LexicalClass::Number) => "number",
+                Some(crate::LexicalClass::Operator | crate::LexicalClass::Punctuation) => {
+                    "operator"
+                }
+                Some(crate::LexicalClass::Identifier) => "symbol",
+                Some(crate::LexicalClass::Other) => "text",
+                None => return Err(format!("notation token {id} has no lexical class")),
             };
+            if kind == "symbol" && !text.is_empty() {
+                symbols.push((text.clone(), range.clone()));
+            }
             (kind, Some(text))
         }
         NotationNodeKind::NamedOperator => {
@@ -935,6 +933,7 @@ mod tests {
                 name: None,
                 text: None,
                 arguments: Vec::new(),
+                lexical_class: None,
                 math_class: None,
             }],
         };
@@ -1004,9 +1003,9 @@ mod tests {
     }
 
     #[test]
-    fn v5_named_operator_is_one_occurrence_and_incomplete_nodes_degrade_locally() {
+    fn v6_named_operator_is_one_occurrence_and_incomplete_nodes_degrade_locally() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -1017,7 +1016,7 @@ mod tests {
                 {
                     "kind": "token", "parent": 1, "children": [],
                     "ranges": {"full": {"startOffset": 15, "endOffset": 18}, "editable": {"startOffset": 15, "endOffset": 18}},
-                    "state": "complete", "text": "ECE",
+                    "state": "complete", "text": "ECE", "lexicalClass": "identifier",
                     "provenance": {"origin": "source", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 15, "endOffset": 18}}, "editable": true}
                 },
                 {
@@ -1062,7 +1061,7 @@ mod tests {
     #[test]
     fn v5_rejects_a_corrupt_arena_root() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5, "proseAnnotations": [], "fileId": "main", "path": "main.tex", "language": "latex",
+            "schemaVersion": 6, "proseAnnotations": [], "fileId": "main", "path": "main.tex", "language": "latex",
             "content": "$x$", "documentVersion": 1, "nodes": [],
             "mathRoots": [{"node": 4, "delimiter": "$", "fullRange": {"startOffset": 0, "endOffset": 3}, "contentRange": {"startOffset": 1, "endOffset": 2}, "state": "complete"}],
             "visibleProse": [],

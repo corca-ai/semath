@@ -8,6 +8,7 @@ mod cursor;
 mod decision;
 mod domain;
 mod engine;
+mod equivalence;
 mod hygiene;
 mod law;
 mod pack;
