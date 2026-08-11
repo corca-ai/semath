@@ -21,10 +21,9 @@ const baseSources = [
     path: "main.tex",
   },
   {
-    content: [
-      "Let $A$ be an event. Let $B$ be an event.",
-      "$A \\cap B$.",
-    ].join("\n"),
+    content: ["Let $A$ be an event. Let $B$ be an event.", "$A \\cap B$."].join(
+      "\n",
+    ),
     documentVersion: 1,
     fileId: "probability",
     language: "latex",
@@ -41,7 +40,8 @@ const baseSources = [
     path: "circuits.tex",
   },
   {
-    content: "Without assuming semantic roles, the isolated relation $q = x/y$ is merely algebraic.",
+    content:
+      "Without assuming semantic roles, the isolated relation $q = x/y$ is merely algebraic.",
     documentVersion: 1,
     fileId: "unsupported",
     language: "latex",
@@ -72,7 +72,14 @@ const baseQueries = [
 ];
 const cursorRequests = cursorSurfaces.flatMap((surface) =>
   surface.probes.flatMap((probe) =>
-    ["semanticView", "definition", "references", "prepareRename"].map((kind) => ({
+    [
+      "selection",
+      "semanticView",
+      "definition",
+      "references",
+      "prepareRename",
+      "rename",
+    ].map((kind) => ({
       envelope: cursorQuery(surface.fileId, probe.offset, kind),
       kind,
       probe,
@@ -80,7 +87,10 @@ const cursorRequests = cursorSurfaces.flatMap((surface) =>
     })),
   ),
 );
-const queries = [...baseQueries, ...cursorRequests.map((request) => request.envelope)];
+const queries = [
+  ...baseQueries,
+  ...cursorRequests.map((request) => request.envelope),
+];
 const fixture = { queries, snapshot };
 
 const build = spawnSync("cargo", ["build", "--locked", "-p", "semath-native"], {
@@ -91,27 +101,39 @@ const native = spawnSync("./target/debug/semath-native", [], {
   encoding: "utf8",
   input: JSON.stringify(fixture),
 });
-if (native.status !== 0) throw new Error(native.stderr || "native parity fixture failed");
+if (native.status !== 0)
+  throw new Error(native.stderr || "native parity fixture failed");
 const nativeResults = JSON.parse(native.stdout);
 
 await init({
-  module_or_path: await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url)),
+  module_or_path: await readFile(
+    new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url),
+  ),
 });
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const engine = new SemathEngine();
 const reset = resetEngine(engine, snapshot);
 const wasmResults = queries.map((entry) => decode(engine.query(encode(entry))));
-assertEquivalent([
-  { name: "native", value: nativeResults },
-  { name: "wasm", value: wasmResults },
-], "native/WASM query results");
-assertEquivalent([
-  { name: "clean", value: wasmResults[0].value },
-  { name: "incremental", value: wasmResults[1].value },
-], "cursor-edge semantic identity");
+assertEquivalent(
+  [
+    { name: "native", value: nativeResults },
+    { name: "wasm", value: wasmResults },
+  ],
+  "native/WASM query results",
+);
+assertEquivalent(
+  [
+    { name: "clean", value: wasmResults[0].value },
+    { name: "incremental", value: wasmResults[1].value },
+  ],
+  "cursor-edge semantic identity",
+);
 assertCursorInvariants(cursorRequests, wasmResults.slice(baseQueries.length));
-if (reset.stats.totalDocuments !== sources.length || reset.stats.semanticNodes <= 0) {
+if (
+  reset.stats.totalDocuments !== sources.length ||
+  reset.stats.semanticNodes <= 0
+) {
   throw new Error("parity reset did not expose trustworthy analysis counters");
 }
 const established = wasmResults[0]?.value;
@@ -129,7 +151,9 @@ if (
   refused?.kind !== "semanticView" ||
   refused.view.decision.status === "established"
 ) {
-  throw new Error("parity unsupported algebraic scenario was not safely refused");
+  throw new Error(
+    "parity unsupported algebraic scenario was not safely refused",
+  );
 }
 
 const updatedSource = {
@@ -137,7 +161,10 @@ const updatedSource = {
   content: sources[1].content.replace("event.", "Event."),
   documentVersion: 2,
 };
-const updatedSnapshot = makeSnapshot([sources[0], updatedSource, sources[2], sources[3]], 2);
+const updatedSnapshot = makeSnapshot(
+  [sources[0], updatedSource, sources[2], sources[3]],
+  2,
+);
 const updatedDocument = updatedSnapshot.documents.find(
   (document) => document.fileId === updatedSource.fileId,
 );
@@ -153,7 +180,9 @@ const update = decode(
   ),
 );
 if (update.analyzedFileIds.join(",") !== "main,probability") {
-  throw new Error(`unexpected incremental affected set: ${update.analyzedFileIds.join(",")}`);
+  throw new Error(
+    `unexpected incremental affected set: ${update.analyzedFileIds.join(",")}`,
+  );
 }
 const incrementalQuery = {
   ...queries[0],
@@ -166,10 +195,13 @@ const incrementalResult = decode(engine.query(encode(incrementalQuery)));
 const clean = new SemathEngine();
 resetEngine(clean, updatedSnapshot);
 const cleanResult = decode(engineQuery(clean, incrementalQuery));
-assertEquivalent([
-  { name: "clean", value: cleanResult.value },
-  { name: "incremental", value: incrementalResult.value },
-], "incremental/clean semantic result");
+assertEquivalent(
+  [
+    { name: "clean", value: cleanResult.value },
+    { name: "incremental", value: incrementalResult.value },
+  ],
+  "incremental/clean semantic result",
+);
 engine.free();
 clean.free();
 console.log(
@@ -209,13 +241,19 @@ function query(fileId, offset) {
 }
 
 function definitionQuery(fileId, offset) {
-  return { ...query(fileId, offset), query: { fileId, kind: "definition", offset } };
+  return {
+    ...query(fileId, offset),
+    query: { fileId, kind: "definition", offset },
+  };
 }
 
 function cursorQuery(fileId, offset, kind) {
   return {
     ...query(fileId, offset),
-    query: { fileId, kind, offset },
+    query:
+      kind === "rename"
+        ? { fileId, kind, newName: "j", offset }
+        : { fileId, kind, offset },
   };
 }
 
@@ -230,7 +268,8 @@ function encode(value) {
 function resetEngine(target, snapshot) {
   const { documents, ...metadata } = snapshot;
   target.beginReset(encode(metadata));
-  for (const document of documents) target.ingestResetDocument(encode(document));
+  for (const document of documents)
+    target.ingestResetDocument(encode(document));
   return decode(target.finishReset());
 }
 
@@ -248,24 +287,58 @@ function assertEquivalent(stages, label) {
 }
 
 function assertCursorInvariants(requests, results) {
+  const semanticRanges = new Map();
+  for (const [index, request] of requests.entries()) {
+    if (request.kind !== "semanticView") continue;
+    const value = results[index]?.value;
+    if (value?.kind === "semanticView" && value.view.symbol) {
+      semanticRanges.set(
+        `${request.surface.id}/${request.probe.id}`,
+        value.view.symbol.location.range,
+      );
+    }
+  }
   const grouped = new Map();
   for (const [index, request] of requests.entries()) {
-    const key = `${request.surface.id}/${request.kind}`;
+    const key = `${request.surface.id}/${request.kind}/${request.probe.identity}`;
     const values = grouped.get(key) ?? [];
     values.push({ request, result: results[index] });
     grouped.set(key, values);
   }
   for (const [key, entries] of grouped) {
+    if (entries[0].request.kind === "selection") {
+      for (const { request, result } of entries) {
+        const expected = semanticRanges.get(
+          `${request.surface.id}/${request.probe.id}`,
+        );
+        const value = result?.value;
+        if (
+          !expected ||
+          value?.kind !== "selection" ||
+          !value.ranges.some(
+            (range) =>
+              range.startOffset === expected.startOffset &&
+              range.endOffset === expected.endOffset,
+          )
+        ) {
+          throw new Error(
+            `${key}/${request.probe.id}: selection does not include its semantic occurrence`,
+          );
+        }
+      }
+      continue;
+    }
     if (entries[0].request.kind === "semanticView") {
       const identities = entries.map(({ request, result }) => {
         const value = result?.value;
-        const symbol = value?.kind === "semanticView" ? value.view.symbol : undefined;
+        const symbol =
+          value?.kind === "semanticView" ? value.view.symbol : undefined;
         if (
-          symbol?.sourceNotation !== request.surface.expectedSourceNotation ||
-          symbol.symbol !== request.surface.expectedSymbol
+          symbol?.sourceNotation !== request.probe.expectedSourceNotation ||
+          symbol.symbol !== request.probe.expectedSymbol
         ) {
           throw new Error(
-            `${key}/${request.probe.id}: expected ${request.surface.expectedSourceNotation}/${request.surface.expectedSymbol}, ` +
+            `${key}/${request.probe.id}: expected ${request.probe.expectedSourceNotation}/${request.probe.expectedSymbol}, ` +
               `observed ${symbol?.sourceNotation ?? "none"}/${symbol?.symbol ?? "none"}`,
           );
         }
@@ -277,19 +350,25 @@ function assertCursorInvariants(requests, results) {
         };
       });
       for (const identity of identities.slice(1)) {
-        assertEquivalent([
-          { name: "clean", value: identities[0] },
-          { name: "incremental", value: identity },
-        ], `${key} semantic occurrence`);
+        assertEquivalent(
+          [
+            { name: "clean", value: identities[0] },
+            { name: "incremental", value: identity },
+          ],
+          `${key} semantic occurrence`,
+        );
       }
       continue;
     }
     const values = entries.map(({ result }) => result?.value);
     for (const value of values.slice(1)) {
-      assertEquivalent([
-        { name: "clean", value: values[0] },
-        { name: "incremental", value },
-      ], `${key} navigation result`);
+      assertEquivalent(
+        [
+          { name: "clean", value: values[0] },
+          { name: "incremental", value },
+        ],
+        `${key} navigation result`,
+      );
     }
   }
 }

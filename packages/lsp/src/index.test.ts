@@ -97,7 +97,12 @@ describe("SemathLspServer", () => {
     await server.handle({
       method: "textDocument/didOpen",
       params: {
-        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+        textDocument: {
+          languageId: "markdown",
+          text: content,
+          uri,
+          version: 1,
+        },
       },
     });
     const plain = content.indexOf("$y$") + 1;
@@ -111,7 +116,10 @@ describe("SemathLspServer", () => {
       await server.handle({
         id,
         method: "semath/semanticView",
-        params: { position: positionAt(content, offset), textDocument: { uri } },
+        params: {
+          position: positionAt(content, offset),
+          textDocument: { uri },
+        },
       });
     }
 
@@ -123,7 +131,7 @@ describe("SemathLspServer", () => {
         { kind: "identifier", value: "y" },
       ],
       sourceNotation: "\\hat y",
-      symbol: "y",
+      symbol: "\\hat y",
     });
     expect(response(messages, 63).view.symbol).toMatchObject({
       notation: [{ kind: "named-surface", value: "ECE" }],
@@ -172,9 +180,10 @@ describe("SemathLspServer", () => {
     });
     const references = response(messages, 180);
     expect(references).toHaveLength(2);
-    expect(new Set(references.map((location: unknown) => JSON.stringify(location))).size).toBe(
-      2,
-    );
+    expect(
+      new Set(references.map((location: unknown) => JSON.stringify(location)))
+        .size,
+    ).toBe(2);
     server.dispose();
   });
 
@@ -192,7 +201,10 @@ describe("SemathLspServer", () => {
       id: 64,
       method: "semath/semanticView",
       params: {
-        position: positionAt(content, content.indexOf("\\int") + "\\int".length),
+        position: positionAt(
+          content,
+          content.indexOf("\\int") + "\\int".length,
+        ),
         textDocument: { uri },
       },
     });
@@ -266,7 +278,12 @@ describe("SemathLspServer", () => {
     await server.handle({
       method: "textDocument/didOpen",
       params: {
-        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+        textDocument: {
+          languageId: "markdown",
+          text: content,
+          uri,
+          version: 1,
+        },
       },
     });
     for (const [id, needle] of [
@@ -299,8 +316,14 @@ describe("SemathLspServer", () => {
     );
     expect(response(messages, 182).view.context.candidates).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ family: "application", status: "unresolved" }),
-        expect.objectContaining({ family: "juxtaposition", status: "unresolved" }),
+        expect.objectContaining({
+          family: "application",
+          status: "unresolved",
+        }),
+        expect.objectContaining({
+          family: "juxtaposition",
+          status: "unresolved",
+        }),
       ]),
     );
     server.dispose();
@@ -316,7 +339,12 @@ describe("SemathLspServer", () => {
     await server.handle({
       method: "textDocument/didOpen",
       params: {
-        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+        textDocument: {
+          languageId: "markdown",
+          text: content,
+          uri,
+          version: 1,
+        },
       },
     });
     const named = content.indexOf("\\operatorname{ECE}") + 15;
@@ -376,7 +404,10 @@ describe("SemathLspServer", () => {
       id: 193,
       method: "textDocument/definition",
       params: {
-        position: positionAt(revised, revised.indexOf("\\operatorname{ECE}") + 15),
+        position: positionAt(
+          revised,
+          revised.indexOf("\\operatorname{ECE}") + 15,
+        ),
         textDocument: { uri },
       },
     });
@@ -398,7 +429,12 @@ describe("SemathLspServer", () => {
     await server.handle({
       method: "textDocument/didOpen",
       params: {
-        textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+        textDocument: {
+          languageId: "markdown",
+          text: content,
+          uri,
+          version: 1,
+        },
       },
     });
     for (const [id, offset] of [
@@ -408,7 +444,10 @@ describe("SemathLspServer", () => {
       await server.handle({
         id,
         method: "textDocument/definition",
-        params: { position: positionAt(content, offset), textDocument: { uri } },
+        params: {
+          position: positionAt(content, offset),
+          textDocument: { uri },
+        },
       });
     }
     expect(response(messages, 194).range.start).toEqual(
@@ -501,7 +540,10 @@ describe("SemathLspServer", () => {
       id: 540,
       method: "textDocument/definition",
       params: {
-        position: positionAt(content, content.lastIndexOf("\\ECE(x)") + "\\ECE(x)".length),
+        position: positionAt(
+          content,
+          content.lastIndexOf("\\ECE(x)") + "\\ECE(x)".length,
+        ),
         textDocument: { uri },
       },
     });
@@ -528,14 +570,22 @@ describe("SemathLspServer", () => {
       await server.handle({
         method: "textDocument/didOpen",
         params: {
-          textDocument: { languageId: "markdown", text: content, uri, version: 1 },
+          textDocument: {
+            languageId: "markdown",
+            text: content,
+            uri,
+            version: 1,
+          },
         },
       });
       await server.handle({
         id: 200 + index,
         method: "textDocument/definition",
         params: {
-          position: positionAt(content, content.lastIndexOf("\\operatorname{ECE}") + 15),
+          position: positionAt(
+            content,
+            content.lastIndexOf("\\operatorname{ECE}") + 15,
+          ),
           textDocument: { uri },
         },
       });
@@ -635,7 +685,10 @@ describe("SemathLspServer", () => {
       await server.handle({
         id,
         method: "textDocument/definition",
-        params: { position: positionAt(content, offset), textDocument: { uri } },
+        params: {
+          position: positionAt(content, offset),
+          textDocument: { uri },
+        },
       });
     }
 
@@ -807,7 +860,11 @@ describe("SemathLspServer", () => {
 
   test("reuses syntax trees across realistic query, edit, move, and close cycles", async () => {
     const { server } = await setup();
-    const uris = ["file:///main.tex", "file:///chapter.tex", "file:///appendix.tex"];
+    const uris = [
+      "file:///main.tex",
+      "file:///chapter.tex",
+      "file:///appendix.tex",
+    ];
     const contents = [
       "\\input{chapter}\nLet $x$ denote a vector. $\\lVert x \\rVert_2$",
       "\\input{appendix}\nLet $A$ and $B$ denote events. $\\Pr(A \\mid B)$",
@@ -837,12 +894,18 @@ describe("SemathLspServer", () => {
       await server.handle({
         id,
         method: "textDocument/hover",
-        params: { position: { character: 40, line: 0 }, textDocument: { uri: uris[0] } },
+        params: {
+          position: { character: 40, line: 0 },
+          textDocument: { uri: uris[0] },
+        },
       });
       await server.handle({
         id: id + 1,
         method: "semath/semanticView",
-        params: { position: { character: 40, line: 0 }, textDocument: { uri: uris[0] } },
+        params: {
+          position: { character: 40, line: 0 },
+          textDocument: { uri: uris[0] },
+        },
       });
     }
     expect(server.getRuntimeStats().syntax.parseCount).toBe(3);
