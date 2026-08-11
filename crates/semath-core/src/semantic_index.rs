@@ -655,6 +655,10 @@ impl ProjectSemanticIndex {
         self.occurrences.values()
     }
 
+    pub(crate) fn entities(&self) -> impl Iterator<Item = &EntityId> {
+        self.entities.iter()
+    }
+
     pub fn claim(&self, id: &ClaimId) -> Option<&Claim> {
         self.claims.get(id)
     }

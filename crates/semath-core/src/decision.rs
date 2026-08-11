@@ -92,6 +92,23 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
     }
 
     if let Some(symbol) = input.symbol {
+        let has_symbol_meaning = !symbol.definitions.is_empty()
+            || !symbol.roles.is_empty()
+            || !symbol.shapes.is_empty()
+            || !symbol.quantities.is_empty();
+        if !has_symbol_meaning {
+            return MeaningDecision::Unsupported {
+                reasons: [
+                    Some(uncertainty_reason(
+                        "No source-supported interpretation is currently available.",
+                    )),
+                    truncation_reason(input.truncated),
+                ]
+                .into_iter()
+                .flatten()
+                .collect(),
+            };
+        }
         return MeaningDecision::Partial {
             meaning: MeaningConclusion {
                 label: symbol

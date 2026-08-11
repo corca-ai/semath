@@ -298,7 +298,7 @@
         "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
-        "symbol": "y"
+        "symbol": "\\hat{y}"
       },
       "variationTags": [
         "modifier",
@@ -330,7 +330,7 @@
         "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
-        "symbol": "r"
+        "symbol": "\\widehat{r}"
       },
       "variationTags": [
         "modifier",
@@ -358,10 +358,10 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
-        "symbol": "F"
+        "symbol": "\\mathbf{F}"
       },
       "variationTags": [
         "style",
@@ -389,7 +389,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
         "symbol": "x_{k+1}"
@@ -486,7 +486,7 @@
         "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
-        "symbol": "v"
+        "symbol": "\\estimate{v}"
       },
       "variationTags": [
         "macro-expansion",
@@ -514,10 +514,10 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
-        "symbol": "x"
+        "symbol": "\\dot{x}"
       },
       "variationTags": [
         "derivative",
@@ -545,10 +545,9 @@
         "problems": 0
       },
       "target": {
-        "decision": "established",
+        "decision": "partial",
         "minimumProblems": 0,
-        "maximumProblems": 0,
-        "relationId": "classical-mechanics:newton-second"
+        "maximumProblems": 0
       },
       "variationTags": [
         "display-followup",
@@ -642,7 +641,7 @@
         "minimumProblems": 0,
         "maximumProblems": 0,
         "symbol": "u",
-        "definitionDescription": "the control input"
+        "definitionDescription": "control input"
       },
       "variationTags": [
         "former-latter",
@@ -830,7 +829,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0
       },
@@ -890,7 +889,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0
       },
@@ -920,7 +919,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "unsupported",
         "minimumProblems": 0,
         "maximumProblems": 0
       },
@@ -950,7 +949,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0
       },
@@ -980,7 +979,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "unsupported",
         "minimumProblems": 0,
         "maximumProblems": 0
       },
@@ -1010,7 +1009,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0
       },
@@ -1199,7 +1198,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "ambiguous",
         "minimumProblems": 0,
         "maximumProblems": 0,
         "shapeKind": "vector"
@@ -1292,7 +1291,7 @@
         "problems": 0
       },
       "target": {
-        "decision": "partial",
+        "decision": "unsupported",
         "minimumProblems": 0,
         "maximumProblems": 0
       },

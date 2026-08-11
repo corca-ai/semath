@@ -380,6 +380,27 @@ fn explicit_diagnostics(facts: &[QuantityFact]) -> Vec<SemanticDiagnostic> {
             continue;
         }
     }
+    for (index, left) in facts.iter().enumerate() {
+        for right in &facts[index + 1..] {
+            if left.symbol != right.symbol
+                || left.scope_id != right.scope_id
+                || left.dimension == right.dimension
+            {
+                continue;
+            }
+            diagnostics.push(dimension_diagnostic(
+                "quantity-declaration-dimension-conflict",
+                format!("`{}` has incompatible quantity declarations.", right.symbol),
+                format!(
+                    "The same semantic lifetime declares dimensions {} and {}.",
+                    left.dimension.info().display,
+                    right.dimension.info().display
+                ),
+                right.symbol_range.clone(),
+                vec![left.evidence.clone(), right.evidence.clone()],
+            ));
+        }
+    }
     diagnostics
 }
 
