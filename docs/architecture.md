@@ -107,15 +107,20 @@ namespaced concepts; they do not add sentence recognizers.
 ## Canonical semantic IR
 
 Source spelling and layout remain in the structural representation. The
-canonical IR represents a small compositional vocabulary: symbols, numbers,
+canonical IR represents a small orthogonal vocabulary: symbols, numbers,
 directional relations, sums, products, fractions, powers, multi-argument
-applications, composition, total and partial derivatives with explicit order
-and variables, integrals with differentials and bounds when structurally
-available, nabla applications, dot and cross products, and explicit set union,
-intersection, and membership operators. Indexed occurrences retain base/index
-components while their complete surface remains the entity key. Operator
-meaning is not encoded as a textbook law name. Every node keeps source ranges
-and macro provenance.
+applications, explicit conditions, structural indexes, binders, systems, and
+piecewise branches. Total and partial derivatives retain explicit variables
+and order; integrals retain their differential, body, and independent bounds.
+Operators and bound variables are source references with exact ranges and
+macro provenance, not lossy strings. Indexed expressions retain base and index
+children instead of folding them into a symbol name. Textbook concepts remain
+typed operator or pack meaning rather than dedicated IR variants.
+
+Complete and malformed structures use the same lowering path for direct and
+transparent macro notation. Missing differentials, incomplete binders, and
+opaque children remain explicit unknowns. Systems and cases are built from
+wasmtex alignment/environment structure, not by reparsing presentation TeX.
 
 Normalization is layered:
 

@@ -200,10 +200,10 @@ fn dispatch_operand(expression: &SemanticExpr, placeholders: &BTreeSet<String>) 
         SemanticExprKind::Symbol(_)
         | SemanticExprKind::Number(_)
         | SemanticExprKind::Unknown(_) => DispatchOperand::Atom,
-        SemanticExprKind::Apply { operator, .. } if placeholders.contains(operator) => {
+        SemanticExprKind::Apply { operator, .. } if placeholders.contains(operator.as_str()) => {
             DispatchOperand::Any
         }
-        SemanticExprKind::Apply { operator, .. } => DispatchOperand::Apply(operator.clone()),
+        SemanticExprKind::Apply { operator, .. } => DispatchOperand::Apply(operator.value.clone()),
         SemanticExprKind::Cross(_, _) => DispatchOperand::Cross,
         SemanticExprKind::Derivative { .. } => DispatchOperand::Derivative,
         SemanticExprKind::Dot(_, _) => DispatchOperand::Dot,
@@ -213,6 +213,12 @@ fn dispatch_operand(expression: &SemanticExpr, placeholders: &BTreeSet<String>) 
         SemanticExprKind::Product(items) => DispatchOperand::Product(items.len()),
         SemanticExprKind::Sum(items) => DispatchOperand::Sum(items.len()),
         SemanticExprKind::Relation { .. } => DispatchOperand::Atom,
+        SemanticExprKind::Index { .. } | SemanticExprKind::Condition { .. } => {
+            DispatchOperand::Atom
+        }
+        SemanticExprKind::Binder { .. }
+        | SemanticExprKind::System(_)
+        | SemanticExprKind::Piecewise(_) => DispatchOperand::Atom,
     }
 }
 
@@ -262,8 +268,10 @@ static LAW_DISPATCH: LazyLock<LawDispatch> =
 
 fn dispatch_root(expression: &SemanticExpr) -> DispatchRoot {
     match &expression.kind {
-        SemanticExprKind::Relation { operator, .. } => DispatchRoot::Relation(operator.clone()),
-        SemanticExprKind::Apply { operator, .. } => DispatchRoot::Apply(operator.clone()),
+        SemanticExprKind::Relation { operator, .. } => {
+            DispatchRoot::Relation(operator.value.clone())
+        }
+        SemanticExprKind::Apply { operator, .. } => DispatchRoot::Apply(operator.value.clone()),
         _ => DispatchRoot::Other,
     }
 }
@@ -313,7 +321,8 @@ fn collect_dispatch_features(
                     matches!(
                         &item.kind,
                         SemanticExprKind::Apply { operator, arguments }
-                            if arguments.len() == 1 && !is_structural_application(operator)
+                            if arguments.len() == 1
+                                && !is_structural_application(operator.as_str())
                     )
                 })
                 .count();
@@ -347,8 +356,8 @@ fn collect_dispatch_features(
             operator,
             arguments,
         } => {
-            if !placeholders.contains(operator) {
-                output.insert(DispatchFeature::Apply(operator.clone()));
+            if !placeholders.contains(operator.as_str()) {
+                output.insert(DispatchFeature::Apply(operator.value.clone()));
             }
             if arguments.len() == 1 {
                 output.insert(DispatchFeature::Product(2));
@@ -360,6 +369,46 @@ fn collect_dispatch_features(
         SemanticExprKind::Relation { left, right, .. } => {
             collect_dispatch_features(left, placeholders, output);
             collect_dispatch_features(right, placeholders, output);
+        }
+        SemanticExprKind::Index { base, indices } => {
+            collect_dispatch_features(base, placeholders, output);
+            for index in indices {
+                collect_dispatch_features(index, placeholders, output);
+            }
+        }
+        SemanticExprKind::Condition { value, predicate } => {
+            collect_dispatch_features(value, placeholders, output);
+            collect_dispatch_features(predicate, placeholders, output);
+        }
+        SemanticExprKind::Binder {
+            operator,
+            variables,
+            lower,
+            upper,
+            body,
+        } => {
+            output.insert(DispatchFeature::Apply(operator.value.clone()));
+            for expression in variables
+                .iter()
+                .chain(lower.iter().map(Box::as_ref))
+                .chain(upper.iter().map(Box::as_ref))
+                .chain(std::iter::once(body.as_ref()))
+            {
+                collect_dispatch_features(expression, placeholders, output);
+            }
+        }
+        SemanticExprKind::System(equations) => {
+            for equation in equations {
+                collect_dispatch_features(equation, placeholders, output);
+            }
+        }
+        SemanticExprKind::Piecewise(branches) => {
+            for branch in branches {
+                collect_dispatch_features(&branch.value, placeholders, output);
+                if let Some(condition) = &branch.condition {
+                    collect_dispatch_features(condition, placeholders, output);
+                }
+            }
         }
         SemanticExprKind::Symbol(_)
         | SemanticExprKind::Number(_)
@@ -783,13 +832,19 @@ fn contains_sum_operator(expression: &SemanticExpr) -> bool {
         SemanticExprKind::Relation { left, right, .. } => {
             contains_sum_operator(left) || contains_sum_operator(right)
         }
+        SemanticExprKind::Binder { body, .. } => contains_sum_operator(body),
+        SemanticExprKind::System(equations) => equations.iter().any(contains_sum_operator),
+        SemanticExprKind::Piecewise(branches) => branches.iter().any(|branch| {
+            contains_sum_operator(&branch.value)
+                || branch.condition.as_ref().is_some_and(contains_sum_operator)
+        }),
         _ => false,
     }
 }
 
 fn balance_expression(expression: &SemanticExpr) -> bool {
     match &expression.kind {
-        SemanticExprKind::Symbol(_) => true,
+        SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. } => true,
         SemanticExprKind::Number(value) => value == "0",
         SemanticExprKind::Negate(inner) => balance_expression(inner),
         SemanticExprKind::Sum(terms) => terms.iter().all(balance_expression),
@@ -817,14 +872,15 @@ fn expression_shape(expression: &SemanticExpr, shapes: &ShapeObservations) -> Sh
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => shapes
             .shape_at(symbol, expression.range.start_offset)
-            .or_else(|| {
-                shapes.shape_at(
-                    symbol.split('_').next().unwrap_or(symbol),
-                    expression.range.start_offset,
-                )
-            })
             .map(|shape| ShapeInference::Known([vec![shape.kind], shape.dimensions].concat()))
             .unwrap_or(ShapeInference::Unknown),
+        SemanticExprKind::Index { base, .. } => {
+            let label = crate::canonical::expression_name(expression).unwrap_or_default();
+            shapes
+                .shape_at(&label, expression.range.start_offset)
+                .map(|shape| ShapeInference::Known([vec![shape.kind], shape.dimensions].concat()))
+                .unwrap_or_else(|| expression_shape(base, shapes))
+        }
         SemanticExprKind::Number(_) => ShapeInference::Known(vec!["scalar".into()]),
         SemanticExprKind::Negate(inner)
         | SemanticExprKind::Derivative {
@@ -943,6 +999,15 @@ fn expression_shape(expression: &SemanticExpr, shapes: &ShapeObservations) -> Sh
                 ])
             }
         }
+        SemanticExprKind::Binder { body, .. } => expression_shape(body, shapes),
+        SemanticExprKind::System(equations) => {
+            combine_equal_shapes(equations.iter().map(|item| expression_shape(item, shapes)))
+        }
+        SemanticExprKind::Piecewise(branches) => combine_equal_shapes(
+            branches
+                .iter()
+                .map(|branch| expression_shape(&branch.value, shapes)),
+        ),
         _ => ShapeInference::Unknown,
     }
 }
@@ -1135,8 +1200,8 @@ pub(crate) fn unify_all(
                 order: right_order,
             },
         ) if left_order == right_order => bind_name_all(
-            left_variable,
-            right_variable,
+            left_variable.as_str(),
+            right_variable.as_str(),
             placeholders,
             actual,
             bindings,
@@ -1195,8 +1260,8 @@ pub(crate) fn unify_all(
                 arguments: right,
             },
         ) if left.len() == right.len() => bind_name_all(
-            left_operator,
-            right_operator,
+            left_operator.as_str(),
+            right_operator.as_str(),
             placeholders,
             actual,
             bindings,
@@ -1216,9 +1281,9 @@ pub(crate) fn unify_all(
                 operator,
                 arguments,
             },
-        ) if arguments.len() == 1 && !is_structural_application(operator) => {
+        ) if arguments.len() == 1 && !is_structural_application(operator.as_str()) => {
             let operator = SemanticExpr {
-                kind: SemanticExprKind::Symbol(operator.clone()),
+                kind: SemanticExprKind::Symbol(operator.value.clone()),
                 range: actual.range.clone(),
                 provenance: actual.provenance.clone(),
             };
@@ -1229,6 +1294,36 @@ pub(crate) fn unify_all(
                 bindings,
             )
         }
+        (
+            SemanticExprKind::Index {
+                base: left_base,
+                indices: left_indices,
+            },
+            SemanticExprKind::Index {
+                base: right_base,
+                indices: right_indices,
+            },
+        ) if left_indices.len() == right_indices.len() => unify_sequence(
+            std::iter::once(left_base.as_ref()).chain(left_indices),
+            std::iter::once(right_base.as_ref()).chain(right_indices),
+            placeholders,
+            bindings,
+        ),
+        (
+            SemanticExprKind::Condition {
+                value: left_value,
+                predicate: left_predicate,
+            },
+            SemanticExprKind::Condition {
+                value: right_value,
+                predicate: right_predicate,
+            },
+        ) => unify_sequence(
+            [left_value.as_ref(), left_predicate.as_ref()],
+            [right_value.as_ref(), right_predicate.as_ref()],
+            placeholders,
+            bindings,
+        ),
         (SemanticExprKind::Unknown(left), SemanticExprKind::Unknown(right)) if left == right => {
             vec![bindings.clone()]
         }
@@ -1277,9 +1372,9 @@ fn ambiguous_factor(expression: &SemanticExpr) -> Option<Vec<SemanticExpr>> {
         SemanticExprKind::Apply {
             operator,
             arguments,
-        } if arguments.len() == 1 && !is_structural_application(operator) => Some(vec![
+        } if arguments.len() == 1 && !is_structural_application(operator.as_str()) => Some(vec![
             SemanticExpr {
-                kind: SemanticExprKind::Symbol(operator.clone()),
+                kind: SemanticExprKind::Symbol(operator.value.clone()),
                 range: expression.range.clone(),
                 provenance: expression.provenance.clone(),
             },
@@ -1293,10 +1388,10 @@ fn ambiguous_factor(expression: &SemanticExpr) -> Option<Vec<SemanticExpr>> {
             else {
                 return None;
             };
-            (arguments.len() == 1 && !is_structural_application(operator)).then(|| {
+            (arguments.len() == 1 && !is_structural_application(operator.as_str())).then(|| {
                 vec![
                     SemanticExpr {
-                        kind: SemanticExprKind::Symbol(operator.clone()),
+                        kind: SemanticExprKind::Symbol(operator.value.clone()),
                         range: base.range.clone(),
                         provenance: base.provenance.clone(),
                     },
@@ -1486,8 +1581,8 @@ fn unify(
         ) => {
             left_order == right_order
                 && bind_name(
-                    left_variable,
-                    right_variable,
+                    left_variable.as_str(),
+                    right_variable.as_str(),
                     placeholders,
                     actual,
                     bindings,
@@ -1532,8 +1627,8 @@ fn unify(
         ) => {
             left.len() == right.len()
                 && bind_name(
-                    left_operator,
-                    right_operator,
+                    left_operator.as_str(),
+                    right_operator.as_str(),
                     placeholders,
                     actual,
                     bindings,
@@ -1554,7 +1649,7 @@ fn unify(
             },
         ) if arguments.len() == 1 => {
             let operator = SemanticExpr {
-                kind: SemanticExprKind::Symbol(operator.clone()),
+                kind: SemanticExprKind::Symbol(operator.value.clone()),
                 range: actual.range.clone(),
                 provenance: actual.provenance.clone(),
             };
@@ -1564,6 +1659,36 @@ fn unify(
                 placeholders,
                 bindings,
             )
+        }
+        (
+            SemanticExprKind::Index {
+                base: left_base,
+                indices: left_indices,
+            },
+            SemanticExprKind::Index {
+                base: right_base,
+                indices: right_indices,
+            },
+        ) => {
+            left_indices.len() == right_indices.len()
+                && unify(left_base, right_base, placeholders, bindings)
+                && left_indices
+                    .iter()
+                    .zip(right_indices)
+                    .all(|(left, right)| unify(left, right, placeholders, bindings))
+        }
+        (
+            SemanticExprKind::Condition {
+                value: left_value,
+                predicate: left_predicate,
+            },
+            SemanticExprKind::Condition {
+                value: right_value,
+                predicate: right_predicate,
+            },
+        ) => {
+            unify(left_value, right_value, placeholders, bindings)
+                && unify(left_predicate, right_predicate, placeholders, bindings)
         }
         (SemanticExprKind::Unknown(left), SemanticExprKind::Unknown(right)) => left == right,
         _ => false,
@@ -1676,7 +1801,7 @@ fn roles_are_supported(
                 && symbols.into_iter().all(|symbol| {
                     role_symbol_is_supported(
                         role,
-                        symbol,
+                        &symbol,
                         offset,
                         law_activated,
                         shapes,
@@ -1691,7 +1816,7 @@ fn roles_are_supported(
 
 fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
     match &expression.kind {
-        SemanticExprKind::Symbol(_) => true,
+        SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. } => true,
         SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
             role_expression_is_atomic(base)
         }
@@ -1714,7 +1839,7 @@ fn role_symbol_is_supported(
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
 ) -> bool {
-    let notation_symbol = symbol.split('_').next().unwrap_or(symbol);
+    let notation_symbol = symbol;
     if let Some(quantity) = role.quantity.as_deref()
         && !quantity_is_supported(
             quantity,
@@ -2023,10 +2148,7 @@ fn equivalence_conditions(
         .enumerate()
         .map(|(index, guard)| match instantiate_guard(guard, bindings) {
             EquivalenceGuard::Nonzero(subject) => {
-                let symbols = semantic_symbols(&subject)
-                    .into_iter()
-                    .map(str::to_owned)
-                    .collect::<Vec<_>>();
+                let symbols = semantic_symbols(&subject);
                 let (status, mut evidence) = nonzero_status(&subject, &symbols, assumptions);
                 evidence.push(Evidence {
                     rule_id: "guarded-equivalence/nonzero".into(),
@@ -2248,9 +2370,10 @@ fn push_evidence(items: &mut Vec<Evidence>, evidence: Evidence) {
     }
 }
 
-fn semantic_symbol(expression: &SemanticExpr) -> Option<&str> {
+fn semantic_symbol(expression: &SemanticExpr) -> Option<String> {
     match &expression.kind {
-        SemanticExprKind::Symbol(symbol) => Some(symbol),
+        SemanticExprKind::Symbol(symbol) => Some(symbol.clone()),
+        SemanticExprKind::Index { .. } => crate::canonical::expression_name(expression),
         SemanticExprKind::Derivative { expression, .. } => semantic_symbol(expression),
         SemanticExprKind::Apply {
             operator,
@@ -2259,12 +2382,12 @@ fn semantic_symbol(expression: &SemanticExpr) -> Option<&str> {
         SemanticExprKind::Apply {
             operator,
             arguments: _,
-        } if operator != "transpose" => Some(operator),
+        } if operator != "transpose" => Some(operator.value.clone()),
         _ => None,
     }
 }
 
-fn semantic_symbols(expression: &SemanticExpr) -> Vec<&str> {
+fn semantic_symbols(expression: &SemanticExpr) -> Vec<String> {
     match &expression.kind {
         SemanticExprKind::Sum(items) | SemanticExprKind::Product(items) => {
             items.iter().flat_map(semantic_symbols).collect()
@@ -2291,6 +2414,7 @@ fn expression_label(expression: &SemanticExpr) -> Option<String> {
             Some(format!("{}^*", expression_label(base)?))
         }
         SemanticExprKind::Derivative { expression, .. } => expression_label(expression),
+        SemanticExprKind::Index { .. } => crate::canonical::expression_name(expression),
         SemanticExprKind::Sum(items) => Some(
             items
                 .iter()

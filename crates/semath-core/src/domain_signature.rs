@@ -419,25 +419,25 @@ fn expression_shape_key(expression: &SemanticExpr, placeholders: &BTreeSet<Strin
         } => format!(
             "derivative({},{},{order})",
             expression_shape_key(expression, placeholders),
-            if placeholders.contains(variable) {
+            if placeholders.contains(variable.as_str()) {
                 "$"
             } else {
-                variable
+                variable.as_str()
             }
         ),
         SemanticExprKind::Relation {
             operator,
             left,
             right,
-        } => binary_key(operator, left, right, placeholders),
+        } => binary_key(operator.as_str(), left, right, placeholders),
         SemanticExprKind::Apply {
             operator,
             arguments,
         } => {
-            let operator = if placeholders.contains(operator) {
+            let operator = if placeholders.contains(operator.as_str()) {
                 "$"
             } else {
-                operator
+                operator.as_str()
             };
             format!(
                 "apply({operator},{})",
@@ -445,6 +445,50 @@ fn expression_shape_key(expression: &SemanticExpr, placeholders: &BTreeSet<Strin
             )
         }
         SemanticExprKind::Unknown(value) => format!("unknown({value})"),
+        SemanticExprKind::Index { base, indices } => format!(
+            "index({},{})",
+            expression_shape_key(base, placeholders),
+            list_key("indices", indices, placeholders)
+        ),
+        SemanticExprKind::Condition { value, predicate } => {
+            binary_key("condition", value, predicate, placeholders)
+        }
+        SemanticExprKind::Binder {
+            operator,
+            variables,
+            lower,
+            upper,
+            body,
+        } => format!(
+            "binder({operator},{},{},{},{})",
+            list_key("vars", variables, placeholders),
+            lower
+                .as_deref()
+                .map(|item| expression_shape_key(item, placeholders))
+                .unwrap_or_default(),
+            upper
+                .as_deref()
+                .map(|item| expression_shape_key(item, placeholders))
+                .unwrap_or_default(),
+            expression_shape_key(body, placeholders)
+        ),
+        SemanticExprKind::System(equations) => list_key("system", equations, placeholders),
+        SemanticExprKind::Piecewise(branches) => format!(
+            "piecewise({})",
+            branches
+                .iter()
+                .map(|branch| format!(
+                    "branch({},{})",
+                    expression_shape_key(&branch.value, placeholders),
+                    branch
+                        .condition
+                        .as_ref()
+                        .map(|item| expression_shape_key(item, placeholders))
+                        .unwrap_or_default()
+                ))
+                .collect::<Vec<_>>()
+                .join(",")
+        ),
     }
 }
 
