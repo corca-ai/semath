@@ -229,6 +229,13 @@ pub enum ClaimRelation {
         right: EntityId,
         canonical_digest: String,
     },
+    Inequality {
+        left: EntityId,
+        right: EntityId,
+        left_label: String,
+        right_label: String,
+        canonical_digest: String,
+    },
     Sum {
         result: EntityId,
         terms: Vec<EntityId>,
@@ -278,6 +285,9 @@ impl ClaimRelation {
             Self::Equality {
                 canonical_digest, ..
             }
+            | Self::Inequality {
+                canonical_digest, ..
+            }
             | Self::Sum {
                 canonical_digest, ..
             }
@@ -304,7 +314,9 @@ impl ClaimRelation {
 
     pub(crate) fn entities(&self) -> Vec<&EntityId> {
         match self {
-            Self::Equality { left, right, .. } => vec![left, right],
+            Self::Equality { left, right, .. } | Self::Inequality { left, right, .. } => {
+                vec![left, right]
+            }
             Self::Sum { result, terms, .. } => std::iter::once(result).chain(terms).collect(),
             Self::Product {
                 result, factors, ..
@@ -1381,6 +1393,19 @@ fn validate_claim_value(value: &ClaimValue) -> Result<(), String> {
         && (relation.entities().len() > 32 || relation.canonical_digest().trim().is_empty())
     {
         return Err("relation claim is invalid or exceeds its bound".to_owned());
+    }
+    if let ClaimValue::Relation(relation) = value
+        && let ClaimRelation::Inequality {
+            left_label,
+            right_label,
+            ..
+        } = relation.as_ref()
+        && (left_label.trim().is_empty()
+            || right_label.trim().is_empty()
+            || left_label.len() > MAX_TEXT_LENGTH
+            || right_label.len() > MAX_TEXT_LENGTH)
+    {
+        return Err("inequality labels are invalid or exceed their bound".to_owned());
     }
     Ok(())
 }
