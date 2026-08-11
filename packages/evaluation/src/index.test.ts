@@ -515,7 +515,7 @@ describe("pack conformance", () => {
         {
           laws: [{ id: "ohm-law" }],
           packId: "circuits",
-          schemaVersion: 5,
+          schemaVersion: 6,
         },
         "circuits.json",
       ),

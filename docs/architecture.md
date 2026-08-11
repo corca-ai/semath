@@ -119,9 +119,10 @@ command name is not treated as its meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 7 describes namespaced concepts and reviewed English aliases, typed law
-roles, semantic forms, conditions, activation evidence, quantities, units, and
-references. Activation evidence is either a reviewed prose phrase or a closed
+Schema 8 describes namespaced concepts and reviewed English aliases, typed law
+roles, one canonical relation with optional surface representations, conditions,
+activation evidence, quantities, units, and references. Activation evidence is
+either a reviewed prose phrase or a closed
 structural kind derived from the canonical math model; arbitrary pattern
 strings are not a runtime policy language. The generic unifier applies every
 compiled law; selecting a pack or law in orchestration code is forbidden.
@@ -137,8 +138,8 @@ registry; the same compiler report is exposed through WASM to authoring tools.
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
 
-Law dispatch compiles root operators and mandatory canonical structure into an
-immutable index. Inference sends only structurally compatible candidates to
+Law dispatch compiles root operators, operand shapes, and mandatory canonical
+structure into an immutable index. Inference sends only structurally compatible candidates to
 the generic unifier; a bounded generic bucket exists only for forms such as
 variadic balances that have no sound discriminator. The exhaustive scan is a
 test oracle, not a production path.
@@ -168,6 +169,16 @@ Runtime concepts always use the pack-qualified identity
 identity system. Longer pack vocabulary terms take precedence over embedded
 generic terms, while equal-specificity collisions remain unresolved.
 
+Each law owns one `canonicalRelation`; optional `representations` describe only
+surface forms. A pure, bounded equivalence compiler derives equality
+orientation, declared-scalar permutations, factor isolation, reciprocal
+normalization, and constant-denominator scaling. It emits proof steps and
+explicit nonzero guards with every derived form. It never commutes an
+undeclared or non-scalar product, changes an inequality direction, or guesses
+from notation. wasmtex supplies neutral syntax and lexical classes, Semath adds
+typed mathematical meaning, and hosts consume results; dependencies never run
+in the opposite direction.
+
 The public meaning states are `established`, `partial`, `ambiguous`,
 `conflicting`, and `unsupported`. A decision carries a typed reason slice:
 proof, neutral uncertainty, engine limit, or demonstrated source conflict.
@@ -180,7 +191,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 9 exposes selection, `semanticView`, definition, references, rename,
+Protocol 10 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is
@@ -210,6 +221,8 @@ leave old and new semantic runtimes in parallel.
   production dispatch signatures.
 - One pack schema/compiler and one generic law runtime are active.
 - Every conclusion retains source evidence and bounded uncertainty.
+- Equivalent-form compilation is deterministic, capped, type-directed, and
+  observable through state and guard-check budget counters.
 - Pure transformations contain normalization, inference, ranking, and view
   construction wherever practical.
 - Pack declarations automatically plan positive, refusal, scope, mutation,

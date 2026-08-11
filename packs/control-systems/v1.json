@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "control-systems",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -224,9 +224,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "\\dot{state} = state-matrix state + input-matrix control-input"
-      ],
       "conditions": [
         {
           "id": "compatible-shapes",
@@ -242,7 +239,8 @@
       ],
       "references": [
         "linear-system-theory"
-      ]
+      ],
+      "canonicalRelation": "\\dot{state} = state-matrix state + input-matrix control-input"
     },
     {
       "id": "continuous-lyapunov-equation",
@@ -298,12 +296,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "state-matrix^T certificate + certificate state-matrix = -forcing",
-        "state-matrix' certificate + certificate state-matrix = -forcing",
-        "0 = state-matrix^T certificate + certificate state-matrix + forcing",
-        "forcing = -(state-matrix^T certificate + certificate state-matrix)"
-      ],
       "conditions": [
         {
           "id": "compatible-square-shapes",
@@ -318,6 +310,12 @@
       ],
       "references": [
         "linear-system-theory"
+      ],
+      "canonicalRelation": "state-matrix^T certificate + certificate state-matrix = -forcing",
+      "representations": [
+        "state-matrix' certificate + certificate state-matrix = -forcing",
+        "0 = state-matrix^T certificate + certificate state-matrix + forcing",
+        "forcing = -(state-matrix^T certificate + certificate state-matrix)"
       ]
     },
     {
@@ -376,9 +374,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "output = output-matrix state + feedthrough-matrix control-input"
-      ],
       "conditions": [
         {
           "id": "compatible-shapes",
@@ -395,7 +390,8 @@
       ],
       "references": [
         "linear-system-theory"
-      ]
+      ],
+      "canonicalRelation": "output = output-matrix state + feedthrough-matrix control-input"
     }
   ],
   "activationRules": [

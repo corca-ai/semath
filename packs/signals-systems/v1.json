@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "signals-systems",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -109,10 +109,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "frequency = 1 / period",
-        "period = 1 / frequency"
-      ],
       "conditions": [
         {
           "id": "positive-period",
@@ -134,6 +130,10 @@
       ],
       "references": [
         "signals-systems"
+      ],
+      "canonicalRelation": "frequency = 1 / period",
+      "representations": [
+        "period = 1 / frequency"
       ]
     },
     {
@@ -173,9 +173,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "angular-frequency = 2 pi frequency"
-      ],
       "conditions": [
         {
           "id": "common-oscillation",
@@ -189,7 +186,8 @@
       ],
       "references": [
         "signals-systems"
-      ]
+      ],
+      "canonicalRelation": "angular-frequency = 2 pi frequency"
     },
     {
       "id": "wave-speed-relation",
@@ -228,10 +226,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "wave-speed = frequency wavelength",
-        "wave-speed = frequency \\cdot wavelength"
-      ],
       "conditions": [
         {
           "id": "common-propagation-mode",
@@ -246,6 +240,10 @@
       ],
       "references": [
         "signals-systems"
+      ],
+      "canonicalRelation": "wave-speed = frequency wavelength",
+      "representations": [
+        "wave-speed = frequency \\cdot wavelength"
       ]
     }
   ],

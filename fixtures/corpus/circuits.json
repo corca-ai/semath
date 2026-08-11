@@ -10,7 +10,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nFor the resistor branch, the constitutive relation is % semath-recognition-evidence:start\nLet $V$ denote voltage, $I$ denote electric current, and $R$ denote resistance.\n% semath-recognition-evidence:end\n$V=IR$."
+          "content": "Consider the following independently stated relation in example 1001. [let singular]\nA presentation-only symbol is $q_{1201}$.\n\nFor the resistor branch, the constitutive relation is % semath-recognition-evidence:start\nLet $V$ denote voltage scalar, $I$ denote electric current scalar, and $R$ denote resistance scalar.\n% semath-recognition-evidence:end\n$V=IR$."
         }
       ],
       "mainFileId": "main",
@@ -45,7 +45,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nThe branch current follows from % semath-recognition-evidence:start\nLet $I$, $V$, and $R$ denote electric current, voltage, and resistance, respectively.\n% semath-recognition-evidence:end\n\\[I=\\frac{V}{R}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1002. [let paired]\nA presentation-only symbol follows: \\[q_{1202}\\]\n\nThe branch current follows from % semath-recognition-evidence:start\nLet $I$, $V$, and $R$ denote electric current scalar, voltage scalar, and resistance scalar, respectively.\n% semath-recognition-evidence:end\n\\[I=\\frac{V}{R}\\]."
         }
       ],
       "mainFileId": "main",
@@ -80,7 +80,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nFor a measured operating point, use % semath-recognition-evidence:start\nWe write $R$ for resistance. We write $V$ for voltage. We write $I$ for electric current.\n% semath-recognition-evidence:end\n$R=\\frac{V}{I}$."
+          "content": "The next formula is presented without an assumed named law (1003). [let series]\n\\begin{equation}q_{1203}\\end{equation}\n\nFor a measured operating point, use % semath-recognition-evidence:start\nWe write $R$ for resistance scalar. We write $V$ for voltage scalar. We write $I$ for electric current scalar.\n% semath-recognition-evidence:end\n$R=\\frac{V}{I}$."
         }
       ],
       "mainFileId": "main",
@@ -115,7 +115,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe source resistor obeys % semath-recognition-evidence:start\n$V_s$ denotes voltage. $I_s$ denotes electric current. $R_s$ denotes resistance.\n% semath-recognition-evidence:end\n\\[V_s=I_sR_s\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1004). [respectively]\n\\[\\begin{aligned}q_{1204}\\end{aligned}\\]\n\nThe source resistor obeys % semath-recognition-evidence:start\n$V_s$ denotes voltage scalar. $I_s$ denotes electric current scalar. $R_s$ denotes resistance scalar.\n% semath-recognition-evidence:end\n\\[V_s=I_sR_s\\]."
         }
       ],
       "mainFileId": "main",
@@ -150,7 +150,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nAcross terminals \\(a\\) and \\(b\\), the passive-sign relation is % semath-recognition-evidence:start\nHere $V_{ab}$ denotes voltage, $R_b$ denotes resistance, and $I_{ab}$ denotes electric current.\n% semath-recognition-evidence:end\n$V_{ab}=R_b I_{ab}$."
+          "content": "Suppose the notation is local to this calculation, case 1005. [where clause]\nA grouped symbol is $ {q_{1205}} $.\n\nAcross terminals \\(a\\) and \\(b\\), the passive-sign relation is % semath-recognition-evidence:start\nHere $V_{ab}$ denotes voltage scalar, $R_b$ denotes resistance scalar, and $I_{ab}$ denotes electric current scalar.\n% semath-recognition-evidence:end\n$V_{ab}=R_b I_{ab}$."
         }
       ],
       "mainFileId": "main",
@@ -185,7 +185,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor an ideal time-invariant resistor, % semath-recognition-evidence:start\nLet $v(t)$ denote voltage, $R$ denote resistance, and $i(t)$ denote electric current.\n% semath-recognition-evidence:end\n\\[v(t)=R\\,i(t)\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1006). [we write]\nA styled symbol is $\\mathbf{q}_{1206}$.\n\nFor an ideal time-invariant resistor, % semath-recognition-evidence:start\nLet $v(t)$ denote voltage scalar, $R$ denote resistance scalar, and $i(t)$ denote electric current scalar.\n% semath-recognition-evidence:end\n\\[v(t)=R\\,i(t)\\]."
         }
       ],
       "mainFileId": "main",
@@ -220,7 +220,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nSolving the same device law for current gives % semath-recognition-evidence:start\nLet $i(t)$, $v(t)$, and $R$ denote electric current, voltage, and resistance, respectively.\n% semath-recognition-evidence:end\n$i(t)=v(t)/R$."
+          "content": "As a deliberately unsupported instance, examine relation 1007. [symbol list]\nAn indexed symbol is $q_{1207}$.\n\nSolving the same device law for current gives % semath-recognition-evidence:start\nLet $i(t)$, $v(t)$, and $R$ denote electric current scalar, voltage scalar, and resistance scalar, respectively.\n% semath-recognition-evidence:end\n$i(t)=v(t)/R$."
         }
       ],
       "mainFileId": "main",
@@ -255,7 +255,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe labeled element satisfies % semath-recognition-evidence:start\nWe write $V_R$ for voltage. We write $R$ for resistance. We write $I_R$ for electric current.\n% semath-recognition-evidence:end\n\\[V_R=R\\,I_R\\]."
+          "content": "No domain interpretation is asserted for the following formula (1008). [role first]\n\\newcommand{\\baselineprobe}{q_{1208}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe labeled element satisfies % semath-recognition-evidence:start\nWe write $V_R$ for voltage scalar. We write $R$ for resistance scalar. We write $I_R$ for electric current scalar.\n% semath-recognition-evidence:end\n\\[V_R=R\\,I_R\\]."
         }
       ],
       "mainFileId": "main",
@@ -290,7 +290,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet \\(\\Delta V\\) be the signed drop. Then % semath-recognition-evidence:start\n$\\Delta V$ denotes voltage. $I_\\ell$ denotes electric current. $R_\\ell$ denotes resistance.\n% semath-recognition-evidence:end\n$\\Delta V=I_\\ell R_\\ell$."
+          "content": "Consider the following independently stated relation in example 1009. [suppose that]\nA presentation-only symbol is $q_{1209}$.\n\nLet \\(\\Delta V\\) be the signed drop. Then % semath-recognition-evidence:start\n$\\Delta V$ denotes voltage scalar. $I_\\ell$ denotes electric current scalar. $R_\\ell$ denotes resistance scalar.\n% semath-recognition-evidence:end\n$\\Delta V=I_\\ell R_\\ell$."
         }
       ],
       "mainFileId": "main",
@@ -325,7 +325,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nHere \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; % semath-recognition-evidence:start\nHere $E$ denotes voltage, $J$ denotes electric current, and $\\rho$ denotes resistance.\n% semath-recognition-evidence:end\n$E=J\\rho$."
+          "content": "For comparison, inspect the displayed expression numbered 1010. [given that]\nA presentation-only symbol follows: \\[q_{1210}\\]\n\nHere \\(E\\) denotes the voltage across the resistor, \\(J\\) its current, and \\(\\rho\\) its resistance; % semath-recognition-evidence:start\nHere $E$ denotes voltage scalar, $J$ denotes electric current scalar, and $\\rho$ denotes resistance scalar.\n% semath-recognition-evidence:end\n$E=J\\rho$."
         }
       ],
       "mainFileId": "main",
@@ -360,7 +360,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nUsing \\(U\\) for voltage, the resistor equation is % semath-recognition-evidence:start\nLet $U$ denote voltage, $R$ denote resistance, and $I$ denote electric current.\n% semath-recognition-evidence:end\n\\[U=R I\\]."
+          "content": "The next formula is presented without an assumed named law (1011). [define as]\n\\begin{equation}q_{1211}\\end{equation}\n\nUsing \\(U\\) for voltage, the resistor equation is % semath-recognition-evidence:start\nLet $U$ denote voltage scalar, $R$ denote resistance scalar, and $I$ denote electric current scalar.\n% semath-recognition-evidence:end\n\\[U=R I\\]."
         }
       ],
       "mainFileId": "main",
@@ -395,7 +395,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nThe lab sheet presents the relation with the product first: % semath-recognition-evidence:start\nLet $I$, $R$, and $V$ denote electric current, resistance, and voltage, respectively.\n% semath-recognition-evidence:end\n\\[I R=V\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1012). [in this model]\n\\[\\begin{aligned}q_{1212}\\end{aligned}\\]\n\nThe lab sheet presents the relation with the product first: % semath-recognition-evidence:start\nLet $I$, $R$, and $V$ denote electric current scalar, resistance scalar, and voltage scalar, respectively.\n% semath-recognition-evidence:end\n\\[I R=V\\]."
         }
       ],
       "mainFileId": "main",
@@ -430,7 +430,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nFor clarity, the report groups the measured factors as % semath-recognition-evidence:start\nWe write $V$ for voltage. We write $I$ for electric current. We write $R$ for resistance.\n% semath-recognition-evidence:end\n$V=(I)(R)$."
+          "content": "Suppose the notation is local to this calculation, case 1013. [throughout section]\nA grouped symbol is $ {q_{1213}} $.\n\nFor clarity, the report groups the measured factors as % semath-recognition-evidence:start\nWe write $V$ for voltage scalar. We write $I$ for electric current scalar. We write $R$ for resistance scalar.\n% semath-recognition-evidence:end\n$V=(I)(R)$."
         }
       ],
       "mainFileId": "main",
@@ -465,7 +465,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nThe asserted device law is % semath-recognition-evidence:start\n$V$ denotes voltage. $R$ denotes resistance. $I$ denotes electric current.\n% semath-recognition-evidence:end\n\\[(V)=(R\\,I)\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1014). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1214}$.\n\nThe asserted device law is % semath-recognition-evidence:start\n$V$ denotes voltage scalar. $R$ denotes resistance scalar. $I$ denotes electric current scalar.\n% semath-recognition-evidence:end\n\\[(V)=(R\\,I)\\]."
         }
       ],
       "mainFileId": "main",
@@ -500,7 +500,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses % semath-recognition-evidence:start\nHere $V_d$ denotes voltage, $I_d$ denotes electric current, and $R_d$ denotes resistance.\n% semath-recognition-evidence:end\n$V_d=I_dR_d$."
+          "content": "As a deliberately unsupported instance, examine relation 1015. [separate sentences]\nAn indexed symbol is $q_{1215}$.\n\nLet \\(V_d\\) denote voltage drop, \\(I_d\\) branch current, and \\(R_d\\) resistance. The model uses % semath-recognition-evidence:start\nHere $V_d$ denotes voltage scalar, $I_d$ denotes electric current scalar, and $R_d$ denotes resistance scalar.\n% semath-recognition-evidence:end\n$V_d=I_dR_d$."
         }
       ],
       "mainFileId": "main",
@@ -535,7 +535,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe branch model is % semath-recognition-evidence:start\nLet $e_b$ denote voltage, $j_b$ denote electric current, and $r_b$ denote resistance.\n% semath-recognition-evidence:end\n\\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
+          "content": "No domain interpretation is asserted for the following formula (1016). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1216}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe branch model is % semath-recognition-evidence:start\nLet $e_b$ denote voltage scalar, $j_b$ denote electric current scalar, and $r_b$ denote resistance scalar.\n% semath-recognition-evidence:end\n\\[e_b=j_b r_b\\]. Here \\(e_b\\), \\(j_b\\), and \\(r_b\\) denote voltage, current, and resistance respectively."
         }
       ],
       "mainFileId": "main",
@@ -570,7 +570,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nWith current \\(i_L\\) directed into the marked terminal, % semath-recognition-evidence:start\nLet $v_L$, $R_L$, and $i_L$ denote voltage, resistance, and electric current, respectively.\n% semath-recognition-evidence:end\n$v_L=R_L i_L$ gives the load voltage."
+          "content": "Consider the following independently stated relation in example 1017. [let singular]\nA presentation-only symbol is $q_{1217}$.\n\nWith current \\(i_L\\) directed into the marked terminal, % semath-recognition-evidence:start\nLet $v_L$, $R_L$, and $i_L$ denote voltage scalar, resistance scalar, and electric current scalar, respectively.\n% semath-recognition-evidence:end\n$v_L=R_L i_L$ gives the load voltage."
         }
       ],
       "mainFileId": "main",
@@ -605,7 +605,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nVoltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is % semath-recognition-evidence:start\nWe write $V_m$ for voltage. We write $I_m$ for electric current. We write $R_m$ for resistance.\n% semath-recognition-evidence:end\n\\[V_m=I_mR_m\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1018. [let paired]\nA presentation-only symbol follows: \\[q_{1218}\\]\n\nVoltages are reported in volts, currents in amperes, and resistance in ohms; the symbolic relation is % semath-recognition-evidence:start\nWe write $V_m$ for voltage scalar. We write $I_m$ for electric current scalar. We write $R_m$ for resistance scalar.\n% semath-recognition-evidence:end\n\\[V_m=I_mR_m\\]."
         }
       ],
       "mainFileId": "main",
@@ -640,7 +640,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nUsing the project voltage alias, the component equation is % semath-recognition-evidence:start\n$\\Vdrop$ denotes voltage. $I$ denotes electric current. $R$ denotes resistance.\n% semath-recognition-evidence:end\n$\\Vdrop=I R$."
+          "content": "The next formula is presented without an assumed named law (1019). [let series]\n\\begin{equation}q_{1219}\\end{equation}\n\nUsing the project voltage alias, the component equation is % semath-recognition-evidence:start\n$\\Vdrop$ denotes voltage scalar. $I$ denotes electric current scalar. $R$ denotes resistance scalar.\n% semath-recognition-evidence:end\n$\\Vdrop=I R$."
         }
       ],
       "mainFileId": "main",
@@ -681,7 +681,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nThe schematic notation states % semath-recognition-evidence:start\nHere $\\Volt$ denotes voltage, $\\Ampere$ denotes electric current, and $\\Ohmic$ denotes resistance.\n% semath-recognition-evidence:end\n\\[\\Volt=\\Ampere\\,\\Ohmic\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1020). [respectively]\n\\[\\begin{aligned}q_{1220}\\end{aligned}\\]\n\nThe schematic notation states % semath-recognition-evidence:start\nHere $\\Volt$ denotes voltage scalar, $\\Ampere$ denotes electric current scalar, and $\\Ohmic$ denotes resistance scalar.\n% semath-recognition-evidence:end\n\\[\\Volt=\\Ampere\\,\\Ohmic\\]."
         }
       ],
       "mainFileId": "main",
@@ -730,7 +730,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nFor the marked positive voltage terminal and entering current arrow, % semath-recognition-evidence:start\nLet $v_+$ denote voltage, $r_p$ denote resistance, and $i_+$ denote electric current.\n% semath-recognition-evidence:end\n\\[v_+=r_p i_+\\]."
+          "content": "Suppose the notation is local to this calculation, case 1021. [where clause]\nA grouped symbol is $ {q_{1221}} $.\n\nFor the marked positive voltage terminal and entering current arrow, % semath-recognition-evidence:start\nLet $v_+$ denote voltage scalar, $r_p$ denote resistance scalar, and $i_+$ denote electric current scalar.\n% semath-recognition-evidence:end\n\\[v_+=r_p i_+\\]."
         }
       ],
       "mainFileId": "main",
@@ -765,7 +765,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe load line uses % semath-recognition-evidence:start\nLet $V_{\\mathrm{load}}$, $I_{\\mathrm{load}}$, and $R_{\\mathrm{load}}$ denote voltage, electric current, and resistance, respectively.\n% semath-recognition-evidence:end\n$V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
+          "content": "The symbols below have no meaning beyond this standalone example (1022). [we write]\nA styled symbol is $\\mathbf{q}_{1222}$.\n\nThe load line uses % semath-recognition-evidence:start\nLet $V_{\\mathrm{load}}$, $I_{\\mathrm{load}}$, and $R_{\\mathrm{load}}$ denote voltage scalar, electric current scalar, and resistance scalar, respectively.\n% semath-recognition-evidence:end\n$V_{\\mathrm{load}}=I_{\\mathrm{load}}R_{\\mathrm{load}}$."
         }
       ],
       "mainFileId": "main",
@@ -800,7 +800,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nFor sensor branch \\(3\\), % semath-recognition-evidence:start\nWe write $v_3$ for voltage. We write $i_3$ for electric current. We write $r_3$ for resistance.\n% semath-recognition-evidence:end\n\\[v_3=i_3 r_3\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1023. [symbol list]\nAn indexed symbol is $q_{1223}$.\n\nFor sensor branch \\(3\\), % semath-recognition-evidence:start\nWe write $v_3$ for voltage scalar. We write $i_3$ for electric current scalar. We write $r_3$ for resistance scalar.\n% semath-recognition-evidence:end\n\\[v_3=i_3 r_3\\]."
         }
       ],
       "mainFileId": "main",
@@ -835,7 +835,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe inferred element value is % semath-recognition-evidence:start\n$\\mathcal{R}_x$ denotes resistance. $V_x$ denotes voltage. $I_x$ denotes electric current.\n% semath-recognition-evidence:end\n$\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
+          "content": "No domain interpretation is asserted for the following formula (1024). [role first]\n\\newcommand{\\baselineprobe}{q_{1224}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe inferred element value is % semath-recognition-evidence:start\n$\\mathcal{R}_x$ denotes resistance scalar. $V_x$ denotes voltage scalar. $I_x$ denotes electric current scalar.\n% semath-recognition-evidence:end\n$\\mathcal{R}_x=V_x/I_x$, where \\(\\mathcal{R}_x\\) is resistance."
         }
       ],
       "mainFileId": "main",
@@ -870,7 +870,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nThe selected row of the derivation is % semath-recognition-evidence:start\nHere $V_o$ denotes voltage, $I_o$ denotes electric current, and $R_o$ denotes resistance.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
+          "content": "Consider the following independently stated relation in example 1025. [suppose that]\nA presentation-only symbol is $q_{1225}$.\n\nThe selected row of the derivation is % semath-recognition-evidence:start\nHere $V_o$ denotes voltage scalar, $I_o$ denotes electric current scalar, and $R_o$ denotes resistance scalar.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}V_o&=I_oR_o\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
@@ -905,7 +905,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nThe final component model is highlighted as % semath-recognition-evidence:start\nLet $V_c$ denote voltage, $R_c$ denote resistance, and $I_c$ denote electric current.\n% semath-recognition-evidence:end\n\\[\\boxed{V_c=R_c I_c}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1026. [given that]\nA presentation-only symbol follows: \\[q_{1226}\\]\n\nThe final component model is highlighted as % semath-recognition-evidence:start\nLet $V_c$ denote voltage scalar, $R_c$ denote resistance scalar, and $I_c$ denote electric current scalar.\n% semath-recognition-evidence:end\n\\[\\boxed{V_c=R_c I_c}\\]."
         }
       ],
       "mainFileId": "main",
@@ -940,7 +940,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nAfter isolating current, the worksheet obtains % semath-recognition-evidence:start\nLet $i_x$, $v_x$, and $r_x$ denote electric current, voltage, and resistance, respectively.\n% semath-recognition-evidence:end\n\\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
+          "content": "The next formula is presented without an assumed named law (1027). [define as]\n\\begin{equation}q_{1227}\\end{equation}\n\nAfter isolating current, the worksheet obtains % semath-recognition-evidence:start\nLet $i_x$, $v_x$, and $r_x$ denote electric current scalar, voltage scalar, and resistance scalar, respectively.\n% semath-recognition-evidence:end\n\\[i_x=\\left(\\frac{v_x}{r_x}\\right)\\]."
         }
       ],
       "mainFileId": "main",
@@ -975,7 +975,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nVoltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus % semath-recognition-evidence:start\nWe write $V_h$ for voltage. We write $R_h$ for resistance. We write $I_h$ for electric current.\n% semath-recognition-evidence:end\n\\[V_h=R_h I_h\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1028). [in this model]\n\\[\\begin{aligned}q_{1228}\\end{aligned}\\]\n\nVoltage \\(V_h\\) is measured across the heater.\nCurrent \\(I_h\\) enters its positive terminal and \\(R_h\\) is its resistance.\nThus % semath-recognition-evidence:start\nWe write $V_h$ for voltage scalar. We write $R_h$ for resistance scalar. We write $I_h$ for electric current scalar.\n% semath-recognition-evidence:end\n\\[V_h=R_h I_h\\]."
         }
       ],
       "mainFileId": "main",
@@ -1010,7 +1010,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\n\\input{symbols}\nThe resistor equation is % semath-recognition-evidence:start\n$V_b$ denotes voltage. $I_b$ denotes electric current. $R_b$ denotes resistance.\n% semath-recognition-evidence:end\n\\[V_b=I_bR_b\\]."
+          "content": "Suppose the notation is local to this calculation, case 1029. [throughout section]\nA grouped symbol is $ {q_{1229}} $.\n\n\\input{symbols}\nThe resistor equation is % semath-recognition-evidence:start\n$V_b$ denotes voltage scalar. $I_b$ denotes electric current scalar. $R_b$ denotes resistance scalar.\n% semath-recognition-evidence:end\n\\[V_b=I_bR_b\\]."
         },
         {
           "fileId": "symbols",
@@ -1050,7 +1050,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\n\\input{notation}\nThe branch law is % semath-recognition-evidence:start\nHere $\\BranchV$ denotes voltage, $\\BranchI$ denotes electric current, and $\\BranchR$ denotes resistance.\n% semath-recognition-evidence:end\n$\\BranchV=\\BranchI\\BranchR$."
+          "content": "The symbols below have no meaning beyond this standalone example (1030). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1230}$.\n\n\\input{notation}\nThe branch law is % semath-recognition-evidence:start\nHere $\\BranchV$ denotes voltage scalar, $\\BranchI$ denotes electric current scalar, and $\\BranchR$ denotes resistance scalar.\n% semath-recognition-evidence:end\n$\\BranchV=\\BranchI\\BranchR$."
         },
         {
           "fileId": "notation",
@@ -3435,7 +3435,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1101. [where clause]\nA grouped symbol is $ {q_{1301}} $.\n\nFor the ideal capacitor, the passive-sign relation is % semath-recognition-evidence:start\nLet $i$ denote electric current, $C$ denote capacitance, $v$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$i=C\\frac{dv}{dt}$."
+          "content": "Suppose the notation is local to this calculation, case 1101. [where clause]\nA grouped symbol is $ {q_{1301}} $.\n\nFor the ideal capacitor, the passive-sign relation is % semath-recognition-evidence:start\nLet $i$ denote electric current scalar, $C$ denote capacitance scalar, $v$ denote voltage scalar, and $t$ denote duration scalar.\n% semath-recognition-evidence:end\n$i=C\\frac{dv}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3471,7 +3471,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1102). [we write]\nA styled symbol is $\\mathbf{q}_{1302}$.\n\nThe labeled component obeys % semath-recognition-evidence:start\nLet $I_C$, $C$, $V_C$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[I_C=C\\frac{dV_C}{dt}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1102). [we write]\nA styled symbol is $\\mathbf{q}_{1302}$.\n\nThe labeled component obeys % semath-recognition-evidence:start\nLet $I_C$, $C$, $V_C$, and $t$ denote electric current scalar, capacitance scalar, voltage scalar, and duration scalar, respectively.\n% semath-recognition-evidence:end\n\\[I_C=C\\frac{dV_C}{dt}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3507,7 +3507,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1103. [symbol list]\nAn indexed symbol is $q_{1303}$.\n\nFrom a transient measurement, compute % semath-recognition-evidence:start\nWe write $C$ for capacitance. We write $i$ for electric current. We write $v$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n$C=\\frac{i}{dv/dt}$."
+          "content": "As a deliberately unsupported instance, examine relation 1103. [symbol list]\nAn indexed symbol is $q_{1303}$.\n\nFrom a transient measurement, compute % semath-recognition-evidence:start\nWe write $C$ for capacitance scalar. We write $i$ for electric current scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar.\n% semath-recognition-evidence:end\n$C=\\frac{i}{dv/dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3543,7 +3543,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1104). [role first]\n\\newcommand{\\baselineprobe}{q_{1304}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe voltage slope is % semath-recognition-evidence:start\n$v$ denotes voltage. $t$ denotes duration. $i$ denotes electric current. $C$ denotes capacitance.\n% semath-recognition-evidence:end\n\\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
+          "content": "No domain interpretation is asserted for the following formula (1104). [role first]\n\\newcommand{\\baselineprobe}{q_{1304}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe voltage slope is % semath-recognition-evidence:start\n$v$ denotes voltage scalar. $t$ denotes duration scalar. $i$ denotes electric current scalar. $C$ denotes capacitance scalar.\n% semath-recognition-evidence:end\n\\[\\frac{dv}{dt}=\\frac{i}{C}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3579,7 +3579,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1105. [suppose that]\nA presentation-only symbol is $q_{1305}$.\n\nWith explicit time dependence, % semath-recognition-evidence:start\nHere $i(t)$ denotes electric current, $C$ denotes capacitance, $v(t)$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n$i(t)=C\\,\\frac{d v(t)}{dt}$."
+          "content": "Consider the following independently stated relation in example 1105. [suppose that]\nA presentation-only symbol is $q_{1305}$.\n\nWith explicit time dependence, % semath-recognition-evidence:start\nHere $i(t)$ denotes electric current scalar, $C$ denotes capacitance scalar, $v(t)$ denotes voltage scalar, and $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n$i(t)=C\\,\\frac{d v(t)}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3615,7 +3615,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1106. [given that]\nA presentation-only symbol follows: \\[q_{1306}\\]\n\nThe same constitutive law in dot notation is % semath-recognition-evidence:start\nLet $i(t)$ denote electric current, $C$ denote capacitance, $v(t)$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n\\[i(t)=C\\dot v(t)\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1106. [given that]\nA presentation-only symbol follows: \\[q_{1306}\\]\n\nThe same constitutive law in dot notation is % semath-recognition-evidence:start\nLet $i(t)$ denote electric current scalar, $C$ denote capacitance scalar, $v(t)$ denote voltage scalar, and $t$ denote duration scalar.\n% semath-recognition-evidence:end\n\\[i(t)=C\\dot v(t)\\]."
         }
       ],
       "mainFileId": "main",
@@ -3651,7 +3651,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1107). [define as]\n\\begin{equation}q_{1307}\\end{equation}\n\nFor the transient waveform, % semath-recognition-evidence:start\nLet $I_c$, $C_c$, $V_c$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n$I_c=C_c\\dot V_c$."
+          "content": "The next formula is presented without an assumed named law (1107). [define as]\n\\begin{equation}q_{1307}\\end{equation}\n\nFor the transient waveform, % semath-recognition-evidence:start\nLet $I_c$, $C_c$, $V_c$, and $t$ denote electric current scalar, capacitance scalar, voltage scalar, and duration scalar, respectively.\n% semath-recognition-evidence:end\n$I_c=C_c\\dot V_c$."
         }
       ],
       "mainFileId": "main",
@@ -3687,7 +3687,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1108). [in this model]\n\\[\\begin{aligned}q_{1308}\\end{aligned}\\]\n\nThe worksheet writes the derivative product first: % semath-recognition-evidence:start\nWe write $C$ for capacitance. We write $V$ for voltage. We write $t$ for duration. We write $I$ for electric current.\n% semath-recognition-evidence:end\n\\[C\\,\\frac{dV}{dt}=I\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1108). [in this model]\n\\[\\begin{aligned}q_{1308}\\end{aligned}\\]\n\nThe worksheet writes the derivative product first: % semath-recognition-evidence:start\nWe write $C$ for capacitance scalar. We write $V$ for voltage scalar. We write $t$ for duration scalar. We write $I$ for electric current scalar.\n% semath-recognition-evidence:end\n\\[C\\,\\frac{dV}{dt}=I\\]."
         }
       ],
       "mainFileId": "main",
@@ -3723,7 +3723,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1109. [throughout section]\nA grouped symbol is $ {q_{1309}} $.\n\nThe constitutive equation is presented as % semath-recognition-evidence:start\n$i$ denotes electric current. $C$ denotes capacitance. $v$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$(i)=\\left(C\\,dv/dt\\right)$."
+          "content": "Suppose the notation is local to this calculation, case 1109. [throughout section]\nA grouped symbol is $ {q_{1309}} $.\n\nThe constitutive equation is presented as % semath-recognition-evidence:start\n$i$ denotes electric current scalar. $C$ denotes capacitance scalar. $v$ denotes voltage scalar. $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n$(i)=\\left(C\\,dv/dt\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -3759,7 +3759,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1110). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1310}$.\n\nAcross terminals \\(a,b\\), % semath-recognition-evidence:start\nHere $i_{ab}$ denotes electric current, $C_{ab}$ denotes capacitance, $v_{ab}$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1110). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1310}$.\n\nAcross terminals \\(a,b\\), % semath-recognition-evidence:start\nHere $i_{ab}$ denotes electric current scalar, $C_{ab}$ denotes capacitance scalar, $v_{ab}$ denotes voltage scalar, and $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n\\[i_{ab}=C_{ab}\\frac{dv_{ab}}{dt}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3795,7 +3795,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1111. [separate sentences]\nAn indexed symbol is $q_{1311}$.\n\nLet \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then % semath-recognition-evidence:start\nLet $j$ denote electric current, $K$ denote capacitance, $u$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$j=K\\,du/dt$."
+          "content": "As a deliberately unsupported instance, examine relation 1111. [separate sentences]\nAn indexed symbol is $q_{1311}$.\n\nLet \\(j\\) be capacitor current, \\(K\\) capacitance, and \\(u\\) terminal voltage. Then % semath-recognition-evidence:start\nLet $j$ denote electric current scalar, $K$ denote capacitance scalar, $u$ denote voltage scalar, and $t$ denote duration scalar.\n% semath-recognition-evidence:end\n$j=K\\,du/dt$."
         }
       ],
       "mainFileId": "main",
@@ -3831,7 +3831,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1112). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1312}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe device follows % semath-recognition-evidence:start\nLet $a$, $B$, $e$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
+          "content": "No domain interpretation is asserted for the following formula (1112). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1312}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe device follows % semath-recognition-evidence:start\nLet $a$, $B$, $e$, and $t$ denote electric current scalar, capacitance scalar, voltage scalar, and duration scalar, respectively.\n% semath-recognition-evidence:end\n\\[a=B\\dot e\\]. Here \\(a\\) is current, \\(B\\) capacitance, and \\(e\\) voltage."
         }
       ],
       "mainFileId": "main",
@@ -3867,7 +3867,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1113. [let singular]\nA presentation-only symbol is $q_{1313}$.\n\nCurrent \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; % semath-recognition-evidence:start\nWe write $j_x$ for electric current. We write $K_x$ for capacitance. We write $u_x$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n$j_x=K_x\\frac{du_x}{dt}$."
+          "content": "Consider the following independently stated relation in example 1113. [let singular]\nA presentation-only symbol is $q_{1313}$.\n\nCurrent \\(j_x\\) enters the positive terminal, \\(u_x\\) is its voltage, and \\(K_x\\) is capacitance; % semath-recognition-evidence:start\nWe write $j_x$ for electric current scalar. We write $K_x$ for capacitance scalar. We write $u_x$ for voltage scalar. We write $t$ for duration scalar.\n% semath-recognition-evidence:end\n$j_x=K_x\\frac{du_x}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3903,7 +3903,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1114. [let paired]\nA presentation-only symbol follows: \\[q_{1314}\\]\n\nUsing the project voltage alias, the capacitor law is % semath-recognition-evidence:start\n$i$ denotes electric current. $C$ denotes capacitance. $\\CapV$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$i=C\\frac{d\\CapV}{dt}$."
+          "content": "For comparison, inspect the displayed expression numbered 1114. [let paired]\nA presentation-only symbol follows: \\[q_{1314}\\]\n\nUsing the project voltage alias, the capacitor law is % semath-recognition-evidence:start\n$i$ denotes electric current scalar. $C$ denotes capacitance scalar. $\\CapV$ denotes voltage scalar. $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n$i=C\\frac{d\\CapV}{dt}$."
         }
       ],
       "mainFileId": "main",
@@ -3945,7 +3945,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1115). [let series]\n\\begin{equation}q_{1315}\\end{equation}\n\nThe aliased transient equation is % semath-recognition-evidence:start\nHere $\\CapI$ denotes electric current, $\\CapC$ denotes capacitance, $\\CapV$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
+          "content": "The next formula is presented without an assumed named law (1115). [let series]\n\\begin{equation}q_{1315}\\end{equation}\n\nThe aliased transient equation is % semath-recognition-evidence:start\nHere $\\CapI$ denotes electric current scalar, $\\CapC$ denotes capacitance scalar, $\\CapV$ denotes voltage scalar, and $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n\\[\\CapI=\\CapC\\,\\dot{\\CapV}\\]."
         }
       ],
       "mainFileId": "main",
@@ -3995,7 +3995,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1116). [respectively]\n\\[\\begin{aligned}q_{1316}\\end{aligned}\\]\n\nThe derivation highlights % semath-recognition-evidence:start\nLet $i_o$ denote electric current, $C_o$ denote capacitance, $v_o$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1116). [respectively]\n\\[\\begin{aligned}q_{1316}\\end{aligned}\\]\n\nThe derivation highlights % semath-recognition-evidence:start\nLet $i_o$ denote electric current scalar, $C_o$ denote capacitance scalar, $v_o$ denote voltage scalar, and $t$ denote duration scalar.\n% semath-recognition-evidence:end\n\\[\\begin{aligned}i_o&=C_o\\frac{dv_o}{dt}\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4031,7 +4031,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1117. [where clause]\nA grouped symbol is $ {q_{1317}} $.\n\nThe final capacitor model is % semath-recognition-evidence:start\nLet $I_x$, $C_x$, $V_x$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[\\boxed{I_x=C_x\\dot V_x}\\]."
+          "content": "Suppose the notation is local to this calculation, case 1117. [where clause]\nA grouped symbol is $ {q_{1317}} $.\n\nThe final capacitor model is % semath-recognition-evidence:start\nLet $I_x$, $C_x$, $V_x$, and $t$ denote electric current scalar, capacitance scalar, voltage scalar, and duration scalar, respectively.\n% semath-recognition-evidence:end\n\\[\\boxed{I_x=C_x\\dot V_x}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4067,7 +4067,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1118). [we write]\nA styled symbol is $\\mathbf{q}_{1318}$.\n\nAt the sample instant, % semath-recognition-evidence:start\nWe write $i(\\tau)$ for electric current. We write $C$ for capacitance. We write $v$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n\\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1118). [we write]\nA styled symbol is $\\mathbf{q}_{1318}$.\n\nAt the sample instant, % semath-recognition-evidence:start\nWe write $i(\\tau)$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar.\n% semath-recognition-evidence:end\n\\[i(\\tau)=C\\left.\\frac{dv}{dt}\\right|_{t=\\tau}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4103,7 +4103,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1119. [symbol list]\nAn indexed symbol is $q_{1319}$.\n\nUsing \\(u\\) for voltage, the element law is % semath-recognition-evidence:start\n$i_c$ denotes electric current. $C_c$ denotes capacitance. $u_c$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$i_c=C_c\\,du_c/dt$."
+          "content": "As a deliberately unsupported instance, examine relation 1119. [symbol list]\nAn indexed symbol is $q_{1319}$.\n\nUsing \\(u\\) for voltage, the element law is % semath-recognition-evidence:start\n$i_c$ denotes electric current scalar. $C_c$ denotes capacitance scalar. $u_c$ denotes voltage scalar. $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n$i_c=C_c\\,du_c/dt$."
         }
       ],
       "mainFileId": "main",
@@ -4139,7 +4139,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1120). [role first]\n\\newcommand{\\baselineprobe}{q_{1320}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current symbol \\(j(t)\\) is defined by % semath-recognition-evidence:start\nHere $j(t)$ denotes electric current, $C_s$ denotes capacitance, $v_s(t)$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[j(t)=C_s\\dot v_s(t)\\]."
+          "content": "No domain interpretation is asserted for the following formula (1120). [role first]\n\\newcommand{\\baselineprobe}{q_{1320}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current symbol \\(j(t)\\) is defined by % semath-recognition-evidence:start\nHere $j(t)$ denotes electric current scalar, $C_s$ denotes capacitance scalar, $v_s(t)$ denotes voltage scalar, and $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n\\[j(t)=C_s\\dot v_s(t)\\]."
         }
       ],
       "mainFileId": "main",
@@ -4175,7 +4175,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1121. [suppose that]\nA presentation-only symbol is $q_{1321}$.\n\nFor capacitance \\(K_m\\), the law reads % semath-recognition-evidence:start\nLet $i_m$ denote electric current, $K_m$ denote capacitance, $v_m$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$i_m=K_m\\,v_m'$."
+          "content": "Consider the following independently stated relation in example 1121. [suppose that]\nA presentation-only symbol is $q_{1321}$.\n\nFor capacitance \\(K_m\\), the law reads % semath-recognition-evidence:start\nLet $i_m$ denote electric current scalar, $K_m$ denote capacitance scalar, $v_m$ denote voltage scalar, and $t$ denote duration scalar.\n% semath-recognition-evidence:end\n$i_m=K_m\\,v_m'$."
         }
       ],
       "mainFileId": "main",
@@ -4211,7 +4211,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1122. [given that]\nA presentation-only symbol follows: \\[q_{1322}\\]\n\nThe storage element satisfies % semath-recognition-evidence:start\nLet $I_{\\mathrm{cap}}$, $C_{\\mathrm{cap}}$, $V_{\\mathrm{cap}}$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1122. [given that]\nA presentation-only symbol follows: \\[q_{1322}\\]\n\nThe storage element satisfies % semath-recognition-evidence:start\nLet $I_{\\mathrm{cap}}$, $C_{\\mathrm{cap}}$, $V_{\\mathrm{cap}}$, and $t$ denote electric current scalar, capacitance scalar, voltage scalar, and duration scalar, respectively.\n% semath-recognition-evidence:end\n\\[I_{\\mathrm{cap}}=C_{\\mathrm{cap}}\\frac{dV_{\\mathrm{cap}}}{dt}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4247,7 +4247,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1123). [define as]\n\\begin{equation}q_{1323}\\end{equation}\n\nCurrent \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so % semath-recognition-evidence:start\nWe write $i_{\\rm out}$ for electric current. We write $C$ for capacitance. We write $v$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n\\[i_{\\rm out}=-C\\,dv/dt\\]."
+          "content": "The next formula is presented without an assumed named law (1123). [define as]\n\\begin{equation}q_{1323}\\end{equation}\n\nCurrent \\(i_{\\rm out}\\) is referenced leaving the positive-voltage terminal, so % semath-recognition-evidence:start\nWe write $i_{\\rm out}$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar.\n% semath-recognition-evidence:end\n\\[i_{\\rm out}=-C\\,dv/dt\\]."
         }
       ],
       "mainFileId": "main",
@@ -4283,7 +4283,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1124). [in this model]\n\\[\\begin{aligned}q_{1324}\\end{aligned}\\]\n\nWith \\(D_t\\) denoting time differentiation, the model is % semath-recognition-evidence:start\n$i$ denotes electric current. $C$ denotes capacitance. $v$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n$i=C D_t v$."
+          "content": "In this local discussion, only the explicit statement below is available (1124). [in this model]\n\\[\\begin{aligned}q_{1324}\\end{aligned}\\]\n\nWith \\(D_t\\) denoting time differentiation, the model is % semath-recognition-evidence:start\n$i$ denotes electric current scalar. $C$ denotes capacitance scalar. $v$ denotes voltage scalar. $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n$i=C D_t v$."
         }
       ],
       "mainFileId": "main",
@@ -4319,7 +4319,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1125. [throughout section]\nA grouped symbol is $ {q_{1325}} $.\n\nThe prime denotes differentiation with respect to time in % semath-recognition-evidence:start\nHere $i_q$ denotes electric current, $C_q$ denotes capacitance, $v_q$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[i_q=C_q v_q'\\]."
+          "content": "Suppose the notation is local to this calculation, case 1125. [throughout section]\nA grouped symbol is $ {q_{1325}} $.\n\nThe prime denotes differentiation with respect to time in % semath-recognition-evidence:start\nHere $i_q$ denotes electric current scalar, $C_q$ denotes capacitance scalar, $v_q$ denotes voltage scalar, and $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n\\[i_q=C_q v_q'\\]."
         }
       ],
       "mainFileId": "main",
@@ -4355,7 +4355,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1126). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1326}$.\n\nWith capacitance in farads and voltage slope in volts per second, % semath-recognition-evidence:start\nLet $I_m$ denote electric current, $C_m$ denote capacitance, $V_m$ denote voltage, and $t$ denote duration.\n% semath-recognition-evidence:end\n$I_m=C_m\\,dV_m/dt$ yields amperes."
+          "content": "The symbols below have no meaning beyond this standalone example (1126). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1326}$.\n\nWith capacitance in farads and voltage slope in volts per second, % semath-recognition-evidence:start\nLet $I_m$ denote electric current scalar, $C_m$ denote capacitance scalar, $V_m$ denote voltage scalar, and $t$ denote duration scalar.\n% semath-recognition-evidence:end\n$I_m=C_m\\,dV_m/dt$ yields amperes."
         }
       ],
       "mainFileId": "main",
@@ -4391,7 +4391,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1127. [separate sentences]\nAn indexed symbol is $q_{1327}$.\n\nThe notation deliberately spaces the differential: % semath-recognition-evidence:start\nLet $i_z$, $C_z$, $v_z$, and $t$ denote electric current, capacitance, voltage, and duration, respectively.\n% semath-recognition-evidence:end\n\\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1127. [separate sentences]\nAn indexed symbol is $q_{1327}$.\n\nThe notation deliberately spaces the differential: % semath-recognition-evidence:start\nLet $i_z$, $C_z$, $v_z$, and $t$ denote electric current scalar, capacitance scalar, voltage scalar, and duration scalar, respectively.\n% semath-recognition-evidence:end\n\\[i_z=C_z\\,\\frac{\\mathrm d v_z}{\\mathrm d t}\\]."
         }
       ],
       "mainFileId": "main",
@@ -4427,7 +4427,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1128). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1328}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current relation is % semath-recognition-evidence:start\nWe write $i_n$ for electric current. We write $C_n$ for capacitance. We write $v_n$ for voltage. We write $t$ for duration.\n% semath-recognition-evidence:end\n$i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
+          "content": "No domain interpretation is asserted for the following formula (1128). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1328}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe current relation is % semath-recognition-evidence:start\nWe write $i_n$ for electric current scalar. We write $C_n$ for capacitance scalar. We write $v_n$ for voltage scalar. We write $t$ for duration scalar.\n% semath-recognition-evidence:end\n$i_n=C_n\\left(\\frac{dv_n}{dt}\\right)$."
         }
       ],
       "mainFileId": "main",
@@ -4463,7 +4463,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1129. [let singular]\nA presentation-only symbol is $q_{1329}$.\n\n\\input{cap-symbols}\nThe element obeys % semath-recognition-evidence:start\n$j_f$ denotes electric current. $K_f$ denotes capacitance. $u_f$ denotes voltage. $t$ denotes duration.\n% semath-recognition-evidence:end\n\\[j_f=K_f\\frac{du_f}{dt}\\]."
+          "content": "Consider the following independently stated relation in example 1129. [let singular]\nA presentation-only symbol is $q_{1329}$.\n\n\\input{cap-symbols}\nThe element obeys % semath-recognition-evidence:start\n$j_f$ denotes electric current scalar. $K_f$ denotes capacitance scalar. $u_f$ denotes voltage scalar. $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n\\[j_f=K_f\\frac{du_f}{dt}\\]."
         },
         {
           "fileId": "symbols",
@@ -4504,7 +4504,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1130. [let paired]\nA presentation-only symbol follows: \\[q_{1330}\\]\n\n\\input{cap-notation}\nThe transient law is % semath-recognition-evidence:start\nHere $\\StoreI$ denotes electric current, $\\StoreC$ denotes capacitance, $\\StoreV$ denotes voltage, and $t$ denotes duration.\n% semath-recognition-evidence:end\n$\\StoreI=\\StoreC\\dot{\\StoreV}$."
+          "content": "For comparison, inspect the displayed expression numbered 1130. [let paired]\nA presentation-only symbol follows: \\[q_{1330}\\]\n\n\\input{cap-notation}\nThe transient law is % semath-recognition-evidence:start\nHere $\\StoreI$ denotes electric current scalar, $\\StoreC$ denotes capacitance scalar, $\\StoreV$ denotes voltage scalar, and $t$ denotes duration scalar.\n% semath-recognition-evidence:end\n$\\StoreI=\\StoreC\\dot{\\StoreV}$."
         },
         {
           "fileId": "notation",

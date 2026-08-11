@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "classical-mechanics",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -92,10 +92,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "net-force = mass acceleration",
-        "net-force = mass \\cdot acceleration"
-      ],
       "conditions": [
         {
           "id": "common-body-frame",
@@ -110,6 +106,10 @@
       ],
       "references": [
         "classical-mechanics"
+      ],
+      "canonicalRelation": "net-force = mass acceleration",
+      "representations": [
+        "net-force = mass \\cdot acceleration"
       ]
     },
     {
@@ -146,11 +146,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "energy = \\frac{1}{2} mass velocity^2",
-        "energy = \\frac{1}{2} mass \\cdot velocity^2",
-        "energy = \\frac{1}{2} mass \\lVert velocity \\rVert^2"
-      ],
       "conditions": [
         {
           "id": "nonrelativistic-motion",
@@ -165,6 +160,11 @@
       ],
       "references": [
         "classical-mechanics"
+      ],
+      "canonicalRelation": "energy = \\frac{1}{2} mass velocity^2",
+      "representations": [
+        "energy = \\frac{1}{2} mass \\cdot velocity^2",
+        "energy = \\frac{1}{2} mass \\lVert velocity \\rVert^2"
       ]
     },
     {
@@ -198,10 +198,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "power = force \\cdot velocity",
-        "power = force velocity"
-      ],
       "conditions": [
         {
           "id": "common-frame",
@@ -215,6 +211,10 @@
       ],
       "references": [
         "classical-mechanics"
+      ],
+      "canonicalRelation": "power = force \\cdot velocity",
+      "representations": [
+        "power = force velocity"
       ]
     },
     {
@@ -248,10 +248,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "momentum = mass velocity",
-        "momentum = mass \\cdot velocity"
-      ],
       "conditions": [
         {
           "id": "common-body-frame",
@@ -265,6 +261,10 @@
       ],
       "references": [
         "classical-mechanics"
+      ],
+      "canonicalRelation": "momentum = mass velocity",
+      "representations": [
+        "momentum = mass \\cdot velocity"
       ]
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "linear-algebra",
   "packVersion": "1.2.0",
   "packKind": "field",
@@ -53,9 +53,6 @@
       "id": "matrix-vector-product",
       "title": "Matrix-vector product",
       "description": "A matrix maps an input vector to an output vector with compatible dimensions.",
-      "semanticForms": [
-        "result = operator vector"
-      ],
       "roles": [
         {
           "id": "result",
@@ -89,15 +86,13 @@
       ],
       "references": [
         "matrix-computations"
-      ]
+      ],
+      "canonicalRelation": "result = operator vector"
     },
     {
       "id": "matrix-matrix-product",
       "title": "Matrix product",
       "description": "A matrix product maps compatible inner dimensions to the outer row and column dimensions.",
-      "semanticForms": [
-        "result = left right"
-      ],
       "roles": [
         {
           "id": "result",
@@ -131,15 +126,13 @@
       ],
       "references": [
         "matrix-computations"
-      ]
+      ],
+      "canonicalRelation": "result = left right"
     },
     {
       "id": "matrix-transpose-definition",
       "title": "Matrix transpose",
       "description": "The transpose exchanges the row and column axes of a matrix.",
-      "semanticForms": [
-        "result = operator^T"
-      ],
       "roles": [
         {
           "id": "result",
@@ -167,7 +160,8 @@
       ],
       "references": [
         "matrix-computations"
-      ]
+      ],
+      "canonicalRelation": "result = operator^T"
     }
   ],
   "activationRules": [
@@ -188,7 +182,9 @@
     {
       "id": "real-coordinate-notation",
       "topic": "vector-spaces",
-      "structures": ["real-coordinate-space"],
+      "structures": [
+        "real-coordinate-space"
+      ],
       "references": [
         "matrix-computations"
       ]

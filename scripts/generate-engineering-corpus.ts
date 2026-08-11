@@ -43,6 +43,21 @@ const suites: readonly EngineeringSuite[] = [
     packPath: "packs/thermodynamics-heat-transfer/v1.json",
   },
   { id: "fluid-mechanics", packPath: "packs/fluid-mechanics/v1.json" },
+  {
+    id: "calculus-analysis-clusters",
+    lawIds: ["gradient-relation"],
+    packPath: "packs/calculus-analysis/v1.json",
+  },
+  {
+    id: "discrete-math-clusters",
+    lawIds: ["handshaking-degree-sum", "two-set-inclusion-exclusion"],
+    packPath: "packs/discrete-math/v1.json",
+  },
+  {
+    id: "optimization-ml-clusters",
+    lawIds: ["regularized-objective", "inequality-feasibility"],
+    packPath: "packs/optimization-ml/v1.json",
+  },
 ];
 
 let total = 0;

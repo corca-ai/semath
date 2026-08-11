@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "thermodynamics-heat-transfer",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -32,7 +32,10 @@
       "conceptKind": "system",
       "title": "Closed thermodynamic system",
       "description": "A system with no mass transfer across its boundary.",
-      "aliases": ["closed system", "control mass"],
+      "aliases": [
+        "closed system",
+        "control mass"
+      ],
       "parents": [],
       "references": [
         "thermodynamics"
@@ -43,7 +46,10 @@
       "conceptKind": "relation",
       "title": "Sensible heating",
       "description": "Heating represented by mass, specific heat, and temperature change.",
-      "aliases": ["sensible heat process", "sensible temperature change"],
+      "aliases": [
+        "sensible heat process",
+        "sensible temperature change"
+      ],
       "parents": [],
       "references": [
         "heat-transfer"
@@ -54,7 +60,10 @@
       "conceptKind": "system",
       "title": "Plane-wall conduction",
       "description": "One-dimensional steady conduction through a plane wall.",
-      "aliases": ["plane wall", "one-dimensional wall conduction"],
+      "aliases": [
+        "plane wall",
+        "one-dimensional wall conduction"
+      ],
       "parents": [],
       "references": [
         "heat-transfer"
@@ -117,6 +126,76 @@
       "references": [
         "heat-transfer"
       ]
+    },
+    {
+      "id": "amount-of-substance",
+      "conceptKind": "quantity",
+      "title": "Amount of substance",
+      "description": "Scalar amount of working substance.",
+      "aliases": [
+        "moles",
+        "molar amount"
+      ],
+      "parents": [],
+      "references": [
+        "thermodynamics"
+      ]
+    },
+    {
+      "id": "gas-constant",
+      "conceptKind": "quantity",
+      "title": "Gas constant",
+      "description": "The gas constant used by a stated ideal-gas model.",
+      "aliases": [
+        "universal gas constant",
+        "specific gas constant"
+      ],
+      "parents": [],
+      "references": [
+        "thermodynamics"
+      ]
+    },
+    {
+      "id": "convection-coefficient",
+      "conceptKind": "quantity",
+      "title": "Convection coefficient",
+      "description": "Surface heat-transfer coefficient.",
+      "aliases": [
+        "film coefficient",
+        "heat transfer coefficient"
+      ],
+      "parents": [],
+      "references": [
+        "heat-transfer"
+      ]
+    },
+    {
+      "id": "thermal-resistance",
+      "conceptKind": "quantity",
+      "title": "Thermal resistance",
+      "description": "Temperature difference per heat-transfer rate.",
+      "aliases": [
+        "heat-transfer resistance",
+        "R thermal"
+      ],
+      "parents": [],
+      "references": [
+        "heat-transfer"
+      ]
+    },
+    {
+      "id": "radiation-fourth-power-difference",
+      "conceptKind": "quantity",
+      "title": "Radiative temperature potential",
+      "description": "The declared difference of absolute temperatures raised to the fourth power.",
+      "aliases": [
+        "fourth-power temperature difference",
+        "radiation temperature potential"
+      ],
+      "parents": [],
+      "references": [
+        "heat-transfer"
+      ]
     }
   ],
   "quantityKinds": [],
@@ -167,9 +246,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "heat-transfer = mass specific-heat temperature-change"
-      ],
       "conditions": [
         {
           "id": "constant-specific-heat",
@@ -183,7 +259,8 @@
       ],
       "references": [
         "heat-transfer"
-      ]
+      ],
+      "canonicalRelation": "heat-transfer = mass specific-heat temperature-change"
     },
     {
       "id": "plane-wall-conduction-rate",
@@ -240,9 +317,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "heat-transfer-rate = conductivity area temperature-change / length"
-      ],
       "conditions": [
         {
           "id": "steady-one-dimensional-conduction",
@@ -259,7 +333,8 @@
       ],
       "references": [
         "heat-transfer"
-      ]
+      ],
+      "canonicalRelation": "heat-transfer-rate = conductivity area temperature-change / length"
     },
     {
       "id": "closed-system-first-law",
@@ -298,9 +373,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "internal-energy-change = heat-transfer - work"
-      ],
       "conditions": [
         {
           "id": "closed-system",
@@ -324,7 +396,97 @@
       ],
       "references": [
         "thermodynamics"
-      ]
+      ],
+      "canonicalRelation": "internal-energy-change = heat-transfer - work"
+    },
+    {
+      "id": "convection-heat-transfer-rate",
+      "title": "Convection heat-transfer rate",
+      "description": "Convective heat-transfer rate equals coefficient times area times temperature difference.",
+      "roles": [
+        {
+          "id": "heat-transfer-rate",
+          "concept": "thermodynamics-heat-transfer:heat-transfer-rate",
+          "description": "Heat-transfer rate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "coefficient",
+          "concept": "thermodynamics-heat-transfer:convection-coefficient",
+          "description": "Convection coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "area",
+          "concept": "quantities-units:area",
+          "description": "Surface area.",
+          "shape": "scalar"
+        },
+        {
+          "id": "temperature-change",
+          "concept": "quantities-units:temperature",
+          "description": "Surface-to-fluid temperature difference.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "heat-transfer-rate",
+            "coefficient",
+            "area",
+            "temperature-change"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "heat-transfer"
+      ],
+      "canonicalRelation": "heat-transfer-rate = coefficient area temperature-change"
+    },
+    {
+      "id": "thermal-resistance-rate",
+      "title": "Thermal resistance relation",
+      "description": "Temperature difference equals heat-transfer rate times thermal resistance.",
+      "roles": [
+        {
+          "id": "temperature-change",
+          "concept": "quantities-units:temperature",
+          "description": "Temperature difference.",
+          "shape": "scalar"
+        },
+        {
+          "id": "heat-transfer-rate",
+          "concept": "thermodynamics-heat-transfer:heat-transfer-rate",
+          "description": "Heat-transfer rate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "resistance",
+          "concept": "thermodynamics-heat-transfer:thermal-resistance",
+          "description": "Thermal resistance.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "temperature-change",
+            "heat-transfer-rate",
+            "resistance"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "heat-transfer"
+      ],
+      "canonicalRelation": "temperature-change = heat-transfer-rate resistance"
     }
   ],
   "activationRules": [

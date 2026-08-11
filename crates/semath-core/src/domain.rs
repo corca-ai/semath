@@ -210,7 +210,7 @@ mod tests {
             language,
             content: source.into(),
             document_version: 1,
-            schema_version: 5,
+            schema_version: 6,
             nodes: Vec::new(),
             math_roots: Vec::new(),
             visible_prose: Vec::new(),

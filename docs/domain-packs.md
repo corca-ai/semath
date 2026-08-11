@@ -1,7 +1,8 @@
 # Built-in domain packs
 
-Semath compiles schema-7 JSON packs into one bounded Rust semantic
-runtime. Packs contain concepts, roles, laws, semantic forms, conditions,
+Semath compiles schema-8 JSON packs into one bounded Rust semantic
+runtime. Packs contain concepts, roles, laws, canonical relations, optional
+representations, conditions,
 quantities, units, activation evidence, and references. They contain no
 executable code.
 
@@ -19,13 +20,13 @@ the summary is only a compact view and never replaces the detailed contract.
 | Signals and systems | evaluated | all seven | — | — | 3 / 240 |
 | Linear algebra | evaluated | all seven | — | — | 3 / 270 |
 | Probability | evaluated | all seven | — | — | 2 / 180 |
-| Electromagnetism | evaluated | all seven | — | — | 3 / 240 |
-| Thermodynamics and heat transfer | evaluated | all seven | — | — | 3 / 240 |
-| Fluid mechanics | evaluated | all seven | — | — | 3 / 240 |
-| Calculus and analysis | evaluated | all seven | — | — | 1 / 90 |
-| Discrete mathematics | evaluated | all seven | — | — | 2 / 180 |
-| Optimization and ML | evaluated | all seven | — | — | 1 / 90 |
-| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 102 foundation |
+| Electromagnetism | evaluated | all seven | — | — | 5 / 400 |
+| Thermodynamics and heat transfer | evaluated | all seven | — | — | 5 / 400 |
+| Fluid mechanics | evaluated | all seven | — | — | 7 / 560 |
+| Calculus and analysis | evaluated | all seven | — | — | 2 / 170 |
+| Discrete mathematics | evaluated | all seven | — | — | 4 / 340 |
+| Optimization and ML | evaluated | all seven | — | — | 3 / 250 |
+| Quantities and units | evaluated foundation | vocabulary, declarations, typing, refusal, project/macro, explanation | — | laws | 0 / 218 foundation |
 
 The seven capabilities are concept vocabulary, English declarations and roles,
 shape/quantity/unit typing, law recognition, diagnostic refusal,
@@ -47,9 +48,10 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 7`, stable identity and SemVer, dependencies,
+Each pack declares `schemaVersion: 8`, stable identity and SemVer, dependencies,
 concepts, and typed laws. Concepts may declare reviewed English aliases. A law
-supplies canonical semantic forms and roles with a required semantic concept
+supplies exactly one `canonicalRelation`, optional presentation
+`representations`, and roles with a required semantic concept
 and optional orthogonal quantity, shape, notation, and variadic constraints.
 Each side condition has a closed kind, stable ID, validated role subjects, and
 a display label. Recognition resolves those subjects to bound source symbols,
@@ -91,7 +93,7 @@ automatic; no Rust registry or recognizer branch is edited. Then use
 reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of editable positive and refusal seeds,
-not evidence of maturity by itself. The checked-in schema-7 pack files and the
+not evidence of maturity by itself. The checked-in schema-8 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

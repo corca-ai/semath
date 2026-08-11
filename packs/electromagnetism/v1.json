@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "electromagnetism",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -32,7 +32,11 @@
       "conceptKind": "entity",
       "title": "Charged particle",
       "description": "A body carrying electric charge.",
-      "aliases": ["charged body", "point charge", "test charge"],
+      "aliases": [
+        "charged body",
+        "point charge",
+        "test charge"
+      ],
       "parents": [],
       "references": [
         "electrodynamics"
@@ -43,7 +47,10 @@
       "conceptKind": "system",
       "title": "Electrostatic field",
       "description": "An electric field in an explicitly electrostatic regime.",
-      "aliases": ["electrostatic regime", "static-field regime"],
+      "aliases": [
+        "electrostatic regime",
+        "static-field regime"
+      ],
       "parents": [],
       "references": [
         "electrodynamics"
@@ -54,7 +61,80 @@
       "conceptKind": "relation",
       "title": "Electric power transfer",
       "description": "Power associated with a voltage and current reference pair.",
-      "aliases": ["electrical power relation", "voltage-current power transfer"],
+      "aliases": [
+        "electrical power relation",
+        "voltage-current power transfer"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "electrostatic-constant",
+      "conceptKind": "quantity",
+      "title": "Electrostatic constant",
+      "description": "The scalar proportionality constant in Coulomb's law.",
+      "aliases": [
+        "Coulomb constant",
+        "electric force constant"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "magnetic-field",
+      "conceptKind": "quantity",
+      "title": "Magnetic-field magnitude",
+      "description": "The magnitude of a magnetic flux-density field.",
+      "aliases": [
+        "magnetic flux density",
+        "B field"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "electric-displacement",
+      "conceptKind": "quantity",
+      "title": "Electric displacement",
+      "description": "The electric displacement field in a stated medium.",
+      "aliases": [
+        "electric flux density",
+        "D field"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "permittivity",
+      "conceptKind": "quantity",
+      "title": "Permittivity",
+      "description": "The scalar electric permittivity of a stated isotropic medium.",
+      "aliases": [
+        "electric permittivity",
+        "dielectric permittivity"
+      ],
+      "parents": [],
+      "references": [
+        "electrodynamics"
+      ]
+    },
+    {
+      "id": "medium-factor",
+      "conceptKind": "quantity",
+      "title": "Electromagnetic medium factor",
+      "description": "The positive square root of permeability times permittivity.",
+      "aliases": [
+        "wave medium factor",
+        "root mu epsilon"
+      ],
       "parents": [],
       "references": [
         "electrodynamics"
@@ -96,10 +176,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "force = charge electric-field",
-        "force = charge \\cdot electric-field"
-      ],
       "conditions": [
         {
           "id": "electrostatic-regime",
@@ -114,6 +190,10 @@
       ],
       "references": [
         "electrodynamics"
+      ],
+      "canonicalRelation": "force = charge electric-field",
+      "representations": [
+        "force = charge \\cdot electric-field"
       ]
     },
     {
@@ -152,10 +232,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "energy = charge voltage",
-        "energy = charge \\cdot voltage"
-      ],
       "conditions": [
         {
           "id": "common-potential-reference",
@@ -170,6 +246,10 @@
       ],
       "references": [
         "electrodynamics"
+      ],
+      "canonicalRelation": "energy = charge voltage",
+      "representations": [
+        "energy = charge \\cdot voltage"
       ]
     },
     {
@@ -208,10 +288,6 @@
           ]
         }
       ],
-      "semanticForms": [
-        "power = voltage current",
-        "power = voltage \\cdot current"
-      ],
       "conditions": [
         {
           "id": "consistent-references",
@@ -225,7 +301,86 @@
       ],
       "references": [
         "electrodynamics"
+      ],
+      "canonicalRelation": "power = voltage current",
+      "representations": [
+        "power = voltage \\cdot current"
       ]
+    },
+    {
+      "id": "linear-electric-constitutive-law",
+      "title": "Linear electric constitutive law",
+      "description": "Electric displacement equals scalar permittivity times electric field.",
+      "roles": [
+        {
+          "id": "displacement",
+          "concept": "electromagnetism:electric-displacement",
+          "description": "Electric displacement vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "permittivity",
+          "concept": "electromagnetism:permittivity",
+          "description": "Scalar permittivity.",
+          "shape": "scalar"
+        },
+        {
+          "id": "electric-field",
+          "concept": "quantities-units:electric-field",
+          "description": "Electric-field vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "displacement",
+            "permittivity",
+            "electric-field"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "electrodynamics"
+      ],
+      "canonicalRelation": "displacement = permittivity electric-field"
+    },
+    {
+      "id": "electromagnetic-wave-speed",
+      "title": "Electromagnetic wave speed",
+      "description": "Wave speed is the reciprocal of the positive medium factor.",
+      "roles": [
+        {
+          "id": "wave-speed",
+          "concept": "quantities-units:velocity",
+          "description": "Wave speed.",
+          "shape": "scalar"
+        },
+        {
+          "id": "medium-factor",
+          "concept": "electromagnetism:medium-factor",
+          "description": "Positive medium factor.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "wave-speed",
+            "medium-factor"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "electrodynamics"
+      ],
+      "canonicalRelation": "wave-speed = 1 / medium-factor"
     }
   ],
   "activationRules": [

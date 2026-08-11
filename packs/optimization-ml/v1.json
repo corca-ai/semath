@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "packId": "optimization-ml",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -19,7 +19,11 @@
       "conceptKind": "entity",
       "title": "Objective function",
       "description": "A function optimized over an explicitly declared variable.",
-      "aliases": ["loss function", "cost function", "optimization objective"],
+      "aliases": [
+        "loss function",
+        "cost function",
+        "optimization objective"
+      ],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -30,7 +34,11 @@
       "conceptKind": "operator",
       "title": "Argmin",
       "description": "An operator denoting minimizers of an objective.",
-      "aliases": ["minimizer", "minimizing argument", "optimal argument"],
+      "aliases": [
+        "minimizer",
+        "minimizing argument",
+        "optimal argument"
+      ],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -41,7 +49,11 @@
       "conceptKind": "entity",
       "title": "Optimization iterate",
       "description": "A current or updated candidate point in an iterative method.",
-      "aliases": ["current iterate", "next iterate", "parameter iterate"],
+      "aliases": [
+        "current iterate",
+        "next iterate",
+        "parameter iterate"
+      ],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -52,7 +64,11 @@
       "conceptKind": "quantity",
       "title": "Objective gradient",
       "description": "The gradient of an objective evaluated at the current iterate.",
-      "aliases": ["objective gradient", "loss gradient", "cost gradient"],
+      "aliases": [
+        "objective gradient",
+        "loss gradient",
+        "cost gradient"
+      ],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -63,7 +79,83 @@
       "conceptKind": "quantity",
       "title": "Step size",
       "description": "A scalar multiplier controlling an optimization update.",
-      "aliases": ["learning rate", "update step size"],
+      "aliases": [
+        "learning rate",
+        "regularization weight",
+        "update step size"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "search-direction",
+      "conceptKind": "quantity",
+      "title": "Search direction",
+      "description": "A declared direction used by an iterative optimizer.",
+      "aliases": [
+        "descent direction",
+        "update direction"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "loss-value",
+      "conceptKind": "quantity",
+      "title": "Loss value",
+      "description": "A scalar data-fit or total objective value.",
+      "aliases": [
+        "data-fit loss",
+        "training loss",
+        "objective value"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "penalty-value",
+      "conceptKind": "quantity",
+      "title": "Penalty value",
+      "description": "A scalar regularization penalty.",
+      "aliases": [
+        "regularizer value",
+        "regularization penalty"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "constraint-residual",
+      "conceptKind": "quantity",
+      "title": "Constraint residual",
+      "description": "A scalar residual compared with a feasibility tolerance.",
+      "aliases": [
+        "constraint residual",
+        "feasibility residual",
+        "constraint violation"
+      ],
+      "parents": [],
+      "references": [
+        "convex-optimization"
+      ]
+    },
+    {
+      "id": "feasibility-tolerance",
+      "conceptKind": "quantity",
+      "title": "Feasibility tolerance",
+      "description": "A scalar tolerance used to decide constraint feasibility.",
+      "aliases": [
+        "constraint tolerance",
+        "feasibility threshold"
+      ],
       "parents": [],
       "references": [
         "convex-optimization"
@@ -77,9 +169,6 @@
       "id": "gradient-descent-update",
       "title": "Gradient descent update",
       "description": "The next iterate is the current iterate minus a scalar step times the objective gradient.",
-      "semanticForms": [
-        "next = current - step gradient"
-      ],
       "roles": [
         {
           "id": "next",
@@ -141,7 +230,90 @@
       ],
       "references": [
         "convex-optimization"
-      ]
+      ],
+      "canonicalRelation": "next = current - step gradient"
+    },
+    {
+      "id": "regularized-objective",
+      "title": "Regularized objective",
+      "description": "A total objective is a data loss plus a weighted penalty.",
+      "roles": [
+        {
+          "id": "total",
+          "concept": "optimization-ml:loss-value",
+          "description": "Total objective value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "data-loss",
+          "concept": "optimization-ml:loss-value",
+          "description": "Data-fit loss.",
+          "shape": "scalar"
+        },
+        {
+          "id": "weight",
+          "concept": "optimization-ml:step-size",
+          "description": "Regularization weight.",
+          "shape": "scalar"
+        },
+        {
+          "id": "penalty",
+          "concept": "optimization-ml:penalty-value",
+          "description": "Penalty value.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "total",
+            "data-loss",
+            "weight",
+            "penalty"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "convex-optimization"
+      ],
+      "canonicalRelation": "total = data-loss + weight penalty"
+    },
+    {
+      "id": "inequality-feasibility",
+      "title": "Inequality feasibility",
+      "description": "A scalar constraint residual does not exceed its tolerance.",
+      "roles": [
+        {
+          "id": "residual",
+          "concept": "optimization-ml:constraint-residual",
+          "description": "Constraint residual.",
+          "shape": "scalar"
+        },
+        {
+          "id": "tolerance",
+          "concept": "optimization-ml:feasibility-tolerance",
+          "description": "Feasibility tolerance.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "residual",
+            "tolerance"
+          ],
+          "label": "Every role is explicitly bound to its declared semantic domain."
+        }
+      ],
+      "references": [
+        "convex-optimization"
+      ],
+      "canonicalRelation": "residual \\le tolerance"
     }
   ],
   "activationRules": [
@@ -163,7 +335,9 @@
     {
       "id": "optimization-notation",
       "topic": "notation",
-      "structures": ["optimization"],
+      "structures": [
+        "optimization"
+      ],
       "references": [
         "convex-optimization"
       ]

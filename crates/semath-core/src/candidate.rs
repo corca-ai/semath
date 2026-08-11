@@ -380,7 +380,7 @@ mod tests {
     #[test]
     fn named_calls_remain_two_unresolved_structural_possibilities() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -444,7 +444,7 @@ mod tests {
     #[test]
     fn decorations_are_bounded_and_do_not_merge_with_the_nucleus() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -486,7 +486,7 @@ mod tests {
     #[test]
     fn application_requires_the_next_meaningful_sibling_to_be_an_argument() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -494,8 +494,8 @@ mod tests {
             "content": "a+(x)",
             "documentVersion": 1,
             "nodes": [
-                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}} ,"state":"complete","text":"a"},
-                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":2}} ,"state":"complete","text":"+"},
+                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}} ,"state":"complete","text":"a","lexicalClass":"identifier"},
+                {"kind":"token","parent":3,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":2}} ,"state":"complete","text":"+","lexicalClass":"operator"},
                 {"kind":"delimiter","parent":3,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":5}} ,"state":"complete","name":"()"},
                 {"kind":"sequence","parent":null,"children":[0,1,2],"ranges":{"full":{"startOffset":0,"endOffset":5}} ,"state":"complete"}
             ],

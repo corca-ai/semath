@@ -16,7 +16,7 @@ fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDo
         language: DocumentLanguage::Latex,
         content: content.into(),
         document_version: version,
-        schema_version: 5,
+        schema_version: 6,
         nodes: Vec::new(),
         math_roots: Vec::new(),
         visible_prose: Vec::new(),
@@ -80,6 +80,7 @@ fn expands_a_style_body_to_its_exact_source_notation() {
             syntax: "required".into(),
             range: range(9, 10),
         }],
+        lexical_class: None,
         math_class: None,
         provenance: None,
     });

@@ -4,8 +4,8 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 9 as const;
-export const WASMTEX_SYNTAX_SCHEMA_VERSION = 5 as const;
+export const SEMATH_PROTOCOL_VERSION = 10 as const;
+export const WASMTEX_SYNTAX_SCHEMA_VERSION = 6 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -291,6 +291,7 @@ export interface LawConditionInfo {
     | "assumption"
     | "differentiable"
     | "domain-membership"
+    | "nonzero"
     | "positive"
     | "same-context"
     | "shape-compatible"
@@ -460,6 +461,8 @@ export interface AnalysisStats {
   analyzedDocuments: number;
   constraints: number;
   lawRulesVisited: number;
+  equivalenceStates: number;
+  equivalenceGuardChecks: number;
   recognizedLaws: number;
   semanticNodes: number;
   semanticOccurrences: number;

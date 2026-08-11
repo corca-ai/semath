@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 7;
+pub const PACK_SCHEMA_VERSION: u32 = 8;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -147,13 +147,22 @@ pub struct PackLaw {
     pub id: String,
     pub title: String,
     pub description: String,
-    pub semantic_forms: Vec<String>,
+    pub canonical_relation: String,
+    #[serde(default)]
+    pub representations: Vec<String>,
     pub roles: Vec<PackLawRole>,
     #[serde(default)]
     pub conditions: Vec<PackLawCondition>,
     #[serde(default)]
     pub activation_phrases: Vec<String>,
     pub references: Vec<String>,
+}
+
+impl PackLaw {
+    pub fn relations(&self) -> impl Iterator<Item = &str> {
+        std::iter::once(self.canonical_relation.as_str())
+            .chain(self.representations.iter().map(String::as_str))
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -463,9 +472,10 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
         validate_id(&format!("{path}.id"), &law.id)?;
         require_text(&format!("{path}.title"), &law.title)?;
         require_text(&format!("{path}.description"), &law.description)?;
-        if law.semantic_forms.is_empty() {
-            return Err(error(format!("{path}.semanticForms"), "must not be empty"));
-        }
+        require_text(
+            &format!("{path}.canonicalRelation"),
+            &law.canonical_relation,
+        )?;
         unique_ids(
             &format!("{path}.roles"),
             law.roles.iter().map(|role| role.id.as_str()),
@@ -519,12 +529,17 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
                 ));
             }
         }
-        for (form_index, form) in law.semantic_forms.iter().enumerate() {
-            require_text(&format!("{path}.semanticForms[{form_index}]"), form)?;
+        for (form_index, form) in law.relations().enumerate() {
+            let form_path = if form_index == 0 {
+                format!("{path}.canonicalRelation")
+            } else {
+                format!("{path}.representations[{}]", form_index - 1)
+            };
+            require_text(&form_path, form)?;
             for role in &law.roles {
                 if !form.contains(&role.id) {
                     return Err(error(
-                        format!("{path}.semanticForms[{form_index}]"),
+                        form_path.clone(),
                         format!("does not bind role {}", role.id),
                     ));
                 }
@@ -781,7 +796,7 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 7);
+        assert_eq!(PACK_SCHEMA_VERSION, 8);
         assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }

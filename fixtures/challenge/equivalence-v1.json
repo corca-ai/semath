@@ -1,0 +1,514 @@
+{
+  "schemaVersion": 1,
+  "baseline": {
+    "commit": "a978d2e",
+    "passed": 21,
+    "total": 24
+  },
+  "cases": [
+    {
+      "id": "eq-orientation-ohm",
+      "family": "orientation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $V$, $R$, and $I$ denote voltage scalar, nonzero resistance scalar, and electric current scalar, respectively. $RI=V$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "RI=V"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "circuits:ohm-law",
+      "variationTags": [
+        "equality-reversal",
+        "scalar"
+      ]
+    },
+    {
+      "id": "eq-orientation-power",
+      "family": "orientation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For Electric power, let $P$ denote electric power scalar, $V$ denote voltage scalar, and $I$ denote electric current scalar. $VI=P$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "VI=P"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "electromagnetism:electric-power-law",
+      "variationTags": [
+        "equality-reversal",
+        "engineering"
+      ]
+    },
+    {
+      "id": "eq-orientation-heat",
+      "family": "orientation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $Q$ denote heat transfer, $m$ mass scalar, $c$ specific heat scalar, and $T$ temperature change scalar. $mcT=Q$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "mcT=Q"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
+      "variationTags": [
+        "equality-reversal",
+        "four-role"
+      ]
+    },
+    {
+      "id": "eq-orientation-flow",
+      "family": "orientation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $M$, $r$, $A$, and $v$ denote mass flow rate scalar, density scalar, area scalar, and velocity scalar, respectively. $rAv=M$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "rAv=M"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "fluid-mechanics:mass-flow-rate",
+      "variationTags": [
+        "equality-reversal",
+        "fluid"
+      ]
+    },
+    {
+      "id": "eq-permute-ohm",
+      "family": "scalar-permutation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $V$ be voltage, $R$ resistance scalar, and $I$ electric current scalar. $V=IR$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=IR"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "circuits:ohm-law",
+      "variationTags": [
+        "two-factor",
+        "commutative"
+      ]
+    },
+    {
+      "id": "eq-permute-power",
+      "family": "scalar-permutation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $P$ be electric power, $V$ voltage scalar, and $I$ electric current scalar. $P=IV$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "P=IV"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "electromagnetism:electric-power-law",
+      "variationTags": [
+        "two-factor",
+        "commutative"
+      ]
+    },
+    {
+      "id": "eq-permute-heat",
+      "family": "scalar-permutation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $Q$ be heat transfer, $m$ mass scalar, $c$ specific heat scalar, and $T$ temperature change scalar. $Q=Tcm$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q=Tcm"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
+      "variationTags": [
+        "three-factor",
+        "commutative"
+      ]
+    },
+    {
+      "id": "eq-permute-flow",
+      "family": "scalar-permutation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $M$ be mass flow rate scalar, $r$ density scalar, $A$ area scalar, and $v$ velocity scalar. $M=vAr$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "M=vAr"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "fluid-mechanics:mass-flow-rate",
+      "variationTags": [
+        "three-factor",
+        "fluid"
+      ]
+    },
+    {
+      "id": "eq-isolate-current",
+      "family": "factor-isolation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $i$ be electric current, $V$ voltage scalar, and $R$ nonzero resistance scalar. $i=V/R$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "i=V/R"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "circuits:ohm-law",
+      "variationTags": [
+        "division",
+        "guard-verified"
+      ]
+    },
+    {
+      "id": "eq-isolate-resistance",
+      "family": "factor-isolation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $R$ be resistance, $V$ voltage scalar, and $i$ nonzero electric current scalar. $R=V/i$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "R=V/i"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "circuits:ohm-law",
+      "variationTags": [
+        "division",
+        "other-factor"
+      ]
+    },
+    {
+      "id": "eq-isolate-density",
+      "family": "factor-isolation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $r$ be density, $M$ mass flow rate scalar, $A$ nonzero area scalar, and $v$ nonzero velocity scalar. $r=M/(Av)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "r=M/(Av)"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "fluid-mechanics:mass-flow-rate",
+      "variationTags": [
+        "three-factor",
+        "two-guards"
+      ]
+    },
+    {
+      "id": "eq-isolate-temperature",
+      "family": "factor-isolation",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $T$ be temperature change, $Q$ heat transfer scalar, $m$ positive mass scalar, and $c$ positive specific heat scalar. $T=Q/(mc)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "T=Q/(mc)"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
+      "variationTags": [
+        "three-factor",
+        "positive-implies-nonzero"
+      ]
+    },
+    {
+      "id": "eq-reciprocal-period",
+      "family": "reciprocal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $T$ be signal period and $f$ a nonzero cyclic frequency scalar. $T=1/f$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "T=1/f"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "signals-systems:period-frequency-reciprocity",
+      "variationTags": [
+        "reciprocal-inversion",
+        "signal"
+      ]
+    },
+    {
+      "id": "eq-reciprocal-frequency",
+      "family": "reciprocal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $f$ be cyclic frequency and $T$ a nonzero signal period scalar. $f=1/T$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "f=1/T"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "signals-systems:period-frequency-reciprocity",
+      "variationTags": [
+        "canonical-reciprocal",
+        "signal"
+      ]
+    },
+    {
+      "id": "eq-reciprocal-medium",
+      "family": "reciprocal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $c$ be wave speed and $h$ a nonzero electromagnetic medium factor scalar. $c=1/h$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "c=1/h"
+      },
+      "expectedDecision": "established",
+      "expectedRelationId": "electromagnetism:electromagnetic-wave-speed",
+      "variationTags": [
+        "canonical-reciprocal",
+        "electromagnetism"
+      ]
+    },
+    {
+      "id": "eq-reciprocal-medium-inverse",
+      "family": "reciprocal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $p$ denote signal period and $f$ denote a nonzero cyclic frequency scalar. $p=1/f$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "p=1/f"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "signals-systems:period-frequency-reciprocity",
+      "variationTags": [
+        "reciprocal-inversion",
+        "electromagnetism"
+      ]
+    },
+    {
+      "id": "eq-group-ohm",
+      "family": "grouping",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "We write $V$ for voltage scalar. We write $R$ for resistance scalar. We write $I$ for electric current scalar. $V=(R)(I)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "V=(R)(I)"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "circuits:ohm-law",
+      "variationTags": [
+        "parentheses",
+        "thin-space"
+      ]
+    },
+    {
+      "id": "eq-group-power",
+      "family": "grouping",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "We write $P$ for electric power scalar. We write $V$ for voltage scalar. We write $I$ for electric current scalar. $P=(V)(I)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "P=(V)(I)"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "electromagnetism:electric-power-law",
+      "variationTags": [
+        "braces",
+        "center-dot"
+      ]
+    },
+    {
+      "id": "eq-group-flow",
+      "family": "grouping",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "We write $Q$ for volumetric flow rate scalar. We write $A$ for area scalar. We write $v$ for velocity scalar. $Q=(A)(v)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q=(A)(v)"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "fluid-mechanics:volumetric-flow-rate",
+      "variationTags": [
+        "mixed-grouping",
+        "center-dot"
+      ]
+    },
+    {
+      "id": "eq-group-heat",
+      "family": "grouping",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "We write $Q$ for heat transfer scalar. We write $m$ for mass scalar. We write $c$ for specific heat scalar. We write $T$ for temperature change scalar. $\\left(Q=mcT\\right)$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "Q=mcT"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
+      "variationTags": [
+        "repeated-parentheses",
+        "three-factor"
+      ]
+    },
+    {
+      "id": "eq-refuse-matrix-vector-order",
+      "family": "refusal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $A$ be a matrix, and let $x$ and $y$ be vectors. $y=xA$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "y=xA"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": null,
+      "variationTags": [
+        "noncommutative",
+        "matrix-vector"
+      ]
+    },
+    {
+      "id": "eq-refuse-matrix-matrix-order",
+      "family": "refusal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $A$ be an m by n matrix, $B$ an n by p matrix, and $C$ an m by p matrix. $C=BA$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "C=BA"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": null,
+      "variationTags": [
+        "noncommutative",
+        "matrix-matrix"
+      ]
+    },
+    {
+      "id": "eq-refuse-state-order",
+      "family": "refusal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $x$ and $u$ be state and control-input vectors, and $A$ and $B$ state and input matrices. $x=xA+uB$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "x=xA+uB"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": null,
+      "variationTags": [
+        "noncommutative",
+        "control"
+      ]
+    },
+    {
+      "id": "eq-refuse-inequality-direction",
+      "family": "refusal",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $r$ be a constraint residual scalar and $e$ a feasibility tolerance scalar. $e≤r$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "e≤r"
+      },
+      "expectedDecision": "partial",
+      "expectedRelationId": null,
+      "variationTags": [
+        "directional",
+        "inequality"
+      ]
+    }
+  ]
+}

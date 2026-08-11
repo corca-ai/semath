@@ -1,5 +1,5 @@
 use crate::{
-    GeneratedNotationNode, GeneratedNotationTree, NotationNodeKind, ProjectDocument,
+    GeneratedNotationNode, GeneratedNotationTree, LexicalClass, NotationNodeKind, ProjectDocument,
     ProjectMacroKind, SourceRange,
 };
 #[cfg(test)]
@@ -130,6 +130,13 @@ impl ArenaNode<'_> {
             Self::Generated(node) => node.text.as_deref(),
         }
     }
+
+    fn lexical_class(&self) -> Option<LexicalClass> {
+        match self {
+            Self::Source(node) => node.lexical_class,
+            Self::Generated(node) => node.lexical_class,
+        }
+    }
 }
 
 impl<'a> NotationArena<'a> {
@@ -178,7 +185,9 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
 
     match node.kind() {
         NotationNodeKind::Token => {
-            if let Some(kind) = semantic_token_kind(node.text().unwrap_or_default()) {
+            if let Some(kind) =
+                semantic_token_kind(node.text().unwrap_or_default(), node.lexical_class())
+            {
                 push(tokens, kind);
             }
         }
@@ -298,27 +307,16 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
     }
 }
 
-fn semantic_token_kind(text: &str) -> Option<TokenKind> {
-    if text.chars().all(char::is_whitespace) {
-        return None;
-    }
-    if text
-        .chars()
-        .all(|character| character.is_ascii_digit() || character == '.')
-        && text.chars().any(|character| character.is_ascii_digit())
-    {
-        return Some(TokenKind::Number(text.to_owned()));
-    }
-    Some(if text.chars().count() == 1 {
-        match text.chars().next().unwrap() {
-            '{' | '(' | '[' => TokenKind::Open(text.chars().next().unwrap()),
-            '}' | ')' | ']' => TokenKind::Close(text.chars().next().unwrap()),
-            character if "+-=<>*/|,:'&".contains(character) => TokenKind::Operator(character),
-            _ => TokenKind::Identifier(text.to_owned()),
+fn semantic_token_kind(text: &str, lexical_class: Option<LexicalClass>) -> Option<TokenKind> {
+    match lexical_class? {
+        LexicalClass::Number => Some(TokenKind::Number(text.to_owned())),
+        LexicalClass::Operator | LexicalClass::Punctuation => {
+            text.chars().next().map(TokenKind::Operator)
         }
-    } else {
-        TokenKind::Identifier(text.to_owned())
-    })
+        LexicalClass::Identifier | LexicalClass::Other => {
+            Some(TokenKind::Identifier(text.to_owned()))
+        }
+    }
 }
 
 fn composite_macro_notation<'a>(
@@ -1800,7 +1798,7 @@ mod tests {
     #[test]
     fn snapshot_lowering_preserves_delimiters_and_ignores_spacing_commands() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -1808,14 +1806,14 @@ mod tests {
             "content": "v(t)=R\\,i(t)",
             "documentVersion": 1,
             "nodes": [
-                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"v"},
-                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"t"},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"v","lexicalClass":"identifier"},
+                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"t","lexicalClass":"identifier"},
                 {"kind":"delimiter","parent":9,"children":[1],"ranges":{"full":{"startOffset":1,"endOffset":4}},"state":"complete","name":"()"},
-                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":4,"endOffset":5}},"state":"complete","text":"="},
-                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":5,"endOffset":6}},"state":"complete","text":"R"},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":4,"endOffset":5}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":5,"endOffset":6}},"state":"complete","text":"R","lexicalClass":"identifier"},
                 {"kind":"command","parent":9,"children":[],"ranges":{"full":{"startOffset":6,"endOffset":8}},"state":"complete","name":","},
-                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":8,"endOffset":9}},"state":"complete","text":"i"},
-                {"kind":"token","parent":8,"children":[],"ranges":{"full":{"startOffset":10,"endOffset":11}},"state":"complete","text":"t"},
+                {"kind":"token","parent":9,"children":[],"ranges":{"full":{"startOffset":8,"endOffset":9}},"state":"complete","text":"i","lexicalClass":"identifier"},
+                {"kind":"token","parent":8,"children":[],"ranges":{"full":{"startOffset":10,"endOffset":11}},"state":"complete","text":"t","lexicalClass":"identifier"},
                 {"kind":"delimiter","parent":9,"children":[7],"ranges":{"full":{"startOffset":9,"endOffset":12}},"state":"complete","name":"()"},
                 {"kind":"sequence","parent":null,"children":[0,2,3,4,5,6,8],"ranges":{"full":{"startOffset":0,"endOffset":12}},"state":"complete"}
             ],
@@ -1843,7 +1841,7 @@ mod tests {
     #[test]
     fn snapshot_lowering_consumes_composite_macro_notation_without_parsing_surface_tex() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "proseAnnotations": [],
             "fileId": "main",
             "path": "main.tex",
@@ -1871,10 +1869,10 @@ mod tests {
                     "inputRange":{"startOffset":0,"endOffset":4},
                     "notation":{
                         "nodes":[
-                            {"kind":"token","children":[],"state":"complete","text":"K"},
-                            {"kind":"token","children":[],"state":"complete","text":"="},
-                            {"kind":"token","children":[],"state":"complete","text":"m"},
-                            {"kind":"token","children":[],"state":"complete","text":"v"},
+                            {"kind":"token","children":[],"state":"complete","text":"K","lexicalClass":"identifier"},
+                            {"kind":"token","children":[],"state":"complete","text":"=","lexicalClass":"operator"},
+                            {"kind":"token","children":[],"state":"complete","text":"m","lexicalClass":"identifier"},
+                            {"kind":"token","children":[],"state":"complete","text":"v","lexicalClass":"identifier"},
                             {"kind":"sequence","children":[0,1,2,3],"state":"complete"}
                         ],
                         "root":4
