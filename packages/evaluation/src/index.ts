@@ -12,6 +12,7 @@ export * from "./notation-conformance";
 export * from "./observation";
 export * from "./pack-properties";
 export * from "./recognition-frontier";
+export * from "./semantic-continuity";
 export * from "./runner";
 export * from "./scorecard";
 export * from "./synthetic";

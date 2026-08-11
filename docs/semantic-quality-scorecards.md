@@ -70,6 +70,17 @@ domain ranking. Normalized challenge documents
 must not occur in development or generated fixtures. `bun run domain:fixture`
 is a fast schema/leakage gate; `bun run domain:challenge` is a manual release
 gate.
+
+The frozen semantic-continuity holdout adds 48 independently authored cases in
+six equal families: lifetime and shadowing, notation identity, discourse flow,
+canonical structure, typed propagation, and safety or retraction. Each case
+records the pre-v0.26 decision and Problems count separately from its reviewed
+target. The scorer weights false establishment, false conflict, and identity
+leakage above missed coverage and reports every family independently.
+Normalized holdout documents must not occur in development or generated
+fixtures. `bun run continuity:fixture` checks schema, diversity, leakage, and
+the pure scorer in ordinary CI; `bun run continuity` executes the engine only
+as a deliberate manual release gate.
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
@@ -93,6 +104,8 @@ mkdir -p .artifacts && bun run frontier:baseline
 bun run frontier
 mkdir -p .artifacts && bun run domain:baseline
 bun run domain:challenge
+mkdir -p .artifacts && bun run continuity:baseline
+bun run continuity
 bun run corpus
 bun run corpus:generate:check
 bun run foundation
