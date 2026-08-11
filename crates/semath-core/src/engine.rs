@@ -151,9 +151,10 @@ impl AnalyzedDocument {
                 let structural_path = notation_path(&document, selection_range);
                 let candidate_options =
                     structural_candidate_options(&document, &structural_path, &range, surface);
+                let notation = notation_components(&document, selection_range, surface);
                 SemanticOccurrenceSeed {
                     kind: OccurrenceKind::Notation,
-                    surface: surface.clone(),
+                    surface: compositional_surface(&document, &range, surface, &notation),
                     selection_range: selection_range.clone(),
                     application_end_offset: application_end_offset(
                         &document,
@@ -161,7 +162,7 @@ impl AnalyzedDocument {
                         &range,
                     ),
                     candidate_options,
-                    notation: notation_components(&document, selection_range, surface),
+                    notation,
                     range,
                 }
             })
@@ -1006,31 +1007,82 @@ fn notation_occurrence_range(document: &ProjectDocument, selection: &SourceRange
     document
         .nodes
         .iter()
-        .filter(|node| {
-            let identity_range = match node.kind {
-                crate::NotationNodeKind::NamedOperator => node.ranges.name.as_ref(),
-                crate::NotationNodeKind::Modifier | crate::NotationNodeKind::Script => {
-                    node.ranges.nucleus.as_ref().or_else(|| {
-                        node.arguments
-                            .iter()
-                            .find(|argument| argument.role == "nucleus")
-                            .map(|argument| &argument.range)
-                    })
-                }
-                crate::NotationNodeKind::Style => node
-                    .arguments
-                    .iter()
-                    .find(|argument| argument.role == "body")
-                    .map(|argument| &argument.range),
-                _ => None,
-            };
-            identity_range.is_some_and(|identity| {
-                identity.start_offset <= selection.start_offset
-                    && selection.end_offset <= identity.end_offset
-            })
-        })
+        .filter(|node| notation_identity_contains(document, node, selection, 0))
         .max_by_key(|node| node.ranges.full.end_offset - node.ranges.full.start_offset)
         .map_or_else(|| selection.clone(), |node| node.ranges.full.clone())
+}
+
+fn notation_identity_contains(
+    document: &ProjectDocument,
+    node: &crate::NotationNode,
+    selection: &SourceRange,
+    depth: u8,
+) -> bool {
+    if depth == 16 {
+        return false;
+    }
+    let identity = match node.kind {
+        crate::NotationNodeKind::NamedOperator => node.ranges.name.as_ref(),
+        crate::NotationNodeKind::Modifier | crate::NotationNodeKind::Script => {
+            node.ranges.nucleus.as_ref().or_else(|| {
+                node.arguments
+                    .iter()
+                    .find(|argument| argument.role == "nucleus")
+                    .map(|argument| &argument.range)
+            })
+        }
+        crate::NotationNodeKind::Style => node
+            .arguments
+            .iter()
+            .find(|argument| argument.role == "body")
+            .map(|argument| &argument.range),
+        _ => None,
+    };
+    let Some(identity) = identity else {
+        return false;
+    };
+    if identity.start_offset > selection.start_offset || selection.end_offset > identity.end_offset
+    {
+        return false;
+    }
+    node.children
+        .iter()
+        .filter_map(|child| document.nodes.get(*child as usize))
+        .find(|child| {
+            identity.start_offset <= child.ranges.full.start_offset
+                && child.ranges.full.end_offset <= identity.end_offset
+                && child.ranges.full.start_offset <= selection.start_offset
+                && selection.end_offset <= child.ranges.full.end_offset
+        })
+        .is_none_or(|child| identity_descendant_contains(document, child, selection, depth + 1))
+}
+
+fn identity_descendant_contains(
+    document: &ProjectDocument,
+    node: &crate::NotationNode,
+    selection: &SourceRange,
+    depth: u8,
+) -> bool {
+    if matches!(
+        node.kind,
+        crate::NotationNodeKind::NamedOperator
+            | crate::NotationNodeKind::Modifier
+            | crate::NotationNodeKind::Script
+            | crate::NotationNodeKind::Style
+    ) {
+        return notation_identity_contains(document, node, selection, depth);
+    }
+    if depth == 16 {
+        return false;
+    }
+    node.children
+        .iter()
+        .filter_map(|child| document.nodes.get(*child as usize))
+        .find(|child| {
+            child.ranges.full.start_offset <= selection.start_offset
+                && selection.end_offset <= child.ranges.full.end_offset
+        })
+        .is_none_or(|child| identity_descendant_contains(document, child, selection, depth + 1))
 }
 
 fn notation_path(document: &ProjectDocument, range: &SourceRange) -> Vec<u32> {
@@ -1640,10 +1692,9 @@ impl SemathEngine {
         &self,
         file_id: &str,
         occurrence: &SourceRange,
-        symbol: &str,
+        _symbol: &str,
     ) -> Vec<DefinitionInfo> {
-        let resolved = self
-            .resolved_entity(file_id, occurrence)
+        self.resolved_entity(file_id, occurrence)
             .and_then(|entity| {
                 self.index
                     .definitions_by_entity
@@ -1655,38 +1706,7 @@ impl SemathEngine {
                     })
             })
             .into_iter()
-            .collect::<Vec<_>>();
-        if !resolved.is_empty() {
-            return resolved;
-        }
-        let Some(document) = self.index.documents.get(file_id) else {
-            return Vec::new();
-        };
-        let mut definitions = document
-            .observations
-            .definitions
-            .iter()
-            .filter(|definition| {
-                semantic_symbol_family_eq(&definition.symbol, symbol)
-                    && definition.location.range.start_offset <= occurrence.start_offset
-                    && document.scopes.visible(
-                        document
-                            .scopes
-                            .id_at(definition.location.range.start_offset),
-                        occurrence.start_offset,
-                    )
-            })
-            .cloned()
-            .collect::<Vec<_>>();
-        definitions.sort_by_key(|definition| {
-            (
-                definition.symbol.trim_start_matches('\\') == symbol.trim_start_matches('\\'),
-                definition.location.range.start_offset,
-            )
-        });
-        definitions.reverse();
-        definitions.truncate(MAX_SYMBOL_DEFINITIONS);
-        definitions
+            .collect()
     }
 
     fn resolve_definition(
@@ -1926,7 +1946,7 @@ impl SemathEngine {
         ))?;
         let semantic_occurrence = self.index.semantic.occurrence(occurrence_id)?;
         Some(SymbolInfo {
-            symbol: name.into(),
+            symbol: semantic_occurrence.surface.clone(),
             occurrence_id: occurrence_id.clone(),
             notation: semantic_occurrence.notation.clone(),
             source_notation: semantic_occurrence.source_text.clone(),
@@ -2106,6 +2126,32 @@ impl SemathEngine {
     }
 }
 
+fn compositional_surface(
+    document: &ProjectDocument,
+    range: &SourceRange,
+    surface: &str,
+    notation: &[NotationComponent],
+) -> String {
+    if notation.iter().any(|component| {
+        matches!(
+            component,
+            NotationComponent::Modifier { .. }
+                | NotationComponent::Style { .. }
+                | NotationComponent::Subscript { .. }
+                | NotationComponent::Superscript
+        )
+    }) {
+        return source_text(document, range);
+    }
+    notation
+        .iter()
+        .find_map(|component| match component {
+            NotationComponent::NamedSurface { value } => Some(value.clone()),
+            _ => None,
+        })
+        .unwrap_or_else(|| surface.to_owned())
+}
+
 fn same_order_topology(
     previous: Option<&ProjectOrderDocument>,
     next: Option<&ProjectOrderDocument>,
@@ -2115,14 +2161,6 @@ fn same_order_topology(
         (Some(previous), Some(next))
             if previous.path == next.path && previous.includes == next.includes
     )
-}
-
-fn semantic_symbol_family_eq(left: &str, right: &str) -> bool {
-    let left = left.trim_start_matches('\\');
-    let right = right.trim_start_matches('\\');
-    left == right
-        || ((left.contains('_') || right.contains('_'))
-            && left.split('_').next() == right.split('_').next())
 }
 
 fn evidence_anchor(evidence: &Evidence) -> u32 {
