@@ -220,13 +220,24 @@ fn collect_conflicts(
     known: &BTreeMap<FactKey, Proof>,
     relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
 ) -> Vec<PlannedConflict> {
+    let inequalities = relations
+        .iter()
+        .filter_map(|(_, relation, _)| match relation {
+            ClaimRelation::Inequality {
+                left_label,
+                right_label,
+                ..
+            } => Some((left_label.clone(), right_label.clone())),
+            _ => None,
+        })
+        .collect::<BTreeSet<_>>();
     let mut conflicts = BTreeSet::new();
     let facts = known.iter().collect::<Vec<_>>();
     for (position, (left, left_proof)) in facts.iter().enumerate() {
         for (right, right_proof) in facts.iter().skip(position + 1) {
             if left.subject != right.subject
                 || left.predicate != right.predicate
-                || !values_conflict(&left.value, &right.value)
+                || !values_conflict(&left.value, &right.value, &inequalities)
             {
                 continue;
             }
@@ -284,7 +295,7 @@ fn collect_conflicts(
                 _ => None,
             })
             .collect::<Vec<_>>();
-        if !product_is_demonstrably_incompatible(&shapes) {
+        if !product_is_demonstrably_incompatible(&shapes, &inequalities) {
             continue;
         }
         let mut parents = factor_shapes
@@ -304,15 +315,25 @@ fn collect_conflicts(
     conflicts.into_iter().collect()
 }
 
-fn values_conflict(left: &ClaimValue, right: &ClaimValue) -> bool {
+fn values_conflict(
+    left: &ClaimValue,
+    right: &ClaimValue,
+    inequalities: &BTreeSet<(String, String)>,
+) -> bool {
     match (left, right) {
-        (ClaimValue::Shape(left), ClaimValue::Shape(right)) => shapes_conflict(left, right),
+        (ClaimValue::Shape(left), ClaimValue::Shape(right)) => {
+            shapes_conflict(left, right, inequalities)
+        }
         (ClaimValue::Dimension(left), ClaimValue::Dimension(right)) => left != right,
         _ => false,
     }
 }
 
-fn shapes_conflict(left: &ClaimShape, right: &ClaimShape) -> bool {
+fn shapes_conflict(
+    left: &ClaimShape,
+    right: &ClaimShape,
+    inequalities: &BTreeSet<(String, String)>,
+) -> bool {
     match (left, right) {
         (ClaimShape::Unknown, _) | (_, ClaimShape::Unknown) => false,
         (ClaimShape::Scalar, ClaimShape::Scalar) => false,
@@ -320,10 +341,9 @@ fn shapes_conflict(left: &ClaimShape, right: &ClaimShape) -> bool {
         | (ClaimShape::Matrix(left), ClaimShape::Matrix(right))
         | (ClaimShape::Tensor(left), ClaimShape::Tensor(right)) => {
             left.len() != right.len()
-                || left
-                    .iter()
-                    .zip(right)
-                    .any(|(left, right)| demonstrably_incompatible_extent(left, right))
+                || left.iter().zip(right).any(|(left, right)| {
+                    demonstrably_incompatible_extent(left, right, inequalities)
+                })
         }
         (
             ClaimShape::Function {
@@ -335,24 +355,27 @@ fn shapes_conflict(left: &ClaimShape, right: &ClaimShape) -> bool {
                 codomain: right_codomain,
             },
         ) => {
-            shapes_conflict(left_domain, right_domain)
-                || shapes_conflict(left_codomain, right_codomain)
+            shapes_conflict(left_domain, right_domain, inequalities)
+                || shapes_conflict(left_codomain, right_codomain, inequalities)
         }
         _ => true,
     }
 }
 
-fn product_is_demonstrably_incompatible(shapes: &[ClaimShape]) -> bool {
+fn product_is_demonstrably_incompatible(
+    shapes: &[ClaimShape],
+    inequalities: &BTreeSet<(String, String)>,
+) -> bool {
     shapes.windows(2).any(|pair| match (&pair[0], &pair[1]) {
         (ClaimShape::Matrix(left), ClaimShape::Vector(right))
             if left.len() == 2 && right.len() == 1 =>
         {
-            demonstrably_incompatible_extent(&left[1], &right[0])
+            demonstrably_incompatible_extent(&left[1], &right[0], inequalities)
         }
         (ClaimShape::Matrix(left), ClaimShape::Matrix(right))
             if left.len() == 2 && right.len() == 2 =>
         {
-            demonstrably_incompatible_extent(&left[1], &right[0])
+            demonstrably_incompatible_extent(&left[1], &right[0], inequalities)
         }
         _ => false,
     })
@@ -478,6 +501,7 @@ fn apply_relation(
         ClaimRelation::Product {
             result, factors, ..
         } => apply_product(known, result, factors, relation_id, evidence, truncated),
+        ClaimRelation::Inequality { .. } => {}
         ClaimRelation::Quotient {
             result,
             numerator,
@@ -981,8 +1005,14 @@ fn compatible(left: &str, right: &str) -> bool {
     left == right || left == "?" || right == "?"
 }
 
-fn demonstrably_incompatible_extent(left: &str, right: &str) -> bool {
-    left != right && left.parse::<u64>().is_ok() && right.parse::<u64>().is_ok()
+fn demonstrably_incompatible_extent(
+    left: &str,
+    right: &str,
+    inequalities: &BTreeSet<(String, String)>,
+) -> bool {
+    (left != right && left.parse::<u64>().is_ok() && right.parse::<u64>().is_ok())
+        || inequalities.contains(&(left.to_owned(), right.to_owned()))
+        || inequalities.contains(&(right.to_owned(), left.to_owned()))
 }
 
 fn combine_dimensions(
@@ -1221,6 +1251,59 @@ mod tests {
                         },
                     ])
         }));
+    }
+
+    #[test]
+    fn explicit_symbolic_inequality_proves_a_product_shape_conflict() {
+        let (matrix, vector, result, left_extent, right_extent, comparison) = (
+            entity(1),
+            entity(2),
+            entity(3),
+            entity(4),
+            entity(5),
+            entity(6),
+        );
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "matrix-shape",
+                matrix.clone(),
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Matrix(vec!["m".into(), "n".into()])),
+            ),
+            input_claim(
+                "vector-shape",
+                vector.clone(),
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Vector(vec!["k".into()])),
+            ),
+            input_claim(
+                "inequality",
+                comparison,
+                ClaimPredicate::Relates,
+                ClaimValue::Relation(Box::new(ClaimRelation::Inequality {
+                    left: left_extent,
+                    right: right_extent,
+                    left_label: "k".into(),
+                    right_label: "n".into(),
+                    canonical_digest: "not-equals(k,n)".into(),
+                })),
+            ),
+            input_claim(
+                "product",
+                result.clone(),
+                ClaimPredicate::Relates,
+                ClaimValue::Relation(Box::new(ClaimRelation::Product {
+                    result,
+                    factors: vec![matrix, vector],
+                    canonical_digest: "product(A,x)".into(),
+                })),
+            ),
+        ]);
+        assert!(
+            plan.conflicts
+                .iter()
+                .any(|conflict| conflict.code == "constraint-product-shape-conflict")
+        );
     }
 
     #[test]

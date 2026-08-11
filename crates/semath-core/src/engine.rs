@@ -785,15 +785,21 @@ fn lower_semantic_document(
             .iter()
             .map(|(entity, definition)| (entity.clone(), definition.clone())),
     );
-    let typed = lower_typed_observation_facts(source, observations, &occurrences, &definitions);
-    evidence.extend(typed.evidence);
-    claims.extend(typed.claims);
     let relations = lower_canonical_relation_facts(
         source,
         &document.canonical_expressions,
         &occurrences,
         &definitions,
     );
+    let typed = lower_typed_observation_facts(
+        source,
+        observations,
+        &occurrences,
+        &definitions,
+        &relations.entities,
+    );
+    evidence.extend(typed.evidence);
+    claims.extend(typed.claims);
     entities.extend(relations.entities);
     evidence.extend(relations.evidence);
     claims.extend(relations.claims);
@@ -900,6 +906,7 @@ fn lower_typed_observation_facts(
     observations: &DocumentSemanticObservations,
     occurrences: &[SourceOccurrence],
     definitions: &BTreeMap<EntityId, DefinitionInfo>,
+    relation_entities: &[EntityId],
 ) -> LoweredTypedFacts {
     let mut output = LoweredTypedFacts::default();
     {
@@ -908,9 +915,12 @@ fn lower_typed_observation_facts(
                           predicate: ClaimPredicate,
                           value: ClaimValue,
                           category: &str| {
-            let Some((entity, _)) = closest_definition(definitions, symbol, evidence) else {
-                return;
-            };
+            let entity = closest_definition(definitions, symbol, evidence)
+                .map(|(entity, _)| entity.clone())
+                .or_else(|| {
+                    closest_relation_entity(relation_entities, occurrences, symbol, evidence)
+                });
+            let Some(entity) = entity else { return };
             let Some(anchor) = occurrences
                 .iter()
                 .find(|occurrence| occurrence.id == entity.anchor)
@@ -940,7 +950,7 @@ fn lower_typed_observation_facts(
                     "{}:{}:typed-{category}-claim:{ordinal}",
                     source.file_id, source.document_version
                 )),
-                subject: entity.clone(),
+                subject: entity,
                 predicate,
                 object: ClaimObject::Value(value),
                 evidence_id,
@@ -1116,6 +1126,28 @@ impl RelationLowerer<'_> {
                 right: self.lower_assignment_expression(right)?,
                 canonical_digest: digest,
             },
+            SemanticExprKind::Relation {
+                operator,
+                left,
+                right,
+            } if operator.as_str() == "not-equals" => ClaimRelation::Inequality {
+                left: self.lower_expression(left)?,
+                right: self.lower_expression(right)?,
+                left_label: crate::canonical::expression_name(left)
+                    .unwrap_or_else(|| render_canonical(left)),
+                right_label: crate::canonical::expression_name(right)
+                    .unwrap_or_else(|| render_canonical(right)),
+                canonical_digest: digest,
+            },
+            SemanticExprKind::Relation {
+                operator,
+                left,
+                right,
+            } if matches!(operator.as_str(), "member-of" | "not-member-of") => {
+                let _ = self.lower_assignment_expression(left);
+                let _ = self.lower_expression(right);
+                return Some(result);
+            }
             SemanticExprKind::Sum(terms) => ClaimRelation::Sum {
                 result: result.clone(),
                 terms: self.lower_many(terms)?,
@@ -1648,6 +1680,38 @@ fn closest_definition<'a>(
                 .start_offset
                 .abs_diff(evidence_start)
         })
+}
+
+fn closest_relation_entity(
+    entities: &[EntityId],
+    occurrences: &[SourceOccurrence],
+    symbol: &str,
+    evidence: &Evidence,
+) -> Option<EntityId> {
+    let normalized = symbol.trim_start_matches('\\');
+    entities
+        .iter()
+        .filter(|entity| entity.kind == "implicit-symbol")
+        .filter_map(|entity| {
+            let occurrence = occurrences
+                .iter()
+                .find(|occurrence| occurrence.id == entity.anchor)?;
+            (occurrence_declared_name(occurrence).trim_start_matches('\\') == normalized
+                && evidence.source_ranges.iter().any(|range| {
+                    range.start_offset <= occurrence.range.start_offset
+                        && occurrence.range.end_offset <= range.end_offset
+                }))
+            .then_some((entity, occurrence))
+        })
+        .min_by_key(|(_, occurrence)| {
+            evidence
+                .source_ranges
+                .iter()
+                .map(|range| range.start_offset.abs_diff(occurrence.range.start_offset))
+                .min()
+                .unwrap_or(u32::MAX)
+        })
+        .map(|(entity, _)| entity.clone())
 }
 
 fn claim_shape(kind: &str, dimensions: Vec<String>) -> ClaimShape {
@@ -3564,6 +3628,19 @@ fn constraint_diagnostics(
         .into_iter()
         .filter_map(|conflict| {
             let anchor = semantic.occurrence(&conflict.subject.anchor)?;
+            let parent_claims = conflict
+                .parent_claims
+                .iter()
+                .filter_map(|claim_id| semantic.claim(claim_id))
+                .collect::<Vec<_>>();
+            let shape_labels = parent_claims
+                .iter()
+                .filter(|claim| claim.predicate == ClaimPredicate::HasShape)
+                .filter_map(|claim| match &claim.object {
+                    ClaimObject::Value(value) => claim_value_display(value),
+                    _ => None,
+                })
+                .collect::<Vec<_>>();
             let mut evidence = conflict
                 .parent_claims
                 .iter()
@@ -3593,11 +3670,24 @@ fn constraint_diagnostics(
                 .collect::<Vec<_>>();
             evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
             evidence.dedup();
+            let (message, explanation) = if conflict.code == "constraint-product-shape-conflict"
+                && shape_labels.len() >= 2
+            {
+                (
+                    format!("Cannot multiply {} by {}.", shape_labels[0], shape_labels[1]),
+                    "Matrix multiplication requires the left inner dimension to equal the right dimension, but the source establishes them as unequal.".into(),
+                )
+            } else {
+                (
+                    "Established semantic constraints are incompatible.".into(),
+                    conflict.summary.clone(),
+                )
+            };
             Some(SemanticDiagnostic {
                 code: conflict.code.clone(),
                 severity: "warning".into(),
-                message: "Established semantic constraints are incompatible.".into(),
-                explanation: conflict.summary.clone(),
+                message,
+                explanation,
                 range: anchor.range.clone(),
                 evidence,
             })

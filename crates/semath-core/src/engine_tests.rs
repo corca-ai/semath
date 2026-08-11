@@ -343,6 +343,38 @@ fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
             .iter()
             .any(|diagnostic| { diagnostic.code == "constraint-product-shape-conflict" })
     );
+
+    let proven_symbolic =
+        "$A \\in \\mathbb{R}^{m \\times n}, x \\in \\mathbb{R}^{k}, k \\ne n$\n$y=Ax$";
+    let mut proven_symbolic_engine = SemathEngine::default();
+    proven_symbolic_engine
+        .reset(snapshot(proven_symbolic))
+        .unwrap();
+    let proven_symbolic_result = proven_symbolic_engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = proven_symbolic_result.value else {
+        panic!("expected diagnostics")
+    };
+    let conflict = diagnostics
+        .iter()
+        .find(|diagnostic| diagnostic.code == "constraint-product-shape-conflict")
+        .expect("an explicit symbolic inequality proves the product conflict");
+    assert_eq!(
+        conflict.message,
+        "Cannot multiply Matrix[m × n] by Vector[k]."
+    );
+    assert!(
+        conflict
+            .explanation
+            .contains("Matrix multiplication requires the left inner dimension")
+    );
 }
 
 #[test]
