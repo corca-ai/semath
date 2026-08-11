@@ -753,6 +753,9 @@ fn expression_has_structure(expression: &SemanticExpr, structure: PackActivation
         (SemanticExprKind::Apply { operator, .. }, PackActivationStructure::Calculus) => {
             matches!(operator.as_str(), "integral" | "limit" | "nabla")
         }
+        (SemanticExprKind::Binder { operator, .. }, PackActivationStructure::Calculus) => {
+            matches!(operator.as_str(), "integral" | "limit" | "sum" | "product")
+        }
         (SemanticExprKind::Apply { operator, .. }, PackActivationStructure::Discrete) => {
             matches!(operator.as_str(), "intersection" | "union" | "binomial")
         }
@@ -783,6 +786,27 @@ fn expression_children(expression: &SemanticExpr) -> impl Iterator<Item = &Seman
         }
         SemanticExprKind::Relation { left, right, .. } => vec![left, right],
         SemanticExprKind::Apply { arguments, .. } => arguments.iter().collect(),
+        SemanticExprKind::Index { base, indices } => {
+            std::iter::once(base.as_ref()).chain(indices).collect()
+        }
+        SemanticExprKind::Condition { value, predicate } => vec![value, predicate],
+        SemanticExprKind::Binder {
+            variables,
+            lower,
+            upper,
+            body,
+            ..
+        } => variables
+            .iter()
+            .chain(lower.iter().map(Box::as_ref))
+            .chain(upper.iter().map(Box::as_ref))
+            .chain(std::iter::once(body.as_ref()))
+            .collect(),
+        SemanticExprKind::System(equations) => equations.iter().collect(),
+        SemanticExprKind::Piecewise(branches) => branches
+            .iter()
+            .flat_map(|branch| std::iter::once(&branch.value).chain(branch.condition.as_ref()))
+            .collect(),
         SemanticExprKind::Symbol(_)
         | SemanticExprKind::Number(_)
         | SemanticExprKind::Unknown(_) => Vec::new(),

@@ -281,14 +281,14 @@ fn number_one(source: &SemanticExpr) -> SemanticExpr {
 
 fn relation_like(
     source: &SemanticExpr,
-    operator: &str,
+    operator: &crate::canonical::SemanticReference,
     left: SemanticExpr,
     right: SemanticExpr,
 ) -> SemanticExpr {
     expression_like(
         source,
         SemanticExprKind::Relation {
-            operator: operator.to_owned(),
+            operator: operator.clone(),
             left: Box::new(left),
             right: Box::new(right),
         },
@@ -322,7 +322,7 @@ fn is_declared_scalar(expression: &SemanticExpr, scalars: &BTreeSet<String>) -> 
             expression,
             variable,
             ..
-        } => is_declared_scalar(expression, scalars) && scalars.contains(variable),
+        } => is_declared_scalar(expression, scalars) && scalars.contains(variable.as_str()),
         SemanticExprKind::Product(items) | SemanticExprKind::Sum(items) => {
             items.iter().all(|item| is_declared_scalar(item, scalars))
         }
@@ -422,6 +422,51 @@ fn substitute(
                 .map(|item| substitute(item, bindings))
                 .collect(),
         },
+        SemanticExprKind::Index { base, indices } => SemanticExprKind::Index {
+            base: map(base),
+            indices: indices
+                .iter()
+                .map(|item| substitute(item, bindings))
+                .collect(),
+        },
+        SemanticExprKind::Condition { value, predicate } => SemanticExprKind::Condition {
+            value: map(value),
+            predicate: map(predicate),
+        },
+        SemanticExprKind::Binder {
+            operator,
+            variables,
+            lower,
+            upper,
+            body,
+        } => SemanticExprKind::Binder {
+            operator: operator.clone(),
+            variables: variables
+                .iter()
+                .map(|item| substitute(item, bindings))
+                .collect(),
+            lower: lower.as_deref().map(map),
+            upper: upper.as_deref().map(map),
+            body: map(body),
+        },
+        SemanticExprKind::System(equations) => SemanticExprKind::System(
+            equations
+                .iter()
+                .map(|item| substitute(item, bindings))
+                .collect(),
+        ),
+        SemanticExprKind::Piecewise(branches) => SemanticExprKind::Piecewise(
+            branches
+                .iter()
+                .map(|branch| crate::canonical::PiecewiseBranch {
+                    value: substitute(&branch.value, bindings),
+                    condition: branch
+                        .condition
+                        .as_ref()
+                        .map(|item| substitute(item, bindings)),
+                })
+                .collect(),
+        ),
         SemanticExprKind::Unknown(value) => SemanticExprKind::Unknown(value.clone()),
     };
     expression_like(expression, kind)
