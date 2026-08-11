@@ -9,9 +9,12 @@ import {
   parseQualityManifest,
   summarizePack,
 } from "../packages/evaluation/src/index";
+import { materializeEngineeringCorpora } from "./generate-engineering-corpus";
+import { materializeSyntheticCorpora } from "./generate-synthetic-corpus";
 
 const fixturesRoot = new URL("../fixtures/", import.meta.url);
 const packsRoot = new URL("../packs/", import.meta.url);
+let generatedCorpora: Promise<Map<string, Corpus>> | undefined;
 
 export async function loadQualityFixtures(): Promise<{
   corpora: Map<string, Corpus>;
@@ -22,14 +25,44 @@ export async function loadQualityFixtures(): Promise<{
       await readFile(new URL("corpus-manifest.json", fixturesRoot), "utf8"),
     ),
   );
+  const generated = await loadGeneratedCorpora();
+  const materialized = new Set(manifest.materializedSuiteIds);
   const corpora = new Map<string, Corpus>();
   for (const suite of manifest.suites) {
-    const source = JSON.parse(
+    const generatedSource = generated.get(suite.path);
+    if (materialized.has(suite.id) !== Boolean(generatedSource)) {
+      throw new Error(
+        `${suite.id}: manifest materialization policy does not match ${suite.path}`,
+      );
+    }
+    const source = generatedSource ?? JSON.parse(
       await readFile(new URL(suite.path, fixturesRoot), "utf8"),
     ) as unknown;
     corpora.set(suite.id, parseCorpus(source, suite));
   }
+  for (const path of generated.keys()) {
+    if (!manifest.suites.some((suite) => suite.path === path)) {
+      throw new Error(`generated corpus has no manifest suite: ${path}`);
+    }
+  }
   return { corpora, manifest };
+}
+
+function loadGeneratedCorpora(): Promise<Map<string, Corpus>> {
+  generatedCorpora ??= Promise.all([
+    materializeSyntheticCorpora(),
+    materializeEngineeringCorpora(),
+  ]).then((groups) => {
+    const corpora = new Map<string, Corpus>();
+    for (const group of groups) {
+      for (const [path, corpus] of group) {
+        if (corpora.has(path)) throw new Error(`duplicate generated corpus path: ${path}`);
+        corpora.set(path, corpus);
+      }
+    }
+    return corpora;
+  });
+  return generatedCorpora;
 }
 
 export async function loadFoundationFixtures(

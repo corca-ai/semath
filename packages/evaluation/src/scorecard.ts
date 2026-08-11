@@ -71,15 +71,17 @@ export interface DiversityScore {
 
 export interface QualityScorecard {
   adversarialRefusal: Metric;
-  authoredCases: number;
   coverage: readonly CoverageScore[];
   diversity: readonly DiversityScore[];
   failures: readonly string[];
-  generatedCases: number;
+  fixtureCases: number;
   laws: readonly LawScore[];
+  materializedCases: number;
   metamorphic: Metric;
+  metamorphicCases: number;
   refusalCategories: number;
-  schemaVersion: 2;
+  schemaVersion: 3;
+  scoredCases: number;
   variations: readonly VariationScore[];
 }
 
@@ -285,15 +287,21 @@ export function scoreQuality(
 
   return {
     adversarialRefusal: metric(adversarialPassed, adversarialCases),
-    authoredCases: expected.size,
     coverage,
     diversity,
     failures: [...new Set(failures)].sort(),
-    generatedCases: plannedMetamorphic.length,
+    fixtureCases: [...expected.values()].filter(
+      (item) => !manifest.materializedSuiteIds.includes(item.suiteId),
+    ).length,
     laws,
+    materializedCases: [...expected.values()].filter(
+      (item) => manifest.materializedSuiteIds.includes(item.suiteId),
+    ).length,
     metamorphic: metric(metamorphicPassed, plannedMetamorphic.length),
+    metamorphicCases: plannedMetamorphic.length,
     refusalCategories: refusalCategories.size,
-    schemaVersion: 2,
+    schemaVersion: 3,
+    scoredCases: expected.size,
     variations: [...variationCounters]
       .map(([tag, cell]) => ({
         cases: cell.cases,

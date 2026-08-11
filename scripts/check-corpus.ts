@@ -85,7 +85,7 @@ for (const suite of manifest.suites) {
   console.log(`${suite.id}: diversity=${diversity}`);
 }
 console.log(
-  `metamorphic invariance=${format(scorecard.metamorphic.percent)} cases=${scorecard.generatedCases}`,
+  `metamorphic invariance=${format(scorecard.metamorphic.percent)} cases=${scorecard.metamorphicCases}`,
 );
 
 if (process.env.SEMATH_CORPUS_REPORT) {
@@ -118,7 +118,7 @@ if (scorecard.failures.length) {
   throw new Error(`corpus quality gate failed:\n${scorecard.failures.join("\n")}`);
 }
 console.log(
-  `corpus quality OK: ${scorecard.authoredCases} authored cases, ${scorecard.generatedCases} generated cases, ${scorecard.variations.length} variation tags, ${scorecard.refusalCategories} refusal categories`,
+  `corpus quality OK: ${scorecard.scoredCases} scored cases (${scorecard.fixtureCases} fixture, ${scorecard.materializedCases} mechanically materialized), ${scorecard.metamorphicCases} metamorphic cases, ${scorecard.variations.length} variation tags, ${scorecard.refusalCategories} refusal categories`,
 );
 
 function format(value: number): string {

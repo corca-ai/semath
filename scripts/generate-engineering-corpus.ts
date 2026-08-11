@@ -1,4 +1,4 @@
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import {
   generateLawDiversityCorpus,
   parseSyntheticDiversitySpec,
@@ -17,10 +17,6 @@ interface EngineeringSuite {
 }
 
 const root = new URL("../", import.meta.url);
-const check = process.argv.includes("--check");
-const spec = parseSyntheticDiversitySpec(JSON.parse(
-  await readFile(new URL("fixtures/synthetic-diversity-spec.json", root), "utf8"),
-));
 const suites: readonly EngineeringSuite[] = [
   {
     id: "mechanics-engineering-depth",
@@ -63,73 +59,82 @@ const suites: readonly EngineeringSuite[] = [
   },
 ];
 
-const packDirectories = (await readdir(new URL("packs/", root), { withFileTypes: true }))
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .sort();
-const packSources = new Map(await Promise.all(
-  packDirectories.map(async (directory) => {
-    const path = `packs/${directory}/v1.json`;
-    return [
-    path,
-    await readFile(new URL(path, root), "utf8"),
-    ] as const;
-  }),
-));
-const wasm = await import("../lib/wasm/semath_wasm.js");
-const wasmBytes = await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url));
-await wasm.default({ module_or_path: wasmBytes });
-const authoringReport = JSON.parse(new TextDecoder().decode(wasm.inspectPackCatalog(
-  new TextEncoder().encode(JSON.stringify({
-    schemaVersion: 3,
-    sources: [...packSources].map(([path, source]) => ({ path, source })),
-  })),
-))) as PackAuthoringReport;
-if (authoringReport.diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
-  throw new Error("pack compiler rejected the engineering catalog");
+export async function materializeEngineeringCorpora(): Promise<Map<string, Corpus>> {
+  const spec = parseSyntheticDiversitySpec(JSON.parse(
+    await readFile(new URL("fixtures/synthetic-diversity-spec.json", root), "utf8"),
+  ));
+  const packDirectories = (await readdir(new URL("packs/", root), { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  const packSources = new Map(await Promise.all(
+    packDirectories.map(async (directory) => {
+      const path = `packs/${directory}/v1.json`;
+      return [path, await readFile(new URL(path, root), "utf8")] as const;
+    }),
+  ));
+  const wasm = await import("../lib/wasm/semath_wasm.js");
+  const wasmBytes = await readFile(
+    new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url),
+  );
+  await wasm.default({ module_or_path: wasmBytes });
+  const authoringReport = JSON.parse(new TextDecoder().decode(wasm.inspectPackCatalog(
+    new TextEncoder().encode(JSON.stringify({
+      schemaVersion: 3,
+      sources: [...packSources].map(([path, source]) => ({ path, source })),
+    })),
+  ))) as PackAuthoringReport;
+  if (authoringReport.diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
+    throw new Error("pack compiler rejected the engineering catalog");
+  }
+
+  const outputs = new Map<string, Corpus>();
+  for (const suite of suites) {
+    const pack = projectValidatedPack(
+      JSON.parse(packSources.get(suite.packPath)!),
+      authoringReport.forms,
+    );
+    const seed = scaffoldPackWorkspace(pack).corpus.cases.filter((item) =>
+      !suite.lawIds || ("lawId" in item && suite.lawIds.includes(item.lawId))
+    );
+    const expected = (suite.lawIds?.length ?? pack.laws.length) * 10;
+    if (seed.length !== expected) {
+      throw new Error(`${suite.id}: expected ${expected} seed cases, got ${seed.length}`);
+    }
+    outputs.set(
+      `corpus/${suite.id}.json`,
+      generateLawDiversityCorpus(suite.id, seed, spec),
+    );
+  }
+  outputs.set("corpus/engineering-cross-field.json", engineeringCrossFieldCorpus());
+  return outputs;
 }
 
-let total = 0;
-for (const suite of suites) {
-  const pack = projectValidatedPack(
-    JSON.parse(packSources.get(suite.packPath)!),
-    authoringReport.forms,
-  );
-  const seed = scaffoldPackWorkspace(pack).corpus.cases.filter((item) =>
-    !suite.lawIds || ("lawId" in item && suite.lawIds.includes(item.lawId))
-  );
-  const expected = (suite.lawIds?.length ?? pack.laws.length) * 10;
-  if (seed.length !== expected) {
-    throw new Error(`${suite.id}: expected ${expected} seed cases, got ${seed.length}`);
-  }
-  const corpus = generateLawDiversityCorpus(suite.id, seed, spec);
-  const output = `${JSON.stringify(corpus, null, 2)}\n`;
-  const path = new URL(`fixtures/corpus/${suite.id}.json`, root);
+async function run(): Promise<void> {
+  const check = process.argv.includes("--check");
+  const outputs = await materializeEngineeringCorpora();
   if (check) {
-    if (await readFile(path, "utf8").catch(() => "") !== output) {
-      throw new Error(`${path.pathname}: generated corpus is stale`);
+    const repeated = await materializeEngineeringCorpora();
+    for (const [path, corpus] of outputs) {
+      if (JSON.stringify(corpus) !== JSON.stringify(repeated.get(path))) {
+        throw new Error(`${path}: generated corpus is not deterministic`);
+      }
     }
   } else {
-    await writeFile(path, output);
+    const outputRoot = new URL(".artifacts/generated-corpus/", root);
+    await mkdir(outputRoot, { recursive: true });
+    for (const [path, corpus] of outputs) {
+      const url = new URL(path, outputRoot);
+      await mkdir(new URL("./", url), { recursive: true });
+      await writeFile(url, `${JSON.stringify(corpus, null, 2)}\n`);
+    }
   }
-  total += corpus.cases.length;
+  console.log(
+    `${check ? "verified" : "materialized"} ${outputs.size} engineering corpus suites (${[...outputs.values()].reduce((sum, corpus) => sum + corpus.cases.length, 0)} cases)`,
+  );
 }
 
-const crossFieldCorpus = engineeringCrossFieldCorpus();
-const crossFieldOutput = `${JSON.stringify(crossFieldCorpus, null, 2)}\n`;
-const crossFieldPath = new URL("fixtures/corpus/engineering-cross-field.json", root);
-if (check) {
-  if (await readFile(crossFieldPath, "utf8").catch(() => "") !== crossFieldOutput) {
-    throw new Error(`${crossFieldPath.pathname}: generated corpus is stale`);
-  }
-} else {
-  await writeFile(crossFieldPath, crossFieldOutput);
-}
-total += crossFieldCorpus.cases.length;
-
-console.log(
-  `${check ? "verified" : "generated"} ${suites.length + 1} engineering corpus files (${total} cases)`,
-);
+if (import.meta.main) await run();
 
 function engineeringCrossFieldCorpus(): Corpus {
   const examples = [

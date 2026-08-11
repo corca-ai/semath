@@ -25,11 +25,11 @@ export type PackSummary =
   | "vocabulary-only";
 
 export interface PackConformanceScore {
-  authoredCases: number;
   capabilities: Readonly<Record<CapabilityId, CapabilityMaturity>>;
   coveredLaws: number;
   laws: number;
   packId: string;
+  scoredCases: number;
   summary: PackSummary;
 }
 
@@ -125,14 +125,14 @@ export function checkPackConformance(
       .map((suiteId) => manifest.suites.find((suite) => suite.id === suiteId))
       .filter((suite) => suite?.kind === "law");
     const covered = new Set<string>();
-    let authoredCases = 0;
+    let scoredCases = 0;
     for (const suite of lawSuites) {
       const corpus = corpora.get(suite.id);
       if (!corpus) {
         failures.push(`${suite.id}: corpus was not loaded`);
         continue;
       }
-      authoredCases += corpus.cases.length;
+      scoredCases += corpus.cases.length;
       for (const lawId of new Set(corpus.cases.flatMap((item) =>
         "lawId" in item ? [item.lawId] : [],
       ))) {
@@ -147,7 +147,6 @@ export function checkPackConformance(
       if (!covered.has(lawId)) failures.push(`${support.packId}/${lawId}: no corpus coverage`);
     }
     scores.push({
-      authoredCases,
       capabilities: Object.fromEntries(
         Object.entries(support.capabilities).map(([id, capability]) => [
           id,
@@ -157,6 +156,7 @@ export function checkPackConformance(
       coveredLaws: covered.size,
       laws: pack.lawIds.length,
       packId: support.packId,
+      scoredCases,
       summary: summarizeMaturity(support.capabilities),
     });
   }

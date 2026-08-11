@@ -1,17 +1,22 @@
 # Pack maturity report
 
-This is measured repository state on 2026-08-11, not live production telemetry
+This is measured repository state on 2026-08-12, not live production telemetry
 and not a future plan. The [quality manifest](../fixtures/corpus-manifest.json)
 holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 5,770 authored law cases cover 61 laws in twelve formula packs, including 48 positive
-  and 32 refusal diversity cases for every promoted law.
-- 327 deterministic metamorphic cases preserve results under irrelevant prose,
+- 5,770 scored law cases cover 61 laws in twelve formula packs, including 48
+  positive and 32 refusal diversity cases for every promoted law. Of all 5,826
+  scored corpus cases, 420 remain readable fixture seeds and 5,406 are
+  deterministic cases reproduced in memory from compact specs, packs, and
+  seeds; generated cases are not called independently authored evidence.
+- 453 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
-- All law families currently score 100% for recall, precision, role binding,
-  source-linked evidence, and refusal preservation.
+- All law families currently score 100% for recall, role binding, and
+  source-linked evidence. The manual v0.27 baseline retains four known
+  precision/refusal failures for `event-intersection`; the release must resolve
+  them without lowering thresholds.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
   unit, dimension, propagation diagnostics, notation, prose, and role evidence.
 - The shared scientific-kernel and scientific-prose foundations pass 166 of 166
@@ -23,10 +28,10 @@ holds approved support policy; GitHub issues hold planned work.
   are useful verticals, not claims of field completeness.
 - The independent frozen challenge v3 preserves 48 semantic boundaries across
   binding, constraints, packs, presentation, resolution, and syntax, then
-  composes them into six realistic document shapes. The engine passes 48 of 48,
-  including all five decision states, source-grounded explanations, and the
-  neutral-versus-conflict Problems policy. Full execution remains a manual
-  release gate.
+  composes them into six realistic document shapes. The v0.27 baseline passes
+  33 of 48; all 15 misses are unsafe meaning establishment in cases that should
+  remain partial without meaning. Full execution remains a manual release gate,
+  and the release must remove these regressions without changing the fixture.
 - The guarded-equivalence challenge freezes 24 separately authored orientation,
   scalar permutation, isolation, reciprocal, grouping, and noncommutative
   refusal cases. The pre-change `a978d2e` baseline passed 21; the current engine

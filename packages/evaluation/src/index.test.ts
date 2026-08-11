@@ -59,7 +59,8 @@ describe("observation helpers", () => {
 function manifestValue() {
   const unsupported = { maturity: "unsupported", suiteIds: [] };
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
+    materializedSuiteIds: [],
     thresholds: {
       evidenceIntegrity: 100,
       lawPrecision: 99,
@@ -476,8 +477,8 @@ describe("pack conformance", () => {
     );
     expect(report.failures).toEqual([]);
     expect(report.packs).toMatchObject([
-      { authoredCases: 50, coveredLaws: 1, laws: 1, summary: "evaluated" },
-      { authoredCases: 0, coveredLaws: 0, laws: 0, summary: "vocabulary-only" },
+      { scoredCases: 50, coveredLaws: 1, laws: 1, summary: "evaluated" },
+      { scoredCases: 0, coveredLaws: 0, laws: 0, summary: "vocabulary-only" },
     ]);
   });
 
