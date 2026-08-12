@@ -12,7 +12,7 @@
       "frozenAt": "2026-08-13T12:00:00Z",
       "id": "v028-fresh-blind",
       "reviewPolicyVersion": 2,
-      "seal": "0041d7151faeb4661fb48d7e6a480f132d8719b80f967047cfa02130abb29104",
+      "seal": "743414bbe2211fe4da5cc68f32060a9f057ce1a09f7ed018ffe2913015c57181",
       "split": "holdout",
       "taskCardDigest": "2b7ab9dbc5d87460b4090401c923a7718feef45d1f1ecd3d25f89ef886a87f0b"
     },
@@ -964,7 +964,17 @@
               "status": "available"
             },
             "prepareRename": {
-              "status": "unavailable"
+              "placeholder": "K",
+              "range": {
+                "fileId": "main",
+                "needle": "K=\\frac12 m v^2.",
+                "occurrence": 0,
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              },
+              "status": "available"
             },
             "references": {
               "excluded": [],
@@ -974,9 +984,23 @@
             },
             "rename": {
               "excluded": [],
-              "minimum": 0,
-              "required": [],
-              "status": "unavailable"
+              "minimum": 1,
+              "required": [
+                {
+                  "fileId": "main",
+                  "needle": "K=\\frac12 m v^2.",
+                  "occurrence": 0,
+                  "selection": {
+                    "length": 1,
+                    "offset": 0
+                  }
+                }
+              ],
+              "status": "available",
+              "expectedText": "K",
+              "newName": "z",
+              "replacementText": "z",
+              "safety": "deterministic"
             }
           },
           "relations": [],
@@ -1128,7 +1152,17 @@
               "status": "available"
             },
             "prepareRename": {
-              "status": "unavailable"
+              "placeholder": "E",
+              "range": {
+                "fileId": "main",
+                "needle": "E=mc^2.",
+                "occurrence": 0,
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              },
+              "status": "available"
             },
             "references": {
               "excluded": [],
@@ -1138,9 +1172,23 @@
             },
             "rename": {
               "excluded": [],
-              "minimum": 0,
-              "required": [],
-              "status": "unavailable"
+              "minimum": 1,
+              "required": [
+                {
+                  "fileId": "main",
+                  "needle": "E=mc^2.",
+                  "occurrence": 0,
+                  "selection": {
+                    "length": 1,
+                    "offset": 0
+                  }
+                }
+              ],
+              "status": "available",
+              "expectedText": "E",
+              "newName": "z",
+              "replacementText": "z",
+              "safety": "deterministic"
             }
           },
           "relations": [],
@@ -1188,7 +1236,17 @@
               "status": "available"
             },
             "prepareRename": {
-              "status": "unavailable"
+              "placeholder": "U",
+              "range": {
+                "fileId": "main",
+                "needle": "U=A\\cup B.",
+                "occurrence": 0,
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              },
+              "status": "available"
             },
             "references": {
               "excluded": [],
@@ -1198,9 +1256,23 @@
             },
             "rename": {
               "excluded": [],
-              "minimum": 0,
-              "required": [],
-              "status": "unavailable"
+              "minimum": 1,
+              "required": [
+                {
+                  "fileId": "main",
+                  "needle": "U=A\\cup B.",
+                  "occurrence": 0,
+                  "selection": {
+                    "length": 1,
+                    "offset": 0
+                  }
+                }
+              ],
+              "status": "available",
+              "expectedText": "U",
+              "newName": "z",
+              "replacementText": "z",
+              "safety": "deterministic"
             }
           },
           "relations": [],
@@ -2397,7 +2469,17 @@
               "status": "available"
             },
             "prepareRename": {
-              "status": "unavailable"
+              "placeholder": "L",
+              "range": {
+                "fileId": "main",
+                "needle": "L=-y\\log p-(1-y)\\log(1-p).",
+                "occurrence": 0,
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              },
+              "status": "available"
             },
             "references": {
               "excluded": [],
@@ -2407,9 +2489,23 @@
             },
             "rename": {
               "excluded": [],
-              "minimum": 0,
-              "required": [],
-              "status": "unavailable"
+              "minimum": 1,
+              "required": [
+                {
+                  "fileId": "main",
+                  "needle": "L=-y\\log p-(1-y)\\log(1-p).",
+                  "occurrence": 0,
+                  "selection": {
+                    "length": 1,
+                    "offset": 0
+                  }
+                }
+              ],
+              "status": "available",
+              "expectedText": "L",
+              "newName": "z",
+              "replacementText": "z",
+              "safety": "deterministic"
             }
           },
           "relations": [],
@@ -4004,7 +4100,17 @@
               "status": "available"
             },
             "prepareRename": {
-              "status": "unavailable"
+              "placeholder": "F",
+              "range": {
+                "fileId": "main",
+                "needle": "F=q(E+v\\times B).",
+                "occurrence": 0,
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              },
+              "status": "available"
             },
             "references": {
               "excluded": [],
@@ -4014,9 +4120,23 @@
             },
             "rename": {
               "excluded": [],
-              "minimum": 0,
-              "required": [],
-              "status": "unavailable"
+              "minimum": 1,
+              "required": [
+                {
+                  "fileId": "main",
+                  "needle": "F=q(E+v\\times B).",
+                  "occurrence": 0,
+                  "selection": {
+                    "length": 1,
+                    "offset": 0
+                  }
+                }
+              ],
+              "status": "available",
+              "expectedText": "F",
+              "newName": "z",
+              "replacementText": "z",
+              "safety": "deterministic"
             }
           },
           "relations": [],
@@ -4621,14 +4741,16 @@
           "taskCardDigest": "2b7ab9dbc5d87460b4090401c923a7718feef45d1f1ecd3d25f89ef886a87f0b"
         },
         "review": {
-          "correctionSummary": [],
+          "correctionSummary": [
+            "Kept the conflicting law decision separate from the uniquely defined kinetic-energy symbol's safe edit contract."
+          ],
           "criticId": "codex-blind-critic-alpha",
-          "finalDigest": "db9cfc09e4a8365b4df82e26fd73c537caf32d45395a8ca39787a7ac9e7770a3",
+          "finalDigest": "580774903cc19c6e37d4c5ff73a3738f8beeca67c88ced1d98ae5b353e7f67a8",
           "frozenAt": "2026-08-13T12:00:00Z",
           "mainReviewer": "codex-main-reviewer",
           "reviewedAt": "2026-08-13",
-          "semanticReviewDigest": "db9cfc09e4a8365b4df82e26fd73c537caf32d45395a8ca39787a7ac9e7770a3",
-          "status": "approved"
+          "semanticReviewDigest": "580774903cc19c6e37d4c5ff73a3738f8beeca67c88ced1d98ae5b353e7f67a8",
+          "status": "corrected"
         },
         "snapshots": [
           {
@@ -4706,14 +4828,16 @@
           "taskCardDigest": "2b7ab9dbc5d87460b4090401c923a7718feef45d1f1ecd3d25f89ef886a87f0b"
         },
         "review": {
-          "correctionSummary": [],
+          "correctionSummary": [
+            "Kept the unsupported law decision separate from the uniquely defined rest-energy symbol's safe edit contract."
+          ],
           "criticId": "codex-blind-critic-alpha",
-          "finalDigest": "015e80fbc911d0cd69febe2a302221465dc6bef105765c6390501c1d14af2259",
+          "finalDigest": "12ab76bba78eccdb7f99b2cccffea4902e7a9cafa137d1a5e94fd2255265c0b6",
           "frozenAt": "2026-08-13T12:00:00Z",
           "mainReviewer": "codex-main-reviewer",
           "reviewedAt": "2026-08-13",
-          "semanticReviewDigest": "015e80fbc911d0cd69febe2a302221465dc6bef105765c6390501c1d14af2259",
-          "status": "approved"
+          "semanticReviewDigest": "12ab76bba78eccdb7f99b2cccffea4902e7a9cafa137d1a5e94fd2255265c0b6",
+          "status": "corrected"
         },
         "snapshots": [
           {
@@ -4750,14 +4874,16 @@
           "taskCardDigest": "2b7ab9dbc5d87460b4090401c923a7718feef45d1f1ecd3d25f89ef886a87f0b"
         },
         "review": {
-          "correctionSummary": [],
+          "correctionSummary": [
+            "Kept the ambiguous domain interpretation separate from the uniquely defined union-result symbol's safe edit contract."
+          ],
           "criticId": "codex-blind-critic-alpha",
-          "finalDigest": "bd5322ec2bb42982ea50f41600569324f6b3a144c017bb944d76e8d5d9573924",
+          "finalDigest": "4fd02e339cb3ac5303d3207f0ee62edac8c86ae94b72f379fe1c19b1fc632036",
           "frozenAt": "2026-08-13T12:00:00Z",
           "mainReviewer": "codex-main-reviewer",
           "reviewedAt": "2026-08-13",
-          "semanticReviewDigest": "bd5322ec2bb42982ea50f41600569324f6b3a144c017bb944d76e8d5d9573924",
-          "status": "approved"
+          "semanticReviewDigest": "4fd02e339cb3ac5303d3207f0ee62edac8c86ae94b72f379fe1c19b1fc632036",
+          "status": "corrected"
         },
         "snapshots": [
           {
@@ -5401,14 +5527,16 @@
           "taskCardDigest": "2b7ab9dbc5d87460b4090401c923a7718feef45d1f1ecd3d25f89ef886a87f0b"
         },
         "review": {
-          "correctionSummary": [],
+          "correctionSummary": [
+            "Kept the conflicting law evaluation separate from the uniquely defined loss symbol's safe edit contract."
+          ],
           "criticId": "codex-blind-critic-beta",
-          "finalDigest": "3d55c32a663692d63cfe367de8e4bdb9bcaa6a4c75d12bb53b0f6a08e56ee889",
+          "finalDigest": "767cc007590fbce455925d2b9434d336cba2cb13af4fef293d29fa12f79dba4a",
           "frozenAt": "2026-08-13T12:00:00Z",
           "mainReviewer": "codex-main-reviewer",
           "reviewedAt": "2026-08-13",
-          "semanticReviewDigest": "3d55c32a663692d63cfe367de8e4bdb9bcaa6a4c75d12bb53b0f6a08e56ee889",
-          "status": "approved"
+          "semanticReviewDigest": "767cc007590fbce455925d2b9434d336cba2cb13af4fef293d29fa12f79dba4a",
+          "status": "corrected"
         },
         "snapshots": [
           {
@@ -6271,14 +6399,14 @@
         },
         "review": {
           "correctionSummary": [
-            "Classified the full Lorentz expression as unsupported structure, with electrostatic-regime contradiction only as additional evidence."
+            "Classified the full Lorentz expression as unsupported structure while preserving the uniquely defined force symbol's safe edit contract."
           ],
           "criticId": "codex-blind-critic-gamma",
-          "finalDigest": "c2b649c7fb56552c0d5115534ed693a8960c8f40430e9b48f590a9dfa6ef0ad3",
+          "finalDigest": "d4b9cb85a4cbcf5e2eb1322c1d4b6f7663f479456e2f0a4e93b7f0fcbfc2293b",
           "frozenAt": "2026-08-13T12:00:00Z",
           "mainReviewer": "codex-main-reviewer",
           "reviewedAt": "2026-08-13",
-          "semanticReviewDigest": "c2b649c7fb56552c0d5115534ed693a8960c8f40430e9b48f590a9dfa6ef0ad3",
+          "semanticReviewDigest": "d4b9cb85a4cbcf5e2eb1322c1d4b6f7663f479456e2f0a4e93b7f0fcbfc2293b",
           "status": "corrected"
         },
         "snapshots": [
@@ -6437,7 +6565,7 @@
     "createdAt": "2026-08-13",
     "frozenAt": "2026-08-13T12:00:00Z",
     "id": "v0.28",
-    "seal": "9e63483ac5dbeef89cc06dae0e19c9896fa91b1c0108a68d289450159d82cb3a",
+    "seal": "ae56a4618c2f97afb8928d6cfd8ff8e4eac8ec4d91ad061993d47a8dde28d7af",
     "taskCardDigest": "2b7ab9dbc5d87460b4090401c923a7718feef45d1f1ecd3d25f89ef886a87f0b"
   },
   "schemaVersion": 1
