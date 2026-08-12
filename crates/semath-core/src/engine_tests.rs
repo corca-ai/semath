@@ -166,6 +166,43 @@ fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
 }
 
 #[test]
+fn indexed_relation_head_is_not_offered_as_a_partial_base_rename() {
+    for (content, notation) in [
+        ("$U_b=q_bV_b$", "U_b"),
+        (
+            "Let $x^\\star$ be a minimizer. $\\nabla f(x^\\star)=0$",
+            "x^\\star",
+        ),
+    ] {
+        let offset = content.rfind(notation).unwrap() as u32 + notation.len() as u32;
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let result = engine
+            .query(query(
+                Query::PrepareRename {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::RenamePreparation {
+            range,
+            placeholder,
+            rejection,
+        } = result.value
+        else {
+            panic!("expected rename preparation")
+        };
+        assert!(range.is_none(), "{notation}");
+        assert!(placeholder.is_none(), "{notation}");
+        assert!(rejection.is_some(), "{notation}");
+    }
+}
+
+#[test]
 fn navigation_and_rename_share_one_established_entity() {
     let content = "Let $A$ denote an event. Let $B$ denote an event. $p=\\frac{\\mathbb{P}(A \\cap B)}{\\mathbb{P}(B)}$";
     let use_offset = content.find("A \\cap").unwrap() as u32;

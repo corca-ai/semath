@@ -1,7 +1,7 @@
 use crate::SourceRange;
 use crate::semantic_index::{
     EntityId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, Resolution,
-    ResolutionStatus, SourceOccurrenceId,
+    ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
 };
 
 pub(crate) const MAX_RENAME_OCCURRENCES: usize = 4_096;
@@ -66,6 +66,17 @@ pub(crate) fn decide_fact(
 pub(crate) enum RenameNotationFamily {
     PlainIdentifier,
     ControlSequence,
+}
+
+pub(crate) fn rename_focus_is_complete(occurrence: &SourceOccurrence) -> bool {
+    let scripted = occurrence.notation.iter().any(|component| {
+        matches!(
+            component,
+            crate::semantic_index::NotationComponent::Subscript { .. }
+                | crate::semantic_index::NotationComponent::Superscript
+        )
+    });
+    !scripted || occurrence.selection_range == occurrence.range
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -165,6 +176,26 @@ mod tests {
     use super::*;
     use crate::semantic_index::{ClaimId, ResolutionCandidate};
 
+    fn source_occurrence(
+        range: SourceRange,
+        selection_range: SourceRange,
+        notation: Vec<crate::semantic_index::NotationComponent>,
+    ) -> SourceOccurrence {
+        SourceOccurrence {
+            id: occurrence(0).occurrence_id,
+            component_id: "project".into(),
+            kind: crate::semantic_index::OccurrenceKind::Notation,
+            range,
+            selection_range,
+            scope_path: Vec::new(),
+            structural_path: Vec::new(),
+            availability_order: 0,
+            surface: "x_s".into(),
+            source_text: "x_s".into(),
+            notation,
+        }
+    }
+
     fn occurrence(local_id: u32) -> RenameSourceOccurrence {
         RenameSourceOccurrence {
             occurrence_id: SourceOccurrenceId {
@@ -257,6 +288,46 @@ mod tests {
             ),
             EntityFactDisposition::Conflicting
         );
+    }
+
+    #[test]
+    fn rename_focus_rejects_only_partial_script_edits() {
+        let whole = SourceRange {
+            start_offset: 1,
+            end_offset: 4,
+        };
+        let nucleus = SourceRange {
+            start_offset: 1,
+            end_offset: 2,
+        };
+        assert!(!rename_focus_is_complete(&source_occurrence(
+            whole.clone(),
+            nucleus.clone(),
+            vec![crate::semantic_index::NotationComponent::Subscript {
+                base: "x".into(),
+                index: "s".into(),
+            }],
+        )));
+        assert!(!rename_focus_is_complete(&source_occurrence(
+            whole.clone(),
+            nucleus.clone(),
+            vec![crate::semantic_index::NotationComponent::Superscript],
+        )));
+        assert!(rename_focus_is_complete(&source_occurrence(
+            whole.clone(),
+            whole,
+            vec![crate::semantic_index::NotationComponent::Superscript],
+        )));
+        assert!(rename_focus_is_complete(&source_occurrence(
+            SourceRange {
+                start_offset: 1,
+                end_offset: 11,
+            },
+            nucleus,
+            vec![crate::semantic_index::NotationComponent::Style {
+                name: "mathbf".into(),
+            }],
+        )));
     }
 
     #[test]

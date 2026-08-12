@@ -3359,6 +3359,14 @@ impl SemathEngine {
         offset: u32,
     ) -> Option<(EntityEvidenceDecision, String, Vec<RenameSourceOccurrence>)> {
         let focus = focus?;
+        let focus_occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
+        if !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
+            return Some((
+                EntityEvidenceDecision::Unsupported,
+                focus.name.clone(),
+                Vec::new(),
+            ));
+        }
         let decision = self.index.semantic.entity_decision(&focus.occurrence_id);
         let EntityEvidenceDecision::Established(entity) = &decision else {
             return Some((decision, focus.name.clone(), Vec::new()));
