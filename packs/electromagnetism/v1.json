@@ -390,7 +390,8 @@
           "id": "displacement",
           "concept": "electromagnetism:electric-displacement",
           "description": "Electric displacement vector.",
-          "shape": "vector"
+          "shape": "vector",
+          "sourceProjection": "head"
         },
         {
           "id": "permittivity",
@@ -402,7 +403,8 @@
           "id": "electric-field",
           "concept": "quantities-units:electric-field",
           "description": "Electric-field vector.",
-          "shape": "vector"
+          "shape": "vector",
+          "sourceProjection": "head"
         }
       ],
       "conditions": [

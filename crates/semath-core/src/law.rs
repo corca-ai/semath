@@ -9,7 +9,9 @@ use crate::consistency::{RoleObservations, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{is_capability_pack, laws_share_collision};
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
-use crate::pack::{PackConditionKind, PackLaw, PackLawCondition, PackLawRole, built_in_packs};
+use crate::pack::{
+    PackConditionKind, PackLaw, PackLawCondition, PackLawRole, RoleSourceProjection, built_in_packs,
+};
 use crate::prose::{FormulaOperationKind, LawActivationEvidence, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
@@ -2447,9 +2449,9 @@ fn recognition(
         .filter_map(|role| {
             let expression = bindings.get(&role.id)?;
             let symbol = if role.variadic {
-                variadic_labels(expression, context).join("; ")
+                variadic_labels(expression, role.source_projection, context).join("; ")
             } else {
-                source_expression_label(expression, context)?
+                role_source_label(expression, role.source_projection, context)?
             };
             Some(LawBinding {
                 parameter: role.id.clone(),
@@ -2476,9 +2478,13 @@ fn recognition(
         .flat_map(|role| {
             let expression = bindings.get(&role.id)?;
             let symbols = if role.variadic {
-                variadic_labels(expression, context)
+                variadic_labels(expression, role.source_projection, context)
             } else {
-                vec![source_expression_label(expression, context)?]
+                vec![role_source_label(
+                    expression,
+                    role.source_projection,
+                    context,
+                )?]
             };
             Some(symbols.into_iter().map(|symbol| RelationRoleInfo {
                 role: role.id.clone(),
@@ -3297,6 +3303,38 @@ fn source_expression_label(
     Some(authored.unwrap_or(&canonical).to_owned())
 }
 
+fn role_source_label(
+    expression: &SemanticExpr,
+    projection: RoleSourceProjection,
+    context: &RecognitionContext<'_>,
+) -> Option<String> {
+    if projection == RoleSourceProjection::Expression {
+        return source_expression_label(expression, context);
+    }
+    let SemanticExprKind::Apply { operator, .. } = &expression.kind else {
+        return source_expression_label(expression, context);
+    };
+    let start = context
+        .source_index
+        .byte_for_utf16(operator.range.start_offset);
+    let end = context
+        .source_index
+        .byte_for_utf16(operator.range.end_offset);
+    let authored = context
+        .source
+        .get(start..end)
+        .map(str::trim)
+        .filter(|label| {
+            label
+                .chars()
+                .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+                .count()
+                <= MAX_COMPOSITE_SOURCE_LABEL_CHARS
+                && semantic_symbol(&lower_template(label)).as_deref() == Some(operator.as_str())
+        });
+    Some(authored.unwrap_or(operator.as_str()).to_owned())
+}
+
 fn strip_source_group(mut label: &str) -> &str {
     loop {
         let bytes = label.as_bytes();
@@ -3380,19 +3418,23 @@ fn is_decorative_star(expression: &SemanticExpr) -> bool {
     )
 }
 
-fn variadic_labels(expression: &SemanticExpr, context: &RecognitionContext<'_>) -> Vec<String> {
+fn variadic_labels(
+    expression: &SemanticExpr,
+    projection: RoleSourceProjection,
+    context: &RecognitionContext<'_>,
+) -> Vec<String> {
     match &expression.kind {
         SemanticExprKind::Sum(items) => items
             .iter()
-            .flat_map(|item| variadic_labels(item, context))
+            .flat_map(|item| variadic_labels(item, projection, context))
             .collect(),
-        SemanticExprKind::Negate(inner) => variadic_labels(inner, context),
+        SemanticExprKind::Negate(inner) => variadic_labels(inner, projection, context),
         SemanticExprKind::Product(items) if contains_sum_operator(expression) => items
             .iter()
             .filter(|item| !contains_sum_operator(item))
-            .filter_map(|item| source_expression_label(item, context))
+            .filter_map(|item| role_source_label(item, projection, context))
             .collect(),
-        _ => source_expression_label(expression, context)
+        _ => role_source_label(expression, projection, context)
             .into_iter()
             .collect(),
     }
@@ -4488,6 +4530,23 @@ mod tests {
                 .map(|binding| binding.symbol.as_str())
                 .collect::<Vec<_>>(),
             ["H(s)", "Y(s)", "X(s)"]
+        );
+    }
+
+    #[test]
+    fn declarative_head_projection_preserves_styled_field_notation() {
+        let source = "The fitted $\\epsilon_{\\rm eff}$ is the effective permittivity, $\\mathbf E$ is the macroscopic electric field, and $\\mathbf D$ is the electric displacement field. We imposed $\\mathbf D(\\mathbf x)=\\epsilon_{\\rm eff}\\,\\mathbf E(\\mathbf x)$.";
+        let constitutive = recognized_law_observations(source)
+            .into_iter()
+            .find(|law| law.law_id == "linear-electric-constitutive-law")
+            .unwrap();
+        assert_eq!(
+            constitutive
+                .bindings
+                .iter()
+                .map(|binding| binding.symbol.as_str())
+                .collect::<Vec<_>>(),
+            ["\\mathbf D", "epsilon_eff", "\\mathbf E"]
         );
     }
 

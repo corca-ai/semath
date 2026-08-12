@@ -267,8 +267,24 @@ pub struct PackLawRole {
     pub shape: Option<String>,
     #[serde(default)]
     pub notation: Vec<String>,
+    #[serde(default, skip_serializing_if = "RoleSourceProjection::is_expression")]
+    pub source_projection: RoleSourceProjection,
     #[serde(default)]
     pub variadic: bool,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum RoleSourceProjection {
+    #[default]
+    Expression,
+    Head,
+}
+
+impl RoleSourceProjection {
+    fn is_expression(value: &Self) -> bool {
+        *value == Self::Expression
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

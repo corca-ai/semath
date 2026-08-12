@@ -29,6 +29,9 @@ concepts, and typed laws. Concepts may declare reviewed English aliases. A law
 supplies exactly one `canonicalRelation`, optional presentation
 `representations`, and roles with a required semantic concept
 and optional orthogonal quantity, shape, notation, and variadic constraints.
+When a role denotes the callable entity rather than its evaluated value, it may
+declare `sourceProjection: head`; the public relation then retains the exact
+authored operator notation without including its arguments.
 Operator vocabulary may additionally declare typed operand concepts and a
 result concept and shape. The generic runtime uses those signatures only when
 the source establishes compatible operand types; notation alone is not proof.

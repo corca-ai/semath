@@ -210,12 +210,14 @@
           "id": "result",
           "concept": "calculus-analysis:nabla-operator",
           "description": "Nabla result.",
-          "shape": "vector"
+          "shape": "vector",
+          "sourceProjection": "head"
         },
         {
           "id": "function",
           "concept": "calculus-analysis:function",
-          "description": "Differentiated scalar function."
+          "description": "Differentiated scalar function.",
+          "sourceProjection": "head"
         }
       ],
       "conditions": [
