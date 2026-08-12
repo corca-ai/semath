@@ -133,7 +133,7 @@ pub(crate) fn classify_role(description: &str) -> Option<String> {
 }
 
 pub(crate) fn classify_role_candidates(description: &str) -> Vec<String> {
-    let lower = description.to_ascii_lowercase();
+    let lower = positive_role_description(description.to_ascii_lowercase());
     if let Some(coordinated) = lower.strip_prefix("both ") {
         let roles = coordinated
             .split(" and ")
@@ -153,7 +153,17 @@ pub(crate) fn classify_role_candidates(description: &str) -> Vec<String> {
     if contains_singular_or_plural(&words, "event") && contains_singular_or_plural(&words, "set") {
         return vec!["semath:event".into(), "semath:set".into()];
     }
-    classify_single_role(description).into_iter().collect()
+    classify_single_role(&lower).into_iter().collect()
+}
+
+fn positive_role_description(description: String) -> String {
+    [" rather than ", ", not ", " but not "]
+        .into_iter()
+        .filter_map(|separator| description.find(separator))
+        .min()
+        .map_or(description.clone(), |offset| {
+            description[..offset].to_owned()
+        })
 }
 
 fn classify_single_role(description: &str) -> Option<String> {
@@ -306,6 +316,18 @@ mod tests {
         assert_eq!(
             classify_role_candidates("event sets"),
             ["semath:event".to_owned(), "semath:set".to_owned()]
+        );
+    }
+
+    #[test]
+    fn excludes_explicitly_contrasted_roles_from_positive_classification() {
+        assert_eq!(
+            classify_role_candidates("ordinary sets rather than events"),
+            ["discrete-math:set".to_owned()]
+        );
+        assert_eq!(
+            classify_role_candidates("subsets of a graph vertex set, not random events"),
+            ["discrete-math:set".to_owned()]
         );
     }
 
