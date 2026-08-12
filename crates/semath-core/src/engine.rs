@@ -15,7 +15,8 @@ use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_moda
 use crate::cursor::{CursorOccurrence, interior_offset, occurrence_at_cursor};
 use crate::decision::{MeaningDecisionInput, decide_meaning, symbol_has_source_meaning};
 use crate::entity_policy::{
-    EntityEvidenceDecision, RenameNotationFamily, RenameSourceOccurrence, plan_entity_rename,
+    EntityEvidenceDecision, EntityFactDisposition, RenameNotationFamily, RenameSourceOccurrence,
+    decide_fact, plan_entity_rename,
 };
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
@@ -33,13 +34,13 @@ use crate::semantic_index::{
     occurrence_binding_key,
 };
 use crate::{
-    AnalysisStats, AssumptionInfo, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo,
-    DomainActivation, Evidence, Location, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
-    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
-    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, DefinitionInfo,
+    DimensionExponentInfo, DomainActivation, Evidence, Location, PROTOCOL_VERSION,
+    PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
+    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue, RoleInfo,
+    SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
+    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -3289,23 +3290,16 @@ impl SemathEngine {
         offset: u32,
         formulas: &[crate::LawRecognition],
     ) -> SemanticContextInfo {
-        let (definitions, entity_id, symbol_name) = focus
+        let (entity_id, symbol_name) = focus
             .map(|focus| {
                 (
-                    self.visible_definitions(focus),
                     self.resolved_entity(&focus.occurrence_id),
                     Some(focus.name.clone()),
                 )
             })
-            .unwrap_or_else(|| (Vec::new(), None, None));
-        let mut context = observations.context(
-            definitions,
-            symbol_name,
-            entity_id.clone(),
-            offset,
-            focus.and_then(|focus| self.index.external_types.get(&focus.occurrence_id.file_id)),
-            formulas.to_vec(),
-        );
+            .unwrap_or((None, None));
+        let mut context =
+            observations.context(symbol_name, entity_id.clone(), offset, formulas.to_vec());
         let semantic_occurrence =
             focus.and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id));
         if let (Some(entity), Some(semantic_occurrence)) = (&entity_id, semantic_occurrence) {
@@ -4334,28 +4328,50 @@ fn append_index_claims(
     occurrence: &SourceOccurrence,
     context: &mut SemanticContextInfo,
 ) {
-    let mut claims = index
+    let raw = index
         .claims_for_entity_at(entity, occurrence)
         .into_iter()
-        .filter(|claim| claim.tier == InferenceTier::Constraint)
         .filter_map(|claim| {
-            let ClaimObject::Value(value) = &claim.object else {
-                return None;
-            };
             let evidence = index.evidence(&claim.evidence_id)?;
-            Some(crate::SemanticClaimInfo {
+            let value = claim_object_display(index, &claim.object)?;
+            Some((claim, evidence, value))
+        })
+        .collect::<Vec<_>>();
+    let mut claims = raw
+        .iter()
+        .map(|(claim, evidence, value)| {
+            let conflicts = raw
+                .iter()
+                .filter(|(other, other_evidence, other_value)| {
+                    claim.predicate == other.predicate
+                        && value == other_value
+                        && evidence.polarity != other_evidence.polarity
+                })
+                .map(|(other, _, _)| other.id.0.clone())
+                .collect::<Vec<_>>();
+            let status = match decide_fact(evidence, !conflicts.is_empty()) {
+                EntityFactDisposition::Certain => SemanticClaimStatus::Certain,
+                EntityFactDisposition::Supported => SemanticClaimStatus::Supported,
+                EntityFactDisposition::Speculative => SemanticClaimStatus::Speculative,
+                EntityFactDisposition::Conflicting => SemanticClaimStatus::Conflicting,
+            };
+            let kind = match evidence.origin {
+                EvidenceOrigin::Explicit => "source-claim",
+                EvidenceOrigin::Derived => "derived-claim",
+            };
+            let strength = match status {
+                SemanticClaimStatus::Certain => "hard",
+                SemanticClaimStatus::Supported => "strong",
+                SemanticClaimStatus::Speculative | SemanticClaimStatus::Conflicting => "weak",
+            };
+            crate::SemanticClaimInfo {
                 claim_id: claim.id.0.clone(),
                 predicate: claim_predicate_name(&claim.predicate).into(),
-                value: claim_value_display(value)?,
-                status: SemanticClaimStatus::Supported,
-                evidence: vec![semantic_evidence(
-                    index,
-                    evidence,
-                    "derived-constraint",
-                    "strong",
-                )],
-                conflicts: Vec::new(),
-            })
+                value: value.clone(),
+                status,
+                evidence: vec![semantic_evidence(index, evidence, kind, strength)],
+                conflicts,
+            }
         })
         .collect::<Vec<_>>();
     claims.sort_by(|left, right| {
@@ -4364,7 +4380,7 @@ fn append_index_claims(
             .then(left.value.cmp(&right.value))
             .then(left.claim_id.cmp(&right.claim_id))
     });
-    context.claims.extend(claims);
+    context.claims = claims;
     context.claims.sort_by(|left, right| {
         left.predicate
             .cmp(&right.predicate)
@@ -4376,6 +4392,54 @@ fn append_index_claims(
         .dedup_by(|left, right| left.claim_id == right.claim_id);
     context.truncated |= context.claims.len() > MAX_VIEW_CLAIMS;
     context.claims.truncate(MAX_VIEW_CLAIMS);
+    context.concepts = context
+        .claims
+        .iter()
+        .filter(|claim| claim.predicate == "concept")
+        .filter_map(|claim| {
+            let evidence = claim.evidence.first()?.clone();
+            Some(ConceptInfo {
+                concept_id: claim.value.clone(),
+                label: concept_label(&claim.value),
+                description: claim.value.clone(),
+                evidence,
+            })
+        })
+        .collect();
+    context
+        .concepts
+        .sort_by(|left, right| left.concept_id.cmp(&right.concept_id));
+    context
+        .concepts
+        .dedup_by(|left, right| left.concept_id == right.concept_id);
+}
+
+fn claim_object_display(index: &ProjectSemanticIndex, object: &ClaimObject) -> Option<String> {
+    match object {
+        ClaimObject::Value(value) => claim_value_display(value),
+        ClaimObject::Occurrence(occurrence) => index
+            .occurrence(occurrence)
+            .map(|source| source.surface.clone()),
+        ClaimObject::Entity(entity) => index
+            .occurrence(&entity.anchor)
+            .map(|source| source.surface.clone()),
+    }
+}
+
+fn concept_label(concept_id: &str) -> String {
+    concept_id
+        .split(':')
+        .next_back()
+        .unwrap_or(concept_id)
+        .split('-')
+        .map(|part| {
+            let mut characters = part.chars();
+            characters.next().map_or_else(String::new, |first| {
+                first.to_uppercase().collect::<String>() + characters.as_str()
+            })
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn claim_predicate_name(predicate: &ClaimPredicate) -> &'static str {

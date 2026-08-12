@@ -548,6 +548,79 @@ fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() 
 }
 
 #[test]
+fn semantic_view_projects_claim_status_only_from_typed_index_evidence() {
+    let content = "Let $A$ denote an event. Inspect $A$.";
+    let offset = content.rfind("$A$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let concept = view
+        .context
+        .claims
+        .iter()
+        .find(|claim| claim.predicate == "concept")
+        .expect("typed concept claim");
+    assert_eq!(concept.status, crate::SemanticClaimStatus::Certain);
+    assert!(
+        concept
+            .evidence
+            .iter()
+            .all(|evidence| evidence.kind == "source-claim" && evidence.strength == "hard")
+    );
+    assert!(
+        view.context
+            .concepts
+            .iter()
+            .any(|item| item.concept_id == concept.value)
+    );
+}
+
+#[test]
+fn public_claim_projection_does_not_join_same_spelling_across_scopes() {
+    let content = "# First\nLet $x$ denote an event. Inspect $x$.\n# Second\nLet $x$ denote a function. Inspect $x$.";
+    let first = content.find("Inspect $x$").unwrap() as u32 + "Inspect $".len() as u32;
+    let second = content.rfind("Inspect $x$").unwrap() as u32 + "Inspect $".len() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let concepts = [first, second].map(|offset| {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        view.context
+            .claims
+            .iter()
+            .filter(|claim| claim.predicate == "concept")
+            .map(|claim| claim.value.clone())
+            .collect::<Vec<_>>()
+    });
+    assert_eq!(concepts[0].len(), 1, "{:?}", concepts[0]);
+    assert_eq!(concepts[1].len(), 1, "{:?}", concepts[1]);
+    assert_ne!(concepts[0], concepts[1]);
+}
+
+#[test]
 fn equality_lhs_establishes_source_ordered_symbol_identity_for_later_uses() {
     let content = "Let $d$ be length and $t$ duration. $v=d/t$. The derived value is $v$.";
     let later = content.rfind("$v$").unwrap() as u32 + 1;

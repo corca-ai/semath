@@ -1,5 +1,8 @@
 use crate::SourceRange;
-use crate::semantic_index::{EntityId, Resolution, ResolutionStatus, SourceOccurrenceId};
+use crate::semantic_index::{
+    EntityId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, Resolution,
+    ResolutionStatus, SourceOccurrenceId,
+};
 
 pub(crate) const MAX_RENAME_OCCURRENCES: usize = 4_096;
 
@@ -30,6 +33,32 @@ pub(crate) fn decide_entity(resolution: &Resolution) -> EntityEvidenceDecision {
         ResolutionStatus::Established | ResolutionStatus::Unsupported => {
             EntityEvidenceDecision::Unsupported
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum EntityFactDisposition {
+    Certain,
+    Supported,
+    Speculative,
+    Conflicting,
+}
+
+pub(crate) fn decide_fact(
+    evidence: &EvidenceRecord,
+    has_opposing_evidence: bool,
+) -> EntityFactDisposition {
+    if has_opposing_evidence {
+        return EntityFactDisposition::Conflicting;
+    }
+    match (evidence.polarity, evidence.modality, evidence.origin) {
+        (EvidencePolarity::Positive, EvidenceModality::Asserted, EvidenceOrigin::Explicit) => {
+            EntityFactDisposition::Certain
+        }
+        (EvidencePolarity::Positive, EvidenceModality::Asserted, EvidenceOrigin::Derived) => {
+            EntityFactDisposition::Supported
+        }
+        _ => EntityFactDisposition::Speculative,
     }
 }
 
@@ -103,6 +132,7 @@ pub(crate) fn plan_entity_rename(
             || !occurrence.editable
             || occurrence.family != family
             || occurrence.current_text != old_name
+            || !valid_replacement(occurrence.family, &occurrence.current_text)
             || !valid_replacement(occurrence.family, new_name)
     }) {
         return Err(
@@ -159,6 +189,74 @@ mod tests {
             kind: "definition".into(),
             anchor: occurrence(0).occurrence_id,
         }
+    }
+
+    fn fact_evidence(
+        polarity: EvidencePolarity,
+        modality: EvidenceModality,
+        origin: EvidenceOrigin,
+    ) -> EvidenceRecord {
+        EvidenceRecord {
+            id: crate::semantic_index::EvidenceId("evidence".into()),
+            source: occurrence(0).occurrence_id.clone(),
+            scope_path: Vec::new(),
+            available_after: 0,
+            polarity,
+            modality,
+            origin,
+            provenance: vec![occurrence(0).occurrence_id],
+            parent_claims: Vec::new(),
+            rule_id: "test/fact".into(),
+            rule_version: 1,
+        }
+    }
+
+    #[test]
+    fn fact_decision_uses_typed_evidence_not_presentation_strings() {
+        assert_eq!(
+            decide_fact(
+                &fact_evidence(
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
+                    EvidenceOrigin::Explicit,
+                ),
+                false,
+            ),
+            EntityFactDisposition::Certain
+        );
+        assert_eq!(
+            decide_fact(
+                &fact_evidence(
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
+                    EvidenceOrigin::Derived,
+                ),
+                false,
+            ),
+            EntityFactDisposition::Supported
+        );
+        assert_eq!(
+            decide_fact(
+                &fact_evidence(
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Hedged,
+                    EvidenceOrigin::Explicit,
+                ),
+                false,
+            ),
+            EntityFactDisposition::Speculative
+        );
+        assert_eq!(
+            decide_fact(
+                &fact_evidence(
+                    EvidencePolarity::Negative,
+                    EvidenceModality::Asserted,
+                    EvidenceOrigin::Explicit,
+                ),
+                true,
+            ),
+            EntityFactDisposition::Conflicting
+        );
     }
 
     #[test]
@@ -219,7 +317,7 @@ mod tests {
         assert!(
             plan_entity_rename(
                 EntityEvidenceDecision::Established(entity()),
-                "x",
+                "x_i",
                 "y",
                 vec![inexact],
             )
