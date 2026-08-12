@@ -335,6 +335,10 @@ function runProbe(
       prepareRename: results[3],
       rename: results[4],
       diagnostics: results[5],
+      relationViews: relationTargets.map((source, index) => ({
+        fileId: source.anchor.fileId,
+        result: results[6 + index]!,
+      })),
     } as AuthoredScientificSurfaceResults,
   );
   const cursorView = semanticView(results[0], probe.id + ": cursor");
