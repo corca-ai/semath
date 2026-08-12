@@ -639,13 +639,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 second adjudication: changed the flywheel decision to partial because the source does not establish the required nonrelativistic-motion condition.",
+          "v0.28 second adjudication: scoped the relation contract to kinetic energy; the later momentum relation begins beyond this probe's cursor evidence boundary."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "c5241fe4af6018e5139131c0a7b76f482c148bd30d0d889fe3edef4feca35666",
+        "finalDigest": "f393c7cd6e1c81302443634721d5bdc1d3446005ae04d9dd29870bc78ac673d9",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "c5241fe4af6018e5139131c0a7b76f482c148bd30d0d889fe3edef4feca35666",
+        "semanticReviewDigest": "f393c7cd6e1c81302443634721d5bdc1d3446005ae04d9dd29870bc78ac673d9",
         "status": "corrected"
       },
       "snapshots": [
@@ -5097,7 +5099,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -5127,40 +5129,18 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
               "fileId": "cm-development-flywheel-review.md",
-              "needle": "K=\\tfrac12 mv^2, \\qquad p=mv."
+              "needle": "K=\\tfrac12 mv^2, \\qquad"
             },
             "relationId": "classical-mechanics:kinetic-energy-definition",
             "roles": [
               {
                 "role": "energy",
                 "symbol": "K"
-              },
-              {
-                "role": "mass",
-                "symbol": "m"
-              },
-              {
-                "role": "velocity",
-                "symbol": "v"
-              }
-            ],
-            "sourceGrounded": true
-          },
-          {
-            "anchor": {
-              "fileId": "cm-development-flywheel-review.md",
-              "needle": "K=\\tfrac12 mv^2, \\qquad p=mv."
-            },
-            "relationId": "classical-mechanics:linear-momentum-definition",
-            "roles": [
-              {
-                "role": "momentum",
-                "symbol": "p"
               },
               {
                 "role": "mass",

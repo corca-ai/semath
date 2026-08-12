@@ -43,6 +43,24 @@ prepare-rename, rename, cursor-occurrence, or scope mismatch. The five entries
 above are first-loss taxonomy outcomes caused by their still-incorrect semantic
 decisions, not evidence that their contracts should be weakened.
 
+## Second exhaustive cursor review
+
+The 89 remaining misses were reviewed again for formula-boundary, punctuation,
+metadata, operator, and entity-focus contract errors. Formula trailing edges
+are intentional ownership probes: moving them mechanically to `=`, `:=`, or a
+relation head caused one false establishment and nine identity or navigation
+regressions. Formula meaning and entity navigation therefore must remain
+separate evaluator surfaces; the fixture must not hide engine cursor losses by
+moving those cursors.
+
+One semantic expectation was mathematically invalid. The flywheel source uses
+`K=\\tfrac12 mv^2` without asserting the pack's required nonrelativistic-motion
+condition. `cm-development-flywheel-review` now expects a partial, ungrounded
+decision. Its relation contract covers only kinetic energy: the separate
+momentum relation starts after this probe's cursor evidence boundary and cannot
+be required by the same query. No cursor or navigation expectation was
+weakened.
+
 ## Verification
 
 The fixture validator passes with 96 development scenarios, 115 development
