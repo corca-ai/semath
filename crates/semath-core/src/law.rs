@@ -2912,6 +2912,16 @@ fn structural_condition_evidence(
             });
         }
     }
+    if condition.kind == PackConditionKind::SameContext
+        && application_roles_share_arguments(&condition.subjects, bindings, actual)
+    {
+        return Some(Evidence {
+            rule_id: "canonical-context/shared-application-arguments".into(),
+            kind: "canonical-binding".into(),
+            strength: "hard".into(),
+            source_ranges: vec![actual.range.clone()],
+        });
+    }
     if condition.kind != PackConditionKind::SameContext || condition.subjects.len() != 2 {
         return None;
     }
@@ -2947,6 +2957,57 @@ fn structural_condition_evidence(
         strength: "hard".into(),
         source_ranges: vec![actual.range.clone()],
     })
+}
+
+fn application_roles_share_arguments(
+    subjects: &[String],
+    bindings: &BTreeMap<String, SemanticExpr>,
+    actual: &SemanticExpr,
+) -> bool {
+    if subjects.len() < 2 {
+        return false;
+    }
+    let argument_lists = subjects
+        .iter()
+        .map(|subject| {
+            let operator = bindings.get(subject).and_then(semantic_symbol)?;
+            let mut matches = Vec::new();
+            collect_application_arguments(actual, &operator, &mut matches);
+            (matches.len() == 1).then(|| matches.pop().unwrap())
+        })
+        .collect::<Option<Vec<_>>>();
+    let Some((first, rest)) = argument_lists
+        .as_deref()
+        .and_then(|items| items.split_first())
+    else {
+        return false;
+    };
+    !first.is_empty()
+        && rest.iter().all(|arguments| {
+            arguments.len() == first.len()
+                && arguments
+                    .iter()
+                    .zip(first.iter())
+                    .all(|(left, right)| equivalent(left, right))
+        })
+}
+
+fn collect_application_arguments<'a>(
+    expression: &'a SemanticExpr,
+    expected_operator: &str,
+    output: &mut Vec<&'a [SemanticExpr]>,
+) {
+    if let SemanticExprKind::Apply {
+        operator,
+        arguments,
+    } = &expression.kind
+        && operator == expected_operator
+    {
+        output.push(arguments);
+    }
+    for child in expression_children(expression) {
+        collect_application_arguments(child, expected_operator, output);
+    }
 }
 
 fn expression_asserts_derivative(
@@ -4530,6 +4591,16 @@ mod tests {
                 .map(|binding| binding.symbol.as_str())
                 .collect::<Vec<_>>(),
             ["H(s)", "Y(s)", "X(s)"]
+        );
+        assert_eq!(transfer.status, LawRecognitionStatus::Verified);
+        assert!(transfer.conditions[0].evidence.iter().any(|evidence| {
+            evidence.rule_id == "canonical-context/shared-application-arguments"
+        }));
+
+        assert!(
+            recognized_law_observations("The transfer function is $H(s)=\\frac{Y(z)}{X(s)}$.")
+                .into_iter()
+                .all(|law| law.law_id != "transfer-function")
         );
     }
 
