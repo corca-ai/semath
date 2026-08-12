@@ -195,10 +195,6 @@ fn collect_conflicts(input: &MeaningDecisionInput<'_>) -> Vec<MeaningConflict> {
 
 fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternative> {
     let formulas = preferred_formulas(input);
-    let supported_candidate_exists = input
-        .candidates
-        .iter()
-        .any(|candidate| candidate.status == SemanticCandidateStatus::Supported);
     let mut alternatives = formulas
         .into_iter()
         .filter_map(|formula| {
@@ -221,11 +217,11 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
                             .symbol
                             .is_none_or(|symbol| symbol.definitions.is_empty())
                 })
-                .filter(|candidate| {
-                    candidate.status == SemanticCandidateStatus::Supported
-                        || (!supported_candidate_exists
-                            && candidate.status == SemanticCandidateStatus::Unresolved)
-                })
+                // An unresolved parse family is an engine hypothesis, not a
+                // source-supported semantic alternative. Presenting several
+                // such hypotheses as user ambiguity turns missing coverage
+                // into a false document problem.
+                .filter(|candidate| candidate.status == SemanticCandidateStatus::Supported)
                 .map(|candidate| MeaningAlternative {
                     alternative_id: candidate.candidate_id.clone(),
                     label: candidate.interpretation.clone(),
@@ -416,7 +412,7 @@ mod tests {
     }
 
     #[test]
-    fn independent_candidate_support_refines_ambiguity_monotonically() {
+    fn only_independently_supported_candidates_become_public_alternatives() {
         let supported = candidate("application", SemanticCandidateStatus::Supported);
         let unresolved = candidate("multiplication", SemanticCandidateStatus::Unresolved);
         let decision = decide_meaning(MeaningDecisionInput {
@@ -439,6 +435,20 @@ mod tests {
             candidates: &[
                 candidate("application", SemanticCandidateStatus::Unresolved),
                 unresolved,
+            ],
+            diagnostics: &[],
+            engine_limited: false,
+            unsupported_relation_context: false,
+            truncated: false,
+        });
+        assert!(matches!(decision, MeaningDecision::Unsupported { .. }));
+
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[
+                candidate("application", SemanticCandidateStatus::Supported),
+                candidate("multiplication", SemanticCandidateStatus::Supported),
             ],
             diagnostics: &[],
             engine_limited: false,

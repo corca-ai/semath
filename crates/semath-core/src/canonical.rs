@@ -1928,7 +1928,17 @@ impl Parser {
     }
 
     fn consume_relation(&mut self) -> Option<SemanticReference> {
-        if self.consume_operator('=') {
+        if self.consume_operator(':') {
+            if self.consume_operator('=') {
+                Some(self.previous_reference("equals"))
+            } else {
+                self.cursor -= 1;
+                None
+            }
+        } else if self.consume_operator('=')
+            || self.consume_command("coloneqq")
+            || self.consume_command("triangleq")
+        {
             Some(self.previous_reference("equals"))
         } else if self.consume_operator('<') {
             Some(self.previous_reference("less-than"))
@@ -2102,15 +2112,21 @@ fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<Se
         }),
         SemanticExprKind::Derivative {
             expression: inner,
-            variable,
+            mut variable,
             order,
         } => {
-            let applied = apply_argument(*inner, argument)?;
+            let implicit_variable = variable.range == inner.range;
+            if implicit_variable
+                && let [argument] = split_arguments(argument.clone()).as_slice()
+                && let Some(name) = expression_name(argument)
+            {
+                variable = SemanticReference::from_expression(name, argument);
+            }
             Some(SemanticExpr {
-                range: applied.range.clone(),
-                provenance: applied.provenance.clone(),
+                range: merge_range(&expression.range, &argument.range),
+                provenance: merge_provenance(&expression, &argument),
                 kind: SemanticExprKind::Derivative {
-                    expression: Box::new(applied),
+                    expression: inner,
                     variable,
                     order,
                 },
@@ -2188,6 +2204,7 @@ fn starts_atom(token: &TokenKind) -> bool {
             "cap"
                 | "cdot"
                 | "circ"
+                | "coloneqq"
                 | "cup"
                 | "ge"
                 | "geq"
@@ -2203,6 +2220,7 @@ fn starts_atom(token: &TokenKind) -> bool {
                 | "supset"
                 | "supseteq"
                 | "times"
+                | "triangleq"
         ),
         TokenKind::Identifier(_)
         | TokenKind::Number(_)
@@ -2223,7 +2241,9 @@ fn token_name(token: &TokenKind) -> Option<&str> {
 fn is_relation_command(name: &str) -> bool {
     matches!(
         name,
-        "ge" | "geq"
+        "coloneqq"
+            | "ge"
+            | "geq"
             | "in"
             | "le"
             | "leq"
@@ -2234,6 +2254,7 @@ fn is_relation_command(name: &str) -> bool {
             | "subseteq"
             | "supset"
             | "supseteq"
+            | "triangleq"
     )
 }
 
@@ -2481,6 +2502,23 @@ mod tests {
     }
 
     #[test]
+    fn lowers_definition_equality_to_the_shared_relation_ir() {
+        let expected = render_canonical(&lower_template("g(x)=\\nabla f(x)"));
+        assert_eq!(
+            render_canonical(&lower_template("g(x):=\\nabla f(x)")),
+            expected
+        );
+        assert_eq!(
+            render_canonical(&lower_template("g(x)\\coloneqq\\nabla f(x)")),
+            expected
+        );
+        assert_eq!(
+            render_canonical(&lower_template("g(x)\\triangleq\\nabla f(x)")),
+            expected
+        );
+    }
+
+    #[test]
     fn source_ranges_preserve_tex_arguments_but_not_presentation_groups() {
         for source in ["m_{e10}", "A_c^{(1)}", r"\mathbf{F}_{p08}"] {
             let expression = lower_template(source);
@@ -2581,7 +2619,15 @@ mod tests {
         );
         assert_eq!(
             render_canonical(&lower_template("\\dot v_s(t)")),
-            "derivative(apply(v_s,symbol(t)),t,1)"
+            "derivative(index(symbol(v),symbol(s)),t,1)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("y'(x)")),
+            "derivative(symbol(y),x,1)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\frac{d y}{d x}(x)")),
+            "derivative(symbol(y),x,1)"
         );
         let operator_derivative = lower_template("D_t v");
         assert_eq!(

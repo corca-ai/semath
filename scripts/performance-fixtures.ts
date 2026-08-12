@@ -23,7 +23,11 @@ export interface PerformanceFixtureDocument extends LatexDocumentInput {
 }
 
 export function buildPerformanceDocuments(count: number): readonly PerformanceFixtureDocument[] {
-  return Array.from({ length: count }, (_, index) => performanceDocument(index));
+  return Array.from({ length: count }, (_, index) => performanceDocument(index, count));
+}
+
+export function performanceEntityFanout(projectSize: number): number {
+  return Math.min(projectSize, Math.min(16, Math.max(4, Math.ceil(projectSize / 32))));
 }
 
 export function editPerformanceDocument(
@@ -54,10 +58,14 @@ export function semanticallyEditPerformanceDocument(
   };
 }
 
-function performanceDocument(index: number): PerformanceFixtureDocument {
+function performanceDocument(index: number, projectSize: number): PerformanceFixtureDocument {
   const family = PERFORMANCE_FIXTURE_FAMILIES[index % PERFORMANCE_FIXTURE_FAMILIES.length]!;
-  const symbol = `p${index}`;
-  const common = `Let ${symbol} denote the probability assigned to event A${index}.`;
+  const symbol = index === 0 ? "z" : `\\p${alphabeticId(index)}`;
+  const sharedReference =
+    index > 0 && index <= performanceEntityFanout(projectSize)
+      ? " The shared reported quantity is $z$."
+      : "";
+  const common = `Let $${symbol}$ denote the probability assigned to event $A_${index}$.${sharedReference}`;
   const body = fixtureBody(family, index, symbol);
   const content = `${common}\n${body}`;
   return {
@@ -71,12 +79,27 @@ function performanceDocument(index: number): PerformanceFixtureDocument {
   };
 }
 
-function fixtureBody(family: PerformanceFixtureFamily, index: number, symbol: string): string {
+function alphabeticId(value: number): string {
+  let remaining = value;
+  let result = "";
+  while (remaining > 0) {
+    remaining -= 1;
+    result = String.fromCharCode(97 + (remaining % 26)) + result;
+    remaining = Math.floor(remaining / 26);
+  }
+  return result;
+}
+
+function fixtureBody(
+  family: PerformanceFixtureFamily,
+  index: number,
+  symbol: string,
+): string {
   switch (family) {
     case "reported-ece":
       return [
         "Expected calibration error (ECE) uses confidence bins $B_m$.",
-        `\$${symbol}=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
+        `\$${symbol}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
       ].join("\n");
     case "decorated-and-styled":
       return `\$${symbol}=\\hat{\\mathbf y}_{t+1}+\\widetilde{\\mathcal L}(\\symbf{x})\$`;

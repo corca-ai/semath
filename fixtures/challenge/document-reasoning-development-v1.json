@@ -67,13 +67,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "aed6f3386ca47b7d538a796b548e5a30c83e2c7217fa2c8b20a33fb5d8e7c402",
+        "finalDigest": "3b479fd9947e9e2596c68dd7bb7c6aaa639b3009f6b5b4b6d2ce8b9a2a8f0c2a",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "aed6f3386ca47b7d538a796b548e5a30c83e2c7217fa2c8b20a33fb5d8e7c402",
+        "semanticReviewDigest": "3b479fd9947e9e2596c68dd7bb7c6aaa639b3009f6b5b4b6d2ce8b9a2a8f0c2a",
         "status": "corrected"
       },
       "snapshots": [
@@ -413,13 +415,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Separated the negated proposal and accepted gradient specialization into lifecycle snapshots and probes."
+          "Separated the negated proposal and accepted gradient specialization into lifecycle snapshots and probes.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "65f86ad2e93ee50acb775f9c02204fc149c48f51214bb64e1725c868c9b64449",
+        "finalDigest": "8f396edc6f58089da70d9e9e816e6dcb80d1775d08e51bb5198cc999ee84a2d5",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "65f86ad2e93ee50acb775f9c02204fc149c48f51214bb64e1725c868c9b64449",
+        "semanticReviewDigest": "8f396edc6f58089da70d9e9e816e6dcb80d1775d08e51bb5198cc999ee84a2d5",
         "status": "corrected"
       },
       "snapshots": [
@@ -678,13 +682,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "5e7894930847f75985e77e13bbd2e118d32e4402b7800db7b83f2536a4620286",
+        "finalDigest": "189a4e491db61327a3b24aeffe46b0643ea1cb86bc5c19f42bd68779d223f4fd",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "5e7894930847f75985e77e13bbd2e118d32e4402b7800db7b83f2536a4620286",
+        "semanticReviewDigest": "189a4e491db61327a3b24aeffe46b0643ea1cb86bc5c19f42bd68779d223f4fd",
         "status": "corrected"
       },
       "snapshots": [
@@ -721,13 +727,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "89395853b5fc448a59b0541d2c2dc60ec2be32c975f7f04b2d699f4546eb4b49",
+        "finalDigest": "4eb1b833ceb50850f2c682c044e618d0c4cf441b53278845979f205cfaebb3d3",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "89395853b5fc448a59b0541d2c2dc60ec2be32c975f7f04b2d699f4546eb4b49",
+        "semanticReviewDigest": "4eb1b833ceb50850f2c682c044e618d0c4cf441b53278845979f205cfaebb3d3",
         "status": "corrected"
       },
       "snapshots": [
@@ -1333,13 +1340,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Aligned the outward enthalpy-flux sign with the stated outward normal-velocity convention."
+          "Aligned the outward enthalpy-flux sign with the stated outward normal-velocity convention.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "d92da360e1b85b2835e987c82e9323abb082c4462194e548407038ebd0b423c5",
+        "finalDigest": "c7a7d48cd64e8db4e2e48d7fccd813b3ac24663c7b400e2665ef4d24e69b26eb",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "d92da360e1b85b2835e987c82e9323abb082c4462194e548407038ebd0b423c5",
+        "semanticReviewDigest": "c7a7d48cd64e8db4e2e48d7fccd813b3ac24663c7b400e2665ef4d24e69b26eb",
         "status": "corrected"
       },
       "snapshots": [
@@ -1373,13 +1381,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Rebuilt include boundaries and clarified covariance, process noise, battery capacity, and discharge sign."
+          "Rebuilt include boundaries and clarified covariance, process noise, battery capacity, and discharge sign.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "abc74da9481555b6e271cd8eba107ed023339844f0d7af5f09ad90422a68196f",
+        "finalDigest": "485a68213b3556b6dbd142a34cf8826f8d82af77ca4e9dfd90942d959ed6ca01",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "abc74da9481555b6e271cd8eba107ed023339844f0d7af5f09ad90422a68196f",
+        "semanticReviewDigest": "485a68213b3556b6dbd142a34cf8826f8d82af77ca4e9dfd90942d959ed6ca01",
         "status": "corrected"
       },
       "snapshots": [
@@ -1675,13 +1685,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Split the exclusive intersection and union alternatives into independently scored math probes."
+          "Split the exclusive intersection and union alternatives into independently scored math probes.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "a0e8b4817c802d2fe3a3146d2c0fcae1695b815276a1ce4ca54b304e150a0a06",
+        "finalDigest": "622a55b5aed942a9d5d40359b18f2135f58cc625e9c8ed51db6a551a70e8e8e1",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "a0e8b4817c802d2fe3a3146d2c0fcae1695b815276a1ce4ca54b304e150a0a06",
+        "semanticReviewDigest": "622a55b5aed942a9d5d40359b18f2135f58cc625e9c8ed51db6a551a70e8e8e1",
         "status": "corrected"
       },
       "snapshots": [
@@ -1759,13 +1771,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Added an independent probe for the accepted directed-degree identity after the rejected claim."
+          "Added an independent probe for the accepted directed-degree identity after the rejected claim.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "03cfeee661e737a73d02fd10066c4aed3169e979ae85016092bf293e4a92c560",
+        "finalDigest": "15ae4aee51635ff3f7bcbbe23c4493678c24261df8852a25324607806165dc52",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "03cfeee661e737a73d02fd10066c4aed3169e979ae85016092bf293e4a92c560",
+        "semanticReviewDigest": "15ae4aee51635ff3f7bcbbe23c4493678c24261df8852a25324607806165dc52",
         "status": "corrected"
       },
       "snapshots": [
@@ -1888,13 +1901,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Split union and intersection membership semantics into exact mathematical probes."
+          "Split union and intersection membership semantics into exact mathematical probes.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "77bfdde1fb2bf67d2963d3d2cf0e6033e1f9323197fe4227cab5fb99b2276769",
+        "finalDigest": "5bcb7f64bdc7cd5bddb6126bf0850e4c492e618d67c2ec8e8e6752bf392e3716",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "77bfdde1fb2bf67d2963d3d2cf0e6033e1f9323197fe4227cab5fb99b2276769",
+        "semanticReviewDigest": "5bcb7f64bdc7cd5bddb6126bf0850e4c492e618d67c2ec8e8e6752bf392e3716",
         "status": "corrected"
       },
       "snapshots": [
@@ -2074,7 +2088,8 @@
       },
       "review": {
         "correctionSummary": [
-          "Replaced non-portable display-dollar equation tags with equation environments."
+          "Replaced non-portable display-dollar equation tags with equation environments.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "physics-development-review",
         "finalDigest": "ea43a2774baaeb150145c8bf044266ebf69396eddc10f63ea56d948c561aa293",
@@ -2541,13 +2556,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "7c99e24839af202fea2192c716561c295b2f57d45e84fee0980bf126c8ef67a2",
+        "finalDigest": "d9fdbf55e0930cabd8fd26116738b7e967ccb27f1b3a8051d1efcb8cafc93693",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "7c99e24839af202fea2192c716561c295b2f57d45e84fee0980bf126c8ef67a2",
+        "semanticReviewDigest": "d9fdbf55e0930cabd8fd26116738b7e967ccb27f1b3a8051d1efcb8cafc93693",
         "status": "corrected"
       },
       "snapshots": [
@@ -2756,13 +2772,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Kept the cited inapplicable closure as a refusal and added a separate guarded stagnant-cell positive."
+          "Kept the cited inapplicable closure as a refusal and added a separate guarded stagnant-cell positive.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "09800f8e50c484cb52d506272ee42929e9c5741c383cabd7f164a8186b6d86f8",
+        "finalDigest": "17b3954b159df925ee23fe42395af441c1dd12a82f59a7053b79ddbd8f2d15a5",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "09800f8e50c484cb52d506272ee42929e9c5741c383cabd7f164a8186b6d86f8",
+        "semanticReviewDigest": "17b3954b159df925ee23fe42395af441c1dd12a82f59a7053b79ddbd8f2d15a5",
         "status": "corrected"
       },
       "snapshots": [
@@ -3399,13 +3416,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Separated the draft stationarity proposal from the later guarded proof."
+          "Separated the draft stationarity proposal from the later guarded proof.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "02bd8dcdc5cabc8b68ecef723ae1221aace28045909b790c3078c537bb9670d3",
+        "finalDigest": "e1a36a513cc6aa6295e2faf7a0118a79fe100585dc2fae2ee3f27feefcbb21c5",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "02bd8dcdc5cabc8b68ecef723ae1221aace28045909b790c3078c537bb9670d3",
+        "semanticReviewDigest": "e1a36a513cc6aa6295e2faf7a0118a79fe100585dc2fae2ee3f27feefcbb21c5",
         "status": "corrected"
       },
       "snapshots": [
@@ -3452,13 +3471,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Rewrote historical inputs, rejected union proposal, and accepted overlap correction as explicit review stages."
+          "Rewrote historical inputs, rejected union proposal, and accepted overlap correction as explicit review stages.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "453fd51167cbfbe025f574abdb08c00579ad274822dfbb14171003b694e787ca",
+        "finalDigest": "1a2cafc2c818eec5c090b527cf15566edbb3cbffd460485ce7bad1f1588e8355",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "453fd51167cbfbe025f574abdb08c00579ad274822dfbb14171003b694e787ca",
+        "semanticReviewDigest": "1a2cafc2c818eec5c090b527cf15566edbb3cbffd460485ce7bad1f1588e8355",
         "status": "corrected"
       },
       "snapshots": [
@@ -3495,13 +3515,16 @@
       },
       "review": {
         "correctionSummary": [
-          "Rewrote sampled givens, positive denominator, reviewed calculation, and decision as explicit stages."
+          "Rewrote sampled givens, positive denominator, reviewed calculation, and decision as explicit stages.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "aa031d5a949ba4618cab6a3c0a0e13709d050755a3913bd9c51844db54707f07",
+        "finalDigest": "79622e4f08845e85fd3c871206ec5c6f84b375802c3cc269ad15ca6c09605411",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "aa031d5a949ba4618cab6a3c0a0e13709d050755a3913bd9c51844db54707f07",
+        "semanticReviewDigest": "79622e4f08845e85fd3c871206ec5c6f84b375802c3cc269ad15ca6c09605411",
         "status": "corrected"
       },
       "snapshots": [
@@ -3538,13 +3561,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Separated the false reviewed variance claim from the accepted quadratic correction."
+          "Separated the false reviewed variance claim from the accepted quadratic correction.",
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "4be9e8bd94267fb17ae92887c3eab3879e4d633775e26a155e9e565d563b2175",
+        "finalDigest": "78d9fd0bc301c45aa1d15d3bb0041a451763d5647bf1fc76ed3c98c90dc4e972",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "4be9e8bd94267fb17ae92887c3eab3879e4d633775e26a155e9e565d563b2175",
+        "semanticReviewDigest": "78d9fd0bc301c45aa1d15d3bb0041a451763d5647bf1fc76ed3c98c90dc4e972",
         "status": "corrected"
       },
       "snapshots": [
@@ -4096,13 +4121,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Kept the pre-declaration query partial instead of granting a relation from later role declarations."
+          "Kept the pre-declaration query partial instead of granting a relation from later role declarations.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "5efea26ada89d6475ae63e1e72ef055dec8a0c8e5b9435ad805ad67be04900e4",
+        "finalDigest": "4021e44b958b8532c3a7118969270e81c2ea701547b3b9a45e6978a798d7018b",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "5efea26ada89d6475ae63e1e72ef055dec8a0c8e5b9435ad805ad67be04900e4",
+        "semanticReviewDigest": "4021e44b958b8532c3a7118969270e81c2ea701547b3b9a45e6978a798d7018b",
         "status": "corrected"
       },
       "snapshots": [
@@ -4198,7 +4224,7 @@
         "snapshotId": "current",
         "fileId": "worked-example.md",
         "needle": "y'(x)=dy/dx",
-        "edge": "after"
+        "offset": 0
       },
       "expected": {
         "decision": "established",
@@ -4256,7 +4282,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "y"
+        "symbol": "y",
+        "cursorOccurrence": {
+          "fileId": "worked-example.md",
+          "needle": "y'(x)=dy/dx",
+          "selection": {
+            "length": 2,
+            "offset": 0
+          }
+        }
       },
       "family": "derivation-chain",
       "id": "CA-DEV-02",
@@ -6079,24 +6113,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "hall-mhd.tex",
+                "needle": "\\(H(T)\\) denotes",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "H",
+            "range": {
+              "fileId": "hall-mhd.tex",
+              "needle": "q_n=\\rho u_n H(T)",
+              "selection": {
+                "offset": 13,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "hall-mhd.tex",
+                "needle": "\\(H(T)\\) denotes",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "hall-mhd.tex",
+                "needle": "q_n=\\rho u_n H(T)",
+                "selection": {
+                  "offset": 13,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "H",
+            "minimum": 1,
+            "newName": "G",
+            "replacementText": "G",
+            "required": [
+              {
+                "fileId": "hall-mhd.tex",
+                "needle": "q_n=\\rho u_n H(T)",
+                "selection": {
+                  "offset": 13,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -6124,25 +6206,81 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "cell-budget.tex",
+                "needle": "Here \\(C(t)\\) denotes",
+                "selection": {
+                  "offset": 7,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "cell-budget.tex",
+              "needle": "C(t)=C_0",
+              "selection": {
+                "offset": 0,
+                "length": 1
+              }
+            },
+            "placeholder": "C"
           },
           "references": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 3,
+            "required": [
+              {
+                "fileId": "cell-budget.tex",
+                "needle": "Here \\(C(t)\\) denotes",
+                "selection": {
+                  "offset": 7,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "cell-budget.tex",
+                "needle": "C(t)=C_0",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "cell-budget.tex",
+                "needle": "This local \\(C\\)",
+                "selection": {
+                  "offset": 13,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "cell-budget.tex",
+                "needle": "C(t)=C_0",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "D",
+            "replacementText": "D",
+            "safety": "deterministic",
+            "expectedText": "C"
           }
         },
         "proofGrounded": true,
@@ -6484,25 +6622,81 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "\\(B\\) records passing",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "design/filter-composition.md",
+              "needle": "R=A\\cap B",
+              "selection": {
+                "offset": 8,
+                "length": 1
+              }
+            },
+            "placeholder": "B"
           },
           "references": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 3,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "\\(B\\) records passing",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cap B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cup B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cap B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "C",
+            "replacementText": "C",
+            "safety": "deterministic",
+            "expectedText": "B"
           }
         },
         "proofGrounded": false,
@@ -6801,24 +6995,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "For two event sets \\(A\\) and \\(B\\)",
+                "selection": {
+                  "offset": 31,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "B",
+            "range": {
+              "fileId": "manual/notation.tex",
+              "needle": "x\\in\\either{A}{B}\\iff x\\in A\\lor x\\in B",
+              "selection": {
+                "offset": 38,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "For two event sets \\(A\\) and \\(B\\)",
+                "selection": {
+                  "offset": 31,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "x\\in\\either{A}{B}\\iff x\\in A\\lor x\\in B",
+                "selection": {
+                  "offset": 38,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "B",
+            "minimum": 1,
+            "newName": "C",
+            "replacementText": "C",
+            "required": [
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "x\\in\\either{A}{B}\\iff x\\in A\\lor x\\in B",
+                "selection": {
+                  "offset": 38,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -9044,10 +9286,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "drafts/necessary-condition.tex",
         "needle": "\\nabla f(x^\\star)=0",
-        "snapshotId": "stage-1"
+        "snapshotId": "stage-1",
+        "offset": 16
       },
       "expected": {
         "decision": "partial",
@@ -9082,7 +9324,15 @@
         },
         "proofGrounded": false,
         "relations": [],
-        "symbol": "x^\\star"
+        "symbol": "x^\\star",
+        "cursorOccurrence": {
+          "fileId": "drafts/necessary-condition.tex",
+          "needle": "\\nabla f(x^\\star)=0",
+          "selection": {
+            "offset": 9,
+            "length": 7
+          }
+        }
       },
       "family": "edit-lifecycle",
       "id": "OPTML-DEV-010",
@@ -9139,9 +9389,9 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "retry-analysis.md",
         "needle": "P(A\\mid B)",
+        "offset": 2,
         "snapshotId": "current"
       },
       "expected": {
@@ -9195,7 +9445,16 @@
             ],
             "sourceGrounded": true
           }
-        ]
+        ],
+        "symbol": "A",
+        "cursorOccurrence": {
+          "fileId": "retry-analysis.md",
+          "needle": "P(A\\mid B)",
+          "selection": {
+            "offset": 2,
+            "length": 1
+          }
+        }
       },
       "family": "guarded-condition",
       "id": "probability-development-retry-conditional",
@@ -10184,25 +10443,73 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "draft.md",
+                "needle": "let $f:M\\to\\mathbb R$",
+                "selection": {
+                  "offset": 5,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "draft.md",
+              "needle": "g(x):=\\nabla f(x)",
+              "selection": {
+                "offset": 13,
+                "length": 1
+              }
+            },
+            "placeholder": "f"
           },
           "references": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "draft.md",
+                "needle": "let $f:M\\to\\mathbb R$",
+                "selection": {
+                  "offset": 5,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "draft.md",
+                "needle": "g(x):=\\nabla f(x)",
+                "selection": {
+                  "offset": 13,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "draft.md",
+                "needle": "g(x):=\\nabla f(x)",
+                "selection": {
+                  "offset": 13,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "h",
+            "replacementText": "h",
+            "safety": "deterministic",
+            "expectedText": "f"
           }
         },
         "proofGrounded": true,
@@ -10250,25 +10557,81 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "\\(B\\) records passing",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "design/filter-composition.md",
+              "needle": "R=A\\cup B",
+              "selection": {
+                "offset": 8,
+                "length": 1
+              }
+            },
+            "placeholder": "B"
           },
           "references": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 3,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "\\(B\\) records passing",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cap B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cup B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cup B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "C",
+            "replacementText": "C",
+            "safety": "deterministic",
+            "expectedText": "B"
           }
         },
         "proofGrounded": false,
@@ -10282,10 +10645,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "paper/methods-network.tex",
         "needle": "\\sum_{v\\in V}\\deg(v)=|E|",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 23
       },
       "expected": {
         "decision": "established",
@@ -10320,7 +10683,15 @@
         },
         "proofGrounded": true,
         "relations": [],
-        "symbol": "E"
+        "symbol": "E",
+        "cursorOccurrence": {
+          "fileId": "paper/methods-network.tex",
+          "needle": "\\sum_{v\\in V}\\deg(v)=|E|",
+          "selection": {
+            "offset": 22,
+            "length": 1
+          }
+        }
       },
       "family": "collision-unsupported",
       "id": "DMD-05-accepted-directed-identity",
@@ -10345,24 +10716,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "For two event sets \\(A\\) and \\(B\\)",
+                "selection": {
+                  "offset": 31,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "B",
+            "range": {
+              "fileId": "manual/notation.tex",
+              "needle": "x\\in\\both{A}{B}\\iff x\\in A\\land x\\in B",
+              "selection": {
+                "offset": 37,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "For two event sets \\(A\\) and \\(B\\)",
+                "selection": {
+                  "offset": 31,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "x\\in\\both{A}{B}\\iff x\\in A\\land x\\in B",
+                "selection": {
+                  "offset": 37,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "B",
+            "minimum": 1,
+            "newName": "C",
+            "replacementText": "C",
+            "required": [
+              {
+                "fileId": "manual/notation.tex",
+                "needle": "x\\in\\both{A}{B}\\iff x\\in A\\land x\\in B",
+                "selection": {
+                  "offset": 37,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -10571,10 +10990,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "drafts/necessary-condition.tex",
         "needle": "\\nabla f(x^\\star)=0",
-        "snapshotId": "stage-2"
+        "snapshotId": "stage-2",
+        "offset": 16
       },
       "expected": {
         "decision": "established",
@@ -10587,18 +11006,44 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "drafts/necessary-condition.tex",
+                "needle": "x^\\star$ is an unconstrained",
+                "selection": {
+                  "offset": 0,
+                  "length": 7
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
             "status": "unavailable"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "drafts/necessary-condition.tex",
+                "needle": "x^\\star$ is an unconstrained",
+                "selection": {
+                  "offset": 0,
+                  "length": 7
+                }
+              },
+              {
+                "fileId": "drafts/necessary-condition.tex",
+                "needle": "\\nabla f(x^\\star)=0",
+                "selection": {
+                  "offset": 9,
+                  "length": 7
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
@@ -10628,7 +11073,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "x^\\star"
+        "symbol": "x^\\star",
+        "cursorOccurrence": {
+          "fileId": "drafts/necessary-condition.tex",
+          "needle": "\\nabla f(x^\\star)=0",
+          "selection": {
+            "offset": 9,
+            "length": 7
+          }
+        }
       },
       "family": "edit-lifecycle",
       "id": "OPTML-DEV-010-established-stationarity",
@@ -10637,10 +11090,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "release-risk-review.md",
         "needle": "P_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B)=0.25",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 26
       },
       "expected": {
         "decision": "established",
@@ -10694,7 +11147,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "B"
+        "symbol": "B",
+        "cursorOccurrence": {
+          "fileId": "release-risk-review.md",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B)=0.25",
+          "selection": {
+            "offset": 25,
+            "length": 1
+          }
+        }
       },
       "family": "scope-comparison",
       "id": "probability-development-release-overlap-accepted-union",
@@ -10703,10 +11164,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "metric-review.md",
         "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 21
       },
       "expected": {
         "decision": "established",
@@ -10719,24 +11180,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "metric-review.md",
+                "needle": "S=2X-3Y",
+                "selection": {
+                  "offset": 3,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "X",
+            "range": {
+              "fileId": "metric-review.md",
+              "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
+              "selection": {
+                "offset": 20,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "metric-review.md",
+                "needle": "S=2X-3Y",
+                "selection": {
+                  "offset": 3,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "metric-review.md",
+                "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
+                "selection": {
+                  "offset": 20,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "X",
+            "minimum": 1,
+            "newName": "Z",
+            "replacementText": "Z",
+            "required": [
+              {
+                "fileId": "metric-review.md",
+                "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
+                "selection": {
+                  "offset": 20,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -10760,7 +11269,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "X"
+        "symbol": "X",
+        "cursorOccurrence": {
+          "fileId": "metric-review.md",
+          "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
+          "selection": {
+            "offset": 20,
+            "length": 1
+          }
+        }
       },
       "family": "collision-unsupported",
       "id": "probability-development-metric-name-collision-accepted-variance-scaling",
@@ -10881,7 +11398,7 @@
         },
         "proofGrounded": false,
         "relations": [],
-        "symbol": "p_g"
+        "cursorOccurrence": null
       },
       "family": "collision-unsupported",
       "id": "FM-DEV-003-sealed-phase-refusal",
@@ -10890,10 +11407,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "methods/stagnant-cell-calibration.tex",
         "needle": "\\mathbf J=-D\\nabla c",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 8
       },
       "expected": {
         "decision": "established",
@@ -10960,10 +11477,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "metric-review.md",
         "needle": "\\mathbb E[S]=2\\mathbb E[X]-3\\mathbb E[Y]",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 11
       },
       "expected": {
         "decision": "established",
@@ -10976,24 +11493,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "metric-review.md",
+                "needle": "S=2X-3Y",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "S",
+            "range": {
+              "fileId": "metric-review.md",
+              "needle": "\\mathbb E[S]=2\\mathbb E[X]-3\\mathbb E[Y]",
+              "selection": {
+                "offset": 10,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "metric-review.md",
+                "needle": "S=2X-3Y",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "metric-review.md",
+                "needle": "\\mathbb E[S]=2\\mathbb E[X]-3\\mathbb E[Y]",
+                "selection": {
+                  "offset": 10,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "S",
+            "minimum": 1,
+            "newName": "T",
+            "replacementText": "T",
+            "required": [
+              {
+                "fileId": "metric-review.md",
+                "needle": "\\mathbb E[S]=2\\mathbb E[X]-3\\mathbb E[Y]",
+                "selection": {
+                  "offset": 10,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -11025,7 +11590,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "S"
+        "symbol": "S",
+        "cursorOccurrence": {
+          "fileId": "metric-review.md",
+          "needle": "\\mathbb E[S]=2\\mathbb E[X]-3\\mathbb E[Y]",
+          "selection": {
+            "offset": 10,
+            "length": 1
+          }
+        }
       },
       "family": "collision-unsupported",
       "id": "probability-development-metric-name-collision-established-expectation-linearity",
@@ -11289,7 +11862,16 @@
             "status": "unavailable"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "procedures/air-jet-reduction.tex",
+              "needle": "A$ is the exposed plate area",
+              "selection": {
+                "offset": 0,
+                "length": 1
+              }
+            },
+            "placeholder": "A"
           },
           "references": {
             "excluded": [],
@@ -11298,10 +11880,23 @@
             "status": "unavailable"
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "procedures/air-jet-reduction.tex",
+                "needle": "A$ is the exposed plate area",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "B",
+            "replacementText": "B",
+            "safety": "deterministic",
+            "expectedText": "A"
           }
         },
         "proofGrounded": true,
@@ -11342,10 +11937,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "cm-development-power-symbol-collision.md",
         "needle": "p=mv",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 1
       },
       "expected": {
         "decision": "established",
@@ -11360,24 +11955,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "cm-development-power-symbol-collision.md",
+                "needle": "lowercase \\(p\\) denotes",
+                "selection": {
+                  "offset": 12,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "p",
+            "range": {
+              "fileId": "cm-development-power-symbol-collision.md",
+              "needle": "p=mv",
+              "selection": {
+                "offset": 0,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "cm-development-power-symbol-collision.md",
+                "needle": "lowercase \\(p\\) denotes",
+                "selection": {
+                  "offset": 12,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "cm-development-power-symbol-collision.md",
+                "needle": "p=mv",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "p",
+            "minimum": 1,
+            "newName": "q",
+            "replacementText": "q",
+            "required": [
+              {
+                "fileId": "cm-development-power-symbol-collision.md",
+                "needle": "p=mv",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -11405,7 +12048,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "p"
+        "symbol": "p",
+        "cursorOccurrence": {
+          "fileId": "cm-development-power-symbol-collision.md",
+          "needle": "p=mv",
+          "selection": {
+            "offset": 0,
+            "length": 1
+          }
+        }
       },
       "family": "collision-unsupported",
       "id": "cm-development-power-symbol-collision-lowercase-momentum-after-definition",
@@ -11414,10 +12065,10 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "control-systems-development-01.md",
         "needle": "y=Cx+Du",
-        "snapshotId": "current"
+        "snapshotId": "current",
+        "offset": 0
       },
       "expected": {
         "decision": "established",

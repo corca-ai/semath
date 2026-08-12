@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -10,16 +10,16 @@ use crate::canonical::{
 use crate::concept::classify_role;
 use crate::construction::{
     coordinated_descriptions, coordination_lead, defines_by_formula, fronted_labeled_descriptions,
-    fronted_shared_description, is_declaration_lead, match_active_definition, match_apposition,
-    match_definition, match_parenthetical, match_passive_definition, match_quantified,
-    role_first_nominal_candidates,
+    fronted_shared_description, is_declaration_lead, match_apposition, match_definition,
+    match_parenthetical, match_passive_definition, match_quantified, role_first_nominal_candidates,
 };
 use crate::pack::{PackActivationStructure, PackConditionKind, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
-    DefinitionAction, DiscourseFrame, ProseEvent, ProseEventKind, ProseEventStream,
-    ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
-    extract_assumptions_with_phrases, normalize_prose_events, segment_scientific_clauses,
+    AnaphorKind, DefinitionAction, DiscourseConnective, DiscourseConstruction, DiscourseFrame,
+    MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent, ProseEventKind, ProseEventStream, ScientificClause,
+    ScientificMention, align_ordered_descriptions, clause_at, extract_assumptions_with_phrases,
+    normalize_prose_events, segment_scientific_clauses,
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
 use crate::{
@@ -113,6 +113,7 @@ pub(crate) struct LawActivationEvidence {
     pub pack_id: String,
     pub law_id: String,
     pub clause_range: SourceRange,
+    pub attached_formula_ranges: Vec<SourceRange>,
     pub identifies_attached_formula: bool,
     pub frame: DiscourseFrame,
     pub evidence: Evidence,
@@ -183,6 +184,21 @@ impl ScientificSemanticEvidence {
             .filter(|activation| {
                 ranges_overlap(&activation.clause_range, range)
                     && self.attachment.permits(&activation.clause_range, range)
+            })
+            .max_by_key(|activation| activation.identifies_attached_formula)
+        {
+            return Some(activation);
+        }
+
+        if let Some(activation) = self
+            .law_activations
+            .iter()
+            .filter(matching)
+            .filter(|activation| {
+                activation
+                    .attached_formula_ranges
+                    .iter()
+                    .any(|target| ranges_overlap(target, range))
             })
             .max_by_key(|activation| activation.identifies_attached_formula)
         {
@@ -276,9 +292,6 @@ pub(crate) fn observe_prose(
     let citation_ranges = citation_byte_ranges(document, &index);
     let clauses = segment_scientific_clauses(source, document.language, &citation_ranges);
     analysis.match_stats.clauses = clauses.len() as u32;
-    analysis.semantic_evidence =
-        collect_semantic_evidence(document, source, &index, &clauses, canonical_expressions);
-    analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     let mentions = parsed
         .iter()
         .enumerate()
@@ -293,7 +306,17 @@ pub(crate) fn observe_prose(
         })
         .collect::<Vec<_>>();
     let events = normalize_prose_events(source, &clauses, &mentions);
-    collect_assumptions(&index, &clauses, &mentions, &mut analysis);
+    analysis.semantic_evidence = collect_semantic_evidence(
+        document,
+        source,
+        &index,
+        &clauses,
+        &events,
+        canonical_expressions,
+    );
+    analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
+    let discourse_constructions = events.discourse_constructions(source, &mentions, &clauses);
+    collect_assumptions(&index, &clauses, &mentions, &events, &mut analysis);
 
     collect_role_first_nominal_definitions(
         document,
@@ -315,6 +338,7 @@ pub(crate) fn observe_prose(
         &clauses,
         &mentions,
         &events,
+        &discourse_constructions,
         &mut analysis,
     );
     collect_equation_flow_definitions(
@@ -325,10 +349,19 @@ pub(crate) fn observe_prose(
         &clauses,
         &mentions,
         &events,
+        &discourse_constructions,
         &mut analysis,
     );
-    collect_clause_definitions(document, source, parsed, &index, &clauses, &mut analysis);
-    for math in parsed {
+    collect_clause_definitions(
+        document,
+        source,
+        parsed,
+        &index,
+        &clauses,
+        &events,
+        &mut analysis,
+    );
+    for (math_index, math) in parsed.iter().enumerate() {
         analysis.match_stats.matcher_work += 1;
         let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
             continue;
@@ -452,19 +485,39 @@ pub(crate) fn observe_prose(
                 before_start + explicit.prefix_start,
                 end_byte + explicit.suffix_end,
             );
-        } else if let Some((active, evidence_start)) =
-            active_event_definition(source, after, clause, start_byte, &events)
+        } else if let Some(active) = mentions
+            .iter()
+            .position(|mention| mention.math_index == math_index)
+            .and_then(|mention_index| {
+                discourse_constructions.iter().find_map(|construction| {
+                    let DiscourseConstruction::Definition(definition) = construction else {
+                        return None;
+                    };
+                    (definition.mention_index == mention_index).then_some(definition)
+                })
+            })
         {
+            if !active.frame.establishes() || active.coordinated {
+                continue;
+            }
+            let rule_id = match active.action {
+                DefinitionAction::Call
+                | DefinitionAction::Define
+                | DefinitionAction::Denote
+                | DefinitionAction::Represent
+                | DefinitionAction::Mean => "english-relational-definition",
+                DefinitionAction::Write | DefinitionAction::Compute => unreachable!(),
+            };
             push_claim(
                 &mut analysis,
                 document,
                 &index,
                 &symbol,
                 &symbol_range,
-                active.description,
-                active.rule_id,
-                evidence_start,
-                end_byte + active.suffix_end,
+                &source[active.description_start..active.description_end],
+                rule_id,
+                active.evidence_start,
+                active.evidence_end,
             );
         } else if let Some(apposition) = match_apposition(after) {
             push_claim(
@@ -662,8 +715,11 @@ fn attach_equation_reference_definitions(
         }) else {
             continue;
         };
-        let reference = format!("\\ref{{{key}}}");
-        let Some(reference_relative) = source[search_from..].find(&reference) else {
+        let Some(reference_relative) = [format!("\\ref{{{key}}}"), format!("\\eqref{{{key}}}")]
+            .iter()
+            .filter_map(|reference| source[search_from..].find(reference))
+            .min()
+        else {
             continue;
         };
         let reference_start = search_from + reference_relative;
@@ -706,22 +762,27 @@ fn collect_anaphoric_definitions(
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
+    constructions: &[DiscourseConstruction],
     output: &mut ProseObservations,
 ) {
-    for description_index in 1..clauses.len() {
-        let symbols_index = description_index - 1;
-        let symbols_clause = &clauses[symbols_index];
-        let description_clause = &clauses[description_index];
-        if !symbols_clause.frame.establishes()
-            || !description_clause.frame.establishes()
-            || description_clause.start.saturating_sub(symbols_clause.end) > 160
-            || !events.has_anaphor(description_index)
-        {
+    for construction in constructions {
+        let DiscourseConstruction::Anaphoric {
+            antecedent_clause_index: symbols_index,
+            description_clause_index: description_index,
+            candidate,
+            frame,
+        } = construction
+        else {
+            continue;
+        };
+        let symbols_clause = &clauses[*symbols_index];
+        let description_clause = &clauses[*description_index];
+        if !symbols_clause.frame.establishes() || !frame.establishes() {
             continue;
         }
 
-        let mut antecedents = events
-            .mentions_in_clause(symbols_index)
+        let mut antecedents = candidate
+            .mention_indices
             .iter()
             .filter_map(|mention_index| mentions.get(*mention_index))
             .filter(|mention| is_definition_slot_math(&parsed[mention.math_index]))
@@ -751,8 +812,9 @@ fn collect_anaphoric_definitions(
         }
 
         let text = description_clause.text.trim();
-        let lower = text.to_ascii_lowercase();
-        if lower.contains("the former") || lower.contains("the latter") {
+        let has_former = events.has_anaphor_kind(*description_index, AnaphorKind::Former);
+        let has_latter = events.has_anaphor_kind(*description_index, AnaphorKind::Latter);
+        if has_former || has_latter {
             if antecedents.len() != 2 {
                 continue;
             }
@@ -760,10 +822,11 @@ fn collect_anaphoric_definitions(
                 (former.to_owned(), latter.to_owned(), description_clause.end)
             });
             let split = paired.or_else(|| {
-                let next = clauses.get(description_index + 1)?;
-                if !lower.contains("the former")
+                let next = clauses.get(*description_index + 1)?;
+                if !has_former
                     || next.start.saturating_sub(description_clause.end) > 160
                     || !next.frame.establishes()
+                    || !events.has_anaphor_kind(*description_index + 1, AnaphorKind::Latter)
                 {
                     return None;
                 }
@@ -805,7 +868,14 @@ fn collect_anaphoric_definitions(
             continue;
         }
 
-        let Some((body, ordered)) = anaphoric_description_body(text, antecedents.len()) else {
+        let ordered = events.has_connective(
+            *description_index,
+            &[
+                DiscourseConnective::Respectively,
+                DiscourseConnective::InThatOrder,
+            ],
+        );
+        let Some(body) = anaphoric_description_body(text, antecedents.len()) else {
             continue;
         };
         let descriptions = if antecedents.len() == 1 {
@@ -838,7 +908,7 @@ fn collect_anaphoric_definitions(
     }
 }
 
-fn anaphoric_description_body(text: &str, arity: usize) -> Option<(&str, bool)> {
+fn anaphoric_description_body(text: &str, arity: usize) -> Option<&str> {
     let trimmed = text.trim();
     let lower = trimmed.to_ascii_lowercase();
     let leads: &[&str] = if arity == 1 {
@@ -874,10 +944,8 @@ fn anaphoric_description_body(text: &str, arity: usize) -> Option<(&str, bool)> 
     {
         body = primary.trim();
     }
-    let ordered = body.to_ascii_lowercase().contains("respectively")
-        || body.to_ascii_lowercase().contains("in that order");
     body = trim_order_marker(body);
-    (!body.is_empty()).then_some((body, ordered))
+    (!body.is_empty()).then_some(body)
 }
 
 fn former_latter_descriptions(text: &str) -> Option<(&str, &str)> {
@@ -974,10 +1042,27 @@ fn collect_equation_flow_definitions(
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
+    constructions: &[DiscourseConstruction],
     output: &mut ProseObservations,
 ) {
     let scopes = ScopeGraph::new(document);
-    for (mention_index, mention) in mentions.iter().enumerate() {
+    let mut resolved_mentions = std::collections::BTreeSet::new();
+    for construction in constructions {
+        let DiscourseConstruction::EquationFlow {
+            mention_index,
+            prose_start,
+            prose_end,
+            precedes_formula,
+            candidate,
+            frame,
+        } = construction
+        else {
+            continue;
+        };
+        if resolved_mentions.contains(mention_index) {
+            continue;
+        }
+        let mention = &mentions[*mention_index];
         let math = &parsed[mention.math_index];
         if is_definition_slot_math(math) {
             continue;
@@ -986,66 +1071,63 @@ fn collect_equation_flow_definitions(
             start_offset: index.utf16_for_byte(mention.start),
             end_offset: index.utf16_for_byte(mention.end),
         };
-        for (prose_start, prose_end, precedes_formula) in
-            equation_flow_windows(clauses, mentions, mention_index, mention)
-        {
-            output.match_stats.matcher_work += 1;
-            let prose_range = SourceRange {
-                start_offset: index.utf16_for_byte(prose_start),
-                end_offset: index.utf16_for_byte(prose_end),
-            };
-            if !output
+        output.match_stats.matcher_work += 1;
+        let prose_range = SourceRange {
+            start_offset: index.utf16_for_byte(*prose_start),
+            end_offset: index.utf16_for_byte(*prose_end),
+        };
+        if !frame.establishes()
+            || !output
                 .semantic_evidence
                 .attachment
                 .permits(&prose_range, &formula_range)
-            {
-                continue;
-            }
-            let window = &source[prose_start..prose_end];
-            let action = events.last_definition_action(prose_start, prose_end);
-            let description = equation_flow_description(window)
-                .or_else(|| precedes_formula.then(|| equation_flow_nominal_description(window))?)
-                .or_else(|| {
-                    precedes_formula.then_some(())?;
-                    action_equation_flow_description(source, prose_start, prose_end, action?)
-                });
-            let Some(description) = description else {
-                continue;
-            };
-            let description_start = description.as_ptr() as usize - source.as_ptr() as usize;
-            if !clause_at(clauses, description_start)
-                .is_some_and(|clause| clause.frame.establishes())
-                || action.is_some_and(|action| {
-                    !clauses
-                        .get(action.clause_index)
-                        .is_some_and(|clause| clause.frame.establishes())
-                })
-            {
-                continue;
-            }
-            let Some((symbol, symbol_range)) =
-                relation_head_symbol(document, &math.region.content_range)
-                    .or_else(|| primary_symbol(document, math))
-            else {
-                continue;
-            };
-            let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
-            if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, &description) {
-                continue;
-            }
-            push_claim(
-                output,
-                document,
-                index,
-                &symbol,
-                &symbol_range,
-                &description,
-                "english-equation-flow-definition",
-                prose_start.min(mention.start),
-                prose_end.max(mention.end),
-            );
-            break;
+        {
+            continue;
         }
+        debug_assert_eq!(candidate.mention_indices, [*mention_index]);
+        let window = &source[*prose_start..*prose_end];
+        let action = events.last_definition_action(*prose_start, *prose_end);
+        let description = equation_flow_description(window)
+            .or_else(|| precedes_formula.then(|| equation_flow_nominal_description(window))?)
+            .or_else(|| {
+                precedes_formula.then_some(())?;
+                action_equation_flow_description(source, *prose_start, *prose_end, action?)
+            });
+        let Some(description) = description else {
+            continue;
+        };
+        let description_start = description.as_ptr() as usize - source.as_ptr() as usize;
+        if !clause_at(clauses, description_start).is_some_and(|clause| clause.frame.establishes())
+            || action.is_some_and(|action| {
+                !clauses
+                    .get(action.clause_index)
+                    .is_some_and(|clause| clause.frame.establishes())
+            })
+        {
+            continue;
+        }
+        let Some((symbol, symbol_range)) =
+            relation_head_symbol(document, &math.region.content_range)
+                .or_else(|| primary_symbol(document, math))
+        else {
+            continue;
+        };
+        let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
+        if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, &description) {
+            continue;
+        }
+        push_claim(
+            output,
+            document,
+            index,
+            &symbol,
+            &symbol_range,
+            &description,
+            "english-equation-flow-definition",
+            candidate.evidence_start,
+            candidate.evidence_end,
+        );
+        resolved_mentions.insert(*mention_index);
     }
 }
 
@@ -1069,55 +1151,6 @@ fn conflicts_with_existing_role(
             )
             && classify_role(&definition.description).is_some_and(|existing| existing != role)
     })
-}
-
-const MAX_EQUATION_FLOW_BYTES: usize = 320;
-const MAX_EQUATION_FLOW_CLAUSES: usize = 2;
-
-fn equation_flow_windows(
-    clauses: &[ScientificClause<'_>],
-    mentions: &[ScientificMention],
-    target_index: usize,
-    target: &ScientificMention,
-) -> Vec<(usize, usize, bool)> {
-    let mut windows = Vec::new();
-    let preceding_math_end = mentions[..target_index]
-        .iter()
-        .map(|mention| mention.end)
-        .max()
-        .unwrap_or_default();
-    windows.extend(
-        clauses
-            .iter()
-            .rev()
-            .filter_map(|clause| {
-                let start = clause.start.max(preceding_math_end);
-                (start < target.start && target.start - start <= MAX_EQUATION_FLOW_BYTES)
-                    .then_some((start, target.start, true))
-            })
-            .take(MAX_EQUATION_FLOW_CLAUSES + 1),
-    );
-    if let Some(clause) = clauses
-        .iter()
-        .find(|clause| clause.start < target.end && target.end <= clause.end)
-        && target.end < clause.end
-    {
-        windows.push((target.end, clause.end, false));
-    }
-    if let Some(clause) = clauses.iter().find(|clause| target.end <= clause.start)
-        && clause.end - target.end <= MAX_EQUATION_FLOW_BYTES
-    {
-        windows.push((target.end, clause.end, false));
-    }
-    windows.retain(|(start, end, _)| {
-        start < end
-            && !mentions.iter().enumerate().any(|(index, mention)| {
-                index != target_index && *start < mention.end && mention.start < *end
-            })
-    });
-    windows.sort_by_key(|(start, end, _)| end - start);
-    windows.dedup();
-    windows
 }
 
 fn action_equation_flow_description<'a>(
@@ -1280,6 +1313,7 @@ fn collect_semantic_evidence(
     source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
+    events: &ProseEventStream,
     canonical_expressions: &[SemanticExpr],
 ) -> ScientificSemanticEvidence {
     let clause_evidence = clauses
@@ -1294,6 +1328,15 @@ fn collect_semantic_evidence(
         .collect::<Vec<_>>();
     let mut domain_priors = Vec::new();
     let mut law_activations = Vec::new();
+    let reference_targets = explicit_equation_reference_targets(
+        document,
+        source,
+        index,
+        clauses,
+        canonical_expressions,
+    );
+    let postposed_targets =
+        postposed_formula_targets(document, index, clauses, events, canonical_expressions);
     let mut formula_operations = Vec::new();
     for clause in clauses {
         for range in phrase_ranges(source, index, clause, "vector dot product") {
@@ -1367,6 +1410,20 @@ fn collect_semantic_evidence(
                 phrases.dedup();
                 for phrase in phrases {
                     for range in phrase_ranges(source, index, clause, phrase) {
+                        let mut attached_formula_ranges = reference_targets
+                            .get(&clause.start)
+                            .cloned()
+                            .unwrap_or_default();
+                        attached_formula_ranges.extend(
+                            postposed_targets
+                                .get(&clause.start)
+                                .into_iter()
+                                .flatten()
+                                .cloned(),
+                        );
+                        attached_formula_ranges
+                            .sort_by_key(|range| (range.start_offset, range.end_offset));
+                        attached_formula_ranges.dedup();
                         law_activations.push(LawActivationEvidence {
                             pack_id: pack.pack_id.clone(),
                             law_id: law.id.clone(),
@@ -1374,13 +1431,15 @@ fn collect_semantic_evidence(
                                 start_offset: index.utf16_for_byte(clause.start),
                                 end_offset: index.utf16_for_byte(clause.end),
                             },
-                            identifies_attached_formula: activation_identifies_formula(
-                                source,
-                                index,
-                                clause,
-                                &range,
-                                canonical_expressions,
-                            ),
+                            identifies_attached_formula: !attached_formula_ranges.is_empty()
+                                || activation_identifies_formula(
+                                    source,
+                                    index,
+                                    clause,
+                                    &range,
+                                    canonical_expressions,
+                                ),
+                            attached_formula_ranges,
                             frame: clause.frame.clone(),
                             evidence: Evidence {
                                 rule_id: format!(
@@ -1418,6 +1477,153 @@ fn collect_semantic_evidence(
         formula_operations,
         attachment: AttachmentGraph::new(document),
     }
+}
+
+fn explicit_equation_reference_targets(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    canonical_expressions: &[SemanticExpr],
+) -> BTreeMap<usize, Vec<SourceRange>> {
+    let commands = scan_reference_commands(source);
+    let labels = commands
+        .iter()
+        .filter(|command| command.kind == ReferenceCommandKind::Label)
+        .filter_map(|command| {
+            let offset = index.utf16_for_byte(command.start);
+            let target = document
+                .math_roots
+                .iter()
+                .filter(|root| root.full_range.contains(offset))
+                .min_by_key(|root| root.full_range.end_offset - root.full_range.start_offset)
+                .map(|root| root.content_range.clone())
+                .or_else(|| {
+                    canonical_expressions
+                        .iter()
+                        .filter(|expression| expression.range.end_offset <= offset)
+                        .filter(|expression| offset - expression.range.end_offset <= 128)
+                        .max_by_key(|expression| expression.range.end_offset)
+                        .map(|expression| expression.range.clone())
+                })?;
+            Some((command.key.as_str(), target))
+        })
+        .collect::<BTreeMap<_, _>>();
+    let mut targets = BTreeMap::<usize, Vec<SourceRange>>::new();
+    for command in commands.iter().filter(|command| {
+        matches!(
+            command.kind,
+            ReferenceCommandKind::Reference | ReferenceCommandKind::EquationReference
+        )
+    }) {
+        let Some(target) = labels.get(command.key.as_str()) else {
+            continue;
+        };
+        let Some(clause) = clause_at(clauses, command.start) else {
+            continue;
+        };
+        let ranges = targets.entry(clause.start).or_default();
+        if !ranges.contains(target) {
+            ranges.push(target.clone());
+        }
+    }
+    targets
+}
+
+fn postposed_formula_targets(
+    document: &ProjectDocument,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    events: &ProseEventStream,
+    canonical_expressions: &[SemanticExpr],
+) -> BTreeMap<usize, Vec<SourceRange>> {
+    let attachment = AttachmentGraph::new(document);
+    let mut targets = BTreeMap::new();
+    for (clause_index, clause) in clauses.iter().enumerate() {
+        if !clause.frame.establishes() || !events.starts_with_anaphor(clause_index, clause.start) {
+            continue;
+        }
+        let Some(previous_clause) = clauses
+            .iter()
+            .filter(|candidate| candidate.end <= clause.start)
+            .max_by_key(|candidate| candidate.end)
+        else {
+            continue;
+        };
+        let previous_range = SourceRange {
+            start_offset: index.utf16_for_byte(previous_clause.start),
+            end_offset: index.utf16_for_byte(previous_clause.end),
+        };
+        let Some(target) = canonical_expressions
+            .iter()
+            .filter(|expression| ranges_overlap(&expression.range, &previous_range))
+            .filter(|expression| {
+                index
+                    .utf16_for_byte(clause.start)
+                    .saturating_sub(expression.range.end_offset)
+                    <= MAX_ATTACHMENT_DISTANCE_BYTES as u32
+            })
+            .max_by_key(|expression| expression.range.end_offset)
+            .map(|expression| expression.range.clone())
+        else {
+            continue;
+        };
+        let clause_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        if attachment.permits(&target, &clause_range) {
+            targets.insert(clause.start, vec![target]);
+        }
+    }
+    targets
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ReferenceCommandKind {
+    Label,
+    Reference,
+    EquationReference,
+}
+
+struct ReferenceCommand {
+    kind: ReferenceCommandKind,
+    key: String,
+    start: usize,
+}
+
+fn scan_reference_commands(source: &str) -> Vec<ReferenceCommand> {
+    let mut commands = Vec::new();
+    let mut cursor = 0;
+    while let Some(relative) = source[cursor..].find('\\') {
+        let start = cursor + relative;
+        let tail = &source[start..];
+        let matched = [
+            ("\\eqref{", ReferenceCommandKind::EquationReference),
+            ("\\label{", ReferenceCommandKind::Label),
+            ("\\ref{", ReferenceCommandKind::Reference),
+        ]
+        .into_iter()
+        .find(|(prefix, _)| tail.starts_with(prefix));
+        let Some((prefix, kind)) = matched else {
+            cursor = start + 1;
+            continue;
+        };
+        let key_start = start + prefix.len();
+        let Some(relative_end) = source[key_start..].find('}') else {
+            break;
+        };
+        let key_end = key_start + relative_end;
+        if key_start < key_end {
+            commands.push(ReferenceCommand {
+                kind,
+                key: source[key_start..key_end].to_owned(),
+                start,
+            });
+        }
+        cursor = key_end + 1;
+    }
+    commands
 }
 
 fn evidence_range_key(evidence: &Evidence) -> (u32, u32) {
@@ -1666,18 +1872,23 @@ fn collect_clause_definitions(
     parsed: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
+    events: &ProseEventStream,
     output: &mut ProseObservations,
 ) {
-    for clause in clauses {
+    for (clause_index, clause) in clauses.iter().enumerate() {
         output.match_stats.matcher_work += 1;
         if !clause.frame.establishes() {
             continue;
         }
         let sentence_start = clause.start;
         let sentence_end = clause.end;
-        let sentence = clause.text;
-        let sentence_lower = sentence.to_ascii_lowercase();
-        if sentence_lower.contains("respectively") || sentence_lower.contains("in that order") {
+        if events.has_connective(
+            clause_index,
+            &[
+                DiscourseConnective::Respectively,
+                DiscourseConnective::InThatOrder,
+            ],
+        ) {
             let definitions_before = output
                 .definitions
                 .iter()
@@ -1888,6 +2099,7 @@ fn collect_assumptions(
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
+    events: &ProseEventStream,
     output: &mut ProseObservations,
 ) {
     let condition_phrases = built_in_packs()
@@ -1902,8 +2114,9 @@ fn collect_assumptions(
                 .map(move |phrase| (phrase.as_str(), kind, condition.id.as_str()))
         })
         .collect::<Vec<_>>();
-    for clause in clauses {
-        let attached_to_preceding_math = clause_attaches_to_preceding_math(clause, mentions);
+    for (clause_index, clause) in clauses.iter().enumerate() {
+        let attached_to_preceding_math =
+            clause_attaches_to_preceding_math(clause_index, mentions, events);
         for assumption in extract_assumptions_with_phrases(clause, mentions, &condition_phrases) {
             let mut source_ranges = assumption
                 .subjects
@@ -1971,21 +2184,21 @@ fn condition_evidence_kind(kind: PackConditionKind) -> &'static str {
 }
 
 fn clause_attaches_to_preceding_math(
-    clause: &ScientificClause<'_>,
+    clause_index: usize,
     mentions: &[ScientificMention],
+    events: &ProseEventStream,
 ) -> bool {
-    let lower = clause.text.to_ascii_lowercase();
-    let connective = ["where ", "here "]
-        .iter()
-        .flat_map(|phrase| lower.match_indices(phrase).map(|(offset, _)| offset))
-        .filter(|offset| *offset == 0 || !lower.as_bytes()[offset - 1].is_ascii_alphanumeric())
-        .min()
-        .map(|offset| clause.start + offset);
-    connective.is_some_and(|connective| {
-        mentions.iter().any(|mention| {
-            mention.end <= connective && connective - mention.end <= MAX_EQUATION_FLOW_BYTES
+    events
+        .first_connective(
+            clause_index,
+            &[DiscourseConnective::Where, DiscourseConnective::Here],
+        )
+        .is_some_and(|connective| {
+            mentions.iter().any(|mention| {
+                mention.end <= connective.start
+                    && connective.start - mention.end <= MAX_ATTACHMENT_DISTANCE_BYTES
+            })
         })
-    })
 }
 
 fn is_description_parameter(
@@ -2101,34 +2314,6 @@ fn explicit_single_definition<'a>(
     math: &ParsedMath,
 ) -> Option<crate::construction::DefinitionConstruction<'a>> {
     match_definition(before, after, contains_assignment(&math.root))
-}
-
-fn active_event_definition<'a>(
-    source: &str,
-    after: &'a str,
-    clause: Option<&ScientificClause<'_>>,
-    mention_start: usize,
-    events: &ProseEventStream,
-) -> Option<(crate::construction::DefinitionConstruction<'a>, usize)> {
-    let clause = clause?;
-    let action = events.last_definition_action(clause.start, mention_start)?;
-    let ProseEventKind::DefinitionAction(kind) = action.kind else {
-        return None;
-    };
-    if !matches!(
-        kind,
-        DefinitionAction::Define
-            | DefinitionAction::Denote
-            | DefinitionAction::Represent
-            | DefinitionAction::Mean
-            | DefinitionAction::Call
-    ) || !source[action.end..mention_start]
-        .chars()
-        .all(char::is_whitespace)
-    {
-        return None;
-    }
-    match_active_definition(after).map(|definition| (definition, action.start))
 }
 
 fn contains_assignment(node: &crate::EquationNode) -> bool {
@@ -2663,13 +2848,12 @@ fn definition_priority(definition: &DefinitionInfo) -> u8 {
 #[cfg(test)]
 mod tests {
     use super::{
-        ProseShape, equation_flow_windows, expand_shared_shape_head, formula_identification_bridge,
-        observe_prose, shape_claim,
+        ProseShape, expand_shared_shape_head, formula_identification_bridge, observe_prose,
+        shape_claim,
     };
     use crate::canonical::lower_document_region;
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
-    use crate::scientific_prose::{ScientificClause, ScientificMention, asserted_author_frame};
     use crate::{DocumentLanguage, ProjectDocument};
 
     fn analyze(source: &str) -> super::ProseObservations {
@@ -2744,34 +2928,6 @@ mod tests {
                 && classify_role(&definition.description).as_deref()
                     == Some("quantities-units:voltage")
         }));
-    }
-
-    #[test]
-    fn equation_flow_windows_start_after_preceding_display_math() {
-        let clauses = [ScientificClause {
-            start: 0,
-            end: 150,
-            text: "",
-            frame: asserted_author_frame(),
-        }];
-        let mentions = [
-            ScientificMention {
-                symbol: "Q".into(),
-                start: 40,
-                end: 80,
-                math_index: 0,
-            },
-            ScientificMention {
-                symbol: "m".into(),
-                start: 120,
-                end: 140,
-                math_index: 1,
-            },
-        ];
-
-        assert!(
-            equation_flow_windows(&clauses, &mentions, 1, &mentions[1]).contains(&(80, 120, true))
-        );
     }
 
     #[test]
@@ -3114,13 +3270,50 @@ Define the mean axial speed by the flow relation
 
     #[test]
     fn attaches_definitions_through_an_explicit_equation_reference() {
-        let source = "$q=-k\\nabla T\\label{eq:flux}$ In Equation~\\ref{eq:flux}, $q$ denotes heat flux, $k$ thermal conductivity, and $T$ temperature.";
-        let analysis = analyze(source);
-        assert_eq!(analysis.definitions.len(), 3, "{:?}", analysis.definitions);
-        assert!(analysis.definitions.iter().all(|definition| {
-            definition.evidence.kind == "attached-prose"
-                && definition.evidence.source_ranges.len() == 2
-        }));
+        for reference in ["\\ref{eq:flux}", "\\eqref{eq:flux}"] {
+            let source = format!(
+                "$q=-k\\nabla T\\label{{eq:flux}}$ In Equation~{reference}, $q$ denotes heat flux, $k$ thermal conductivity, and $T$ temperature."
+            );
+            let analysis = analyze(&source);
+            assert_eq!(analysis.definitions.len(), 3, "{:?}", analysis.definitions);
+            assert!(analysis.definitions.iter().all(|definition| {
+                definition.evidence.kind == "attached-prose"
+                    && definition.evidence.source_ranges.len() == 2
+            }));
+        }
+    }
+
+    #[test]
+    fn postposed_formula_reference_requires_a_typed_head_and_bounded_adjacency() {
+        let attached = analyze("$P=Fv$. This relation is the mechanical power relation.");
+        assert!(
+            attached
+                .semantic_evidence
+                .law_activations
+                .iter()
+                .any(|activation| {
+                    activation.law_id == "mechanical-power"
+                        && !activation.attached_formula_ranges.is_empty()
+                })
+        );
+
+        for source in [
+            "$P=Fv$. According to this study, the mechanical power relation is useful.",
+            "$P=Fv$. Background material separates the statements. This relation is the mechanical power relation.",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis
+                    .semantic_evidence
+                    .law_activations
+                    .iter()
+                    .all(|activation| {
+                        activation.law_id != "mechanical-power"
+                            || activation.attached_formula_ranges.is_empty()
+                    }),
+                "{source}"
+            );
+        }
     }
 
     #[test]

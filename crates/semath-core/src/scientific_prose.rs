@@ -117,6 +117,15 @@ pub(crate) enum DefinitionAction {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DefinitionLink {
+    As,
+    By,
+    Copula,
+    For,
+    ToBe,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum DiscourseConnective {
     Where,
     Here,
@@ -124,6 +133,7 @@ pub(crate) enum DiscourseConnective {
     Hence,
     Therefore,
     Respectively,
+    InThatOrder,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -141,6 +151,7 @@ pub(crate) enum ProseEventKind {
     ClauseEnd,
     MathMention(usize),
     DefinitionAction(DefinitionAction),
+    DefinitionLink(DefinitionLink),
     DescriptionSpan,
     Coordination,
     Connective(DiscourseConnective),
@@ -163,6 +174,50 @@ pub(crate) struct ProseEventStream {
     clause_anaphors: Vec<Vec<AnaphorKind>>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct DefinitionConstruction {
+    pub action: DefinitionAction,
+    pub mention_index: usize,
+    pub description_start: usize,
+    pub description_end: usize,
+    pub evidence_start: usize,
+    pub evidence_end: usize,
+    pub frame: DiscourseFrame,
+    pub coordinated: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct AttachmentCandidate {
+    pub mention_indices: Vec<usize>,
+    pub evidence_start: usize,
+    pub evidence_end: usize,
+    pub distance_bytes: usize,
+}
+
+const MAX_ATTACHMENT_MENTIONS: usize = 8;
+const MAX_ANAPHORIC_DISTANCE_BYTES: usize = 160;
+pub(crate) const MAX_ATTACHMENT_DISTANCE_BYTES: usize = 320;
+const MAX_EQUATION_FLOW_CLAUSES: usize = 2;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum DiscourseConstruction {
+    Definition(DefinitionConstruction),
+    Anaphoric {
+        antecedent_clause_index: usize,
+        description_clause_index: usize,
+        candidate: AttachmentCandidate,
+        frame: DiscourseFrame,
+    },
+    EquationFlow {
+        mention_index: usize,
+        prose_start: usize,
+        prose_end: usize,
+        precedes_formula: bool,
+        candidate: AttachmentCandidate,
+        frame: DiscourseFrame,
+    },
+}
+
 impl ProseEventStream {
     pub(crate) fn mentions_in_clause(&self, clause_index: usize) -> &[usize] {
         self.clause_mentions
@@ -175,6 +230,42 @@ impl ProseEventStream {
         self.clause_anaphors
             .get(clause_index)
             .is_some_and(|items| !items.is_empty())
+    }
+
+    pub(crate) fn has_anaphor_kind(&self, clause_index: usize, kind: AnaphorKind) -> bool {
+        self.clause_anaphors
+            .get(clause_index)
+            .is_some_and(|items| items.contains(&kind))
+    }
+
+    pub(crate) fn starts_with_anaphor(&self, clause_index: usize, clause_start: usize) -> bool {
+        self.events.iter().any(|event| {
+            event.clause_index == clause_index
+                && event.start == clause_start
+                && matches!(event.kind, ProseEventKind::Anaphor(_))
+        })
+    }
+
+    pub(crate) fn has_connective(
+        &self,
+        clause_index: usize,
+        accepted: &[DiscourseConnective],
+    ) -> bool {
+        self.events.iter().any(|event| {
+            event.clause_index == clause_index
+                && matches!(event.kind, ProseEventKind::Connective(kind) if accepted.contains(&kind))
+        })
+    }
+
+    pub(crate) fn first_connective(
+        &self,
+        clause_index: usize,
+        accepted: &[DiscourseConnective],
+    ) -> Option<&ProseEvent> {
+        self.events.iter().find(|event| {
+            event.clause_index == clause_index
+                && matches!(event.kind, ProseEventKind::Connective(kind) if accepted.contains(&kind))
+        })
     }
 
     pub(crate) fn last_definition_action(&self, start: usize, end: usize) -> Option<&ProseEvent> {
@@ -219,6 +310,279 @@ impl ProseEventStream {
                 (event.start, end)
             })
     }
+
+    pub(crate) fn definition_constructions(
+        &self,
+        source: &str,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DefinitionConstruction> {
+        mentions
+            .iter()
+            .enumerate()
+            .filter_map(|(mention_index, mention)| {
+                let mention_event = self
+                    .events
+                    .iter()
+                    .find(|event| event.kind == ProseEventKind::MathMention(mention_index))?;
+                let clause = clauses.get(mention_event.clause_index)?;
+                let action = self.nearest_definition_action(mention_event, mention)?;
+                let action_precedes = action.end <= mention.start;
+                let gap = if action_precedes {
+                    &source[action.end..mention.start]
+                } else {
+                    &source[mention.end..action.start]
+                };
+                if !gap.chars().all(char::is_whitespace) {
+                    return None;
+                }
+                let boundary = if action_precedes {
+                    mention.end
+                } else {
+                    action.end
+                };
+                let description = self.events.iter().find(|event| {
+                    event.clause_index == mention_event.clause_index
+                        && event.kind == ProseEventKind::DescriptionSpan
+                        && event.start <= boundary
+                        && boundary <= event.end
+                })?;
+                let description_start = self
+                    .events
+                    .iter()
+                    .filter(|event| {
+                        event.clause_index == mention_event.clause_index
+                            && boundary <= event.start
+                            && event.end <= description.end
+                            && matches!(event.kind, ProseEventKind::DefinitionLink(_))
+                    })
+                    .min_by_key(|event| event.start)
+                    .map_or(boundary, |link| link.end);
+                let description_end = self
+                    .events
+                    .iter()
+                    .filter(|event| {
+                        event.clause_index == mention_event.clause_index
+                            && description_start < event.start
+                            && event.end <= description.end
+                            && event.kind == ProseEventKind::Coordination
+                    })
+                    .max_by_key(|event| event.start)
+                    .filter(|event| {
+                        source[event.end..description.end]
+                            .chars()
+                            .all(|character| character.is_whitespace() || character == ',')
+                    })
+                    .map_or(description.end, |event| event.start);
+                let (description_start, description_end) =
+                    trim_range(source, description_start, description_end);
+                let description_end =
+                    trim_terminal_punctuation(source, description_start, description_end);
+                let coordinated = self.events.iter().any(|event| {
+                    event.clause_index == mention_event.clause_index
+                        && event.start < mention.start
+                        && event.kind == ProseEventKind::Coordination
+                });
+                (description_start < description_end).then_some(DefinitionConstruction {
+                    action: match action.kind {
+                        ProseEventKind::DefinitionAction(action) => action,
+                        _ => unreachable!(),
+                    },
+                    mention_index,
+                    description_start,
+                    description_end,
+                    evidence_start: action.start.min(mention.start),
+                    evidence_end: description.end,
+                    frame: clause.frame.clone(),
+                    coordinated,
+                })
+            })
+            .collect()
+    }
+
+    pub(crate) fn discourse_constructions(
+        &self,
+        source: &str,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        let mut constructions = self
+            .definition_constructions(source, mentions, clauses)
+            .into_iter()
+            .map(DiscourseConstruction::Definition)
+            .collect::<Vec<_>>();
+        constructions.extend(self.anaphoric_constructions(clauses));
+        constructions.extend(self.equation_flow_constructions(mentions, clauses));
+        constructions
+    }
+
+    fn anaphoric_constructions(
+        &self,
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        clauses
+            .iter()
+            .enumerate()
+            .skip(1)
+            .filter(|(description_clause_index, _)| self.has_anaphor(*description_clause_index))
+            .filter_map(|(description_clause_index, description_clause)| {
+                let antecedent_clause_index = description_clause_index - 1;
+                let antecedent_clause = &clauses[antecedent_clause_index];
+                let distance_bytes = description_clause
+                    .start
+                    .saturating_sub(antecedent_clause.end);
+                if distance_bytes > MAX_ANAPHORIC_DISTANCE_BYTES {
+                    return None;
+                }
+                let mention_indices = self.mentions_in_clause(antecedent_clause_index).to_vec();
+                if mention_indices.is_empty() || mention_indices.len() > MAX_ATTACHMENT_MENTIONS {
+                    return None;
+                }
+                Some(DiscourseConstruction::Anaphoric {
+                    antecedent_clause_index,
+                    description_clause_index,
+                    candidate: AttachmentCandidate {
+                        mention_indices,
+                        evidence_start: antecedent_clause.start,
+                        evidence_end: description_clause.end,
+                        distance_bytes,
+                    },
+                    frame: description_clause.frame.clone(),
+                })
+            })
+            .collect()
+    }
+
+    fn equation_flow_constructions(
+        &self,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        mentions
+            .iter()
+            .enumerate()
+            .flat_map(|(mention_index, mention)| {
+                equation_flow_windows(clauses, mentions, mention_index, mention)
+                    .into_iter()
+                    .filter_map(move |(prose_start, prose_end, precedes_formula)| {
+                        let clause = clause_at(clauses, prose_start)?;
+                        Some(DiscourseConstruction::EquationFlow {
+                            mention_index,
+                            prose_start,
+                            prose_end,
+                            precedes_formula,
+                            candidate: AttachmentCandidate {
+                                mention_indices: vec![mention_index],
+                                evidence_start: prose_start.min(mention.start),
+                                evidence_end: prose_end.max(mention.end),
+                                distance_bytes: if precedes_formula {
+                                    mention.start.saturating_sub(prose_end)
+                                } else {
+                                    prose_start.saturating_sub(mention.end)
+                                },
+                            },
+                            frame: clause.frame.clone(),
+                        })
+                    })
+            })
+            .collect()
+    }
+
+    fn nearest_definition_action<'a>(
+        &'a self,
+        mention_event: &ProseEvent,
+        mention: &ScientificMention,
+    ) -> Option<&'a ProseEvent> {
+        let accepted = |event: &&ProseEvent| {
+            event.clause_index == mention_event.clause_index
+                && matches!(
+                    event.kind,
+                    ProseEventKind::DefinitionAction(
+                        DefinitionAction::Define
+                            | DefinitionAction::Denote
+                            | DefinitionAction::Represent
+                            | DefinitionAction::Mean
+                            | DefinitionAction::Call
+                    )
+                )
+        };
+        let before = self
+            .events
+            .iter()
+            .filter(accepted)
+            .filter(|event| event.end <= mention.start)
+            .max_by_key(|event| event.end);
+        let after = self
+            .events
+            .iter()
+            .filter(accepted)
+            .filter(|event| mention.end <= event.start)
+            .min_by_key(|event| event.start);
+        [before, after].into_iter().flatten().min_by_key(|event| {
+            if event.end <= mention.start {
+                mention.start - event.end
+            } else {
+                event.start - mention.end
+            }
+        })
+    }
+}
+
+fn equation_flow_windows(
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    target_index: usize,
+    target: &ScientificMention,
+) -> Vec<(usize, usize, bool)> {
+    let mut windows = Vec::new();
+    let preceding_math_end = mentions[..target_index]
+        .iter()
+        .map(|mention| mention.end)
+        .max()
+        .unwrap_or_default();
+    windows.extend(
+        clauses
+            .iter()
+            .rev()
+            .filter_map(|clause| {
+                let start = clause.start.max(preceding_math_end);
+                (start < target.start && target.start - start <= MAX_ATTACHMENT_DISTANCE_BYTES)
+                    .then_some((start, target.start, true))
+            })
+            .take(MAX_EQUATION_FLOW_CLAUSES + 1),
+    );
+    if let Some(clause) = clauses
+        .iter()
+        .find(|clause| clause.start < target.end && target.end <= clause.end)
+        && target.end < clause.end
+    {
+        windows.push((target.end, clause.end, false));
+    }
+    if let Some(clause) = clauses.iter().find(|clause| target.end <= clause.start)
+        && clause.end - target.end <= MAX_ATTACHMENT_DISTANCE_BYTES
+    {
+        windows.push((target.end, clause.end, false));
+    }
+    windows.retain(|(start, end, _)| {
+        start < end
+            && !mentions.iter().enumerate().any(|(index, mention)| {
+                index != target_index && *start < mention.end && mention.start < *end
+            })
+    });
+    windows.sort_by_key(|(start, end, _)| end - start);
+    windows.dedup();
+    windows
+}
+
+fn trim_terminal_punctuation(source: &str, start: usize, mut end: usize) -> usize {
+    while start < end
+        && source[..end].chars().next_back().is_some_and(|character| {
+            character.is_whitespace() || matches!(character, '.' | ',' | ':' | ';')
+        })
+    {
+        end -= source[..end].chars().next_back().unwrap().len_utf8();
+    }
+    end
 }
 
 pub(crate) fn normalize_prose_events(
@@ -322,6 +686,16 @@ fn emit_lexical_events(
         ("hence", DiscourseConnective::Hence),
         ("therefore", DiscourseConnective::Therefore),
         ("respectively", DiscourseConnective::Respectively),
+        ("in that order", DiscourseConnective::InThatOrder),
+    ];
+    const LINKS: &[(&str, DefinitionLink)] = &[
+        ("to be", DefinitionLink::ToBe),
+        ("as", DefinitionLink::As),
+        ("by", DefinitionLink::By),
+        ("for", DefinitionLink::For),
+        ("is", DefinitionLink::Copula),
+        ("are", DefinitionLink::Copula),
+        ("be", DefinitionLink::Copula),
     ];
     const ANAPHORS: &[(&str, AnaphorKind)] = &[
         ("these quantities", AnaphorKind::PluralDemonstrative),
@@ -332,6 +706,9 @@ fn emit_lexical_events(
         ("this symbol", AnaphorKind::SingularDemonstrative),
         ("this variable", AnaphorKind::SingularDemonstrative),
         ("this equation", AnaphorKind::SingularDemonstrative),
+        ("this identity", AnaphorKind::SingularDemonstrative),
+        ("this relation", AnaphorKind::SingularDemonstrative),
+        ("this formula", AnaphorKind::SingularDemonstrative),
         ("the former", AnaphorKind::Former),
         ("the latter", AnaphorKind::Latter),
         ("they", AnaphorKind::PluralPronoun),
@@ -351,6 +728,15 @@ fn emit_lexical_events(
             clause,
             phrase,
             ProseEventKind::Connective(*kind),
+            output,
+        );
+    }
+    for (phrase, kind) in LINKS {
+        emit_phrase_events(
+            clause_index,
+            clause,
+            phrase,
+            ProseEventKind::DefinitionLink(*kind),
             output,
         );
     }
@@ -444,10 +830,11 @@ fn event_kind_order(kind: ProseEventKind) -> u8 {
         ProseEventKind::Connective(_) => 2,
         ProseEventKind::Anaphor(_) => 3,
         ProseEventKind::DefinitionAction(_) => 4,
-        ProseEventKind::MathMention(_) => 5,
-        ProseEventKind::Coordination => 6,
-        ProseEventKind::DescriptionSpan => 7,
-        ProseEventKind::ClauseEnd => 8,
+        ProseEventKind::DefinitionLink(_) => 5,
+        ProseEventKind::MathMention(_) => 6,
+        ProseEventKind::Coordination => 7,
+        ProseEventKind::DescriptionSpan => 8,
+        ProseEventKind::ClauseEnd => 9,
     }
 }
 
@@ -1166,6 +1553,195 @@ mod tests {
                 .filter(|event| event.kind == ProseEventKind::ClauseStart)
                 .count(),
             2
+        );
+    }
+
+    #[test]
+    fn composes_an_active_definition_from_typed_events_without_rescanning_grammar() {
+        let source = "The notation calls $K$ both kinetic energy and stiffness.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let math_start = source.find("$K$").unwrap();
+        let mentions = vec![ScientificMention {
+            symbol: "K".into(),
+            start: math_start,
+            end: math_start + 3,
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+        let construction = stream
+            .definition_constructions(source, &mentions, &clauses)
+            .into_iter()
+            .next()
+            .expect("typed definition construction");
+
+        assert_eq!(construction.action, DefinitionAction::Call);
+        assert_eq!(
+            &source[construction.description_start..construction.description_end],
+            "both kinetic energy and stiffness"
+        );
+        assert_eq!(construction.evidence_start, source.find("calls").unwrap());
+    }
+
+    #[test]
+    fn definition_constructions_are_stable_across_verb_and_whitespace_variants() {
+        for source in [
+            "We define $r$ as residual.",
+            "We denote $r$ by residual.",
+            "We represent $r$ as residual.",
+            "We call $r$ residual.",
+            "We define\n$r$ as residual.",
+            "$r$ means residual.",
+        ] {
+            let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+            let start = source.find("$r$").unwrap();
+            let mentions = [ScientificMention {
+                symbol: "r".into(),
+                start,
+                end: start + 3,
+                math_index: 0,
+            }];
+            let stream = normalize_prose_events(source, &clauses, &mentions);
+            let construction = stream
+                .definition_constructions(source, &mentions, &clauses)
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| panic!("missing construction for {source:?}"));
+
+            assert_eq!(
+                &source[construction.description_start..construction.description_end],
+                "residual",
+                "unexpected description for {source:?}",
+            );
+        }
+    }
+
+    #[test]
+    fn definition_constructions_preserve_nonasserted_frames_for_one_safety_gate() {
+        for source in [
+            "We might define $r$ as residual.",
+            "We do not define $r$ as residual.",
+            "According to Smith, we define $r$ as residual.",
+        ] {
+            let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+            let start = source.find("$r$").unwrap();
+            let mentions = [ScientificMention {
+                symbol: "r".into(),
+                start,
+                end: start + 3,
+                math_index: 0,
+            }];
+            let stream = normalize_prose_events(source, &clauses, &mentions);
+            let construction = stream
+                .definition_constructions(source, &mentions, &clauses)
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| panic!("missing construction for {source:?}"));
+
+            assert!(
+                !construction.frame.establishes(),
+                "unsafe frame for {source:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn exposes_typed_attachment_connectives_without_downstream_text_scans() {
+        let source = "Where $x$ is positive, the variables are input and output, in that order.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let start = source.find("$x$").unwrap();
+        let mentions = [ScientificMention {
+            symbol: "x".into(),
+            start,
+            end: start + 3,
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+
+        assert!(stream.has_connective(0, &[DiscourseConnective::Where]));
+        assert!(stream.has_connective(0, &[DiscourseConnective::InThatOrder]));
+    }
+
+    #[test]
+    fn equation_flow_candidates_start_after_preceding_math_and_remain_bounded() {
+        let clauses = [ScientificClause {
+            start: 0,
+            end: 150,
+            text: "",
+            frame: asserted_author_frame(),
+        }];
+        let mentions = [
+            ScientificMention {
+                symbol: "Q".into(),
+                start: 40,
+                end: 80,
+                math_index: 0,
+            },
+            ScientificMention {
+                symbol: "m".into(),
+                start: 120,
+                end: 140,
+                math_index: 1,
+            },
+        ];
+
+        assert_eq!(
+            equation_flow_windows(&clauses, &mentions, 1, &mentions[1]),
+            vec![(140, 150, false), (80, 120, true)],
+        );
+    }
+
+    #[test]
+    fn composes_bounded_anaphoric_attachment_candidates_from_typed_events() {
+        let source = "$x$ and $y$ are introduced. They denote input and output, respectively.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let mentions = ["$x$", "$y$"]
+            .into_iter()
+            .enumerate()
+            .map(|(math_index, needle)| {
+                let start = source.find(needle).unwrap();
+                ScientificMention {
+                    symbol: needle[1..2].into(),
+                    start,
+                    end: start + needle.len(),
+                    math_index,
+                }
+            })
+            .collect::<Vec<_>>();
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+
+        let candidate = stream
+            .discourse_constructions(source, &mentions, &clauses)
+            .into_iter()
+            .find_map(|construction| match construction {
+                DiscourseConstruction::Anaphoric { candidate, .. } => Some(candidate),
+                _ => None,
+            })
+            .expect("anaphoric attachment candidate");
+        assert_eq!(candidate.mention_indices, [0, 1]);
+        assert!(candidate.distance_bytes <= MAX_ANAPHORIC_DISTANCE_BYTES);
+    }
+
+    #[test]
+    fn refuses_unbounded_anaphoric_attachment_candidates() {
+        let padding = "x".repeat(MAX_ANAPHORIC_DISTANCE_BYTES + 1);
+        let source = format!("$x$ is introduced.\n\n{padding}\n\nThis symbol denotes input.");
+        let clauses = segment_scientific_clauses(&source, DocumentLanguage::Latex, &[]);
+        let mentions = [ScientificMention {
+            symbol: "x".into(),
+            start: 0,
+            end: 3,
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(&source, &clauses, &mentions);
+
+        assert!(
+            !stream
+                .discourse_constructions(&source, &mentions, &clauses)
+                .iter()
+                .any(|construction| matches!(
+                    construction,
+                    DiscourseConstruction::Anaphoric { .. }
+                ))
         );
     }
 

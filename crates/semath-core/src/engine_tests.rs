@@ -1,8 +1,12 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 
-use super::{SemathEngine, notation_occurrence_range, stable_text_digest};
+use super::{
+    SemathEngine, index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
+    stable_text_digest,
+};
 use crate::canonical::{lower_document_region, render_canonical};
 use crate::parser::test_math_regions;
+use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
     ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, LexicalClass,
     MathRoot, MathRootState, MeaningDecision, NotationArgument, NotationNode, NotationNodeKind,
@@ -138,6 +142,32 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
 }
 
 #[test]
+fn differential_variable_owns_both_cursor_edges_inside_the_composite() {
+    let content = "Let $x$ denote position. In $\\frac{dx}{dt}$, inspect $dx$.";
+    let start = content.find("dx}{dt}").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    for offset in [start, start + 1] {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        let symbol = view.symbol.expect("differential variable focus");
+        assert_eq!(symbol.symbol, "x");
+        assert_eq!(symbol.source_notation, "x");
+    }
+}
+
+#[test]
 fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
     let content = "Let $x$ denote the input.";
     let offset = content.find('x').unwrap() as u32;
@@ -159,6 +189,193 @@ fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
         };
         assert!(locations.is_empty());
     }
+}
+
+#[test]
+fn indexed_relation_head_is_not_offered_as_a_partial_base_rename() {
+    for (content, notation) in [
+        ("$U_b=q_bV_b$", "U_b"),
+        (
+            "Let $x^\\star$ be a minimizer. $\\nabla f(x^\\star)=0$",
+            "x^\\star",
+        ),
+    ] {
+        let offset = content.rfind(notation).unwrap() as u32 + notation.len() as u32;
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        let result = engine
+            .query(query(
+                Query::PrepareRename {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::RenamePreparation {
+            range,
+            placeholder,
+            rejection,
+        } = result.value
+        else {
+            panic!("expected rename preparation")
+        };
+        assert!(range.is_none(), "{notation}");
+        assert!(placeholder.is_none(), "{notation}");
+        assert!(rejection.is_some(), "{notation}");
+    }
+}
+
+#[test]
+fn navigation_and_rename_share_one_established_entity() {
+    let content = "Let $A$ denote an event. Let $B$ denote an event. $p=\\frac{\\mathbb{P}(A \\cap B)}{\\mathbb{P}(B)}$";
+    let use_offset = content.find("A \\cap").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let references = engine
+        .query(query(
+            Query::References {
+                file_id: "main".into(),
+                offset: use_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Locations { locations } = references.value else {
+        panic!("expected locations")
+    };
+    assert_eq!(locations.len(), 2);
+
+    let preparation = engine
+        .query(query(
+            Query::PrepareRename {
+                file_id: "main".into(),
+                offset: use_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::RenamePreparation {
+        range: preparation_range,
+        placeholder,
+        rejection,
+    } = preparation.value
+    else {
+        panic!("expected rename preparation")
+    };
+    assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
+    assert_eq!(placeholder.as_deref(), Some("A"));
+    assert_eq!(rejection, None);
+
+    let rename = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "E".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        proposal: Some(proposal),
+        rejection: None,
+    } = rename.value
+    else {
+        panic!("expected rename proposal")
+    };
+    assert_eq!(proposal.files.len(), 1);
+    assert_eq!(proposal.files[0].edits.len(), locations.len());
+    assert!(
+        proposal.files[0]
+            .edits
+            .iter()
+            .all(|edit| { edit.expected_text == "A" && edit.replacement_text == "E" })
+    );
+}
+
+#[test]
+fn rename_refuses_to_merge_two_entities_in_the_same_scope() {
+    let content = "Let $A$ denote an event. Let $B$ denote another event. $p=A$";
+    let use_offset = content.rfind('A').unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "B".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        proposal: None,
+        rejection: Some(rejection),
+    } = result.value
+    else {
+        panic!("expected rename rejection")
+    };
+    assert!(rejection.contains("merge"));
+}
+
+#[test]
+fn exact_occurrence_range_outranks_a_structural_selection_alias() {
+    let exact_id = SourceOccurrenceId {
+        file_id: "main".into(),
+        document_version: 1,
+        local_id: 0,
+    };
+    let container_id = SourceOccurrenceId {
+        file_id: "main".into(),
+        document_version: 1,
+        local_id: 1,
+    };
+    let exact_range = range(1, 2);
+    let occurrences = vec![
+        SourceOccurrence {
+            id: exact_id.clone(),
+            component_id: "main".into(),
+            kind: OccurrenceKind::Notation,
+            range: exact_range.clone(),
+            selection_range: exact_range.clone(),
+            scope_path: Vec::new(),
+            structural_path: Vec::new(),
+            availability_order: 1,
+            surface: "P".into(),
+            source_text: "P".into(),
+            notation: Vec::new(),
+        },
+        SourceOccurrence {
+            id: container_id.clone(),
+            component_id: "main".into(),
+            kind: OccurrenceKind::Notation,
+            range: range(1, 4),
+            selection_range: exact_range.clone(),
+            scope_path: Vec::new(),
+            structural_path: Vec::new(),
+            availability_order: 1,
+            surface: "P_s".into(),
+            source_text: "P_s".into(),
+            notation: Vec::new(),
+        },
+    ];
+    let mut index = HashMap::new();
+    index_occurrence_range(&mut index, ("main".into(), 1, 2), exact_id.clone());
+    index_occurrence_range(&mut index, ("main".into(), 1, 2), container_id);
+
+    assert_eq!(
+        occurrence_id_at_range(&index, &occurrences, "main", &exact_range),
+        Some(exact_id),
+    );
 }
 
 #[test]
@@ -244,6 +461,7 @@ fn complete_indexed_notation_owns_its_shared_right_edge() {
     let mut project = snapshot(content);
     project.documents = vec![input];
     engine.reset(project).unwrap();
+    let mut occurrence_ids = Vec::new();
     for offset in [1, 4] {
         let result = engine
             .query(query(
@@ -262,14 +480,18 @@ fn complete_indexed_notation_owns_its_shared_right_edge() {
             view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
             Some("P_s")
         );
+        let symbol = view.symbol.expect("expected indexed symbol focus");
+        assert_eq!(symbol.location.range, range(1, 4));
+        occurrence_ids.push(symbol.occurrence_id);
     }
+    assert_eq!(occurrence_ids[0], occurrence_ids[1]);
 }
 
 #[test]
 fn projects_vector_shape_through_a_trajectory_derivative() {
     let content =
         "Let $x(t)$ be an n-dimensional state vector. Inspect its derivative $\\dot{x}(t)$.";
-    let offset = content.find("dot{x}").unwrap() as u32;
+    let offset = content.find("{x}").unwrap() as u32 + 2;
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
     let result = engine
@@ -386,6 +608,79 @@ fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() 
         })
         .unwrap();
     assert_eq!(retracted.stats.semantic_derived_claims, 0);
+}
+
+#[test]
+fn semantic_view_projects_claim_status_only_from_typed_index_evidence() {
+    let content = "Let $A$ denote an event. Inspect $A$.";
+    let offset = content.rfind("$A$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let concept = view
+        .context
+        .claims
+        .iter()
+        .find(|claim| claim.predicate == "concept")
+        .expect("typed concept claim");
+    assert_eq!(concept.status, crate::SemanticClaimStatus::Certain);
+    assert!(
+        concept
+            .evidence
+            .iter()
+            .all(|evidence| evidence.kind == "source-claim" && evidence.strength == "hard")
+    );
+    assert!(
+        view.context
+            .concepts
+            .iter()
+            .any(|item| item.concept_id == concept.value)
+    );
+}
+
+#[test]
+fn public_claim_projection_does_not_join_same_spelling_across_scopes() {
+    let content = "# First\nLet $x$ denote an event. Inspect $x$.\n# Second\nLet $x$ denote a function. Inspect $x$.";
+    let first = content.find("Inspect $x$").unwrap() as u32 + "Inspect $".len() as u32;
+    let second = content.rfind("Inspect $x$").unwrap() as u32 + "Inspect $".len() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let concepts = [first, second].map(|offset| {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        view.context
+            .claims
+            .iter()
+            .filter(|claim| claim.predicate == "concept")
+            .map(|claim| claim.value.clone())
+            .collect::<Vec<_>>()
+    });
+    assert_eq!(concepts[0].len(), 1, "{:?}", concepts[0]);
+    assert_eq!(concepts[1].len(), 1, "{:?}", concepts[1]);
+    assert_ne!(concepts[0], concepts[1]);
 }
 
 #[test]
@@ -779,9 +1074,10 @@ fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
         })
         .unwrap();
     let relation_start = base.find("Q=Av").unwrap() as u32;
-    let occurrence = engine.index.occurrences_by_range
-        [&("base".into(), relation_start, relation_start + 1)]
-        .clone();
+    let occurrence = engine
+        .index
+        .occurrence_id_for_range("base", &range(relation_start, relation_start + 1))
+        .expect("expected relation head occurrence");
     assert!(
         engine
             .index

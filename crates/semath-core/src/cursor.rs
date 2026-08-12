@@ -14,14 +14,35 @@ pub(crate) fn occurrence_at_cursor(
     occurrences: &[CursorOccurrence<'_>],
     offset: u32,
 ) -> Option<usize> {
-    let best_priority = occurrences
-        .iter()
-        .filter_map(|occurrence| ownership_priority(*occurrence, offset))
-        .min()?;
-    let mut candidates = occurrences
+    let eligible = occurrences
         .iter()
         .enumerate()
-        .filter(|(_, occurrence)| ownership_priority(**occurrence, offset) == Some(best_priority))
+        .filter_map(|(index, occurrence)| {
+            ownership_priority(*occurrence, offset).map(|priority| (index, priority))
+        })
+        .collect::<Vec<_>>();
+    let shadowed_by_nested_trailing_edge = |index: usize, priority: u8| {
+        priority == 0
+            && eligible.iter().any(|(child_index, child_priority)| {
+                *child_priority == 1
+                    && *child_index != index
+                    && strictly_contains(
+                        occurrences[index].occurrence,
+                        occurrences[*child_index].occurrence,
+                    )
+            })
+    };
+    let best_priority = eligible
+        .iter()
+        .filter(|(index, priority)| !shadowed_by_nested_trailing_edge(*index, *priority))
+        .map(|(_, priority)| *priority)
+        .min()?;
+    let mut candidates = eligible
+        .iter()
+        .filter(|(index, priority)| {
+            *priority == best_priority && !shadowed_by_nested_trailing_edge(*index, *priority)
+        })
+        .map(|(index, _)| (*index, &occurrences[*index]))
         .collect::<Vec<_>>();
     candidates.sort_by(|(_, left), (_, right)| {
         let left_occurrence_width = left.occurrence.end_offset - left.occurrence.start_offset;
@@ -51,6 +72,11 @@ pub(crate) fn occurrence_at_cursor(
         return None;
     }
     Some(selected_index)
+}
+
+fn strictly_contains(container: &SourceRange, child: &SourceRange) -> bool {
+    container.start_offset <= child.start_offset
+        && child.end_offset.saturating_add(1) < container.end_offset
 }
 
 fn ownership_priority(occurrence: CursorOccurrence<'_>, offset: u32) -> Option<u8> {
@@ -146,6 +172,41 @@ mod tests {
         ];
         assert_eq!(occurrence_at_cursor(&occurrences, 3), Some(1));
         assert_eq!(occurrence_at_cursor(&occurrences, 4), Some(0));
+    }
+
+    #[test]
+    fn nested_atomic_trailing_edge_outranks_its_structural_container() {
+        let composite = range(1, 10);
+        let variable = range(4, 5);
+        let occurrences = [
+            CursorOccurrence {
+                occurrence: &composite,
+                selection: &composite,
+                application_end: None,
+            },
+            CursorOccurrence {
+                occurrence: &variable,
+                selection: &variable,
+                application_end: None,
+            },
+        ];
+        assert_eq!(occurrence_at_cursor(&occurrences, 5), Some(1));
+
+        let braced_container = range(1, 6);
+        let final_index = range(4, 5);
+        let braced = [
+            CursorOccurrence {
+                occurrence: &braced_container,
+                selection: &braced_container,
+                application_end: None,
+            },
+            CursorOccurrence {
+                occurrence: &final_index,
+                selection: &final_index,
+                application_end: None,
+            },
+        ];
+        assert_eq!(occurrence_at_cursor(&braced, 5), Some(0));
     }
 
     #[test]

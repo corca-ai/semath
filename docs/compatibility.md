@@ -2,7 +2,7 @@
 
 | Semath | Protocol | Pack schema | wasmtex syntax |
 | --- | ---: | ---: | ---: |
-| current `main` code | 12 | 8 | 7 |
+| current `main` code | 12 | 9 | 8 |
 
 `package.json` pins the reviewed wasmtex commit. That commit, the generated
 WASM declarations, protocol version, and pack schema are one tested set.
@@ -14,5 +14,10 @@ corresponding wire or data contract changes. Patch releases preserve the
 active contract.
 
 Release WASM is built on a separate x86_64 Linux host, not Apple Silicon. The
-release gate checks formatting, lint, unit tests, the held-out corpus,
-native/WASM parity, incremental performance, package installation, and docs.
+manual `bun run release:semantic` gate checks formatting, lint, unit tests,
+editable development evidence and final historical regression evidence,
+native/WASM parity, incremental
+performance, package installation, and docs before it spends the explicitly
+selected fresh blind fixture. The fresh fixture is never executed by ordinary
+CI. Its immutable receipt records the exact Semath and wasmtex revisions and
+native/WASM artifact digests.

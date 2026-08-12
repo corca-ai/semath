@@ -20,6 +20,7 @@ import {
 import {
   buildPerformanceDocuments,
   editPerformanceDocument,
+  performanceEntityFanout,
   semanticallyEditPerformanceDocument,
   type PerformanceFixtureDocument,
 } from "./performance-fixtures";
@@ -99,7 +100,7 @@ const snapshot: ProjectSnapshot = {
   protocolVersion: SEMATH_PROTOCOL_VERSION,
 };
 const initialTransferBytes = encodedLength(snapshot);
-let current = documents[1]!;
+let current = documents[2]!;
 collectGarbage();
 const rssAfterSyntax = residentBytes();
 
@@ -125,12 +126,15 @@ assertCounters(initial, DOCUMENT_COUNT + 1);
 const deltaDurations: number[] = [];
 const syntaxDurations: number[] = [];
 const queryDurations = new Map<SemathQuery["kind"], number[]>();
+const queryResultCounts = new Map<SemathQuery["kind"], number>();
+let maxQueryResultBytes = 0;
 let peakRss = residentBytes();
 let peakRssStage = "initial";
 let maxAffected = 0;
 let maxTransferBytes = 0;
 let inventoryVersion = snapshot.inventoryVersion;
-let currentSource: PerformanceFixtureDocument = sources[0]!;
+const querySource = sources[0]!;
+let currentSource: PerformanceFixtureDocument = sources[1]!;
 
 for (let run = 0; run < DELTA_RUNS; run += 1) {
   // Keep the memory sample about one edit/query lifecycle. Without collecting
@@ -168,22 +172,28 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
   }
   assertCounters(update, 0);
 
-  for (const query of measuredQueries(currentSource)) {
+  for (const query of measuredQueries(querySource)) {
     const envelope: QueryEnvelope = {
       analysisGeneration: run + 1,
-      documentVersion: current.documentVersion,
+      documentVersion: querySource.documentVersion,
       epoch: snapshot.epoch,
       inventoryVersion,
       protocolVersion: SEMATH_PROTOCOL_VERSION,
       query,
     };
     const queryStarted = performance.now();
-    await worker.request<QueryResult>({
+    const result = await worker.request<QueryResult>({
       envelope,
       id: worker.nextId(),
       kind: "query",
       priority: "cursor",
     });
+    maxQueryResultBytes = Math.max(maxQueryResultBytes, encodedLength(result));
+    queryResultCounts.set(
+      query.kind,
+      Math.max(queryResultCounts.get(query.kind) ?? 0, queryResultCount(result)),
+    );
+    assertFanoutResult(query, result);
     const durations = queryDurations.get(query.kind) ?? [];
     durations.push(performance.now() - queryStarted);
     queryDurations.set(query.kind, durations);
@@ -349,6 +359,8 @@ const report = {
   peakRssStage,
   postDisposeRssGrowthBytes: postDisposeRssGrowth,
   queryP95ByKind,
+  queryResultBytes: maxQueryResultBytes,
+  queryResultCounts: Object.fromEntries(queryResultCounts),
   semanticViewP95Ms: queryP95ByKind.semanticView ?? null,
   lifecycleFamilies: planSemanticLifecycleTraces(0x5e_21).map((trace) => trace.family),
   retainedRssGrowthBytes: retainedRssGrowth,
@@ -536,8 +548,56 @@ function measuredQueries(document: PerformanceFixtureDocument): readonly SemathQ
     { ...target, kind: "definition" },
     { ...target, kind: "references" },
     { ...target, kind: "prepareRename" },
-    { ...target, kind: "rename", newName: "renamed" },
+    { ...target, kind: "rename", newName: "w" },
   ];
+}
+
+function queryResultCount(result: QueryResult): number {
+  switch (result.value.kind) {
+    case "locations":
+      return result.value.locations.length;
+    case "editProposal":
+      return result.value.proposal?.files.reduce(
+        (count, file) => count + file.edits.length,
+        0,
+      ) ?? 0;
+    case "renamePreparation":
+      return result.value.range ? 1 : 0;
+    case "selection":
+      return result.value.ranges.length;
+    case "semanticView":
+      return result.value.view.declarations.length;
+    case "diagnostics":
+      return result.value.diagnostics.length;
+    case "diagnosticExplanation":
+      return result.value.diagnostic ? 1 : 0;
+  }
+}
+
+function assertFanoutResult(query: SemathQuery, result: QueryResult): void {
+  if (query.kind === "references" || query.kind === "rename") {
+    const count = queryResultCount(result);
+    const expectedFanout = performanceEntityFanout(DOCUMENT_COUNT);
+    if (count < expectedFanout) {
+      throw new Error(
+        `budget ${query.kind} returned ${count} source occurrences; expected at least ${expectedFanout}`,
+      );
+    }
+  }
+  if (
+    query.kind === "definition" &&
+    (result.value.kind !== "locations" || result.value.locations.length !== 1)
+  ) {
+    throw new Error(
+      `budget entity definition did not resolve exactly once: ${JSON.stringify(result.value)}`,
+    );
+  }
+  if (
+    query.kind === "prepareRename" &&
+    (result.value.kind !== "renamePreparation" || !result.value.range)
+  ) {
+    throw new Error("budget established entity was not renameable");
+  }
 }
 
 function positiveInteger(name: string, fallback: number): number {

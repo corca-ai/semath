@@ -59,6 +59,18 @@ export type DocumentReasoningFamily =
 export type FirstLossStage = (typeof FIRST_LOSS_STAGES)[number];
 export type ScientificDecision = SemanticViewInfo["decision"]["status"];
 
+export type AuthoredIdentityFailureArea =
+  | "cursor-symbol"
+  | "definition"
+  | "references"
+  | "prepare-rename"
+  | "rename";
+
+export interface AuthoredIdentityFailure {
+  readonly area: AuthoredIdentityFailureArea;
+  readonly basis: string;
+}
+
 export interface AuthoredSourceAnchor {
   readonly fileId: string;
   readonly needle: string;
@@ -141,6 +153,7 @@ export interface AuthoredScientificProbe {
     readonly snapshotId: string;
   };
   readonly expected: {
+    readonly cursorOccurrence?: AuthoredSourceAnchor | null;
     readonly decision: ScientificDecision;
     readonly diagnostics: {
       readonly excludedCodes: readonly string[];
@@ -157,7 +170,12 @@ export interface AuthoredScientificProbe {
         readonly status: "available" | "unavailable";
       };
       readonly references: AuthoredLocationExpectation;
-      readonly rename: AuthoredLocationExpectation;
+      readonly rename: AuthoredLocationExpectation & {
+        readonly expectedText?: string;
+        readonly newName?: string;
+        readonly replacementText?: string;
+        readonly safety?: string;
+      };
     };
     readonly relations: readonly AuthoredRelationExpectation[];
     readonly symbol?: string;
@@ -211,11 +229,15 @@ export interface AuthoredScientificObservation {
     readonly sourceGrounded: boolean;
   }[];
   readonly renameEdits: readonly {
+    readonly expectedText: string;
     readonly fileId: string;
     readonly path: string;
     readonly range: SourceRange;
+    readonly replacementText: string;
   }[];
+  readonly renameSafety?: string;
   readonly symbol: string | null;
+  readonly symbolLocation?: ObservedLocation;
 }
 
 export interface AuthoredScientificSurfaceResults {
@@ -510,7 +532,7 @@ export function scoreAuthoredScientificFixture(
       probe,
       observed,
     );
-    caseFailures.push(...identityFailures);
+    caseFailures.push(...identityFailures.map((failure) => failure.basis));
     caseNavigation = identityFailures.length > 0;
     const problems = observed.diagnostics.filter(
       (item) => item.severity === "error" || item.severity === "warning",
@@ -624,9 +646,19 @@ export function observeAuthoredScientificProbe(
         relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
     })),
     renameEdits: (results.rename.value.proposal?.files ?? []).flatMap((file) =>
-      file.edits.map((edit) => ({ fileId: file.fileId, path: file.path, range: edit.range })),
+      file.edits.map((edit) => ({
+        expectedText: edit.expectedText,
+        fileId: file.fileId,
+        path: file.path,
+        range: edit.range,
+        replacementText: edit.replacementText,
+      })),
     ),
+    ...(results.rename.value.proposal
+      ? { renameSafety: results.rename.value.proposal.safety }
+      : {}),
     symbol: view.symbol?.symbol ?? null,
+    ...(view.symbol ? { symbolLocation: view.symbol.location } : {}),
   };
 }
 
@@ -832,11 +864,11 @@ function parseExpected(
   exact(
     item,
     [
-      "decision", "symbol", "proofGrounded", "relations", "excludedRelationIds",
+      "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
       "navigation", "diagnostics",
     ],
     path,
-    ["symbol"],
+    ["symbol", "cursorOccurrence"],
   );
   const navigation = record(item.navigation, `${path}.navigation`);
   exact(
@@ -853,6 +885,22 @@ function parseExpected(
     ["status", "range", "placeholder"],
     `${path}.navigation.prepareRename`,
     ["range", "placeholder"],
+  );
+  const rename = record(navigation.rename, `${path}.navigation.rename`);
+  exact(
+    rename,
+    [
+      "status",
+      "minimum",
+      "required",
+      "excluded",
+      "expectedText",
+      "newName",
+      "replacementText",
+      "safety",
+    ],
+    `${path}.navigation.rename`,
+    ["expectedText", "newName", "replacementText", "safety"],
   );
   const diagnostics = record(item.diagnostics, `${path}.diagnostics`);
   exact(
@@ -877,6 +925,14 @@ function parseExpected(
     throw new Error(`${path}.diagnostics.maximum: smaller than required diagnostics`);
   }
   return {
+    ...(item.cursorOccurrence === undefined
+      ? {}
+      : {
+          cursorOccurrence:
+            item.cursorOccurrence === null
+              ? null
+              : parseAnchor(item.cursorOccurrence, `${path}.cursorOccurrence`),
+        }),
     decision: oneOf(
       item.decision,
       ["ambiguous", "conflicting", "established", "partial", "unsupported"] as const,
@@ -911,7 +967,36 @@ function parseExpected(
         navigation.references,
         `${path}.navigation.references`,
       ),
-      rename: parseLocationExpectation(navigation.rename, `${path}.navigation.rename`),
+      rename: {
+        ...parseLocationExpectation(rename, `${path}.navigation.rename`, [
+          "expectedText",
+          "newName",
+          "replacementText",
+          "safety",
+        ]),
+        ...(rename.expectedText === undefined
+          ? {}
+          : {
+              expectedText: text(
+                rename.expectedText,
+                `${path}.navigation.rename.expectedText`,
+              ),
+            }),
+        ...(rename.newName === undefined
+          ? {}
+          : { newName: text(rename.newName, `${path}.navigation.rename.newName`) }),
+        ...(rename.replacementText === undefined
+          ? {}
+          : {
+              replacementText: text(
+                rename.replacementText,
+                `${path}.navigation.rename.replacementText`,
+              ),
+            }),
+        ...(rename.safety === undefined
+          ? {}
+          : { safety: text(rename.safety, `${path}.navigation.rename.safety`) }),
+      },
     },
     relations: parseRelationExpectations(item.relations, `${path}.relations`),
     ...(item.symbol === undefined ? {} : { symbol: text(item.symbol, `${path}.symbol`) }),
@@ -947,9 +1032,10 @@ function parseRelationExpectations(
 function parseLocationExpectation(
   value: unknown,
   path: string,
+  extensions: readonly string[] = [],
 ): AuthoredLocationExpectation {
   const item = record(value, path);
-  exact(item, ["status", "minimum", "required", "excluded"], path);
+  exact(item, ["status", "minimum", "required", "excluded", ...extensions], path, extensions);
   const result = {
     excluded: array(item.excluded, `${path}.excluded`).map((value, index) =>
       parseAnchor(value, `${path}.excluded[${index}]`),
@@ -1169,17 +1255,42 @@ export function authoredProbeIdentityMatches(
   return authoredProbeIdentityFailures(fixture, probe, observation).length === 0;
 }
 
-function authoredProbeIdentityFailures(
+export function authoredProbeIdentityFailures(
   fixture: AuthoredScientificFixture,
   probe: AuthoredScientificProbe,
   observation: AuthoredScientificObservation,
-): string[] {
+): AuthoredIdentityFailure[] {
   const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
-  const failures: string[] = [];
+  const failures: AuthoredIdentityFailure[] = [];
+  if (probe.expected.cursorOccurrence !== undefined) {
+    const expected = probe.expected.cursorOccurrence;
+    if (expected === null) {
+      if (observation.symbolLocation) {
+        failures.push({
+          area: "cursor-symbol",
+          basis: "formula-boundary cursor resolved an unexpected symbol occurrence",
+        });
+      }
+    } else {
+      const occurrence = resolveAuthoredAnchor(snapshot, expected);
+      if (
+        !observation.symbolLocation ||
+        observation.symbolLocation.fileId !== occurrence.fileId ||
+        observation.symbolLocation.path !== occurrence.path ||
+        !sameRange(observation.symbolLocation.range, occurrence.range)
+      ) {
+        failures.push({
+          area: "cursor-symbol",
+          basis: `cursor occurrence differs from ${expected.fileId}:${expected.needle}`,
+        });
+      }
+    }
+  }
   if (probe.expected.symbol && observation.symbol !== probe.expected.symbol) {
-    failures.push(
-      `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
-    );
+    failures.push({
+      area: "cursor-symbol",
+      basis: `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
+    });
   }
   checkLocationExpectation(
     "definition",
@@ -1188,6 +1299,27 @@ function authoredProbeIdentityFailures(
     snapshot,
     failures,
   );
+  const rename = probe.expected.navigation.rename;
+  if (
+    rename.expectedText !== undefined &&
+    observation.renameEdits.some((edit) => edit.expectedText !== rename.expectedText)
+  ) {
+    failures.push({ area: "rename", basis: "rename expected source text differs" });
+  }
+  if (
+    rename.replacementText !== undefined &&
+    observation.renameEdits.some(
+      (edit) => edit.replacementText !== rename.replacementText,
+    )
+  ) {
+    failures.push({ area: "rename", basis: "rename replacement text differs" });
+  }
+  if (
+    rename.safety !== undefined &&
+    observation.renameSafety !== rename.safety
+  ) {
+    failures.push({ area: "rename", basis: "rename safety differs" });
+  }
   checkLocationExpectation(
     "references",
     probe.expected.navigation.references,
@@ -1207,7 +1339,10 @@ function authoredProbeIdentityFailures(
     Boolean(observation.prepareRename.range) !==
     (preparation.status === "available")
   ) {
-    failures.push("prepareRename availability differs");
+    failures.push({
+      area: "prepare-rename",
+      basis: "prepareRename availability differs",
+    });
   }
   if (
     preparation.range &&
@@ -1217,31 +1352,37 @@ function authoredProbeIdentityFailures(
         resolveAuthoredAnchor(snapshot, preparation.range).range,
       ))
   ) {
-    failures.push("prepareRename range differs");
+    failures.push({ area: "prepare-rename", basis: "prepareRename range differs" });
   }
   if (
     preparation.placeholder !== undefined &&
     observation.prepareRename.placeholder !== preparation.placeholder
   ) {
-    failures.push("prepareRename placeholder differs");
+    failures.push({
+      area: "prepare-rename",
+      basis: "prepareRename placeholder differs",
+    });
   }
   return failures;
 }
 
 function checkLocationExpectation(
-  name: string,
+  name: "definition" | "references" | "rename",
   expected: AuthoredLocationExpectation,
   actual: readonly ObservedLocation[],
   snapshot: AuthoredScientificSnapshot,
-  failures: string[],
+  failures: AuthoredIdentityFailure[],
 ): boolean {
   let failed = false;
   if ((actual.length > 0) !== (expected.status === "available")) {
-    failures.push(`${name} availability differs`);
+    failures.push({ area: name, basis: `${name} availability differs` });
     failed = true;
   }
   if (actual.length < expected.minimum) {
-    failures.push(`${name} count ${actual.length}; expected at least ${expected.minimum}`);
+    failures.push({
+      area: name,
+      basis: `${name} count ${actual.length}; expected at least ${expected.minimum}`,
+    });
     failed = true;
   }
   for (const anchor of expected.required) {
@@ -1254,7 +1395,10 @@ function checkLocationExpectation(
           sameRange(item.range, resolved.range),
       )
     ) {
-      failures.push(`${name} missing ${anchor.fileId}:${anchor.needle}`);
+      failures.push({
+        area: name,
+        basis: `${name} missing ${anchor.fileId}:${anchor.needle}`,
+      });
       failed = true;
     }
   }
@@ -1268,7 +1412,10 @@ function checkLocationExpectation(
           sameRange(item.range, resolved.range),
       )
     ) {
-      failures.push(`${name} leaked ${anchor.fileId}:${anchor.needle}`);
+      failures.push({
+        area: name,
+        basis: `${name} leaked ${anchor.fileId}:${anchor.needle}`,
+      });
       failed = true;
     }
   }

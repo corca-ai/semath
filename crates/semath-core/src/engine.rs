@@ -14,6 +14,10 @@ use crate::canonical::{
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
 use crate::cursor::{CursorOccurrence, interior_offset, occurrence_at_cursor};
 use crate::decision::{MeaningDecisionInput, decide_meaning, symbol_has_source_meaning};
+use crate::entity_policy::{
+    EntityEvidenceDecision, EntityFactDisposition, RenameNotationFamily, RenameSourceOccurrence,
+    decide_fact, plan_entity_rename,
+};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
@@ -26,17 +30,17 @@ use crate::semantic_index::{
     ClaimOperation, ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent,
     DocumentSemanticFacts, EntityId, EvidenceId, EvidenceModality, EvidenceOrigin,
     EvidencePolarity, EvidenceRecord, InferenceTier, Mention, MentionModality, NotationComponent,
-    OccurrenceKind, ProjectSemanticIndex, ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
+    OccurrenceKind, ProjectSemanticIndex, SourceOccurrence, SourceOccurrenceId,
     occurrence_binding_key,
 };
 use crate::{
-    AnalysisStats, AssumptionInfo, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo,
-    DomainActivation, Evidence, Location, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
-    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticCandidateInfo,
-    SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
-    SourceRange, SymbolInfo, UpdateResult,
+    AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, DefinitionInfo,
+    DimensionExponentInfo, DomainActivation, Evidence, Location, PROTOCOL_VERSION,
+    PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
+    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue, RoleInfo,
+    SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
+    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -327,7 +331,17 @@ struct ProjectState {
     external_types: HashMap<String, ExternalTypeEnvironment>,
     semantic: ProjectSemanticIndex,
     definitions_by_entity: BTreeMap<EntityId, DefinitionInfo>,
-    occurrences_by_range: HashMap<(String, u32, u32), SourceOccurrenceId>,
+    occurrences_by_range: OccurrenceRangeIndex,
+}
+
+type OccurrenceRangeKey = (String, u32, u32);
+type OccurrenceRangeIndex = HashMap<OccurrenceRangeKey, Vec<SourceOccurrenceId>>;
+
+#[derive(Clone, Debug)]
+struct CursorFocus {
+    name: String,
+    range: SourceRange,
+    occurrence_id: SourceOccurrenceId,
 }
 
 impl ProjectState {
@@ -369,6 +383,106 @@ impl ProjectState {
             .get_mut(file_id)
             .expect("semantic observations require an analyzed document")
             .observations
+    }
+
+    fn occurrence_id_for_range(
+        &self,
+        file_id: &str,
+        range: &SourceRange,
+    ) -> Option<SourceOccurrenceId> {
+        let ids = self.occurrences_by_range.get(&(
+            file_id.to_owned(),
+            range.start_offset,
+            range.end_offset,
+        ))?;
+        let mut exact = ids
+            .iter()
+            .filter_map(|id| self.semantic.occurrence(id))
+            .filter(|occurrence| occurrence.range == *range)
+            .collect::<Vec<_>>();
+        if exact.is_empty() {
+            exact = ids
+                .iter()
+                .filter_map(|id| self.semantic.occurrence(id))
+                .filter(|occurrence| occurrence.selection_range == *range)
+                .collect();
+        }
+        (exact.len() == 1).then(|| exact[0].id.clone())
+    }
+
+    fn cursor_focus(&self, file_id: &str, seed: &SemanticOccurrenceSeed) -> Option<CursorFocus> {
+        let mut ids = self
+            .occurrences_by_range
+            .get(&(
+                file_id.to_owned(),
+                seed.range.start_offset,
+                seed.range.end_offset,
+            ))?
+            .iter()
+            .filter_map(|id| self.semantic.occurrence(id))
+            .filter(|occurrence| {
+                occurrence.kind == seed.kind
+                    && occurrence.range == seed.range
+                    && occurrence.selection_range == seed.selection_range
+                    && occurrence.surface == seed.surface
+            })
+            .collect::<Vec<_>>();
+        ids.sort_by_key(|occurrence| occurrence.id.local_id);
+        ids.dedup_by_key(|occurrence| occurrence.id.clone());
+        let occurrence = (ids.len() == 1).then(|| ids[0])?;
+        Some(CursorFocus {
+            name: occurrence.surface.clone(),
+            range: occurrence.range.clone(),
+            occurrence_id: occurrence.id.clone(),
+        })
+    }
+
+    fn cursor_focus_at(
+        &self,
+        file_id: &str,
+        math: &ParsedMath,
+        offset: u32,
+    ) -> Option<CursorFocus> {
+        let document = self.documents.get(file_id)?;
+        let candidates = self
+            .semantic
+            .occurrences()
+            .filter(|occurrence| occurrence.id.file_id == file_id)
+            .filter(|occurrence| {
+                math.region.full_range.start_offset <= occurrence.range.start_offset
+                    && occurrence.range.end_offset <= math.region.full_range.end_offset
+            })
+            .filter(|occurrence| {
+                !occurrence.notation.is_empty()
+                    || self
+                        .semantic
+                        .occurrence_has_explicit_identity(&occurrence.id)
+            })
+            .collect::<Vec<_>>();
+        let ownership = candidates
+            .iter()
+            .map(|occurrence| CursorOccurrence {
+                occurrence: &occurrence.range,
+                selection: &occurrence.selection_range,
+                application_end: document
+                    .semantic_occurrences
+                    .iter()
+                    .find(|seed| {
+                        seed.kind == occurrence.kind
+                            && seed.range == occurrence.range
+                            && seed.selection_range == occurrence.selection_range
+                            && seed.surface == occurrence.surface
+                    })
+                    .and_then(|seed| seed.application_end_offset)
+                    .filter(|end| *end <= math.region.full_range.end_offset),
+            })
+            .collect::<Vec<_>>();
+        let occurrence = candidates.get(occurrence_at_cursor(&ownership, offset)?)?;
+        Some(CursorFocus {
+            name: occurrence.surface.clone(),
+            range: occurrence.range.clone(),
+            occurrence_id: occurrence.id.clone(),
+        })
     }
 
     fn order_document(&self, file_id: &str) -> Option<ProjectOrderDocument> {
@@ -496,7 +610,40 @@ impl ProjectState {
 struct LoweredSemanticDocument {
     facts: DocumentSemanticFacts,
     definitions: BTreeMap<EntityId, DefinitionInfo>,
-    occurrences: HashMap<(String, u32, u32), SourceOccurrenceId>,
+    occurrences: OccurrenceRangeIndex,
+}
+
+fn index_occurrence_range(
+    index: &mut OccurrenceRangeIndex,
+    key: OccurrenceRangeKey,
+    occurrence_id: SourceOccurrenceId,
+) {
+    let occurrences = index.entry(key).or_default();
+    if !occurrences.contains(&occurrence_id) {
+        occurrences.push(occurrence_id);
+    }
+}
+
+fn occurrence_id_at_range(
+    index: &OccurrenceRangeIndex,
+    occurrences: &[SourceOccurrence],
+    file_id: &str,
+    range: &SourceRange,
+) -> Option<SourceOccurrenceId> {
+    let ids = index.get(&(file_id.to_owned(), range.start_offset, range.end_offset))?;
+    let mut exact = ids
+        .iter()
+        .filter_map(|id| occurrences.iter().find(|occurrence| occurrence.id == *id))
+        .filter(|occurrence| occurrence.range == *range)
+        .collect::<Vec<_>>();
+    if exact.is_empty() {
+        exact = ids
+            .iter()
+            .filter_map(|id| occurrences.iter().find(|occurrence| occurrence.id == *id))
+            .filter(|occurrence| occurrence.selection_range == *range)
+            .collect();
+    }
+    (exact.len() == 1).then(|| exact[0].id.clone())
 }
 
 fn append_relation_occurrences(
@@ -658,14 +805,15 @@ fn lower_semantic_document(
 ) -> LoweredSemanticDocument {
     let source = &document.document;
     let mut occurrences = Vec::new();
-    let mut occurrences_by_range = HashMap::new();
+    let mut occurrences_by_range = OccurrenceRangeIndex::new();
     for (local_id, seed) in document.semantic_occurrences.iter().enumerate() {
         let id = SourceOccurrenceId {
             file_id: source.file_id.clone(),
             document_version: source.document_version,
             local_id: local_id as u32,
         };
-        occurrences_by_range.insert(
+        index_occurrence_range(
+            &mut occurrences_by_range,
             (
                 source.file_id.clone(),
                 seed.selection_range.start_offset,
@@ -673,7 +821,8 @@ fn lower_semantic_document(
             ),
             id.clone(),
         );
-        occurrences_by_range.insert(
+        index_occurrence_range(
+            &mut occurrences_by_range,
             (
                 source.file_id.clone(),
                 seed.range.start_offset,
@@ -726,7 +875,8 @@ fn lower_semantic_document(
     for (local_id, (occurrence, options)) in occurrences.iter_mut().enumerate() {
         occurrence.id.local_id = local_id as u32;
         append_semantic_candidates(source, occurrence, options, &mut candidates);
-        occurrences_by_range.insert(
+        index_occurrence_range(
+            &mut occurrences_by_range,
             (
                 source.file_id.clone(),
                 occurrence.range.start_offset,
@@ -734,7 +884,8 @@ fn lower_semantic_document(
             ),
             occurrence.id.clone(),
         );
-        occurrences_by_range.insert(
+        index_occurrence_range(
+            &mut occurrences_by_range,
             (
                 source.file_id.clone(),
                 occurrence.selection_range.start_offset,
@@ -898,13 +1049,11 @@ fn definition_anchor(
     definition: &DefinitionInfo,
     file_id: &str,
     occurrences: &[SourceOccurrence],
-    occurrences_by_range: &HashMap<(String, u32, u32), SourceOccurrenceId>,
+    occurrences_by_range: &OccurrenceRangeIndex,
 ) -> Option<SourceOccurrenceId> {
     let range = &definition.location.range;
-    if let Some(exact) =
-        occurrences_by_range.get(&(file_id.to_owned(), range.start_offset, range.end_offset))
-    {
-        return Some(exact.clone());
+    if let Some(exact) = occurrence_id_at_range(occurrences_by_range, occurrences, file_id, range) {
+        return Some(exact);
     }
     let mut candidates = occurrences
         .iter()
@@ -1468,7 +1617,7 @@ impl RelationLowerer<'_> {
         if let Some(entity) = self.entities_by_expression.get(&key) {
             return Some(entity.clone());
         }
-        let anchor = self.occurrence_for_range(&expression.range)?;
+        let anchor = self.occurrence_for_range(&expression.range)?.clone();
         let entity = EntityId {
             component_id: anchor.component_id.clone(),
             scope_path: anchor.scope_path.clone(),
@@ -1477,7 +1626,51 @@ impl RelationLowerer<'_> {
         };
         self.output.entities.push(entity.clone());
         self.entities_by_expression.insert(key, entity.clone());
+        if matches!(expression.kind, SemanticExprKind::Derivative { .. }) {
+            self.emit_composite_identity(&entity, &anchor, "derivative");
+        }
         Some(entity)
+    }
+
+    fn emit_composite_identity(
+        &mut self,
+        entity: &EntityId,
+        occurrence: &SourceOccurrence,
+        kind: &str,
+    ) {
+        let ordinal = self.output.claims.len();
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:canonical-{kind}-identity-evidence:{ordinal}",
+            self.source.file_id, self.source.document_version
+        ));
+        let (polarity, modality) = self
+            .semantic_evidence
+            .formula_disposition(&occurrence.range);
+        self.output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: occurrence.id.clone(),
+            scope_path: occurrence.scope_path.clone(),
+            available_after: occurrence.availability_order,
+            polarity,
+            modality,
+            origin: EvidenceOrigin::Explicit,
+            provenance: vec![occurrence.id.clone()],
+            parent_claims: Vec::new(),
+            rule_id: format!("semath/canonical-{kind}-identity"),
+            rule_version: 1,
+        });
+        self.output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:canonical-{kind}-identity-claim:{ordinal}",
+                self.source.file_id, self.source.document_version
+            )),
+            subject: entity.clone(),
+            predicate: ClaimPredicate::Names,
+            object: ClaimObject::Occurrence(occurrence.id.clone()),
+            evidence_id,
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
     }
 
     fn establish_implicit_entity(
@@ -1951,16 +2144,14 @@ struct LoweredCrossModalFacts {
 fn lower_cross_modal_facts(
     document: &AnalyzedDocument,
     occurrences: &[SourceOccurrence],
-    occurrences_by_range: &HashMap<(String, u32, u32), SourceOccurrenceId>,
+    occurrences_by_range: &OccurrenceRangeIndex,
     order: &ProjectOrder,
 ) -> LoweredCrossModalFacts {
     let source = &document.document;
     let mut output = LoweredCrossModalFacts::default();
     for (binding_index, binding) in document.cross_modal_bindings.iter().enumerate() {
         let lookup = |range: &SourceRange| {
-            occurrences_by_range
-                .get(&(source.file_id.clone(), range.start_offset, range.end_offset))
-                .cloned()
+            occurrence_id_at_range(occurrences_by_range, occurrences, &source.file_id, range)
         };
         let (Some(short), Some(anchor)) =
             (lookup(&binding.short_range), lookup(&binding.long_range))
@@ -2537,14 +2728,14 @@ impl SemathEngine {
         let offset = query_offset.unwrap_or(0);
         let parsed =
             query_offset.and_then(|offset| parsed_math_at_cursor(&document.parsed, offset));
-        let symbol = parsed.and_then(|math| semantic_symbol_at_cursor(document, math, offset));
-        let cursor_offset = symbol.as_ref().map_or_else(
+        let focus = parsed.and_then(|math| self.index.cursor_focus_at(file_id, math, offset));
+        let cursor_offset = focus.as_ref().map_or_else(
             || {
                 parsed.map_or(offset, |math| {
                     interior_offset(&math.region.content_range, offset)
                 })
             },
-            |(_, range)| interior_offset(range, offset),
+            |focus| interior_offset(&focus.range, offset),
         );
 
         let hygiene_enabled = self.index.documents.len() == 1;
@@ -2564,35 +2755,35 @@ impl SemathEngine {
                     document,
                     observations,
                     parsed,
-                    symbol.as_ref(),
+                    focus.as_ref(),
                     cursor_offset,
                     hygiene_enabled,
                 )),
             },
             Query::Definition { .. } => QueryValue::Locations {
-                locations: symbol
+                locations: focus
                     .as_ref()
-                    .and_then(|(name, occurrence)| {
-                        self.resolve_definition(file_id, occurrence, name)
-                    })
+                    .and_then(|focus| self.resolve_definition(focus))
                     .map(|definition| vec![definition.location])
                     .unwrap_or_default(),
             },
             Query::References { .. } => QueryValue::Locations {
-                locations: symbol
+                locations: focus
                     .as_ref()
-                    .and_then(|(name, occurrence)| {
-                        self.visible_definitions(file_id, occurrence, name)
-                            .into_iter()
-                            .next()
-                    })
+                    .and_then(|focus| self.visible_definitions(focus).into_iter().next())
                     .map(|definition| self.references_for(&definition))
                     .unwrap_or_default(),
             },
-            Query::PrepareRename { .. } => prepare_rename(parsed, cursor_offset),
-            Query::Rename { new_name, .. } => {
-                rename_proposal(document, parsed, cursor_offset, &new_name)
+            Query::PrepareRename { .. } => {
+                self.prepare_entity_rename(document, parsed, focus.as_ref(), cursor_offset)
             }
+            Query::Rename { new_name, .. } => self.entity_rename_proposal(
+                document,
+                parsed,
+                focus.as_ref(),
+                cursor_offset,
+                &new_name,
+            ),
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
                 diagnostics: document_diagnostics(
                     document,
@@ -2821,13 +3012,8 @@ impl SemathEngine {
             && analysis_fingerprint(next) != current.analysis_fingerprint
     }
 
-    fn visible_definitions(
-        &self,
-        file_id: &str,
-        occurrence: &SourceRange,
-        _symbol: &str,
-    ) -> Vec<DefinitionInfo> {
-        self.resolved_entity(file_id, occurrence)
+    fn visible_definitions(&self, focus: &CursorFocus) -> Vec<DefinitionInfo> {
+        self.resolved_entity(&focus.occurrence_id)
             .and_then(|entity| {
                 self.index
                     .definitions_by_entity
@@ -2842,16 +3028,12 @@ impl SemathEngine {
             .collect()
     }
 
-    fn resolve_definition(
-        &self,
-        file_id: &str,
-        occurrence: &SourceRange,
-        symbol: &str,
-    ) -> Option<DefinitionInfo> {
-        self.visible_definitions(file_id, occurrence, symbol)
+    fn resolve_definition(&self, focus: &CursorFocus) -> Option<DefinitionInfo> {
+        self.visible_definitions(focus)
             .into_iter()
             .find(|definition| {
-                definition.location.file_id != file_id || definition.location.range != *occurrence
+                definition.location.file_id != focus.occurrence_id.file_id
+                    || definition.location.range != focus.range
             })
     }
 
@@ -2859,21 +3041,20 @@ impl SemathEngine {
         let Some(entity) = &definition.entity_id else {
             return Vec::new();
         };
-        let mut locations = Vec::new();
-        for occurrence in self.index.semantic.occurrences() {
-            let resolution = self.index.semantic.resolve(&occurrence.id);
-            if resolution.status == ResolutionStatus::Established
-                && resolution.candidates.len() == 1
-                && resolution.candidates[0].entity_id == *entity
-            {
+        let mut locations = self
+            .index
+            .semantic
+            .established_occurrences_for_entity(entity)
+            .into_iter()
+            .map(|occurrence| {
                 let document = &self.index.documents[&occurrence.id.file_id];
-                locations.push(Location {
+                Location {
                     file_id: occurrence.id.file_id.clone(),
                     path: document.document.path.clone(),
                     range: occurrence.range.clone(),
-                });
-            }
-        }
+                }
+            })
+            .collect::<Vec<_>>();
         locations.sort_by(|left, right| {
             left.path
                 .cmp(&right.path)
@@ -2886,115 +3067,249 @@ impl SemathEngine {
         }
     }
 
-    fn resolved_entity(&self, file_id: &str, range: &SourceRange) -> Option<EntityId> {
-        let occurrence_id = self.index.occurrences_by_range.get(&(
-            file_id.to_owned(),
-            range.start_offset,
-            range.end_offset,
-        ))?;
-        let resolution = self.index.semantic.resolve(occurrence_id);
-        (resolution.status == ResolutionStatus::Established && resolution.candidates.len() == 1)
-            .then(|| resolution.candidates[0].entity_id.clone())
+    fn resolved_entity(&self, occurrence_id: &SourceOccurrenceId) -> Option<EntityId> {
+        match self.index.semantic.entity_decision(occurrence_id) {
+            EntityEvidenceDecision::Established(entity) => Some(entity),
+            EntityEvidenceDecision::Ambiguous
+            | EntityEvidenceDecision::Conflicting
+            | EntityEvidenceDecision::Unsupported
+            | EntityEvidenceDecision::EngineLimited => None,
+        }
     }
 
-    fn semantic_entity(&self, file_id: &str, range: &SourceRange) -> Option<EntityId> {
-        if let Some(entity) = self.resolved_entity(file_id, range) {
-            return Some(entity);
+    fn prepare_entity_rename(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        offset: u32,
+    ) -> QueryValue {
+        let target = self.entity_rename_target(document, parsed, focus, offset);
+        let Some((decision, old_name, occurrences)) = target else {
+            return rename_preparation_value_rejection(
+                "The cursor does not resolve to one complete editable entity.",
+            );
+        };
+        let Some(first) = occurrences.first() else {
+            return rename_preparation_value_rejection(
+                "The complete entity has no editable source occurrences.",
+            );
+        };
+        let replacement = alternate_name(&old_name, first.family);
+        match plan_entity_rename(decision, &old_name, &replacement, occurrences) {
+            Ok(plan) => QueryValue::RenamePreparation {
+                range: focus
+                    .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id))
+                    .map(|occurrence| occurrence.selection_range.clone())
+                    .or_else(|| {
+                        parsed.and_then(|math| {
+                            math.symbols
+                                .iter()
+                                .find(|(_, range)| range.contains(offset))
+                                .map(|(_, range)| range.clone())
+                        })
+                    }),
+                placeholder: Some(plan.old_name),
+                rejection: None,
+            },
+            Err(rejection) => rename_preparation_value_rejection(&rejection),
         }
-        let occurrence_id = self.index.occurrences_by_range.get(&(
-            file_id.to_owned(),
-            range.start_offset,
-            range.end_offset,
-        ))?;
-        let occurrence = self.index.semantic.occurrence(occurrence_id)?;
-        self.index
-            .semantic
-            .entities()
-            .filter(|entity| entity.anchor.file_id == occurrence_id.file_id)
-            .filter(|entity| {
-                let anchor_is_within_surface = self
-                    .index
-                    .semantic
-                    .occurrence(&entity.anchor)
-                    .is_some_and(|anchor| {
-                        range.start_offset <= anchor.range.start_offset
-                            && anchor.range.end_offset <= range.end_offset
-                    });
-                let occurrence_is_provenance = self
-                    .index
-                    .semantic
-                    .claims_for_entity_at(entity, occurrence)
-                    .iter()
-                    .filter(|claim| claim.tier == InferenceTier::Constraint)
-                    .filter_map(|claim| self.index.semantic.evidence(&claim.evidence_id))
-                    .any(|evidence| evidence.provenance.contains(occurrence_id));
-                anchor_is_within_surface || occurrence_is_provenance
+    }
+
+    fn entity_rename_proposal(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        offset: u32,
+        new_name: &str,
+    ) -> QueryValue {
+        let binder = parsed.and_then(|math| {
+            let found = binders(math);
+            let target = binder_at(math, &found, offset).cloned()?;
+            Some((math, found, target))
+        });
+        if let Some((math, found, target)) = &binder
+            && let Some(rejection) = rename_rejection(math, found, target, new_name)
+        {
+            return edit_proposal_rejection(&rejection);
+        }
+        let target = self.entity_rename_target(document, parsed, focus, offset);
+        let Some((decision, old_name, occurrences)) = target else {
+            return edit_proposal_rejection(
+                "The cursor does not resolve to one complete editable entity.",
+            );
+        };
+        let plan = match plan_entity_rename(decision, &old_name, new_name, occurrences) {
+            Ok(plan) => plan,
+            Err(rejection) => return edit_proposal_rejection(&rejection),
+        };
+        if self.rename_would_merge_entity(&plan.entity_id, new_name) {
+            return edit_proposal_rejection(
+                "The replacement would merge this entity with another established identity.",
+            );
+        }
+        let mut by_file = BTreeMap::<String, Vec<RenameSourceOccurrence>>::new();
+        for occurrence in plan.occurrences {
+            by_file
+                .entry(occurrence.occurrence_id.file_id.clone())
+                .or_default()
+                .push(occurrence);
+        }
+        let mut files = by_file
+            .into_iter()
+            .map(|(file_id, occurrences)| {
+                let analyzed = &self.index.documents[&file_id];
+                SemanticEditFile {
+                    file_id,
+                    path: analyzed.document.path.clone(),
+                    document_version: analyzed.document.document_version,
+                    edits: occurrences
+                        .into_iter()
+                        .map(|occurrence| SemanticTextEdit {
+                            range: occurrence.range,
+                            expected_text: plan.old_name.clone(),
+                            replacement_text: plan.new_name.clone(),
+                        })
+                        .collect(),
+                }
             })
-            .filter(|entity| {
-                self.index
-                    .semantic
-                    .claims_for_entity_at(entity, occurrence)
-                    .iter()
-                    .any(|claim| claim.tier == InferenceTier::Constraint)
-            })
-            .max_by_key(|entity| {
-                let exact = (entity.anchor == *occurrence_id) as usize;
-                let provenance = self
-                    .index
-                    .semantic
-                    .claims_for_entity_at(entity, occurrence)
-                    .iter()
-                    .filter(|claim| claim.tier == InferenceTier::Constraint)
-                    .filter_map(|claim| self.index.semantic.evidence(&claim.evidence_id))
-                    .filter(|evidence| evidence.provenance.contains(occurrence_id))
-                    .count();
-                let claims = self
-                    .index
-                    .semantic
-                    .claims_for_entity(entity)
-                    .iter()
-                    .filter(|claim| claim.tier == InferenceTier::Constraint)
-                    .count();
-                (exact, provenance, claims)
-            })
-            .cloned()
+            .collect::<Vec<_>>();
+        files.sort_by(|left, right| left.path.cmp(&right.path));
+        QueryValue::EditProposal {
+            proposal: Some(SemanticEditProposal {
+                title: format!("Rename `{}` to `{}`", plan.old_name, plan.new_name),
+                safety: "deterministic".into(),
+                evidence: vec![Evidence {
+                    rule_id: "semath/established-entity-rename".into(),
+                    kind: "semantic-identity".into(),
+                    strength: "hard".into(),
+                    source_ranges: files
+                        .iter()
+                        .flat_map(|file| file.edits.iter().map(|edit| edit.range.clone()))
+                        .collect(),
+                }],
+                files,
+            }),
+            rejection: None,
+        }
+    }
+
+    fn entity_rename_target(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        offset: u32,
+    ) -> Option<(EntityEvidenceDecision, String, Vec<RenameSourceOccurrence>)> {
+        let focus = focus?;
+        let focus_occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
+        if !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
+            return Some((
+                EntityEvidenceDecision::Unsupported,
+                focus.name.clone(),
+                Vec::new(),
+            ));
+        }
+        let decision = self.index.semantic.entity_decision(&focus.occurrence_id);
+        let EntityEvidenceDecision::Established(entity) = &decision else {
+            return Some((decision, focus.name.clone(), Vec::new()));
+        };
+        let binder = parsed.filter(|math| math.region.closed).and_then(|math| {
+            let found = binders(math);
+            let target = binder_at(math, &found, offset).cloned()?;
+            Some((math, found, target))
+        });
+        let occurrences = if let Some((math, found, target)) = binder {
+            bound_occurrences(math, &found, &target)
+                .into_iter()
+                .map(|range| {
+                    let mut matches = self
+                        .index
+                        .semantic
+                        .occurrences()
+                        .filter(|occurrence| {
+                            occurrence.id.file_id == document.document.file_id
+                                && occurrence.selection_range == range
+                                && matches!(
+                                    self.index.semantic.entity_decision(&occurrence.id),
+                                    EntityEvidenceDecision::Established(candidate) if candidate == *entity
+                                )
+                        })
+                        .collect::<Vec<_>>();
+                    matches.sort_by_key(|occurrence| occurrence.id.local_id);
+                    matches.dedup_by_key(|occurrence| occurrence.id.clone());
+                    (matches.len() == 1).then(|| self.rename_occurrence(matches[0]))
+                })
+                .collect::<Option<Vec<_>>>()?
+        } else {
+            self.index.definitions_by_entity.get(entity)?;
+            self.index
+                .semantic
+                .established_occurrences_for_entity(entity)
+                .into_iter()
+                .map(|occurrence| self.rename_occurrence(occurrence))
+                .collect()
+        };
+        let old_name = occurrences.first()?.current_text.clone();
+        Some((decision, old_name, occurrences))
+    }
+
+    fn rename_occurrence(&self, occurrence: &SourceOccurrence) -> RenameSourceOccurrence {
+        let analyzed = &self.index.documents[&occurrence.id.file_id];
+        let current_text = source_text(&analyzed.document, &occurrence.selection_range);
+        let family = if current_text.starts_with('\\') {
+            RenameNotationFamily::ControlSequence
+        } else {
+            RenameNotationFamily::PlainIdentifier
+        };
+        RenameSourceOccurrence {
+            occurrence_id: occurrence.id.clone(),
+            range: occurrence.selection_range.clone(),
+            current_text,
+            family,
+            editable: occurrence.kind == OccurrenceKind::Notation
+                && occurrence.selection_range.start_offset < occurrence.selection_range.end_offset
+                && occurrence.range.start_offset <= occurrence.selection_range.start_offset
+                && occurrence.selection_range.end_offset <= occurrence.range.end_offset,
+        }
+    }
+
+    fn rename_would_merge_entity(&self, target: &EntityId, new_name: &str) -> bool {
+        self.index.semantic.occurrences().any(|occurrence| {
+            occurrence.kind == OccurrenceKind::Notation
+                && occurrence.component_id == target.component_id
+                && occurrence.scope_path == target.scope_path
+                && source_text(
+                    &self.index.documents[&occurrence.id.file_id].document,
+                    &occurrence.selection_range,
+                ) == new_name
+                && matches!(
+                    self.index.semantic.entity_decision(&occurrence.id),
+                    EntityEvidenceDecision::Established(entity) if entity != *target
+                )
+        })
     }
 
     fn semantic_context(
         &self,
         observations: &DocumentSemanticObservations,
-        file_id: &str,
-        symbol: Option<&(String, SourceRange)>,
+        focus: Option<&CursorFocus>,
         offset: u32,
         formulas: &[crate::LawRecognition],
     ) -> SemanticContextInfo {
-        let (definitions, entity_id, symbol_name) = symbol
-            .map(|(name, occurrence)| {
+        let (entity_id, symbol_name) = focus
+            .map(|focus| {
                 (
-                    self.visible_definitions(file_id, occurrence, name),
-                    self.semantic_entity(file_id, occurrence),
-                    Some(name.clone()),
+                    self.resolved_entity(&focus.occurrence_id),
+                    Some(focus.name.clone()),
                 )
             })
-            .unwrap_or_else(|| (Vec::new(), None, None));
-        let mut context = observations.context(
-            definitions,
-            symbol_name,
-            entity_id.clone(),
-            offset,
-            self.index.external_types.get(file_id),
-            formulas.to_vec(),
-        );
-        let semantic_occurrence = symbol.and_then(|(_, occurrence)| {
-            self.index
-                .occurrences_by_range
-                .get(&(
-                    file_id.to_owned(),
-                    occurrence.start_offset,
-                    occurrence.end_offset,
-                ))
-                .and_then(|id| self.index.semantic.occurrence(id))
-        });
+            .unwrap_or((None, None));
+        let mut context =
+            observations.context(symbol_name, entity_id.clone(), offset, formulas.to_vec());
+        let semantic_occurrence =
+            focus.and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id));
         if let (Some(entity), Some(semantic_occurrence)) = (&entity_id, semantic_occurrence) {
             let context_symbol = context.symbol.clone();
             context.quantities.extend(derived_quantity_infos(
@@ -3011,17 +3326,11 @@ impl SemathEngine {
                 &mut context,
             );
         }
-        if let Some((_, occurrence)) = symbol
-            && let Some(occurrence_id) = self.index.occurrences_by_range.get(&(
-                file_id.to_owned(),
-                occurrence.start_offset,
-                occurrence.end_offset,
-            ))
-        {
+        if let Some(focus) = focus {
             let mut candidates = self
                 .index
                 .semantic
-                .candidates_for(occurrence_id)
+                .candidates_for(&focus.occurrence_id)
                 .into_iter()
                 .map(|candidate| SemanticCandidateInfo {
                     candidate_id: candidate.id.0.clone(),
@@ -3056,11 +3365,11 @@ impl SemathEngine {
         document: &AnalyzedDocument,
         observations: &DocumentSemanticObservations,
         parsed: Option<&ParsedMath>,
-        symbol: Option<&(String, SourceRange)>,
+        focus: Option<&CursorFocus>,
         offset: u32,
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
-        let formula_boundary = symbol.is_none();
+        let formula_boundary = focus.is_none();
         let queried_relation = parsed.and_then(|math| {
             document.canonical_expressions.iter().find(|expression| {
                 math.region.content_range.start_offset <= expression.range.start_offset
@@ -3076,9 +3385,17 @@ impl SemathEngine {
             local_formulas = observations.laws.overlapping(&math.region.content_range);
         }
         local_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
-        let display_focus = symbol
-            .cloned()
-            .or_else(|| queried_relation.and_then(relation_head));
+        let display_focus = focus.cloned().or_else(|| {
+            let (name, range) = queried_relation.and_then(relation_head)?;
+            let occurrence_id = self
+                .index
+                .occurrence_id_for_range(&document.document.file_id, &range)?;
+            Some(CursorFocus {
+                name,
+                range,
+                occurrence_id,
+            })
+        });
         let semantic_focus = (!parsed
             .is_some_and(|math| cursor_is_structural_environment_marker(&math.root, offset)))
         .then_some(display_focus.as_ref())
@@ -3098,23 +3415,11 @@ impl SemathEngine {
             }
         }
         context_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
-        let symbol_info = display_focus.as_ref().and_then(|(name, occurrence)| {
-            self.symbol_info(
-                document,
-                observations,
-                name,
-                occurrence,
-                offset,
-                hygiene_enabled,
-            )
+        let symbol_info = display_focus.as_ref().and_then(|focus| {
+            self.symbol_info(document, observations, focus, offset, hygiene_enabled)
         });
-        let context = self.semantic_context(
-            observations,
-            &document.document.file_id,
-            semantic_focus,
-            offset,
-            &context_formulas,
-        );
+        let context =
+            self.semantic_context(observations, semantic_focus, offset, &context_formulas);
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -3227,16 +3532,15 @@ impl SemathEngine {
         let Some((_, subject_range)) = relation_head(expression) else {
             return false;
         };
-        let Some(occurrence) = self.index.occurrences_by_range.get(&(
-            document.document.file_id.clone(),
-            subject_range.start_offset,
-            subject_range.end_offset,
-        )) else {
+        let Some(occurrence) = self
+            .index
+            .occurrence_id_for_range(&document.document.file_id, &subject_range)
+        else {
             return false;
         };
         self.index.semantic.relation_is_retracted(
             &stable_text_digest(&render_canonical(expression)),
-            occurrence,
+            &occurrence,
         )
     }
 
@@ -3290,13 +3594,10 @@ impl SemathEngine {
                     && occurrence.selection_range.end_offset <= range.end_offset
             })
             .filter_map(|occurrence| {
-                self.index.occurrences_by_range.get(&(
-                    document.document.file_id.clone(),
-                    occurrence.selection_range.start_offset,
-                    occurrence.selection_range.end_offset,
-                ))
+                self.index
+                    .cursor_focus(&document.document.file_id, occurrence)
             })
-            .flat_map(|occurrence| self.index.semantic.resolve(occurrence).candidates)
+            .flat_map(|focus| self.index.semantic.resolve(&focus.occurrence_id).candidates)
             .filter(|candidate| {
                 !candidate.supporting_claims.is_empty() && candidate.rejecting_claims.is_empty()
             })
@@ -3314,16 +3615,13 @@ impl SemathEngine {
             })
             .take(32)
             .filter_map(|occurrence| {
-                self.index.occurrences_by_range.get(&(
-                    document.document.file_id.clone(),
-                    occurrence.selection_range.start_offset,
-                    occurrence.selection_range.end_offset,
-                ))
+                self.index
+                    .cursor_focus(&document.document.file_id, occurrence)
             })
-            .any(|occurrence| {
+            .any(|focus| {
                 self.index
                     .semantic
-                    .occurrence_has_source_meaning(occurrence)
+                    .occurrence_has_source_meaning(&focus.occurrence_id)
             })
     }
 
@@ -3358,14 +3656,12 @@ impl SemathEngine {
         &self,
         document: &AnalyzedDocument,
         observations: &DocumentSemanticObservations,
-        name: &str,
-        occurrence: &SourceRange,
+        focus: &CursorFocus,
         offset: u32,
         hygiene_enabled: bool,
     ) -> Option<SymbolInfo> {
-        let semantic_name = name.trim_start_matches('\\');
-        let mut definitions =
-            self.visible_definitions(&document.document.file_id, occurrence, name);
+        let semantic_name = focus.name.trim_start_matches('\\');
+        let mut definitions = self.visible_definitions(focus);
         let definitions_truncated = definitions.len() > MAX_SYMBOL_DEFINITIONS;
         definitions.truncate(MAX_SYMBOL_DEFINITIONS);
         let external = self.index.external_types.get(&document.document.file_id);
@@ -3393,13 +3689,8 @@ impl SemathEngine {
             &quantities,
             hygiene_enabled,
         );
-        let occurrence_id = self.index.occurrences_by_range.get(&(
-            document.document.file_id.clone(),
-            occurrence.start_offset,
-            occurrence.end_offset,
-        ))?;
-        let semantic_occurrence = self.index.semantic.occurrence(occurrence_id)?;
-        let entity_id = self.semantic_entity(&document.document.file_id, occurrence);
+        let semantic_occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
+        let entity_id = self.resolved_entity(&focus.occurrence_id);
         if let Some(entity) = &entity_id {
             shapes.extend(derived_shape_infos(
                 &self.index.semantic,
@@ -3426,7 +3717,7 @@ impl SemathEngine {
         quantities.truncate(MAX_SYMBOL_QUANTITIES);
         Some(SymbolInfo {
             symbol: semantic_occurrence.surface.clone(),
-            occurrence_id: occurrence_id.clone(),
+            occurrence_id: focus.occurrence_id.clone(),
             notation: semantic_occurrence.notation.clone(),
             source_notation: semantic_occurrence.source_text.clone(),
             entity_id,
@@ -3772,35 +4063,6 @@ fn parsed_math_at_cursor(parsed: &[ParsedMath], offset: u32) -> Option<&ParsedMa
         })
 }
 
-fn semantic_symbol_at_cursor(
-    document: &AnalyzedDocument,
-    math: &ParsedMath,
-    offset: u32,
-) -> Option<(String, SourceRange)> {
-    let candidates = document
-        .semantic_occurrences
-        .iter()
-        .filter(|seed| {
-            math.region.full_range.start_offset <= seed.range.start_offset
-                && seed.range.end_offset <= math.region.full_range.end_offset
-        })
-        .collect::<Vec<_>>();
-    let ownership = candidates
-        .iter()
-        .map(|seed| CursorOccurrence {
-            occurrence: &seed.range,
-            selection: &seed.selection_range,
-            application_end: seed.application_end_offset.filter(|candidate| {
-                math.region.full_range.start_offset <= seed.selection_range.start_offset
-                    && seed.selection_range.end_offset <= math.region.full_range.end_offset
-                    && *candidate <= math.region.full_range.end_offset
-            }),
-        })
-        .collect::<Vec<_>>();
-    let selected = candidates.get(occurrence_at_cursor(&ownership, offset)?)?;
-    Some((selected.surface.clone(), selected.range.clone()))
-}
-
 fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
     left.start_offset < right.end_offset && right.start_offset < left.end_offset
 }
@@ -4074,28 +4336,50 @@ fn append_index_claims(
     occurrence: &SourceOccurrence,
     context: &mut SemanticContextInfo,
 ) {
-    let mut claims = index
+    let raw = index
         .claims_for_entity_at(entity, occurrence)
         .into_iter()
-        .filter(|claim| claim.tier == InferenceTier::Constraint)
         .filter_map(|claim| {
-            let ClaimObject::Value(value) = &claim.object else {
-                return None;
-            };
             let evidence = index.evidence(&claim.evidence_id)?;
-            Some(crate::SemanticClaimInfo {
+            let value = claim_object_display(index, &claim.object)?;
+            Some((claim, evidence, value))
+        })
+        .collect::<Vec<_>>();
+    let mut claims = raw
+        .iter()
+        .map(|(claim, evidence, value)| {
+            let conflicts = raw
+                .iter()
+                .filter(|(other, other_evidence, other_value)| {
+                    claim.predicate == other.predicate
+                        && value == other_value
+                        && evidence.polarity != other_evidence.polarity
+                })
+                .map(|(other, _, _)| other.id.0.clone())
+                .collect::<Vec<_>>();
+            let status = match decide_fact(evidence, !conflicts.is_empty()) {
+                EntityFactDisposition::Certain => SemanticClaimStatus::Certain,
+                EntityFactDisposition::Supported => SemanticClaimStatus::Supported,
+                EntityFactDisposition::Speculative => SemanticClaimStatus::Speculative,
+                EntityFactDisposition::Conflicting => SemanticClaimStatus::Conflicting,
+            };
+            let kind = match evidence.origin {
+                EvidenceOrigin::Explicit => "source-claim",
+                EvidenceOrigin::Derived => "derived-claim",
+            };
+            let strength = match status {
+                SemanticClaimStatus::Certain => "hard",
+                SemanticClaimStatus::Supported => "strong",
+                SemanticClaimStatus::Speculative | SemanticClaimStatus::Conflicting => "weak",
+            };
+            crate::SemanticClaimInfo {
                 claim_id: claim.id.0.clone(),
                 predicate: claim_predicate_name(&claim.predicate).into(),
-                value: claim_value_display(value)?,
-                status: SemanticClaimStatus::Supported,
-                evidence: vec![semantic_evidence(
-                    index,
-                    evidence,
-                    "derived-constraint",
-                    "strong",
-                )],
-                conflicts: Vec::new(),
-            })
+                value: value.clone(),
+                status,
+                evidence: vec![semantic_evidence(index, evidence, kind, strength)],
+                conflicts,
+            }
         })
         .collect::<Vec<_>>();
     claims.sort_by(|left, right| {
@@ -4104,7 +4388,7 @@ fn append_index_claims(
             .then(left.value.cmp(&right.value))
             .then(left.claim_id.cmp(&right.claim_id))
     });
-    context.claims.extend(claims);
+    context.claims = claims;
     context.claims.sort_by(|left, right| {
         left.predicate
             .cmp(&right.predicate)
@@ -4116,6 +4400,54 @@ fn append_index_claims(
         .dedup_by(|left, right| left.claim_id == right.claim_id);
     context.truncated |= context.claims.len() > MAX_VIEW_CLAIMS;
     context.claims.truncate(MAX_VIEW_CLAIMS);
+    context.concepts = context
+        .claims
+        .iter()
+        .filter(|claim| claim.predicate == "concept")
+        .filter_map(|claim| {
+            let evidence = claim.evidence.first()?.clone();
+            Some(ConceptInfo {
+                concept_id: claim.value.clone(),
+                label: concept_label(&claim.value),
+                description: claim.value.clone(),
+                evidence,
+            })
+        })
+        .collect();
+    context
+        .concepts
+        .sort_by(|left, right| left.concept_id.cmp(&right.concept_id));
+    context
+        .concepts
+        .dedup_by(|left, right| left.concept_id == right.concept_id);
+}
+
+fn claim_object_display(index: &ProjectSemanticIndex, object: &ClaimObject) -> Option<String> {
+    match object {
+        ClaimObject::Value(value) => claim_value_display(value),
+        ClaimObject::Occurrence(occurrence) => index
+            .occurrence(occurrence)
+            .map(|source| source.surface.clone()),
+        ClaimObject::Entity(entity) => index
+            .occurrence(&entity.anchor)
+            .map(|source| source.surface.clone()),
+    }
+}
+
+fn concept_label(concept_id: &str) -> String {
+    concept_id
+        .split(':')
+        .next_back()
+        .unwrap_or(concept_id)
+        .split('-')
+        .map(|part| {
+            let mut characters = part.chars();
+            characters.next().map_or_else(String::new, |first| {
+                first.to_uppercase().collect::<String>() + characters.as_str()
+            })
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn claim_predicate_name(predicate: &ClaimPredicate) -> &'static str {
@@ -4345,99 +4677,23 @@ fn symbol_diagnostics(
     (diagnostics, truncated)
 }
 
-fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
-    let preparation = prepare_rename_info(parsed, offset);
+fn rename_preparation_value_rejection(message: &str) -> QueryValue {
     QueryValue::RenamePreparation {
-        range: preparation.range,
-        placeholder: preparation.placeholder,
-        rejection: preparation.rejection,
-    }
-}
-
-fn prepare_rename_info(parsed: Option<&ParsedMath>, offset: u32) -> RenamePreparation {
-    let Some(parsed) = parsed else {
-        return rename_preparation_rejection("The cursor is not inside a math expression.");
-    };
-    if !parsed.region.closed {
-        return rename_preparation_rejection(
-            "Finish the math expression before renaming a bound variable.",
-        );
-    }
-    let found = binders(parsed);
-    let Some(target) = binder_at(parsed, &found, offset) else {
-        return rename_preparation_rejection(
-            "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
-        );
-    };
-    RenamePreparation {
-        range: parsed
-            .symbols
-            .iter()
-            .find(|(_, range)| range.contains(offset))
-            .map(|(_, range)| range.clone()),
-        placeholder: Some(target.symbol.clone()),
-        rejection: None,
-    }
-}
-
-fn rename_preparation_rejection(message: &str) -> RenamePreparation {
-    RenamePreparation {
         range: None,
         placeholder: None,
         rejection: Some(message.into()),
     }
 }
 
-fn rename_proposal(
-    document: &AnalyzedDocument,
-    parsed: Option<&ParsedMath>,
-    offset: u32,
-    new_name: &str,
-) -> QueryValue {
-    let Some(parsed) = parsed else {
-        return edit_proposal_rejection("The cursor is not inside a math expression.");
-    };
-    if !parsed.region.closed {
-        return edit_proposal_rejection(
-            "Finish the math expression before renaming a bound variable.",
-        );
-    }
-    let found = binders(parsed);
-    let Some(target) = binder_at(parsed, &found, offset) else {
-        return edit_proposal_rejection(
-            "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
-        );
-    };
-    if let Some(rejection) = rename_rejection(parsed, &found, target, new_name) {
-        return edit_proposal_rejection(&rejection);
-    }
-    let occurrences = bound_occurrences(parsed, &found, target);
-    let evidence = Evidence {
-        rule_id: "capture-avoiding-bound-variable-rename".into(),
-        kind: "syntax".into(),
-        strength: "hard".into(),
-        source_ranges: occurrences.clone(),
-    };
-    QueryValue::EditProposal {
-        proposal: Some(SemanticEditProposal {
-            title: format!("Rename bound `{}` to `{new_name}`", target.symbol),
-            safety: "deterministic".into(),
-            evidence: vec![evidence],
-            files: vec![SemanticEditFile {
-                file_id: document.document.file_id.clone(),
-                path: document.document.path.clone(),
-                document_version: document.document.document_version,
-                edits: occurrences
-                    .into_iter()
-                    .map(|range| SemanticTextEdit {
-                        range,
-                        expected_text: target.symbol.clone(),
-                        replacement_text: new_name.into(),
-                    })
-                    .collect(),
-            }],
-        }),
-        rejection: None,
+fn alternate_name(current: &str, family: RenameNotationFamily) -> String {
+    match family {
+        RenameNotationFamily::PlainIdentifier => if current == "z" { "y" } else { "z" }.into(),
+        RenameNotationFamily::ControlSequence => if current == "\\zeta" {
+            "\\eta"
+        } else {
+            "\\zeta"
+        }
+        .into(),
     }
 }
 
