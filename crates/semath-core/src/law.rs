@@ -3281,7 +3281,9 @@ fn source_expression_label(
         .byte_for_utf16(expression.range.end_offset);
     if matches!(
         expression.kind,
-        SemanticExprKind::Apply { .. } | SemanticExprKind::Derivative { .. }
+        SemanticExprKind::Apply { .. }
+            | SemanticExprKind::Derivative { .. }
+            | SemanticExprKind::Symbol(_)
     ) && context.source.as_bytes().get(end) == Some(&b')')
     {
         end += 1;
@@ -3290,8 +3292,39 @@ fn source_expression_label(
         .source
         .get(start..end)
         .map(str::trim)
+        .map(strip_source_group)
         .filter(|label| source_label_matches_expression(expression, label));
     Some(authored.unwrap_or(&canonical).to_owned())
+}
+
+fn strip_source_group(mut label: &str) -> &str {
+    loop {
+        let bytes = label.as_bytes();
+        if bytes.first() != Some(&b'{') || bytes.last() != Some(&b'}') {
+            return label;
+        }
+        let mut depth = 0_u32;
+        let balanced = label.char_indices().all(|(offset, character)| {
+            match character {
+                '{' => depth += 1,
+                '}' => {
+                    let Some(next) = depth.checked_sub(1) else {
+                        return false;
+                    };
+                    depth = next;
+                    if depth == 0 && offset + character.len_utf8() < label.len() {
+                        return false;
+                    }
+                }
+                _ => {}
+            }
+            true
+        });
+        if !balanced || depth != 0 {
+            return label;
+        }
+        label = label[1..label.len() - 1].trim();
+    }
 }
 
 fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bool {
@@ -3300,7 +3333,18 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
     }
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => {
-            label == symbol || label.strip_prefix('\\') == Some(symbol.as_str())
+            label == symbol
+                || label.strip_prefix('\\') == Some(symbol.as_str())
+                || (label
+                    .chars()
+                    .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+                    .count()
+                    <= MAX_COMPOSITE_SOURCE_LABEL_CHARS
+                    && matches!(
+                        lower_template(label).kind,
+                        SemanticExprKind::Apply { operator, .. }
+                            if operator == symbol.as_str()
+                    ))
         }
         SemanticExprKind::Index { .. } => !label.chars().any(char::is_whitespace),
         SemanticExprKind::Derivative { .. } => {
@@ -4428,6 +4472,23 @@ mod tests {
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");
         }
+    }
+
+    #[test]
+    fn callable_role_bindings_retain_their_authored_application() {
+        let source = "The transfer function is $H(s)=\\frac{Y(s)}{X(s)}$.";
+        let transfer = recognized_law_observations(source)
+            .into_iter()
+            .find(|law| law.law_id == "transfer-function")
+            .unwrap();
+        assert_eq!(
+            transfer
+                .bindings
+                .iter()
+                .map(|binding| binding.symbol.as_str())
+                .collect::<Vec<_>>(),
+            ["H(s)", "Y(s)", "X(s)"]
+        );
     }
 
     #[test]
