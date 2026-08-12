@@ -23,11 +23,11 @@
       "sha256": "2cb30af73cb4df6fd7be907356c18da0032671ff0794487770c519341e2f10e1"
     },
     {
-      "bytes": 327711,
+      "bytes": 328014,
       "cases": 240,
       "id": "circuits-diversity",
       "path": "corpus/circuits-diversity.json",
-      "sha256": "1303b8b520eea22f78ebe23da5c5d3538da0c6b1dfe134b6a78cf660b744b22d"
+      "sha256": "cc09c10b58644258cf3e164f4b178beca36daff1a23b15783f98b1abf2ce8294"
     },
     {
       "bytes": 103223,
@@ -198,6 +198,6 @@
       "sha256": "39d1369854f686e9847ff9cbad922da6d96f38177dfe977ad5e21002c3a1ec80"
     }
   ],
-  "totalBytes": 6836015,
+  "totalBytes": 6836318,
   "totalCases": 5406
 }
