@@ -31,6 +31,9 @@ describe("semantic differential planning", () => {
       "negation-retraction",
       "typed-conflict-recovery",
     ]);
+    expect(
+      traces.find((trace) => trace.family === "malformed-recovery")?.stages[0]?.queryNeedle,
+    ).toBe("\\cap");
     for (const trace of traces) {
       expect(trace.stages.at(-1)?.expectedDecision).toBe(trace.initialExpectedDecision);
       expect(
