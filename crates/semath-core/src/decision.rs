@@ -264,10 +264,40 @@ fn preferred_formulas<'a>(input: &'a MeaningDecisionInput<'a>) -> Vec<&'a LawRec
     let Some(best_rank) = candidates.iter().map(|formula| formula.rank).min() else {
         return Vec::new();
     };
-    candidates
+    let candidates = candidates
         .into_iter()
         .filter(|formula| formula.rank == best_rank)
+        .collect::<Vec<_>>();
+    candidates
+        .iter()
+        .copied()
+        .filter(|candidate| {
+            !candidates
+                .iter()
+                .any(|other| formula_structurally_dominates(other, candidate))
+        })
         .collect()
+}
+
+fn formula_structurally_dominates(outer: &LawRecognition, nested: &LawRecognition) -> bool {
+    outer.law_id != nested.law_id
+        && outer.pack_id == nested.pack_id
+        && outer.range == nested.range
+        && outer.bindings.len() > nested.bindings.len()
+        && nested.bindings.iter().all(|binding| {
+            binding.evidence.source_ranges.iter().all(|nested_range| {
+                outer.bindings.iter().any(|outer_binding| {
+                    outer_binding
+                        .evidence
+                        .source_ranges
+                        .iter()
+                        .any(|outer_range| {
+                            outer_range.start_offset <= nested_range.start_offset
+                                && nested_range.end_offset <= outer_range.end_offset
+                        })
+                })
+            })
+        })
 }
 
 fn has_law_activation(formula: &LawRecognition) -> bool {
@@ -434,6 +464,28 @@ mod tests {
             decide_meaning(input(&[fallback, preferred])),
             MeaningDecision::Established { meaning, .. }
                 if meaning.relation_id.as_deref() == Some("preferred")
+        ));
+    }
+
+    #[test]
+    fn enclosing_typed_relation_suppresses_nested_law_ambiguity() {
+        let nested = formula("nested", ConstraintStatus::Verified);
+        let mut enclosing = formula("enclosing", ConstraintStatus::Verified);
+        enclosing.bindings.push(enclosing.bindings[0].clone());
+        assert!(matches!(
+            decide_meaning(input(&[nested, enclosing])),
+            MeaningDecision::Established { meaning, .. }
+                if meaning.relation_id.as_deref() == Some("enclosing")
+        ));
+    }
+
+    #[test]
+    fn independent_same_range_laws_remain_ambiguous() {
+        let first = formula("first", ConstraintStatus::Verified);
+        let second = formula("second", ConstraintStatus::Verified);
+        assert!(matches!(
+            decide_meaning(input(&[first, second])),
+            MeaningDecision::Ambiguous { .. }
         ));
     }
 

@@ -1,7 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
-use crate::canonical::{SemanticExpr, SemanticExprKind, expression_children, lower_template};
+use crate::canonical::{
+    SemanticExpr, SemanticExprKind, expression_children, lower_template, render_canonical,
+};
 use crate::concept::concepts_share_lineage;
 use crate::consistency::{RoleObservations, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
@@ -20,6 +22,7 @@ use crate::{
 
 const MAX_LAW_MATCHES: usize = 16;
 const MAX_UNIFICATION_CANDIDATES: usize = 64;
+const MAX_COMPOSITE_SOURCE_LABEL_CHARS: usize = 256;
 
 struct CompiledLaw {
     pack_id: &'static str,
@@ -3309,6 +3312,19 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
         SemanticExprKind::Power(_, exponent) if is_decorative_star(exponent) => {
             !label.chars().any(char::is_whitespace)
         }
+        SemanticExprKind::Apply { .. }
+        | SemanticExprKind::Fraction(_, _)
+        | SemanticExprKind::Negate(_)
+        | SemanticExprKind::Power(_, _)
+        | SemanticExprKind::Product(_)
+        | SemanticExprKind::Sum(_) => {
+            label
+                .chars()
+                .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+                .count()
+                <= MAX_COMPOSITE_SOURCE_LABEL_CHARS
+                && render_canonical(&lower_template(label)) == render_canonical(expression)
+        }
         _ => false,
     }
 }
@@ -4180,14 +4196,26 @@ mod tests {
 
     #[test]
     fn set_laws_remain_visible_inside_cardinality_identities() {
-        let recognized =
-            recognized_laws("Assume $A$ and $B$ are finite sets. $|A\\cup B|=|A|+|B|-|A\\cap B|$.");
+        let source = "Assume $A$ and $B$ are finite sets. $|A\\cup B|=|A|+|B|-|A\\cap B|$.";
+        let recognized = recognized_laws(source);
         assert!(recognized.iter().any(|law| law == "set-union"));
         assert!(recognized.iter().any(|law| law == "set-intersection"));
         assert!(
             recognized
                 .iter()
                 .any(|law| law == "two-set-inclusion-exclusion")
+        );
+        let inclusion_exclusion = recognized_law_observations(source)
+            .into_iter()
+            .find(|law| law.law_id == "two-set-inclusion-exclusion")
+            .unwrap();
+        assert_eq!(
+            inclusion_exclusion
+                .bindings
+                .iter()
+                .map(|binding| binding.symbol.as_str())
+                .collect::<Vec<_>>(),
+            ["|A\\cup B|", "|A|", "|B|", "|A\\cap B|"]
         );
 
         let untyped = recognized_laws("$|A\\cup B|=|A|+|B|-|A\\cap B|$.");
