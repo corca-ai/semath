@@ -1213,13 +1213,6 @@ fn opaque_application_equation_result(
     result: &ParsedMath,
 ) -> Option<(String, SourceRange)> {
     let producer_expression = lower_document_region(document, &producer.region.content_range);
-    let SemanticExprKind::Apply {
-        operator: producer_operator,
-        arguments: producer_arguments,
-    } = &producer_expression.kind
-    else {
-        return None;
-    };
     let result_expression = lower_document_region(document, &result.region.content_range);
     let SemanticExprKind::Relation {
         operator,
@@ -1232,18 +1225,12 @@ fn opaque_application_equation_result(
     if !matches!(operator.as_str(), "=" | "equals") {
         return None;
     }
-    let SemanticExprKind::Apply {
-        operator: result_operator,
-        arguments: result_arguments,
-    } = &right.kind
-    else {
-        return None;
-    };
-    if producer_operator != result_operator
-        || producer_arguments.len() != 1
-        || result_arguments.len() != 1
-        || expression_name(&producer_arguments[0]) != expression_name(&result_arguments[0])
-    {
+    if !same_transformation_application(
+        document,
+        &producer_expression,
+        &producer.region.content_range,
+        right,
+    ) {
         return None;
     }
     match &left.kind {
@@ -1253,6 +1240,45 @@ fn opaque_application_equation_result(
         }
         _ => None,
     }
+}
+
+fn same_transformation_application(
+    document: &ProjectDocument,
+    producer: &SemanticExpr,
+    producer_range: &SourceRange,
+    result: &SemanticExpr,
+) -> bool {
+    if let (
+        SemanticExprKind::Apply {
+            operator: producer_operator,
+            arguments: producer_arguments,
+        },
+        SemanticExprKind::Apply {
+            operator: result_operator,
+            arguments: result_arguments,
+        },
+    ) = (&producer.kind, &result.kind)
+    {
+        return producer_operator == result_operator
+            && producer_arguments.len() == 1
+            && result_arguments.len() == 1
+            && expression_name(&producer_arguments[0]) == expression_name(&result_arguments[0]);
+    }
+
+    macro_application_signature(document, producer_range)
+        .zip(macro_application_signature(document, &result.range))
+        .is_some_and(|(producer, result)| producer == result)
+}
+
+fn macro_application_signature(document: &ProjectDocument, range: &SourceRange) -> Option<String> {
+    document.macros.iter().find_map(|event| {
+        let input = event.expansion.input_range.as_ref()?;
+        let surface = event.expansion.surface.as_ref()?;
+        (event.kind == crate::ProjectMacroKind::Call
+            && event.expansion.status == crate::ProjectMacroExpansionStatus::Expanded
+            && input == range)
+            .then(|| format!("{}:{surface}", event.name))
+    })
 }
 
 fn conflicts_with_existing_role(
@@ -3128,7 +3154,10 @@ mod tests {
     use crate::canonical::lower_document_region;
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
-    use crate::{DocumentLanguage, ProjectDocument};
+    use crate::{
+        DocumentLanguage, ProjectDocument, ProjectMacro, ProjectMacroExpansion,
+        ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSourceRef, SourceRange,
+    };
 
     fn analyze(source: &str) -> super::ProseObservations {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
@@ -3150,12 +3179,16 @@ mod tests {
             macros: Vec::new(),
             includes: Vec::new(),
         };
-        let parsed = parse_regions(source, &regions);
+        analyze_document(&document)
+    }
+
+    fn analyze_document(document: &ProjectDocument) -> super::ProseObservations {
+        let parsed = parse_regions(&document.content, &document.math_regions);
         let canonical = parsed
             .iter()
-            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .map(|math| lower_document_region(document, &math.region.content_range))
             .collect::<Vec<_>>();
-        observe_prose(&document, &parsed, &canonical)
+        observe_prose(document, &parsed, &canonical)
     }
 
     #[test]
@@ -3514,6 +3547,67 @@ mod tests {
     }
 
     #[test]
+    fn attaches_outputs_through_matching_opaque_macro_calls() {
+        let source = "The sealed transformation $\\vendorcal{z}$ returns calibrated range:\n\\[r=\\vendorcal{z}.\\]";
+        let mut document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: test_math_regions(source, DocumentLanguage::Latex),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        let invocation = "\\vendorcal{z}";
+        document.macros = source
+            .match_indices(invocation)
+            .map(|(start, _)| {
+                let input_range = SourceRange {
+                    start_offset: start as u32,
+                    end_offset: (start + invocation.len()) as u32,
+                };
+                ProjectMacro {
+                    kind: ProjectMacroKind::Call,
+                    name: "vendorcal".into(),
+                    source: ProjectSourceRef {
+                        file_id: "main".into(),
+                        path: "main.tex".into(),
+                        range: SourceRange {
+                            start_offset: start as u32,
+                            end_offset: (start + "\\vendorcal".len()) as u32,
+                        },
+                    },
+                    definitions: Vec::new(),
+                    expansion: ProjectMacroExpansion {
+                        status: ProjectMacroExpansionStatus::Expanded,
+                        depth: 0,
+                        editable: false,
+                        surface: Some("\\mathsf{VendorCal}(z)".into()),
+                        input_range: Some(input_range),
+                        notation: None,
+                    },
+                }
+            })
+            .collect();
+
+        let analysis = analyze_document(&document);
+        assert!(analysis.definitions.iter().any(|definition| {
+            definition.symbol == "r"
+                && definition.description == "calibrated range"
+                && definition.evidence.rule_id == "english-output-definition"
+        }));
+    }
+
+    #[test]
     fn refuses_nonasserted_or_ambiguous_transformation_outputs() {
         for source in [
             "According to [1], the transform $F(z)$ returns calibrated range:\n\\[r=F(z).\\]",
@@ -3531,6 +3625,70 @@ mod tests {
                 analysis.definitions
             );
         }
+    }
+
+    #[test]
+    fn refuses_mismatched_opaque_macro_outputs() {
+        let source =
+            "The transform $\\vendorcal{z}$ returns calibrated range:\n\\[r=\\vendorcal{x}.\\]";
+        let mut document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: test_math_regions(source, DocumentLanguage::Latex),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        document.macros = [
+            ("\\vendorcal{z}", "\\mathsf{VendorCal}(z)"),
+            ("\\vendorcal{x}", "\\mathsf{VendorCal}(x)"),
+        ]
+        .into_iter()
+        .map(|(invocation, surface)| {
+            let start = source.find(invocation).unwrap();
+            ProjectMacro {
+                kind: ProjectMacroKind::Call,
+                name: "vendorcal".into(),
+                source: ProjectSourceRef {
+                    file_id: "main".into(),
+                    path: "main.tex".into(),
+                    range: SourceRange {
+                        start_offset: start as u32,
+                        end_offset: (start + "\\vendorcal".len()) as u32,
+                    },
+                },
+                definitions: Vec::new(),
+                expansion: ProjectMacroExpansion {
+                    status: ProjectMacroExpansionStatus::Expanded,
+                    depth: 0,
+                    editable: false,
+                    surface: Some(surface.into()),
+                    input_range: Some(SourceRange {
+                        start_offset: start as u32,
+                        end_offset: (start + invocation.len()) as u32,
+                    }),
+                    notation: None,
+                },
+            }
+        })
+        .collect();
+
+        assert!(
+            analyze_document(&document)
+                .definitions
+                .iter()
+                .all(|definition| { definition.evidence.rule_id != "english-output-definition" })
+        );
     }
 
     #[test]
