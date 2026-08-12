@@ -2048,6 +2048,11 @@ fn roles_are_supported(
             RoleSupport::Refuted => return false,
             RoleSupport::Unresolved => {}
         }
+        if role.shape.as_deref() == Some("scalar") && is_numeric_scalar(expression) {
+            supported += 1;
+            supported_roles.insert(role.id.as_str());
+            continue;
+        }
         let symbols = semantic_symbols(expression);
         if symbols.is_empty() || !(role.variadic || role_expression_is_atomic(expression)) {
             return false;
@@ -2092,6 +2097,14 @@ fn roles_are_supported(
             && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
                 || (roles.len() == 2 && supported == 1 && unresolved == 1)))
         || formula_identified
+}
+
+fn is_numeric_scalar(expression: &SemanticExpr) -> bool {
+    match &expression.kind {
+        SemanticExprKind::Number(_) => true,
+        SemanticExprKind::Negate(inner) => is_numeric_scalar(inner),
+        _ => false,
+    }
 }
 
 fn formula_operator_role_support(
@@ -2308,7 +2321,10 @@ fn bindings_have_formula_attached_declared_roles(
 
 fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
     match &expression.kind {
-        SemanticExprKind::Symbol(_) | SemanticExprKind::Index { .. } => true,
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Number(_)
+        | SemanticExprKind::Index { .. } => true,
+        SemanticExprKind::Negate(inner) => role_expression_is_atomic(inner),
         SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
             role_expression_is_atomic(base)
         }
@@ -5175,6 +5191,31 @@ This conversion is performed once per accepted timing sample so the accumulator 
             .find(|recognition| recognition.law_id == "closed-system-first-law")
             .expect("generic compiled law recognition");
         assert_eq!(recognition.status, LawRecognitionStatus::Verified);
+    }
+
+    #[test]
+    fn recognizes_bracketed_blackboard_expectation_linearity() {
+        let template = lower_template("E(a X + b Y) = a E(X) + b E(Y)");
+        let actual = lower_template("E(2 X - 3 Y) = 2 E(X) - 3 E(Y)");
+        let placeholders = ["a", "X", "b", "Y"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
+            "template={} actual={}",
+            crate::canonical::render_canonical(&template),
+            crate::canonical::render_canonical(&actual),
+        );
+        let observations = recognized_law_observations(
+            "The random variables $X$ and $Y$ are integrable. Linearity of expectation gives $\\mathbb E[2X-3Y]=2\\mathbb E[X]-3\\mathbb E[Y]$.",
+        );
+        assert!(
+            observations
+                .iter()
+                .any(|recognition| recognition.law_id == "expectation-linearity"),
+            "{observations:#?}"
+        );
     }
 
     #[test]

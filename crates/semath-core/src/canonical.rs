@@ -1508,11 +1508,7 @@ impl Parser {
                 terms.push(self.parse_product());
             } else if self.consume_operator('-') {
                 let term = self.parse_product();
-                terms.push(SemanticExpr {
-                    range: term.range.clone(),
-                    provenance: term.provenance.clone(),
-                    kind: SemanticExprKind::Negate(Box::new(term)),
-                });
+                terms.push(negate_term(term));
             } else {
                 break;
             }
@@ -2235,6 +2231,25 @@ impl Parser {
         });
         self.cursor += usize::from(self.cursor < self.tokens.len());
         token
+    }
+}
+
+fn negate_term(mut expression: SemanticExpr) -> SemanticExpr {
+    if let SemanticExprKind::Product(factors) = &mut expression.kind
+        && let Some(first) = factors.first_mut()
+    {
+        let negated = SemanticExpr {
+            range: first.range.clone(),
+            provenance: first.provenance.clone(),
+            kind: SemanticExprKind::Negate(Box::new(first.clone())),
+        };
+        *first = negated;
+        return expression;
+    }
+    SemanticExpr {
+        range: expression.range.clone(),
+        provenance: expression.provenance.clone(),
+        kind: SemanticExprKind::Negate(Box::new(expression)),
     }
 }
 
