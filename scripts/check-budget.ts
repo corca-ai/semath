@@ -125,6 +125,8 @@ assertCounters(initial, DOCUMENT_COUNT + 1);
 const deltaDurations: number[] = [];
 const syntaxDurations: number[] = [];
 const queryDurations = new Map<SemathQuery["kind"], number[]>();
+const queryResultCounts = new Map<SemathQuery["kind"], number>();
+let maxQueryResultBytes = 0;
 let peakRss = residentBytes();
 let peakRssStage = "initial";
 let maxAffected = 0;
@@ -178,12 +180,18 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
       query,
     };
     const queryStarted = performance.now();
-    await worker.request<QueryResult>({
+    const result = await worker.request<QueryResult>({
       envelope,
       id: worker.nextId(),
       kind: "query",
       priority: "cursor",
     });
+    maxQueryResultBytes = Math.max(maxQueryResultBytes, encodedLength(result));
+    queryResultCounts.set(
+      query.kind,
+      Math.max(queryResultCounts.get(query.kind) ?? 0, queryResultCount(result)),
+    );
+    assertFanoutResult(query, result);
     const durations = queryDurations.get(query.kind) ?? [];
     durations.push(performance.now() - queryStarted);
     queryDurations.set(query.kind, durations);
@@ -349,6 +357,8 @@ const report = {
   peakRssStage,
   postDisposeRssGrowthBytes: postDisposeRssGrowth,
   queryP95ByKind,
+  queryResultBytes: maxQueryResultBytes,
+  queryResultCounts: Object.fromEntries(queryResultCounts),
   semanticViewP95Ms: queryP95ByKind.semanticView ?? null,
   lifecycleFamilies: planSemanticLifecycleTraces(0x5e_21).map((trace) => trace.family),
   retainedRssGrowthBytes: retainedRssGrowth,
@@ -536,8 +546,55 @@ function measuredQueries(document: PerformanceFixtureDocument): readonly SemathQ
     { ...target, kind: "definition" },
     { ...target, kind: "references" },
     { ...target, kind: "prepareRename" },
-    { ...target, kind: "rename", newName: "renamed" },
+    { ...target, kind: "rename", newName: "w" },
   ];
+}
+
+function queryResultCount(result: QueryResult): number {
+  switch (result.value.kind) {
+    case "locations":
+      return result.value.locations.length;
+    case "editProposal":
+      return result.value.proposal?.files.reduce(
+        (count, file) => count + file.edits.length,
+        0,
+      ) ?? 0;
+    case "renamePreparation":
+      return result.value.range ? 1 : 0;
+    case "selection":
+      return result.value.ranges.length;
+    case "semanticView":
+      return result.value.view.declarations.length;
+    case "diagnostics":
+      return result.value.diagnostics.length;
+    case "diagnosticExplanation":
+      return result.value.diagnostic ? 1 : 0;
+  }
+}
+
+function assertFanoutResult(query: SemathQuery, result: QueryResult): void {
+  if (query.kind === "references" || query.kind === "rename") {
+    const count = queryResultCount(result);
+    if (count < DOCUMENT_COUNT) {
+      throw new Error(
+        `budget ${query.kind} returned ${count} source occurrences; expected at least ${DOCUMENT_COUNT}`,
+      );
+    }
+  }
+  if (
+    query.kind === "definition" &&
+    (result.value.kind !== "locations" || result.value.locations.length !== 1)
+  ) {
+    throw new Error(
+      `budget entity definition did not resolve exactly once: ${JSON.stringify(result.value)}`,
+    );
+  }
+  if (
+    query.kind === "prepareRename" &&
+    (result.value.kind !== "renamePreparation" || !result.value.range)
+  ) {
+    throw new Error("budget established entity was not renameable");
+  }
 }
 
 function positiveInteger(name: string, fallback: number): number {

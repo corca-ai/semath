@@ -23,7 +23,7 @@ export interface PerformanceFixtureDocument extends LatexDocumentInput {
 }
 
 export function buildPerformanceDocuments(count: number): readonly PerformanceFixtureDocument[] {
-  return Array.from({ length: count }, (_, index) => performanceDocument(index));
+  return Array.from({ length: count }, (_, index) => performanceDocument(index, count));
 }
 
 export function editPerformanceDocument(
@@ -54,11 +54,11 @@ export function semanticallyEditPerformanceDocument(
   };
 }
 
-function performanceDocument(index: number): PerformanceFixtureDocument {
+function performanceDocument(index: number, projectSize: number): PerformanceFixtureDocument {
   const family = PERFORMANCE_FIXTURE_FAMILIES[index % PERFORMANCE_FIXTURE_FAMILIES.length]!;
-  const symbol = `p${index}`;
-  const common = `Let ${symbol} denote the probability assigned to event A${index}.`;
-  const body = fixtureBody(family, index, symbol);
+  const symbol = index === 0 ? "z" : `p${index}`;
+  const common = `Let $${symbol}$ denote the probability assigned to event $A_${index}$.`;
+  const body = fixtureBody(family, index, symbol, projectSize);
   const content = `${common}\n${body}`;
   return {
     content,
@@ -71,12 +71,21 @@ function performanceDocument(index: number): PerformanceFixtureDocument {
   };
 }
 
-function fixtureBody(family: PerformanceFixtureFamily, index: number, symbol: string): string {
+function fixtureBody(
+  family: PerformanceFixtureFamily,
+  index: number,
+  symbol: string,
+  projectSize: number,
+): string {
   switch (family) {
     case "reported-ece":
       return [
         "Expected calibration error (ECE) uses confidence bins $B_m$.",
         `\$${symbol}=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
+        ...Array.from(
+          { length: projectSize },
+          (_, mention) => `The report retains source-grounded occurrence ${mention}: $${symbol}$.`,
+        ),
       ].join("\n");
     case "decorated-and-styled":
       return `\$${symbol}=\\hat{\\mathbf y}_{t+1}+\\widetilde{\\mathcal L}(\\symbf{x})\$`;
