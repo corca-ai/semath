@@ -192,7 +192,10 @@
         "class probability",
         "confidence"
       ],
-      "parents": [],
+      "parents": [
+        "probability:probability",
+        "quantities-units:dimensionless"
+      ],
       "references": [
         "convex-optimization"
       ]
@@ -360,19 +363,30 @@
           "id": "loss",
           "concept": "optimization-ml:loss-value",
           "description": "Binary cross-entropy loss.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "L",
+            "ell"
+          ]
         },
         {
           "id": "label",
           "concept": "optimization-ml:binary-label",
           "description": "Binary label.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "y"
+          ]
         },
         {
           "id": "probability",
           "concept": "optimization-ml:predicted-probability",
           "description": "Predicted probability.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "p",
+            "q"
+          ]
         }
       ],
       "conditions": [

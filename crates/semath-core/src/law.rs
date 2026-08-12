@@ -886,7 +886,7 @@ pub(crate) fn observe_laws(
                     actual,
                     inferred_role.as_deref(),
                     actual.range.start_offset,
-                    role_context_activated,
+                    role_context_activated || activation.is_some(),
                     activation.is_some(),
                     activation.is_some_and(|activation| activation.identifies_attached_formula),
                     context.shapes,
@@ -2031,9 +2031,33 @@ fn roles_are_supported(
     let mut unresolved = 0;
     let mut unresolved_role = None;
     for role in roles {
-        let Some(expression) = bindings.get(&role.id) else {
+        let Some(bound_expression) = bindings.get(&role.id) else {
             return false;
         };
+        let projected_expression = match (&bound_expression.kind, role.source_projection) {
+            (SemanticExprKind::Apply { operator, .. }, RoleSourceProjection::Head) => {
+                Some(SemanticExpr {
+                    kind: SemanticExprKind::Symbol(operator.value.clone()),
+                    range: operator.range.clone(),
+                    provenance: operator.provenance.clone(),
+                })
+            }
+            (SemanticExprKind::Apply { operator, .. }, RoleSourceProjection::Expression)
+                if notation_context_activated
+                    && role
+                        .notation
+                        .iter()
+                        .any(|notation| notation_matches_symbol(notation, operator.as_str())) =>
+            {
+                Some(SemanticExpr {
+                    kind: SemanticExprKind::Symbol(operator.value.clone()),
+                    range: operator.range.clone(),
+                    provenance: operator.provenance.clone(),
+                })
+            }
+            _ => None,
+        };
+        let expression = projected_expression.as_ref().unwrap_or(bound_expression);
         if formula_operator_role_support(role, expression, actual) == RoleSupport::Supported {
             supported += 1;
             supported_roles.insert(role.id.as_str());
@@ -2058,10 +2082,10 @@ fn roles_are_supported(
             return false;
         }
         let mut role_support = RoleSupport::Supported;
-        for symbol in symbols {
+        for symbol in &symbols {
             role_support = role_support.and(role_symbol_support(
                 role,
-                &symbol,
+                symbol,
                 offset,
                 notation_context_activated,
                 shapes,
@@ -5222,6 +5246,41 @@ This conversion is performed once per accepted timing sample so the accumulator 
                 .iter()
                 .any(|recognition| recognition.law_id == "expectation-linearity"),
             "{observations:#?}"
+        );
+    }
+
+    #[test]
+    fn recognizes_authored_binary_cross_entropy_notation() {
+        let template = lower_template(
+            "loss = -label log probability - (1 - label) log (1 - probability)",
+        );
+        let actual = lower_template("L(y,p) = - y log p - (1 - y) log (1 - p)");
+        let placeholders = ["loss", "label", "probability"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
+            "template={} actual={}",
+            crate::canonical::render_canonical(&template),
+            crate::canonical::render_canonical(&actual),
+        );
+        let observations = recognized_law_observations(
+            r"For each binary label $y\in\{0,1\}$, the network emits a probability $p\in(0,1)$. We computed binary cross-entropy as
+\[
+L(y,p)=-y\log p-(1-y)\log(1-p).
+\]",
+        );
+        let recognition = observations
+            .iter()
+            .find(|recognition| recognition.law_id == "binary-cross-entropy")
+            .expect("binary cross-entropy should be recognized");
+        assert_eq!(recognition.status, LawRecognitionStatus::Verified);
+        assert!(
+            recognition
+                .bindings
+                .iter()
+                .any(|binding| binding.parameter == "loss" && binding.symbol == "L(y,p)")
         );
     }
 
