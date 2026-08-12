@@ -16,9 +16,10 @@ use crate::construction::{
 use crate::pack::{PackActivationStructure, PackConditionKind, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
-    AnaphorKind, DefinitionAction, DiscourseConnective, DiscourseFrame, ProseEvent, ProseEventKind,
-    ProseEventStream, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
-    extract_assumptions_with_phrases, normalize_prose_events, segment_scientific_clauses,
+    AnaphorKind, DefinitionAction, DiscourseConnective, DiscourseConstruction, DiscourseFrame,
+    MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent, ProseEventKind, ProseEventStream, ScientificClause,
+    ScientificMention, align_ordered_descriptions, clause_at, extract_assumptions_with_phrases,
+    normalize_prose_events, segment_scientific_clauses,
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
 use crate::{
@@ -292,7 +293,7 @@ pub(crate) fn observe_prose(
         })
         .collect::<Vec<_>>();
     let events = normalize_prose_events(source, &clauses, &mentions);
-    let definition_constructions = events.definition_constructions(source, &mentions, &clauses);
+    let discourse_constructions = events.discourse_constructions(source, &mentions, &clauses);
     collect_assumptions(&index, &clauses, &mentions, &events, &mut analysis);
 
     collect_role_first_nominal_definitions(
@@ -315,6 +316,7 @@ pub(crate) fn observe_prose(
         &clauses,
         &mentions,
         &events,
+        &discourse_constructions,
         &mut analysis,
     );
     collect_equation_flow_definitions(
@@ -325,6 +327,7 @@ pub(crate) fn observe_prose(
         &clauses,
         &mentions,
         &events,
+        &discourse_constructions,
         &mut analysis,
     );
     collect_clause_definitions(
@@ -464,9 +467,12 @@ pub(crate) fn observe_prose(
             .iter()
             .position(|mention| mention.math_index == math_index)
             .and_then(|mention_index| {
-                definition_constructions
-                    .iter()
-                    .find(|construction| construction.mention_index == mention_index)
+                discourse_constructions.iter().find_map(|construction| {
+                    let DiscourseConstruction::Definition(definition) = construction else {
+                        return None;
+                    };
+                    (definition.mention_index == mention_index).then_some(definition)
+                })
             })
         {
             if !active.frame.establishes() || active.coordinated {
@@ -731,22 +737,27 @@ fn collect_anaphoric_definitions(
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
+    constructions: &[DiscourseConstruction],
     output: &mut ProseObservations,
 ) {
-    for description_index in 1..clauses.len() {
-        let symbols_index = description_index - 1;
-        let symbols_clause = &clauses[symbols_index];
-        let description_clause = &clauses[description_index];
-        if !symbols_clause.frame.establishes()
-            || !description_clause.frame.establishes()
-            || description_clause.start.saturating_sub(symbols_clause.end) > 160
-            || !events.has_anaphor(description_index)
-        {
+    for construction in constructions {
+        let DiscourseConstruction::Anaphoric {
+            antecedent_clause_index: symbols_index,
+            description_clause_index: description_index,
+            candidate,
+            frame,
+        } = construction
+        else {
+            continue;
+        };
+        let symbols_clause = &clauses[*symbols_index];
+        let description_clause = &clauses[*description_index];
+        if !symbols_clause.frame.establishes() || !frame.establishes() {
             continue;
         }
 
-        let mut antecedents = events
-            .mentions_in_clause(symbols_index)
+        let mut antecedents = candidate
+            .mention_indices
             .iter()
             .filter_map(|mention_index| mentions.get(*mention_index))
             .filter(|mention| is_definition_slot_math(&parsed[mention.math_index]))
@@ -776,8 +787,8 @@ fn collect_anaphoric_definitions(
         }
 
         let text = description_clause.text.trim();
-        let has_former = events.has_anaphor_kind(description_index, AnaphorKind::Former);
-        let has_latter = events.has_anaphor_kind(description_index, AnaphorKind::Latter);
+        let has_former = events.has_anaphor_kind(*description_index, AnaphorKind::Former);
+        let has_latter = events.has_anaphor_kind(*description_index, AnaphorKind::Latter);
         if has_former || has_latter {
             if antecedents.len() != 2 {
                 continue;
@@ -786,11 +797,11 @@ fn collect_anaphoric_definitions(
                 (former.to_owned(), latter.to_owned(), description_clause.end)
             });
             let split = paired.or_else(|| {
-                let next = clauses.get(description_index + 1)?;
+                let next = clauses.get(*description_index + 1)?;
                 if !has_former
                     || next.start.saturating_sub(description_clause.end) > 160
                     || !next.frame.establishes()
-                    || !events.has_anaphor_kind(description_index + 1, AnaphorKind::Latter)
+                    || !events.has_anaphor_kind(*description_index + 1, AnaphorKind::Latter)
                 {
                     return None;
                 }
@@ -833,7 +844,7 @@ fn collect_anaphoric_definitions(
         }
 
         let ordered = events.has_connective(
-            description_index,
+            *description_index,
             &[
                 DiscourseConnective::Respectively,
                 DiscourseConnective::InThatOrder,
@@ -1006,10 +1017,27 @@ fn collect_equation_flow_definitions(
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
+    constructions: &[DiscourseConstruction],
     output: &mut ProseObservations,
 ) {
     let scopes = ScopeGraph::new(document);
-    for (mention_index, mention) in mentions.iter().enumerate() {
+    let mut resolved_mentions = std::collections::BTreeSet::new();
+    for construction in constructions {
+        let DiscourseConstruction::EquationFlow {
+            mention_index,
+            prose_start,
+            prose_end,
+            precedes_formula,
+            candidate,
+            frame,
+        } = construction
+        else {
+            continue;
+        };
+        if resolved_mentions.contains(mention_index) {
+            continue;
+        }
+        let mention = &mentions[*mention_index];
         let math = &parsed[mention.math_index];
         if is_definition_slot_math(math) {
             continue;
@@ -1018,66 +1046,63 @@ fn collect_equation_flow_definitions(
             start_offset: index.utf16_for_byte(mention.start),
             end_offset: index.utf16_for_byte(mention.end),
         };
-        for (prose_start, prose_end, precedes_formula) in
-            equation_flow_windows(clauses, mentions, mention_index, mention)
-        {
-            output.match_stats.matcher_work += 1;
-            let prose_range = SourceRange {
-                start_offset: index.utf16_for_byte(prose_start),
-                end_offset: index.utf16_for_byte(prose_end),
-            };
-            if !output
+        output.match_stats.matcher_work += 1;
+        let prose_range = SourceRange {
+            start_offset: index.utf16_for_byte(*prose_start),
+            end_offset: index.utf16_for_byte(*prose_end),
+        };
+        if !frame.establishes()
+            || !output
                 .semantic_evidence
                 .attachment
                 .permits(&prose_range, &formula_range)
-            {
-                continue;
-            }
-            let window = &source[prose_start..prose_end];
-            let action = events.last_definition_action(prose_start, prose_end);
-            let description = equation_flow_description(window)
-                .or_else(|| precedes_formula.then(|| equation_flow_nominal_description(window))?)
-                .or_else(|| {
-                    precedes_formula.then_some(())?;
-                    action_equation_flow_description(source, prose_start, prose_end, action?)
-                });
-            let Some(description) = description else {
-                continue;
-            };
-            let description_start = description.as_ptr() as usize - source.as_ptr() as usize;
-            if !clause_at(clauses, description_start)
-                .is_some_and(|clause| clause.frame.establishes())
-                || action.is_some_and(|action| {
-                    !clauses
-                        .get(action.clause_index)
-                        .is_some_and(|clause| clause.frame.establishes())
-                })
-            {
-                continue;
-            }
-            let Some((symbol, symbol_range)) =
-                relation_head_symbol(document, &math.region.content_range)
-                    .or_else(|| primary_symbol(document, math))
-            else {
-                continue;
-            };
-            let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
-            if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, &description) {
-                continue;
-            }
-            push_claim(
-                output,
-                document,
-                index,
-                &symbol,
-                &symbol_range,
-                &description,
-                "english-equation-flow-definition",
-                prose_start.min(mention.start),
-                prose_end.max(mention.end),
-            );
-            break;
+        {
+            continue;
         }
+        debug_assert_eq!(candidate.mention_indices, [*mention_index]);
+        let window = &source[*prose_start..*prose_end];
+        let action = events.last_definition_action(*prose_start, *prose_end);
+        let description = equation_flow_description(window)
+            .or_else(|| precedes_formula.then(|| equation_flow_nominal_description(window))?)
+            .or_else(|| {
+                precedes_formula.then_some(())?;
+                action_equation_flow_description(source, *prose_start, *prose_end, action?)
+            });
+        let Some(description) = description else {
+            continue;
+        };
+        let description_start = description.as_ptr() as usize - source.as_ptr() as usize;
+        if !clause_at(clauses, description_start).is_some_and(|clause| clause.frame.establishes())
+            || action.is_some_and(|action| {
+                !clauses
+                    .get(action.clause_index)
+                    .is_some_and(|clause| clause.frame.establishes())
+            })
+        {
+            continue;
+        }
+        let Some((symbol, symbol_range)) =
+            relation_head_symbol(document, &math.region.content_range)
+                .or_else(|| primary_symbol(document, math))
+        else {
+            continue;
+        };
+        let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
+        if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, &description) {
+            continue;
+        }
+        push_claim(
+            output,
+            document,
+            index,
+            &symbol,
+            &symbol_range,
+            &description,
+            "english-equation-flow-definition",
+            candidate.evidence_start,
+            candidate.evidence_end,
+        );
+        resolved_mentions.insert(*mention_index);
     }
 }
 
@@ -1101,55 +1126,6 @@ fn conflicts_with_existing_role(
             )
             && classify_role(&definition.description).is_some_and(|existing| existing != role)
     })
-}
-
-const MAX_EQUATION_FLOW_BYTES: usize = 320;
-const MAX_EQUATION_FLOW_CLAUSES: usize = 2;
-
-fn equation_flow_windows(
-    clauses: &[ScientificClause<'_>],
-    mentions: &[ScientificMention],
-    target_index: usize,
-    target: &ScientificMention,
-) -> Vec<(usize, usize, bool)> {
-    let mut windows = Vec::new();
-    let preceding_math_end = mentions[..target_index]
-        .iter()
-        .map(|mention| mention.end)
-        .max()
-        .unwrap_or_default();
-    windows.extend(
-        clauses
-            .iter()
-            .rev()
-            .filter_map(|clause| {
-                let start = clause.start.max(preceding_math_end);
-                (start < target.start && target.start - start <= MAX_EQUATION_FLOW_BYTES)
-                    .then_some((start, target.start, true))
-            })
-            .take(MAX_EQUATION_FLOW_CLAUSES + 1),
-    );
-    if let Some(clause) = clauses
-        .iter()
-        .find(|clause| clause.start < target.end && target.end <= clause.end)
-        && target.end < clause.end
-    {
-        windows.push((target.end, clause.end, false));
-    }
-    if let Some(clause) = clauses.iter().find(|clause| target.end <= clause.start)
-        && clause.end - target.end <= MAX_EQUATION_FLOW_BYTES
-    {
-        windows.push((target.end, clause.end, false));
-    }
-    windows.retain(|(start, end, _)| {
-        start < end
-            && !mentions.iter().enumerate().any(|(index, mention)| {
-                index != target_index && *start < mention.end && mention.start < *end
-            })
-    });
-    windows.sort_by_key(|(start, end, _)| end - start);
-    windows.dedup();
-    windows
 }
 
 fn action_equation_flow_description<'a>(
@@ -2022,7 +1998,7 @@ fn clause_attaches_to_preceding_math(
         .is_some_and(|connective| {
             mentions.iter().any(|mention| {
                 mention.end <= connective.start
-                    && connective.start - mention.end <= MAX_EQUATION_FLOW_BYTES
+                    && connective.start - mention.end <= MAX_ATTACHMENT_DISTANCE_BYTES
             })
         })
 }
@@ -2674,13 +2650,12 @@ fn definition_priority(definition: &DefinitionInfo) -> u8 {
 #[cfg(test)]
 mod tests {
     use super::{
-        ProseShape, equation_flow_windows, expand_shared_shape_head, formula_identification_bridge,
-        observe_prose, shape_claim,
+        ProseShape, expand_shared_shape_head, formula_identification_bridge, observe_prose,
+        shape_claim,
     };
     use crate::canonical::lower_document_region;
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
-    use crate::scientific_prose::{ScientificClause, ScientificMention, asserted_author_frame};
     use crate::{DocumentLanguage, ProjectDocument};
 
     fn analyze(source: &str) -> super::ProseObservations {
@@ -2755,34 +2730,6 @@ mod tests {
                 && classify_role(&definition.description).as_deref()
                     == Some("quantities-units:voltage")
         }));
-    }
-
-    #[test]
-    fn equation_flow_windows_start_after_preceding_display_math() {
-        let clauses = [ScientificClause {
-            start: 0,
-            end: 150,
-            text: "",
-            frame: asserted_author_frame(),
-        }];
-        let mentions = [
-            ScientificMention {
-                symbol: "Q".into(),
-                start: 40,
-                end: 80,
-                math_index: 0,
-            },
-            ScientificMention {
-                symbol: "m".into(),
-                start: 120,
-                end: 140,
-                math_index: 1,
-            },
-        ];
-
-        assert!(
-            equation_flow_windows(&clauses, &mentions, 1, &mentions[1]).contains(&(80, 120, true))
-        );
     }
 
     #[test]

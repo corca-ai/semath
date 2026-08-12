@@ -175,7 +175,7 @@ pub(crate) struct ProseEventStream {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct DiscourseConstruction {
+pub(crate) struct DefinitionConstruction {
     pub action: DefinitionAction,
     pub mention_index: usize,
     pub description_start: usize,
@@ -184,6 +184,38 @@ pub(crate) struct DiscourseConstruction {
     pub evidence_end: usize,
     pub frame: DiscourseFrame,
     pub coordinated: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct AttachmentCandidate {
+    pub mention_indices: Vec<usize>,
+    pub evidence_start: usize,
+    pub evidence_end: usize,
+    pub distance_bytes: usize,
+}
+
+const MAX_ATTACHMENT_MENTIONS: usize = 8;
+const MAX_ANAPHORIC_DISTANCE_BYTES: usize = 160;
+pub(crate) const MAX_ATTACHMENT_DISTANCE_BYTES: usize = 320;
+const MAX_EQUATION_FLOW_CLAUSES: usize = 2;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum DiscourseConstruction {
+    Definition(DefinitionConstruction),
+    Anaphoric {
+        antecedent_clause_index: usize,
+        description_clause_index: usize,
+        candidate: AttachmentCandidate,
+        frame: DiscourseFrame,
+    },
+    EquationFlow {
+        mention_index: usize,
+        prose_start: usize,
+        prose_end: usize,
+        precedes_formula: bool,
+        candidate: AttachmentCandidate,
+        frame: DiscourseFrame,
+    },
 }
 
 impl ProseEventStream {
@@ -276,7 +308,7 @@ impl ProseEventStream {
         source: &str,
         mentions: &[ScientificMention],
         clauses: &[ScientificClause<'_>],
-    ) -> Vec<DiscourseConstruction> {
+    ) -> Vec<DefinitionConstruction> {
         mentions
             .iter()
             .enumerate()
@@ -343,7 +375,7 @@ impl ProseEventStream {
                         && event.start < mention.start
                         && event.kind == ProseEventKind::Coordination
                 });
-                (description_start < description_end).then_some(DiscourseConstruction {
+                (description_start < description_end).then_some(DefinitionConstruction {
                     action: match action.kind {
                         ProseEventKind::DefinitionAction(action) => action,
                         _ => unreachable!(),
@@ -356,6 +388,94 @@ impl ProseEventStream {
                     frame: clause.frame.clone(),
                     coordinated,
                 })
+            })
+            .collect()
+    }
+
+    pub(crate) fn discourse_constructions(
+        &self,
+        source: &str,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        let mut constructions = self
+            .definition_constructions(source, mentions, clauses)
+            .into_iter()
+            .map(DiscourseConstruction::Definition)
+            .collect::<Vec<_>>();
+        constructions.extend(self.anaphoric_constructions(clauses));
+        constructions.extend(self.equation_flow_constructions(mentions, clauses));
+        constructions
+    }
+
+    fn anaphoric_constructions(
+        &self,
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        clauses
+            .iter()
+            .enumerate()
+            .skip(1)
+            .filter(|(description_clause_index, _)| self.has_anaphor(*description_clause_index))
+            .filter_map(|(description_clause_index, description_clause)| {
+                let antecedent_clause_index = description_clause_index - 1;
+                let antecedent_clause = &clauses[antecedent_clause_index];
+                let distance_bytes = description_clause
+                    .start
+                    .saturating_sub(antecedent_clause.end);
+                if distance_bytes > MAX_ANAPHORIC_DISTANCE_BYTES {
+                    return None;
+                }
+                let mention_indices = self.mentions_in_clause(antecedent_clause_index).to_vec();
+                if mention_indices.is_empty() || mention_indices.len() > MAX_ATTACHMENT_MENTIONS {
+                    return None;
+                }
+                Some(DiscourseConstruction::Anaphoric {
+                    antecedent_clause_index,
+                    description_clause_index,
+                    candidate: AttachmentCandidate {
+                        mention_indices,
+                        evidence_start: antecedent_clause.start,
+                        evidence_end: description_clause.end,
+                        distance_bytes,
+                    },
+                    frame: description_clause.frame.clone(),
+                })
+            })
+            .collect()
+    }
+
+    fn equation_flow_constructions(
+        &self,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        mentions
+            .iter()
+            .enumerate()
+            .flat_map(|(mention_index, mention)| {
+                equation_flow_windows(clauses, mentions, mention_index, mention)
+                    .into_iter()
+                    .filter_map(move |(prose_start, prose_end, precedes_formula)| {
+                        let clause = clause_at(clauses, prose_start)?;
+                        Some(DiscourseConstruction::EquationFlow {
+                            mention_index,
+                            prose_start,
+                            prose_end,
+                            precedes_formula,
+                            candidate: AttachmentCandidate {
+                                mention_indices: vec![mention_index],
+                                evidence_start: prose_start.min(mention.start),
+                                evidence_end: prose_end.max(mention.end),
+                                distance_bytes: if precedes_formula {
+                                    mention.start.saturating_sub(prose_end)
+                                } else {
+                                    prose_start.saturating_sub(mention.end)
+                                },
+                            },
+                            frame: clause.frame.clone(),
+                        })
+                    })
             })
             .collect()
     }
@@ -398,6 +518,52 @@ impl ProseEventStream {
             }
         })
     }
+}
+
+fn equation_flow_windows(
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    target_index: usize,
+    target: &ScientificMention,
+) -> Vec<(usize, usize, bool)> {
+    let mut windows = Vec::new();
+    let preceding_math_end = mentions[..target_index]
+        .iter()
+        .map(|mention| mention.end)
+        .max()
+        .unwrap_or_default();
+    windows.extend(
+        clauses
+            .iter()
+            .rev()
+            .filter_map(|clause| {
+                let start = clause.start.max(preceding_math_end);
+                (start < target.start && target.start - start <= MAX_ATTACHMENT_DISTANCE_BYTES)
+                    .then_some((start, target.start, true))
+            })
+            .take(MAX_EQUATION_FLOW_CLAUSES + 1),
+    );
+    if let Some(clause) = clauses
+        .iter()
+        .find(|clause| clause.start < target.end && target.end <= clause.end)
+        && target.end < clause.end
+    {
+        windows.push((target.end, clause.end, false));
+    }
+    if let Some(clause) = clauses.iter().find(|clause| target.end <= clause.start)
+        && clause.end - target.end <= MAX_ATTACHMENT_DISTANCE_BYTES
+    {
+        windows.push((target.end, clause.end, false));
+    }
+    windows.retain(|(start, end, _)| {
+        start < end
+            && !mentions.iter().enumerate().any(|(index, mention)| {
+                index != target_index && *start < mention.end && mention.start < *end
+            })
+    });
+    windows.sort_by_key(|(start, end, _)| end - start);
+    windows.dedup();
+    windows
 }
 
 fn trim_terminal_punctuation(source: &str, start: usize, mut end: usize) -> usize {
@@ -1482,6 +1648,90 @@ mod tests {
 
         assert!(stream.has_connective(0, &[DiscourseConnective::Where]));
         assert!(stream.has_connective(0, &[DiscourseConnective::InThatOrder]));
+    }
+
+    #[test]
+    fn equation_flow_candidates_start_after_preceding_math_and_remain_bounded() {
+        let clauses = [ScientificClause {
+            start: 0,
+            end: 150,
+            text: "",
+            frame: asserted_author_frame(),
+        }];
+        let mentions = [
+            ScientificMention {
+                symbol: "Q".into(),
+                start: 40,
+                end: 80,
+                math_index: 0,
+            },
+            ScientificMention {
+                symbol: "m".into(),
+                start: 120,
+                end: 140,
+                math_index: 1,
+            },
+        ];
+
+        assert_eq!(
+            equation_flow_windows(&clauses, &mentions, 1, &mentions[1]),
+            vec![(140, 150, false), (80, 120, true)],
+        );
+    }
+
+    #[test]
+    fn composes_bounded_anaphoric_attachment_candidates_from_typed_events() {
+        let source = "$x$ and $y$ are introduced. They denote input and output, respectively.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let mentions = ["$x$", "$y$"]
+            .into_iter()
+            .enumerate()
+            .map(|(math_index, needle)| {
+                let start = source.find(needle).unwrap();
+                ScientificMention {
+                    symbol: needle[1..2].into(),
+                    start,
+                    end: start + needle.len(),
+                    math_index,
+                }
+            })
+            .collect::<Vec<_>>();
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+
+        let candidate = stream
+            .discourse_constructions(source, &mentions, &clauses)
+            .into_iter()
+            .find_map(|construction| match construction {
+                DiscourseConstruction::Anaphoric { candidate, .. } => Some(candidate),
+                _ => None,
+            })
+            .expect("anaphoric attachment candidate");
+        assert_eq!(candidate.mention_indices, [0, 1]);
+        assert!(candidate.distance_bytes <= MAX_ANAPHORIC_DISTANCE_BYTES);
+    }
+
+    #[test]
+    fn refuses_unbounded_anaphoric_attachment_candidates() {
+        let padding = "x".repeat(MAX_ANAPHORIC_DISTANCE_BYTES + 1);
+        let source = format!("$x$ is introduced.\n\n{padding}\n\nThis symbol denotes input.");
+        let clauses = segment_scientific_clauses(&source, DocumentLanguage::Latex, &[]);
+        let mentions = [ScientificMention {
+            symbol: "x".into(),
+            start: 0,
+            end: 3,
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(&source, &clauses, &mentions);
+
+        assert!(
+            !stream
+                .discourse_constructions(&source, &mentions, &clauses)
+                .iter()
+                .any(|construction| matches!(
+                    construction,
+                    DiscourseConstruction::Anaphoric { .. }
+                ))
+        );
     }
 
     #[test]
