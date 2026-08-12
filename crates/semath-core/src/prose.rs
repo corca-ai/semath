@@ -5,7 +5,8 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use crate::canonical::{
-    SemanticExpr, SemanticExprKind, declared_symbols, expression_children, relation_head_symbol,
+    SemanticExpr, SemanticExprKind, declared_symbols, expression_children, expression_name,
+    lower_document_region, relation_head_symbol,
 };
 use crate::concept::classify_role;
 use crate::construction::{
@@ -518,7 +519,9 @@ pub(crate) fn observe_prose(
                 | DefinitionAction::Denote
                 | DefinitionAction::Represent
                 | DefinitionAction::Mean => "english-relational-definition",
-                DefinitionAction::Write | DefinitionAction::Compute => unreachable!(),
+                DefinitionAction::Write | DefinitionAction::Compute | DefinitionAction::Produce => {
+                    unreachable!()
+                }
             };
             push_claim(
                 &mut analysis,
@@ -1060,6 +1063,67 @@ fn collect_equation_flow_definitions(
     let scopes = ScopeGraph::new(document);
     let mut resolved_mentions = std::collections::BTreeSet::new();
     for construction in constructions {
+        let DiscourseConstruction::OutputDefinition {
+            producer_mention_index,
+            result_mention_index,
+            description_start,
+            description_end,
+            candidate,
+            frame,
+        } = construction
+        else {
+            continue;
+        };
+        let Some((producer, result)) = mentions
+            .get(*producer_mention_index)
+            .zip(mentions.get(*result_mention_index))
+        else {
+            continue;
+        };
+        let result_math = &parsed[result.math_index];
+        let formula_range = result_math.region.content_range.clone();
+        let evidence_range = SourceRange {
+            start_offset: index.utf16_for_byte(candidate.evidence_start),
+            end_offset: index.utf16_for_byte(candidate.evidence_end),
+        };
+        if !frame.establishes()
+            || !output.semantic_evidence.formula_is_asserted(&formula_range)
+            || candidate.distance_bytes > MAX_ATTACHMENT_DISTANCE_BYTES
+            || !output
+                .semantic_evidence
+                .attachment
+                .permits(&evidence_range, &formula_range)
+        {
+            continue;
+        }
+        let producer_math = &parsed[producer.math_index];
+        let Some((symbol, symbol_range)) =
+            opaque_application_equation_result(document, producer_math, result_math)
+        else {
+            continue;
+        };
+        let description =
+            strip_description_article(source[*description_start..*description_end].trim());
+        if !valid_flow_description(description) {
+            continue;
+        }
+        if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, description) {
+            continue;
+        }
+        push_claim(
+            output,
+            document,
+            index,
+            &symbol,
+            &symbol_range,
+            description,
+            "english-output-definition",
+            candidate.evidence_start,
+            candidate.evidence_end,
+        );
+        resolved_mentions.insert(*result_mention_index);
+    }
+    for construction in constructions {
         let DiscourseConstruction::EquationFlow {
             mention_index,
             prose_start,
@@ -1140,6 +1204,54 @@ fn collect_equation_flow_definitions(
             candidate.evidence_end,
         );
         resolved_mentions.insert(*mention_index);
+    }
+}
+
+fn opaque_application_equation_result(
+    document: &ProjectDocument,
+    producer: &ParsedMath,
+    result: &ParsedMath,
+) -> Option<(String, SourceRange)> {
+    let producer_expression = lower_document_region(document, &producer.region.content_range);
+    let SemanticExprKind::Apply {
+        operator: producer_operator,
+        arguments: producer_arguments,
+    } = &producer_expression.kind
+    else {
+        return None;
+    };
+    let result_expression = lower_document_region(document, &result.region.content_range);
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &result_expression.kind
+    else {
+        return None;
+    };
+    if !matches!(operator.as_str(), "=" | "equals") {
+        return None;
+    }
+    let SemanticExprKind::Apply {
+        operator: result_operator,
+        arguments: result_arguments,
+    } = &right.kind
+    else {
+        return None;
+    };
+    if producer_operator != result_operator
+        || producer_arguments.len() != 1
+        || result_arguments.len() != 1
+        || expression_name(&producer_arguments[0]) != expression_name(&result_arguments[0])
+    {
+        return None;
+    }
+    match &left.kind {
+        SemanticExprKind::Symbol(symbol) => Some((symbol.clone(), left.range.clone())),
+        SemanticExprKind::Index { .. } => {
+            relation_head_symbol(document, &result.region.content_range)
+        }
+        _ => None,
     }
 }
 
@@ -2741,6 +2853,7 @@ fn push_claim(
             | "english-contextual-definition"
             | "english-equation-flow-definition"
             | "english-former-latter-definition"
+            | "english-output-definition"
     ) && evidence_range.start_offset < symbol_range.start_offset;
     let definition_evidence = Evidence {
         rule_id: rule_id.into(),
@@ -2987,6 +3100,7 @@ fn definition_priority(definition: &DefinitionInfo) -> u8 {
         | "english-use-definition"
         | "english-formula-definition"
         | "english-math-assignment-definition"
+        | "english-output-definition"
         | "english-former-latter-definition"
         | "english-anaphoric-definition" => 5,
         "english-equation-reference-definition"
@@ -3369,6 +3483,49 @@ mod tests {
                 analysis.definitions.iter().any(|definition| {
                     definition.description == description
                         && definition.evidence.rule_id == "english-equation-flow-definition"
+                }),
+                "{source}: {:?}",
+                analysis.definitions
+            );
+        }
+    }
+
+    #[test]
+    fn attaches_typed_transformation_outputs_to_equation_results_only() {
+        for action in ["returns", "produces", "yields"] {
+            let source = format!(
+                "The sealed transformation $F(z)$ {action} calibrated range:\n\\[r=F(z).\\]"
+            );
+            let analysis = analyze(&source);
+            assert!(
+                analysis.definitions.iter().any(|definition| {
+                    definition.symbol == "r"
+                        && definition.description == "calibrated range"
+                        && definition.evidence.rule_id == "english-output-definition"
+                }),
+                "{source}: {:?}",
+                analysis.definitions
+            );
+            assert!(analysis.definitions.iter().all(|definition| {
+                definition.evidence.rule_id != "english-output-definition"
+                    || definition.symbol == "r"
+            }));
+        }
+    }
+
+    #[test]
+    fn refuses_nonasserted_or_ambiguous_transformation_outputs() {
+        for source in [
+            "According to [1], the transform $F(z)$ returns calibrated range:\n\\[r=F(z).\\]",
+            "The transform $F(z)$ might return calibrated range:\n\\[r=F(z).\\]",
+            "The transform $F(z)$ returns either calibrated range or bearing:\n\\[r=F(z).\\]",
+            "The transform $F(z)$ returns calibrated range:\n\\[r=G(z).\\]",
+            "The transform $F(z)$ returns calibrated range:\n\\[r=z+1.\\]",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis.definitions.iter().all(|definition| {
+                    definition.evidence.rule_id != "english-output-definition"
                 }),
                 "{source}: {:?}",
                 analysis.definitions

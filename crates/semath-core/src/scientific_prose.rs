@@ -114,6 +114,7 @@ pub(crate) enum DefinitionAction {
     Write,
     Call,
     Compute,
+    Produce,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -134,6 +135,7 @@ pub(crate) enum DiscourseConnective {
     Therefore,
     Respectively,
     InThatOrder,
+    Alternative,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -214,6 +216,14 @@ pub(crate) enum DiscourseConstruction {
         prose_start: usize,
         prose_end: usize,
         precedes_formula: bool,
+        candidate: AttachmentCandidate,
+        frame: DiscourseFrame,
+    },
+    OutputDefinition {
+        producer_mention_index: usize,
+        result_mention_index: usize,
+        description_start: usize,
+        description_end: usize,
         candidate: AttachmentCandidate,
         frame: DiscourseFrame,
     },
@@ -418,8 +428,101 @@ impl ProseEventStream {
             .map(DiscourseConstruction::Definition)
             .collect::<Vec<_>>();
         constructions.extend(self.anaphoric_constructions(clauses));
-        constructions.extend(self.equation_flow_constructions(mentions, clauses));
+        let equation_flows = self.equation_flow_constructions(mentions, clauses);
+        constructions.extend(self.output_definition_constructions(
+            source,
+            mentions,
+            clauses,
+            &equation_flows,
+        ));
+        constructions.extend(equation_flows);
         constructions
+    }
+
+    fn output_definition_constructions(
+        &self,
+        source: &str,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+        equation_flows: &[DiscourseConstruction],
+    ) -> Vec<DiscourseConstruction> {
+        self.events
+            .iter()
+            .filter(|event| {
+                event.kind == ProseEventKind::DefinitionAction(DefinitionAction::Produce)
+            })
+            .filter_map(|action| {
+                let clause = clauses.get(action.clause_index)?;
+                let producer_mention_index = self
+                    .mentions_in_clause(action.clause_index)
+                    .iter()
+                    .copied()
+                    .filter(|mention_index| mentions[*mention_index].end <= action.start)
+                    .max_by_key(|mention_index| mentions[*mention_index].end)?;
+                let producer = &mentions[producer_mention_index];
+                if !source[producer.end..action.start]
+                    .chars()
+                    .all(|character| character.is_whitespace() || matches!(character, ','))
+                {
+                    return None;
+                }
+                let flow = equation_flows
+                    .iter()
+                    .filter_map(|construction| {
+                        let DiscourseConstruction::EquationFlow {
+                            mention_index,
+                            prose_start,
+                            prose_end,
+                            precedes_formula: true,
+                            candidate,
+                            ..
+                        } = construction
+                        else {
+                            return None;
+                        };
+                        (*prose_start <= action.start
+                            && action.end <= *prose_end
+                            && producer_mention_index < *mention_index)
+                            .then_some((*mention_index, candidate))
+                    })
+                    .min_by_key(|(_, candidate)| candidate.distance_bytes)?;
+                if self
+                    .mentions_in_clause(action.clause_index)
+                    .iter()
+                    .any(|mention_index| {
+                        *mention_index != flow.0 && action.end <= mentions[*mention_index].start
+                    })
+                {
+                    return None;
+                }
+                let (description_start, description_end) =
+                    trim_range(source, action.end, clause.end.min(mentions[flow.0].start));
+                let description_end =
+                    trim_terminal_punctuation(source, description_start, description_end);
+                if description_start >= description_end {
+                    return None;
+                }
+                if self.events.iter().any(|event| {
+                    event.clause_index == action.clause_index
+                        && description_start <= event.start
+                        && event.end <= description_end
+                        && event.kind
+                            == ProseEventKind::Connective(DiscourseConnective::Alternative)
+                }) {
+                    return None;
+                }
+                let mut candidate = flow.1.clone();
+                candidate.evidence_start = producer.start;
+                Some(DiscourseConstruction::OutputDefinition {
+                    producer_mention_index,
+                    result_mention_index: flow.0,
+                    description_start,
+                    description_end,
+                    candidate,
+                    frame: clause.frame.clone(),
+                })
+            })
+            .collect()
     }
 
     fn anaphoric_constructions(
@@ -676,8 +779,12 @@ fn emit_lexical_events(
         ("obtain", DefinitionAction::Compute),
         ("gives", DefinitionAction::Compute),
         ("give", DefinitionAction::Compute),
-        ("yields", DefinitionAction::Compute),
-        ("yield", DefinitionAction::Compute),
+        ("returns", DefinitionAction::Produce),
+        ("return", DefinitionAction::Produce),
+        ("produces", DefinitionAction::Produce),
+        ("produce", DefinitionAction::Produce),
+        ("yields", DefinitionAction::Produce),
+        ("yield", DefinitionAction::Produce),
         ("expressed", DefinitionAction::Write),
         ("written", DefinitionAction::Write),
         ("write", DefinitionAction::Write),
@@ -693,6 +800,8 @@ fn emit_lexical_events(
         ("therefore", DiscourseConnective::Therefore),
         ("respectively", DiscourseConnective::Respectively),
         ("in that order", DiscourseConnective::InThatOrder),
+        ("either", DiscourseConnective::Alternative),
+        ("or", DiscourseConnective::Alternative),
     ];
     const LINKS: &[(&str, DefinitionLink)] = &[
         ("to be", DefinitionLink::ToBe),
