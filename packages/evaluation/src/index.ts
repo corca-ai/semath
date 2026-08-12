@@ -8,6 +8,7 @@ export * from "./equivalence-challenge";
 export * from "./domain-routing-challenge";
 export * from "./cursor-invariants";
 export * from "./foundation";
+export * from "./fresh-blind-release";
 export * from "./legacy-path-audit";
 export * from "./metamorphic";
 export * from "./model";

@@ -11,6 +11,7 @@ import {
   frontierSignals,
   observeAuthoredScientificProbe,
   parseAuthoredScientificFixture,
+  parseFreshBlindReleaseFixture,
   resolveAuthoredAnchor,
   roleInstancesMatch,
   scoreAuthoredScientificFixture,
@@ -76,7 +77,7 @@ if (
 ) {
   throw new Error("SEMATH_AUTHORED_FIXTURE split does not match SEMATH_AUTHORED_SPLIT");
 }
-buildNative();
+if (process.env.SEMATH_AUTHORED_SKIP_BUILD !== "1") buildNative();
 
 const report = [];
 let failures = 0;
@@ -186,9 +187,16 @@ if (
 }
 
 async function readFixture(path: URL): Promise<AuthoredScientificFixture> {
-  return parseAuthoredScientificFixture(
-    JSON.parse(await readFile(path, "utf8")),
-  );
+  const value = JSON.parse(await readFile(path, "utf8")) as unknown;
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "commissioning" in value &&
+    "release" in value
+  ) {
+    return parseFreshBlindReleaseFixture(value).fixture;
+  }
+  return parseAuthoredScientificFixture(value);
 }
 
 function buildNative(): void {

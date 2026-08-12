@@ -97,6 +97,31 @@ only schema, provenance, digest, coverage, anchor, and leakage checks in normal
 CI. `bun run authored:baseline` and `bun run authored` execute the six public
 query surfaces only as deliberate manual evidence gates.
 
+The v0.28 release adds a new 48-scenario blind tranche rather than reusing the
+historical holdout as a tuning target. It has exactly eight scenarios in each
+document-reasoning family and covers every decision class. Isolated Codex
+subagents author its source and expectations without engine execution;
+independent subagents critique them; then the main agent reads every source and
+expectation, applies corrections, freezes the task card and review digests, and
+seals both the authored fixture and its release envelope. Author, critic, and
+main-review identities must be distinct, and the validator rejects source
+reuse or suspicious math/prose similarity with any checked-in fixture.
+
+The blind path is always explicit: set `SEMATH_FRESH_BLIND_FIXTURE` and
+`SEMATH_FRESH_BLIND_RECEIPT`, then run `bun run release:semantic` on the separate
+x86_64 Linux release host. All pre-blind checks—including the editable
+development tranche, final historical regression suites, stable performance
+budget, WASM build and checksum, package smoke test, and docs lint—must pass
+first. The
+runner exclusively creates the receipt immediately before the first engine
+query, refuses to reuse a receipt path, evaluates all six public query surfaces,
+and compares clean rebuilds with incremental snapshot transitions. The receipt
+retains fixture and artifact seals, exact Semath and wasmtex revisions, score,
+first-loss atlas, lifecycle result, and separate safety counts. Missed coverage
+is reported honestly; false establishment, false conflict, or unsafe navigation
+and edit fail the release. After that single run, the tranche becomes historical
+evidence and must not guide implementation changes.
+
 The 2026-08-12 v0.27 release evaluation passes 17 of 115 development probes
 (risk 404, no false establishment or false conflict) and 6 of 97 now-exposed
 historical holdout probes (risk 720). These deliberately difficult documents
@@ -138,12 +163,19 @@ mkdir -p .artifacts && bun run continuity:baseline
 bun run continuity
 mkdir -p .artifacts && bun run authored:baseline
 bun run authored
+bun run authored:development
 bun run corpus
 bun run corpus:generate:check
 bun run foundation
 bun run foundation:generate:check
 bun run scorecard
 ```
+
+The fresh blind commands are intentionally absent from the generic examples:
+they require an independently commissioned, sealed v0.28 fixture and a new
+receipt path. `bun run fresh-blind:validate` checks that explicit fixture without
+executing Semath. `bun run fresh-blind:run` is the one-shot evidence boundary and
+should normally be reached only through `bun run release:semantic`.
 
 `bun run challenge:report` writes `.artifacts/recognition-challenge.json`, and
 `bun run scorecard` writes `.artifacts/semantic-scorecard.json`. The same
