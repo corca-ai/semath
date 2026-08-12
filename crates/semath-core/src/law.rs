@@ -2001,6 +2001,12 @@ fn roles_are_supported(
         || (unresolved == 1
             && supported >= 2
             && ((unresolved_role == inferred_role && roles.len() <= 3)
+                || (roles.len() <= 3
+                    && unresolved_role.is_some_and(|unresolved| {
+                        roles
+                            .iter()
+                            .any(|role| role.id == unresolved && role.quantity.is_some())
+                    }))
                 || (unresolved_role != inferred_role && supported >= 3)))
         || (law_explicitly_activated
             && inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role)))
@@ -4140,6 +4146,12 @@ mod tests {
                 "Let $M$ be mass flow rate, $A$ area, and $v$ velocity. $M=\\rho Q=\\rho A v$."
             ),
             ["mass-flow-rate"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Let $c$ be wave propagation speed and $\\lambda$ wavelength. $c=f\\lambda$."
+            ),
+            ["wave-speed-relation"]
         );
     }
 
