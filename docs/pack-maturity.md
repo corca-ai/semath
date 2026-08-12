@@ -72,17 +72,17 @@ holds approved support policy; GitHub issues hold planned work.
   is \(A\cap B\). The release policy names these cases and rejects any new or
   ungrounded substitution. The current first losses localize as follows:
 
-  | First loss | Development | Holdout |
-  | --- | ---: | ---: |
-  | Neutral syntax | 0 | 0 |
-  | Prose attachment | 25 | 23 |
-  | Identity or scope | 3 | 42 |
-  | Canonical IR | 0 | 0 |
-  | Typed fact or condition | 23 | 10 |
-  | Local-to-observation propagation | 0 | 0 |
-  | Pack unification | 13 | 12 |
-  | Decision | 1 | 4 |
-  | Host projection | Not exercised | Not exercised |
+  | First loss                       |   Development |       Holdout |
+  | -------------------------------- | ------------: | ------------: |
+  | Neutral syntax                   |             0 |             0 |
+  | Prose attachment                 |            25 |            23 |
+  | Identity or scope                |             3 |            42 |
+  | Canonical IR                     |             0 |             0 |
+  | Typed fact or condition          |            23 |            10 |
+  | Local-to-observation propagation |             0 |             0 |
+  | Pack unification                 |            13 |            12 |
+  | Decision                         |             1 |             4 |
+  | Host projection                  | Not exercised | Not exercised |
 
   The scorer reuses the existing recognition-frontier signals and queries
   each reviewed relation at its original equation. A low propagation count
@@ -91,53 +91,60 @@ holds approved support policy; GitHub issues hold planned work.
   gaps. Host parity remains release evidence rather than a native-baseline
   inference.
 
+- The independently sealed v0.28 fresh blind was run once after all pre-blind
+  gates passed. It scored 7 of 48 with risk 490, including four false
+  establishments and two false conflicts; all 12 lifecycle comparison stages
+  agreed and unsafe navigation/edit was zero. The candidate is therefore not a
+  release. This exposed tranche remains historical evidence and is not a tuning
+  set.
+
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
 
 ## Gaps resolved in this evaluation
 
-| Category | Finding | Resolution |
-| --- | --- | --- |
-| Pack data | Linear algebra lacked matrix product/transpose; probability lacked union; three vocabulary packs had no measured laws | Added typed pack laws and independently seeded positive/refusal families |
-| Generic prose | Common plural declarations such as “events,” “sets,” and “iterates” lost roles | Law-role vocabulary now derives from pack concepts and handles singular/plural wording |
-| Generic prose | “In this setting, let X and Y …” lost the first coordinated declaration | Coordinated declarations now accept an introductory clause without a pack branch |
-| Fixture quality | Several seeds used invalid TeX words such as `alpha` or semantically invalid “respectively” phrasing | Corrected authored seeds; generation and duplicate/integrity gates prevent silent drift |
-| Maturity policy | One pack-wide tier conflated vocabulary, laws, typing, and provenance | Manifest schema 3 declares all seven capabilities separately and derives the summary |
-| Foundation evidence | Quantity/unit support was judged by a zero-law count | Added a strict 46-case non-law corpus and pure scorer |
-| Generic IR | Union/intersection were implicit and function calls were narrowly recovered | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path |
-| Concept identity | Runtime roles could collide as unnamespaced suffixes | Protocol 12 and the core use pack-qualified concept identities without a legacy role field |
-| Project environment | Included facts only affected law matching and dropped rich quantity facts | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records |
-| Macro semantics | A macro command name could be mistaken for prose meaning | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse |
-| Engineering composition | Shared notation could activate an unrelated field | Added typed role/quantity composition and a 16-case cross-field refusal suite |
-| Pack vocabulary | Natural concept paraphrases required runtime vocabulary edits | Schema 8 retains reviewed concept aliases consumed by the generic classifier |
-| Constraints | Side conditions were free-form strings without machine-checkable subjects or evidence | Schema 8 uses closed constraint kinds, validated law roles, bound symbols, source evidence, and explicit resolution status |
-| Generic calculus IR | Integrals, partial derivatives, nabla applications, and indexed families lost operator structure | The shared structural path now keeps explicit differential variables, derivative order, integral bounds, and base/index components without command-specific pack logic |
-| Source notation | Styled, decorated, and declared operator surfaces collapsed to a leaf or failed at a trailing application edge | Exact wasmtex identity ranges and precomputed complete-application boundaries preserve source notation without retaining the syntax arena at query time |
-| Prose declarations | Elided parallel declarations such as “let h be heat transfer, m mass, …” lost later role evidence | One bounded clause grammar maps arbitrary-arity copula elision without pack-specific phrases |
-| Typed role shape | A strongly typed quantity could be rejected only because no redundant scalar word was present | Quantity evidence admits an absent shape while explicit incompatible shape evidence still refuses the law |
-| Section scope | Markdown sibling headings could leak acronym and prose evidence | wasmtex emits nested Markdown scopes; Semath resolves evidence only inside the structural scope graph |
-| Equation equivalence | Solved and coefficient variants were ad-hoc unguarded law rewrites | Schema 8 provides one canonical relation; a bounded typed compiler emits guarded derived forms and proof evidence without commuting matrix/operator products |
-| Structural token identity | Semath inferred token kinds again from source text, splitting decorated and named notation | wasmtex syntax 7 supplies neutral lexical classes and document fields; Semath consumes them without TeX re-lexing or interpreting domains |
-| Domain routing | Global weak/strong activations could neither express scoped relevance nor order cross-pack collisions | Catalog-derived signatures and collision reports feed explicit/supported/tentative hypotheses; relevance orders a bounded frontier without becoming proof or a diagnostic |
-| Formula/prose order | Typed descriptions after an equation arrived too late to support that equation | One bounded math-slot construction attaches formula-first and prose-first declarations with exact evidence and deterministic retraction |
-| Equation references | A later “In Equation …” role list could not support the labeled display equation | Label/reference attachment links the two exact ranges; equation metadata is removed from canonical meaning |
-| Scientific operators | Gradient, divergence, curl, Laplacian, conditional arguments, and callable role placeholders lost reusable structure | One shared canonical IR and generic unifier represent them without field-specific runtime branches |
-| Decorated and indexed roles | Decorated optima and indexed state families lost identity or role evidence | Canonical decorated atoms and indexed-family lookup preserve exact source notation while sharing declared family evidence |
-| Opaque expansions | Macro resolution status conflated ordinary commands with truly opaque generated notation | Only opaque/cyclic/truncated structure yields an engine-limit decision; no Problems diagnostic is invented |
-| Canonical relations | Labels, chained equalities, and comma-separated systems could distort the relation extent or lose reusable constraints | Exact equation ranges and one canonical system path now preserve relation heads and all source-linked constraints |
-| Scoped comparisons | A rendered spelling could accidentally stand in for semantic identity | Comparison and retraction authority now follows resolved entities, source order, scopes, and connected components |
-| Document conditions | Included roles propagated but their typed assumptions stopped at the file boundary | The existing ordered external type environment now carries subject-bound assumptions and retracts them through the same dependency closure |
-| Prose composition | Result actions, role-first clauses, and formula-following `where` or `Here` assumptions used separate narrow branches | The normalized event stream composes these bounded forms and rejects cited, hedged, hypothetical, negated, or contradictory evidence |
-| Law runtime | A legacy single-result unifier coexisted with bounded multi-result matching | One bounded unifier remains, preserving structural recognition while deleting the obsolete path |
+| Category                    | Finding                                                                                                                | Resolution                                                                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pack data                   | Linear algebra lacked matrix product/transpose; probability lacked union; three vocabulary packs had no measured laws  | Added typed pack laws and independently seeded positive/refusal families                                                                                                  |
+| Generic prose               | Common plural declarations such as “events,” “sets,” and “iterates” lost roles                                         | Law-role vocabulary now derives from pack concepts and handles singular/plural wording                                                                                    |
+| Generic prose               | “In this setting, let X and Y …” lost the first coordinated declaration                                                | Coordinated declarations now accept an introductory clause without a pack branch                                                                                          |
+| Fixture quality             | Several seeds used invalid TeX words such as `alpha` or semantically invalid “respectively” phrasing                   | Corrected authored seeds; generation and duplicate/integrity gates prevent silent drift                                                                                   |
+| Maturity policy             | One pack-wide tier conflated vocabulary, laws, typing, and provenance                                                  | Manifest schema 3 declares all seven capabilities separately and derives the summary                                                                                      |
+| Foundation evidence         | Quantity/unit support was judged by a zero-law count                                                                   | Added a strict 46-case non-law corpus and pure scorer                                                                                                                     |
+| Generic IR                  | Union/intersection were implicit and function calls were narrowly recovered                                            | Added explicit set/relation operators, ordered composition, and multi-argument application on one canonical path                                                          |
+| Concept identity            | Runtime roles could collide as unnamespaced suffixes                                                                   | Protocol 12 and the core use pack-qualified concept identities without a legacy role field                                                                                |
+| Project environment         | Included facts only affected law matching and dropped rich quantity facts                                              | One ordered external type environment now exports complete role, shape, quantity, unit, dimension, and evidence records                                                   |
+| Macro semantics             | A macro command name could be mistaken for prose meaning                                                               | Only wasmtex-approved transparent surfaces contribute prose quantity meaning; opaque calls refuse                                                                         |
+| Engineering composition     | Shared notation could activate an unrelated field                                                                      | Added typed role/quantity composition and a 16-case cross-field refusal suite                                                                                             |
+| Pack vocabulary             | Natural concept paraphrases required runtime vocabulary edits                                                          | Schema 8 retains reviewed concept aliases consumed by the generic classifier                                                                                              |
+| Constraints                 | Side conditions were free-form strings without machine-checkable subjects or evidence                                  | Schema 8 uses closed constraint kinds, validated law roles, bound symbols, source evidence, and explicit resolution status                                                |
+| Generic calculus IR         | Integrals, partial derivatives, nabla applications, and indexed families lost operator structure                       | The shared structural path now keeps explicit differential variables, derivative order, integral bounds, and base/index components without command-specific pack logic    |
+| Source notation             | Styled, decorated, and declared operator surfaces collapsed to a leaf or failed at a trailing application edge         | Exact wasmtex identity ranges and precomputed complete-application boundaries preserve source notation without retaining the syntax arena at query time                   |
+| Prose declarations          | Elided parallel declarations such as “let h be heat transfer, m mass, …” lost later role evidence                      | One bounded clause grammar maps arbitrary-arity copula elision without pack-specific phrases                                                                              |
+| Typed role shape            | A strongly typed quantity could be rejected only because no redundant scalar word was present                          | Quantity evidence admits an absent shape while explicit incompatible shape evidence still refuses the law                                                                 |
+| Section scope               | Markdown sibling headings could leak acronym and prose evidence                                                        | wasmtex emits nested Markdown scopes; Semath resolves evidence only inside the structural scope graph                                                                     |
+| Equation equivalence        | Solved and coefficient variants were ad-hoc unguarded law rewrites                                                     | Schema 8 provides one canonical relation; a bounded typed compiler emits guarded derived forms and proof evidence without commuting matrix/operator products              |
+| Structural token identity   | Semath inferred token kinds again from source text, splitting decorated and named notation                             | wasmtex syntax 7 supplies neutral lexical classes and document fields; Semath consumes them without TeX re-lexing or interpreting domains                                 |
+| Domain routing              | Global weak/strong activations could neither express scoped relevance nor order cross-pack collisions                  | Catalog-derived signatures and collision reports feed explicit/supported/tentative hypotheses; relevance orders a bounded frontier without becoming proof or a diagnostic |
+| Formula/prose order         | Typed descriptions after an equation arrived too late to support that equation                                         | One bounded math-slot construction attaches formula-first and prose-first declarations with exact evidence and deterministic retraction                                   |
+| Equation references         | A later “In Equation …” role list could not support the labeled display equation                                       | Label/reference attachment links the two exact ranges; equation metadata is removed from canonical meaning                                                                |
+| Scientific operators        | Gradient, divergence, curl, Laplacian, conditional arguments, and callable role placeholders lost reusable structure   | One shared canonical IR and generic unifier represent them without field-specific runtime branches                                                                        |
+| Decorated and indexed roles | Decorated optima and indexed state families lost identity or role evidence                                             | Canonical decorated atoms and indexed-family lookup preserve exact source notation while sharing declared family evidence                                                 |
+| Opaque expansions           | Macro resolution status conflated ordinary commands with truly opaque generated notation                               | Only opaque/cyclic/truncated structure yields an engine-limit decision; no Problems diagnostic is invented                                                                |
+| Canonical relations         | Labels, chained equalities, and comma-separated systems could distort the relation extent or lose reusable constraints | Exact equation ranges and one canonical system path now preserve relation heads and all source-linked constraints                                                         |
+| Scoped comparisons          | A rendered spelling could accidentally stand in for semantic identity                                                  | Comparison and retraction authority now follows resolved entities, source order, scopes, and connected components                                                         |
+| Document conditions         | Included roles propagated but their typed assumptions stopped at the file boundary                                     | The existing ordered external type environment now carries subject-bound assumptions and retracts them through the same dependency closure                                |
+| Prose composition           | Result actions, role-first clauses, and formula-following `where` or `Here` assumptions used separate narrow branches  | The normalized event stream composes these bounded forms and rejects cited, hedged, hypothetical, negated, or contradictory evidence                                      |
+| Law runtime                 | A legacy single-result unifier coexisted with bounded multi-result matching                                            | One bounded unifier remains, preserving structural recognition while deleting the obsolete path                                                                           |
 
 ## Remaining measured gaps
 
-| Category | Current limitation | Affected evidence |
-| --- | --- | --- |
-| Coverage | Evaluated vertical slices do not yet provide broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
-| Document identity | Realistic declarations, edits, scoped reuse, and navigation projections still frequently lose the intended entity | 74 of 189 failed authored probes localize first to identity or scope |
-| Local recognition | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | 96 of 189 failed authored probes localize to attachment, typed facts, or pack unification |
-| Decision projection | Available evidence still produces the wrong calm/established distinction in some realistic scenes | 18 of 189 failed authored probes localize first to the decision boundary |
+| Category            | Current limitation                                                                                                   | Affected evidence                                                                                                    |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Coverage            | Evaluated vertical slices do not yet provide broad field recognition                                                 | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
+| Document identity   | Realistic declarations, edits, scoped reuse, and navigation projections still frequently lose the intended entity    | 74 of 189 failed authored probes localize first to identity or scope                                                 |
+| Local recognition   | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | 96 of 189 failed authored probes localize to attachment, typed facts, or pack unification                            |
+| Decision projection | Available evidence still produces the wrong calm/established distinction in some realistic scenes                    | 18 of 189 failed authored probes localize first to the decision boundary                                             |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by

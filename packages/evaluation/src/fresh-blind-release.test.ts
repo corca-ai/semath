@@ -34,9 +34,9 @@ describe("fresh blind release evidence", () => {
     const value = fixtureValue();
     value.fixture.scenarios[0]!.review.criticId = "main-codex";
     const release = finalize(value);
-    expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
-      "author, critic, and main reviewer must be independent",
-    );
+    expect(() =>
+      validateFreshBlindRelease(release, validation(release)),
+    ).toThrow("author, critic, and main reviewer must be independent");
 
     const sameWorker = fixtureValue();
     sameWorker.fixture.scenarios[0]!.review.criticId =
@@ -57,7 +57,9 @@ describe("fresh blind release evidence", () => {
       status: "available",
     };
     const release = finalize(value);
-    expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
+    expect(() =>
+      validateFreshBlindRelease(release, validation(release)),
+    ).toThrow(
       "available rename requires exact source, replacement, and safety evidence",
     );
   });
@@ -103,7 +105,11 @@ describe("fresh blind release evidence", () => {
       caseId: probe.id,
       decision: "established",
       definitions: [
-        { fileId: "main", path: "main.md", range: { startOffset: 0, endOffset: 1 } },
+        {
+          fileId: "main",
+          path: "main.md",
+          range: { startOffset: 0, endOffset: 1 },
+        },
       ],
       diagnostics: [],
       prepareRename: { range: { startOffset: 0, endOffset: 1 } },
@@ -123,8 +129,29 @@ describe("fresh blind release evidence", () => {
     };
     expect(freshBlindSafetySummary(release.fixture, [observation])).toEqual({
       falseConflict: 0,
+      falseConflictIds: [],
       falseEstablishment: 1,
+      falseEstablishmentIds: [probe.id],
       unsafeNavigationOrEdit: 3,
+      unsafeNavigationOrEditIds: [probe.id],
+    });
+    expect(
+      freshBlindSafetySummary(release.fixture, [
+        {
+          ...observation,
+          decision: "conflicting",
+          definitions: [],
+          prepareRename: {},
+          renameEdits: [],
+        },
+      ]),
+    ).toEqual({
+      falseConflict: 1,
+      falseConflictIds: [probe.id],
+      falseEstablishment: 0,
+      falseEstablishmentIds: [],
+      unsafeNavigationOrEdit: 0,
+      unsafeNavigationOrEditIds: [],
     });
   });
 

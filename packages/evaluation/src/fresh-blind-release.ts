@@ -61,8 +61,11 @@ export interface FreshBlindValidationSummary {
 
 export interface FreshBlindSafetySummary {
   readonly falseConflict: number;
+  readonly falseConflictIds: readonly string[];
   readonly falseEstablishment: number;
+  readonly falseEstablishmentIds: readonly string[];
   readonly unsafeNavigationOrEdit: number;
+  readonly unsafeNavigationOrEditIds: readonly string[];
 }
 
 export interface FreshBlindSnapshotTransition {
@@ -137,7 +140,10 @@ export function parseFreshBlindReleaseFixture(
     },
     fixture: parseAuthoredScientificFixture(root.fixture),
     release: {
-      createdAt: date(release.createdAt, "fresh blind release.release.createdAt"),
+      createdAt: date(
+        release.createdAt,
+        "fresh blind release.release.createdAt",
+      ),
       frozenAt: timestamp(
         release.frozenAt,
         "fresh blind release.release.frozenAt",
@@ -178,17 +184,25 @@ export function validateFreshBlindRelease(
     throw new Error("fresh blind outer release and authored batch disagree");
   }
   if (release.release.seal !== input.sealDigest) {
-    throw new Error("fresh blind release seal does not cover the frozen fixture");
+    throw new Error(
+      "fresh blind release seal does not cover the frozen fixture",
+    );
   }
   if (fixture.batch.seal !== input.authoredSealDigest) {
-    throw new Error("fresh blind authored seal does not cover the frozen fixture");
+    throw new Error(
+      "fresh blind authored seal does not cover the frozen fixture",
+    );
   }
   if (fixture.scenarios.length !== REQUIRED_SCENARIOS) {
-    throw new Error(`fresh blind fixture requires exactly ${REQUIRED_SCENARIOS} scenarios`);
+    throw new Error(
+      `fresh blind fixture requires exactly ${REQUIRED_SCENARIOS} scenarios`,
+    );
   }
   const primary = fixture.probes.filter((probe) => probe.kind === "primary");
   if (primary.length !== REQUIRED_SCENARIOS) {
-    throw new Error("fresh blind fixture requires one primary probe per scenario");
+    throw new Error(
+      "fresh blind fixture requires one primary probe per scenario",
+    );
   }
   for (const probe of fixture.probes) {
     const rename = probe.expected.navigation.rename;
@@ -210,7 +224,9 @@ export function validateFreshBlindRelease(
       rename.status === "unavailable" &&
       contract.some((value) => value !== undefined)
     ) {
-      throw new Error(`${probe.id}: unavailable rename cannot define an edit contract`);
+      throw new Error(
+        `${probe.id}: unavailable rename cannot define an edit contract`,
+      );
     }
   }
   const families = count(primary.map((probe) => probe.family));
@@ -230,7 +246,9 @@ export function validateFreshBlindRelease(
     "unsupported",
   ]) {
     if (!decisions[decision]) {
-      throw new Error(`${decision}: fresh blind fixture requires reviewed coverage`);
+      throw new Error(
+        `${decision}: fresh blind fixture requires reviewed coverage`,
+      );
     }
   }
   validateCommissioning(release);
@@ -248,7 +266,9 @@ export function validateFreshBlindRelease(
   if (input.freshProfiles.length !== fixture.scenarios.length) {
     throw new Error("fresh blind integrity profiles must cover every scenario");
   }
-  const freshProfileIds = new Set(input.freshProfiles.map((profile) => profile.id));
+  const freshProfileIds = new Set(
+    input.freshProfiles.map((profile) => profile.id),
+  );
   if (
     freshProfileIds.size !== fixture.scenarios.length ||
     fixture.scenarios.some((scenario) => !freshProfileIds.has(scenario.id))
@@ -305,42 +325,74 @@ export function freshBlindSafetySummary(
   fixture: AuthoredScientificFixture,
   observations: readonly AuthoredScientificObservation[],
 ): FreshBlindSafetySummary {
-  const byId = new Map(observations.map((observation) => [observation.caseId, observation]));
+  const byId = new Map(
+    observations.map((observation) => [observation.caseId, observation]),
+  );
   const risk = scoreAuthoredScientificFixture(fixture, observations).risk;
   let unsafeNavigationOrEdit = 0;
+  const falseConflictIds: string[] = [];
+  const falseEstablishmentIds: string[] = [];
+  const unsafeNavigationOrEditIds = new Set<string>();
   for (const probe of fixture.probes) {
     const observed = byId.get(probe.id);
     if (!observed) continue;
+    if (
+      observed.decision === "established" &&
+      probe.expected.decision !== "established"
+    ) {
+      falseEstablishmentIds.push(probe.id);
+    }
+    if (
+      (observed.decision === "conflicting" &&
+        probe.expected.decision !== "conflicting") ||
+      observed.diagnostics.length > probe.expected.diagnostics.maximum
+    ) {
+      falseConflictIds.push(probe.id);
+    }
     const snapshot = authoredSnapshotFor(
       authoredScenarioFor(fixture, probe),
       probe,
     );
-    unsafeNavigationOrEdit += unsafeLocations(
+    const unsafeDefinitions = unsafeLocations(
       observed.definitions,
       probe.expected.navigation.definition,
       snapshot,
     );
-    unsafeNavigationOrEdit += unsafeLocations(
+    const unsafeReferences = unsafeLocations(
       observed.references,
       probe.expected.navigation.references,
       snapshot,
     );
+    unsafeNavigationOrEdit += unsafeDefinitions + unsafeReferences;
     if (
       probe.expected.navigation.prepareRename.status === "unavailable" &&
       observed.prepareRename.range
     ) {
       unsafeNavigationOrEdit += 1;
     }
-    unsafeNavigationOrEdit += unsafeLocations(
+    const unsafeRename = unsafeLocations(
       observed.renameEdits,
       probe.expected.navigation.rename,
       snapshot,
     );
+    unsafeNavigationOrEdit += unsafeRename;
+    if (
+      unsafeDefinitions ||
+      unsafeReferences ||
+      unsafeRename ||
+      (probe.expected.navigation.prepareRename.status === "unavailable" &&
+        observed.prepareRename.range)
+    ) {
+      unsafeNavigationOrEditIds.add(probe.id);
+    }
   }
   return {
     falseConflict: risk.falseConflict,
+    falseConflictIds: falseConflictIds.sort(),
     falseEstablishment: risk.falseEstablishment,
+    falseEstablishmentIds: falseEstablishmentIds.sort(),
     unsafeNavigationOrEdit,
+    unsafeNavigationOrEditIds: [...unsafeNavigationOrEditIds].sort(),
   };
 }
 
@@ -360,10 +412,14 @@ function validateCommissioning(release: FreshBlindReleaseFixture): void {
   const seenGroups = new Set<string>();
   for (const scenario of release.fixture.scenarios) {
     if (scenario.provenance.taskCardDigest !== release.release.taskCardDigest) {
-      throw new Error(`${scenario.id}: authored task card differs from the frozen release`);
+      throw new Error(
+        `${scenario.id}: authored task card differs from the frozen release`,
+      );
     }
     if (scenario.review.frozenAt !== release.release.frozenAt) {
-      throw new Error(`${scenario.id}: review freeze differs from the frozen release`);
+      throw new Error(
+        `${scenario.id}: review freeze differs from the frozen release`,
+      );
     }
     if (!seenGroups.add(scenario.provenance.independenceGroup)) {
       throw new Error(`${scenario.id}: independence group is reused`);
@@ -386,11 +442,13 @@ function validateLaws(
   catalog: readonly AuthoredLawCatalogEntry[],
 ): number {
   const byId = new Map(catalog.map((law) => [law.lawId, law]));
-  if (byId.size !== catalog.length) throw new Error("law catalog ids are not unique");
+  if (byId.size !== catalog.length)
+    throw new Error("law catalog ids are not unique");
   const covered = new Set<string>();
   for (const scenario of fixture.scenarios) {
     for (const lawId of scenario.lawIds) {
-      if (!byId.has(lawId)) throw new Error(`${scenario.id}: unknown law ${lawId}`);
+      if (!byId.has(lawId))
+        throw new Error(`${scenario.id}: unknown law ${lawId}`);
       covered.add(lawId);
     }
   }
@@ -399,17 +457,25 @@ function validateLaws(
     for (const relation of probe.expected.relations) {
       const law = byId.get(relation.relationId);
       if (!law || !scenario.lawIds.includes(relation.relationId)) {
-        throw new Error(`${probe.id}: expected relation is absent from scenario law coverage`);
+        throw new Error(
+          `${probe.id}: expected relation is absent from scenario law coverage`,
+        );
       }
       for (const role of law.roles) {
-        const matches = relation.roles.filter((candidate) => candidate.role === role.id);
+        const matches = relation.roles.filter(
+          (candidate) => candidate.role === role.id,
+        );
         if (role.variadic ? matches.length === 0 : matches.length !== 1) {
-          throw new Error(`${probe.id}: ${relation.relationId} has invalid role coverage`);
+          throw new Error(
+            `${probe.id}: ${relation.relationId} has invalid role coverage`,
+          );
         }
       }
       const knownRoles = new Set(law.roles.map((role) => role.id));
       if (relation.roles.some((role) => !knownRoles.has(role.role))) {
-        throw new Error(`${probe.id}: ${relation.relationId} has an unknown role`);
+        throw new Error(
+          `${probe.id}: ${relation.relationId} has an unknown role`,
+        );
       }
     }
   }
@@ -425,7 +491,9 @@ function rejectExactLeakage(
     for (const snapshot of scenario.snapshots) {
       for (const document of snapshot.documents) {
         if (known.has(normalizeDocument(document.content))) {
-          throw new Error(`${scenario.id}: frozen document duplicates existing evidence`);
+          throw new Error(
+            `${scenario.id}: frozen document duplicates existing evidence`,
+          );
         }
       }
     }
@@ -452,7 +520,8 @@ function unsafeLocations(
   return observed.some((location) =>
     excluded.some(
       (anchor) =>
-        location.fileId === anchor.fileId && sameRange(location.range, anchor.range),
+        location.fileId === anchor.fileId &&
+        sameRange(location.range, anchor.range),
     ),
   )
     ? 1
@@ -460,7 +529,11 @@ function unsafeLocations(
 }
 
 function normalizeDocument(value: string): string {
-  return value.normalize("NFKC").toLocaleLowerCase("en-US").replaceAll(/\s+/gu, " ").trim();
+  return value
+    .normalize("NFKC")
+    .toLocaleLowerCase("en-US")
+    .replaceAll(/\s+/gu, " ")
+    .trim();
 }
 
 function count(values: readonly string[]): Record<string, number> {
@@ -511,7 +584,11 @@ function exact(
   }
 }
 
-function literal<T extends string>(value: unknown, expected: T, path: string): T {
+function literal<T extends string>(
+  value: unknown,
+  expected: T,
+  path: string,
+): T {
   if (value !== expected) throw new Error(`${path}: must be ${expected}`);
   return expected;
 }
@@ -525,20 +602,24 @@ function text(value: unknown, path: string): string {
 
 function digest(value: unknown, path: string): string {
   const result = text(value, path);
-  if (!DIGEST.test(result)) throw new Error(`${path}: expected a lowercase SHA-256 digest`);
+  if (!DIGEST.test(result))
+    throw new Error(`${path}: expected a lowercase SHA-256 digest`);
   return result;
 }
 
 function date(value: unknown, path: string): string {
   const result = text(value, path);
-  if (!/^\d{4}-\d{2}-\d{2}$/u.test(result)) throw new Error(`${path}: expected YYYY-MM-DD`);
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(result))
+    throw new Error(`${path}: expected YYYY-MM-DD`);
   return result;
 }
 
 function timestamp(value: unknown, path: string): string {
   const result = text(value, path);
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(result)) {
-    throw new Error(`${path}: expected a UTC timestamp without fractional seconds`);
+    throw new Error(
+      `${path}: expected a UTC timestamp without fractional seconds`,
+    );
   }
   return result;
 }

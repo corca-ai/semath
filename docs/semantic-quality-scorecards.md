@@ -5,22 +5,22 @@ accuracy number. The checked-in [quality manifest](../fixtures/corpus-manifest.j
 owns suite discovery, support tiers, coverage dimensions, transforms, and
 thresholds.
 
-| Signal | Meaning | It does not mean |
-| --- | --- | --- |
-| Recall | reviewed positive cases that recognize one target law | field-wide notation coverage |
-| Precision | target recognitions absent from reviewed refusal cases | probabilistic confidence |
-| Role accuracy | expected roles bind the intended symbols | universal validity of the formula |
-| Evidence integrity | conclusions retain conditions and source ranges | sufficiency outside the source context |
-| Refusal preservation | negative cases avoid recognizing the target law | proof that the input is false |
-| Adversarial refusal | unknown and cross-pack collision cases recognize no law | refusal of a different, valid law in the same formula |
-| Variation coverage | labeled notation, prose, role, constraint, project, macro, and mutation families | equal real-world frequency |
-| Diversity cells | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles | real-world prevalence |
-| Metamorphic invariance | irrelevant prose, comments, and document ordering preserve outcomes | arbitrary source rewrites are safe |
-| Pack-derived properties | every law receives positive, refusal, scope, mutation, macro/project, and cursor cells | production recognition agrees with itself |
-| Differential equivalence | clean, incremental, native, WASM, Worker, and LSP projections agree exactly | a second semantic engine exists |
-| Prose association | declared symbols receive their exact descriptions | the description is a supported domain concept |
-| Assumption extraction | explicit assumptions retain subjects and evidence | hypothetical or cited properties are assumptions |
-| Prose scope | declarations and assumptions obey section and include order | later or disconnected evidence is visible |
+| Signal                   | Meaning                                                                                | It does not mean                                      |
+| ------------------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Recall                   | reviewed positive cases that recognize one target law                                  | field-wide notation coverage                          |
+| Precision                | target recognitions absent from reviewed refusal cases                                 | probabilistic confidence                              |
+| Role accuracy            | expected roles bind the intended symbols                                               | universal validity of the formula                     |
+| Evidence integrity       | conclusions retain conditions and source ranges                                        | sufficiency outside the source context                |
+| Refusal preservation     | negative cases avoid recognizing the target law                                        | proof that the input is false                         |
+| Adversarial refusal      | unknown and cross-pack collision cases recognize no law                                | refusal of a different, valid law in the same formula |
+| Variation coverage       | labeled notation, prose, role, constraint, project, macro, and mutation families       | equal real-world frequency                            |
+| Diversity cells          | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles     | real-world prevalence                                 |
+| Metamorphic invariance   | irrelevant prose, comments, and document ordering preserve outcomes                    | arbitrary source rewrites are safe                    |
+| Pack-derived properties  | every law receives positive, refusal, scope, mutation, macro/project, and cursor cells | production recognition agrees with itself             |
+| Differential equivalence | clean, incremental, native, WASM, Worker, and LSP projections agree exactly            | a second semantic engine exists                       |
+| Prose association        | declared symbols receive their exact descriptions                                      | the description is a supported domain concept         |
+| Assumption extraction    | explicit assumptions retain subjects and evidence                                      | hypothetical or cited properties are assumptions      |
+| Prose scope              | declarations and assumptions obey section and include order                            | later or disconnected evidence is visible             |
 
 Thresholds apply to every law, so a broad suite cannot hide a weak law. The
 evaluator also rejects missing or unexpected generated observations rather than
@@ -150,6 +150,17 @@ and rejects substitution by any new false establishment. Current historical
 first losses are 23 attachment, 42 identity or scope, 10 typed-fact, 12
 pack-unification, and four decision cases. See
 [Pack maturity](pack-maturity.md) for interpretation by capability.
+
+The sealed v0.28 fresh blind was executed once on 2026-08-13 after every
+pre-blind gate passed. It scored 7 of 48 with risk 490: four false
+establishments, two false conflicts, 35 identity or navigation expectation
+misses, and 34 coverage misses. Clean and incremental results agreed across all
+12 reviewed lifecycle stages, and no unsafe navigation or edit was observed.
+The terminal receipt is `safety-failed`, so this candidate is not a release and
+must not be pinned by CorTeX. The fixture is now historical evidence and must
+not be used to tune or silently relabel the engine. Future one-shot receipts
+retain exact safety case IDs as well as counts and artifact digests so a failed
+run remains diagnosable without executing its fixture again.
 
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
