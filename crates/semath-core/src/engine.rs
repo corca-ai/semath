@@ -159,6 +159,9 @@ impl AnalyzedDocument {
         let mut semantic_occurrences: Vec<SemanticOccurrenceSeed> = parsed
             .iter()
             .flat_map(|math| &math.symbols)
+            .filter(|(surface, selection_range)| {
+                semantic_occurrence_is_meaningful(&document, surface, selection_range)
+            })
             .map(|(surface, selection_range)| {
                 let range = notation_occurrence_range(&document, selection_range);
                 let structural_path = notation_path(&document, selection_range);
@@ -272,6 +275,25 @@ impl AnalyzedDocument {
             observations,
         })
     }
+}
+
+fn semantic_occurrence_is_meaningful(
+    document: &ProjectDocument,
+    surface: &str,
+    selection: &SourceRange,
+) -> bool {
+    if let Some(name) = surface.strip_prefix('\\')
+        && (crate::canonical::is_ignorable_command(Some(name))
+            || crate::canonical::is_math_class_wrapper(Some(name)))
+    {
+        return false;
+    }
+    !document.nodes.iter().any(|node| {
+        node.kind == crate::NotationNodeKind::Command
+            && node.ranges.command.as_ref().or(node.ranges.name.as_ref()) == Some(selection)
+            && (crate::canonical::is_ignorable_command(node.name.as_deref())
+                || crate::canonical::is_math_class_wrapper(node.name.as_deref()))
+    })
 }
 
 fn structural_command_occurrences(

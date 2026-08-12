@@ -1482,6 +1482,16 @@ export function authoredRelationRangeMatches(
     return true;
   }
   if (sameRange(actual, expected)) return true;
+  const metadata = /^(?:(?:\\tag|\\label)\s*\{[^{}]*\}\s*)*$/u;
+  const trailing = /^(?:[.,;:]\s*)?(?:(?:\\(?:enspace|medspace|negthinspace|quad|qquad|thickspace|thinspace))\s*)*(?:(?:\\tag|\\label)\s*\{[^{}]*\}\s*)*$/u;
+  if (
+    actual.startOffset <= expected.startOffset &&
+    expected.endOffset <= actual.endOffset
+  ) {
+    const prefix = content.slice(actual.startOffset, expected.startOffset).trim();
+    const suffix = content.slice(expected.endOffset, actual.endOffset).trim();
+    return metadata.test(prefix) && trailing.test(suffix);
+  }
   if (
     actual.startOffset < expected.startOffset ||
     actual.endOffset > expected.endOffset
@@ -1490,8 +1500,6 @@ export function authoredRelationRangeMatches(
   }
   const prefix = content.slice(expected.startOffset, actual.startOffset).trim();
   const suffix = content.slice(actual.endOffset, expected.endOffset).trim();
-  const metadata = /^(?:(?:\\tag|\\label)\s*\{[^{}]*\}\s*)*$/u;
-  const trailing = /^(?:[.,;:]\s*)?(?:(?:\\tag|\\label)\s*\{[^{}]*\}\s*)*$/u;
   return metadata.test(prefix) && trailing.test(suffix);
 }
 

@@ -520,7 +520,7 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
     }
 }
 
-fn is_math_class_wrapper(name: Option<&str>) -> bool {
+pub(crate) fn is_math_class_wrapper(name: Option<&str>) -> bool {
     matches!(
         name,
         Some("mathord" | "mathop" | "mathbin" | "mathrel" | "mathopen" | "mathclose" | "mathinner")
@@ -716,7 +716,7 @@ fn emit_sized_delimiter(
     });
 }
 
-fn is_ignorable_command(name: Option<&str>) -> bool {
+pub(crate) fn is_ignorable_command(name: Option<&str>) -> bool {
     matches!(
         name,
         Some(
@@ -1293,9 +1293,42 @@ impl Parser {
     }
 
     fn parse_relation(&mut self) -> SemanticExpr {
+        let mut expression = self.parse_logical();
+        while let Some(operator) = self.consume_statement_relation() {
+            let right = self.parse_logical();
+            expression = combined(
+                &expression,
+                &right,
+                SemanticExprKind::Relation {
+                    operator,
+                    left: Box::new(expression.clone()),
+                    right: Box::new(right.clone()),
+                },
+            );
+        }
+        expression
+    }
+
+    fn parse_logical(&mut self) -> SemanticExpr {
+        let mut expression = self.parse_comparison();
+        while let Some(operator) = self.consume_logical_connective() {
+            let right = self.parse_comparison();
+            expression = combined(
+                &expression,
+                &right,
+                SemanticExprKind::Apply {
+                    operator,
+                    arguments: vec![expression.clone(), right.clone()],
+                },
+            );
+        }
+        expression
+    }
+
+    fn parse_comparison(&mut self) -> SemanticExpr {
         let mut operands = vec![self.parse_set_operation()];
         let mut operators = Vec::new();
-        while let Some(operator) = self.consume_relation() {
+        while let Some(operator) = self.consume_comparison() {
             operators.push(operator);
             operands.push(self.parse_set_operation());
         }
@@ -1467,7 +1500,7 @@ impl Parser {
                 factors.push(self.parse_power());
                 continue;
             }
-            if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. }) {
+            if is_argument_group(self.peek()) {
                 let argument = self.parse_power();
                 if let Some(previous) = factors.last().cloned()
                     && let Some(applied) = apply_argument(previous, argument.clone())
@@ -1586,9 +1619,7 @@ impl Parser {
                         order: 1,
                     },
                 };
-            } else if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. })
-                && is_callable_expression(&expression)
-            {
+            } else if is_argument_group(self.peek()) && is_callable_expression(&expression) {
                 let argument = self.parse_prefix();
                 expression = apply_argument(expression.clone(), argument)
                     .expect("callable postfix was checked before consuming its argument");
@@ -1971,7 +2002,33 @@ impl Parser {
         self.parse_prefix()
     }
 
-    fn consume_relation(&mut self) -> Option<SemanticReference> {
+    fn consume_statement_relation(&mut self) -> Option<SemanticReference> {
+        if self.consume_command("iff")
+            || self.consume_command("Leftrightarrow")
+            || self.consume_command("Longleftrightarrow")
+        {
+            Some(self.previous_reference("equivalent-to"))
+        } else if self.consume_command("implies")
+            || self.consume_command("Rightarrow")
+            || self.consume_command("Longrightarrow")
+        {
+            Some(self.previous_reference("implies"))
+        } else {
+            None
+        }
+    }
+
+    fn consume_logical_connective(&mut self) -> Option<SemanticReference> {
+        if self.consume_command("land") || self.consume_command("wedge") {
+            Some(self.previous_reference("and"))
+        } else if self.consume_command("lor") || self.consume_command("vee") {
+            Some(self.previous_reference("or"))
+        } else {
+            None
+        }
+    }
+
+    fn consume_comparison(&mut self) -> Option<SemanticReference> {
         if self.consume_operator(':') {
             if self.consume_operator('=') {
                 Some(self.previous_reference("equals"))
@@ -2191,6 +2248,16 @@ fn is_callable_expression(expression: &SemanticExpr) -> bool {
     }
 }
 
+fn is_argument_group(token: &TokenKind) -> bool {
+    matches!(
+        token,
+        TokenKind::Open {
+            delimiter: '(' | '[',
+            ..
+        }
+    )
+}
+
 fn split_arguments(argument: SemanticExpr) -> Vec<SemanticExpr> {
     let SemanticExprKind::Product(items) = &argument.kind else {
         return vec![argument];
@@ -2243,29 +2310,22 @@ fn split_arguments(argument: SemanticExpr) -> Vec<SemanticExpr> {
 
 fn starts_atom(token: &TokenKind) -> bool {
     match token {
-        TokenKind::Command(command) => !matches!(
-            command.as_str(),
-            "cap"
-                | "cdot"
-                | "circ"
-                | "coloneqq"
-                | "cup"
-                | "ge"
-                | "geq"
-                | "in"
-                | "le"
-                | "leq"
-                | "notin"
-                | "ne"
-                | "neq"
-                | "right"
-                | "subset"
-                | "subseteq"
-                | "supset"
-                | "supseteq"
-                | "times"
-                | "triangleq"
-        ),
+        TokenKind::Command(command) => {
+            !is_relation_command(command)
+                && !matches!(
+                    command.as_str(),
+                    "cap"
+                        | "cdot"
+                        | "circ"
+                        | "cup"
+                        | "land"
+                        | "lor"
+                        | "right"
+                        | "times"
+                        | "vee"
+                        | "wedge"
+                )
+        }
         TokenKind::Identifier(_)
         | TokenKind::Number(_)
         | TokenKind::Open { .. }
@@ -2286,6 +2346,12 @@ fn is_relation_command(name: &str) -> bool {
     matches!(
         name,
         "coloneqq"
+            | "iff"
+            | "implies"
+            | "Leftrightarrow"
+            | "Longleftrightarrow"
+            | "Longrightarrow"
+            | "Rightarrow"
             | "ge"
             | "geq"
             | "in"
@@ -2828,6 +2894,32 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template("G(s) = Y(s) / U(s)")),
             "relation(equals,apply(G,symbol(s)),fraction(apply(Y,symbol(s)),apply(U,symbol(s))))"
+        );
+    }
+
+    #[test]
+    fn lowers_square_bracket_function_application_without_naming_an_operator() {
+        assert_eq!(
+            render_canonical(&lower_template("\\mathbb E[X]")),
+            "apply(E,symbol(X))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("F[x,y]")),
+            "apply(F,symbol(x),symbol(y))"
+        );
+    }
+
+    #[test]
+    fn logical_connectives_preserve_their_relation_operands() {
+        assert_eq!(
+            render_canonical(&lower_template(
+                "x\\in A\\cup B\\iff (x\\in A)\\lor(x\\in B)"
+            )),
+            "relation(equivalent-to,relation(member-of,symbol(x),apply(union,symbol(A),symbol(B))),apply(or,relation(member-of,symbol(x),symbol(A)),relation(member-of,symbol(x),symbol(B))))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("p\\Longrightarrow q\\land r")),
+            "relation(implies,symbol(p),apply(and,symbol(q),symbol(r)))"
         );
     }
 

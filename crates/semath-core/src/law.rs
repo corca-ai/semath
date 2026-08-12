@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
 use crate::canonical::{SemanticExpr, SemanticExprKind, expression_children, lower_template};
+use crate::concept::concepts_share_lineage;
 use crate::consistency::{RoleObservations, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{is_capability_pack, laws_share_collision};
@@ -566,7 +567,7 @@ impl ExternalTypeEnvironment {
     fn has_role(&self, offset: u32, symbol: &str, role: &str) -> bool {
         self.roles_at(offset, symbol)
             .iter()
-            .any(|info| info.concept_id == role)
+            .any(|info| concepts_share_lineage(&info.concept_id, role))
     }
 
     fn has_quantity(&self, offset: u32, symbol: &str, quantity: &str) -> bool {
@@ -1005,33 +1006,21 @@ fn collect_law_expressions<'a>(
     output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
 ) {
     if let SemanticExprKind::System(expressions) = &expression.kind {
-        let disjoint = expressions
-            .windows(2)
-            .all(|pair| pair[0].range.end_offset <= pair[1].range.start_offset);
-        for (index, expression) in expressions.iter().enumerate() {
-            let segment = disjoint.then(|| {
-                let fallback = expression_source_envelope(expression);
-                SourceRange {
-                    start_offset: if index == 0 {
-                        formula_range.map_or(fallback.start_offset, |range| range.start_offset)
-                    } else {
-                        fallback.start_offset
-                    },
-                    end_offset: expressions.get(index + 1).map_or_else(
-                        || formula_range.map_or(fallback.end_offset, |range| range.end_offset),
-                        |next| next.range.start_offset,
-                    ),
-                }
-            });
+        for expression in expressions {
             collect_law_expressions_with_envelope(
                 expression,
-                segment.as_ref(),
+                Some(&expression.range),
                 formula_range,
                 output,
             );
         }
     } else {
-        collect_law_expressions_with_envelope(expression, formula_range, formula_range, output);
+        collect_law_expressions_with_envelope(
+            expression,
+            Some(&expression.range),
+            formula_range,
+            output,
+        );
     }
 }
 
@@ -1043,7 +1032,7 @@ fn collect_law_expressions_with_envelope<'a>(
 ) {
     let relation_envelope = relation_range
         .cloned()
-        .unwrap_or_else(|| expression_source_envelope(expression));
+        .unwrap_or_else(|| expression.range.clone());
     let formula_envelope = formula_range
         .cloned()
         .unwrap_or_else(|| relation_envelope.clone());
@@ -1055,17 +1044,6 @@ fn collect_law_expressions_with_envelope<'a>(
     for child in expression_children(expression) {
         collect_nested_law_expressions(child, &relation_envelope, &formula_envelope, output);
     }
-}
-
-fn expression_source_envelope(expression: &SemanticExpr) -> SourceRange {
-    expression
-        .provenance
-        .iter()
-        .fold(expression.range.clone(), |mut envelope, range| {
-            envelope.start_offset = envelope.start_offset.min(range.start_offset);
-            envelope.end_offset = envelope.end_offset.max(range.end_offset);
-            envelope
-        })
 }
 
 fn collect_nested_law_expressions<'a>(
@@ -2076,7 +2054,7 @@ fn bindings_have_formula_attached_declared_roles(
                         .roles_at(&symbol, offset)
                         .0
                         .iter()
-                        .any(|claim| claim.concept_id == role.concept)
+                        .any(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
                         || external.has_role(offset, &symbol, &role.concept)
                 })
         })
@@ -2085,7 +2063,7 @@ fn bindings_have_formula_attached_declared_roles(
         bindings.get(&role.id).is_some_and(|expression| {
             semantic_symbols(expression).into_iter().any(|symbol| {
                 consistency.roles_at(&symbol, offset).0.iter().any(|claim| {
-                    claim.concept_id == role.concept
+                    concepts_share_lineage(&claim.concept_id, &role.concept)
                         && claim.evidence.source_ranges.iter().any(|range| {
                             range.start_offset <= formula_range.start_offset
                                 && formula_range.end_offset <= range.end_offset
@@ -2159,7 +2137,7 @@ fn role_symbol_support(
     let declared_roles = consistency.roles_at(symbol, offset).0;
     let has_exact_role = declared_roles
         .iter()
-        .any(|claim| claim.concept_id == role.concept);
+        .any(|claim| concepts_share_lineage(&claim.concept_id, &role.concept));
     let comparable_roles = declared_roles
         .iter()
         .filter(|claim| concepts_are_comparable(&role.concept, &claim.concept_id))
@@ -2308,7 +2286,7 @@ fn recognition(
     context: &RecognitionContext<'_>,
     activation: Option<&LawActivationEvidence>,
 ) -> LawRecognition {
-    let formula_range = formula_source_range(source_envelope, context);
+    let formula_range = source_envelope.clone();
     let formula_evidence_range = formula_source_range(formula_envelope, context);
     let formula_evidence = Evidence {
         rule_id: "semantic-law-unification".into(),
@@ -3256,6 +3234,22 @@ mod tests {
     }
 
     #[test]
+    fn probability_operators_accept_square_bracket_application() {
+        assert_eq!(
+            recognized_laws(
+                "For integrable random variables $X$ and $Y$ and scalars $a,b$, linearity of expectation gives $\\mathbb E[aX+bY]=a\\mathbb E[X]+b\\mathbb E[Y]$.",
+            ),
+            ["expectation-linearity"],
+        );
+        assert!(
+            recognized_laws(
+                "Let $E$ be a matrix and $X$ a vector. The untyped expression is $E[X]$.",
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
     fn recognizes_stationarity_with_a_decorated_optimum() {
         let template = lower_template("\\nabla objective(variable) = 0");
         let actual = lower_template("\\nabla f(x^*) = 0");
@@ -3885,6 +3879,29 @@ mod tests {
     }
 
     #[test]
+    fn set_laws_remain_visible_inside_logical_equivalences() {
+        assert_eq!(
+            recognized_laws(
+                "Let $A$ and $B$ be sets in one universe. For every $x$, $x\\in A\\cup B\\iff (x\\in A)\\lor(x\\in B)$.",
+            ),
+            ["set-union"],
+        );
+        assert!(
+            recognized_laws(
+                "For two event sets $A$ and $B$, $x\\in A\\cup B\\iff (x\\in A)\\lor(x\\in B)$.",
+            )
+            .iter()
+            .any(|law| law == "set-union")
+        );
+        assert!(
+            recognized_laws(
+                "Without set declarations, the surface is $x\\in Q\\cup R\\iff (x\\in Q)\\lor(x\\in R)$.",
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
     fn formula_evidence_excludes_leading_and_trailing_presentation_commands() {
         let display = "\\label{eq:set}\n A\\cap B=C. \\tag{4}";
         let source_index = SourceIndex::new(display);
@@ -3935,6 +3952,14 @@ mod tests {
             .find(|law| law.law_id == "linear-momentum-definition")
             .unwrap();
         assert!(kinetic.range.end_offset <= momentum.range.start_offset);
+        assert_eq!(
+            &source[kinetic.range.start_offset as usize..kinetic.range.end_offset as usize],
+            "K=\\tfrac12 mv^2"
+        );
+        assert_eq!(
+            &source[momentum.range.start_offset as usize..momentum.range.end_offset as usize],
+            "p=mv"
+        );
         let kinetic_formula = kinetic
             .evidence
             .iter()

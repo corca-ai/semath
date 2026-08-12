@@ -256,10 +256,17 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
 
 fn preferred_formulas<'a>(input: &'a MeaningDecisionInput<'a>) -> Vec<&'a LawRecognition> {
     let explicitly_named = input.formulas.iter().any(has_law_activation);
-    input
+    let candidates = input
         .formulas
         .iter()
         .filter(|formula| !explicitly_named || has_law_activation(formula))
+        .collect::<Vec<_>>();
+    let Some(best_rank) = candidates.iter().map(|formula| formula.rank).min() else {
+        return Vec::new();
+    };
+    candidates
+        .into_iter()
+        .filter(|formula| formula.rank == best_rank)
         .collect()
 }
 
@@ -414,6 +421,19 @@ mod tests {
         assert!(matches!(
             decide_meaning(input(&[verified, conflicting])),
             MeaningDecision::Conflicting { .. }
+        ));
+    }
+
+    #[test]
+    fn stronger_scoped_domain_evidence_resolves_cross_pack_alternatives() {
+        let mut preferred = formula("preferred", ConstraintStatus::Verified);
+        preferred.rank = 10;
+        let mut fallback = formula("fallback", ConstraintStatus::Verified);
+        fallback.rank = 30;
+        assert!(matches!(
+            decide_meaning(input(&[fallback, preferred])),
+            MeaningDecision::Established { meaning, .. }
+                if meaning.relation_id.as_deref() == Some("preferred")
         ));
     }
 

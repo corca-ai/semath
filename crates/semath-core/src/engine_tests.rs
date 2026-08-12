@@ -1022,12 +1022,13 @@ fn symbolic_comparisons_do_not_cross_sibling_document_scopes() {
 
 #[test]
 fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
-    let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}$.";
+    let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}\\quad$.";
     let offsets = [
         content.find("$P=").unwrap() as u32,
         content.find("P=").unwrap() as u32,
         content.find("\\mathbf{F}").unwrap() as u32,
-        content.rfind('v').unwrap() as u32 + 1,
+        content.rfind("\\mathbf{v}").unwrap() as u32 + "\\mathbf{v}".len() as u32,
+        content.rfind("\\quad").unwrap() as u32 + "\\quad".len() as u32,
         content.rfind('$').unwrap() as u32 + 1,
     ];
     let mut engine = SemathEngine::default();
