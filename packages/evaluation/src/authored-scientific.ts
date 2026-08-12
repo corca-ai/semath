@@ -59,6 +59,18 @@ export type DocumentReasoningFamily =
 export type FirstLossStage = (typeof FIRST_LOSS_STAGES)[number];
 export type ScientificDecision = SemanticViewInfo["decision"]["status"];
 
+export type AuthoredIdentityFailureArea =
+  | "cursor-symbol"
+  | "definition"
+  | "references"
+  | "prepare-rename"
+  | "rename";
+
+export interface AuthoredIdentityFailure {
+  readonly area: AuthoredIdentityFailureArea;
+  readonly basis: string;
+}
+
 export interface AuthoredSourceAnchor {
   readonly fileId: string;
   readonly needle: string;
@@ -510,7 +522,7 @@ export function scoreAuthoredScientificFixture(
       probe,
       observed,
     );
-    caseFailures.push(...identityFailures);
+    caseFailures.push(...identityFailures.map((failure) => failure.basis));
     caseNavigation = identityFailures.length > 0;
     const problems = observed.diagnostics.filter(
       (item) => item.severity === "error" || item.severity === "warning",
@@ -1169,17 +1181,18 @@ export function authoredProbeIdentityMatches(
   return authoredProbeIdentityFailures(fixture, probe, observation).length === 0;
 }
 
-function authoredProbeIdentityFailures(
+export function authoredProbeIdentityFailures(
   fixture: AuthoredScientificFixture,
   probe: AuthoredScientificProbe,
   observation: AuthoredScientificObservation,
-): string[] {
+): AuthoredIdentityFailure[] {
   const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
-  const failures: string[] = [];
+  const failures: AuthoredIdentityFailure[] = [];
   if (probe.expected.symbol && observation.symbol !== probe.expected.symbol) {
-    failures.push(
-      `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
-    );
+    failures.push({
+      area: "cursor-symbol",
+      basis: `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
+    });
   }
   checkLocationExpectation(
     "definition",
@@ -1207,7 +1220,10 @@ function authoredProbeIdentityFailures(
     Boolean(observation.prepareRename.range) !==
     (preparation.status === "available")
   ) {
-    failures.push("prepareRename availability differs");
+    failures.push({
+      area: "prepare-rename",
+      basis: "prepareRename availability differs",
+    });
   }
   if (
     preparation.range &&
@@ -1217,31 +1233,37 @@ function authoredProbeIdentityFailures(
         resolveAuthoredAnchor(snapshot, preparation.range).range,
       ))
   ) {
-    failures.push("prepareRename range differs");
+    failures.push({ area: "prepare-rename", basis: "prepareRename range differs" });
   }
   if (
     preparation.placeholder !== undefined &&
     observation.prepareRename.placeholder !== preparation.placeholder
   ) {
-    failures.push("prepareRename placeholder differs");
+    failures.push({
+      area: "prepare-rename",
+      basis: "prepareRename placeholder differs",
+    });
   }
   return failures;
 }
 
 function checkLocationExpectation(
-  name: string,
+  name: "definition" | "references" | "rename",
   expected: AuthoredLocationExpectation,
   actual: readonly ObservedLocation[],
   snapshot: AuthoredScientificSnapshot,
-  failures: string[],
+  failures: AuthoredIdentityFailure[],
 ): boolean {
   let failed = false;
   if ((actual.length > 0) !== (expected.status === "available")) {
-    failures.push(`${name} availability differs`);
+    failures.push({ area: name, basis: `${name} availability differs` });
     failed = true;
   }
   if (actual.length < expected.minimum) {
-    failures.push(`${name} count ${actual.length}; expected at least ${expected.minimum}`);
+    failures.push({
+      area: name,
+      basis: `${name} count ${actual.length}; expected at least ${expected.minimum}`,
+    });
     failed = true;
   }
   for (const anchor of expected.required) {
@@ -1254,7 +1276,10 @@ function checkLocationExpectation(
           sameRange(item.range, resolved.range),
       )
     ) {
-      failures.push(`${name} missing ${anchor.fileId}:${anchor.needle}`);
+      failures.push({
+        area: name,
+        basis: `${name} missing ${anchor.fileId}:${anchor.needle}`,
+      });
       failed = true;
     }
   }
@@ -1268,7 +1293,10 @@ function checkLocationExpectation(
           sameRange(item.range, resolved.range),
       )
     ) {
-      failures.push(`${name} leaked ${anchor.fileId}:${anchor.needle}`);
+      failures.push({
+        area: name,
+        basis: `${name} leaked ${anchor.fileId}:${anchor.needle}`,
+      });
       failed = true;
     }
   }

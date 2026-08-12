@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   FIRST_LOSS_STAGES,
-  authoredProbeIdentityMatches,
+  authoredProbeIdentityFailures,
   authoredRelationRangeMatches,
   authoredScenarioFor,
   authoredSnapshotFor,
@@ -14,6 +14,7 @@ import {
   resolveAuthoredAnchor,
   roleInstancesMatch,
   scoreAuthoredScientificFixture,
+  summarizeAuthoredFirstLoss,
   type AuthoredRelationSourceEvidence,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
@@ -31,20 +32,6 @@ import {
 import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index";
 import { semanticEvaluationCursorOffset } from "./semantic-evaluation-runner";
 
-const fixtures = await Promise.all([
-  readFixture(
-    new URL(
-      "../fixtures/challenge/document-reasoning-development-v1.json",
-      import.meta.url,
-    ),
-  ),
-  readFixture(
-    new URL(
-      "../fixtures/challenge/document-reasoning-holdout-v1.json",
-      import.meta.url,
-    ),
-  ),
-]);
 const requestedSplit = process.env.SEMATH_AUTHORED_SPLIT;
 if (
   requestedSplit !== undefined &&
@@ -55,10 +42,40 @@ if (
     "SEMATH_AUTHORED_SPLIT must be development or holdout",
   );
 }
-const selected = fixtures.filter(
-  (fixture) =>
-    requestedSplit === undefined || fixture.batch.split === requestedSplit,
-);
+const requestedFixture = process.env.SEMATH_AUTHORED_FIXTURE;
+const fixturePaths = requestedFixture
+  ? [new URL(requestedFixture, `file://${process.cwd()}/`)]
+  : requestedSplit === "development"
+    ? [
+        new URL(
+          "../fixtures/challenge/document-reasoning-development-v1.json",
+          import.meta.url,
+        ),
+      ]
+    : requestedSplit === "holdout"
+      ? [
+          new URL(
+            "../fixtures/challenge/document-reasoning-holdout-v1.json",
+            import.meta.url,
+          ),
+        ]
+      : [
+          new URL(
+            "../fixtures/challenge/document-reasoning-development-v1.json",
+            import.meta.url,
+          ),
+          new URL(
+            "../fixtures/challenge/document-reasoning-holdout-v1.json",
+            import.meta.url,
+          ),
+        ];
+const selected = await Promise.all(fixturePaths.map(readFixture));
+if (
+  requestedSplit !== undefined &&
+  selected.some((fixture) => fixture.batch.split !== requestedSplit)
+) {
+  throw new Error("SEMATH_AUTHORED_FIXTURE split does not match SEMATH_AUTHORED_SPLIT");
+}
 buildNative();
 
 const report = [];
@@ -85,8 +102,13 @@ for (const fixture of selected) {
   const firstLoss = runs.map((run, index) => {
     const probe = fixture.probes[index];
     if (!probe) throw new Error(`missing probe for observation ${index}`);
+    const scenario = authoredScenarioFor(fixture, probe);
     return {
       caseId: probe.id,
+      expectedDecision: probe.expected.decision,
+      family: probe.family,
+      field: scenario.field,
+      split: fixture.batch.split,
       ...classifyAuthoredFirstLoss({
         cursorSignals: run.cursorSignals,
         expectedDecision: probe.expected.decision,
@@ -95,7 +117,7 @@ for (const fixture of selected) {
           probe,
           run.observation,
         ),
-        identityMatches: authoredProbeIdentityMatches(
+        identityFailures: authoredProbeIdentityFailures(
           fixture,
           probe,
           run.observation,
@@ -113,10 +135,12 @@ for (const fixture of selected) {
       firstLoss.filter((item) => item.stage === stage).length,
     ]),
   );
+  const firstLossAtlas = summarizeAuthoredFirstLoss(firstLoss);
   failures += score.failures.length;
   report.push({
     batch: fixture.batch,
     firstLoss,
+    firstLossAtlas,
     firstLossCounts,
     observations,
     score,
@@ -317,23 +341,28 @@ function runProbe(
         results[6 + index],
         probe.id + ": relation source " + index,
       );
-      return {
-        localRelationMatched: view.context.relations.some(
-          (relation) =>
-            relation.relationId === source.relation.relationId &&
-            authoredRelationRangeMatches(
-              documents.find((document) => document.fileId === source.anchor.fileId)
-                ?.content ?? "",
-              relation.range,
-              source.anchor.range,
-            ) &&
-            roleInstancesMatch(
-              relation.roles,
-              source.relation.roles,
-              undefined,
-            ),
+      const documentContent =
+        documents.find((document) => document.fileId === source.anchor.fileId)
+          ?.content ?? "";
+      const sameRelation = view.context.relations.filter(
+        (relation) => relation.relationId === source.relation.relationId,
+      );
+      const sameRange = sameRelation.filter((relation) =>
+        authoredRelationRangeMatches(
+          documentContent,
+          relation.range,
+          source.anchor.range,
         ),
+      );
+      const rolesMatched = sameRange.some((relation) =>
+        roleInstancesMatch(relation.roles, source.relation.roles, undefined),
+      );
+      return {
+        localRelationMatched: rolesMatched,
+        rangeMatched: sameRange.length > 0,
         relationId: source.relation.relationId,
+        relationPresent: sameRelation.length > 0,
+        rolesMatched,
         signals: frontierSignals(view, source.syntaxAvailable),
       };
     },

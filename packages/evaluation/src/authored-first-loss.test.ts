@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import type { RecognitionFrontierSignals } from "./recognition-frontier";
-import { classifyAuthoredFirstLoss } from "./authored-first-loss";
+import {
+  classifyAuthoredFirstLoss,
+  summarizeAuthoredFirstLoss,
+} from "./authored-first-loss";
 
 const signals: RecognitionFrontierSignals = {
   decision: "partial",
@@ -20,11 +23,15 @@ describe("authored first-loss localization", () => {
         cursorSignals: { ...signals, decision: "established" },
         expectedDecision: "established",
         expectedRelationsMatched: true,
-        identityMatches: true,
+        identityFailures: [],
         probePassed: true,
         relationSources: [],
       }),
-    ).toEqual({ basis: "all reviewed public surfaces match", stage: null });
+    ).toEqual({
+      basis: "all reviewed public surfaces match",
+      reason: "passed",
+      stage: null,
+    });
   });
 
   test("distinguishes local recognition from propagation loss", () => {
@@ -33,55 +40,75 @@ describe("authored first-loss localization", () => {
         cursorSignals: signals,
         expectedDecision: "established",
         expectedRelationsMatched: false,
-        identityMatches: true,
+        identityFailures: [],
         probePassed: false,
         relationSources: [
           {
             localRelationMatched: true,
+            rangeMatched: true,
             relationId: "field:law",
+            relationPresent: true,
+            rolesMatched: true,
             signals: { ...signals, decision: "established" },
           },
         ],
-      }).stage,
-    ).toBe("propagation");
+      }),
+    ).toMatchObject({
+      reason: "propagation-boundary-loss",
+      stage: "propagation",
+    });
   });
 
-  test("maps the existing frontier instead of inventing runtime stages", () => {
+  test("maps public frontier signals to an actionable reason", () => {
     expect(
       classifyAuthoredFirstLoss({
         cursorSignals: signals,
         expectedDecision: "established",
         expectedRelationsMatched: false,
-        identityMatches: true,
+        identityFailures: [],
         probePassed: false,
         relationSources: [
           {
             localRelationMatched: false,
+            rangeMatched: false,
             relationId: "field:law",
+            relationPresent: false,
+            rolesMatched: false,
             signals: { ...signals, structuralCandidates: false },
           },
         ],
-      }).stage,
-    ).toBe("pack-unification");
+      }),
+    ).toMatchObject({
+      reason: "structural-dispatch-miss",
+      stage: "pack-unification",
+    });
   });
 
-  test("reports scope identity before downstream propagation", () => {
+  test("reports navigation identity before downstream propagation", () => {
     expect(
       classifyAuthoredFirstLoss({
         cursorSignals: signals,
         expectedDecision: "established",
         expectedRelationsMatched: false,
-        identityMatches: false,
+        identityFailures: [
+          { area: "references", basis: "references availability differs" },
+        ],
         probePassed: false,
         relationSources: [
           {
             localRelationMatched: true,
+            rangeMatched: true,
             relationId: "field:law",
+            relationPresent: true,
+            rolesMatched: true,
             signals: { ...signals, decision: "established" },
           },
         ],
-      }).stage,
-    ).toBe("identity");
+      }),
+    ).toMatchObject({
+      reason: "navigation-projection-mismatch",
+      stage: "identity",
+    });
   });
 
   test("reports missing neutral source structure before identity", () => {
@@ -90,17 +117,25 @@ describe("authored first-loss localization", () => {
         cursorSignals: signals,
         expectedDecision: "established",
         expectedRelationsMatched: false,
-        identityMatches: false,
+        identityFailures: [
+          { area: "cursor-symbol", basis: "symbol null; expected x" },
+        ],
         probePassed: false,
         relationSources: [
           {
             localRelationMatched: false,
+            rangeMatched: false,
             relationId: "field:law",
+            relationPresent: false,
+            rolesMatched: false,
             signals: { ...signals, syntaxAvailable: false },
           },
         ],
-      }).stage,
-    ).toBe("neutral-syntax");
+      }),
+    ).toMatchObject({
+      reason: "neutral-syntax-unavailable",
+      stage: "neutral-syntax",
+    });
   });
 
   test("keeps unsafe certainty at the decision boundary", () => {
@@ -109,10 +144,108 @@ describe("authored first-loss localization", () => {
         cursorSignals: { ...signals, decision: "established" },
         expectedDecision: "unsupported",
         expectedRelationsMatched: true,
-        identityMatches: true,
+        identityFailures: [],
         probePassed: false,
         relationSources: [],
-      }).stage,
-    ).toBe("decision");
+      }),
+    ).toMatchObject({ reason: "unsafe-decision", stage: "decision" });
+  });
+
+  test("separates cursor, navigation, and edit projection reasons", () => {
+    const base = {
+      cursorSignals: signals,
+      expectedDecision: "established" as const,
+      expectedRelationsMatched: true,
+      probePassed: false,
+      relationSources: [],
+    };
+    expect(
+      classifyAuthoredFirstLoss({
+        ...base,
+        identityFailures: [
+          { area: "cursor-symbol", basis: "wrong symbol" },
+        ],
+      }).reason,
+    ).toBe("cursor-occurrence-mismatch");
+    expect(
+      classifyAuthoredFirstLoss({
+        ...base,
+        identityFailures: [
+          { area: "definition", basis: "missing definition" },
+        ],
+      }).reason,
+    ).toBe("navigation-projection-mismatch");
+    expect(
+      classifyAuthoredFirstLoss({
+        ...base,
+        identityFailures: [
+          { area: "prepare-rename", basis: "rename unavailable" },
+        ],
+      }).reason,
+    ).toBe("edit-projection-mismatch");
+  });
+
+  test("builds deterministic matrices without counting passing probes", () => {
+    const atlas = summarizeAuthoredFirstLoss([
+      {
+        basis: "ok",
+        caseId: "pass",
+        expectedDecision: "established",
+        family: "derivation-chain",
+        field: "calculus-analysis",
+        reason: "passed",
+        split: "development",
+        stage: null,
+      },
+      {
+        basis: "missing event",
+        caseId: "failure-b",
+        expectedDecision: "established",
+        family: "discourse-reference",
+        field: "probability",
+        reason: "discourse-evidence-missing",
+        split: "development",
+        stage: "attachment",
+      },
+      {
+        basis: "wrong cursor",
+        caseId: "failure-a",
+        expectedDecision: "partial",
+        family: "scope-comparison",
+        field: "calculus-analysis",
+        reason: "cursor-occurrence-mismatch",
+        split: "holdout",
+        stage: "identity",
+      },
+    ]);
+    expect(atlas).toEqual({
+      failed: 2,
+      passed: 1,
+      byDecision: [
+        { key: "established", count: 1 },
+        { key: "partial", count: 1 },
+      ],
+      byFamily: [
+        { key: "discourse-reference", count: 1 },
+        { key: "scope-comparison", count: 1 },
+      ],
+      byField: [
+        { key: "calculus-analysis", count: 1 },
+        { key: "probability", count: 1 },
+      ],
+      byReason: [
+        { key: "cursor-occurrence-mismatch", count: 1 },
+        { key: "discourse-evidence-missing", count: 1 },
+      ],
+      bySplit: [
+        { key: "development", count: 1 },
+        { key: "holdout", count: 1 },
+      ],
+      byStage: [
+        { key: "attachment", count: 1 },
+        { key: "identity", count: 1 },
+      ],
+      total: 3,
+    });
   });
 });
