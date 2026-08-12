@@ -3127,6 +3127,12 @@ mod tests {
     }
 
     #[test]
+    fn explicit_equation_references_attach_later_law_evidence_to_the_named_formula() {
+        let source = "$P=Fv\\label{eq:power}$ The mesh is fixed. The time step is fixed. Equation~\\eqref{eq:power} is the mechanical power relation.";
+        assert_eq!(recognized_laws(source), ["mechanical-power"]);
+    }
+
+    #[test]
     fn recognizes_new_probability_and_learning_relations_from_explicit_roles() {
         assert_eq!(
             recognized_laws(

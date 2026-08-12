@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -113,6 +113,7 @@ pub(crate) struct LawActivationEvidence {
     pub pack_id: String,
     pub law_id: String,
     pub clause_range: SourceRange,
+    pub attached_formula_ranges: Vec<SourceRange>,
     pub identifies_attached_formula: bool,
     pub frame: DiscourseFrame,
     pub evidence: Evidence,
@@ -183,6 +184,21 @@ impl ScientificSemanticEvidence {
             .filter(|activation| {
                 ranges_overlap(&activation.clause_range, range)
                     && self.attachment.permits(&activation.clause_range, range)
+            })
+            .max_by_key(|activation| activation.identifies_attached_formula)
+        {
+            return Some(activation);
+        }
+
+        if let Some(activation) = self
+            .law_activations
+            .iter()
+            .filter(matching)
+            .filter(|activation| {
+                activation
+                    .attached_formula_ranges
+                    .iter()
+                    .any(|target| ranges_overlap(target, range))
             })
             .max_by_key(|activation| activation.identifies_attached_formula)
         {
@@ -693,8 +709,11 @@ fn attach_equation_reference_definitions(
         }) else {
             continue;
         };
-        let reference = format!("\\ref{{{key}}}");
-        let Some(reference_relative) = source[search_from..].find(&reference) else {
+        let Some(reference_relative) = [format!("\\ref{{{key}}}"), format!("\\eqref{{{key}}}")]
+            .iter()
+            .filter_map(|reference| source[search_from..].find(reference))
+            .min()
+        else {
             continue;
         };
         let reference_start = search_from + reference_relative;
@@ -1302,6 +1321,13 @@ fn collect_semantic_evidence(
         .collect::<Vec<_>>();
     let mut domain_priors = Vec::new();
     let mut law_activations = Vec::new();
+    let reference_targets = explicit_equation_reference_targets(
+        document,
+        source,
+        index,
+        clauses,
+        canonical_expressions,
+    );
     let mut formula_operations = Vec::new();
     for clause in clauses {
         for range in phrase_ranges(source, index, clause, "vector dot product") {
@@ -1382,6 +1408,10 @@ fn collect_semantic_evidence(
                                 start_offset: index.utf16_for_byte(clause.start),
                                 end_offset: index.utf16_for_byte(clause.end),
                             },
+                            attached_formula_ranges: reference_targets
+                                .get(&clause.start)
+                                .cloned()
+                                .unwrap_or_default(),
                             identifies_attached_formula: activation_identifies_formula(
                                 source,
                                 index,
@@ -1426,6 +1456,104 @@ fn collect_semantic_evidence(
         formula_operations,
         attachment: AttachmentGraph::new(document),
     }
+}
+
+fn explicit_equation_reference_targets(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    canonical_expressions: &[SemanticExpr],
+) -> BTreeMap<usize, Vec<SourceRange>> {
+    let commands = scan_reference_commands(source);
+    let labels = commands
+        .iter()
+        .filter(|command| command.kind == ReferenceCommandKind::Label)
+        .filter_map(|command| {
+            let offset = index.utf16_for_byte(command.start);
+            let target = document
+                .math_roots
+                .iter()
+                .filter(|root| root.full_range.contains(offset))
+                .min_by_key(|root| root.full_range.end_offset - root.full_range.start_offset)
+                .map(|root| root.content_range.clone())
+                .or_else(|| {
+                    canonical_expressions
+                        .iter()
+                        .filter(|expression| expression.range.end_offset <= offset)
+                        .filter(|expression| offset - expression.range.end_offset <= 128)
+                        .max_by_key(|expression| expression.range.end_offset)
+                        .map(|expression| expression.range.clone())
+                })?;
+            Some((command.key.as_str(), target))
+        })
+        .collect::<BTreeMap<_, _>>();
+    let mut targets = BTreeMap::<usize, Vec<SourceRange>>::new();
+    for command in commands.iter().filter(|command| {
+        matches!(
+            command.kind,
+            ReferenceCommandKind::Reference | ReferenceCommandKind::EquationReference
+        )
+    }) {
+        let Some(target) = labels.get(command.key.as_str()) else {
+            continue;
+        };
+        let Some(clause) = clause_at(clauses, command.start) else {
+            continue;
+        };
+        let ranges = targets.entry(clause.start).or_default();
+        if !ranges.contains(target) {
+            ranges.push(target.clone());
+        }
+    }
+    targets
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ReferenceCommandKind {
+    Label,
+    Reference,
+    EquationReference,
+}
+
+struct ReferenceCommand {
+    kind: ReferenceCommandKind,
+    key: String,
+    start: usize,
+}
+
+fn scan_reference_commands(source: &str) -> Vec<ReferenceCommand> {
+    let mut commands = Vec::new();
+    let mut cursor = 0;
+    while let Some(relative) = source[cursor..].find('\\') {
+        let start = cursor + relative;
+        let tail = &source[start..];
+        let matched = [
+            ("\\eqref{", ReferenceCommandKind::EquationReference),
+            ("\\label{", ReferenceCommandKind::Label),
+            ("\\ref{", ReferenceCommandKind::Reference),
+        ]
+        .into_iter()
+        .find(|(prefix, _)| tail.starts_with(prefix));
+        let Some((prefix, kind)) = matched else {
+            cursor = start + 1;
+            continue;
+        };
+        let key_start = start + prefix.len();
+        let Some(relative_end) = source[key_start..].find('}') else {
+            break;
+        };
+        let key_end = key_start + relative_end;
+        if key_start < key_end {
+            commands.push(ReferenceCommand {
+                kind,
+                key: source[key_start..key_end].to_owned(),
+                start,
+            });
+        }
+        cursor = key_end + 1;
+    }
+    commands
 }
 
 fn evidence_range_key(evidence: &Evidence) -> (u32, u32) {
@@ -3072,13 +3200,17 @@ Define the mean axial speed by the flow relation
 
     #[test]
     fn attaches_definitions_through_an_explicit_equation_reference() {
-        let source = "$q=-k\\nabla T\\label{eq:flux}$ In Equation~\\ref{eq:flux}, $q$ denotes heat flux, $k$ thermal conductivity, and $T$ temperature.";
-        let analysis = analyze(source);
-        assert_eq!(analysis.definitions.len(), 3, "{:?}", analysis.definitions);
-        assert!(analysis.definitions.iter().all(|definition| {
-            definition.evidence.kind == "attached-prose"
-                && definition.evidence.source_ranges.len() == 2
-        }));
+        for reference in ["\\ref{eq:flux}", "\\eqref{eq:flux}"] {
+            let source = format!(
+                "$q=-k\\nabla T\\label{{eq:flux}}$ In Equation~{reference}, $q$ denotes heat flux, $k$ thermal conductivity, and $T$ temperature."
+            );
+            let analysis = analyze(&source);
+            assert_eq!(analysis.definitions.len(), 3, "{:?}", analysis.definitions);
+            assert!(analysis.definitions.iter().all(|definition| {
+                definition.evidence.kind == "attached-prose"
+                    && definition.evidence.source_ranges.len() == 2
+            }));
+        }
     }
 
     #[test]
