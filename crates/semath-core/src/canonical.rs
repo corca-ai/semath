@@ -426,15 +426,15 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
                 && let Some((tree, call_range, provenance)) =
                     composite_macro_notation(document, source)
             {
-                emit_notation_node(
-                    &NotationArena::Generated {
-                        tree,
-                        range: call_range,
-                        provenance: &provenance,
-                    },
-                    tree.root,
-                    tokens,
-                );
+                let generated = NotationArena::Generated {
+                    tree,
+                    range: call_range,
+                    provenance: &provenance,
+                };
+                let mut expansion_tokens = Vec::new();
+                emit_notation_node(&generated, tree.root, &mut expansion_tokens);
+                let expression = Parser::new(canonical_tokens(expansion_tokens)).parse_document();
+                push(tokens, TokenKind::Structured(Box::new(expression)));
                 return;
             }
             if is_math_class_wrapper(node.name())
@@ -3302,6 +3302,62 @@ mod tests {
         assert_eq!(
             render_canonical(&expression),
             "relation(equals,symbol(K),product(symbol(m),symbol(v)))"
+        );
+    }
+
+    #[test]
+    fn composite_macro_expansion_remains_one_operand_inside_a_formula() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8,
+            "proseAnnotations": [],
+            "fileId": "main",
+            "path": "main.tex",
+            "language": "latex",
+            "content": "m\\dtemp",
+            "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"m","lexicalClass":"identifier"},
+                {"kind":"command","parent":2,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":7},"command":{"startOffset":1,"endOffset":7}},"state":"opaque","name":"dtemp"},
+                {"kind":"sequence","parent":null,"children":[0,1],"ranges":{"full":{"startOffset":0,"endOffset":7}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":2,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":7},"contentRange":{"startOffset":0,"endOffset":7},"state":"complete"}],
+            "visibleProse": [],
+            "scopes": [{"kind":"document","parent":null,"range":{"startOffset":0,"endOffset":7},"state":"complete"}],
+            "declarations": [],
+            "macros": [{
+                "kind":"call",
+                "name":"dtemp",
+                "source":{"fileId":"main","path":"main.tex","range":{"startOffset":1,"endOffset":7}},
+                "definitions":[],
+                "expansion":{
+                    "status":"expanded",
+                    "depth":0,
+                    "editable":false,
+                    "surface":"ignored by Semath",
+                    "inputRange":{"startOffset":1,"endOffset":7},
+                    "notation":{
+                        "nodes":[
+                            {"kind":"token","children":[],"state":"complete","text":"Delta","lexicalClass":"identifier"},
+                            {"kind":"token","children":[],"state":"complete","text":"T","lexicalClass":"identifier"},
+                            {"kind":"sequence","children":[0,1],"state":"complete"}
+                        ],
+                        "root":2
+                    }
+                }
+            }],
+            "includes": []
+        }))
+        .unwrap();
+
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &document,
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 7,
+                },
+            )),
+            "product(symbol(m),symbol(DeltaT))"
         );
     }
 }

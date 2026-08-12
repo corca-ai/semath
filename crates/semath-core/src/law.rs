@@ -3729,8 +3729,20 @@ fn strip_source_group(mut label: &str) -> &str {
 }
 
 fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bool {
-    if label.is_empty() || !expression.provenance.is_empty() {
+    if label.is_empty() {
         return false;
+    }
+    if !expression.provenance.is_empty() {
+        return label.strip_prefix('\\').is_some_and(|name| {
+            !name.is_empty()
+                && name
+                    .chars()
+                    .all(|character| character.is_ascii_alphabetic())
+        }) && label
+            .chars()
+            .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+            .count()
+            <= MAX_COMPOSITE_SOURCE_LABEL_CHARS;
     }
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => {
@@ -3809,8 +3821,8 @@ mod tests {
 
     use super::{
         COMPILED_LAWS, ExternalTypeEnvironment, LAW_DISPATCH, LawAnalysisContext, LawDispatch,
-        LawObservations, collect_law_expressions, observe_laws, strip_formula_presentation,
-        structural_alternatives, unify_all,
+        LawObservations, collect_law_expressions, observe_laws, source_label_matches_expression,
+        strip_formula_presentation, structural_alternatives, unify_all,
     };
     use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
@@ -3848,6 +3860,28 @@ mod tests {
         assert!(bindings[0].contains_key("objective"));
         assert!(bindings[0].contains_key("variable"));
         assert!(bindings[0].contains_key("value"));
+    }
+
+    #[test]
+    fn generated_notation_projects_its_authored_macro_call() {
+        let expression = SemanticExpr {
+            kind: SemanticExprKind::Symbol("DeltaT".into()),
+            range: SourceRange {
+                start_offset: 2,
+                end_offset: 8,
+            },
+            provenance: vec![SourceRange {
+                start_offset: 2,
+                end_offset: 8,
+            }],
+        };
+
+        assert!(source_label_matches_expression(&expression, "\\dtemp"));
+        assert!(!source_label_matches_expression(
+            &expression,
+            "\\dtemp extra"
+        ));
+        assert!(!source_label_matches_expression(&expression, "\\dtemp{T}"));
     }
 
     #[test]
