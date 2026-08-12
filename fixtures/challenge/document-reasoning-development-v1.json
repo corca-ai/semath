@@ -3696,13 +3696,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Rendered the colliding helper name as mathematical notation."
+          "Rendered the colliding helper name as mathematical notation.",
+          "Projected callable law roles to their source entity heads rather than treating applications as symbol identities."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "b955221afb5066180b1487181bc91930a2b0fdf0c20efecac9371cb223a20e6c",
+        "finalDigest": "bb3e467c45639fb9fb578dd99a1d5b4eb4cb9343207d09a266a8960c9ba8c791",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "b955221afb5066180b1487181bc91930a2b0fdf0c20efecac9371cb223a20e6c",
+        "semanticReviewDigest": "bb3e467c45639fb9fb578dd99a1d5b4eb4cb9343207d09a266a8960c9ba8c791",
         "status": "corrected"
       },
       "snapshots": [
@@ -9735,15 +9736,15 @@
             "roles": [
               {
                 "role": "transfer",
-                "symbol": "H(s)"
+                "symbol": "H"
               },
               {
                 "role": "output",
-                "symbol": "Y(s)"
+                "symbol": "Y"
               },
               {
                 "role": "input",
-                "symbol": "X(s)"
+                "symbol": "X"
               }
             ],
             "sourceGrounded": true

@@ -32,6 +32,7 @@
     "authored": "bun scripts/check-authored-scientific.ts",
     "authored:baseline": "SEMATH_AUTHORED_ALLOW_FAILURES=1 SEMATH_AUTHORED_REPORT=.artifacts/document-reasoning-baseline.json bun scripts/check-authored-scientific.ts",
     "authored:development": "SEMATH_AUTHORED_SPLIT=development SEMATH_AUTHORED_FIXTURE=fixtures/challenge/document-reasoning-development-v1.json bun scripts/check-authored-scientific.ts",
+    "authored:development:release": "bun scripts/check-authored-development-release.ts",
     "authored:historical": "SEMATH_AUTHORED_SPLIT=holdout SEMATH_AUTHORED_FIXTURE=fixtures/challenge/document-reasoning-holdout-v1.json bun scripts/check-authored-scientific.ts",
     "authored:fixture": "bun scripts/check-authored-scientific-fixture.ts",
     "budget": "bun scripts/check-budget.ts",

@@ -1,4 +1,5 @@
 export * from "./authored-integrity";
+export * from "./authored-release-gate";
 export * from "./authored-first-loss";
 export * from "./authored-scientific";
 export * from "./conformance";

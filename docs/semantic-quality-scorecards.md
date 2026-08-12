@@ -122,6 +122,12 @@ is reported honestly; false establishment, false conflict, or unsafe navigation
 and edit fail the release. After that single run, the tranche becomes historical
 evidence and must not guide implementation changes.
 
+The editable development tranche is a reviewed coverage frontier, not a
+115/115 conformance suite. Its release gate permits documented misses but
+rejects any false establishment, false conflict, navigation or identity risk,
+fewer than 50 passing probes, or risk above 130. Tighten this dated baseline
+when coverage improves; do not weaken it to admit a regression.
+
 The 2026-08-12 v0.27 release evaluation passes 17 of 115 development probes
 (risk 404, no false establishment or false conflict) and 6 of 97 now-exposed
 historical holdout probes (risk 720). These deliberately difficult documents

@@ -17,7 +17,7 @@ if (output("git", ["status", "--porcelain"])) {
 // not spend the sealed fixture, and ordinary CI never invokes this orchestrator.
 run("bun", ["run", "check"]);
 run("bun", ["run", "quality"]);
-run("bun", ["run", "authored:development"]);
+run("bun", ["run", "authored:development:release"]);
 run("awiki", ["lint", "-r"]);
 run("sh", ["scripts/build-wasm.sh"]);
 run("sha256sum", ["-c", "SHA256SUMS"], { cwd: "lib/wasm" });
