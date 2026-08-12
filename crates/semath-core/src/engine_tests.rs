@@ -166,6 +166,105 @@ fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
 }
 
 #[test]
+fn navigation_and_rename_share_one_established_entity() {
+    let content = "Let $A$ denote an event. Let $B$ denote an event. $p=\\frac{\\mathbb{P}(A \\cap B)}{\\mathbb{P}(B)}$";
+    let use_offset = content.find("A \\cap").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let references = engine
+        .query(query(
+            Query::References {
+                file_id: "main".into(),
+                offset: use_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Locations { locations } = references.value else {
+        panic!("expected locations")
+    };
+    assert_eq!(locations.len(), 2);
+
+    let preparation = engine
+        .query(query(
+            Query::PrepareRename {
+                file_id: "main".into(),
+                offset: use_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::RenamePreparation {
+        range: preparation_range,
+        placeholder,
+        rejection,
+    } = preparation.value
+    else {
+        panic!("expected rename preparation")
+    };
+    assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
+    assert_eq!(placeholder.as_deref(), Some("A"));
+    assert_eq!(rejection, None);
+
+    let rename = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "E".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        proposal: Some(proposal),
+        rejection: None,
+    } = rename.value
+    else {
+        panic!("expected rename proposal")
+    };
+    assert_eq!(proposal.files.len(), 1);
+    assert_eq!(proposal.files[0].edits.len(), locations.len());
+    assert!(
+        proposal.files[0]
+            .edits
+            .iter()
+            .all(|edit| { edit.expected_text == "A" && edit.replacement_text == "E" })
+    );
+}
+
+#[test]
+fn rename_refuses_to_merge_two_entities_in_the_same_scope() {
+    let content = "Let $A$ denote an event. Let $B$ denote another event. $p=A$";
+    let use_offset = content.rfind('A').unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "B".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        proposal: None,
+        rejection: Some(rejection),
+    } = result.value
+    else {
+        panic!("expected rename rejection")
+    };
+    assert!(rejection.contains("merge"));
+}
+
+#[test]
 fn exact_occurrence_range_outranks_a_structural_selection_alias() {
     let exact_id = SourceOccurrenceId {
         file_id: "main".into(),

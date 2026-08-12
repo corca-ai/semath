@@ -11,6 +11,7 @@ mod decision;
 mod domain;
 mod domain_signature;
 mod engine;
+mod entity_policy;
 mod equivalence;
 mod hygiene;
 mod law;

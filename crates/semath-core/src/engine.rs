@@ -14,6 +14,9 @@ use crate::canonical::{
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
 use crate::cursor::{CursorOccurrence, interior_offset, occurrence_at_cursor};
 use crate::decision::{MeaningDecisionInput, decide_meaning, symbol_has_source_meaning};
+use crate::entity_policy::{
+    EntityEvidenceDecision, RenameNotationFamily, RenameSourceOccurrence, plan_entity_rename,
+};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
@@ -26,17 +29,17 @@ use crate::semantic_index::{
     ClaimOperation, ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent,
     DocumentSemanticFacts, EntityId, EvidenceId, EvidenceModality, EvidenceOrigin,
     EvidencePolarity, EvidenceRecord, InferenceTier, Mention, MentionModality, NotationComponent,
-    OccurrenceKind, ProjectSemanticIndex, ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
+    OccurrenceKind, ProjectSemanticIndex, SourceOccurrence, SourceOccurrenceId,
     occurrence_binding_key,
 };
 use crate::{
     AnalysisStats, AssumptionInfo, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo,
     DomainActivation, Evidence, Location, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
     ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticCandidateInfo,
-    SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic,
-    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
-    SourceRange, SymbolInfo, UpdateResult,
+    QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
+    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
+    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
+    UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -2770,10 +2773,16 @@ impl SemathEngine {
                     .map(|definition| self.references_for(&definition))
                     .unwrap_or_default(),
             },
-            Query::PrepareRename { .. } => prepare_rename(parsed, cursor_offset),
-            Query::Rename { new_name, .. } => {
-                rename_proposal(document, parsed, cursor_offset, &new_name)
+            Query::PrepareRename { .. } => {
+                self.prepare_entity_rename(document, parsed, focus.as_ref(), cursor_offset)
             }
+            Query::Rename { new_name, .. } => self.entity_rename_proposal(
+                document,
+                parsed,
+                focus.as_ref(),
+                cursor_offset,
+                &new_name,
+            ),
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
                 diagnostics: document_diagnostics(
                     document,
@@ -3031,21 +3040,20 @@ impl SemathEngine {
         let Some(entity) = &definition.entity_id else {
             return Vec::new();
         };
-        let mut locations = Vec::new();
-        for occurrence in self.index.semantic.occurrences() {
-            let resolution = self.index.semantic.resolve(&occurrence.id);
-            if resolution.status == ResolutionStatus::Established
-                && resolution.candidates.len() == 1
-                && resolution.candidates[0].entity_id == *entity
-            {
+        let mut locations = self
+            .index
+            .semantic
+            .established_occurrences_for_entity(entity)
+            .into_iter()
+            .map(|occurrence| {
                 let document = &self.index.documents[&occurrence.id.file_id];
-                locations.push(Location {
+                Location {
                     file_id: occurrence.id.file_id.clone(),
                     path: document.document.path.clone(),
                     range: occurrence.range.clone(),
-                });
-            }
-        }
+                }
+            })
+            .collect::<Vec<_>>();
         locations.sort_by(|left, right| {
             left.path
                 .cmp(&right.path)
@@ -3059,9 +3067,219 @@ impl SemathEngine {
     }
 
     fn resolved_entity(&self, occurrence_id: &SourceOccurrenceId) -> Option<EntityId> {
-        let resolution = self.index.semantic.resolve(occurrence_id);
-        (resolution.status == ResolutionStatus::Established && resolution.candidates.len() == 1)
-            .then(|| resolution.candidates[0].entity_id.clone())
+        match self.index.semantic.entity_decision(occurrence_id) {
+            EntityEvidenceDecision::Established(entity) => Some(entity),
+            EntityEvidenceDecision::Ambiguous
+            | EntityEvidenceDecision::Conflicting
+            | EntityEvidenceDecision::Unsupported
+            | EntityEvidenceDecision::EngineLimited => None,
+        }
+    }
+
+    fn prepare_entity_rename(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        offset: u32,
+    ) -> QueryValue {
+        let target = self.entity_rename_target(document, parsed, focus, offset);
+        let Some((decision, old_name, occurrences)) = target else {
+            return rename_preparation_value_rejection(
+                "The cursor does not resolve to one complete editable entity.",
+            );
+        };
+        let Some(first) = occurrences.first() else {
+            return rename_preparation_value_rejection(
+                "The complete entity has no editable source occurrences.",
+            );
+        };
+        let replacement = alternate_name(&old_name, first.family);
+        match plan_entity_rename(decision, &old_name, &replacement, occurrences) {
+            Ok(plan) => QueryValue::RenamePreparation {
+                range: focus
+                    .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id))
+                    .map(|occurrence| occurrence.selection_range.clone())
+                    .or_else(|| {
+                        parsed.and_then(|math| {
+                            math.symbols
+                                .iter()
+                                .find(|(_, range)| range.contains(offset))
+                                .map(|(_, range)| range.clone())
+                        })
+                    }),
+                placeholder: Some(plan.old_name),
+                rejection: None,
+            },
+            Err(rejection) => rename_preparation_value_rejection(&rejection),
+        }
+    }
+
+    fn entity_rename_proposal(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        offset: u32,
+        new_name: &str,
+    ) -> QueryValue {
+        let binder = parsed.and_then(|math| {
+            let found = binders(math);
+            let target = binder_at(math, &found, offset).cloned()?;
+            Some((math, found, target))
+        });
+        if let Some((math, found, target)) = &binder
+            && let Some(rejection) = rename_rejection(math, found, target, new_name)
+        {
+            return edit_proposal_rejection(&rejection);
+        }
+        let target = self.entity_rename_target(document, parsed, focus, offset);
+        let Some((decision, old_name, occurrences)) = target else {
+            return edit_proposal_rejection(
+                "The cursor does not resolve to one complete editable entity.",
+            );
+        };
+        let plan = match plan_entity_rename(decision, &old_name, new_name, occurrences) {
+            Ok(plan) => plan,
+            Err(rejection) => return edit_proposal_rejection(&rejection),
+        };
+        if self.rename_would_merge_entity(&plan.entity_id, new_name) {
+            return edit_proposal_rejection(
+                "The replacement would merge this entity with another established identity.",
+            );
+        }
+        let mut by_file = BTreeMap::<String, Vec<RenameSourceOccurrence>>::new();
+        for occurrence in plan.occurrences {
+            by_file
+                .entry(occurrence.occurrence_id.file_id.clone())
+                .or_default()
+                .push(occurrence);
+        }
+        let mut files = by_file
+            .into_iter()
+            .map(|(file_id, occurrences)| {
+                let analyzed = &self.index.documents[&file_id];
+                SemanticEditFile {
+                    file_id,
+                    path: analyzed.document.path.clone(),
+                    document_version: analyzed.document.document_version,
+                    edits: occurrences
+                        .into_iter()
+                        .map(|occurrence| SemanticTextEdit {
+                            range: occurrence.range,
+                            expected_text: plan.old_name.clone(),
+                            replacement_text: plan.new_name.clone(),
+                        })
+                        .collect(),
+                }
+            })
+            .collect::<Vec<_>>();
+        files.sort_by(|left, right| left.path.cmp(&right.path));
+        QueryValue::EditProposal {
+            proposal: Some(SemanticEditProposal {
+                title: format!("Rename `{}` to `{}`", plan.old_name, plan.new_name),
+                safety: "deterministic".into(),
+                evidence: vec![Evidence {
+                    rule_id: "semath/established-entity-rename".into(),
+                    kind: "semantic-identity".into(),
+                    strength: "hard".into(),
+                    source_ranges: files
+                        .iter()
+                        .flat_map(|file| file.edits.iter().map(|edit| edit.range.clone()))
+                        .collect(),
+                }],
+                files,
+            }),
+            rejection: None,
+        }
+    }
+
+    fn entity_rename_target(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        offset: u32,
+    ) -> Option<(EntityEvidenceDecision, String, Vec<RenameSourceOccurrence>)> {
+        let focus = focus?;
+        let decision = self.index.semantic.entity_decision(&focus.occurrence_id);
+        let EntityEvidenceDecision::Established(entity) = &decision else {
+            return Some((decision, focus.name.clone(), Vec::new()));
+        };
+        let binder = parsed.filter(|math| math.region.closed).and_then(|math| {
+            let found = binders(math);
+            let target = binder_at(math, &found, offset).cloned()?;
+            Some((math, found, target))
+        });
+        let occurrences = if let Some((math, found, target)) = binder {
+            bound_occurrences(math, &found, &target)
+                .into_iter()
+                .map(|range| {
+                    let mut matches = self
+                        .index
+                        .semantic
+                        .occurrences()
+                        .filter(|occurrence| {
+                            occurrence.id.file_id == document.document.file_id
+                                && occurrence.selection_range == range
+                                && matches!(
+                                    self.index.semantic.entity_decision(&occurrence.id),
+                                    EntityEvidenceDecision::Established(candidate) if candidate == *entity
+                                )
+                        })
+                        .collect::<Vec<_>>();
+                    matches.sort_by_key(|occurrence| occurrence.id.local_id);
+                    matches.dedup_by_key(|occurrence| occurrence.id.clone());
+                    (matches.len() == 1).then(|| self.rename_occurrence(matches[0]))
+                })
+                .collect::<Option<Vec<_>>>()?
+        } else {
+            self.index.definitions_by_entity.get(entity)?;
+            self.index
+                .semantic
+                .established_occurrences_for_entity(entity)
+                .into_iter()
+                .map(|occurrence| self.rename_occurrence(occurrence))
+                .collect()
+        };
+        let old_name = occurrences.first()?.current_text.clone();
+        Some((decision, old_name, occurrences))
+    }
+
+    fn rename_occurrence(&self, occurrence: &SourceOccurrence) -> RenameSourceOccurrence {
+        let analyzed = &self.index.documents[&occurrence.id.file_id];
+        let current_text = source_text(&analyzed.document, &occurrence.selection_range);
+        let family = if current_text.starts_with('\\') {
+            RenameNotationFamily::ControlSequence
+        } else {
+            RenameNotationFamily::PlainIdentifier
+        };
+        RenameSourceOccurrence {
+            occurrence_id: occurrence.id.clone(),
+            range: occurrence.selection_range.clone(),
+            current_text,
+            family,
+            editable: occurrence.kind == OccurrenceKind::Notation
+                && occurrence.selection_range.start_offset < occurrence.selection_range.end_offset
+                && occurrence.range.start_offset <= occurrence.selection_range.start_offset
+                && occurrence.selection_range.end_offset <= occurrence.range.end_offset,
+        }
+    }
+
+    fn rename_would_merge_entity(&self, target: &EntityId, new_name: &str) -> bool {
+        self.index.semantic.occurrences().any(|occurrence| {
+            occurrence.kind == OccurrenceKind::Notation
+                && occurrence.component_id == target.component_id
+                && occurrence.scope_path == target.scope_path
+                && source_text(
+                    &self.index.documents[&occurrence.id.file_id].document,
+                    &occurrence.selection_range,
+                ) == new_name
+                && matches!(
+                    self.index.semantic.entity_decision(&occurrence.id),
+                    EntityEvidenceDecision::Established(entity) if entity != *target
+                )
+        })
     }
 
     fn semantic_context(
@@ -4387,99 +4605,23 @@ fn symbol_diagnostics(
     (diagnostics, truncated)
 }
 
-fn prepare_rename(parsed: Option<&ParsedMath>, offset: u32) -> QueryValue {
-    let preparation = prepare_rename_info(parsed, offset);
+fn rename_preparation_value_rejection(message: &str) -> QueryValue {
     QueryValue::RenamePreparation {
-        range: preparation.range,
-        placeholder: preparation.placeholder,
-        rejection: preparation.rejection,
-    }
-}
-
-fn prepare_rename_info(parsed: Option<&ParsedMath>, offset: u32) -> RenamePreparation {
-    let Some(parsed) = parsed else {
-        return rename_preparation_rejection("The cursor is not inside a math expression.");
-    };
-    if !parsed.region.closed {
-        return rename_preparation_rejection(
-            "Finish the math expression before renaming a bound variable.",
-        );
-    }
-    let found = binders(parsed);
-    let Some(target) = binder_at(parsed, &found, offset) else {
-        return rename_preparation_rejection(
-            "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
-        );
-    };
-    RenamePreparation {
-        range: parsed
-            .symbols
-            .iter()
-            .find(|(_, range)| range.contains(offset))
-            .map(|(_, range)| range.clone()),
-        placeholder: Some(target.symbol.clone()),
-        rejection: None,
-    }
-}
-
-fn rename_preparation_rejection(message: &str) -> RenamePreparation {
-    RenamePreparation {
         range: None,
         placeholder: None,
         rejection: Some(message.into()),
     }
 }
 
-fn rename_proposal(
-    document: &AnalyzedDocument,
-    parsed: Option<&ParsedMath>,
-    offset: u32,
-    new_name: &str,
-) -> QueryValue {
-    let Some(parsed) = parsed else {
-        return edit_proposal_rejection("The cursor is not inside a math expression.");
-    };
-    if !parsed.region.closed {
-        return edit_proposal_rejection(
-            "Finish the math expression before renaming a bound variable.",
-        );
-    }
-    let found = binders(parsed);
-    let Some(target) = binder_at(parsed, &found, offset) else {
-        return edit_proposal_rejection(
-            "Only resolved sum, limit, and quantifier bound variables can be renamed here.",
-        );
-    };
-    if let Some(rejection) = rename_rejection(parsed, &found, target, new_name) {
-        return edit_proposal_rejection(&rejection);
-    }
-    let occurrences = bound_occurrences(parsed, &found, target);
-    let evidence = Evidence {
-        rule_id: "capture-avoiding-bound-variable-rename".into(),
-        kind: "syntax".into(),
-        strength: "hard".into(),
-        source_ranges: occurrences.clone(),
-    };
-    QueryValue::EditProposal {
-        proposal: Some(SemanticEditProposal {
-            title: format!("Rename bound `{}` to `{new_name}`", target.symbol),
-            safety: "deterministic".into(),
-            evidence: vec![evidence],
-            files: vec![SemanticEditFile {
-                file_id: document.document.file_id.clone(),
-                path: document.document.path.clone(),
-                document_version: document.document.document_version,
-                edits: occurrences
-                    .into_iter()
-                    .map(|range| SemanticTextEdit {
-                        range,
-                        expected_text: target.symbol.clone(),
-                        replacement_text: new_name.into(),
-                    })
-                    .collect(),
-            }],
-        }),
-        rejection: None,
+fn alternate_name(current: &str, family: RenameNotationFamily) -> String {
+    match family {
+        RenameNotationFamily::PlainIdentifier => if current == "z" { "y" } else { "z" }.into(),
+        RenameNotationFamily::ControlSequence => if current == "\\zeta" {
+            "\\eta"
+        } else {
+            "\\zeta"
+        }
+        .into(),
     }
 }
 

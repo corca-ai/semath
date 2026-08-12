@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::SourceRange;
 use crate::constraint::{ConstraintInputClaim, PlannedConflict, plan_constraint_derivations};
+use crate::entity_policy::{EntityEvidenceDecision, decide_entity};
 use crate::scope::scope_visible;
 
 const MAX_DOCUMENT_OCCURRENCES: usize = 100_000;
@@ -511,6 +512,7 @@ pub struct ProjectSemanticIndex {
     dependents: BTreeMap<ClaimId, BTreeSet<ClaimId>>,
     binding_claims: BTreeMap<String, BTreeSet<ClaimId>>,
     claims_by_entity: BTreeMap<EntityId, BTreeSet<ClaimId>>,
+    established_occurrences_by_entity: BTreeMap<EntityId, BTreeSet<SourceOccurrenceId>>,
     invalidated_claims: u32,
     constraint_work: u32,
     constraint_truncated: bool,
@@ -562,6 +564,7 @@ impl ProjectSemanticIndex {
             );
             return Err(error);
         }
+        self.rebuild_resolution_index();
         Ok(())
     }
 
@@ -569,6 +572,7 @@ impl ProjectSemanticIndex {
         self.retract_document(file_id);
         self.recompute_constraints(&BTreeSet::from([file_id.to_owned()]))
             .expect("existing semantic facts must produce valid constraints");
+        self.rebuild_resolution_index();
     }
 
     pub fn resolve(&self, occurrence_id: &SourceOccurrenceId) -> Resolution {
@@ -727,6 +731,25 @@ impl ProjectSemanticIndex {
 
     pub fn occurrences(&self) -> impl Iterator<Item = &SourceOccurrence> {
         self.occurrences.values()
+    }
+
+    pub(crate) fn entity_decision(
+        &self,
+        occurrence_id: &SourceOccurrenceId,
+    ) -> EntityEvidenceDecision {
+        decide_entity(&self.resolve(occurrence_id))
+    }
+
+    pub(crate) fn established_occurrences_for_entity(
+        &self,
+        entity: &EntityId,
+    ) -> Vec<&SourceOccurrence> {
+        self.established_occurrences_by_entity
+            .get(entity)
+            .into_iter()
+            .flatten()
+            .filter_map(|occurrence_id| self.occurrences.get(occurrence_id))
+            .collect()
     }
 
     pub fn claim(&self, id: &ClaimId) -> Option<&Claim> {
@@ -1364,6 +1387,30 @@ impl ProjectSemanticIndex {
         for claim_id in claim_ids {
             self.index_claim(&claim_id);
         }
+        self.rebuild_resolution_index();
+    }
+
+    fn rebuild_resolution_index(&mut self) {
+        self.established_occurrences_by_entity.clear();
+        let resolved = self
+            .occurrences
+            .keys()
+            .filter_map(|occurrence_id| match self.entity_decision(occurrence_id) {
+                EntityEvidenceDecision::Established(entity) => {
+                    Some((entity, occurrence_id.clone()))
+                }
+                EntityEvidenceDecision::Ambiguous
+                | EntityEvidenceDecision::Conflicting
+                | EntityEvidenceDecision::Unsupported
+                | EntityEvidenceDecision::EngineLimited => None,
+            })
+            .collect::<Vec<_>>();
+        for (entity, occurrence_id) in resolved {
+            self.established_occurrences_by_entity
+                .entry(entity)
+                .or_default()
+                .insert(occurrence_id);
+        }
     }
 
     fn index_claim(&mut self, claim_id: &ClaimId) {
@@ -1980,6 +2027,77 @@ mod tests {
                 ResolutionStatus::Unsupported
             );
         }
+    }
+
+    #[test]
+    fn established_occurrence_index_replaces_and_retracts_atomically() {
+        let declaration = occurrence("main.tex", 1, 1, 0, 1, &[], "x", Vec::new());
+        let reference = occurrence("main.tex", 1, 2, 5, 2, &[], "x", Vec::new());
+        let declared_entity = entity(&declaration, "definition");
+        let source_evidence = evidence(
+            "identity",
+            &declaration,
+            EvidencePolarity::Positive,
+            EvidenceModality::Asserted,
+        );
+        let claims = vec![
+            claim(
+                "declaration-name",
+                &declared_entity,
+                ClaimPredicate::Names,
+                ClaimObject::Occurrence(declaration.id.clone()),
+                "identity",
+            ),
+            claim(
+                "reference-name",
+                &declared_entity,
+                ClaimPredicate::Names,
+                ClaimObject::Occurrence(reference.id.clone()),
+                "identity",
+            ),
+        ];
+        let mut index = ProjectSemanticIndex::default();
+        index
+            .replace_document(facts(
+                "main.tex",
+                1,
+                vec![declaration.clone(), reference.clone()],
+                vec![declared_entity.clone()],
+                vec![declaration.id, reference.id],
+                vec![source_evidence],
+                claims,
+            ))
+            .unwrap();
+        assert_eq!(
+            index
+                .established_occurrences_for_entity(&declared_entity)
+                .len(),
+            2
+        );
+
+        let replacement = occurrence("main.tex", 2, 1, 0, 1, &[], "y", Vec::new());
+        index
+            .replace_document(facts(
+                "main.tex",
+                2,
+                vec![replacement.clone()],
+                Vec::new(),
+                vec![replacement.id],
+                Vec::new(),
+                Vec::new(),
+            ))
+            .unwrap();
+        assert!(
+            index
+                .established_occurrences_for_entity(&declared_entity)
+                .is_empty()
+        );
+        index.remove_document("main.tex");
+        assert!(
+            index
+                .established_occurrences_for_entity(&declared_entity)
+                .is_empty()
+        );
     }
 
     #[test]
