@@ -3001,9 +3001,16 @@ fn source_expression_label(
     let start = context
         .source_index
         .byte_for_utf16(expression.range.start_offset);
-    let end = context
+    let mut end = context
         .source_index
         .byte_for_utf16(expression.range.end_offset);
+    if matches!(
+        expression.kind,
+        SemanticExprKind::Apply { .. } | SemanticExprKind::Derivative { .. }
+    ) && context.source.as_bytes().get(end) == Some(&b')')
+    {
+        end += 1;
+    }
     let authored = context
         .source
         .get(start..end)
@@ -3022,7 +3029,10 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
         }
         SemanticExprKind::Index { .. } => !label.chars().any(char::is_whitespace),
         SemanticExprKind::Derivative { .. } => {
-            label.starts_with("\\dot") || label.starts_with("\\ddot")
+            label.starts_with("\\dot")
+                || label.starts_with("\\ddot")
+                || label.starts_with("\\frac")
+                || label.contains('\'')
         }
         SemanticExprKind::Power(_, exponent) if is_decorative_star(exponent) => {
             !label.chars().any(char::is_whitespace)
@@ -4197,6 +4207,37 @@ mod tests {
             .iter()
             .map(|law| law.law_id.clone())
             .collect()
+    }
+
+    #[test]
+    fn callable_derivative_roles_preserve_the_complete_authored_notation() {
+        let recognized = recognized_law_observations(
+            "Let $y$ be differentiable in $x$. $y'(x)=\\frac{dy}{dx}(x)$",
+        );
+        let roles = &recognized
+            .iter()
+            .find(|law| law.law_id == "first-derivative-relation")
+            .unwrap()
+            .relation
+            .as_ref()
+            .unwrap()
+            .roles;
+
+        assert!(
+            roles
+                .iter()
+                .any(|role| role.role == "derivative" && role.symbol == "y'(x)")
+        );
+        assert!(
+            roles
+                .iter()
+                .any(|role| role.role == "function" && role.symbol == "y")
+        );
+        assert!(
+            roles
+                .iter()
+                .any(|role| role.role == "variable" && role.symbol == "x")
+        );
     }
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {

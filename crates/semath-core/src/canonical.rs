@@ -2102,15 +2102,21 @@ fn apply_argument(expression: SemanticExpr, argument: SemanticExpr) -> Option<Se
         }),
         SemanticExprKind::Derivative {
             expression: inner,
-            variable,
+            mut variable,
             order,
         } => {
-            let applied = apply_argument(*inner, argument)?;
+            let implicit_variable = variable.range == inner.range;
+            if implicit_variable
+                && let [argument] = split_arguments(argument.clone()).as_slice()
+                && let Some(name) = expression_name(argument)
+            {
+                variable = SemanticReference::from_expression(name, argument);
+            }
             Some(SemanticExpr {
-                range: applied.range.clone(),
-                provenance: applied.provenance.clone(),
+                range: merge_range(&expression.range, &argument.range),
+                provenance: merge_provenance(&expression, &argument),
                 kind: SemanticExprKind::Derivative {
-                    expression: Box::new(applied),
+                    expression: inner,
                     variable,
                     order,
                 },
@@ -2581,7 +2587,15 @@ mod tests {
         );
         assert_eq!(
             render_canonical(&lower_template("\\dot v_s(t)")),
-            "derivative(apply(v_s,symbol(t)),t,1)"
+            "derivative(index(symbol(v),symbol(s)),t,1)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("y'(x)")),
+            "derivative(symbol(y),x,1)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("\\frac{d y}{d x}(x)")),
+            "derivative(symbol(y),x,1)"
         );
         let operator_derivative = lower_template("D_t v");
         assert_eq!(
