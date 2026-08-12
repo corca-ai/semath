@@ -3,6 +3,7 @@ import {
   AUTHORED_AREA_ALLOCATION,
   DOCUMENT_REASONING_FAMILIES,
   authoredFixtureSealPayload,
+  observeAuthoredRelations,
   authoredProbeIdentityFailures,
   authoredRelationRangeMatches,
   authoredScenarioReviewPayload,
@@ -50,11 +51,56 @@ describe("independently authored scientific corpus", () => {
     ).toBe(false);
   });
 
+  test("projects a reviewed relation from its own source anchor", () => {
+    const range = { startOffset: 10, endOffset: 15 };
+    expect(
+      observeAuthoredRelations("earlier.tex", [
+        {
+          relationId: "circuits:ohm-law",
+          title: "Ohm's law",
+          description: "Voltage equals resistance times current.",
+          roles: [
+            {
+              role: "voltage",
+              label: "Voltage",
+              symbol: "V",
+              conceptId: "circuits:voltage",
+            },
+          ],
+          conditions: [],
+          evidence: [
+            {
+              ruleId: "semantic-law-unification",
+              kind: "canonical-math",
+              strength: "hard",
+              sourceRanges: [range],
+            },
+          ],
+          range,
+        },
+      ]),
+    ).toEqual([
+      {
+        fileId: "earlier.tex",
+        relationId: "circuits:ohm-law",
+        range,
+        roles: [
+          {
+            conceptId: "circuits:voltage",
+            role: "voltage",
+            symbol: "V",
+          },
+        ],
+        sourceGrounded: true,
+      },
+    ]);
+  });
+
   test("keeps lifecycle snapshots explicit and cursors on unique source", () => {
     const fixture = parseAuthoredScientificFixture(fixtureValue("holdout", 1));
-    expect(fixture.scenarios[0]?.snapshots.map((snapshot) => snapshot.id)).toEqual([
-      "stage-1",
-    ]);
+    expect(
+      fixture.scenarios[0]?.snapshots.map((snapshot) => snapshot.id),
+    ).toEqual(["stage-1"]);
     const broken = fixtureValue("holdout", 1) as FixtureValue;
     broken.probes[0]!.cursor.needle = "missing";
     expect(() => parseAuthoredScientificFixture(broken)).toThrow(
@@ -67,7 +113,9 @@ describe("independently authored scientific corpus", () => {
     value.scenarios[0]!.snapshots[0]!.documents[0]!.content +=
       " The independent scope repeats $x_0=y_0$.";
     value.probes[0]!.cursor.occurrence = 1;
-    expect(parseAuthoredScientificFixture(value).probes[0]?.cursor.occurrence).toBe(1);
+    expect(
+      parseAuthoredScientificFixture(value).probes[0]?.cursor.occurrence,
+    ).toBe(1);
 
     delete value.probes[0]!.cursor.occurrence;
     expect(() => parseAuthoredScientificFixture(value)).toThrow(
@@ -125,7 +173,9 @@ describe("independently authored scientific corpus", () => {
         endOffset: anchorStart + needle.indexOf("x_0") + 3,
       },
     };
-    expect(authoredProbeIdentityFailures(fixture, probe, observation)).toEqual([]);
+    expect(authoredProbeIdentityFailures(fixture, probe, observation)).toEqual(
+      [],
+    );
 
     observation.symbolLocation = {
       fileId: "main",
@@ -191,16 +241,21 @@ describe("independently authored scientific corpus", () => {
     const holdout = parseAuthoredScientificFixture(
       trancheValue("holdout", decisions.slice(96)),
     );
-    const summary = validateAuthoredScientificTranche(development, holdout, [
-      {
-        field: "electromagnetism",
-        lawId: "electromagnetism:test-law",
-        roles: [
-          { id: "left", variadic: false },
-          { id: "right", variadic: false },
-        ],
-      },
-    ], ["electromagnetism"]);
+    const summary = validateAuthoredScientificTranche(
+      development,
+      holdout,
+      [
+        {
+          field: "electromagnetism",
+          lawId: "electromagnetism:test-law",
+          roles: [
+            { id: "left", variadic: false },
+            { id: "right", variadic: false },
+          ],
+        },
+      ],
+      ["electromagnetism"],
+    );
     expect(summary.developmentCases).toBe(96);
     expect(summary.holdoutCases).toBe(48);
     expect(summary.decisions).toEqual({
@@ -247,7 +302,9 @@ describe("independently authored scientific corpus", () => {
     expect(authoredScenarioReviewPayload(fixture, "scenario-0")).toContain(
       "proofGrounded",
     );
-    expect(authoredFixtureSealPayload(fixture)).not.toContain(fixture.batch.seal!);
+    expect(authoredFixtureSealPayload(fixture)).not.toContain(
+      fixture.batch.seal!,
+    );
   });
 
   test("review and seal payloads do not depend on JSON key order", () => {
@@ -258,9 +315,7 @@ describe("independently authored scientific corpus", () => {
     ) as unknown as typeof scenario;
     const reordered = {
       ...fixture,
-      batch: Object.fromEntries(
-        Object.entries(fixture.batch).reverse(),
-      ),
+      batch: Object.fromEntries(Object.entries(fixture.batch).reverse()),
       scenarios: [reorderedScenario],
     } as unknown as AuthoredScientificFixture;
     expect(authoredScenarioReviewPayload(reordered, scenario.id)).toBe(
@@ -278,12 +333,17 @@ function trancheValue(
 ): unknown {
   const values: unknown[] = [];
   let decisionIndex = split === "development" ? 0 : 96;
-  for (const [field, allocation] of Object.entries(AUTHORED_AREA_ALLOCATION) as [
-    AuthoredArea,
-    { development: number; holdout: number },
-  ][]) {
+  for (const [field, allocation] of Object.entries(
+    AUTHORED_AREA_ALLOCATION,
+  ) as [AuthoredArea, { development: number; holdout: number }][]) {
     for (let index = 0; index < allocation[split]; index += 1) {
-      const value = fixtureValue(split, 1, decisionIndex, [decisions[decisionIndex - (split === "development" ? 0 : 96)]!], field) as FixtureValue;
+      const value = fixtureValue(
+        split,
+        1,
+        decisionIndex,
+        [decisions[decisionIndex - (split === "development" ? 0 : 96)]!],
+        field,
+      ) as FixtureValue;
       values.push(value);
       decisionIndex += 1;
     }
@@ -330,9 +390,9 @@ function fixtureValue(
   split: AuthoredSplit,
   count: number,
   start = 0,
-  decisions: readonly ScientificDecision[] = Array<ScientificDecision>(count).fill(
-    "partial",
-  ),
+  decisions: readonly ScientificDecision[] = Array<ScientificDecision>(
+    count,
+  ).fill("partial"),
   field: AuthoredArea = "cross-field",
 ): unknown {
   const scenarios = Array.from({ length: count }, (_, localIndex) => {
@@ -389,16 +449,34 @@ function fixtureValue(
         diagnostics: { excludedCodes: [], maximum: 0, required: [] },
         excludedRelationIds: [],
         navigation: {
-          definition: { excluded: [], minimum: 0, required: [], status: "unavailable" },
+          definition: {
+            excluded: [],
+            minimum: 0,
+            required: [],
+            status: "unavailable",
+          },
           prepareRename: { status: "unavailable" },
-          references: { excluded: [], minimum: 0, required: [], status: "unavailable" },
-          rename: { excluded: [], minimum: 0, required: [], status: "unavailable" },
+          references: {
+            excluded: [],
+            minimum: 0,
+            required: [],
+            status: "unavailable",
+          },
+          rename: {
+            excluded: [],
+            minimum: 0,
+            required: [],
+            status: "unavailable",
+          },
         },
         proofGrounded: false,
         relations: [],
         symbol: `x_${start + localIndex}`,
       },
-      family: DOCUMENT_REASONING_FAMILIES[localIndex % DOCUMENT_REASONING_FAMILIES.length],
+      family:
+        DOCUMENT_REASONING_FAMILIES[
+          localIndex % DOCUMENT_REASONING_FAMILIES.length
+        ],
       id: `probe-${start + localIndex}`,
       kind: "primary",
       scenarioId: scenario.id,
@@ -441,7 +519,9 @@ function hex(value: number): string {
 }
 
 type WritableObservation = {
-  -readonly [Key in keyof AuthoredScientificObservation]: AuthoredScientificObservation[Key];
+  -readonly [
+    Key in keyof AuthoredScientificObservation
+  ]: AuthoredScientificObservation[Key];
 };
 
 interface FixtureValue {

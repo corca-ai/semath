@@ -1,5 +1,6 @@
 import type {
   QueryResult,
+  RelationInfo,
   SemanticViewInfo,
   SourceRange,
 } from "../../protocol/src/index";
@@ -60,11 +61,7 @@ export type FirstLossStage = (typeof FIRST_LOSS_STAGES)[number];
 export type ScientificDecision = SemanticViewInfo["decision"]["status"];
 
 export type AuthoredIdentityFailureArea =
-  | "cursor-symbol"
-  | "definition"
-  | "references"
-  | "prepare-rename"
-  | "rename";
+  "cursor-symbol" | "definition" | "references" | "prepare-rename" | "rename";
 
 export interface AuthoredIdentityFailure {
   readonly area: AuthoredIdentityFailureArea;
@@ -196,7 +193,10 @@ export interface AuthoredScientificFixture {
 export interface AuthoredLawCatalogEntry {
   readonly field: string;
   readonly lawId: string;
-  readonly roles: readonly { readonly id: string; readonly variadic: boolean }[];
+  readonly roles: readonly {
+    readonly id: string;
+    readonly variadic: boolean;
+  }[];
 }
 
 export interface ObservedLocation {
@@ -246,6 +246,10 @@ export interface AuthoredScientificSurfaceResults {
   readonly prepareRename: QueryResult;
   readonly references: QueryResult;
   readonly rename: QueryResult;
+  readonly relationViews?: readonly {
+    readonly fileId: string;
+    readonly result: QueryResult;
+  }[];
   readonly semanticView: QueryResult;
 }
 
@@ -276,41 +280,64 @@ export function parseAuthoredScientificFixture(
 ): AuthoredScientificFixture {
   const root = record(value, "fixture");
   exact(root, ["schemaVersion", "batch", "scenarios", "probes"], "fixture");
-  if (root.schemaVersion !== 1) throw new Error("fixture.schemaVersion: must be 1");
+  if (root.schemaVersion !== 1)
+    throw new Error("fixture.schemaVersion: must be 1");
   const batch = parseBatch(root.batch);
-  const scenarios = array(root.scenarios, "fixture.scenarios").map(parseScenario);
+  const scenarios = array(root.scenarios, "fixture.scenarios").map(
+    parseScenario,
+  );
   const probes = array(root.probes, "fixture.probes").map(parseProbe);
-  unique(scenarios.map((item) => item.id), "fixture.scenarios.id");
-  unique(probes.map((item) => item.id), "fixture.probes.id");
+  unique(
+    scenarios.map((item) => item.id),
+    "fixture.scenarios.id",
+  );
+  unique(
+    probes.map((item) => item.id),
+    "fixture.probes.id",
+  );
   const scenarioById = new Map(scenarios.map((item) => [item.id, item]));
   for (const probe of probes) {
     const scenario = scenarioById.get(probe.scenarioId);
-    if (!scenario) throw new Error(`${probe.id}: unknown scenario ${probe.scenarioId}`);
+    if (!scenario)
+      throw new Error(`${probe.id}: unknown scenario ${probe.scenarioId}`);
     validateProbe(probe, scenario);
   }
   for (const scenario of scenarios) {
-    const caseProbes = probes.filter((probe) => probe.scenarioId === scenario.id);
+    const caseProbes = probes.filter(
+      (probe) => probe.scenarioId === scenario.id,
+    );
     if (caseProbes.filter((probe) => probe.kind === "primary").length !== 1) {
-      throw new Error(`${scenario.id}: scenario requires exactly one primary probe`);
+      throw new Error(
+        `${scenario.id}: scenario requires exactly one primary probe`,
+      );
     }
     if (scenario.provenance.authorId === scenario.review.criticId) {
       throw new Error(`${scenario.id}: critic must be independent from author`);
     }
     if (scenario.review.finalDigest !== scenario.review.semanticReviewDigest) {
-      throw new Error(`${scenario.id}: semantic review must approve the final digest`);
+      throw new Error(
+        `${scenario.id}: semantic review must approve the final digest`,
+      );
     }
     const corrected = scenario.review.status === "corrected";
-    if (corrected !== (scenario.review.correctionSummary.length > 0)) {
+    if (corrected !== scenario.review.correctionSummary.length > 0) {
       throw new Error(`${scenario.id}: correction status and summary disagree`);
     }
-    if (corrected && scenario.provenance.rawDigest === scenario.review.finalDigest) {
-      throw new Error(`${scenario.id}: corrected source must differ from raw output`);
+    if (
+      corrected &&
+      scenario.provenance.rawDigest === scenario.review.finalDigest
+    ) {
+      throw new Error(
+        `${scenario.id}: corrected source must differ from raw output`,
+      );
     }
     if (batch.split === "holdout" && !scenario.review.frozenAt) {
       throw new Error(`${scenario.id}: holdout review must be frozen`);
     }
     if (batch.split === "development" && scenario.review.frozenAt) {
-      throw new Error(`${scenario.id}: development scenario must remain editable`);
+      throw new Error(
+        `${scenario.id}: development scenario must remain editable`,
+      );
     }
   }
   if (batch.split === "holdout") {
@@ -318,7 +345,9 @@ export function parseAuthoredScientificFixture(
       throw new Error("fixture.batch: holdout requires frozenAt and seal");
     }
   } else if (batch.frozenAt || batch.seal) {
-    throw new Error("fixture.batch: development must remain editable and unsealed");
+    throw new Error(
+      "fixture.batch: development must remain editable and unsealed",
+    );
   }
   return { batch, probes, scenarios, schemaVersion: 1 };
 }
@@ -341,7 +370,10 @@ export function validateAuthoredScientificTranche(
   const primaryDevelopment = primaryProbes(development);
   const primaryHoldout = primaryProbes(holdout);
   const allPrimary = [...primaryDevelopment, ...primaryHoldout];
-  unique(allScenarios.map((item) => item.id), "tranche scenario ids");
+  unique(
+    allScenarios.map((item) => item.id),
+    "tranche scenario ids",
+  );
   unique(
     [...development.probes, ...holdout.probes].map((item) => item.id),
     "tranche probe ids",
@@ -352,11 +384,21 @@ export function validateAuthoredScientificTranche(
 
   const decisions = countBy(
     allPrimary.map((probe) => probe.expected.decision),
-    ["established", "partial", "ambiguous", "conflicting", "unsupported"] as const,
+    [
+      "established",
+      "partial",
+      "ambiguous",
+      "conflicting",
+      "unsupported",
+    ] as const,
   );
-  for (const decision of Object.keys(AUTHORED_DECISION_TARGET) as ScientificDecision[]) {
+  for (const decision of Object.keys(
+    AUTHORED_DECISION_TARGET,
+  ) as ScientificDecision[]) {
     if (decisions[decision] === 0) {
-      throw new Error(`${decision}: authored tranche must contain reviewed cases`);
+      throw new Error(
+        `${decision}: authored tranche must contain reviewed cases`,
+      );
     }
   }
 
@@ -370,13 +412,21 @@ export function validateAuthoredScientificTranche(
     }
   }
 
-  unique(lawCatalog.map((item) => item.lawId), "law catalog ids");
-  for (const law of lawCatalog) unique(law.roles.map((role) => role.id), `${law.lawId}.roles`);
+  unique(
+    lawCatalog.map((item) => item.lawId),
+    "law catalog ids",
+  );
+  for (const law of lawCatalog)
+    unique(
+      law.roles.map((role) => role.id),
+      `${law.lawId}.roles`,
+    );
   const knownLaws = new Set(lawCatalog.map((item) => item.lawId));
   const lawsById = new Map(lawCatalog.map((law) => [law.lawId, law]));
   for (const scenario of allScenarios) {
     for (const lawId of scenario.lawIds) {
-      if (!knownLaws.has(lawId)) throw new Error(`${scenario.id}: unknown law ${lawId}`);
+      if (!knownLaws.has(lawId))
+        throw new Error(`${scenario.id}: unknown law ${lawId}`);
     }
   }
   for (const fixture of [development, holdout]) {
@@ -384,38 +434,55 @@ export function validateAuthoredScientificTranche(
       const scenario = authoredScenarioFor(fixture, probe);
       for (const relation of probe.expected.relations) {
         if (!knownLaws.has(relation.relationId)) {
-          throw new Error(`${probe.id}: unknown expected relation ${relation.relationId}`);
+          throw new Error(
+            `${probe.id}: unknown expected relation ${relation.relationId}`,
+          );
         }
         if (!scenario.lawIds.includes(relation.relationId)) {
-          throw new Error(`${probe.id}: expected relation is absent from scenario law coverage`);
+          throw new Error(
+            `${probe.id}: expected relation is absent from scenario law coverage`,
+          );
         }
         const law = lawsById.get(relation.relationId)!;
         const roleIds = new Set(law.roles.map((role) => role.id));
         if (relation.roles.some((role) => !roleIds.has(role.role))) {
-          throw new Error(`${probe.id}: ${relation.relationId} has an unknown authored role`);
+          throw new Error(
+            `${probe.id}: ${relation.relationId} has an unknown authored role`,
+          );
         }
         for (const role of law.roles) {
-          const count = relation.roles.filter((candidate) => candidate.role === role.id).length;
+          const count = relation.roles.filter(
+            (candidate) => candidate.role === role.id,
+          ).length;
           if (role.variadic ? count === 0 : count !== 1) {
-            throw new Error(`${probe.id}: ${relation.relationId} requires exact authored roles`);
+            throw new Error(
+              `${probe.id}: ${relation.relationId} requires exact authored roles`,
+            );
           }
         }
       }
       for (const relationId of probe.expected.excludedRelationIds) {
         if (!knownLaws.has(relationId)) {
-          throw new Error(`${probe.id}: unknown excluded relation ${relationId}`);
+          throw new Error(
+            `${probe.id}: unknown excluded relation ${relationId}`,
+          );
         }
       }
     }
   }
   for (const law of lawCatalog) {
-    const matches = allScenarios.filter((scenario) => scenario.lawIds.includes(law.lawId));
-    if (!matches.length) throw new Error(`${law.lawId}: missing authored coverage`);
+    const matches = allScenarios.filter((scenario) =>
+      scenario.lawIds.includes(law.lawId),
+    );
+    if (!matches.length)
+      throw new Error(`${law.lawId}: missing authored coverage`);
     if (
       priorityFields.includes(law.field) &&
       new Set(matches.map((scenario) => scenario.genre)).size < 2
     ) {
-      throw new Error(`${law.lawId}: priority law requires two document genres`);
+      throw new Error(
+        `${law.lawId}: priority law requires two document genres`,
+      );
     }
   }
   return {
@@ -471,11 +538,15 @@ export function scoreAuthoredScientificFixture(
     let caseMissedCoverage = false;
     let caseNavigation = false;
     if (observed.decision !== probe.expected.decision) {
-      caseFailures.push(`decision ${observed.decision}; expected ${probe.expected.decision}`);
+      caseFailures.push(
+        `decision ${observed.decision}; expected ${probe.expected.decision}`,
+      );
       caseFalseEstablishment =
-        observed.decision === "established" && probe.expected.decision !== "established";
+        observed.decision === "established" &&
+        probe.expected.decision !== "established";
       caseFalseConflict =
-        observed.decision === "conflicting" && probe.expected.decision !== "conflicting";
+        observed.decision === "conflicting" &&
+        probe.expected.decision !== "conflicting";
       caseMissedCoverage = !caseFalseEstablishment && !caseFalseConflict;
     }
     if (observed.proofGrounded !== probe.expected.proofGrounded) {
@@ -507,7 +578,9 @@ export function scoreAuthoredScientificFixture(
           roleInstancesMatch(item.roles, expected.roles, undefined),
       );
       if (!relation) {
-        caseFailures.push(`missing relation ${expected.relationId} at ${expected.anchor.fileId}:${expected.anchor.needle}`);
+        caseFailures.push(
+          `missing relation ${expected.relationId} at ${expected.anchor.fileId}:${expected.anchor.needle}`,
+        );
         caseMissedCoverage = true;
         continue;
       }
@@ -520,7 +593,11 @@ export function scoreAuthoredScientificFixture(
       }
     }
     for (const relationId of probe.expected.excludedRelationIds) {
-      if (observed.relations.some((relation) => relation.relationId === relationId)) {
+      if (
+        observed.relations.some(
+          (relation) => relation.relationId === relationId,
+        )
+      ) {
         caseFailures.push(`leaked relation ${relationId}`);
         caseFalseEstablishment = true;
       }
@@ -575,7 +652,9 @@ export function scoreAuthoredScientificFixture(
   return {
     cases: fixture.probes.length,
     failures,
-    passed: invalidObservationSet ? 0 : fixture.probes.length - failedCases.size,
+    passed: invalidObservationSet
+      ? 0
+      : fixture.probes.length - failedCases.size,
     risk: {
       falseConflict,
       falseEstablishment,
@@ -607,8 +686,31 @@ export function observeAuthoredScientificProbe(
     throw new Error(`${probe.id}: public surface results are incomplete`);
   }
   const view = results.semanticView.value.view;
+  const relations = [
+    ...observeAuthoredRelations(probe.cursor.fileId, view.context.relations),
+    ...(results.relationViews ?? []).flatMap(({ fileId, result }) => {
+      if (result.value.kind !== "semanticView") {
+        throw new Error(`${probe.id}: relation source semanticView is missing`);
+      }
+      return observeAuthoredRelations(
+        fileId,
+        result.value.view.context.relations,
+      );
+    }),
+  ].filter(
+    (relation, index, all) =>
+      all.findIndex(
+        (candidate) =>
+          candidate.fileId === relation.fileId &&
+          candidate.relationId === relation.relationId &&
+          candidate.range.startOffset === relation.range.startOffset &&
+          candidate.range.endOffset === relation.range.endOffset,
+      ) === index,
+  );
   const proofEvidence = view.decision.reasons
-    .filter((reason) => reason.kind === "proof" || reason.kind === "source-conflict")
+    .filter(
+      (reason) => reason.kind === "proof" || reason.kind === "source-conflict",
+    )
     .flatMap((reason) => reason.evidence);
   return {
     caseId: probe.id,
@@ -632,19 +734,7 @@ export function observeAuthoredScientificProbe(
       proofEvidence.length > 0 &&
       proofEvidence.every((evidence) => evidence.sourceRanges.length > 0),
     references: results.references.value.locations,
-    relations: view.context.relations.map((relation) => ({
-      fileId: probe.cursor.fileId,
-      relationId: relation.relationId,
-      range: relation.range,
-      roles: relation.roles.map((role) => ({
-        ...(role.conceptId ? { conceptId: role.conceptId } : {}),
-        role: role.role,
-        symbol: role.symbol,
-      })),
-      sourceGrounded:
-        relation.evidence.length > 0 &&
-        relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
-    })),
+    relations,
     renameEdits: (results.rename.value.proposal?.files ?? []).flatMap((file) =>
       file.edits.map((edit) => ({
         expectedText: edit.expectedText,
@@ -662,6 +752,25 @@ export function observeAuthoredScientificProbe(
   };
 }
 
+export function observeAuthoredRelations(
+  fileId: string,
+  relations: readonly RelationInfo[],
+): AuthoredScientificObservation["relations"] {
+  return relations.map((relation) => ({
+    fileId,
+    relationId: relation.relationId,
+    range: relation.range,
+    roles: relation.roles.map((role) => ({
+      ...(role.conceptId ? { conceptId: role.conceptId } : {}),
+      role: role.role,
+      symbol: role.symbol,
+    })),
+    sourceGrounded:
+      relation.evidence.length > 0 &&
+      relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
+  }));
+}
+
 export function authoredScenarioReviewPayload(
   fixture: AuthoredScientificFixture,
   scenarioId: string,
@@ -675,7 +784,9 @@ export function authoredScenarioReviewPayload(
   });
 }
 
-export function authoredFixtureSealPayload(fixture: AuthoredScientificFixture): string {
+export function authoredFixtureSealPayload(
+  fixture: AuthoredScientificFixture,
+): string {
   const { seal: _seal, ...batch } = fixture.batch;
   return stableJson({ ...fixture, batch });
 }
@@ -699,35 +810,69 @@ function parseBatch(value: unknown): AuthoredScientificBatch {
   exact(
     item,
     [
-      "id", "split", "createdAt", "taskCardDigest", "reviewPolicyVersion", "frozenAt", "seal",
+      "id",
+      "split",
+      "createdAt",
+      "taskCardDigest",
+      "reviewPolicyVersion",
+      "frozenAt",
+      "seal",
     ],
     "fixture.batch",
     ["frozenAt", "seal"],
   );
   return {
     createdAt: date(item.createdAt, "fixture.batch.createdAt"),
-    ...(item.frozenAt === undefined ? {} : { frozenAt: timestamp(item.frozenAt, "fixture.batch.frozenAt") }),
+    ...(item.frozenAt === undefined
+      ? {}
+      : { frozenAt: timestamp(item.frozenAt, "fixture.batch.frozenAt") }),
     id: text(item.id, "fixture.batch.id"),
-    reviewPolicyVersion: positiveInteger(item.reviewPolicyVersion, "fixture.batch.reviewPolicyVersion"),
-    ...(item.seal === undefined ? {} : { seal: digest(item.seal, "fixture.batch.seal") }),
-    split: oneOf(item.split, ["development", "holdout"] as const, "fixture.batch.split"),
+    reviewPolicyVersion: positiveInteger(
+      item.reviewPolicyVersion,
+      "fixture.batch.reviewPolicyVersion",
+    ),
+    ...(item.seal === undefined
+      ? {}
+      : { seal: digest(item.seal, "fixture.batch.seal") }),
+    split: oneOf(
+      item.split,
+      ["development", "holdout"] as const,
+      "fixture.batch.split",
+    ),
     taskCardDigest: digest(item.taskCardDigest, "fixture.batch.taskCardDigest"),
   };
 }
 
-function parseScenario(value: unknown, index: number): AuthoredScientificScenario {
+function parseScenario(
+  value: unknown,
+  index: number,
+): AuthoredScientificScenario {
   const path = `fixture.scenarios[${index}]`;
   const item = record(value, path);
   exact(
     item,
-    ["id", "field", "genre", "lawIds", "snapshots", "variationTags", "provenance", "review"],
+    [
+      "id",
+      "field",
+      "genre",
+      "lawIds",
+      "snapshots",
+      "variationTags",
+      "provenance",
+      "review",
+    ],
     path,
   );
-  const snapshots = array(item.snapshots, `${path}.snapshots`).map((value, snapshotIndex) =>
-    parseSnapshot(value, `${path}.snapshots[${snapshotIndex}]`),
+  const snapshots = array(item.snapshots, `${path}.snapshots`).map(
+    (value, snapshotIndex) =>
+      parseSnapshot(value, `${path}.snapshots[${snapshotIndex}]`),
   );
-  if (!snapshots.length) throw new Error(`${path}.snapshots: must not be empty`);
-  unique(snapshots.map((snapshot) => snapshot.id), `${path}.snapshots.id`);
+  if (!snapshots.length)
+    throw new Error(`${path}.snapshots: must not be empty`);
+  unique(
+    snapshots.map((snapshot) => snapshot.id),
+    `${path}.snapshots.id`,
+  );
   return {
     field: oneOf(
       item.field,
@@ -744,22 +889,34 @@ function parseScenario(value: unknown, index: number): AuthoredScientificScenari
   };
 }
 
-function parseSnapshot(value: unknown, path: string): AuthoredScientificSnapshot {
+function parseSnapshot(
+  value: unknown,
+  path: string,
+): AuthoredScientificSnapshot {
   const item = record(value, path);
   exact(item, ["id", "documents"], path);
-  const documents = array(item.documents, `${path}.documents`).map((value, index) => {
-    const documentPath = `${path}.documents[${index}]`;
-    const document = record(value, documentPath);
-    exact(document, ["fileId", "path", "content"], documentPath);
-    return {
-      content: text(document.content, `${documentPath}.content`),
-      fileId: text(document.fileId, `${documentPath}.fileId`),
-      path: text(document.path, `${documentPath}.path`),
-    };
-  });
-  if (!documents.length) throw new Error(`${path}.documents: must not be empty`);
-  unique(documents.map((document) => document.fileId), `${path}.documents.fileId`);
-  unique(documents.map((document) => document.path), `${path}.documents.path`);
+  const documents = array(item.documents, `${path}.documents`).map(
+    (value, index) => {
+      const documentPath = `${path}.documents[${index}]`;
+      const document = record(value, documentPath);
+      exact(document, ["fileId", "path", "content"], documentPath);
+      return {
+        content: text(document.content, `${documentPath}.content`),
+        fileId: text(document.fileId, `${documentPath}.fileId`),
+        path: text(document.path, `${documentPath}.path`),
+      };
+    },
+  );
+  if (!documents.length)
+    throw new Error(`${path}.documents: must not be empty`);
+  unique(
+    documents.map((document) => document.fileId),
+    `${path}.documents.fileId`,
+  );
+  unique(
+    documents.map((document) => document.path),
+    `${path}.documents.path`,
+  );
   return { documents, id: text(item.id, `${path}.id`) };
 }
 
@@ -770,14 +927,24 @@ function parseProvenance(
   const item = record(value, path);
   exact(
     item,
-    ["authorId", "engineBlind", "independenceGroup", "taskCardDigest", "rawDigest"],
+    [
+      "authorId",
+      "engineBlind",
+      "independenceGroup",
+      "taskCardDigest",
+      "rawDigest",
+    ],
     path,
   );
-  if (item.engineBlind !== true) throw new Error(`${path}.engineBlind: must be true`);
+  if (item.engineBlind !== true)
+    throw new Error(`${path}.engineBlind: must be true`);
   return {
     authorId: text(item.authorId, `${path}.authorId`),
     engineBlind: true,
-    independenceGroup: text(item.independenceGroup, `${path}.independenceGroup`),
+    independenceGroup: text(
+      item.independenceGroup,
+      `${path}.independenceGroup`,
+    ),
     rawDigest: digest(item.rawDigest, `${path}.rawDigest`),
     taskCardDigest: digest(item.taskCardDigest, `${path}.taskCardDigest`),
   };
@@ -788,21 +955,39 @@ function parseReview(value: unknown, path: string): AuthoredScientificReview {
   exact(
     item,
     [
-      "criticId", "mainReviewer", "status", "correctionSummary", "finalDigest",
-      "semanticReviewDigest", "reviewedAt", "frozenAt",
+      "criticId",
+      "mainReviewer",
+      "status",
+      "correctionSummary",
+      "finalDigest",
+      "semanticReviewDigest",
+      "reviewedAt",
+      "frozenAt",
     ],
     path,
     ["frozenAt"],
   );
   return {
-    correctionSummary: strings(item.correctionSummary, `${path}.correctionSummary`),
+    correctionSummary: strings(
+      item.correctionSummary,
+      `${path}.correctionSummary`,
+    ),
     criticId: text(item.criticId, `${path}.criticId`),
     finalDigest: digest(item.finalDigest, `${path}.finalDigest`),
-    ...(item.frozenAt === undefined ? {} : { frozenAt: timestamp(item.frozenAt, `${path}.frozenAt`) }),
+    ...(item.frozenAt === undefined
+      ? {}
+      : { frozenAt: timestamp(item.frozenAt, `${path}.frozenAt`) }),
     mainReviewer: text(item.mainReviewer, `${path}.mainReviewer`),
     reviewedAt: date(item.reviewedAt, `${path}.reviewedAt`),
-    semanticReviewDigest: digest(item.semanticReviewDigest, `${path}.semanticReviewDigest`),
-    status: oneOf(item.status, ["approved", "corrected"] as const, `${path}.status`),
+    semanticReviewDigest: digest(
+      item.semanticReviewDigest,
+      `${path}.semanticReviewDigest`,
+    ),
+    status: oneOf(
+      item.status,
+      ["approved", "corrected"] as const,
+      `${path}.status`,
+    ),
   };
 }
 
@@ -811,9 +996,7 @@ function parseProbe(value: unknown, index: number): AuthoredScientificProbe {
   const item = record(value, path);
   exact(
     item,
-    [
-      "id", "scenarioId", "kind", "family", "cursor", "expected",
-    ],
+    ["id", "scenarioId", "kind", "family", "cursor", "expected"],
     path,
   );
   const cursor = record(item.cursor, `${path}.cursor`);
@@ -824,7 +1007,9 @@ function parseProbe(value: unknown, index: number): AuthoredScientificProbe {
     ["occurrence", "edge", "offset"],
   );
   if ((cursor.edge === undefined) === (cursor.offset === undefined)) {
-    throw new Error(`${path}.cursor: exactly one of edge or offset is required`);
+    throw new Error(
+      `${path}.cursor: exactly one of edge or offset is required`,
+    );
   }
   const needle = text(cursor.needle, `${path}.cursor.needle`);
   const offset =
@@ -832,26 +1017,40 @@ function parseProbe(value: unknown, index: number): AuthoredScientificProbe {
       ? undefined
       : integer(cursor.offset, `${path}.cursor.offset`);
   if (offset !== undefined && offset > needle.length) {
-    throw new Error(`${path}.cursor.offset: must fall within the cursor needle`);
+    throw new Error(
+      `${path}.cursor.offset: must fall within the cursor needle`,
+    );
   }
   const expected = parseExpected(item.expected, `${path}.expected`);
   return {
     cursor: {
       ...(cursor.edge === undefined
         ? {}
-        : { edge: oneOf(cursor.edge, ["after", "before"] as const, `${path}.cursor.edge`) }),
+        : {
+            edge: oneOf(
+              cursor.edge,
+              ["after", "before"] as const,
+              `${path}.cursor.edge`,
+            ),
+          }),
       fileId: text(cursor.fileId, `${path}.cursor.fileId`),
       needle,
       ...(cursor.occurrence === undefined
         ? {}
-        : { occurrence: integer(cursor.occurrence, `${path}.cursor.occurrence`) }),
+        : {
+            occurrence: integer(cursor.occurrence, `${path}.cursor.occurrence`),
+          }),
       ...(offset === undefined ? {} : { offset }),
       snapshotId: text(cursor.snapshotId, `${path}.cursor.snapshotId`),
     },
     expected,
     family: oneOf(item.family, DOCUMENT_REASONING_FAMILIES, `${path}.family`),
     id: text(item.id, `${path}.id`),
-    kind: oneOf(item.kind, ["primary", "supplemental"] as const, `${path}.kind`),
+    kind: oneOf(
+      item.kind,
+      ["primary", "supplemental"] as const,
+      `${path}.kind`,
+    ),
     scenarioId: text(item.scenarioId, `${path}.scenarioId`),
   };
 }
@@ -864,8 +1063,14 @@ function parseExpected(
   exact(
     item,
     [
-      "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
-      "navigation", "diagnostics",
+      "decision",
+      "symbol",
+      "cursorOccurrence",
+      "proofGrounded",
+      "relations",
+      "excludedRelationIds",
+      "navigation",
+      "diagnostics",
     ],
     path,
     ["symbol", "cursorOccurrence"],
@@ -922,7 +1127,9 @@ function parseExpected(
   });
   const maximum = integer(diagnostics.maximum, `${path}.diagnostics.maximum`);
   if (maximum < requiredDiagnostics.length) {
-    throw new Error(`${path}.diagnostics.maximum: smaller than required diagnostics`);
+    throw new Error(
+      `${path}.diagnostics.maximum: smaller than required diagnostics`,
+    );
   }
   return {
     ...(item.cursorOccurrence === undefined
@@ -935,15 +1142,27 @@ function parseExpected(
         }),
     decision: oneOf(
       item.decision,
-      ["ambiguous", "conflicting", "established", "partial", "unsupported"] as const,
+      [
+        "ambiguous",
+        "conflicting",
+        "established",
+        "partial",
+        "unsupported",
+      ] as const,
       `${path}.decision`,
     ),
     diagnostics: {
-      excludedCodes: strings(diagnostics.excludedCodes, `${path}.diagnostics.excludedCodes`),
+      excludedCodes: strings(
+        diagnostics.excludedCodes,
+        `${path}.diagnostics.excludedCodes`,
+      ),
       maximum,
       required: requiredDiagnostics,
     },
-    excludedRelationIds: strings(item.excludedRelationIds, `${path}.excludedRelationIds`),
+    excludedRelationIds: strings(
+      item.excludedRelationIds,
+      `${path}.excludedRelationIds`,
+    ),
     proofGrounded: boolean(item.proofGrounded, `${path}.proofGrounded`),
     navigation: {
       definition: parseLocationExpectation(
@@ -953,10 +1172,20 @@ function parseExpected(
       prepareRename: {
         ...(prepareRename.placeholder === undefined
           ? {}
-          : { placeholder: text(prepareRename.placeholder, `${path}.navigation.prepareRename.placeholder`) }),
+          : {
+              placeholder: text(
+                prepareRename.placeholder,
+                `${path}.navigation.prepareRename.placeholder`,
+              ),
+            }),
         ...(prepareRename.range === undefined
           ? {}
-          : { range: parseAnchor(prepareRename.range, `${path}.navigation.prepareRename.range`) }),
+          : {
+              range: parseAnchor(
+                prepareRename.range,
+                `${path}.navigation.prepareRename.range`,
+              ),
+            }),
         status: oneOf(
           prepareRename.status,
           ["available", "unavailable"] as const,
@@ -984,7 +1213,12 @@ function parseExpected(
             }),
         ...(rename.newName === undefined
           ? {}
-          : { newName: text(rename.newName, `${path}.navigation.rename.newName`) }),
+          : {
+              newName: text(
+                rename.newName,
+                `${path}.navigation.rename.newName`,
+              ),
+            }),
         ...(rename.replacementText === undefined
           ? {}
           : {
@@ -995,11 +1229,15 @@ function parseExpected(
             }),
         ...(rename.safety === undefined
           ? {}
-          : { safety: text(rename.safety, `${path}.navigation.rename.safety`) }),
+          : {
+              safety: text(rename.safety, `${path}.navigation.rename.safety`),
+            }),
       },
     },
     relations: parseRelationExpectations(item.relations, `${path}.relations`),
-    ...(item.symbol === undefined ? {} : { symbol: text(item.symbol, `${path}.symbol`) }),
+    ...(item.symbol === undefined
+      ? {}
+      : { symbol: text(item.symbol, `${path}.symbol`) }),
   };
 }
 
@@ -1008,13 +1246,18 @@ function parseRelationExpectations(
   path: string,
 ): AuthoredRelationExpectation[] {
   const relations = array(value, path).map((value, index) => {
-      const relationPath = `${path}[${index}]`;
-      const relation = record(value, relationPath);
-      exact(relation, ["relationId", "anchor", "roles", "sourceGrounded"], relationPath);
-      return {
-        anchor: parseAnchor(relation.anchor, `${relationPath}.anchor`),
-        relationId: text(relation.relationId, `${relationPath}.relationId`),
-        roles: array(relation.roles, `${relationPath}.roles`).map((value, roleIndex) => {
+    const relationPath = `${path}[${index}]`;
+    const relation = record(value, relationPath);
+    exact(
+      relation,
+      ["relationId", "anchor", "roles", "sourceGrounded"],
+      relationPath,
+    );
+    return {
+      anchor: parseAnchor(relation.anchor, `${relationPath}.anchor`),
+      relationId: text(relation.relationId, `${relationPath}.relationId`),
+      roles: array(relation.roles, `${relationPath}.roles`).map(
+        (value, roleIndex) => {
           const rolePath = `${relationPath}.roles[${roleIndex}]`;
           const role = record(value, rolePath);
           exact(role, ["role", "symbol"], rolePath);
@@ -1022,10 +1265,14 @@ function parseRelationExpectations(
             role: text(role.role, `${rolePath}.role`),
             symbol: text(role.symbol, `${rolePath}.symbol`),
           };
-        }),
-        sourceGrounded: boolean(relation.sourceGrounded, `${relationPath}.sourceGrounded`),
-      };
-    });
+        },
+      ),
+      sourceGrounded: boolean(
+        relation.sourceGrounded,
+        `${relationPath}.sourceGrounded`,
+      ),
+    };
+  });
   return relations;
 }
 
@@ -1035,7 +1282,12 @@ function parseLocationExpectation(
   extensions: readonly string[] = [],
 ): AuthoredLocationExpectation {
   const item = record(value, path);
-  exact(item, ["status", "minimum", "required", "excluded", ...extensions], path, extensions);
+  exact(
+    item,
+    ["status", "minimum", "required", "excluded", ...extensions],
+    path,
+    extensions,
+  );
   const result = {
     excluded: array(item.excluded, `${path}.excluded`).map((value, index) =>
       parseAnchor(value, `${path}.excluded[${index}]`),
@@ -1044,12 +1296,19 @@ function parseLocationExpectation(
     required: array(item.required, `${path}.required`).map((value, index) =>
       parseAnchor(value, `${path}.required[${index}]`),
     ),
-    status: oneOf(item.status, ["available", "unavailable"] as const, `${path}.status`),
+    status: oneOf(
+      item.status,
+      ["available", "unavailable"] as const,
+      `${path}.status`,
+    ),
   };
   if (result.minimum < result.required.length) {
     throw new Error(`${path}.minimum: smaller than required anchors`);
   }
-  if (result.status === "unavailable" && (result.minimum || result.required.length)) {
+  if (
+    result.status === "unavailable" &&
+    (result.minimum || result.required.length)
+  ) {
     throw new Error(`${path}: unavailable surface cannot require locations`);
   }
   return result;
@@ -1057,12 +1316,10 @@ function parseLocationExpectation(
 
 function parseAnchor(value: unknown, path: string): AuthoredSourceAnchor {
   const item = record(value, path);
-  exact(
-    item,
-    ["fileId", "needle", "occurrence", "selection"],
-    path,
-    ["occurrence", "selection"],
-  );
+  exact(item, ["fileId", "needle", "occurrence", "selection"], path, [
+    "occurrence",
+    "selection",
+  ]);
   const needle = text(item.needle, `${path}.needle`);
   const selection =
     item.selection === undefined
@@ -1107,9 +1364,12 @@ function validateProbe(
       : cursor.range.startOffset + probe.cursor.offset;
   if (
     probe.cursor.offset !== undefined &&
-    (probe.cursor.offset < 0 || probe.cursor.offset > probe.cursor.needle.length)
+    (probe.cursor.offset < 0 ||
+      probe.cursor.offset > probe.cursor.needle.length)
   ) {
-    throw new Error(`${probe.id}: cursor offset falls outside its reviewed needle`);
+    throw new Error(
+      `${probe.id}: cursor offset falls outside its reviewed needle`,
+    );
   }
   for (const location of [
     probe.expected.navigation.definition,
@@ -1142,20 +1402,30 @@ function validateProbe(
   }
 }
 
-function requireSplit(fixture: AuthoredScientificFixture, split: AuthoredSplit): void {
-  if (fixture.batch.split !== split) throw new Error(`${split} fixture has the wrong split`);
+function requireSplit(
+  fixture: AuthoredScientificFixture,
+  split: AuthoredSplit,
+): void {
+  if (fixture.batch.split !== split)
+    throw new Error(`${split} fixture has the wrong split`);
 }
 
-function primaryProbes(fixture: AuthoredScientificFixture): AuthoredScientificProbe[] {
+function primaryProbes(
+  fixture: AuthoredScientificFixture,
+): AuthoredScientificProbe[] {
   return fixture.probes.filter((probe) => probe.kind === "primary");
 }
 
 function validateAreaAllocation(fixture: AuthoredScientificFixture): void {
   for (const field of Object.keys(AUTHORED_AREA_ALLOCATION) as AuthoredArea[]) {
     const expected = AUTHORED_AREA_ALLOCATION[field][fixture.batch.split];
-    const actual = fixture.scenarios.filter((scenario) => scenario.field === field).length;
+    const actual = fixture.scenarios.filter(
+      (scenario) => scenario.field === field,
+    ).length;
     if (actual !== expected) {
-      throw new Error(`${field}: ${fixture.batch.split} requires ${expected} cases, got ${actual}`);
+      throw new Error(
+        `${field}: ${fixture.batch.split} requires ${expected} cases, got ${actual}`,
+      );
     }
   }
 }
@@ -1168,7 +1438,9 @@ function rejectLineageLeakage(
     throw new Error("development and holdout task-card batches must differ");
   }
   const developmentGroups = new Set(
-    development.scenarios.map((scenario) => scenario.provenance.independenceGroup),
+    development.scenarios.map(
+      (scenario) => scenario.provenance.independenceGroup,
+    ),
   );
   const projects = new Map<string, string>();
   for (const scenario of [...development.scenarios, ...holdout.scenarios]) {
@@ -1176,11 +1448,14 @@ function rejectLineageLeakage(
       holdout.scenarios.includes(scenario) &&
       developmentGroups.has(scenario.provenance.independenceGroup)
     ) {
-      throw new Error(`${scenario.id}: development/holdout author lineage overlap`);
+      throw new Error(
+        `${scenario.id}: development/holdout author lineage overlap`,
+      );
     }
     const normalized = normalizedProject(scenario);
     const existing = projects.get(normalized);
-    if (existing) throw new Error(`${scenario.id}: duplicate project with ${existing}`);
+    if (existing)
+      throw new Error(`${scenario.id}: duplicate project with ${existing}`);
     projects.set(normalized, scenario.id);
   }
 }
@@ -1200,7 +1475,9 @@ export function authoredScenarioFor(
   fixture: AuthoredScientificFixture,
   probe: AuthoredScientificProbe,
 ): AuthoredScientificScenario {
-  const scenario = fixture.scenarios.find((item) => item.id === probe.scenarioId);
+  const scenario = fixture.scenarios.find(
+    (item) => item.id === probe.scenarioId,
+  );
   if (!scenario) throw new Error(`${probe.id}: unknown scenario`);
   return scenario;
 }
@@ -1209,23 +1486,37 @@ export function authoredSnapshotFor(
   scenario: AuthoredScientificScenario,
   probe: AuthoredScientificProbe,
 ): AuthoredScientificSnapshot {
-  const snapshot = scenario.snapshots.find((item) => item.id === probe.cursor.snapshotId);
-  if (!snapshot) throw new Error(`${probe.id}: unknown snapshot ${probe.cursor.snapshotId}`);
+  const snapshot = scenario.snapshots.find(
+    (item) => item.id === probe.cursor.snapshotId,
+  );
+  if (!snapshot)
+    throw new Error(`${probe.id}: unknown snapshot ${probe.cursor.snapshotId}`);
   return snapshot;
 }
 
 export function resolveAuthoredAnchor(
   snapshot: AuthoredScientificSnapshot,
   anchor: AuthoredSourceAnchor,
-): { readonly fileId: string; readonly path: string; readonly range: SourceRange } {
-  const document = snapshot.documents.find((item) => item.fileId === anchor.fileId);
-  if (!document) throw new Error(`${snapshot.id}: unknown anchor file ${anchor.fileId}`);
+): {
+  readonly fileId: string;
+  readonly path: string;
+  readonly range: SourceRange;
+} {
+  const document = snapshot.documents.find(
+    (item) => item.fileId === anchor.fileId,
+  );
+  if (!document)
+    throw new Error(`${snapshot.id}: unknown anchor file ${anchor.fileId}`);
   const matches: number[] = [];
   for (let offset = document.content.indexOf(anchor.needle); offset >= 0;) {
     matches.push(offset);
-    offset = document.content.indexOf(anchor.needle, offset + Math.max(anchor.needle.length, 1));
+    offset = document.content.indexOf(
+      anchor.needle,
+      offset + Math.max(anchor.needle.length, 1),
+    );
   }
-  const selected = anchor.occurrence === undefined ? matches[0] : matches[anchor.occurrence];
+  const selected =
+    anchor.occurrence === undefined ? matches[0] : matches[anchor.occurrence];
   if (
     selected === undefined ||
     (anchor.occurrence === undefined && matches.length !== 1)
@@ -1252,7 +1543,9 @@ export function authoredProbeIdentityMatches(
   probe: AuthoredScientificProbe,
   observation: AuthoredScientificObservation,
 ): boolean {
-  return authoredProbeIdentityFailures(fixture, probe, observation).length === 0;
+  return (
+    authoredProbeIdentityFailures(fixture, probe, observation).length === 0
+  );
 }
 
 export function authoredProbeIdentityFailures(
@@ -1260,7 +1553,10 @@ export function authoredProbeIdentityFailures(
   probe: AuthoredScientificProbe,
   observation: AuthoredScientificObservation,
 ): AuthoredIdentityFailure[] {
-  const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
+  const snapshot = authoredSnapshotFor(
+    authoredScenarioFor(fixture, probe),
+    probe,
+  );
   const failures: AuthoredIdentityFailure[] = [];
   if (probe.expected.cursorOccurrence !== undefined) {
     const expected = probe.expected.cursorOccurrence;
@@ -1268,7 +1564,8 @@ export function authoredProbeIdentityFailures(
       if (observation.symbolLocation) {
         failures.push({
           area: "cursor-symbol",
-          basis: "formula-boundary cursor resolved an unexpected symbol occurrence",
+          basis:
+            "formula-boundary cursor resolved an unexpected symbol occurrence",
         });
       }
     } else {
@@ -1302,9 +1599,14 @@ export function authoredProbeIdentityFailures(
   const rename = probe.expected.navigation.rename;
   if (
     rename.expectedText !== undefined &&
-    observation.renameEdits.some((edit) => edit.expectedText !== rename.expectedText)
+    observation.renameEdits.some(
+      (edit) => edit.expectedText !== rename.expectedText,
+    )
   ) {
-    failures.push({ area: "rename", basis: "rename expected source text differs" });
+    failures.push({
+      area: "rename",
+      basis: "rename expected source text differs",
+    });
   }
   if (
     rename.replacementText !== undefined &&
@@ -1352,7 +1654,10 @@ export function authoredProbeIdentityFailures(
         resolveAuthoredAnchor(snapshot, preparation.range).range,
       ))
   ) {
-    failures.push({ area: "prepare-rename", basis: "prepareRename range differs" });
+    failures.push({
+      area: "prepare-rename",
+      basis: "prepareRename range differs",
+    });
   }
   if (
     preparation.placeholder !== undefined &&
@@ -1374,7 +1679,7 @@ function checkLocationExpectation(
   failures: AuthoredIdentityFailure[],
 ): boolean {
   let failed = false;
-  if ((actual.length > 0) !== (expected.status === "available")) {
+  if (actual.length > 0 !== (expected.status === "available")) {
     failures.push({ area: name, basis: `${name} availability differs` });
     failed = true;
   }
@@ -1423,7 +1728,9 @@ function checkLocationExpectation(
 }
 
 function sameRange(left: SourceRange, right: SourceRange): boolean {
-  return left.startOffset === right.startOffset && left.endOffset === right.endOffset;
+  return (
+    left.startOffset === right.startOffset && left.endOffset === right.endOffset
+  );
 }
 
 /** Accepts an exact semantic range or a reviewed anchor with only surrounding
@@ -1477,18 +1784,24 @@ function exact(
   const allowed = new Set(keys);
   const unknown = Object.keys(value).find((key) => !allowed.has(key));
   if (unknown) throw new Error(`${path}.${unknown}: unknown field`);
-  const missing = keys.find((key) => !optional.includes(key) && !Object.hasOwn(value, key));
+  const missing = keys.find(
+    (key) => !optional.includes(key) && !Object.hasOwn(value, key),
+  );
   if (missing) throw new Error(`${path}.${missing}: missing field`);
 }
 
 function text(value: unknown, path: string): string {
-  if (typeof value !== "string" || !value.trim()) throw new Error(`${path}: must be non-empty text`);
+  if (typeof value !== "string" || !value.trim())
+    throw new Error(`${path}: must be non-empty text`);
   return value;
 }
 
 function strings(value: unknown, path: string, minimum = 0): string[] {
-  const result = array(value, path).map((item, index) => text(item, `${path}[${index}]`));
-  if (result.length < minimum) throw new Error(`${path}: requires at least ${minimum} values`);
+  const result = array(value, path).map((item, index) =>
+    text(item, `${path}[${index}]`),
+  );
+  if (result.length < minimum)
+    throw new Error(`${path}: requires at least ${minimum} values`);
   unique(result, path);
   return result;
 }
@@ -1521,7 +1834,8 @@ function digest(value: unknown, path: string): string {
 
 function date(value: unknown, path: string): string {
   const result = text(value, path);
-  if (!/^\d{4}-\d{2}-\d{2}$/u.test(result)) throw new Error(`${path}: must be an ISO date`);
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(result))
+    throw new Error(`${path}: must be an ISO date`);
   return result;
 }
 
@@ -1539,10 +1853,12 @@ function oneOf<const T extends string>(
   path: string,
 ): T {
   const result = text(value, path);
-  if (!values.includes(result as T)) throw new Error(`${path}: invalid value ${result}`);
+  if (!values.includes(result as T))
+    throw new Error(`${path}: invalid value ${result}`);
   return result as T;
 }
 
 function unique(values: readonly string[], path: string): void {
-  if (new Set(values).size !== values.length) throw new Error(`${path}: values must be unique`);
+  if (new Set(values).size !== values.length)
+    throw new Error(`${path}: values must be unique`);
 }

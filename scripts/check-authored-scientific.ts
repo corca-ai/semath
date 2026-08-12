@@ -39,9 +39,7 @@ if (
   requestedSplit !== "development" &&
   requestedSplit !== "holdout"
 ) {
-  throw new Error(
-    "SEMATH_AUTHORED_SPLIT must be development or holdout",
-  );
+  throw new Error("SEMATH_AUTHORED_SPLIT must be development or holdout");
 }
 const requestedFixture = process.env.SEMATH_AUTHORED_FIXTURE;
 const fixturePaths = requestedFixture
@@ -75,7 +73,9 @@ if (
   requestedSplit !== undefined &&
   selected.some((fixture) => fixture.batch.split !== requestedSplit)
 ) {
-  throw new Error("SEMATH_AUTHORED_FIXTURE split does not match SEMATH_AUTHORED_SPLIT");
+  throw new Error(
+    "SEMATH_AUTHORED_FIXTURE split does not match SEMATH_AUTHORED_SPLIT",
+  );
 }
 if (process.env.SEMATH_AUTHORED_SKIP_BUILD !== "1") buildNative();
 
@@ -87,11 +87,7 @@ for (const fixture of selected) {
     runs.push(runProbe(fixture, probe));
     if ((index + 1) % 10 === 0 || index + 1 === fixture.probes.length) {
       console.error(
-        fixture.batch.split +
-          ": " +
-          (index + 1) +
-          "/" +
-          fixture.probes.length,
+        fixture.batch.split + ": " + (index + 1) + "/" + fixture.probes.length,
       );
     }
   }
@@ -176,10 +172,7 @@ if (process.env.SEMATH_AUTHORED_REPORT) {
     JSON.stringify({ results: report }, null, 2) + "\n",
   );
 }
-if (
-  failures > 0 &&
-  process.env.SEMATH_AUTHORED_ALLOW_FAILURES !== "1"
-) {
+if (failures > 0 && process.env.SEMATH_AUTHORED_ALLOW_FAILURES !== "1") {
   const messages = report.flatMap((item) => item.score.failures);
   throw new Error(
     "authored scientific evaluation failed:\n" + messages.join("\n"),
@@ -244,8 +237,7 @@ function runProbe(
     cursorDocument.content,
     probe.cursor,
   );
-  const epoch =
-    "authored-v027-" + fixture.batch.split + "-" + probe.id;
+  const epoch = "authored-v027-" + fixture.batch.split + "-" + probe.id;
   const target = {
     fileId: probe.cursor.fileId,
     offset,
@@ -326,17 +318,18 @@ function runProbe(
         " results",
     );
   }
-  const observation = observeAuthoredScientificProbe(
-    probe,
-    {
-      semanticView: results[0],
-      definition: results[1],
-      references: results[2],
-      prepareRename: results[3],
-      rename: results[4],
-      diagnostics: results[5],
-    } as AuthoredScientificSurfaceResults,
-  );
+  const observation = observeAuthoredScientificProbe(probe, {
+    semanticView: results[0],
+    definition: results[1],
+    references: results[2],
+    prepareRename: results[3],
+    rename: results[4],
+    diagnostics: results[5],
+    relationViews: relationTargets.map((source, index) => ({
+      fileId: source.anchor.fileId,
+      result: results[6 + index]!,
+    })),
+  } as AuthoredScientificSurfaceResults);
   const cursorView = semanticView(results[0], probe.id + ": cursor");
   const cursorDocumentSyntax = documents.find(
     (document) => document.fileId === probe.cursor.fileId,
@@ -392,10 +385,7 @@ interface ProbeRun {
   readonly relationSources: readonly AuthoredRelationSourceEvidence[];
 }
 
-function semanticView(
-  result: QueryResult | undefined,
-  context: string,
-) {
+function semanticView(result: QueryResult | undefined, context: string) {
   if (!result || result.value.kind !== "semanticView") {
     throw new Error(context + ": semanticView result is unavailable");
   }
@@ -407,7 +397,10 @@ function expectedRelationsMatch(
   probe: AuthoredScientificProbe,
   observation: AuthoredScientificObservation,
 ): boolean {
-  const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
+  const snapshot = authoredSnapshotFor(
+    authoredScenarioFor(fixture, probe),
+    probe,
+  );
   return probe.expected.relations.every((expected) => {
     const anchor = resolveAuthoredAnchor(snapshot, expected.anchor);
     const document = snapshot.documents.find(
@@ -418,7 +411,11 @@ function expectedRelationsMatch(
         relation.relationId === expected.relationId &&
         relation.fileId === anchor.fileId &&
         document !== undefined &&
-        authoredRelationRangeMatches(document.content, relation.range, anchor.range) &&
+        authoredRelationRangeMatches(
+          document.content,
+          relation.range,
+          anchor.range,
+        ) &&
         relation.sourceGrounded === expected.sourceGrounded &&
         roleInstancesMatch(relation.roles, expected.roles, undefined),
     );
@@ -426,11 +423,15 @@ function expectedRelationsMatch(
 }
 
 function rangesOverlap(left: SourceRange, right: SourceRange): boolean {
-  return left.startOffset < right.endOffset && right.startOffset < left.endOffset;
+  return (
+    left.startOffset < right.endOffset && right.startOffset < left.endOffset
+  );
 }
 
 function sameRange(left: SourceRange, right: SourceRange): boolean {
-  return left.startOffset === right.startOffset && left.endOffset === right.endOffset;
+  return (
+    left.startOffset === right.startOffset && left.endOffset === right.endOffset
+  );
 }
 
 function languageOf(path: string): "latex" | "markdown" {
