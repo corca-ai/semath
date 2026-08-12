@@ -2915,6 +2915,13 @@ fn condition_evidence(
         push_evidence(&mut evidence, law_activation.clone());
         return (evidence, true);
     }
+    if kind == PackConditionKind::ShapeCompatible
+        && expression_is_well_typed(actual, shapes)
+        && let Some(law_activation) = law_activation
+    {
+        push_evidence(&mut evidence, law_activation.clone());
+        return (evidence, true);
+    }
     for subject in subjects {
         let Some(expression) = bindings.get(subject) else {
             continue;
@@ -5215,6 +5222,39 @@ This conversion is performed once per accepted timing sample so the accumulator 
                 .iter()
                 .any(|recognition| recognition.law_id == "expectation-linearity"),
             "{observations:#?}"
+        );
+    }
+
+    #[test]
+    fn verifies_normal_equation_from_declared_matrix_dimensions() {
+        let observations = recognized_law_observations(
+            r"Consider the unconstrained least-squares problem
+\[
+  \min_{\theta\in\mathbb{R}^n}\frac12\lVert A\theta-b\rVert_2^2,
+  \qquad A\in\mathbb{R}^{m\times n},\quad b\in\mathbb R^m.
+\]
+Consequently every least-squares minimizer obeys the normal equation
+\[
+  A^\top A\theta=A^\top b.
+\]",
+        );
+        let recognition = observations
+            .iter()
+            .find(|recognition| recognition.law_id == "least-squares-normal-equation")
+            .expect("normal equation should be recognized");
+        assert_eq!(recognition.status, LawRecognitionStatus::Verified);
+    }
+
+    #[test]
+    fn named_normal_equation_does_not_override_incompatible_shapes() {
+        let observations = recognized_law_observations(
+            r"Let $A$ be a $2$ by $3$ matrix, $\theta$ a $4$-dimensional vector, and $b$ a $2$-dimensional vector.
+The normal equation is $A^\top A\theta=A^\top b$.",
+        );
+        assert!(
+            observations
+                .iter()
+                .all(|recognition| recognition.law_id != "least-squares-normal-equation")
         );
     }
 
