@@ -5166,6 +5166,18 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
+    fn recognizes_source_grounded_closed_system_balance_without_a_law_specific_path() {
+        let observations = recognized_law_observations(
+            "The vessel is a closed system. Heat into the system and work done by the system are positive. The balance is $\\Delta U=Q-W$.",
+        );
+        let recognition = observations
+            .iter()
+            .find(|recognition| recognition.law_id == "closed-system-first-law")
+            .expect("generic compiled law recognition");
+        assert_eq!(recognition.status, LawRecognitionStatus::Verified);
+    }
+
+    #[test]
     fn possessive_equation_flow_uses_the_existing_role_and_law_pipeline() {
         let source = "A charge packet with signed charge $q_b$ entering a region held at potential $V_b$ has electric potential energy $U_b=q_bV_b$.";
         assert_eq!(recognized_laws(source), ["electric-potential-energy"]);
