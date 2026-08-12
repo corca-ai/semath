@@ -511,6 +511,7 @@ pub struct ProjectSemanticIndex {
     candidates: BTreeMap<SourceOccurrenceId, Vec<SemanticCandidateClaim>>,
     dependents: BTreeMap<ClaimId, BTreeSet<ClaimId>>,
     binding_claims: BTreeMap<String, BTreeSet<ClaimId>>,
+    occurrences_by_binding: BTreeMap<String, BTreeSet<SourceOccurrenceId>>,
     claims_by_entity: BTreeMap<EntityId, BTreeSet<ClaimId>>,
     established_occurrences_by_entity: BTreeMap<EntityId, BTreeSet<SourceOccurrenceId>>,
     invalidated_claims: u32,
@@ -546,6 +547,7 @@ impl ProjectSemanticIndex {
             .iter()
             .map(|facts| facts.file_id.clone())
             .collect::<BTreeSet<_>>();
+        let mut affected_bindings = self.binding_keys_depending_on(&affected_files);
         let mut rollback = Some(self.snapshot_affected(&affected_files));
         for facts in documents {
             self.retract_document(&facts.file_id);
@@ -564,15 +566,18 @@ impl ProjectSemanticIndex {
             );
             return Err(error);
         }
-        self.rebuild_resolution_index();
+        affected_bindings.extend(self.binding_keys_depending_on(&affected_files));
+        self.refresh_resolution_index(&affected_bindings);
         Ok(())
     }
 
     pub fn remove_document(&mut self, file_id: &str) {
+        let affected_files = BTreeSet::from([file_id.to_owned()]);
+        let affected_bindings = self.binding_keys_depending_on(&affected_files);
         self.retract_document(file_id);
-        self.recompute_constraints(&BTreeSet::from([file_id.to_owned()]))
+        self.recompute_constraints(&affected_files)
             .expect("existing semantic facts must produce valid constraints");
-        self.rebuild_resolution_index();
+        self.refresh_resolution_index(&affected_bindings);
     }
 
     pub fn resolve(&self, occurrence_id: &SourceOccurrenceId) -> Resolution {
@@ -1204,12 +1209,13 @@ impl ProjectSemanticIndex {
         }
         self.document_versions
             .insert(facts.file_id, facts.document_version);
-        self.occurrences.extend(
-            facts
-                .occurrences
-                .into_iter()
-                .map(|item| (item.id.clone(), item)),
-        );
+        for occurrence in facts.occurrences {
+            self.occurrences_by_binding
+                .entry(occurrence_binding_key(&occurrence))
+                .or_default()
+                .insert(occurrence.id.clone());
+            self.occurrences.insert(occurrence.id.clone(), occurrence);
+        }
         self.entities.extend(facts.entities);
         self.mentions.extend(
             facts
@@ -1280,7 +1286,21 @@ impl ProjectSemanticIndex {
         self.mentions.retain(|id, _| id.file_id != file_id);
         self.entities
             .retain(|entity| entity.anchor.file_id != file_id);
-        self.occurrences.retain(|id, _| id.file_id != file_id);
+        let occurrence_ids = self
+            .occurrences
+            .keys()
+            .filter(|id| id.file_id == file_id)
+            .cloned()
+            .collect::<Vec<_>>();
+        for occurrence_id in occurrence_ids {
+            if let Some(occurrence) = self.occurrences.remove(&occurrence_id) {
+                remove_occurrence_index_value(
+                    &mut self.occurrences_by_binding,
+                    &occurrence_binding_key(&occurrence),
+                    &occurrence_id,
+                );
+            }
+        }
     }
 
     fn snapshot_affected(&self, affected_files: &BTreeSet<String>) -> SemanticRollback {
@@ -1382,7 +1402,14 @@ impl ProjectSemanticIndex {
     fn rebuild_indexes(&mut self) {
         self.dependents.clear();
         self.binding_claims.clear();
+        self.occurrences_by_binding.clear();
         self.claims_by_entity.clear();
+        for occurrence in self.occurrences.values() {
+            self.occurrences_by_binding
+                .entry(occurrence_binding_key(occurrence))
+                .or_default()
+                .insert(occurrence.id.clone());
+        }
         let claim_ids = self.claims.keys().cloned().collect::<Vec<_>>();
         for claim_id in claim_ids {
             self.index_claim(&claim_id);
@@ -1395,6 +1422,65 @@ impl ProjectSemanticIndex {
         let resolved = self
             .occurrences
             .keys()
+            .filter_map(|occurrence_id| match self.entity_decision(occurrence_id) {
+                EntityEvidenceDecision::Established(entity) => {
+                    Some((entity, occurrence_id.clone()))
+                }
+                EntityEvidenceDecision::Ambiguous
+                | EntityEvidenceDecision::Conflicting
+                | EntityEvidenceDecision::Unsupported
+                | EntityEvidenceDecision::EngineLimited => None,
+            })
+            .collect::<Vec<_>>();
+        for (entity, occurrence_id) in resolved {
+            self.established_occurrences_by_entity
+                .entry(entity)
+                .or_default()
+                .insert(occurrence_id);
+        }
+    }
+
+    fn binding_keys_depending_on(&self, affected_files: &BTreeSet<String>) -> BTreeSet<String> {
+        let mut keys = self
+            .occurrences
+            .values()
+            .filter(|occurrence| affected_files.contains(&occurrence.id.file_id))
+            .map(occurrence_binding_key)
+            .collect::<BTreeSet<_>>();
+        keys.extend(self.claims.values().filter_map(|claim| {
+            affected_files
+                .iter()
+                .any(|file_id| claim_depends_on_file(claim, &self.evidence, file_id))
+                .then(|| binding_key_for_claim(claim, &self.occurrences))
+                .flatten()
+        }));
+        keys
+    }
+
+    fn refresh_resolution_index(&mut self, affected_bindings: &BTreeSet<String>) {
+        if affected_bindings.is_empty() {
+            return;
+        }
+        let affected_occurrences = affected_bindings
+            .iter()
+            .flat_map(|binding| {
+                self.occurrences_by_binding
+                    .get(binding)
+                    .into_iter()
+                    .flatten()
+            })
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        self.established_occurrences_by_entity
+            .retain(|_, occurrences| {
+                occurrences.retain(|occurrence| {
+                    self.occurrences.contains_key(occurrence)
+                        && !affected_occurrences.contains(occurrence)
+                });
+                !occurrences.is_empty()
+            });
+        let resolved = affected_occurrences
+            .iter()
             .filter_map(|occurrence_id| match self.entity_decision(occurrence_id) {
                 EntityEvidenceDecision::Established(entity) => {
                     Some((entity, occurrence_id.clone()))
@@ -1585,6 +1671,20 @@ fn remove_index_value<K: Ord + Clone>(
     index: &mut BTreeMap<K, BTreeSet<ClaimId>>,
     key: &K,
     value: &ClaimId,
+) {
+    let remove_key = index.get_mut(key).is_some_and(|values| {
+        values.remove(value);
+        values.is_empty()
+    });
+    if remove_key {
+        index.remove(key);
+    }
+}
+
+fn remove_occurrence_index_value<K: Ord + Clone>(
+    index: &mut BTreeMap<K, BTreeSet<SourceOccurrenceId>>,
+    key: &K,
+    value: &SourceOccurrenceId,
 ) {
     let remove_key = index.get_mut(key).is_some_and(|values| {
         values.remove(value);
@@ -1808,6 +1908,25 @@ pub(crate) fn occurrence_binding_key(occurrence: &SourceOccurrence) -> String {
     }
     serde_json::to_string(&occurrence.notation)
         .expect("notation components always serialize to a binding key")
+}
+
+fn binding_key_for_claim(
+    claim: &Claim,
+    occurrences: &BTreeMap<SourceOccurrenceId, SourceOccurrence>,
+) -> Option<String> {
+    if !matches!(
+        claim.predicate,
+        ClaimPredicate::Defines
+            | ClaimPredicate::Names
+            | ClaimPredicate::Abbreviates
+            | ClaimPredicate::Aliases
+    ) {
+        return None;
+    }
+    let ClaimObject::Occurrence(occurrence_id) = &claim.object else {
+        return None;
+    };
+    occurrences.get(occurrence_id).map(occurrence_binding_key)
 }
 
 fn unsupported(occurrence_id: SourceOccurrenceId) -> Resolution {
@@ -2101,6 +2220,100 @@ mod tests {
     }
 
     #[test]
+    fn replacing_a_declaration_refreshes_only_its_binding_fanout() {
+        let mut declaration = occurrence("definitions.tex", 1, 1, 0, 1, &[], "x", Vec::new());
+        declaration.component_id = "project".to_owned();
+        let mut reference = occurrence("usage.tex", 1, 1, 0, 2, &[], "x", Vec::new());
+        reference.component_id = "project".to_owned();
+        let original_entity = entity(&declaration, "definition-v1");
+        let source_evidence = evidence(
+            "identity-v1",
+            &declaration,
+            EvidencePolarity::Positive,
+            EvidenceModality::Asserted,
+        );
+        let source_claim = claim(
+            "declaration-v1",
+            &original_entity,
+            ClaimPredicate::Defines,
+            ClaimObject::Occurrence(declaration.id.clone()),
+            "identity-v1",
+        );
+        let mut index = ProjectSemanticIndex::default();
+        index
+            .replace_documents(vec![
+                facts(
+                    "definitions.tex",
+                    1,
+                    vec![declaration],
+                    vec![original_entity.clone()],
+                    Vec::new(),
+                    vec![source_evidence],
+                    vec![source_claim],
+                ),
+                facts(
+                    "usage.tex",
+                    1,
+                    vec![reference.clone()],
+                    Vec::new(),
+                    vec![reference.id.clone()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ])
+            .unwrap();
+        assert_eq!(
+            index.entity_decision(&reference.id),
+            EntityEvidenceDecision::Established(original_entity.clone())
+        );
+
+        let mut replacement = occurrence("definitions.tex", 2, 1, 0, 1, &[], "x", Vec::new());
+        replacement.component_id = "project".to_owned();
+        let replacement_entity = entity(&replacement, "definition-v2");
+        let replacement_evidence = evidence(
+            "identity-v2",
+            &replacement,
+            EvidencePolarity::Positive,
+            EvidenceModality::Asserted,
+        );
+        let replacement_claim = claim(
+            "declaration-v2",
+            &replacement_entity,
+            ClaimPredicate::Defines,
+            ClaimObject::Occurrence(replacement.id.clone()),
+            "identity-v2",
+        );
+        index
+            .replace_document(facts(
+                "definitions.tex",
+                2,
+                vec![replacement],
+                vec![replacement_entity.clone()],
+                Vec::new(),
+                vec![replacement_evidence],
+                vec![replacement_claim],
+            ))
+            .unwrap();
+
+        assert!(
+            index
+                .established_occurrences_for_entity(&original_entity)
+                .is_empty()
+        );
+        assert_eq!(
+            index.entity_decision(&reference.id),
+            EntityEvidenceDecision::Established(replacement_entity.clone())
+        );
+        assert_eq!(
+            index.established_occurrences_for_entity(&replacement_entity),
+            vec![&reference]
+        );
+        let incremental = index.established_occurrences_by_entity.clone();
+        index.rebuild_resolution_index();
+        assert_eq!(index.established_occurrences_by_entity, incremental);
+    }
+
+    #[test]
     fn relation_between_hat_y_and_y_does_not_merge_them() {
         let plain = occurrence("main.tex", 1, 1, 0, 1, &[], "y", Vec::new());
         let hat = occurrence(
@@ -2265,16 +2478,21 @@ mod tests {
 
             let dependents = index.dependents.clone();
             let binding_claims = index.binding_claims.clone();
+            let occurrences_by_binding = index.occurrences_by_binding.clone();
             let claims_by_entity = index.claims_by_entity.clone();
+            let established = index.established_occurrences_by_entity.clone();
             index.rebuild_indexes();
             assert_eq!(index.dependents, dependents);
             assert_eq!(index.binding_claims, binding_claims);
+            assert_eq!(index.occurrences_by_binding, occurrences_by_binding);
             assert_eq!(index.claims_by_entity, claims_by_entity);
+            assert_eq!(index.established_occurrences_by_entity, established);
         }
 
         index.remove_document("paper.tex");
         assert!(index.dependents.is_empty());
         assert!(index.binding_claims.is_empty());
+        assert!(index.occurrences_by_binding.is_empty());
         assert!(index.claims_by_entity.is_empty());
     }
 
