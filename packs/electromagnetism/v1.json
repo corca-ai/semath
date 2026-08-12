@@ -291,12 +291,16 @@
         {
           "id": "common-potential-reference",
           "kind": "same-context",
-          "subjects": [
-            "energy",
-            "charge",
-            "voltage"
-          ],
-          "label": "Charge and potential use the same reference and the electrostatic regime is explicit."
+        "subjects": [
+          "energy",
+          "charge",
+          "voltage"
+        ],
+        "label": "Charge and potential use the same reference and the electrostatic regime is explicit.",
+        "evidencePhrases": [
+          "potential relative to",
+          "region held at potential"
+        ]
         }
       ],
       "references": [

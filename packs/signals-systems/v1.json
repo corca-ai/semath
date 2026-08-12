@@ -278,12 +278,15 @@
         {
           "id": "common-propagation-mode",
           "kind": "same-context",
-          "subjects": [
-            "wave-speed",
-            "frequency",
-            "wavelength"
-          ],
-          "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium."
+        "subjects": [
+          "wave-speed",
+          "frequency",
+          "wavelength"
+        ],
+        "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium.",
+        "evidencePhrases": [
+          "same-phase"
+        ]
         }
       ],
       "references": [

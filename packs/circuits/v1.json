@@ -164,10 +164,13 @@
           "subjects": [
             "branch-current"
           ],
-          "evidencePhrases": [
-            "node convention",
-            "currents entering the node",
-            "currents leaving the node"
+        "evidencePhrases": [
+          "node convention",
+          "junction convention",
+          "currents entering the node",
+          "currents leaving the node",
+          "currents directed into the junction",
+          "currents directed away"
           ],
           "label": "All branch-current signs use one node convention."
         }

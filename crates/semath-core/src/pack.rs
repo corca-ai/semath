@@ -1094,6 +1094,47 @@ mod tests {
     }
 
     #[test]
+    fn retains_reviewed_condition_phrase_families_declaratively() {
+        for (pack_id, law_id, required) in [
+            (
+                "circuits",
+                "kirchhoff-current-law",
+                &[
+                    "junction convention",
+                    "currents directed into the junction",
+                    "currents directed away",
+                ][..],
+            ),
+            (
+                "signals-systems",
+                "wave-speed-relation",
+                &["same-phase"][..],
+            ),
+            (
+                "electromagnetism",
+                "electric-potential-energy",
+                &["potential relative to", "region held at potential"][..],
+            ),
+        ] {
+            let condition = &built_in_packs()
+                .iter()
+                .find(|pack| pack.pack_id == pack_id)
+                .unwrap()
+                .laws
+                .iter()
+                .find(|law| law.id == law_id)
+                .unwrap()
+                .conditions[0];
+            assert!(required.iter().all(|phrase| {
+                condition
+                    .evidence_phrases
+                    .iter()
+                    .any(|candidate| candidate == phrase)
+            }));
+        }
+    }
+
+    #[test]
     fn rejects_legacy_and_incoherent_law_conditions() {
         let pack = built_in_packs()
             .iter()
