@@ -24,8 +24,13 @@ struct CompiledLaw {
     pack_id: &'static str,
     pack_version: &'static str,
     law: &'static PackLaw,
+    plan: LawMatchPlan,
+}
+
+struct LawMatchPlan {
     forms: Vec<GuardedForm>,
     placeholders: BTreeSet<String>,
+    variadic: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -81,9 +86,9 @@ impl LawDispatch {
         for (index, compiled) in laws.iter().enumerate() {
             dispatch.insert(
                 index,
-                &compiled.forms,
-                &compiled.placeholders,
-                compiled.law.roles.iter().any(|role| role.variadic),
+                &compiled.plan.forms,
+                &compiled.plan.placeholders,
+                compiled.plan.variadic,
             );
         }
         dispatch
@@ -112,7 +117,23 @@ impl LawDispatch {
         }
     }
 
+    #[cfg(test)]
     fn candidate_indices(&self, expression: &SemanticExpr) -> Vec<usize> {
+        self.candidate_indices_for(&structural_alternatives(expression))
+    }
+
+    fn candidate_indices_for(&self, alternatives: &[SemanticExpr]) -> Vec<usize> {
+        let mut indices = alternatives
+            .iter()
+            .flat_map(|expression| self.candidate_indices_exact(expression))
+            .collect::<BTreeSet<_>>();
+        if alternatives.iter().any(is_variadic_balance_candidate) {
+            indices.extend(self.variadic_candidates.iter().copied());
+        }
+        indices.into_iter().collect()
+    }
+
+    fn candidate_indices_exact(&self, expression: &SemanticExpr) -> Vec<usize> {
         let root = dispatch_root(expression);
         let features = expression_dispatch_features(expression)
             .into_iter()
@@ -129,20 +150,17 @@ impl LawDispatch {
                 });
             }
         }
-        let mut indices = keys
+        let indices = keys
             .into_iter()
             .filter_map(|key| self.candidates.get(&key))
             .flatten()
             .copied()
             .collect::<BTreeSet<_>>();
-        if is_variadic_balance_candidate(expression) {
-            indices.extend(self.variadic_candidates.iter().copied());
-        }
         indices.into_iter().collect()
     }
 
-    fn candidates(&self, expression: &SemanticExpr) -> Vec<&'static CompiledLaw> {
-        self.candidate_indices(expression)
+    fn candidates_for(&self, alternatives: &[SemanticExpr]) -> Vec<&'static CompiledLaw> {
+        self.candidate_indices_for(alternatives)
             .into_iter()
             .map(|index| &COMPILED_LAWS[index])
             .collect()
@@ -174,19 +192,17 @@ fn dispatch_actual_operands(
         return vec![None];
     };
     let mut pairs = Vec::new();
-    for left in dispatch_operand_variants(left) {
-        for right in dispatch_operand_variants(right) {
-            for pair in [
-                (left.clone(), right.clone()),
-                (DispatchOperand::Any, right.clone()),
-                (left.clone(), DispatchOperand::Any),
-                (DispatchOperand::Any, DispatchOperand::Any),
-            ] {
-                pairs.push(Some(pair.clone()));
-                if operator == "equals" {
-                    pairs.push(Some((pair.1, pair.0)));
-                }
-            }
+    let left = dispatch_operand(left, &BTreeSet::new());
+    let right = dispatch_operand(right, &BTreeSet::new());
+    for pair in [
+        (left.clone(), right.clone()),
+        (DispatchOperand::Any, right),
+        (left, DispatchOperand::Any),
+        (DispatchOperand::Any, DispatchOperand::Any),
+    ] {
+        pairs.push(Some(pair.clone()));
+        if operator == "equals" {
+            pairs.push(Some((pair.1, pair.0)));
         }
     }
     pairs.push(None);
@@ -223,16 +239,6 @@ fn dispatch_operand(expression: &SemanticExpr, placeholders: &BTreeSet<String>) 
     }
 }
 
-fn dispatch_operand_variants(expression: &SemanticExpr) -> Vec<DispatchOperand> {
-    let mut variants = vec![dispatch_operand(expression, &BTreeSet::new())];
-    if let Some(expanded) = expand_ambiguous_juxtaposition(expression) {
-        variants.push(dispatch_operand(&expanded, &BTreeSet::new()));
-    }
-    variants.sort();
-    variants.dedup();
-    variants
-}
-
 static COMPILED_LAWS: LazyLock<Vec<CompiledLaw>> = LazyLock::new(|| {
     built_in_packs()
         .iter()
@@ -250,14 +256,20 @@ static COMPILED_LAWS: LazyLock<Vec<CompiledLaw>> = LazyLock::new(|| {
                     CompiledLaw {
                         pack_id: &pack.pack_id,
                         pack_version: &pack.pack_version,
-                        forms: law
-                            .relations()
-                            .flat_map(|form| {
-                                compile_guarded_forms(lower_template(form), &scalar_placeholders)
-                            })
-                            .collect(),
-                        placeholders: law.roles.iter().map(|role| role.id.clone()).collect(),
                         law,
+                        plan: LawMatchPlan {
+                            forms: law
+                                .relations()
+                                .flat_map(|form| {
+                                    compile_guarded_forms(
+                                        lower_template(form),
+                                        &scalar_placeholders,
+                                    )
+                                })
+                                .collect(),
+                            placeholders: law.roles.iter().map(|role| role.id.clone()).collect(),
+                            variadic: law.roles.iter().any(|role| role.variadic),
+                        },
                     }
                 })
         })
@@ -270,7 +282,7 @@ static LAW_DISPATCH: LazyLock<LawDispatch> =
 static NESTED_LAW_APPLICATIONS: LazyLock<BTreeSet<String>> = LazyLock::new(|| {
     COMPILED_LAWS
         .iter()
-        .flat_map(|compiled| &compiled.forms)
+        .flat_map(|compiled| &compiled.plan.forms)
         .filter_map(|form| match &form.expression.kind {
             SemanticExprKind::Apply { operator, .. } => Some(operator.value.clone()),
             _ => None,
@@ -300,9 +312,6 @@ fn strongest_dispatch_feature(
 fn expression_dispatch_features(expression: &SemanticExpr) -> BTreeSet<DispatchFeature> {
     let mut features = BTreeSet::new();
     collect_dispatch_features(expression, &BTreeSet::new(), &mut features);
-    if let Some(expanded) = expand_ambiguous_juxtaposition(expression) {
-        collect_dispatch_features(&expanded, &BTreeSet::new(), &mut features);
-    }
     features
 }
 
@@ -688,24 +697,28 @@ pub(crate) fn observe_laws(
         {
             continue;
         }
-        let mut frontier = LAW_DISPATCH.candidates(actual);
+        let alternatives = structural_alternatives(actual);
+        let mut frontier = LAW_DISPATCH.candidates_for(&alternatives);
         let dominant_context_pack =
             dominant_frontier_context_pack(&frontier, context.domains, actual.range.start_offset);
         let recognition_start = recognitions.len();
         let mut traversed_latent = false;
         pack_frontier_candidates += frontier.len() as u32;
         frontier.sort_by_key(|compiled| {
-            context
-                .domains
-                .relevance(compiled.pack_id, actual.range.start_offset)
-                .map_or(
-                    if is_capability_pack(compiled.pack_id) {
-                        25
-                    } else {
-                        30
-                    },
-                    |relevance| support_rank(relevance.support),
-                )
+            (
+                !plan_matches_exact(&compiled.plan, actual),
+                context
+                    .domains
+                    .relevance(compiled.pack_id, actual.range.start_offset)
+                    .map_or(
+                        if is_capability_pack(compiled.pack_id) {
+                            25
+                        } else {
+                            30
+                        },
+                        |relevance| support_rank(relevance.support),
+                    ),
+            )
         });
         for compiled in frontier {
             if recognitions.len() >= MAX_LAW_MATCHES {
@@ -729,21 +742,34 @@ pub(crate) fn observe_laws(
                     DomainSupportTier::Explicit | DomainSupportTier::Supported
                 )
             }) || dominant_context_pack == Some(compiled.pack_id);
-            equivalence_states += compiled.forms.len() as u32;
+            let exact_match = plan_matches_exact(&compiled.plan, actual);
+            if !exact_match && recognitions.len() > recognition_start {
+                continue;
+            }
+            let match_alternatives = if exact_match {
+                std::slice::from_ref(actual)
+            } else {
+                alternatives.as_slice()
+            };
+            equivalence_states += (compiled.plan.forms.len() * match_alternatives.len()) as u32;
             let candidates = compiled
+                .plan
                 .forms
                 .iter()
                 .flat_map(|form| {
-                    unify_all(
-                        &form.expression,
-                        actual,
-                        &compiled.placeholders,
-                        &BTreeMap::new(),
-                    )
-                    .into_iter()
-                    .map(move |bindings| (Some(form), bindings))
+                    match_alternatives.iter().flat_map(move |alternative| {
+                        unify_exact_all(
+                            &form.expression,
+                            alternative,
+                            &compiled.plan.placeholders,
+                            &BTreeMap::new(),
+                        )
+                        .into_iter()
+                        .map(move |bindings| (Some(form), bindings))
+                    })
                 })
                 .chain(variadic_balance(compiled, actual).map(|bindings| (None, bindings)))
+                .take(MAX_UNIFICATION_CANDIDATES)
                 .collect::<Vec<_>>();
             let attached_role_support = candidates.iter().any(|(_, bindings)| {
                 bindings_have_formula_attached_declared_roles(
@@ -1430,6 +1456,19 @@ pub(crate) fn unify_all(
     placeholders: &BTreeSet<String>,
     bindings: &BTreeMap<String, SemanticExpr>,
 ) -> Vec<BTreeMap<String, SemanticExpr>> {
+    structural_alternatives(actual)
+        .iter()
+        .flat_map(|alternative| unify_exact_all(template, alternative, placeholders, bindings))
+        .take(MAX_UNIFICATION_CANDIDATES)
+        .collect()
+}
+
+fn unify_exact_all(
+    template: &SemanticExpr,
+    actual: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+    bindings: &BTreeMap<String, SemanticExpr>,
+) -> Vec<BTreeMap<String, SemanticExpr>> {
     if let SemanticExprKind::Symbol(name) = &template.kind
         && placeholders.contains(name)
     {
@@ -1443,7 +1482,7 @@ pub(crate) fn unify_all(
             }
         };
     }
-    let mut candidates = match (&template.kind, &actual.kind) {
+    let candidates = match (&template.kind, &actual.kind) {
         (SemanticExprKind::Symbol(left), SemanticExprKind::Symbol(right)) if left == right => {
             vec![bindings.clone()]
         }
@@ -1451,19 +1490,7 @@ pub(crate) fn unify_all(
             vec![bindings.clone()]
         }
         (SemanticExprKind::Negate(left), SemanticExprKind::Negate(right)) => {
-            unify_all(left, right, placeholders, bindings)
-        }
-        (SemanticExprKind::Power(lb, le), SemanticExprKind::Power(rb, re)) if matches!(&rb.kind, SemanticExprKind::Apply { operator, arguments } if operator == "norm" && arguments.len() == 1) =>
-        {
-            let SemanticExprKind::Apply { arguments, .. } = &rb.kind else {
-                unreachable!()
-            };
-            unify_sequence(
-                [lb.as_ref(), le.as_ref()],
-                [&arguments[0], re.as_ref()],
-                placeholders,
-                bindings,
-            )
+            unify_exact_all(left, right, placeholders, bindings)
         }
         (SemanticExprKind::Power(lb, le), SemanticExprKind::Power(rb, re))
         | (SemanticExprKind::Fraction(lb, le), SemanticExprKind::Fraction(rb, re)) => {
@@ -1514,7 +1541,7 @@ pub(crate) fn unify_all(
             bindings,
         )
         .into_iter()
-        .flat_map(|candidate| unify_all(left, right, placeholders, &candidate))
+        .flat_map(|candidate| unify_exact_all(left, right, placeholders, &candidate))
         .collect(),
         (
             SemanticExprKind::Relation {
@@ -1583,25 +1610,6 @@ pub(crate) fn unify_all(
         })
         .collect(),
         (
-            SemanticExprKind::Product(template),
-            SemanticExprKind::Apply {
-                operator,
-                arguments,
-            },
-        ) if arguments.len() == 1 && !is_structural_application(operator.as_str()) => {
-            let operator = SemanticExpr {
-                kind: SemanticExprKind::Symbol(operator.value.clone()),
-                range: actual.range.clone(),
-                provenance: actual.provenance.clone(),
-            };
-            commutative_unify_all(
-                template,
-                &[operator, arguments[0].clone()],
-                placeholders,
-                bindings,
-            )
-        }
-        (
             SemanticExprKind::Index {
                 base: left_base,
                 indices: left_indices,
@@ -1636,39 +1644,134 @@ pub(crate) fn unify_all(
         }
         _ => Vec::new(),
     };
-    if candidates.is_empty()
-        && matches!(template.kind, SemanticExprKind::Product(_))
-        && let Some(expanded) = expand_ambiguous_juxtaposition(actual)
-    {
-        candidates = unify_all(template, &expanded, placeholders, bindings);
-    }
     candidates
         .into_iter()
         .take(MAX_UNIFICATION_CANDIDATES)
         .collect()
 }
 
+fn structural_alternatives(expression: &SemanticExpr) -> Vec<SemanticExpr> {
+    let mut alternatives = vec![expression.clone()];
+    if let Some(expanded) = expand_ambiguous_juxtaposition(expression)
+        && expanded != *expression
+    {
+        alternatives.push(expanded);
+    }
+    alternatives
+}
+
+fn plan_matches_exact(plan: &LawMatchPlan, actual: &SemanticExpr) -> bool {
+    plan.forms.iter().any(|form| {
+        !unify_exact_all(
+            &form.expression,
+            actual,
+            &plan.placeholders,
+            &BTreeMap::new(),
+        )
+        .is_empty()
+    }) || plan.variadic && is_variadic_balance_candidate(actual)
+}
+
 fn expand_ambiguous_juxtaposition(expression: &SemanticExpr) -> Option<SemanticExpr> {
-    let mut changed = false;
-    let factors = match &expression.kind {
-        SemanticExprKind::Product(items) => items
-            .iter()
-            .flat_map(|item| {
-                if let Some(expanded) = ambiguous_factor(item) {
-                    changed = true;
-                    expanded
-                } else {
-                    vec![item.clone()]
-                }
-            })
-            .collect::<Vec<_>>(),
-        _ => {
-            changed = true;
-            ambiguous_factor(expression)?
+    if let Some(factors) = ambiguous_factor(expression) {
+        return Some(SemanticExpr {
+            kind: SemanticExprKind::Product(factors),
+            range: expression.range.clone(),
+            provenance: expression.provenance.clone(),
+        });
+    }
+
+    let expand = |child: &SemanticExpr| match expand_ambiguous_juxtaposition(child) {
+        Some(expanded) => (expanded, true),
+        None => (child.clone(), false),
+    };
+    let (kind, changed) = match &expression.kind {
+        SemanticExprKind::Sum(items) => {
+            let expanded = items.iter().map(expand).collect::<Vec<_>>();
+            (
+                SemanticExprKind::Sum(expanded.iter().map(|(item, _)| item.clone()).collect()),
+                expanded.iter().any(|(_, changed)| *changed),
+            )
         }
+        SemanticExprKind::Product(items) => {
+            let mut changed = false;
+            let factors = items
+                .iter()
+                .flat_map(|item| {
+                    if let Some(expanded) = ambiguous_factor(item) {
+                        changed = true;
+                        expanded
+                    } else if let Some(expanded) = expand_ambiguous_juxtaposition(item) {
+                        changed = true;
+                        vec![expanded]
+                    } else {
+                        vec![item.clone()]
+                    }
+                })
+                .collect();
+            (SemanticExprKind::Product(factors), changed)
+        }
+        SemanticExprKind::Dot(left, right)
+        | SemanticExprKind::Cross(left, right)
+        | SemanticExprKind::Fraction(left, right)
+        | SemanticExprKind::Power(left, right) => {
+            let ((left, left_changed), (right, right_changed)) = (expand(left), expand(right));
+            let kind = match &expression.kind {
+                SemanticExprKind::Dot(_, _) => {
+                    SemanticExprKind::Dot(Box::new(left), Box::new(right))
+                }
+                SemanticExprKind::Cross(_, _) => {
+                    SemanticExprKind::Cross(Box::new(left), Box::new(right))
+                }
+                SemanticExprKind::Fraction(_, _) => {
+                    SemanticExprKind::Fraction(Box::new(left), Box::new(right))
+                }
+                SemanticExprKind::Power(_, _) => {
+                    SemanticExprKind::Power(Box::new(left), Box::new(right))
+                }
+                _ => unreachable!(),
+            };
+            (kind, left_changed || right_changed)
+        }
+        SemanticExprKind::Negate(inner) => {
+            let (inner, changed) = expand(inner);
+            (SemanticExprKind::Negate(Box::new(inner)), changed)
+        }
+        SemanticExprKind::Relation {
+            operator,
+            left,
+            right,
+        } => {
+            let ((left, left_changed), (right, right_changed)) = (expand(left), expand(right));
+            (
+                SemanticExprKind::Relation {
+                    operator: operator.clone(),
+                    left: Box::new(left),
+                    right: Box::new(right),
+                },
+                left_changed || right_changed,
+            )
+        }
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } => {
+            let arguments = arguments.iter().map(expand).collect::<Vec<_>>();
+            (
+                SemanticExprKind::Apply {
+                    operator: operator.clone(),
+                    arguments: arguments
+                        .iter()
+                        .map(|(argument, _)| argument.clone())
+                        .collect(),
+                },
+                arguments.iter().any(|(_, changed)| *changed),
+            )
+        }
+        _ => return None,
     };
     changed.then(|| SemanticExpr {
-        kind: SemanticExprKind::Product(factors),
+        kind,
         range: expression.range.clone(),
         provenance: expression.provenance.clone(),
     })
@@ -1776,7 +1879,7 @@ fn unify_sequence<'a>(
         |candidates, (template, actual)| {
             candidates
                 .into_iter()
-                .flat_map(|candidate| unify_all(template, actual, placeholders, &candidate))
+                .flat_map(|candidate| unify_exact_all(template, actual, placeholders, &candidate))
                 .take(MAX_UNIFICATION_CANDIDATES)
                 .collect()
         },
@@ -1810,7 +1913,9 @@ fn commutative_unify_all(
                 continue;
             }
             used[candidate] = true;
-            for next in unify_all(&template[index], &actual[candidate], placeholders, bindings) {
+            for next in
+                unify_exact_all(&template[index], &actual[candidate], placeholders, bindings)
+            {
                 step(
                     template,
                     actual,
@@ -1838,7 +1943,7 @@ fn commutative_unify_all(
 }
 
 fn equivalent(left: &SemanticExpr, right: &SemanticExpr) -> bool {
-    !unify_all(left, right, &BTreeSet::new(), &BTreeMap::new()).is_empty()
+    !unify_exact_all(left, right, &BTreeSet::new(), &BTreeMap::new()).is_empty()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -2958,7 +3063,7 @@ mod tests {
     use super::{
         COMPILED_LAWS, ExternalTypeEnvironment, LAW_DISPATCH, LawAnalysisContext, LawDispatch,
         LawObservations, collect_law_expressions, observe_laws, strip_formula_presentation,
-        unify_all,
+        structural_alternatives, unify_all,
     };
     use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
@@ -3112,16 +3217,16 @@ mod tests {
     #[test]
     fn indexed_dispatch_is_complete_against_exhaustive_unification() {
         for compiled in &*COMPILED_LAWS {
-            for actual in &compiled.forms {
+            for actual in &compiled.plan.forms {
                 let exhaustive = COMPILED_LAWS
                     .iter()
                     .enumerate()
                     .filter(|(_, candidate)| {
-                        candidate.forms.iter().any(|form| {
+                        candidate.plan.forms.iter().any(|form| {
                             !unify_all(
                                 &form.expression,
                                 &actual.expression,
-                                &candidate.placeholders,
+                                &candidate.plan.placeholders,
                                 &BTreeMap::new(),
                             )
                             .is_empty()
@@ -3134,11 +3239,11 @@ mod tests {
                     .into_iter()
                     .filter(|index| {
                         let candidate = &COMPILED_LAWS[*index];
-                        candidate.forms.iter().any(|form| {
+                        candidate.plan.forms.iter().any(|form| {
                             !unify_all(
                                 &form.expression,
                                 &actual.expression,
-                                &candidate.placeholders,
+                                &candidate.plan.placeholders,
                                 &BTreeMap::new(),
                             )
                             .is_empty()
@@ -3296,6 +3401,25 @@ mod tests {
             !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
             "{actual:?}"
         );
+    }
+
+    #[test]
+    fn norm_application_is_not_silently_erased_by_unification() {
+        let template = lower_template("energy = state^2");
+        let actual = lower_template("energy = \\lVert state \\rVert^2");
+        let placeholders = ["energy"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect::<BTreeSet<_>>();
+        assert!(unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty());
+    }
+
+    #[test]
+    fn structural_alternatives_expand_ambiguous_application_once_at_any_depth() {
+        let actual = lower_template("output = coefficient(input)");
+        let alternatives = structural_alternatives(&actual);
+        assert_eq!(alternatives.len(), 2);
+        assert_eq!(structural_alternatives(&alternatives[1]).len(), 1);
     }
 
     #[test]
@@ -3791,11 +3915,11 @@ mod tests {
             .position(|compiled| compiled.law.id == "capacitor-current-law")
             .expect("capacitor law");
         assert!(LAW_DISPATCH.candidate_indices(&actual).contains(&capacitor));
-        assert!(COMPILED_LAWS[capacitor].forms.iter().any(|form| {
+        assert!(COMPILED_LAWS[capacitor].plan.forms.iter().any(|form| {
             !unify_all(
                 &form.expression,
                 &actual,
-                &COMPILED_LAWS[capacitor].placeholders,
+                &COMPILED_LAWS[capacitor].plan.placeholders,
                 &BTreeMap::new(),
             )
             .is_empty()

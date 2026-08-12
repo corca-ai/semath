@@ -187,20 +187,6 @@ pub(crate) fn match_definition<'a>(
     None
 }
 
-pub(crate) fn match_active_definition(after: &str) -> Option<DefinitionConstruction<'_>> {
-    let trimmed_after = after.trim_start();
-    if trimmed_after.starts_with(',') || trimmed_after.starts_with("and ") {
-        return None;
-    }
-    let (description, suffix_end) = match_description(after, &[""], false)?;
-    valid_description(description).then_some(DefinitionConstruction {
-        description,
-        rule_id: "english-relational-definition",
-        prefix_start: 0,
-        suffix_end,
-    })
-}
-
 pub(crate) fn is_declaration_lead(before: &str) -> bool {
     let lead = current_clause(before).trim();
     [
@@ -844,8 +830,7 @@ fn valid_plain_description(value: &str) -> bool {
 mod tests {
     use super::{
         CoordinationLead, coordinated_descriptions, defines_by_formula,
-        fronted_labeled_descriptions, match_active_definition, match_definition,
-        role_first_nominal_candidates,
+        fronted_labeled_descriptions, match_definition, role_first_nominal_candidates,
     };
 
     #[test]
@@ -871,15 +856,6 @@ mod tests {
             )
             .map(|item| item.description),
             Some("capacitance scalar"),
-        );
-    }
-
-    #[test]
-    fn preserves_coordinated_descriptions_after_active_definition_actions() {
-        assert_eq!(
-            match_active_definition(" both kinetic energy and stiffness; then continue")
-                .map(|item| item.description),
-            Some("both kinetic energy and stiffness"),
         );
     }
 

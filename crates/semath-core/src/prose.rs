@@ -10,15 +10,14 @@ use crate::canonical::{
 use crate::concept::classify_role;
 use crate::construction::{
     coordinated_descriptions, coordination_lead, defines_by_formula, fronted_labeled_descriptions,
-    fronted_shared_description, is_declaration_lead, match_active_definition, match_apposition,
-    match_definition, match_parenthetical, match_passive_definition, match_quantified,
-    role_first_nominal_candidates,
+    fronted_shared_description, is_declaration_lead, match_apposition, match_definition,
+    match_parenthetical, match_passive_definition, match_quantified, role_first_nominal_candidates,
 };
 use crate::pack::{PackActivationStructure, PackConditionKind, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
-    DefinitionAction, DiscourseFrame, ProseEvent, ProseEventKind, ProseEventStream,
-    ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
+    AnaphorKind, DefinitionAction, DiscourseConnective, DiscourseFrame, ProseEvent, ProseEventKind,
+    ProseEventStream, ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
     extract_assumptions_with_phrases, normalize_prose_events, segment_scientific_clauses,
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
@@ -293,7 +292,8 @@ pub(crate) fn observe_prose(
         })
         .collect::<Vec<_>>();
     let events = normalize_prose_events(source, &clauses, &mentions);
-    collect_assumptions(&index, &clauses, &mentions, &mut analysis);
+    let definition_constructions = events.definition_constructions(source, &mentions, &clauses);
+    collect_assumptions(&index, &clauses, &mentions, &events, &mut analysis);
 
     collect_role_first_nominal_definitions(
         document,
@@ -327,8 +327,16 @@ pub(crate) fn observe_prose(
         &events,
         &mut analysis,
     );
-    collect_clause_definitions(document, source, parsed, &index, &clauses, &mut analysis);
-    for math in parsed {
+    collect_clause_definitions(
+        document,
+        source,
+        parsed,
+        &index,
+        &clauses,
+        &events,
+        &mut analysis,
+    );
+    for (math_index, math) in parsed.iter().enumerate() {
         analysis.match_stats.matcher_work += 1;
         let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
             continue;
@@ -452,19 +460,38 @@ pub(crate) fn observe_prose(
                 before_start + explicit.prefix_start,
                 end_byte + explicit.suffix_end,
             );
-        } else if let Some((active, evidence_start)) =
-            active_event_definition(source, after, clause, start_byte, &events)
+        } else if let Some((mention_index, active)) = mentions
+            .iter()
+            .position(|mention| mention.math_index == math_index)
+            .and_then(|mention_index| {
+                definition_constructions
+                    .iter()
+                    .find(|construction| construction.mention_index == mention_index)
+                    .map(|active| (mention_index, active))
+            })
         {
+            debug_assert_eq!(active.mention_index, mention_index);
+            if !active.frame.establishes() || active.coordinated {
+                continue;
+            }
+            let rule_id = match active.action {
+                DefinitionAction::Call
+                | DefinitionAction::Define
+                | DefinitionAction::Denote
+                | DefinitionAction::Represent
+                | DefinitionAction::Mean => "english-relational-definition",
+                DefinitionAction::Write | DefinitionAction::Compute => unreachable!(),
+            };
             push_claim(
                 &mut analysis,
                 document,
                 &index,
                 &symbol,
                 &symbol_range,
-                active.description,
-                active.rule_id,
-                evidence_start,
-                end_byte + active.suffix_end,
+                &source[active.description_start..active.description_end],
+                rule_id,
+                active.evidence_start,
+                active.evidence_end,
             );
         } else if let Some(apposition) = match_apposition(after) {
             push_claim(
@@ -751,8 +778,9 @@ fn collect_anaphoric_definitions(
         }
 
         let text = description_clause.text.trim();
-        let lower = text.to_ascii_lowercase();
-        if lower.contains("the former") || lower.contains("the latter") {
+        let has_former = events.has_anaphor_kind(description_index, AnaphorKind::Former);
+        let has_latter = events.has_anaphor_kind(description_index, AnaphorKind::Latter);
+        if has_former || has_latter {
             if antecedents.len() != 2 {
                 continue;
             }
@@ -761,9 +789,10 @@ fn collect_anaphoric_definitions(
             });
             let split = paired.or_else(|| {
                 let next = clauses.get(description_index + 1)?;
-                if !lower.contains("the former")
+                if !has_former
                     || next.start.saturating_sub(description_clause.end) > 160
                     || !next.frame.establishes()
+                    || !events.has_anaphor_kind(description_index + 1, AnaphorKind::Latter)
                 {
                     return None;
                 }
@@ -805,7 +834,14 @@ fn collect_anaphoric_definitions(
             continue;
         }
 
-        let Some((body, ordered)) = anaphoric_description_body(text, antecedents.len()) else {
+        let ordered = events.has_connective(
+            description_index,
+            &[
+                DiscourseConnective::Respectively,
+                DiscourseConnective::InThatOrder,
+            ],
+        );
+        let Some(body) = anaphoric_description_body(text, antecedents.len()) else {
             continue;
         };
         let descriptions = if antecedents.len() == 1 {
@@ -838,7 +874,7 @@ fn collect_anaphoric_definitions(
     }
 }
 
-fn anaphoric_description_body(text: &str, arity: usize) -> Option<(&str, bool)> {
+fn anaphoric_description_body(text: &str, arity: usize) -> Option<&str> {
     let trimmed = text.trim();
     let lower = trimmed.to_ascii_lowercase();
     let leads: &[&str] = if arity == 1 {
@@ -874,10 +910,8 @@ fn anaphoric_description_body(text: &str, arity: usize) -> Option<(&str, bool)> 
     {
         body = primary.trim();
     }
-    let ordered = body.to_ascii_lowercase().contains("respectively")
-        || body.to_ascii_lowercase().contains("in that order");
     body = trim_order_marker(body);
-    (!body.is_empty()).then_some((body, ordered))
+    (!body.is_empty()).then_some(body)
 }
 
 fn former_latter_descriptions(text: &str) -> Option<(&str, &str)> {
@@ -1666,18 +1700,23 @@ fn collect_clause_definitions(
     parsed: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
+    events: &ProseEventStream,
     output: &mut ProseObservations,
 ) {
-    for clause in clauses {
+    for (clause_index, clause) in clauses.iter().enumerate() {
         output.match_stats.matcher_work += 1;
         if !clause.frame.establishes() {
             continue;
         }
         let sentence_start = clause.start;
         let sentence_end = clause.end;
-        let sentence = clause.text;
-        let sentence_lower = sentence.to_ascii_lowercase();
-        if sentence_lower.contains("respectively") || sentence_lower.contains("in that order") {
+        if events.has_connective(
+            clause_index,
+            &[
+                DiscourseConnective::Respectively,
+                DiscourseConnective::InThatOrder,
+            ],
+        ) {
             let definitions_before = output
                 .definitions
                 .iter()
@@ -1888,6 +1927,7 @@ fn collect_assumptions(
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
+    events: &ProseEventStream,
     output: &mut ProseObservations,
 ) {
     let condition_phrases = built_in_packs()
@@ -1902,8 +1942,9 @@ fn collect_assumptions(
                 .map(move |phrase| (phrase.as_str(), kind, condition.id.as_str()))
         })
         .collect::<Vec<_>>();
-    for clause in clauses {
-        let attached_to_preceding_math = clause_attaches_to_preceding_math(clause, mentions);
+    for (clause_index, clause) in clauses.iter().enumerate() {
+        let attached_to_preceding_math =
+            clause_attaches_to_preceding_math(clause_index, mentions, events);
         for assumption in extract_assumptions_with_phrases(clause, mentions, &condition_phrases) {
             let mut source_ranges = assumption
                 .subjects
@@ -1971,21 +2012,21 @@ fn condition_evidence_kind(kind: PackConditionKind) -> &'static str {
 }
 
 fn clause_attaches_to_preceding_math(
-    clause: &ScientificClause<'_>,
+    clause_index: usize,
     mentions: &[ScientificMention],
+    events: &ProseEventStream,
 ) -> bool {
-    let lower = clause.text.to_ascii_lowercase();
-    let connective = ["where ", "here "]
-        .iter()
-        .flat_map(|phrase| lower.match_indices(phrase).map(|(offset, _)| offset))
-        .filter(|offset| *offset == 0 || !lower.as_bytes()[offset - 1].is_ascii_alphanumeric())
-        .min()
-        .map(|offset| clause.start + offset);
-    connective.is_some_and(|connective| {
-        mentions.iter().any(|mention| {
-            mention.end <= connective && connective - mention.end <= MAX_EQUATION_FLOW_BYTES
+    events
+        .first_connective(
+            clause_index,
+            &[DiscourseConnective::Where, DiscourseConnective::Here],
+        )
+        .is_some_and(|connective| {
+            mentions.iter().any(|mention| {
+                mention.end <= connective.start
+                    && connective.start - mention.end <= MAX_EQUATION_FLOW_BYTES
+            })
         })
-    })
 }
 
 fn is_description_parameter(
@@ -2101,34 +2142,6 @@ fn explicit_single_definition<'a>(
     math: &ParsedMath,
 ) -> Option<crate::construction::DefinitionConstruction<'a>> {
     match_definition(before, after, contains_assignment(&math.root))
-}
-
-fn active_event_definition<'a>(
-    source: &str,
-    after: &'a str,
-    clause: Option<&ScientificClause<'_>>,
-    mention_start: usize,
-    events: &ProseEventStream,
-) -> Option<(crate::construction::DefinitionConstruction<'a>, usize)> {
-    let clause = clause?;
-    let action = events.last_definition_action(clause.start, mention_start)?;
-    let ProseEventKind::DefinitionAction(kind) = action.kind else {
-        return None;
-    };
-    if !matches!(
-        kind,
-        DefinitionAction::Define
-            | DefinitionAction::Denote
-            | DefinitionAction::Represent
-            | DefinitionAction::Mean
-            | DefinitionAction::Call
-    ) || !source[action.end..mention_start]
-        .chars()
-        .all(char::is_whitespace)
-    {
-        return None;
-    }
-    match_active_definition(after).map(|definition| (definition, action.start))
 }
 
 fn contains_assignment(node: &crate::EquationNode) -> bool {
