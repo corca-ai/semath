@@ -6,12 +6,24 @@
   "namespace": "optimization-ml",
   "title": "Optimization and machine learning",
   "description": "Recognition-first catalog for objectives, constraints, and learning updates without inferred convexity or optimality.",
-  "dependencies": [],
+  "dependencies": [
+    {
+      "packId": "quantities-units",
+      "versionMajor": 1,
+      "requiredCapabilities": [
+        "semath:dimensional-analysis",
+        "semath:quantities"
+      ]
+    }
+  ],
   "capabilities": {
     "provides": [
       "semath:formula-recognition"
     ],
-    "requires": []
+    "requires": [
+      "semath:dimensional-analysis",
+      "semath:quantities"
+    ]
   },
   "concepts": [
     {
@@ -193,7 +205,6 @@
         "confidence"
       ],
       "parents": [
-        "probability:probability",
         "quantities-units:dimensionless"
       ],
       "references": [
