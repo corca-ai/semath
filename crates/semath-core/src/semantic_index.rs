@@ -510,6 +510,7 @@ pub struct ProjectSemanticIndex {
     claims: BTreeMap<ClaimId, Claim>,
     candidates: BTreeMap<SourceOccurrenceId, Vec<SemanticCandidateClaim>>,
     dependents: BTreeMap<ClaimId, BTreeSet<ClaimId>>,
+    claims_by_file_dependency: BTreeMap<String, BTreeSet<ClaimId>>,
     binding_claims: BTreeMap<String, BTreeSet<ClaimId>>,
     occurrences_by_binding: BTreeMap<String, BTreeSet<SourceOccurrenceId>>,
     claims_by_entity: BTreeMap<EntityId, BTreeSet<ClaimId>>,
@@ -1251,10 +1252,11 @@ impl ProjectSemanticIndex {
     fn retract_document(&mut self, file_id: &str) {
         self.document_versions.remove(file_id);
         let mut queue = self
-            .claims
-            .values()
-            .filter(|claim| claim_depends_on_file(claim, &self.evidence, file_id))
-            .map(|claim| claim.id.clone())
+            .claims_by_file_dependency
+            .get(file_id)
+            .into_iter()
+            .flatten()
+            .cloned()
             .collect::<VecDeque<_>>();
         let mut removed = BTreeSet::new();
         while let Some(claim_id) = queue.pop_front() {
@@ -1305,14 +1307,8 @@ impl ProjectSemanticIndex {
 
     fn snapshot_affected(&self, affected_files: &BTreeSet<String>) -> SemanticRollback {
         let mut queue = self
-            .claims
-            .values()
-            .filter(|claim| {
-                affected_files
-                    .iter()
-                    .any(|file_id| claim_depends_on_file(claim, &self.evidence, file_id))
-            })
-            .map(|claim| claim.id.clone())
+            .claim_ids_depending_on(affected_files)
+            .into_iter()
             .collect::<VecDeque<_>>();
         let mut claim_ids = BTreeSet::new();
         while let Some(claim_id) = queue.pop_front() {
@@ -1401,6 +1397,7 @@ impl ProjectSemanticIndex {
 
     fn rebuild_indexes(&mut self) {
         self.dependents.clear();
+        self.claims_by_file_dependency.clear();
         self.binding_claims.clear();
         self.occurrences_by_binding.clear();
         self.claims_by_entity.clear();
@@ -1447,14 +1444,26 @@ impl ProjectSemanticIndex {
             .filter(|occurrence| affected_files.contains(&occurrence.id.file_id))
             .map(occurrence_binding_key)
             .collect::<BTreeSet<_>>();
-        keys.extend(self.claims.values().filter_map(|claim| {
-            affected_files
+        keys.extend(
+            self.claim_ids_depending_on(affected_files)
                 .iter()
-                .any(|file_id| claim_depends_on_file(claim, &self.evidence, file_id))
-                .then(|| binding_key_for_claim(claim, &self.occurrences))
-                .flatten()
-        }));
+                .filter_map(|claim_id| self.claims.get(claim_id))
+                .filter_map(|claim| binding_key_for_claim(claim, &self.occurrences)),
+        );
         keys
+    }
+
+    fn claim_ids_depending_on(&self, affected_files: &BTreeSet<String>) -> BTreeSet<ClaimId> {
+        affected_files
+            .iter()
+            .flat_map(|file_id| {
+                self.claims_by_file_dependency
+                    .get(file_id)
+                    .into_iter()
+                    .flatten()
+            })
+            .cloned()
+            .collect()
     }
 
     fn refresh_resolution_index(&mut self, affected_bindings: &BTreeSet<String>) {
@@ -1508,6 +1517,7 @@ impl ProjectSemanticIndex {
             .evidence
             .get(&claim.evidence_id)
             .map_or_else(Vec::new, |evidence| evidence.parent_claims.clone());
+        let dependency_files = claim_dependency_files(claim, self.evidence.get(&claim.evidence_id));
         let binding = if matches!(
             claim.predicate,
             ClaimPredicate::Defines
@@ -1533,6 +1543,12 @@ impl ProjectSemanticIndex {
                 .or_default()
                 .insert(claim_id.clone());
         }
+        for file_id in dependency_files {
+            self.claims_by_file_dependency
+                .entry(file_id)
+                .or_default()
+                .insert(claim_id.clone());
+        }
         if let Some(binding) = binding {
             self.binding_claims
                 .entry(binding)
@@ -1550,6 +1566,7 @@ impl ProjectSemanticIndex {
             .evidence
             .get(&claim.evidence_id)
             .map_or_else(Vec::new, |evidence| evidence.parent_claims.clone());
+        let dependency_files = claim_dependency_files(claim, self.evidence.get(&claim.evidence_id));
         let binding = if matches!(
             claim.predicate,
             ClaimPredicate::Defines
@@ -1568,6 +1585,9 @@ impl ProjectSemanticIndex {
         remove_index_value(&mut self.claims_by_entity, &subject, claim_id);
         for parent in parents {
             remove_index_value(&mut self.dependents, &parent, claim_id);
+        }
+        for file_id in dependency_files {
+            remove_index_value(&mut self.claims_by_file_dependency, &file_id, claim_id);
         }
         self.dependents.remove(claim_id);
         if let Some(binding) = binding {
@@ -1848,57 +1868,77 @@ fn valid_claim_shape(shape: &ClaimShape, max_text_length: usize) -> bool {
     }
 }
 
-fn claim_depends_on_file(
-    claim: &Claim,
-    evidence: &BTreeMap<EvidenceId, EvidenceRecord>,
-    file_id: &str,
-) -> bool {
-    claim.subject.anchor.file_id == file_id
-        || matches!(&claim.object, ClaimObject::Occurrence(id) if id.file_id == file_id)
-        || matches!(&claim.object, ClaimObject::Entity(id) if id.anchor.file_id == file_id)
-        || matches!(&claim.object, ClaimObject::Value(value) if claim_value_depends_on_file(value, file_id))
-        || evidence.get(&claim.evidence_id).is_some_and(|item| {
-            item.source.file_id == file_id
-                || item
-                    .provenance
-                    .iter()
-                    .any(|source| source.file_id == file_id)
-        })
+fn claim_dependency_files(claim: &Claim, evidence: Option<&EvidenceRecord>) -> BTreeSet<String> {
+    let mut files = BTreeSet::from([claim.subject.anchor.file_id.clone()]);
+    match &claim.object {
+        ClaimObject::Occurrence(id) => {
+            files.insert(id.file_id.clone());
+        }
+        ClaimObject::Entity(entity) => {
+            files.insert(entity.anchor.file_id.clone());
+        }
+        ClaimObject::Value(value) => collect_claim_value_files(value, &mut files),
+    }
+    if let Some(evidence) = evidence {
+        files.insert(evidence.source.file_id.clone());
+        files.extend(
+            evidence
+                .provenance
+                .iter()
+                .map(|source| source.file_id.clone()),
+        );
+    }
+    files
 }
 
-fn claim_value_depends_on_file(value: &ClaimValue, file_id: &str) -> bool {
+fn collect_claim_value_files(value: &ClaimValue, files: &mut BTreeSet<String>) {
     match value {
         ClaimValue::Condition(condition) => match condition {
             ClaimCondition::Nonzero(entity)
             | ClaimCondition::Positive(entity)
             | ClaimCondition::Nonnegative(entity)
-            | ClaimCondition::Invertible(entity) => entity.anchor.file_id == file_id,
-            ClaimCondition::Member { entity, set } => {
-                entity.anchor.file_id == file_id || set.anchor.file_id == file_id
+            | ClaimCondition::Invertible(entity) => {
+                files.insert(entity.anchor.file_id.clone());
             }
-            ClaimCondition::Named(_) => false,
+            ClaimCondition::Member { entity, set } => {
+                files.insert(entity.anchor.file_id.clone());
+                files.insert(set.anchor.file_id.clone());
+            }
+            ClaimCondition::Named(_) => {}
         },
-        ClaimValue::Relation(relation) => relation
-            .entities()
-            .into_iter()
-            .any(|entity| entity.anchor.file_id == file_id),
-        ClaimValue::Shape(shape) => claim_shape_depends_on_file(shape, file_id),
-        _ => false,
+        ClaimValue::Relation(relation) => files.extend(
+            relation
+                .entities()
+                .into_iter()
+                .map(|entity| entity.anchor.file_id.clone()),
+        ),
+        ClaimValue::Shape(shape) => collect_claim_shape_files(shape, files),
+        ClaimValue::Concept(_)
+        | ClaimValue::Role(_)
+        | ClaimValue::Type(_)
+        | ClaimValue::Dimension(_)
+        | ClaimValue::Unit(_)
+        | ClaimValue::QuantityKind(_)
+        | ClaimValue::Scalar(_)
+        | ClaimValue::Text(_) => {}
     }
 }
 
-fn claim_shape_depends_on_file(shape: &ClaimShape, file_id: &str) -> bool {
+fn collect_claim_shape_files(shape: &ClaimShape, files: &mut BTreeSet<String>) {
     match shape {
-        ClaimShape::Vector(extents)
-        | ClaimShape::Matrix(extents)
-        | ClaimShape::Tensor(extents) => extents.iter().any(|extent| {
-            matches!(extent, ClaimExtent::Symbolic { entity, .. } if entity.anchor.file_id == file_id)
-        }),
-        ClaimShape::Function { domain, codomain } => {
-            claim_shape_depends_on_file(domain, file_id)
-                || claim_shape_depends_on_file(codomain, file_id)
+        ClaimShape::Vector(extents) | ClaimShape::Matrix(extents) | ClaimShape::Tensor(extents) => {
+            files.extend(extents.iter().filter_map(|extent| {
+                let ClaimExtent::Symbolic { entity, .. } = extent else {
+                    return None;
+                };
+                Some(entity.anchor.file_id.clone())
+            }))
         }
-        ClaimShape::Scalar | ClaimShape::Unknown => false,
+        ClaimShape::Function { domain, codomain } => {
+            collect_claim_shape_files(domain, files);
+            collect_claim_shape_files(codomain, files);
+        }
+        ClaimShape::Scalar | ClaimShape::Unknown => {}
     }
 }
 
@@ -2477,12 +2517,14 @@ mod tests {
                 .unwrap();
 
             let dependents = index.dependents.clone();
+            let claims_by_file_dependency = index.claims_by_file_dependency.clone();
             let binding_claims = index.binding_claims.clone();
             let occurrences_by_binding = index.occurrences_by_binding.clone();
             let claims_by_entity = index.claims_by_entity.clone();
             let established = index.established_occurrences_by_entity.clone();
             index.rebuild_indexes();
             assert_eq!(index.dependents, dependents);
+            assert_eq!(index.claims_by_file_dependency, claims_by_file_dependency);
             assert_eq!(index.binding_claims, binding_claims);
             assert_eq!(index.occurrences_by_binding, occurrences_by_binding);
             assert_eq!(index.claims_by_entity, claims_by_entity);
@@ -2491,6 +2533,7 @@ mod tests {
 
         index.remove_document("paper.tex");
         assert!(index.dependents.is_empty());
+        assert!(index.claims_by_file_dependency.is_empty());
         assert!(index.binding_claims.is_empty());
         assert!(index.occurrences_by_binding.is_empty());
         assert!(index.claims_by_entity.is_empty());
