@@ -20,6 +20,7 @@ import {
 import {
   buildPerformanceDocuments,
   editPerformanceDocument,
+  performanceEntityFanout,
   semanticallyEditPerformanceDocument,
   type PerformanceFixtureDocument,
 } from "./performance-fixtures";
@@ -99,7 +100,7 @@ const snapshot: ProjectSnapshot = {
   protocolVersion: SEMATH_PROTOCOL_VERSION,
 };
 const initialTransferBytes = encodedLength(snapshot);
-let current = documents[1]!;
+let current = documents[2]!;
 collectGarbage();
 const rssAfterSyntax = residentBytes();
 
@@ -132,7 +133,8 @@ let peakRssStage = "initial";
 let maxAffected = 0;
 let maxTransferBytes = 0;
 let inventoryVersion = snapshot.inventoryVersion;
-let currentSource: PerformanceFixtureDocument = sources[0]!;
+const querySource = sources[0]!;
+let currentSource: PerformanceFixtureDocument = sources[1]!;
 
 for (let run = 0; run < DELTA_RUNS; run += 1) {
   // Keep the memory sample about one edit/query lifecycle. Without collecting
@@ -170,10 +172,10 @@ for (let run = 0; run < DELTA_RUNS; run += 1) {
   }
   assertCounters(update, 0);
 
-  for (const query of measuredQueries(currentSource)) {
+  for (const query of measuredQueries(querySource)) {
     const envelope: QueryEnvelope = {
       analysisGeneration: run + 1,
-      documentVersion: current.documentVersion,
+      documentVersion: querySource.documentVersion,
       epoch: snapshot.epoch,
       inventoryVersion,
       protocolVersion: SEMATH_PROTOCOL_VERSION,
@@ -575,9 +577,10 @@ function queryResultCount(result: QueryResult): number {
 function assertFanoutResult(query: SemathQuery, result: QueryResult): void {
   if (query.kind === "references" || query.kind === "rename") {
     const count = queryResultCount(result);
-    if (count < DOCUMENT_COUNT) {
+    const expectedFanout = performanceEntityFanout(DOCUMENT_COUNT);
+    if (count < expectedFanout) {
       throw new Error(
-        `budget ${query.kind} returned ${count} source occurrences; expected at least ${DOCUMENT_COUNT}`,
+        `budget ${query.kind} returned ${count} source occurrences; expected at least ${expectedFanout}`,
       );
     }
   }

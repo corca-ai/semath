@@ -26,6 +26,10 @@ export function buildPerformanceDocuments(count: number): readonly PerformanceFi
   return Array.from({ length: count }, (_, index) => performanceDocument(index, count));
 }
 
+export function performanceEntityFanout(projectSize: number): number {
+  return Math.min(projectSize, Math.min(16, Math.max(4, Math.ceil(projectSize / 32))));
+}
+
 export function editPerformanceDocument(
   source: PerformanceFixtureDocument,
   run: number,
@@ -57,8 +61,12 @@ export function semanticallyEditPerformanceDocument(
 function performanceDocument(index: number, projectSize: number): PerformanceFixtureDocument {
   const family = PERFORMANCE_FIXTURE_FAMILIES[index % PERFORMANCE_FIXTURE_FAMILIES.length]!;
   const symbol = index === 0 ? "z" : `p${index}`;
-  const common = `Let $${symbol}$ denote the probability assigned to event $A_${index}$.`;
-  const body = fixtureBody(family, index, symbol, projectSize);
+  const sharedReference =
+    index > 0 && index <= performanceEntityFanout(projectSize)
+      ? " The shared reported quantity is $z$."
+      : "";
+  const common = `Let $${symbol}$ denote the probability assigned to event $A_${index}$.${sharedReference}`;
+  const body = fixtureBody(family, index, symbol);
   const content = `${common}\n${body}`;
   return {
     content,
@@ -75,17 +83,12 @@ function fixtureBody(
   family: PerformanceFixtureFamily,
   index: number,
   symbol: string,
-  projectSize: number,
 ): string {
   switch (family) {
     case "reported-ece":
       return [
         "Expected calibration error (ECE) uses confidence bins $B_m$.",
         `\$${symbol}=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
-        ...Array.from(
-          { length: projectSize },
-          (_, mention) => `The report retains source-grounded occurrence ${mention}: $${symbol}$.`,
-        ),
       ].join("\n");
     case "decorated-and-styled":
       return `\$${symbol}=\\hat{\\mathbf y}_{t+1}+\\widetilde{\\mathcal L}(\\symbf{x})\$`;
