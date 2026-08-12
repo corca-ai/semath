@@ -259,9 +259,13 @@ function runProbe(
     );
     return {
       anchor,
+      // Query the reviewed relation at its trailing edge. Leading equation
+      // metadata (for example `\\label`) is presentation, and querying its
+      // start would misclassify an already recognized formula as an
+      // attachment loss.
       offset: mathRoot
-        ? Math.max(mathRoot.contentRange.startOffset, anchor.range.startOffset)
-        : anchor.range.startOffset,
+        ? Math.min(mathRoot.contentRange.endOffset, anchor.range.endOffset)
+        : anchor.range.endOffset,
       relation,
       syntaxAvailable: Boolean(mathRoot),
     };
