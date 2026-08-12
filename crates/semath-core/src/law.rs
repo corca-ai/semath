@@ -2716,6 +2716,18 @@ fn structural_condition_evidence(
     bindings: &BTreeMap<String, SemanticExpr>,
     actual: &SemanticExpr,
 ) -> Option<Evidence> {
+    if condition.kind == PackConditionKind::Differentiable && condition.subjects.len() == 2 {
+        let function = bindings.get(&condition.subjects[0])?;
+        let variable = bindings.get(&condition.subjects[1])?;
+        if expression_asserts_derivative(actual, function, variable) {
+            return Some(Evidence {
+                rule_id: "canonical-regularity/asserted-derivative".into(),
+                kind: "canonical-binding".into(),
+                strength: "hard".into(),
+                source_ranges: vec![actual.range.clone()],
+            });
+        }
+    }
     if condition.kind != PackConditionKind::SameContext || condition.subjects.len() != 2 {
         return None;
     }
@@ -2751,6 +2763,26 @@ fn structural_condition_evidence(
         strength: "hard".into(),
         source_ranges: vec![actual.range.clone()],
     })
+}
+
+fn expression_asserts_derivative(
+    expression: &SemanticExpr,
+    function: &SemanticExpr,
+    variable: &SemanticExpr,
+) -> bool {
+    if let SemanticExprKind::Derivative {
+        expression,
+        variable: derivative_variable,
+        ..
+    } = &expression.kind
+        && equivalent(expression, function)
+        && semantic_symbol(variable).is_some_and(|name| name == derivative_variable.value)
+    {
+        return true;
+    }
+    crate::canonical::expression_children(expression)
+        .into_iter()
+        .any(|child| expression_asserts_derivative(child, function, variable))
 }
 
 const MAX_ASSUMPTION_DISTANCE: u32 = 640;
@@ -4352,9 +4384,11 @@ mod tests {
         let condition = &derivative[0].conditions[0];
         assert_eq!(condition.condition_id, "function-differentiable");
         assert_eq!(condition.kind, ScientificConstraintKind::Differentiable);
-        assert_eq!(condition.status, ConstraintStatus::Required);
+        assert_eq!(condition.status, ConstraintStatus::Verified);
         assert_eq!(condition.subjects, ["f", "x"]);
-        assert_eq!(condition.evidence.len(), 2);
+        assert!(condition.evidence.iter().any(|evidence| {
+            evidence.rule_id == "canonical-regularity/asserted-derivative"
+        }));
         assert!(
             condition
                 .evidence
