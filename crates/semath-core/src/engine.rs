@@ -3,7 +3,7 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 
 use thiserror::Error;
 
-use crate::binder::{binder_at, binders, bound_occurrences, rename_rejection};
+use crate::binder::{MathBinder, binder_at, binders, bound_occurrences, rename_rejection};
 use crate::candidate::{
     StructuralCandidateOption, append_semantic_candidates, application_end_offset,
     structural_candidate_options,
@@ -894,10 +894,17 @@ fn lower_semantic_document(
             occurrence.id.clone(),
         );
     }
-    let occurrences = occurrences
+    let mut occurrences = occurrences
         .into_iter()
         .map(|(occurrence, _)| occurrence)
         .collect::<Vec<_>>();
+    let document_binders = document
+        .parsed
+        .iter()
+        .filter(|math| math.region.closed)
+        .flat_map(binders)
+        .collect::<Vec<_>>();
+    append_binder_scope_paths(&mut occurrences, &document_binders);
 
     let mut entities = Vec::new();
     let mut evidence = Vec::new();
@@ -984,6 +991,11 @@ fn lower_semantic_document(
             entities.push(entity);
         }
     }
+    let binder_facts = lower_binder_facts(document, observations, &occurrences, &document_binders);
+    definitions.extend(binder_facts.definitions);
+    entities.extend(binder_facts.entities);
+    evidence.extend(binder_facts.evidence);
+    claims.extend(binder_facts.claims);
     let cross_modal = lower_cross_modal_facts(document, &occurrences, &occurrences_by_range, order);
     definitions.extend(
         cross_modal
@@ -1043,6 +1055,157 @@ fn lower_semantic_document(
         definitions,
         occurrences: occurrences_by_range,
     }
+}
+
+const BINDER_SCOPE_MARKER: u32 = u32::MAX;
+
+fn append_binder_scope_paths(occurrences: &mut [SourceOccurrence], binders: &[MathBinder]) {
+    for occurrence in occurrences {
+        let mut enclosing = binders
+            .iter()
+            .filter(|binder| {
+                binder.declaration == occurrence.selection_range
+                    || binder
+                        .scope
+                        .contains(occurrence.selection_range.start_offset)
+            })
+            .collect::<Vec<_>>();
+        enclosing.sort_by_key(|binder| {
+            (
+                binder.declaration.start_offset,
+                u32::MAX - (binder.scope.end_offset - binder.scope.start_offset),
+            )
+        });
+        if enclosing.is_empty() {
+            continue;
+        }
+        occurrence.scope_path.push(BINDER_SCOPE_MARKER);
+        occurrence.scope_path.extend(
+            enclosing
+                .into_iter()
+                .map(|binder| binder.declaration.start_offset),
+        );
+    }
+}
+
+#[derive(Default)]
+struct LoweredBinderFacts {
+    entities: Vec<EntityId>,
+    evidence: Vec<EvidenceRecord>,
+    claims: Vec<Claim>,
+    definitions: BTreeMap<EntityId, DefinitionInfo>,
+}
+
+fn lower_binder_facts(
+    document: &AnalyzedDocument,
+    observations: &DocumentSemanticObservations,
+    occurrences: &[SourceOccurrence],
+    binders: &[MathBinder],
+) -> LoweredBinderFacts {
+    let source = &document.document;
+    let mut output = LoweredBinderFacts::default();
+    for (binder_index, binder) in binders.iter().enumerate() {
+        let occurrence_at = |range: &SourceRange| {
+            occurrences
+                .iter()
+                .filter(|occurrence| {
+                    occurrence.kind == OccurrenceKind::Notation
+                        && occurrence.selection_range == *range
+                        && source_text(source, &occurrence.selection_range) == binder.symbol
+                })
+                .min_by_key(|occurrence| {
+                    (
+                        occurrence.range.end_offset - occurrence.range.start_offset,
+                        occurrence.id.local_id,
+                    )
+                })
+        };
+        let Some(declaration) = occurrence_at(&binder.declaration) else {
+            continue;
+        };
+        let mut bound = document
+            .parsed
+            .iter()
+            .filter(|math| {
+                math.region.closed
+                    && math
+                        .region
+                        .full_range
+                        .contains(binder.declaration.start_offset)
+            })
+            .flat_map(|math| bound_occurrences(math, binders, binder))
+            .filter_map(|range| occurrence_at(&range))
+            .collect::<Vec<_>>();
+        bound.sort_by_key(|occurrence| occurrence.id.local_id);
+        bound.dedup_by_key(|occurrence| occurrence.id.clone());
+        if bound.is_empty() {
+            continue;
+        }
+        let entity = EntityId {
+            component_id: document.component_id.clone(),
+            scope_path: declaration.scope_path.clone(),
+            kind: format!("binder:{}", binder.kind),
+            anchor: declaration.id.clone(),
+        };
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:binder-evidence:{binder_index}",
+            source.file_id, source.document_version
+        ));
+        let (polarity, modality) = observations
+            .semantic_evidence()
+            .formula_disposition(&binder.scope);
+        output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: declaration.id.clone(),
+            scope_path: declaration.scope_path.clone(),
+            available_after: declaration.availability_order,
+            polarity,
+            modality,
+            origin: EvidenceOrigin::Explicit,
+            provenance: bound
+                .iter()
+                .map(|occurrence| occurrence.id.clone())
+                .collect(),
+            parent_claims: Vec::new(),
+            rule_id: "semath/structural-binder-identity".into(),
+            rule_version: 1,
+        });
+        for (occurrence_index, occurrence) in bound.iter().enumerate() {
+            output.claims.push(Claim {
+                id: ClaimId(format!(
+                    "{}:{}:binder-name:{binder_index}:{occurrence_index}",
+                    source.file_id, source.document_version
+                )),
+                subject: entity.clone(),
+                predicate: ClaimPredicate::Names,
+                object: ClaimObject::Occurrence(occurrence.id.clone()),
+                evidence_id: evidence_id.clone(),
+                tier: InferenceTier::ExplicitClaim,
+                derivation_depth: 0,
+            });
+        }
+        output.definitions.insert(
+            entity.clone(),
+            DefinitionInfo {
+                symbol: binder.symbol.clone(),
+                description: format!("{} bound variable", binder.kind),
+                location: Location {
+                    file_id: source.file_id.clone(),
+                    path: source.path.clone(),
+                    range: binder.declaration.clone(),
+                },
+                evidence: Evidence {
+                    rule_id: "semath/structural-binder-identity".into(),
+                    kind: "structural-declaration".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![binder.declaration.clone()],
+                },
+                entity_id: Some(entity.clone()),
+            },
+        );
+        output.entities.push(entity);
+    }
+    output
 }
 
 fn definition_anchor(
@@ -3204,7 +3367,12 @@ impl SemathEngine {
     ) -> Option<(EntityEvidenceDecision, String, Vec<RenameSourceOccurrence>)> {
         let focus = focus?;
         let focus_occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
-        if !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
+        let binder = parsed.filter(|math| math.region.closed).and_then(|math| {
+            let found = binders(math);
+            let target = binder_at(math, &found, offset).cloned()?;
+            Some((math, found, target))
+        });
+        if binder.is_none() && !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
             return Some((
                 EntityEvidenceDecision::Unsupported,
                 focus.name.clone(),
@@ -3215,11 +3383,6 @@ impl SemathEngine {
         let EntityEvidenceDecision::Established(entity) = &decision else {
             return Some((decision, focus.name.clone(), Vec::new()));
         };
-        let binder = parsed.filter(|math| math.region.closed).and_then(|math| {
-            let found = binders(math);
-            let target = binder_at(math, &found, offset).cloned()?;
-            Some((math, found, target))
-        });
         let occurrences = if let Some((math, found, target)) = binder {
             bound_occurrences(math, &found, &target)
                 .into_iter()
