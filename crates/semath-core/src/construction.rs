@@ -542,7 +542,7 @@ pub(crate) fn coordinated_descriptions(
         let end = shared
             .find([',', ';', '.', '\n', '$'])
             .unwrap_or(shared.len());
-        let description = shared[..end].trim();
+        let description = shared_nominal_head(shared[..end].trim());
         if valid_plain_description(description)
             && !description.to_ascii_lowercase().contains(" and ")
         {
@@ -554,6 +554,16 @@ pub(crate) fn coordinated_descriptions(
         }
     }
     None
+}
+
+fn shared_nominal_head(description: &str) -> &str {
+    let lower = description.to_ascii_lowercase();
+    let end = [" who ", " that ", " which ", " whose "]
+        .into_iter()
+        .filter_map(|marker| lower.find(marker))
+        .min()
+        .unwrap_or(description.len());
+    description[..end].trim_end()
 }
 
 pub(crate) fn fronted_shared_description<'a>(
@@ -892,6 +902,18 @@ mod tests {
             )
             .map(|(items, _, _)| items),
             Some(vec!["gain", "bias", "scale", "offset"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(
+                CoordinationLead::Let,
+                " are finite sets of respondents who selected alpha and beta, respectively.",
+                2,
+            )
+            .map(|(items, _, _)| items),
+            Some(vec![
+                "finite sets of respondents",
+                "finite sets of respondents"
+            ]),
         );
     }
 

@@ -3121,19 +3121,19 @@ fn deduplicate(analysis: &mut ProseObservations) {
 
 fn definition_priority(definition: &DefinitionInfo) -> u8 {
     match definition.evidence.rule_id.as_str() {
+        "english-output-definition"
+        | "english-former-latter-definition"
+        | "english-anaphoric-definition" => 6,
         "english-imperative-definition"
         | "english-write-for-definition"
         | "english-use-definition"
         | "english-formula-definition"
         | "english-math-assignment-definition"
-        | "english-output-definition"
-        | "english-former-latter-definition"
-        | "english-anaphoric-definition" => 5,
+        | "english-respectively-definition"
+        | "english-coordinated-definition" => 5,
         "english-equation-reference-definition"
         | "english-clause-definition"
-        | "english-clause-ordered-definition"
-        | "english-respectively-definition"
-        | "english-coordinated-definition" => 4,
+        | "english-clause-ordered-definition" => 4,
         "english-apposition-definition"
         | "english-equation-flow-definition"
         | "english-construction-definition"
@@ -3270,6 +3270,36 @@ mod tests {
         assert_eq!(
             analysis.shapes[5].evidence.rule_id,
             "english-relational-definition"
+        );
+    }
+
+    #[test]
+    fn shared_nominal_heads_type_coordinated_assumption_subjects() {
+        let analysis = analyze(
+            "Assume $A$ and $B$ are finite sets of respondents who selected alpha and beta, respectively.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| {
+                (
+                    definition.symbol.as_str(),
+                    definition.description.as_str(),
+                    definition.evidence.rule_id.as_str(),
+                )
+            })
+            .collect::<Vec<_>>();
+        assert!(
+            definitions.iter().any(|(symbol, description, _)| {
+                *symbol == "A" && *description == "finite sets of respondents"
+            }),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.iter().any(|(symbol, description, _)| {
+                *symbol == "B" && *description == "finite sets of respondents"
+            }),
+            "{definitions:?}"
         );
     }
 
