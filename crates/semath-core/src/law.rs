@@ -1992,7 +1992,8 @@ fn roles_are_supported(
                     }))
                 || (unresolved_role != inferred_role && supported >= 3)))
         || (law_explicitly_activated
-            && inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role)))
+            && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
+                || (roles.len() == 2 && supported == 1 && unresolved == 1)))
         || formula_identified
 }
 
@@ -3520,6 +3521,16 @@ mod tests {
                 && condition.status == ConstraintStatus::Verified
                 && condition.subjects == ["R"]
         }));
+    }
+
+    #[test]
+    fn an_explicit_law_name_can_complete_one_unrefuted_role() {
+        assert_eq!(
+            recognized_laws(
+                "Let $T$ denote signal period. The period-frequency reciprocity is $f=1/T$."
+            ),
+            ["period-frequency-reciprocity"]
+        );
     }
 
     #[test]
