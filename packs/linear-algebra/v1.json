@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "packId": "linear-algebra",
   "packVersion": "1.2.0",
   "packKind": "field",

@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath compiles schema-9 JSON packs into one bounded Rust semantic
+Semath compiles schema-10 JSON packs into one bounded Rust semantic
 runtime. Packs contain concepts, roles, laws, canonical relations, optional
 representations, conditions,
 quantities, units, activation evidence, and references. They contain no
@@ -24,11 +24,14 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 9`, stable identity and SemVer, dependencies,
+Each pack declares `schemaVersion: 10`, stable identity and SemVer, dependencies,
 concepts, and typed laws. Concepts may declare reviewed English aliases. A law
 supplies exactly one `canonicalRelation`, optional presentation
 `representations`, and roles with a required semantic concept
 and optional orthogonal quantity, shape, notation, and variadic constraints.
+Operator vocabulary may additionally declare typed operand concepts and a
+result concept and shape. The generic runtime uses those signatures only when
+the source establishes compatible operand types; notation alone is not proof.
 Each side condition has a closed kind, stable ID, validated role subjects, a
 display label, and optional reviewed English `evidencePhrases`. Those phrases
 compile into the shared assumption-event path; they do not create a pack
@@ -86,7 +89,7 @@ reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of positive and refusal observations
 materialized from compact editable seeds, not independently authored evidence
-or evidence of maturity by itself. The checked-in schema-9 pack files and the
+or evidence of maturity by itself. The checked-in schema-10 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

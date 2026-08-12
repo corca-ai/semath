@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "packId": "discrete-math",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -146,7 +146,9 @@
         "overlap count",
         "intersection size"
       ],
-      "parents": [],
+      "parents": [
+        "discrete-math:cardinality"
+      ],
       "references": [
         "concrete-mathematics"
       ]
@@ -362,6 +364,11 @@
       "notation": [
         "|S|"
       ],
+      "operandConcepts": [
+        "discrete-math:set"
+      ],
+      "resultConcept": "discrete-math:cardinality",
+      "resultShape": "scalar",
       "references": [
         "concrete-mathematics"
       ]

@@ -801,8 +801,92 @@ fn coalesce_numbers(tokens: Vec<Token>) -> Vec<Token> {
     output
 }
 
+fn fold_vertical_bar_groups(tokens: Vec<Token>) -> Vec<Token> {
+    let mut output = Vec::with_capacity(tokens.len());
+    let mut cursor = 0;
+    while cursor < tokens.len() {
+        if !is_vertical_bar(&tokens[cursor].kind)
+            || !vertical_bar_can_open(output.last().map(|token: &Token| &token.kind))
+        {
+            output.push(tokens[cursor].clone());
+            cursor += 1;
+            continue;
+        }
+        let mut depth = 0_u32;
+        let close = (cursor + 1..tokens.len()).find(|index| {
+            match tokens[*index].kind {
+                TokenKind::Open { .. } => depth += 1,
+                TokenKind::Close(_) => depth = depth.saturating_sub(1),
+                _ => {}
+            }
+            depth == 0 && is_vertical_bar(&tokens[*index].kind)
+        });
+        let Some(close) = close.filter(|close| cursor + 1 < *close) else {
+            output.push(tokens[cursor].clone());
+            cursor += 1;
+            continue;
+        };
+        let inner_tokens = tokens[cursor + 1..close].to_vec();
+        if inner_tokens.iter().any(|token| {
+            matches!(token.kind, TokenKind::Operator('=' | '<' | '>'))
+                || matches!(&token.kind, TokenKind::Command(command) if is_relation_command(command))
+        }) {
+            output.push(tokens[cursor].clone());
+            cursor += 1;
+            continue;
+        }
+        let inner = Parser::new(canonical_tokens(inner_tokens)).parse_document();
+        let open = &tokens[cursor];
+        let close_token = &tokens[close];
+        let mut provenance = open.provenance.clone();
+        provenance.extend(inner.provenance.iter().cloned());
+        provenance.extend(close_token.provenance.iter().cloned());
+        provenance.sort_by_key(|range| (range.start_offset, range.end_offset));
+        provenance.dedup();
+        output.push(Token {
+            kind: TokenKind::Structured(Box::new(SemanticExpr {
+                kind: SemanticExprKind::Apply {
+                    operator: SemanticReference::new(
+                        "vertical-bars",
+                        open.range.clone(),
+                        open.provenance.clone(),
+                    ),
+                    arguments: vec![inner],
+                },
+                range: SourceRange {
+                    start_offset: open.range.start_offset,
+                    end_offset: close_token.range.end_offset,
+                },
+                provenance,
+            })),
+            range: SourceRange {
+                start_offset: open.range.start_offset,
+                end_offset: close_token.range.end_offset,
+            },
+            provenance: Vec::new(),
+        });
+        cursor = close + 1;
+    }
+    output
+}
+
+fn is_vertical_bar(token: &TokenKind) -> bool {
+    matches!(token, TokenKind::Identifier(value) if value == "|")
+        || matches!(token, TokenKind::Operator('|'))
+}
+
+fn vertical_bar_can_open(previous: Option<&TokenKind>) -> bool {
+    previous.is_none_or(|token| {
+        matches!(
+            token,
+            TokenKind::Open { .. }
+                | TokenKind::Operator('=' | '+' | '-' | '*' | '/' | ',' | '<' | '>')
+        ) || matches!(token, TokenKind::Command(command) if is_relation_command(command))
+    })
+}
+
 fn canonical_tokens(tokens: Vec<Token>) -> Vec<Token> {
-    let mut tokens = coalesce_numbers(tokens);
+    let mut tokens = fold_vertical_bar_groups(coalesce_numbers(tokens));
     while tokens.last().is_some_and(|token| {
         matches!(token.kind, TokenKind::Operator(',' | '.'))
             || matches!(&token.kind, TokenKind::Number(value) if value == ".")
@@ -2609,6 +2693,16 @@ mod tests {
             render_canonical(&lower_template(r"a<b\leq c")),
             "system(relation(less-than,symbol(a),symbol(b)),relation(less-or-equal,symbol(b),symbol(c)))"
         );
+    }
+
+    #[test]
+    fn pairs_expression_boundary_vertical_bars_without_consuming_set_builders() {
+        assert_eq!(
+            render_canonical(&lower_template("|A\\cup B|=|A|+|B|-|A\\cap B|")),
+            "relation(equals,apply(vertical-bars,apply(union,symbol(A),symbol(B))),sum(apply(vertical-bars,symbol(A)),apply(vertical-bars,symbol(B)),negate(apply(vertical-bars,apply(intersection,symbol(A),symbol(B))))))"
+        );
+        assert!(!render_canonical(&lower_template("x|x>0")).contains("vertical-bars"));
+        assert!(!render_canonical(&lower_template("|x>0")).contains("vertical-bars"));
     }
 
     #[test]
