@@ -524,6 +524,15 @@ pub(crate) fn coordinated_descriptions(
         }
     }
     if lead == CoordinationLead::Let {
+        if let Some(body) = consume_any(trimmed, &["be"])
+            && let Some((descriptions, consumed)) = ordered_body(body, arity)
+        {
+            return Some((
+                descriptions,
+                "english-respectively-definition",
+                after.len() - body.len() + consumed,
+            ));
+        }
         let shared = consume_any(
             trimmed,
             &[
@@ -902,6 +911,15 @@ mod tests {
             )
             .map(|(items, _, _)| items),
             Some(vec!["gain", "bias", "scale", "offset"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(
+                CoordinationLead::Let,
+                " be kinetic energy, mass, and speed, respectively.",
+                3,
+            )
+            .map(|(items, _, _)| items),
+            Some(vec!["kinetic energy", "mass", "speed"]),
         );
         assert_eq!(
             coordinated_descriptions(

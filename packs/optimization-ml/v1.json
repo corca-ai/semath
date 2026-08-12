@@ -427,7 +427,8 @@
         {
           "id": "objective",
           "concept": "optimization-ml:objective-function",
-          "description": "Differentiable objective function."
+          "description": "Differentiable objective function.",
+          "sourceProjection": "head"
         },
         {
           "id": "variable",

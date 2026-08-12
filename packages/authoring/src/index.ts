@@ -418,12 +418,19 @@ function scaffoldLawCases(
     const bindings = bindSymbols(law, symbols);
     const formula = renderFormula(law.canonicalRelation, bindings);
     const shapedRole = law.roles.find((role) => role.shape);
+    const roleSwapIsMeaningful = law.roles.some((role, roleIndex) =>
+      law.roles.slice(roleIndex + 1).some((other) => other.concept !== role.concept)
+    );
     const effectiveCategory = mutation.category === "shape-mismatch" && !shapedRole
       ? "missing-role"
-      : mutation.category;
+      : mutation.category === "role-swap" && !roleSwapIsMeaningful
+        ? "role-domain-mismatch"
+        : mutation.category;
     const mutated = effectiveCategory === "missing-role"
       ? `${[...bindings.values()][0]}_{probe}=0`
-      : mutation.mutate(formula, [...bindings.values()]);
+      : effectiveCategory === "role-domain-mismatch"
+        ? replaceRoleWithNumber(formula, [...bindings.values()][0]!)
+        : mutation.mutate(formula, [...bindings.values()]);
     const declarationBindings = effectiveCategory === "role-swap"
       ? conflictFirstTwoBindings(bindings)
       : bindings;
@@ -610,6 +617,13 @@ function wrongOperator(formula: string): string {
   if (formula.includes("\\cap")) return formula.replace("\\cap", "\\cup");
   if (formula.includes("\\cup")) return formula.replace("\\cup", "\\cap");
   return `${formula}+z`;
+}
+
+function replaceRoleWithNumber(formula: string, symbol: string): string {
+  return formula.replace(
+    new RegExp(`(?<![A-Za-z0-9])${escapeRegExp(symbol)}(?![A-Za-z0-9])`, "u"),
+    "0",
+  );
 }
 
 function conflictFirstTwoBindings(

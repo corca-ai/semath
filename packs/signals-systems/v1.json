@@ -327,17 +327,20 @@
         {
           "id": "transfer",
           "concept": "signals-systems:transfer-function",
-          "description": "Transfer function."
+          "description": "Transfer function.",
+          "sourceProjection": "head"
         },
         {
           "id": "output",
           "concept": "signals-systems:output-transform",
-          "description": "Output transform."
+          "description": "Output transform.",
+          "sourceProjection": "head"
         },
         {
           "id": "input",
           "concept": "signals-systems:input-transform",
-          "description": "Input transform."
+          "description": "Input transform.",
+          "sourceProjection": "head"
         }
       ],
       "conditions": [

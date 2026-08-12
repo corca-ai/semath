@@ -3793,18 +3793,7 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
     }
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => {
-            label == symbol
-                || label.strip_prefix('\\') == Some(symbol.as_str())
-                || (label
-                    .chars()
-                    .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
-                    .count()
-                    <= MAX_COMPOSITE_SOURCE_LABEL_CHARS
-                    && matches!(
-                        lower_template(label).kind,
-                        SemanticExprKind::Apply { operator, .. }
-                            if operator == symbol.as_str()
-                    ))
+            label == symbol || label.strip_prefix('\\') == Some(symbol.as_str())
         }
         SemanticExprKind::Index { .. } => !label.chars().any(char::is_whitespace),
         SemanticExprKind::Derivative { .. } => {
@@ -3929,6 +3918,24 @@ mod tests {
             "\\dtemp extra"
         ));
         assert!(!source_label_matches_expression(&expression, "\\dtemp{T}"));
+    }
+
+    #[test]
+    fn atomic_role_label_does_not_absorb_a_following_grouped_factor() {
+        let expression = SemanticExpr {
+            kind: SemanticExprKind::Symbol("C_n".into()),
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 25,
+            },
+            provenance: Vec::new(),
+        };
+
+        assert!(source_label_matches_expression(&expression, "C_n"));
+        assert!(!source_label_matches_expression(
+            &expression,
+            "C_n\\left(\\frac{dv_n}{dt}"
+        ));
     }
 
     #[test]
@@ -4983,6 +4990,16 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
+    fn prime_voltage_derivative_matches_the_capacitor_law() {
+        assert_eq!(
+            recognized_laws(
+                "Let $i_m$ denote electric current scalar, $K_m$ capacitance scalar, $v_m$ voltage scalar, and $t$ duration scalar. $i_m=K_m v_m'$.",
+            ),
+            ["capacitor-current-law"],
+        );
+    }
+
+    #[test]
     fn explicit_symbolic_shape_mismatch_refuses_a_structural_law() {
         assert!(
             recognized_laws(
@@ -5029,7 +5046,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
-    fn callable_role_bindings_retain_their_authored_application() {
+    fn callable_role_bindings_project_their_entity_heads() {
         let source = "The transfer function is $H(s)=\\frac{Y(s)}{X(s)}$.";
         let transfer = recognized_law_observations(source)
             .into_iter()
@@ -5041,7 +5058,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
                 .iter()
                 .map(|binding| binding.symbol.as_str())
                 .collect::<Vec<_>>(),
-            ["H(s)", "Y(s)", "X(s)"]
+            ["H", "Y", "X"]
         );
         assert_eq!(transfer.status, LawRecognitionStatus::Verified);
         assert!(transfer.conditions[0].evidence.iter().any(|evidence| {

@@ -1685,6 +1685,7 @@ impl Parser {
                 let subscript = self.parse_group_or_atom();
                 expression = apply_subscript(expression, &subscript);
             } else if self.consume_operator('^') {
+                self.split_unbraced_transpose_prefix();
                 let exponent = self.parse_group_or_atom();
                 expression = if matches!(&exponent.kind, SemanticExprKind::Number(value) if value == "1")
                 {
@@ -1712,10 +1713,15 @@ impl Parser {
                     )
                 };
             } else if self.consume_operator('\'') {
+                let prime = &self.tokens[self.cursor - 1];
                 let variable = SemanticReference::from_expression("t", &expression);
+                let mut provenance = expression.provenance.clone();
+                provenance.extend(prime.provenance.clone());
+                provenance.sort_by_key(|range| (range.start_offset, range.end_offset));
+                provenance.dedup();
                 expression = SemanticExpr {
-                    range: expression.range.clone(),
-                    provenance: expression.provenance.clone(),
+                    range: merge_range(&expression.range, &prime.range),
+                    provenance,
                     kind: SemanticExprKind::Derivative {
                         expression: Box::new(expression),
                         variable,
@@ -2183,6 +2189,38 @@ impl Parser {
         } else {
             false
         }
+    }
+
+    fn split_unbraced_transpose_prefix(&mut self) {
+        let Some(token) = self.tokens.get(self.cursor).cloned() else {
+            return;
+        };
+        let TokenKind::Identifier(value) = token.kind else {
+            return;
+        };
+        let Some(rest) = value.strip_prefix('T').filter(|rest| !rest.is_empty()) else {
+            return;
+        };
+        let split = token.range.start_offset + 1;
+        self.tokens[self.cursor] = Token {
+            kind: TokenKind::Identifier("T".into()),
+            range: SourceRange {
+                start_offset: token.range.start_offset,
+                end_offset: split,
+            },
+            provenance: token.provenance.clone(),
+        };
+        self.tokens.insert(
+            self.cursor + 1,
+            Token {
+                kind: TokenKind::Identifier(rest.into()),
+                range: SourceRange {
+                    start_offset: split,
+                    end_offset: token.range.end_offset,
+                },
+                provenance: token.provenance,
+            },
+        );
     }
 
     fn consume_close(&mut self, expected: char) -> bool {
@@ -2797,6 +2835,22 @@ mod tests {
     }
 
     #[test]
+    fn normalizes_reviewed_lyapunov_notation() {
+        assert_eq!(
+            render_canonical(&lower_template(
+                "(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}"
+            )),
+            "relation(equals,sum(product(apply(transpose,index(symbol(A),symbol(c))),index(symbol(P),symbol(c))),product(index(symbol(P),symbol(c)),index(symbol(A),symbol(c)))),negate(index(symbol(Q),symbol(c))))",
+        );
+        assert_eq!(
+            render_canonical(&lower_template(
+                "\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}"
+            )),
+            "relation(equals,sum(index(symbol(I),symbol(a)),index(symbol(I),symbol(b))),sum(index(symbol(I),symbol(c)),index(symbol(I),symbol(d))))",
+        );
+    }
+
+    #[test]
     fn lowers_compact_total_differentials_in_quotients() {
         assert_eq!(
             render_canonical(&lower_template("i=-C dv/dt")),
@@ -2867,6 +2921,7 @@ mod tests {
             render_canonical(&lower_template("y'(x)")),
             "derivative(symbol(y),x,1)"
         );
+        assert_eq!(lower_template("v_m'").range.end_offset, 4);
         assert_eq!(
             render_canonical(&lower_template("\\frac{d y}{d x}(x)")),
             "derivative(symbol(y),x,1)"
