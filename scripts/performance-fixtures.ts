@@ -60,7 +60,7 @@ export function semanticallyEditPerformanceDocument(
 
 function performanceDocument(index: number, projectSize: number): PerformanceFixtureDocument {
   const family = PERFORMANCE_FIXTURE_FAMILIES[index % PERFORMANCE_FIXTURE_FAMILIES.length]!;
-  const symbol = index === 0 ? "z" : `p${index}`;
+  const symbol = index === 0 ? "z" : `\\p${alphabeticId(index)}`;
   const sharedReference =
     index > 0 && index <= performanceEntityFanout(projectSize)
       ? " The shared reported quantity is $z$."
@@ -77,6 +77,17 @@ function performanceDocument(index: number, projectSize: number): PerformanceFix
     path: `section-${index}.tex`,
     queryOffset: content.indexOf(symbol, common.length),
   };
+}
+
+function alphabeticId(value: number): string {
+  let remaining = value;
+  let result = "";
+  while (remaining > 0) {
+    remaining -= 1;
+    result = String.fromCharCode(97 + (remaining % 26)) + result;
+    remaining = Math.floor(remaining / 26);
+  }
+  return result;
 }
 
 function fixtureBody(
