@@ -33,6 +33,7 @@ use crate::semantic_index::{
     OccurrenceKind, ProjectSemanticIndex, SourceOccurrence, SourceOccurrenceId,
     occurrence_binding_key,
 };
+use crate::type_projection::{MAX_PROJECTED_TYPE_FACTS, ProjectedTypeValue, project_type_facts};
 use crate::{
     AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, DefinitionInfo,
     DimensionExponentInfo, DomainActivation, Evidence, Location, PROTOCOL_VERSION,
@@ -605,6 +606,160 @@ impl ProjectState {
         self.occurrences_by_range.extend(occurrences);
         Ok(())
     }
+
+    fn projected_types_for_formula(
+        &self,
+        document: &AnalyzedDocument,
+        math: &ParsedMath,
+    ) -> Vec<ExportedTypeFact> {
+        let mut subjects = BTreeMap::<EntityId, (String, &SourceOccurrence)>::new();
+        for (symbol, range) in &math.symbols {
+            let Some(occurrence_id) =
+                self.occurrence_id_for_range(&document.document.file_id, range)
+            else {
+                continue;
+            };
+            let Some(occurrence) = self.semantic.occurrence(&occurrence_id) else {
+                continue;
+            };
+            let EntityEvidenceDecision::Established(entity) =
+                self.semantic.entity_decision(&occurrence_id)
+            else {
+                continue;
+            };
+            subjects
+                .entry(entity)
+                .or_insert((symbol.clone(), occurrence));
+            if subjects.len() > MAX_PROJECTED_TYPE_FACTS {
+                return Vec::new();
+            }
+        }
+        let claims = subjects.iter().flat_map(|(entity, (_, occurrence))| {
+            self.semantic
+                .claims_for_entity_at(entity, occurrence)
+                .into_iter()
+                .filter_map(|claim| {
+                    self.semantic
+                        .evidence(&claim.evidence_id)
+                        .map(|evidence| (claim, evidence))
+                })
+        });
+        let Ok(projected) = project_type_facts(claims) else {
+            return Vec::new();
+        };
+        projected
+            .into_iter()
+            .filter_map(|fact| {
+                let (symbol, _) = subjects.get(&fact.entity)?;
+                let evidence = self.semantic.evidence(&fact.evidence_id)?;
+                projected_type_info(&self.semantic, symbol, fact.value, evidence)
+            })
+            .collect()
+    }
+}
+
+fn projected_type_info(
+    index: &ProjectSemanticIndex,
+    symbol: &str,
+    value: ProjectedTypeValue,
+    evidence: &EvidenceRecord,
+) -> Option<ExportedTypeFact> {
+    let evidence = semantic_evidence(index, evidence, "semantic-type", "strong");
+    match value {
+        ProjectedTypeValue::Role(concept_id) => Some(ExportedTypeFact::Role(RoleInfo {
+            symbol: symbol.to_owned(),
+            description: concept_id.clone(),
+            concept_id,
+            evidence,
+        })),
+        ProjectedTypeValue::Shape(shape) => {
+            let (kind, dimensions, display) = projected_shape(&shape)?;
+            Some(ExportedTypeFact::Shape(ShapeInfo {
+                symbol: symbol.to_owned(),
+                kind: kind.into(),
+                dimensions,
+                refinements: Vec::new(),
+                display,
+                evidence,
+            }))
+        }
+        ProjectedTypeValue::Quantity(quantity_kind_id) => {
+            Some(ExportedTypeFact::Quantity(QuantityInfo {
+                symbol: symbol.to_owned(),
+                quantity_kind: None,
+                quantity_kind_id: Some(quantity_kind_id),
+                unit_id: None,
+                unit: None,
+                dimension: PhysicalDimensionInfo {
+                    exponents: Vec::new(),
+                    display: "unknown".into(),
+                },
+                display: symbol.to_owned(),
+                evidence,
+                derived_from: Vec::new(),
+            }))
+        }
+        ProjectedTypeValue::Unit(unit_id) => Some(ExportedTypeFact::Quantity(QuantityInfo {
+            symbol: symbol.to_owned(),
+            quantity_kind: None,
+            quantity_kind_id: None,
+            unit: None,
+            unit_id: Some(unit_id),
+            dimension: PhysicalDimensionInfo {
+                exponents: Vec::new(),
+                display: "unknown".into(),
+            },
+            display: symbol.to_owned(),
+            evidence,
+            derived_from: Vec::new(),
+        })),
+        ProjectedTypeValue::Dimension(exponents) => {
+            let dimension = physical_dimension_info(&exponents);
+            Some(ExportedTypeFact::Quantity(QuantityInfo {
+                symbol: symbol.to_owned(),
+                quantity_kind: None,
+                quantity_kind_id: None,
+                unit: None,
+                unit_id: None,
+                display: dimension.display.clone(),
+                dimension,
+                evidence,
+                derived_from: Vec::new(),
+            }))
+        }
+        ProjectedTypeValue::Type(_) => None,
+    }
+}
+
+fn projected_shape(shape: &ClaimShape) -> Option<(&'static str, Vec<String>, String)> {
+    let (kind, dimensions) = match shape {
+        ClaimShape::Scalar => ("scalar", Vec::new()),
+        ClaimShape::Vector(dimensions) => (
+            "vector",
+            dimensions.iter().map(ClaimExtent::display).collect(),
+        ),
+        ClaimShape::Matrix(dimensions) => (
+            "matrix",
+            dimensions.iter().map(ClaimExtent::display).collect(),
+        ),
+        ClaimShape::Tensor(dimensions) => (
+            "tensor",
+            dimensions.iter().map(ClaimExtent::display).collect(),
+        ),
+        ClaimShape::Function { .. } | ClaimShape::Unknown => return None,
+    };
+    let display = if dimensions.is_empty() {
+        "Scalar".to_owned()
+    } else {
+        let label = match kind {
+            "vector" => "Vector",
+            "matrix" => "Matrix",
+            "tensor" => "Tensor",
+            _ => kind,
+        };
+        format!("{label}[{}]", dimensions.join(" × "))
+    };
+    Some((kind, dimensions, display))
 }
 
 struct LoweredSemanticDocument {
@@ -2588,8 +2743,9 @@ impl SemathEngine {
         let mut changed_file_ids = self.index.documents.keys().cloned().collect::<Vec<_>>();
         changed_file_ids.sort();
         self.refresh_project_topology();
-        self.refresh_project_laws(&changed_file_ids.iter().cloned().collect());
+        let targets = changed_file_ids.iter().cloned().collect();
         self.index.rebuild_semantic_index()?;
+        self.refresh_project_laws(&targets);
         Ok(self.update_result(changed_file_ids.clone(), changed_file_ids))
     }
 
@@ -2675,11 +2831,8 @@ impl SemathEngine {
             Vec::new()
         };
         analyzed.sort();
-        if !analyzed.is_empty() {
-            self.refresh_project_laws(&analyzed.iter().cloned().collect());
-            if topology_changed {
-                self.index.rebuild_semantic_index()?;
-            }
+        if !analyzed.is_empty() && topology_changed {
+            self.index.rebuild_semantic_index()?;
         }
         if !topology_changed {
             let mut semantic_updates = analyzed.clone();
@@ -2689,6 +2842,9 @@ impl SemathEngine {
             if !semantic_updates.is_empty() {
                 self.index.replace_semantic_documents(&semantic_updates)?;
             }
+        }
+        if !analyzed.is_empty() {
+            self.refresh_project_laws(&analyzed.iter().cloned().collect());
         }
         changed.sort();
         Ok(self.update_result(changed, analyzed))
@@ -3860,6 +4016,26 @@ impl SemathEngine {
                 .or_default()
                 .push(fact);
         }
+        let projected_types = targets
+            .iter()
+            .filter_map(|file_id| {
+                let document = self.index.documents.get(file_id)?;
+                Some(
+                    document
+                        .parsed
+                        .iter()
+                        .filter(|math| math.region.closed)
+                        .map(|math| {
+                            (
+                                (file_id.clone(), math.region.content_range.start_offset),
+                                self.index.projected_types_for_formula(document, math),
+                            )
+                        })
+                        .collect::<Vec<_>>(),
+                )
+            })
+            .flatten()
+            .collect::<HashMap<_, _>>();
 
         let environments = targets
             .iter()
@@ -3933,6 +4109,23 @@ impl SemathEngine {
                                 ExportedTypeFact::Shape(shape) => {
                                     environment.add_shape(semantic_offset, shape.clone());
                                 }
+                            }
+                        }
+                    }
+                    for fact in projected_types
+                        .get(&(file_id.clone(), semantic_offset))
+                        .into_iter()
+                        .flatten()
+                    {
+                        match fact {
+                            ExportedTypeFact::Role(role) => {
+                                environment.add_role(semantic_offset, role.clone());
+                            }
+                            ExportedTypeFact::Quantity(quantity) => {
+                                environment.add_quantity(semantic_offset, quantity.clone());
+                            }
+                            ExportedTypeFact::Shape(shape) => {
+                                environment.add_shape(semantic_offset, shape.clone());
                             }
                         }
                     }

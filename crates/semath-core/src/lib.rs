@@ -28,6 +28,7 @@ mod semantic;
 pub mod semantic_index;
 mod shape;
 mod source_index;
+mod type_projection;
 
 pub use engine::SemathEngine;
 pub use pack::*;
