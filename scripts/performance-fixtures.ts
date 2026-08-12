@@ -88,7 +88,7 @@ function fixtureBody(
     case "reported-ece":
       return [
         "Expected calibration error (ECE) uses confidence bins $B_m$.",
-        `\$${symbol}=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
+        `\$${symbol}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|\$`,
       ].join("\n");
     case "decorated-and-styled":
       return `\$${symbol}=\\hat{\\mathbf y}_{t+1}+\\widetilde{\\mathcal L}(\\symbf{x})\$`;
