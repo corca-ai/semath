@@ -324,7 +324,7 @@ pub(crate) fn observe_prose(
         &construction_targets,
     );
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
-    collect_assumptions(&index, &clauses, &mentions, &events, &mut analysis);
+    collect_assumptions(source, &index, &clauses, &mentions, &events, &mut analysis);
 
     collect_role_first_nominal_definitions(
         document,
@@ -2204,6 +2204,7 @@ fn collect_ordered_clause_definition(
 }
 
 fn collect_assumptions(
+    source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
@@ -2260,6 +2261,7 @@ fn collect_assumptions(
             });
         }
     }
+    collect_typed_regularity_assumptions(source, index, clauses, mentions, output);
     output.assumptions.sort_by(|left, right| {
         left.evidence
             .source_ranges
@@ -2276,6 +2278,52 @@ fn collect_assumptions(
             .then(left.value.cmp(&right.value))
     });
     output.assumptions.dedup();
+}
+
+fn collect_typed_regularity_assumptions(
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    mentions: &[ScientificMention],
+    output: &mut ProseObservations,
+) {
+    for clause in clauses.iter().filter(|clause| clause.frame.establishes()) {
+        for mention in mentions
+            .iter()
+            .filter(|mention| clause.start <= mention.start && mention.end <= clause.end)
+        {
+            let typed_expression = &source[mention.start..mention.end];
+            if !is_differentiability_membership(typed_expression) {
+                continue;
+            }
+            output.assumptions.push(AssumptionInfo {
+                kind: "regularity".into(),
+                value: "differentiable".into(),
+                subjects: vec![mention.symbol.clone()],
+                evidence: Evidence {
+                    rule_id: "scientific-prose/function-space-regularity".into(),
+                    kind: "typed-math-condition".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![SourceRange {
+                        start_offset: index.utf16_for_byte(mention.start),
+                        end_offset: index.utf16_for_byte(mention.end),
+                    }],
+                },
+            });
+        }
+    }
+}
+
+fn is_differentiability_membership(expression: &str) -> bool {
+    let compact = expression
+        .chars()
+        .filter(|character| !character.is_whitespace())
+        .collect::<String>();
+    compact.contains("\\in")
+        && !compact.contains("\\notin")
+        && ["C^1(", "C^{1}(", "C^\\infty(", "C^{\\infty}("]
+            .iter()
+            .any(|class| compact.contains(class))
 }
 
 fn condition_evidence_kind(kind: PackConditionKind) -> &'static str {
@@ -3223,6 +3271,33 @@ mod tests {
                         && !activation.attached_formula_ranges.is_empty()),
                 "{source}: {:?}",
                 analysis.semantic_evidence.law_activations
+            );
+        }
+    }
+
+    #[test]
+    fn extracts_differentiability_from_typed_function_space_membership() {
+        let analysis = analyze("Suppose $y\\in C^1([a,b])$. For $x\\in(a,b)$, inspect $y'(x)$.");
+        assert!(analysis.assumptions.iter().any(|assumption| {
+            assumption.kind == "regularity"
+                && assumption.value == "differentiable"
+                && assumption.subjects == ["y"]
+                && assumption.evidence.kind == "typed-math-condition"
+        }));
+
+        for source in [
+            "Suppose $y\\notin C^1([a,b])$.",
+            "According to the reference, $y\\in C^1([a,b])$.",
+            "The space $C^1([a,b])$ is used for comparison.",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis
+                    .assumptions
+                    .iter()
+                    .all(|assumption| assumption.evidence.kind != "typed-math-condition"),
+                "{source}: {:?}",
+                analysis.assumptions
             );
         }
     }
