@@ -1,8 +1,12 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 
-use super::{SemathEngine, notation_occurrence_range, stable_text_digest};
+use super::{
+    SemathEngine, index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
+    stable_text_digest,
+};
 use crate::canonical::{lower_document_region, render_canonical};
 use crate::parser::test_math_regions;
+use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
     ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, LexicalClass,
     MathRoot, MathRootState, MeaningDecision, NotationArgument, NotationNode, NotationNodeKind,
@@ -162,6 +166,57 @@ fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
 }
 
 #[test]
+fn exact_occurrence_range_outranks_a_structural_selection_alias() {
+    let exact_id = SourceOccurrenceId {
+        file_id: "main".into(),
+        document_version: 1,
+        local_id: 0,
+    };
+    let container_id = SourceOccurrenceId {
+        file_id: "main".into(),
+        document_version: 1,
+        local_id: 1,
+    };
+    let exact_range = range(1, 2);
+    let occurrences = vec![
+        SourceOccurrence {
+            id: exact_id.clone(),
+            component_id: "main".into(),
+            kind: OccurrenceKind::Notation,
+            range: exact_range.clone(),
+            selection_range: exact_range.clone(),
+            scope_path: Vec::new(),
+            structural_path: Vec::new(),
+            availability_order: 1,
+            surface: "P".into(),
+            source_text: "P".into(),
+            notation: Vec::new(),
+        },
+        SourceOccurrence {
+            id: container_id.clone(),
+            component_id: "main".into(),
+            kind: OccurrenceKind::Notation,
+            range: range(1, 4),
+            selection_range: exact_range.clone(),
+            scope_path: Vec::new(),
+            structural_path: Vec::new(),
+            availability_order: 1,
+            surface: "P_s".into(),
+            source_text: "P_s".into(),
+            notation: Vec::new(),
+        },
+    ];
+    let mut index = HashMap::new();
+    index_occurrence_range(&mut index, ("main".into(), 1, 2), exact_id.clone());
+    index_occurrence_range(&mut index, ("main".into(), 1, 2), container_id);
+
+    assert_eq!(
+        occurrence_id_at_range(&index, &occurrences, "main", &exact_range),
+        Some(exact_id),
+    );
+}
+
+#[test]
 fn complete_indexed_notation_owns_its_shared_right_edge() {
     let content = "$P_s$";
     let mut input = document("main", "main.tex", content, 1);
@@ -244,6 +299,7 @@ fn complete_indexed_notation_owns_its_shared_right_edge() {
     let mut project = snapshot(content);
     project.documents = vec![input];
     engine.reset(project).unwrap();
+    let mut occurrence_ids = Vec::new();
     for offset in [1, 4] {
         let result = engine
             .query(query(
@@ -262,14 +318,18 @@ fn complete_indexed_notation_owns_its_shared_right_edge() {
             view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
             Some("P_s")
         );
+        let symbol = view.symbol.expect("expected indexed symbol focus");
+        assert_eq!(symbol.location.range, range(1, 4));
+        occurrence_ids.push(symbol.occurrence_id);
     }
+    assert_eq!(occurrence_ids[0], occurrence_ids[1]);
 }
 
 #[test]
 fn projects_vector_shape_through_a_trajectory_derivative() {
     let content =
         "Let $x(t)$ be an n-dimensional state vector. Inspect its derivative $\\dot{x}(t)$.";
-    let offset = content.find("dot{x}").unwrap() as u32;
+    let offset = content.find("{x}").unwrap() as u32 + 2;
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
     let result = engine
@@ -779,9 +839,10 @@ fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
         })
         .unwrap();
     let relation_start = base.find("Q=Av").unwrap() as u32;
-    let occurrence = engine.index.occurrences_by_range
-        [&("base".into(), relation_start, relation_start + 1)]
-        .clone();
+    let occurrence = engine
+        .index
+        .occurrence_id_for_range("base", &range(relation_start, relation_start + 1))
+        .expect("expected relation head occurrence");
     assert!(
         engine
             .index

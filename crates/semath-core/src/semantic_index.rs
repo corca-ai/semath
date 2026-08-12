@@ -729,10 +729,6 @@ impl ProjectSemanticIndex {
         self.occurrences.values()
     }
 
-    pub(crate) fn entities(&self) -> impl Iterator<Item = &EntityId> {
-        self.entities.iter()
-    }
-
     pub fn claim(&self, id: &ClaimId) -> Option<&Claim> {
         self.claims.get(id)
     }
@@ -857,6 +853,32 @@ impl ProjectSemanticIndex {
                                 ClaimPredicate::Assumes | ClaimPredicate::Relates => false,
                             }
                     })
+            })
+    }
+
+    pub(crate) fn occurrence_has_explicit_identity(
+        &self,
+        occurrence_id: &SourceOccurrenceId,
+    ) -> bool {
+        let Some(occurrence) = self.occurrences.get(occurrence_id) else {
+            return false;
+        };
+        self.binding_claims
+            .get(&occurrence_binding_key(occurrence))
+            .into_iter()
+            .flatten()
+            .filter_map(|claim_id| self.claims.get(claim_id))
+            .any(|claim| {
+                claim.predicate == ClaimPredicate::Names
+                    && matches!(&claim.object, ClaimObject::Occurrence(id) if id == occurrence_id)
+                    && self
+                        .evidence
+                        .get(&claim.evidence_id)
+                        .is_some_and(|evidence| {
+                            evidence.origin == EvidenceOrigin::Explicit
+                                && evidence.modality == EvidenceModality::Asserted
+                                && evidence.polarity == EvidencePolarity::Positive
+                        })
             })
     }
 
