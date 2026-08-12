@@ -460,17 +460,15 @@ pub(crate) fn observe_prose(
                 before_start + explicit.prefix_start,
                 end_byte + explicit.suffix_end,
             );
-        } else if let Some((mention_index, active)) = mentions
+        } else if let Some(active) = mentions
             .iter()
             .position(|mention| mention.math_index == math_index)
             .and_then(|mention_index| {
                 definition_constructions
                     .iter()
                     .find(|construction| construction.mention_index == mention_index)
-                    .map(|active| (mention_index, active))
             })
         {
-            debug_assert_eq!(active.mention_index, mention_index);
             if !active.frame.establishes() || active.coordinated {
                 continue;
             }
