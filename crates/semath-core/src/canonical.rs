@@ -1928,7 +1928,17 @@ impl Parser {
     }
 
     fn consume_relation(&mut self) -> Option<SemanticReference> {
-        if self.consume_operator('=') {
+        if self.consume_operator(':') {
+            if self.consume_operator('=') {
+                Some(self.previous_reference("equals"))
+            } else {
+                self.cursor -= 1;
+                None
+            }
+        } else if self.consume_operator('=')
+            || self.consume_command("coloneqq")
+            || self.consume_command("triangleq")
+        {
             Some(self.previous_reference("equals"))
         } else if self.consume_operator('<') {
             Some(self.previous_reference("less-than"))
@@ -2194,6 +2204,7 @@ fn starts_atom(token: &TokenKind) -> bool {
             "cap"
                 | "cdot"
                 | "circ"
+                | "coloneqq"
                 | "cup"
                 | "ge"
                 | "geq"
@@ -2209,6 +2220,7 @@ fn starts_atom(token: &TokenKind) -> bool {
                 | "supset"
                 | "supseteq"
                 | "times"
+                | "triangleq"
         ),
         TokenKind::Identifier(_)
         | TokenKind::Number(_)
@@ -2229,7 +2241,9 @@ fn token_name(token: &TokenKind) -> Option<&str> {
 fn is_relation_command(name: &str) -> bool {
     matches!(
         name,
-        "ge" | "geq"
+        "coloneqq"
+            | "ge"
+            | "geq"
             | "in"
             | "le"
             | "leq"
@@ -2240,6 +2254,7 @@ fn is_relation_command(name: &str) -> bool {
             | "subseteq"
             | "supset"
             | "supseteq"
+            | "triangleq"
     )
 }
 
@@ -2483,6 +2498,23 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template(r"a<b\leq c")),
             "system(relation(less-than,symbol(a),symbol(b)),relation(less-or-equal,symbol(b),symbol(c)))"
+        );
+    }
+
+    #[test]
+    fn lowers_definition_equality_to_the_shared_relation_ir() {
+        let expected = render_canonical(&lower_template("g(x)=\\nabla f(x)"));
+        assert_eq!(
+            render_canonical(&lower_template("g(x):=\\nabla f(x)")),
+            expected
+        );
+        assert_eq!(
+            render_canonical(&lower_template("g(x)\\coloneqq\\nabla f(x)")),
+            expected
+        );
+        assert_eq!(
+            render_canonical(&lower_template("g(x)\\triangleq\\nabla f(x)")),
+            expected
         );
     }
 
