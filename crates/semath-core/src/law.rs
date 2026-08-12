@@ -689,7 +689,7 @@ pub(crate) fn observe_laws(
             .min_by_key(|range| range.end_offset - range.start_offset);
         collect_law_expressions(expression, formula_range, &mut actuals);
     }
-    for (actual, source_envelope) in actuals {
+    for (actual, source_envelope, formula_envelope) in actuals {
         let source_envelope =
             strip_formula_presentation(&source_envelope, context.source, &source_index);
         if !semantic_evidence.formula_is_asserted(&actual.range)
@@ -850,6 +850,7 @@ pub(crate) fn observe_laws(
                 compiled,
                 actual,
                 &source_envelope,
+                &formula_envelope,
                 bindings,
                 matched_form,
                 &recognition_context,
@@ -1001,20 +1002,58 @@ fn presentation_command_end(source: &str, start: usize, limit: usize) -> Option<
 fn collect_law_expressions<'a>(
     expression: &'a SemanticExpr,
     formula_range: Option<&SourceRange>,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
 ) {
     if let SemanticExprKind::System(expressions) = &expression.kind {
-        for expression in expressions {
-            collect_law_expressions(expression, formula_range, output);
+        let disjoint = expressions
+            .windows(2)
+            .all(|pair| pair[0].range.end_offset <= pair[1].range.start_offset);
+        for (index, expression) in expressions.iter().enumerate() {
+            let segment = disjoint.then(|| {
+                let fallback = expression_source_envelope(expression);
+                SourceRange {
+                    start_offset: if index == 0 {
+                        formula_range.map_or(fallback.start_offset, |range| range.start_offset)
+                    } else {
+                        fallback.start_offset
+                    },
+                    end_offset: expressions.get(index + 1).map_or_else(
+                        || formula_range.map_or(fallback.end_offset, |range| range.end_offset),
+                        |next| next.range.start_offset,
+                    ),
+                }
+            });
+            collect_law_expressions_with_envelope(
+                expression,
+                segment.as_ref(),
+                formula_range,
+                output,
+            );
         }
     } else {
-        let source_envelope = formula_range
-            .cloned()
-            .unwrap_or_else(|| expression_source_envelope(expression));
-        output.push((expression, source_envelope.clone()));
-        for child in expression_children(expression) {
-            collect_nested_law_expressions(child, &source_envelope, output);
-        }
+        collect_law_expressions_with_envelope(expression, formula_range, formula_range, output);
+    }
+}
+
+fn collect_law_expressions_with_envelope<'a>(
+    expression: &'a SemanticExpr,
+    relation_range: Option<&SourceRange>,
+    formula_range: Option<&SourceRange>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
+) {
+    let relation_envelope = relation_range
+        .cloned()
+        .unwrap_or_else(|| expression_source_envelope(expression));
+    let formula_envelope = formula_range
+        .cloned()
+        .unwrap_or_else(|| relation_envelope.clone());
+    output.push((
+        expression,
+        relation_envelope.clone(),
+        formula_envelope.clone(),
+    ));
+    for child in expression_children(expression) {
+        collect_nested_law_expressions(child, &relation_envelope, &formula_envelope, output);
     }
 }
 
@@ -1032,17 +1071,22 @@ fn expression_source_envelope(expression: &SemanticExpr) -> SourceRange {
 fn collect_nested_law_expressions<'a>(
     expression: &'a SemanticExpr,
     source_envelope: &SourceRange,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
+    formula_envelope: &SourceRange,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
 ) {
     if matches!(
         &expression.kind,
         SemanticExprKind::Apply { operator, .. }
             if NESTED_LAW_APPLICATIONS.contains(operator.as_str())
     ) {
-        output.push((expression, source_envelope.clone()));
+        output.push((
+            expression,
+            source_envelope.clone(),
+            formula_envelope.clone(),
+        ));
     }
     for child in expression_children(expression) {
-        collect_nested_law_expressions(child, source_envelope, output);
+        collect_nested_law_expressions(child, source_envelope, formula_envelope, output);
     }
 }
 
@@ -2253,21 +2297,24 @@ fn quantity_support(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn recognition(
     compiled: &CompiledLaw,
     actual: &SemanticExpr,
     source_envelope: &SourceRange,
+    formula_envelope: &SourceRange,
     bindings: BTreeMap<String, SemanticExpr>,
     matched_form: Option<&GuardedForm>,
     context: &RecognitionContext<'_>,
     activation: Option<&LawActivationEvidence>,
 ) -> LawRecognition {
     let formula_range = formula_source_range(source_envelope, context);
+    let formula_evidence_range = formula_source_range(formula_envelope, context);
     let formula_evidence = Evidence {
         rule_id: "semantic-law-unification".into(),
         kind: "canonical-math".into(),
         strength: "hard".into(),
-        source_ranges: vec![formula_range.clone()],
+        source_ranges: vec![formula_evidence_range],
     };
     let formula_bindings = compiled
         .law
@@ -3854,7 +3901,7 @@ mod tests {
     }
 
     #[test]
-    fn neighboring_relations_share_their_authored_formula_envelope() {
+    fn neighboring_relations_keep_exact_ownership_and_shared_formula_evidence() {
         let source = "B=A^T,\\qquad C=AB";
         let expression = lower_template(source);
         let formula_range = SourceRange {
@@ -3863,15 +3910,45 @@ mod tests {
         };
         let mut actuals = Vec::new();
         collect_law_expressions(&expression, Some(&formula_range), &mut actuals);
-        let ranges = actuals
+        let (ranges, envelopes): (Vec<_>, Vec<_>) = actuals
             .iter()
-            .filter_map(|(expression, range)| {
+            .filter_map(|(expression, range, envelope)| {
                 matches!(expression.kind, SemanticExprKind::Relation { .. })
-                    .then_some(range.clone())
+                    .then_some((range.clone(), envelope.clone()))
             })
-            .collect::<Vec<_>>();
+            .unzip();
         assert_eq!(ranges.len(), 2);
-        assert_eq!(ranges, [formula_range.clone(), formula_range]);
+        assert!(ranges[0].end_offset <= ranges[1].start_offset);
+        assert_eq!(envelopes, [formula_range.clone(), formula_range]);
+    }
+
+    #[test]
+    fn neighboring_law_recognitions_have_disjoint_query_ranges() {
+        let source = "Let $K$ be energy, $p$ momentum, $m$ mass, and $v$ velocity. $K=\\tfrac12 mv^2, \\qquad p=mv$.";
+        let recognized = recognized_law_observations(source);
+        let kinetic = recognized
+            .iter()
+            .find(|law| law.law_id == "kinetic-energy-definition")
+            .unwrap();
+        let momentum = recognized
+            .iter()
+            .find(|law| law.law_id == "linear-momentum-definition")
+            .unwrap();
+        assert!(kinetic.range.end_offset <= momentum.range.start_offset);
+        let kinetic_formula = kinetic
+            .evidence
+            .iter()
+            .find(|evidence| evidence.rule_id == "semantic-law-unification")
+            .unwrap();
+        let momentum_formula = momentum
+            .evidence
+            .iter()
+            .find(|evidence| evidence.rule_id == "semantic-law-unification")
+            .unwrap();
+        assert_eq!(
+            kinetic_formula.source_ranges,
+            momentum_formula.source_ranges
+        );
     }
 
     #[test]

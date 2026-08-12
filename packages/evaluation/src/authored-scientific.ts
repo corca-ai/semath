@@ -226,6 +226,7 @@ export interface AuthoredScientificObservation {
     readonly fileId: string;
     readonly relationId: string;
     readonly range: SourceRange;
+    readonly formulaRange?: SourceRange;
     readonly roles: readonly ObservedRole[];
     readonly sourceGrounded: boolean;
   }[];
@@ -508,6 +509,7 @@ export function scoreAuthoredScientificFixture(
             expectedDocument.content,
             item.range,
             expectedAnchor.range,
+            item.formulaRange,
           ) &&
           roleInstancesMatch(item.roles, expected.roles, undefined),
       );
@@ -677,10 +679,17 @@ export function observeAuthoredRelations(
   fileId: string,
   relations: readonly RelationInfo[],
 ): AuthoredScientificObservation["relations"] {
-  return relations.map((relation) => ({
+  return relations.map((relation) => {
+    const formulaRange = relation.evidence.find(
+      (evidence) => evidence.ruleId === "semantic-law-unification",
+    )?.sourceRanges[0];
+    return {
       fileId,
       relationId: relation.relationId,
       range: relation.range,
+      ...(formulaRange && !sameRange(formulaRange, relation.range)
+        ? { formulaRange }
+        : {}),
       roles: relation.roles.map((role) => ({
         ...(role.conceptId ? { conceptId: role.conceptId } : {}),
         role: role.role,
@@ -689,7 +698,8 @@ export function observeAuthoredRelations(
       sourceGrounded:
         relation.evidence.length > 0 &&
         relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
-  }));
+    };
+  });
 }
 
 export function authoredScenarioReviewPayload(
@@ -1462,7 +1472,15 @@ export function authoredRelationRangeMatches(
   content: string,
   actual: SourceRange,
   expected: SourceRange,
+  formulaEvidence?: SourceRange,
 ): boolean {
+  if (
+    formulaEvidence &&
+    !sameRange(formulaEvidence, actual) &&
+    authoredRelationRangeMatches(content, formulaEvidence, expected)
+  ) {
+    return true;
+  }
   if (sameRange(actual, expected)) return true;
   if (
     actual.startOffset < expected.startOffset ||

@@ -49,6 +49,15 @@ describe("independently authored scientific corpus", () => {
         { startOffset: 0, endOffset: 5 },
       ),
     ).toBe(false);
+    const system = "K=\\tfrac12 mv^2, \\qquad p=mv.";
+    expect(
+      authoredRelationRangeMatches(
+        system,
+        { startOffset: 0, endOffset: system.indexOf(",") },
+        { startOffset: 0, endOffset: system.length },
+        { startOffset: 0, endOffset: system.length },
+      ),
+    ).toBe(true);
   });
 
   test("projects a reviewed relation from its own source anchor", () => {
