@@ -22,8 +22,8 @@ run("awiki", ["lint", "-r"]);
 run("sh", ["scripts/build-wasm.sh"]);
 run("sha256sum", ["-c", "SHA256SUMS"], { cwd: "lib/wasm" });
 run("bun", ["run", "package:smoke"]);
-run("bun", ["run", "continuity"]);
-run("bun", ["run", "authored:historical"]);
+run("bun", ["run", "continuity:release"]);
+run("bun", ["run", "authored:historical:release"]);
 run("bun", ["scripts/check-fresh-blind-fixture.ts"], {
   env: { SEMATH_FRESH_BLIND_FIXTURE: fixture },
 });
@@ -42,7 +42,8 @@ function required(name: string): string {
 
 function output(command: string, args: readonly string[]): string {
   const result = spawnSync(command, args, { encoding: "utf8" });
-  if (result.status !== 0) throw new Error(result.stderr || `${command} failed`);
+  if (result.status !== 0)
+    throw new Error(result.stderr || `${command} failed`);
   return result.stdout.trim();
 }
 
@@ -59,5 +60,6 @@ function run(
     env: { ...process.env, ...options.env },
     stdio: "inherit",
   });
-  if (result.status !== 0) throw new Error(`${command} ${args.join(" ")} failed`);
+  if (result.status !== 0)
+    throw new Error(`${command} ${args.join(" ")} failed`);
 }

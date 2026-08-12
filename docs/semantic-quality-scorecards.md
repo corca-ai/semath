@@ -79,8 +79,10 @@ target. The scorer weights false establishment, false conflict, and identity
 leakage above missed coverage and reports every family independently.
 Normalized holdout documents must not occur in development or generated
 fixtures. `bun run continuity:fixture` checks schema, diversity, leakage, and
-the pure scorer in ordinary CI; `bun run continuity` executes the engine only
-as a deliberate manual release gate.
+the pure scorer in ordinary CI; `bun run continuity` preserves the original
+frozen-target report. `bun run continuity:release` is the deliberate release
+gate. It applies only the reviewed decision transitions listed in release code
+and still scores every other expectation from the immutable fixture.
 
 The v0.27 authored scientific tranche adds 96 editable development scenarios
 and 48 separately authored frozen holdout scenarios. Its 212 probes observe
@@ -128,17 +130,25 @@ rejects any false establishment, false conflict, navigation or identity risk,
 fewer than 50 passing probes, or risk above 130. Tighten this dated baseline
 when coverage improves; do not weaken it to admit a regression.
 
-The 2026-08-12 v0.27 release evaluation passes 17 of 115 development probes
-(risk 404, no false establishment or false conflict) and 6 of 97 now-exposed
-historical holdout probes (risk 720). These deliberately difficult documents
-are a first-loss map, not a release pass-rate target. The holdout's single raw
-false-establishment count is a frozen contract disagreement: one lifecycle
-expects prose in a disconnected file to retract a relation in another project
-component. Semath preserves the component boundary and records the case as a
-safe remaining limit. Current first losses are 45 attachment, 74 identity or
-scope, 12 typed-fact, one safe non-propagation, 39 pack-unification, and 18
-decision cases; no current failure first localizes to neutral syntax or
-canonical IR. See
+The 2026-08-13 v0.28 pre-blind evaluation passes 50 of 115 editable development
+probes (risk 130, no false establishment, false conflict, or navigation risk).
+The immutable semantic-continuity report is 22 of 48 with raw risk 202; fifteen
+reviewed `partial` to `established` transitions now have exact source-backed
+definitions or relations. Applying only those explicit adjudications produces
+the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
+cases stay visible as coverage work.
+
+The now-exposed historical authored holdout remains 6 of 97 with risk 720.
+These deliberately difficult documents are a first-loss map, not a release
+pass-rate target. Its two raw false-establishment counts are exact, reviewed
+frozen-contract disagreements. One lifecycle expects prose in a disconnected
+project component to retract a relation in another component; Semath preserves
+the dependency boundary. The other expects `partial` for prose that directly
+asserts an overlap as \(A\cap B\); the current source-grounded entity decision is
+`established`. The release gate permits only these named, proof-grounded cases
+and rejects substitution by any new false establishment. Current historical
+first losses are 23 attachment, 42 identity or scope, 10 typed-fact, 12
+pack-unification, and four decision cases. See
 [Pack maturity](pack-maturity.md) for interpretation by capability.
 
 Evaluated laws require
@@ -167,9 +177,12 @@ mkdir -p .artifacts && bun run domain:baseline
 bun run domain:challenge
 mkdir -p .artifacts && bun run continuity:baseline
 bun run continuity
+bun run continuity:release
 mkdir -p .artifacts && bun run authored:baseline
 bun run authored
 bun run authored:development
+bun run authored:development:release
+bun run authored:historical:release
 bun run corpus
 bun run corpus:generate:check
 bun run foundation

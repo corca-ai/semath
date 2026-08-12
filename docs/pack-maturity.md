@@ -62,33 +62,31 @@ holds approved support policy; GitHub issues hold planned work.
   `0380421` after its 96 development scenarios were reviewed and its 48 holdout
   scenarios were separately reviewed and frozen before engine execution. The
   baseline passed 7 of 115 development probes with risk 484 and 4 of 97 holdout
-  probes with risk 732. The current release passes 17 development probes with
-  risk 404 and 6 historical holdout probes with risk 720. Development has no
-  false establishment or false conflict. The holdout reports one raw false
-  establishment because its stage-6 expectation asks prose in a disconnected
-  file to retract an established relation in another component; preserving the
-  component boundary is the safer engine behavior, so the frozen expectation is
-  retained and documented rather than matched by global string retraction. The
-  current first losses localize as follows:
+  probes with risk 732. The v0.28 pre-blind release passes 50 development probes
+  with risk 130 and 6 historical holdout probes with risk 720. Development has
+  no false establishment, false conflict, or navigation risk. The frozen
+  holdout has two exact, reviewed source-grounded contract disagreements. One
+  asks prose in a disconnected file to retract an established relation in
+  another component; preserving the component boundary is safer. The other
+  expects a partial decision where the source directly states that an overlap
+  is \(A\cap B\). The release policy names these cases and rejects any new or
+  ungrounded substitution. The current first losses localize as follows:
 
   | First loss | Development | Holdout |
   | --- | ---: | ---: |
   | Neutral syntax | 0 | 0 |
-  | Prose attachment | 26 | 19 |
-  | Identity or scope | 26 | 48 |
+  | Prose attachment | 25 | 23 |
+  | Identity or scope | 3 | 42 |
   | Canonical IR | 0 | 0 |
-  | Typed fact or condition | 9 | 3 |
-  | Local-to-observation propagation | 1 | 0 |
-  | Pack unification | 21 | 18 |
-  | Decision | 15 | 3 |
+  | Typed fact or condition | 23 | 10 |
+  | Local-to-observation propagation | 0 | 0 |
+  | Pack unification | 13 | 12 |
+  | Decision | 1 | 4 |
   | Host projection | Not exercised | Not exercised |
 
   The scorer reuses the existing recognition-frontier signals and queries
   each reviewed relation at its original equation. A low propagation count
-  does not by itself prove that propagation is complete. The one development
-  propagation expectation asks an unrelated earlier relation to appear at a
-  later equation with no shared entity or derivation edge; Semath safely keeps
-  it local. The measured order of work is
+  does not by itself prove that propagation is complete. The measured order of work is
   identity/scope, local pack and prose recognition, then canonical or typed
   gaps. Host parity remains release evidence rather than a native-baseline
   inference.

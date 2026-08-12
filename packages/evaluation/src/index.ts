@@ -1,4 +1,5 @@
 export * from "./authored-integrity";
+export * from "./authored-historical-release";
 export * from "./authored-release-gate";
 export * from "./authored-first-loss";
 export * from "./authored-scientific";
@@ -18,6 +19,7 @@ export * from "./observation";
 export * from "./pack-properties";
 export * from "./recognition-frontier";
 export * from "./semantic-continuity";
+export * from "./semantic-continuity-release";
 export * from "./runner";
 export * from "./scorecard";
 export * from "./synthetic";
