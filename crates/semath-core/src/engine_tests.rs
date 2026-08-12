@@ -142,6 +142,32 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
 }
 
 #[test]
+fn differential_variable_owns_both_cursor_edges_inside_the_composite() {
+    let content = "Let $x$ denote position. In $\\frac{dx}{dt}$, inspect $dx$.";
+    let start = content.find("dx}{dt}").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    for offset in [start, start + 1] {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        let symbol = view.symbol.expect("differential variable focus");
+        assert_eq!(symbol.symbol, "x");
+        assert_eq!(symbol.source_notation, "x");
+    }
+}
+
+#[test]
 fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
     let content = "Let $x$ denote the input.";
     let offset = content.find('x').unwrap() as u32;
