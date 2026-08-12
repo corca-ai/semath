@@ -3583,6 +3583,18 @@ impl SemathEngine {
         });
         let context =
             self.semantic_context(observations, semantic_focus, offset, &context_formulas);
+        let symbol_definition_may_establish = queried_relation.is_none_or(|relation| {
+            observations
+                .semantic_evidence()
+                .formula_is_asserted(&relation.range)
+        });
+        let symbol_proof = if symbol_definition_may_establish {
+            symbol_info.as_ref().map_or_else(Vec::new, |symbol| {
+                asserted_definition_evidence(&self.index.semantic, symbol)
+            })
+        } else {
+            Vec::new()
+        };
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -3665,6 +3677,7 @@ impl SemathEngine {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &local_formulas,
             symbol: semantic_focus.and(symbol_info.as_ref()),
+            symbol_proof: &symbol_proof,
             candidates: &context.candidates,
             diagnostics: &diagnostics,
             engine_limited,
@@ -4143,6 +4156,46 @@ impl SemathEngine {
         }
         self.index.order = project_order;
     }
+}
+
+fn asserted_definition_evidence(
+    index: &ProjectSemanticIndex,
+    symbol: &SymbolInfo,
+) -> Vec<Evidence> {
+    let (Some(entity), Some(occurrence)) = (
+        symbol.entity_id.as_ref(),
+        index.occurrence(&symbol.occurrence_id),
+    ) else {
+        return Vec::new();
+    };
+    let claims = index
+        .claims_for_entity_at(entity, occurrence)
+        .into_iter()
+        .filter(|claim| {
+            matches!(
+                claim.predicate,
+                ClaimPredicate::Defines | ClaimPredicate::Abbreviates
+            )
+        })
+        .collect::<Vec<_>>();
+    let mut evidence = claims
+        .iter()
+        .filter_map(|claim| {
+            let record = index.evidence(&claim.evidence_id)?;
+            let opposed = claims.iter().any(|other| {
+                other.predicate == claim.predicate
+                    && other.object == claim.object
+                    && index
+                        .evidence(&other.evidence_id)
+                        .is_some_and(|other_record| other_record.polarity != record.polarity)
+            });
+            (decide_fact(record, opposed) == EntityFactDisposition::Certain)
+                .then(|| semantic_evidence(index, record, "source-definition", "hard"))
+        })
+        .collect::<Vec<_>>();
+    evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
+    evidence.dedup();
+    evidence
 }
 
 fn compositional_surface(
