@@ -507,7 +507,18 @@ struct RecognitionContext<'a> {
     consistency: &'a RoleObservations,
     assumptions: &'a [AssumptionInfo],
     external: &'a ExternalTypeEnvironment,
+    positive_facts: &'a [PositiveFormulaFact],
 }
+
+#[derive(Clone, Debug)]
+struct PositiveFormulaFact {
+    expression: SemanticExpr,
+    evidence_range: SourceRange,
+}
+
+const MAX_STRUCTURAL_FACT_NODES: usize = 256;
+const MAX_POSITIVE_FACTS: usize = 256;
+const MAX_POSITIVE_FACTS_PER_SYSTEM: usize = 64;
 
 pub(crate) struct LawAnalysisContext<'a> {
     pub(crate) source: &'a str,
@@ -703,6 +714,7 @@ pub(crate) fn observe_laws(
     context: &LawAnalysisContext<'_>,
 ) -> LawObservations {
     let source_index = SourceIndex::new(context.source);
+    let positive_facts = collect_positive_formula_facts(canonical_expressions);
     let recognition_context = RecognitionContext {
         source: context.source,
         source_index: &source_index,
@@ -711,6 +723,7 @@ pub(crate) fn observe_laws(
         consistency: context.consistency,
         assumptions: context.assumptions,
         external: context.external,
+        positive_facts: &positive_facts,
     };
     let mut recognitions = Vec::<LawRecognition>::new();
     let mut equivalence_states = 0;
@@ -820,7 +833,12 @@ pub(crate) fn observe_laws(
                     &actual.range,
                     context.consistency,
                     context.external,
-                )
+                ) || compiled.law.roles.iter().all(|role| {
+                    bindings.get(&role.id).is_some_and(|expression| {
+                        formula_operator_role_support(role, expression, actual)
+                            == RoleSupport::Supported
+                    })
+                })
             });
             if !compiled.law.activation_phrases.is_empty()
                 && activation.is_none()
@@ -865,6 +883,7 @@ pub(crate) fn observe_laws(
                 let supported = roles_are_supported(
                     &compiled.law.roles,
                     bindings,
+                    actual,
                     inferred_role.as_deref(),
                     actual.range.start_offset,
                     role_context_activated,
@@ -1996,6 +2015,7 @@ fn equivalent(left: &SemanticExpr, right: &SemanticExpr) -> bool {
 fn roles_are_supported(
     roles: &[PackLawRole],
     bindings: &BTreeMap<String, SemanticExpr>,
+    actual: &SemanticExpr,
     inferred_role: Option<&str>,
     offset: u32,
     notation_context_activated: bool,
@@ -2014,6 +2034,11 @@ fn roles_are_supported(
         let Some(expression) = bindings.get(&role.id) else {
             return false;
         };
+        if formula_operator_role_support(role, expression, actual) == RoleSupport::Supported {
+            supported += 1;
+            supported_roles.insert(role.id.as_str());
+            continue;
+        }
         match structural_operator_role_support(role, expression, offset, consistency, external) {
             RoleSupport::Supported => {
                 supported += 1;
@@ -2067,6 +2092,64 @@ fn roles_are_supported(
             && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
                 || (roles.len() == 2 && supported == 1 && unresolved == 1)))
         || formula_identified
+}
+
+fn formula_operator_role_support(
+    role: &PackLawRole,
+    expression: &SemanticExpr,
+    formula: &SemanticExpr,
+) -> RoleSupport {
+    let expected_symbols = semantic_leaf_symbols(expression);
+    if expected_symbols.is_empty() {
+        return RoleSupport::Unresolved;
+    }
+    let supported = expression_any(formula, |candidate| {
+        let SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } = &candidate.kind
+        else {
+            return false;
+        };
+        OPERATOR_TYPES.iter().any(|signature| {
+            signature.operator == operator.value
+                && signature.operand_concepts.len() == arguments.len()
+                && arguments
+                    .iter()
+                    .zip(&signature.operand_concepts)
+                    .any(|(argument, concept)| {
+                        if !concepts_share_lineage(concept, &role.concept) {
+                            return false;
+                        }
+                        let argument_symbols = semantic_leaf_symbols(argument);
+                        expected_symbols
+                            .iter()
+                            .all(|symbol| argument_symbols.contains(symbol))
+                    })
+        })
+    });
+    if supported {
+        RoleSupport::Supported
+    } else {
+        RoleSupport::Unresolved
+    }
+}
+
+fn expression_any(
+    expression: &SemanticExpr,
+    mut predicate: impl FnMut(&SemanticExpr) -> bool,
+) -> bool {
+    let mut pending = vec![expression];
+    for _ in 0..MAX_STRUCTURAL_FACT_NODES {
+        let Some(candidate) = pending.pop() else {
+            return false;
+        };
+        if predicate(candidate) {
+            return true;
+        }
+        pending.extend(expression_children(candidate).into_iter().rev());
+    }
+    false
 }
 
 fn structural_operator_role_support(
@@ -2515,6 +2598,7 @@ fn recognition(
                 context.consistency,
                 context.assumptions,
                 context.external,
+                context.positive_facts,
                 activation.map(|activation| &activation.evidence),
             );
             LawConditionInfo {
@@ -2753,6 +2837,7 @@ fn condition_evidence(
     consistency: &RoleObservations,
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
+    positive_facts: &[PositiveFormulaFact],
     law_activation: Option<&Evidence>,
 ) -> (Vec<Evidence>, bool) {
     let offset = formula_range.start_offset;
@@ -2792,6 +2877,14 @@ fn condition_evidence(
         external,
     );
     if let Some(condition_evidence) = &structural_condition {
+        push_evidence(&mut evidence, condition_evidence.clone());
+    }
+    let formula_fact = (kind == PackConditionKind::Positive)
+        .then(|| {
+            positive_condition_evidence(subjects, bindings, actual, formula_range, positive_facts)
+        })
+        .flatten();
+    if let Some(condition_evidence) = &formula_fact {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
     if kind == PackConditionKind::DomainMembership
@@ -2869,6 +2962,7 @@ fn condition_evidence(
         evidence,
         semantic_condition.is_some()
             || structural_condition.is_some()
+            || formula_fact.is_some()
             || proved_subjects == subjects.len(),
     )
 }
@@ -2922,6 +3016,16 @@ fn structural_condition_evidence(
             source_ranges: vec![actual.range.clone()],
         });
     }
+    if condition.kind == PackConditionKind::SameContext
+        && typed_operator_groups_roles(&condition.subjects, roles, bindings, actual)
+    {
+        return Some(Evidence {
+            rule_id: "typed-operator/shared-context".into(),
+            kind: "canonical-binding".into(),
+            strength: "hard".into(),
+            source_ranges: vec![actual.range.clone()],
+        });
+    }
     if condition.kind != PackConditionKind::SameContext || condition.subjects.len() != 2 {
         return None;
     }
@@ -2956,6 +3060,192 @@ fn structural_condition_evidence(
         kind: "canonical-binding".into(),
         strength: "hard".into(),
         source_ranges: vec![actual.range.clone()],
+    })
+}
+
+fn typed_operator_groups_roles(
+    subjects: &[String],
+    roles: &[PackLawRole],
+    bindings: &BTreeMap<String, SemanticExpr>,
+    actual: &SemanticExpr,
+) -> bool {
+    if subjects.len() < 2 {
+        return false;
+    }
+    let subject_roles = subjects
+        .iter()
+        .map(|subject| {
+            Some((
+                roles.iter().find(|role| role.id == *subject)?,
+                bindings.get(subject)?,
+            ))
+        })
+        .collect::<Option<Vec<_>>>();
+    let Some(subject_roles) = subject_roles else {
+        return false;
+    };
+    expression_any(actual, |candidate| {
+        let SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } = &candidate.kind
+        else {
+            return false;
+        };
+        OPERATOR_TYPES.iter().any(|signature| {
+            signature.operator == operator.value
+                && signature.operand_concepts.len() == arguments.len()
+                && arguments
+                    .iter()
+                    .zip(&signature.operand_concepts)
+                    .any(|(argument, expected)| {
+                        let available = semantic_leaf_symbols(argument);
+                        subject_roles.iter().all(|(role, binding)| {
+                            concepts_share_lineage(&role.concept, expected)
+                                && semantic_leaf_symbols(binding)
+                                    .iter()
+                                    .all(|symbol| available.contains(symbol))
+                        })
+                    })
+        })
+    })
+}
+
+fn collect_positive_formula_facts(expressions: &[SemanticExpr]) -> Vec<PositiveFormulaFact> {
+    let mut facts = Vec::new();
+    let mut visited = 0;
+    for expression in expressions {
+        collect_positive_facts_from_expression(expression, &mut facts, &mut visited);
+        if facts.len() >= MAX_POSITIVE_FACTS || visited >= MAX_STRUCTURAL_FACT_NODES {
+            break;
+        }
+    }
+    facts
+}
+
+fn collect_positive_facts_from_expression(
+    expression: &SemanticExpr,
+    output: &mut Vec<PositiveFormulaFact>,
+    visited: &mut usize,
+) {
+    if output.len() >= MAX_POSITIVE_FACTS || *visited >= MAX_STRUCTURAL_FACT_NODES {
+        return;
+    }
+    *visited += 1;
+    let relations = match &expression.kind {
+        SemanticExprKind::System(items) => items
+            .iter()
+            .take(MAX_POSITIVE_FACTS_PER_SYSTEM)
+            .collect::<Vec<_>>(),
+        SemanticExprKind::Relation { .. } => vec![expression],
+        _ => Vec::new(),
+    };
+    let equalities = relations
+        .iter()
+        .filter_map(|relation| {
+            let SemanticExprKind::Relation {
+                operator,
+                left,
+                right,
+            } = &relation.kind
+            else {
+                return None;
+            };
+            (operator == "equals").then_some((left.as_ref(), right.as_ref()))
+        })
+        .collect::<Vec<_>>();
+    let mut positive = relations
+        .iter()
+        .filter_map(|relation| {
+            let SemanticExprKind::Relation {
+                operator,
+                left,
+                right,
+            } = &relation.kind
+            else {
+                return None;
+            };
+            if operator == "greater-than" && is_additive_zero(right) {
+                Some((*left.clone(), relation.range.clone()))
+            } else if operator == "less-than" && is_additive_zero(left) {
+                Some((*right.clone(), relation.range.clone()))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    let mut cursor = 0;
+    while cursor < positive.len() && positive.len() < MAX_POSITIVE_FACTS_PER_SYSTEM {
+        let (known, range) = positive[cursor].clone();
+        for (left, right) in &equalities {
+            let propagated = if equivalent(&known, left) {
+                Some((*right).clone())
+            } else if equivalent(&known, right) {
+                Some((*left).clone())
+            } else {
+                None
+            };
+            if let Some(propagated) = propagated
+                && !positive
+                    .iter()
+                    .any(|(candidate, _)| equivalent(candidate, &propagated))
+            {
+                positive.push((propagated, range.clone()));
+            }
+        }
+        cursor += 1;
+    }
+    output.extend(
+        positive
+            .into_iter()
+            .take(MAX_POSITIVE_FACTS - output.len())
+            .map(|(expression, evidence_range)| PositiveFormulaFact {
+                expression,
+                evidence_range,
+            }),
+    );
+    for child in expression_children(expression) {
+        if !matches!(expression.kind, SemanticExprKind::System(_))
+            || matches!(child.kind, SemanticExprKind::System(_))
+        {
+            collect_positive_facts_from_expression(child, output, visited);
+        }
+    }
+}
+
+fn positive_condition_evidence(
+    subjects: &[String],
+    bindings: &BTreeMap<String, SemanticExpr>,
+    actual: &SemanticExpr,
+    formula_range: &SourceRange,
+    facts: &[PositiveFormulaFact],
+) -> Option<Evidence> {
+    let subject = bindings.get(subjects.first()?)?;
+    let subject_symbols = semantic_leaf_symbols(subject);
+    let fact = facts.iter().find(|fact| {
+        fact.evidence_range.end_offset <= formula_range.start_offset
+            && (equivalent(subject, &fact.expression)
+                || application_with_symbols_matches(actual, &subject_symbols, &fact.expression))
+    })?;
+    Some(Evidence {
+        rule_id: "canonical-propagation/positive-equality".into(),
+        kind: "canonical-binding".into(),
+        strength: "hard".into(),
+        source_ranges: vec![fact.evidence_range.clone()],
+    })
+}
+
+fn application_with_symbols_matches(
+    expression: &SemanticExpr,
+    symbols: &[String],
+    expected: &SemanticExpr,
+) -> bool {
+    expression_any(expression, |candidate| {
+        if !matches!(candidate.kind, SemanticExprKind::Apply { .. }) {
+            return false;
+        }
+        let available = semantic_leaf_symbols(candidate);
+        symbols.iter().all(|symbol| available.contains(symbol)) && equivalent(candidate, expected)
     })
 }
 
@@ -3593,6 +3883,42 @@ mod tests {
             ),
             ["conditional-probability", "event-intersection"]
         );
+        let authored = recognized_law_observations(
+            "Let $A$ denote a request timing out and $B$ the request having entered the retry path. In sampled traffic, $P(A\\cap B)=0.012$ and $P(B)=0.08>0$. Among those requests, $P(A\\mid B)=\\frac{P(A\\cap B)}{P(B)}=0.15$.",
+        )
+        .into_iter()
+        .find(|law| law.law_id == "conditional-probability")
+        .unwrap();
+        assert_eq!(authored.status, LawRecognitionStatus::Verified);
+        assert!(
+            authored
+                .conditions
+                .iter()
+                .flat_map(|condition| &condition.evidence)
+                .any(|evidence| {
+                    matches!(
+                        evidence.rule_id.as_str(),
+                        "typed-operator/shared-context" | "canonical-propagation/positive-equality"
+                    )
+                })
+        );
+        let missing_positive = recognized_law_observations(
+            "Use $P(A\\mid B)=\\frac{P(A\\cap B)}{P(B)}$ without a positivity premise.",
+        )
+        .into_iter()
+        .find(|law| law.law_id == "conditional-probability")
+        .unwrap();
+        assert_eq!(
+            missing_positive.status,
+            LawRecognitionStatus::ConditionMissing
+        );
+        let combined_premise = recognized_law_observations(
+            "Let $A$ denote a request timing out and $B$ the retry event. The sample gives $P(A\\cap B)=0.012,\\qquad P(B)=0.08>0$. Then $P(A\\mid B)=\\frac{P(A\\cap B)}{P(B)}=0.15$.",
+        )
+        .into_iter()
+        .find(|law| law.law_id == "conditional-probability")
+        .unwrap();
+        assert_eq!(combined_premise.status, LawRecognitionStatus::Verified);
         assert_eq!(
             recognized_laws(
                 "Let $A$ and $B$ be events. Conditional probability is $\\mathbb{P}(A\\mid B)=\\frac{\\mathbb{P}(A\\cap B)}{\\mathbb{P}(B)}$."

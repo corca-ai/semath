@@ -785,7 +785,30 @@ fn syntax_provenance(node: &crate::NotationNode) -> Vec<SourceRange> {
 
 fn coalesce_numbers(tokens: Vec<Token>) -> Vec<Token> {
     let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
-    for token in tokens {
+    let mut input = tokens.into_iter().peekable();
+    while let Some(mut token) = input.next() {
+        if let TokenKind::Number(number) = &mut token.kind
+            && let Some(decimal) = input.peek()
+            && matches!(decimal.kind, TokenKind::Operator('.'))
+            && token.range.end_offset == decimal.range.start_offset
+            && token.provenance == decimal.provenance
+        {
+            let decimal = input.next().expect("peeked decimal token");
+            if let Some(fraction) = input.peek()
+                && let TokenKind::Number(fractional_digits) = &fraction.kind
+                && decimal.range.end_offset == fraction.range.start_offset
+                && decimal.provenance == fraction.provenance
+            {
+                number.push('.');
+                number.push_str(fractional_digits);
+                let fraction = input.next().expect("peeked fractional digits");
+                token.range.end_offset = fraction.range.end_offset;
+            } else {
+                output.push(token);
+                output.push(decimal);
+                continue;
+            }
+        }
         if let Some(previous) = output.last_mut()
             && let (TokenKind::Number(left), TokenKind::Number(right)) =
                 (&mut previous.kind, &token.kind)
@@ -3077,6 +3100,55 @@ mod tests {
         assert_eq!(
             render_canonical(&expression),
             "relation(equals,apply(v,symbol(t)),product(symbol(R),apply(i,symbol(t))))"
+        );
+    }
+
+    #[test]
+    fn snapshot_lowering_keeps_decimal_relations_separate_across_spacing() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
+            "language": "latex", "content": "P(A\\cap B)=0.012,\\qquad P(B)=0.08>0.", "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"P","lexicalClass":"identifier"},
+                {"kind":"token","parent":4,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"A","lexicalClass":"identifier"},
+                {"kind":"command","parent":4,"children":[],"ranges":{"full":{"startOffset":3,"endOffset":7}},"state":"complete","name":"cap","mathClass":"binary"},
+                {"kind":"token","parent":4,"children":[],"ranges":{"full":{"startOffset":8,"endOffset":9}},"state":"complete","text":"B","lexicalClass":"identifier"},
+                {"kind":"delimiter","parent":24,"children":[1,2,3],"ranges":{"full":{"startOffset":1,"endOffset":10}},"state":"complete","name":"()"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":10,"endOffset":11}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":11,"endOffset":12}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":12,"endOffset":13}},"state":"complete","text":".","lexicalClass":"other"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":13,"endOffset":14}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":14,"endOffset":15}},"state":"complete","text":"1","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":15,"endOffset":16}},"state":"complete","text":"2","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":16,"endOffset":17}},"state":"complete","text":",","lexicalClass":"punctuation"},
+                {"kind":"command","parent":24,"children":[],"ranges":{"full":{"startOffset":17,"endOffset":23}},"state":"complete","name":"qquad"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":24,"endOffset":25}},"state":"complete","text":"P","lexicalClass":"identifier"},
+                {"kind":"token","parent":15,"children":[],"ranges":{"full":{"startOffset":26,"endOffset":27}},"state":"complete","text":"B","lexicalClass":"identifier"},
+                {"kind":"delimiter","parent":24,"children":[14],"ranges":{"full":{"startOffset":25,"endOffset":28}},"state":"complete","name":"()"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":28,"endOffset":29}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":29,"endOffset":30}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":30,"endOffset":31}},"state":"complete","text":".","lexicalClass":"other"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":31,"endOffset":32}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":32,"endOffset":33}},"state":"complete","text":"8","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":33,"endOffset":34}},"state":"complete","text":">","lexicalClass":"operator"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":34,"endOffset":35}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":35,"endOffset":36}},"state":"complete","text":".","lexicalClass":"other"},
+                {"kind":"sequence","parent":null,"children":[0,4,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,22,23],"ranges":{"full":{"startOffset":0,"endOffset":36}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":24,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":36},"contentRange":{"startOffset":0,"endOffset":36},"state":"complete"}],
+            "visibleProse": [], "scopes": [], "blocks": [], "declarations": [], "mathRegions": [], "macros": [], "includes": []
+        }))
+        .unwrap();
+
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &document,
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 36,
+                },
+            )),
+            "system(relation(equals,apply(P,apply(intersection,symbol(A),symbol(B))),number(0.012)),system(relation(equals,apply(P,symbol(B)),number(0.08)),relation(greater-than,number(0.08),number(0))))"
         );
     }
 

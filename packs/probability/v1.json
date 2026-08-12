@@ -46,6 +46,16 @@
       ]
     },
     {
+      "id": "probability",
+      "conceptKind": "quantity",
+      "title": "Probability value",
+      "description": "A scalar probability assigned to a measurable event.",
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
       "id": "scalar-coefficient",
       "conceptKind": "quantity",
       "title": "Scalar coefficient",
@@ -307,6 +317,22 @@
     }
   ],
   "operators": [
+    {
+      "id": "probability",
+      "topic": "events",
+      "description": "Probability assigned to an event expression.",
+      "notation": [
+        "P(A)"
+      ],
+      "operandConcepts": [
+        "probability:event"
+      ],
+      "resultConcept": "probability:probability",
+      "resultShape": "scalar",
+      "references": [
+        "probability-theory"
+      ]
+    },
     {
       "id": "expectation",
       "topic": "moments",
