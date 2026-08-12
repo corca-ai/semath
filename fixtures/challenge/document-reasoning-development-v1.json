@@ -415,13 +415,14 @@
       "review": {
         "correctionSummary": [
           "Separated the negated proposal and accepted gradient specialization into lifecycle snapshots and probes.",
-          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "7a31599795d4b7d18bf48cf40418027bf9659396bfd83a3b962727af2bcfd650",
+        "finalDigest": "8f396edc6f58089da70d9e9e816e6dcb80d1775d08e51bb5198cc999ee84a2d5",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "7a31599795d4b7d18bf48cf40418027bf9659396bfd83a3b962727af2bcfd650",
+        "semanticReviewDigest": "8f396edc6f58089da70d9e9e816e6dcb80d1775d08e51bb5198cc999ee84a2d5",
         "status": "corrected"
       },
       "snapshots": [
@@ -1377,13 +1378,14 @@
       "review": {
         "correctionSummary": [
           "Rebuilt include boundaries and clarified covariance, process noise, battery capacity, and discharge sign.",
-          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "ad9ebb8e4e4dd655368248d96bd9bb192ddde754977e62b9f9f3fc7d7e0b1dac",
+        "finalDigest": "485a68213b3556b6dbd142a34cf8826f8d82af77ca4e9dfd90942d959ed6ca01",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "ad9ebb8e4e4dd655368248d96bd9bb192ddde754977e62b9f9f3fc7d7e0b1dac",
+        "semanticReviewDigest": "485a68213b3556b6dbd142a34cf8826f8d82af77ca4e9dfd90942d959ed6ca01",
         "status": "corrected"
       },
       "snapshots": [
@@ -1680,13 +1682,14 @@
       "review": {
         "correctionSummary": [
           "Split the exclusive intersection and union alternatives into independently scored math probes.",
-          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "7c2ae55d72543f3ff6e5d1ee7744a6daee24aad96249722910d216365abae7cd",
+        "finalDigest": "622a55b5aed942a9d5d40359b18f2135f58cc625e9c8ed51db6a551a70e8e8e1",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "7c2ae55d72543f3ff6e5d1ee7744a6daee24aad96249722910d216365abae7cd",
+        "semanticReviewDigest": "622a55b5aed942a9d5d40359b18f2135f58cc625e9c8ed51db6a551a70e8e8e1",
         "status": "corrected"
       },
       "snapshots": [
@@ -2080,7 +2083,8 @@
       },
       "review": {
         "correctionSummary": [
-          "Replaced non-portable display-dollar equation tags with equation environments."
+          "Replaced non-portable display-dollar equation tags with equation environments.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "physics-development-review",
         "finalDigest": "ea43a2774baaeb150145c8bf044266ebf69396eddc10f63ea56d948c561aa293",
@@ -3505,13 +3509,14 @@
       "review": {
         "correctionSummary": [
           "Rewrote sampled givens, positive denominator, reviewed calculation, and decision as explicit stages.",
-          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "5dd849b2ce57ee5a0b6282e0dc59bf6070a7dd35df9e9f80cb45a66ac7c6c528",
+        "finalDigest": "aaac357dc5ddada165507721b1a2da3fb86315857309e50cea1da00687ca4d5e",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "5dd849b2ce57ee5a0b6282e0dc59bf6070a7dd35df9e9f80cb45a66ac7c6c528",
+        "semanticReviewDigest": "aaac357dc5ddada165507721b1a2da3fb86315857309e50cea1da00687ca4d5e",
         "status": "corrected"
       },
       "snapshots": [
@@ -4107,13 +4112,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Kept the pre-declaration query partial instead of granting a relation from later role declarations."
+          "Kept the pre-declaration query partial instead of granting a relation from later role declarations.",
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "5efea26ada89d6475ae63e1e72ef055dec8a0c8e5b9435ad805ad67be04900e4",
+        "finalDigest": "4021e44b958b8532c3a7118969270e81c2ea701547b3b9a45e6978a798d7018b",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "5efea26ada89d6475ae63e1e72ef055dec8a0c8e5b9435ad805ad67be04900e4",
+        "semanticReviewDigest": "4021e44b958b8532c3a7118969270e81c2ea701547b3b9a45e6978a798d7018b",
         "status": "corrected"
       },
       "snapshots": [
@@ -6158,7 +6164,16 @@
             "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "cell-budget.tex",
+              "needle": "C(t)=C_0",
+              "selection": {
+                "offset": 0,
+                "length": 1
+              }
+            },
+            "placeholder": "C"
           },
           "references": {
             "status": "available",
@@ -6192,10 +6207,23 @@
             "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "cell-budget.tex",
+                "needle": "C(t)=C_0",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "D",
+            "replacementText": "D",
+            "safety": "deterministic",
+            "expectedText": "C"
           }
         },
         "proofGrounded": true,
@@ -6552,7 +6580,16 @@
             "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "design/filter-composition.md",
+              "needle": "R=A\\cap B",
+              "selection": {
+                "offset": 8,
+                "length": 1
+              }
+            },
+            "placeholder": "B"
           },
           "references": {
             "status": "available",
@@ -6586,10 +6623,23 @@
             "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cap B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "C",
+            "replacementText": "C",
+            "safety": "deterministic",
+            "expectedText": "B"
           }
         },
         "proofGrounded": false,
@@ -9234,9 +9284,9 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "retry-analysis.md",
         "needle": "P(A\\mid B)",
+        "offset": 3,
         "snapshotId": "current"
       },
       "expected": {
@@ -9249,13 +9299,31 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "retry-analysis.md",
+                "needle": "Let \\(A\\) denote",
+                "selection": {
+                  "offset": 6,
+                  "length": 1
+                }
+              }
+            ],
+            "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "retry-analysis.md",
+              "needle": "P(A\\mid B)",
+              "selection": {
+                "offset": 2,
+                "length": 1
+              }
+            },
+            "placeholder": "A"
           },
           "references": {
             "status": "available",
@@ -9263,27 +9331,26 @@
             "required": [
               {
                 "fileId": "retry-analysis.md",
-                "needle": "P(A\\mid B)",
+                "needle": "Let \\(A\\) denote",
                 "selection": {
-                  "offset": 0,
+                  "offset": 6,
                   "length": 1
                 }
               },
               {
                 "fileId": "retry-analysis.md",
                 "needle": "P(A\\cap B)",
-                "occurrence": 1,
+                "occurrence": 0,
                 "selection": {
-                  "offset": 0,
+                  "offset": 2,
                   "length": 1
                 }
               },
               {
                 "fileId": "retry-analysis.md",
-                "needle": "P(B)",
-                "occurrence": 1,
+                "needle": "P(A\\mid B)",
                 "selection": {
-                  "offset": 0,
+                  "offset": 2,
                   "length": 1
                 }
               }
@@ -9291,10 +9358,23 @@
             "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "retry-analysis.md",
+                "needle": "P(A\\mid B)",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "C",
+            "replacementText": "C",
+            "safety": "deterministic",
+            "expectedText": "A"
           }
         },
         "proofGrounded": true,
@@ -9317,7 +9397,16 @@
             ],
             "sourceGrounded": true
           }
-        ]
+        ],
+        "symbol": "A",
+        "cursorOccurrence": {
+          "fileId": "retry-analysis.md",
+          "needle": "P(A\\mid B)",
+          "selection": {
+            "offset": 2,
+            "length": 1
+          }
+        }
       },
       "family": "guarded-condition",
       "id": "probability-development-retry-conditional",
@@ -10321,7 +10410,16 @@
             "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "draft.md",
+              "needle": "g(x):=\\nabla f(x)",
+              "selection": {
+                "offset": 13,
+                "length": 1
+              }
+            },
+            "placeholder": "f"
           },
           "references": {
             "status": "available",
@@ -10347,10 +10445,23 @@
             "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "draft.md",
+                "needle": "g(x):=\\nabla f(x)",
+                "selection": {
+                  "offset": 13,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "h",
+            "replacementText": "h",
+            "safety": "deterministic",
+            "expectedText": "f"
           }
         },
         "proofGrounded": true,
@@ -10413,7 +10524,16 @@
             "excluded": []
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "design/filter-composition.md",
+              "needle": "R=A\\cup B",
+              "selection": {
+                "offset": 8,
+                "length": 1
+              }
+            },
+            "placeholder": "B"
           },
           "references": {
             "status": "available",
@@ -10447,10 +10567,23 @@
             "excluded": []
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "design/filter-composition.md",
+                "needle": "R=A\\cup B",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "C",
+            "replacementText": "C",
+            "safety": "deterministic",
+            "expectedText": "B"
           }
         },
         "proofGrounded": false,
@@ -11511,7 +11644,16 @@
             "status": "unavailable"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "status": "available",
+            "range": {
+              "fileId": "procedures/air-jet-reduction.tex",
+              "needle": "A$ is the exposed plate area",
+              "selection": {
+                "offset": 0,
+                "length": 1
+              }
+            },
+            "placeholder": "A"
           },
           "references": {
             "excluded": [],
@@ -11520,10 +11662,23 @@
             "status": "unavailable"
           },
           "rename": {
+            "status": "available",
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "procedures/air-jet-reduction.tex",
+                "needle": "A$ is the exposed plate area",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "newName": "B",
+            "replacementText": "B",
+            "safety": "deterministic",
+            "expectedText": "A"
           }
         },
         "proofGrounded": true,

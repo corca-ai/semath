@@ -275,7 +275,11 @@ function runProbe(
     { ...target, kind: "definition" },
     { ...target, kind: "references" },
     { ...target, kind: "prepareRename" },
-    { ...target, kind: "rename", newName: "renamed" },
+    {
+      ...target,
+      kind: "rename",
+      newName: probe.expected.navigation.rename.newName ?? "renamed",
+    },
     { fileId: probe.cursor.fileId, kind: "diagnostics" },
     ...relationTargets.map((source) => ({
       fileId: source.anchor.fileId,

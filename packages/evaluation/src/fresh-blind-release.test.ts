@@ -44,6 +44,24 @@ describe("fresh blind release evidence", () => {
     expect(() => finalize(sameWorker)).toThrow("critic must be independent");
   });
 
+  test("requires exact reviewed evidence for every available rename", () => {
+    const value = fixtureValue();
+    const probe = value.fixture.probes[0]!;
+    const expected = probe.expected as {
+      navigation: { rename: Record<string, unknown> };
+    };
+    expected.navigation.rename = {
+      excluded: [],
+      minimum: 1,
+      required: [{ fileId: "main", needle: "$x_0=1$" }],
+      status: "available",
+    };
+    const release = finalize(value);
+    expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
+      "available rename requires exact source, replacement, and safety evidence",
+    );
+  });
+
   test("rejects exact evidence reuse and suspicious prose lineage", () => {
     const release = fixture();
     const input = validation(release);
@@ -93,7 +111,13 @@ describe("fresh blind release evidence", () => {
       references: [],
       relations: [],
       renameEdits: [
-        { fileId: "main", path: "main.md", range: { startOffset: 0, endOffset: 1 } },
+        {
+          expectedText: "x",
+          fileId: "main",
+          path: "main.md",
+          range: { startOffset: 0, endOffset: 1 },
+          replacementText: "y",
+        },
       ],
       symbol: null,
     };

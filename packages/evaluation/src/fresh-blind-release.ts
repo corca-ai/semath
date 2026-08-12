@@ -190,6 +190,29 @@ export function validateFreshBlindRelease(
   if (primary.length !== REQUIRED_SCENARIOS) {
     throw new Error("fresh blind fixture requires one primary probe per scenario");
   }
+  for (const probe of fixture.probes) {
+    const rename = probe.expected.navigation.rename;
+    const contract = [
+      rename.expectedText,
+      rename.newName,
+      rename.replacementText,
+      rename.safety,
+    ];
+    if (
+      rename.status === "available" &&
+      contract.some((value) => value === undefined)
+    ) {
+      throw new Error(
+        `${probe.id}: available rename requires exact source, replacement, and safety evidence`,
+      );
+    }
+    if (
+      rename.status === "unavailable" &&
+      contract.some((value) => value !== undefined)
+    ) {
+      throw new Error(`${probe.id}: unavailable rename cannot define an edit contract`);
+    }
+  }
   const families = count(primary.map((probe) => probe.family));
   for (const family of DOCUMENT_REASONING_FAMILIES) {
     if (families[family] !== REQUIRED_FAMILY_SCENARIOS) {

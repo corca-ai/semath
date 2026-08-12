@@ -170,7 +170,12 @@ export interface AuthoredScientificProbe {
         readonly status: "available" | "unavailable";
       };
       readonly references: AuthoredLocationExpectation;
-      readonly rename: AuthoredLocationExpectation;
+      readonly rename: AuthoredLocationExpectation & {
+        readonly expectedText?: string;
+        readonly newName?: string;
+        readonly replacementText?: string;
+        readonly safety?: string;
+      };
     };
     readonly relations: readonly AuthoredRelationExpectation[];
     readonly symbol?: string;
@@ -224,10 +229,13 @@ export interface AuthoredScientificObservation {
     readonly sourceGrounded: boolean;
   }[];
   readonly renameEdits: readonly {
+    readonly expectedText: string;
     readonly fileId: string;
     readonly path: string;
     readonly range: SourceRange;
+    readonly replacementText: string;
   }[];
+  readonly renameSafety?: string;
   readonly symbol: string | null;
   readonly symbolLocation?: ObservedLocation;
 }
@@ -638,8 +646,17 @@ export function observeAuthoredScientificProbe(
         relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
     })),
     renameEdits: (results.rename.value.proposal?.files ?? []).flatMap((file) =>
-      file.edits.map((edit) => ({ fileId: file.fileId, path: file.path, range: edit.range })),
+      file.edits.map((edit) => ({
+        expectedText: edit.expectedText,
+        fileId: file.fileId,
+        path: file.path,
+        range: edit.range,
+        replacementText: edit.replacementText,
+      })),
     ),
+    ...(results.rename.value.proposal
+      ? { renameSafety: results.rename.value.proposal.safety }
+      : {}),
     symbol: view.symbol?.symbol ?? null,
     ...(view.symbol ? { symbolLocation: view.symbol.location } : {}),
   };
@@ -869,6 +886,22 @@ function parseExpected(
     `${path}.navigation.prepareRename`,
     ["range", "placeholder"],
   );
+  const rename = record(navigation.rename, `${path}.navigation.rename`);
+  exact(
+    rename,
+    [
+      "status",
+      "minimum",
+      "required",
+      "excluded",
+      "expectedText",
+      "newName",
+      "replacementText",
+      "safety",
+    ],
+    `${path}.navigation.rename`,
+    ["expectedText", "newName", "replacementText", "safety"],
+  );
   const diagnostics = record(item.diagnostics, `${path}.diagnostics`);
   exact(
     diagnostics,
@@ -934,7 +967,36 @@ function parseExpected(
         navigation.references,
         `${path}.navigation.references`,
       ),
-      rename: parseLocationExpectation(navigation.rename, `${path}.navigation.rename`),
+      rename: {
+        ...parseLocationExpectation(rename, `${path}.navigation.rename`, [
+          "expectedText",
+          "newName",
+          "replacementText",
+          "safety",
+        ]),
+        ...(rename.expectedText === undefined
+          ? {}
+          : {
+              expectedText: text(
+                rename.expectedText,
+                `${path}.navigation.rename.expectedText`,
+              ),
+            }),
+        ...(rename.newName === undefined
+          ? {}
+          : { newName: text(rename.newName, `${path}.navigation.rename.newName`) }),
+        ...(rename.replacementText === undefined
+          ? {}
+          : {
+              replacementText: text(
+                rename.replacementText,
+                `${path}.navigation.rename.replacementText`,
+              ),
+            }),
+        ...(rename.safety === undefined
+          ? {}
+          : { safety: text(rename.safety, `${path}.navigation.rename.safety`) }),
+      },
     },
     relations: parseRelationExpectations(item.relations, `${path}.relations`),
     ...(item.symbol === undefined ? {} : { symbol: text(item.symbol, `${path}.symbol`) }),
@@ -970,9 +1032,10 @@ function parseRelationExpectations(
 function parseLocationExpectation(
   value: unknown,
   path: string,
+  extensions: readonly string[] = [],
 ): AuthoredLocationExpectation {
   const item = record(value, path);
-  exact(item, ["status", "minimum", "required", "excluded"], path);
+  exact(item, ["status", "minimum", "required", "excluded", ...extensions], path, extensions);
   const result = {
     excluded: array(item.excluded, `${path}.excluded`).map((value, index) =>
       parseAnchor(value, `${path}.excluded[${index}]`),
@@ -1236,6 +1299,27 @@ export function authoredProbeIdentityFailures(
     snapshot,
     failures,
   );
+  const rename = probe.expected.navigation.rename;
+  if (
+    rename.expectedText !== undefined &&
+    observation.renameEdits.some((edit) => edit.expectedText !== rename.expectedText)
+  ) {
+    failures.push({ area: "rename", basis: "rename expected source text differs" });
+  }
+  if (
+    rename.replacementText !== undefined &&
+    observation.renameEdits.some(
+      (edit) => edit.replacementText !== rename.replacementText,
+    )
+  ) {
+    failures.push({ area: "rename", basis: "rename replacement text differs" });
+  }
+  if (
+    rename.safety !== undefined &&
+    observation.renameSafety !== rename.safety
+  ) {
+    failures.push({ area: "rename", basis: "rename safety differs" });
+  }
   checkLocationExpectation(
     "references",
     probe.expected.navigation.references,
