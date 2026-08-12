@@ -709,12 +709,14 @@ fn consume_any<'a>(value: &'a str, phrases: &[&str]) -> Option<&'a str> {
 }
 
 fn ordered_body(value: &str, arity: usize) -> Option<(Vec<&str>, usize)> {
+    let boundary = value.find(['.', '\n']).unwrap_or(value.len());
+    let clause = &value[..boundary];
     for marker in ["respectively", "in that order"] {
-        let lower = value.to_ascii_lowercase();
+        let lower = clause.to_ascii_lowercase();
         let Some(marker_start) = lower.find(marker) else {
             continue;
         };
-        let descriptions = value[..marker_start]
+        let descriptions = clause[..marker_start]
             .trim_end_matches(|character: char| character.is_whitespace() || character == ',');
         let aligned = crate::scientific_prose::align_ordered_descriptions(descriptions, arity)?;
         let consumed = marker_start + marker.len();
@@ -920,6 +922,11 @@ mod tests {
             )
             .map(|(items, _, _)| items),
             Some(vec!["kinetic energy", "mass", "speed"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(CoordinationLead::Let, " be matrices.", 2)
+                .map(|(items, _, _)| items),
+            Some(vec!["matrices", "matrices"]),
         );
         assert_eq!(
             coordinated_descriptions(

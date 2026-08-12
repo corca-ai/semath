@@ -3793,7 +3793,9 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
     }
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => {
-            label == symbol || label.strip_prefix('\\') == Some(symbol.as_str())
+            label == symbol
+                || label.strip_prefix('\\') == Some(symbol.as_str())
+                || source_label_is_structural_operator_application(label, symbol)
         }
         SemanticExprKind::Index { .. } => !label.chars().any(char::is_whitespace),
         SemanticExprKind::Derivative { .. } => {
@@ -3820,6 +3822,27 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
         }
         _ => false,
     }
+}
+
+fn source_label_is_structural_operator_application(label: &str, symbol: &str) -> bool {
+    if symbol != "transpose" {
+        return false;
+    }
+    if label
+        .chars()
+        .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+        .count()
+        > MAX_COMPOSITE_SOURCE_LABEL_CHARS
+    {
+        return false;
+    }
+    let lowered = lower_template(label);
+    matches!(
+        &lowered.kind,
+        SemanticExprKind::Apply { operator, arguments }
+            if operator.as_str() == symbol
+                && arguments.len() == 1
+    )
 }
 
 fn is_decorative_star(expression: &SemanticExpr) -> bool {
@@ -3936,6 +3959,28 @@ mod tests {
             &expression,
             "C_n\\left(\\frac{dv_n}{dt}"
         ));
+        assert!(!source_label_matches_expression(&expression, "C_n(s)"));
+    }
+
+    #[test]
+    fn structural_transpose_operator_accepts_only_its_application() {
+        let expression = SemanticExpr {
+            kind: SemanticExprKind::Symbol("transpose".into()),
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 8,
+            },
+            provenance: Vec::new(),
+        };
+
+        assert!(source_label_matches_expression(&expression, "M^{\\top}"));
+        assert!(!source_label_matches_expression(&expression, "M(s)"));
+    }
+
+    #[test]
+    fn recognizes_a_command_transpose_without_accepting_arbitrary_calls() {
+        let source = "Let $M$ and $N$ be matrices. The transposed matrix satisfies Let $N$ and $M$ denote linear operator matrix and linear operator matrix, respectively. $N=M^{\\top}$";
+        assert_eq!(recognized_laws(source), ["matrix-transpose-definition"]);
     }
 
     #[test]
