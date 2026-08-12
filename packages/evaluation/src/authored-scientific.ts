@@ -153,6 +153,7 @@ export interface AuthoredScientificProbe {
     readonly snapshotId: string;
   };
   readonly expected: {
+    readonly cursorOccurrence?: AuthoredSourceAnchor | null;
     readonly decision: ScientificDecision;
     readonly diagnostics: {
       readonly excludedCodes: readonly string[];
@@ -228,6 +229,7 @@ export interface AuthoredScientificObservation {
     readonly range: SourceRange;
   }[];
   readonly symbol: string | null;
+  readonly symbolLocation?: ObservedLocation;
 }
 
 export interface AuthoredScientificSurfaceResults {
@@ -639,6 +641,7 @@ export function observeAuthoredScientificProbe(
       file.edits.map((edit) => ({ fileId: file.fileId, path: file.path, range: edit.range })),
     ),
     symbol: view.symbol?.symbol ?? null,
+    ...(view.symbol ? { symbolLocation: view.symbol.location } : {}),
   };
 }
 
@@ -844,11 +847,11 @@ function parseExpected(
   exact(
     item,
     [
-      "decision", "symbol", "proofGrounded", "relations", "excludedRelationIds",
+      "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
       "navigation", "diagnostics",
     ],
     path,
-    ["symbol"],
+    ["symbol", "cursorOccurrence"],
   );
   const navigation = record(item.navigation, `${path}.navigation`);
   exact(
@@ -889,6 +892,14 @@ function parseExpected(
     throw new Error(`${path}.diagnostics.maximum: smaller than required diagnostics`);
   }
   return {
+    ...(item.cursorOccurrence === undefined
+      ? {}
+      : {
+          cursorOccurrence:
+            item.cursorOccurrence === null
+              ? null
+              : parseAnchor(item.cursorOccurrence, `${path}.cursorOccurrence`),
+        }),
     decision: oneOf(
       item.decision,
       ["ambiguous", "conflicting", "established", "partial", "unsupported"] as const,
@@ -1188,6 +1199,30 @@ export function authoredProbeIdentityFailures(
 ): AuthoredIdentityFailure[] {
   const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
   const failures: AuthoredIdentityFailure[] = [];
+  if (probe.expected.cursorOccurrence !== undefined) {
+    const expected = probe.expected.cursorOccurrence;
+    if (expected === null) {
+      if (observation.symbolLocation) {
+        failures.push({
+          area: "cursor-symbol",
+          basis: "formula-boundary cursor resolved an unexpected symbol occurrence",
+        });
+      }
+    } else {
+      const occurrence = resolveAuthoredAnchor(snapshot, expected);
+      if (
+        !observation.symbolLocation ||
+        observation.symbolLocation.fileId !== occurrence.fileId ||
+        observation.symbolLocation.path !== occurrence.path ||
+        !sameRange(observation.symbolLocation.range, occurrence.range)
+      ) {
+        failures.push({
+          area: "cursor-symbol",
+          basis: `cursor occurrence differs from ${expected.fileId}:${expected.needle}`,
+        });
+      }
+    }
+  }
   if (probe.expected.symbol && observation.symbol !== probe.expected.symbol) {
     failures.push({
       area: "cursor-symbol",

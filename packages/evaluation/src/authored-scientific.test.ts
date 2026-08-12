@@ -3,6 +3,7 @@ import {
   AUTHORED_AREA_ALLOCATION,
   DOCUMENT_REASONING_FAMILIES,
   authoredFixtureSealPayload,
+  authoredProbeIdentityFailures,
   authoredRelationRangeMatches,
   authoredScenarioReviewPayload,
   parseAuthoredScientificFixture,
@@ -101,6 +102,45 @@ describe("independently authored scientific corpus", () => {
     expect(() => parseAuthoredScientificFixture(value)).toThrow(
       "selection must fall within the anchor needle",
     );
+  });
+
+  test("compares cursor identity to a reviewed occurrence instead of a display label", () => {
+    const value = fixtureValue("development", 1) as FixtureValue;
+    const needle = "unique relation $x_0=y_0$";
+    value.probes[0]!.expected.cursorOccurrence = {
+      fileId: "main",
+      needle,
+      selection: { length: 3, offset: needle.indexOf("x_0") },
+    };
+    const fixture = parseAuthoredScientificFixture(value);
+    const probe = fixture.probes[0]!;
+    const observation = observationValue();
+    const source = fixture.scenarios[0]!.snapshots[0]!.documents[0]!.content;
+    const anchorStart = source.indexOf(needle);
+    observation.symbolLocation = {
+      fileId: "main",
+      path: "main.tex",
+      range: {
+        startOffset: anchorStart + needle.indexOf("x_0"),
+        endOffset: anchorStart + needle.indexOf("x_0") + 3,
+      },
+    };
+    expect(authoredProbeIdentityFailures(fixture, probe, observation)).toEqual([]);
+
+    observation.symbolLocation = {
+      fileId: "main",
+      path: "main.tex",
+      range: {
+        startOffset: anchorStart + needle.indexOf("y_0"),
+        endOffset: anchorStart + needle.indexOf("y_0") + 3,
+      },
+    };
+    expect(authoredProbeIdentityFailures(fixture, probe, observation)).toEqual([
+      {
+        area: "cursor-symbol",
+        basis: "cursor occurrence differs from main:unique relation $x_0=y_0$",
+      },
+    ]);
   });
 
   test("rejects same-document relations grounded after the cursor", () => {
@@ -409,6 +449,11 @@ interface FixtureValue {
   probes: {
     cursor: { needle: string; occurrence?: number };
     expected: {
+      cursorOccurrence?: {
+        fileId: string;
+        needle: string;
+        selection?: { length: number; offset: number };
+      } | null;
       navigation: {
         definition: {
           excluded: { fileId: string; needle: string }[];
