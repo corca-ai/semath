@@ -109,6 +109,8 @@
       "title": "Subset operand",
       "description": "The left-hand set in an asserted subset relation.",
       "aliases": [
+        "subset",
+        "subsets",
         "subset operand",
         "declared subset"
       ],
