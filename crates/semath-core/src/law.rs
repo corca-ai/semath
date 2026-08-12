@@ -2355,6 +2355,7 @@ fn recognition(
             let (evidence, mechanically_verified) = condition_evidence(
                 condition,
                 &bindings,
+                actual,
                 &actual.range,
                 context.shapes,
                 context.quantities,
@@ -2591,6 +2592,7 @@ fn condition_status(
 fn condition_evidence(
     condition: &PackLawCondition,
     bindings: &BTreeMap<String, SemanticExpr>,
+    actual: &SemanticExpr,
     formula_range: &SourceRange,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
@@ -2624,6 +2626,10 @@ fn condition_evidence(
         external.assumptions_at(offset),
     );
     if let Some(condition_evidence) = &semantic_condition {
+        push_evidence(&mut evidence, condition_evidence.clone());
+    }
+    let structural_condition = structural_condition_evidence(condition, bindings, actual);
+    if let Some(condition_evidence) = &structural_condition {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
     if kind == PackConditionKind::DomainMembership
@@ -2699,8 +2705,52 @@ fn condition_evidence(
     }
     (
         evidence,
-        semantic_condition.is_some() || proved_subjects == subjects.len(),
+        semantic_condition.is_some()
+            || structural_condition.is_some()
+            || proved_subjects == subjects.len(),
     )
+}
+
+fn structural_condition_evidence(
+    condition: &PackLawCondition,
+    bindings: &BTreeMap<String, SemanticExpr>,
+    actual: &SemanticExpr,
+) -> Option<Evidence> {
+    if condition.kind != PackConditionKind::SameContext || condition.subjects.len() != 2 {
+        return None;
+    }
+    let first = bindings.get(&condition.subjects[0])?;
+    let second = bindings.get(&condition.subjects[1])?;
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &actual.kind
+    else {
+        return None;
+    };
+    if operator != "equals" {
+        return None;
+    }
+    let transpose_pair = |result: &SemanticExpr, source: &SemanticExpr| {
+        let SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } = &source.kind
+        else {
+            return false;
+        };
+        operator == "transpose"
+            && arguments.len() == 1
+            && ((equivalent(result, first) && equivalent(&arguments[0], second))
+                || (equivalent(result, second) && equivalent(&arguments[0], first)))
+    };
+    (transpose_pair(left, right) || transpose_pair(right, left)).then(|| Evidence {
+        rule_id: "canonical-context-preserving/transpose".into(),
+        kind: "canonical-binding".into(),
+        strength: "hard".into(),
+        source_ranges: vec![actual.range.clone()],
+    })
 }
 
 const MAX_ASSUMPTION_DISTANCE: u32 = 640;
@@ -3572,6 +3622,25 @@ mod tests {
             ),
             ["period-frequency-reciprocity"]
         );
+    }
+
+    #[test]
+    fn transpose_structure_proves_its_shared_scalar_context() {
+        let recognized = recognized_law_observations(
+            "Let the centered data table satisfy $A\\in\\mathbb R^{r\\times s}$. The matrix transpose is $B=A^{\\mathsf T}$.",
+        );
+        let transpose = recognized
+            .iter()
+            .find(|law| law.law_id == "matrix-transpose-definition")
+            .expect("matrix transpose");
+        assert_eq!(transpose.status, LawRecognitionStatus::Verified);
+        assert!(transpose.conditions.iter().any(|condition| {
+            condition.kind == ScientificConstraintKind::SameContext
+                && condition.status == ConstraintStatus::Verified
+                && condition.evidence.iter().any(|evidence| {
+                    evidence.rule_id == "canonical-context-preserving/transpose"
+                })
+        }));
     }
 
     #[test]
