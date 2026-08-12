@@ -176,22 +176,16 @@
         }
       ],
       "activationPhrases": [
-        "node",
-        "junction",
         "kcl",
-        "branch",
-        "balance",
-        "aggregate",
-        "entering",
-        "outgoing",
-        "feeders",
+        "charge conservation",
+        "node current balance",
+        "junction current balance",
+        "branch current balance",
         "flow groups",
-        "reference",
         "current splits",
         "currents satisfy",
         "currents obey",
         "currents balance",
-        "conservation",
         "terminal currents"
       ],
       "references": [

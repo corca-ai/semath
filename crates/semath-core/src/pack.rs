@@ -1135,6 +1135,29 @@ mod tests {
     }
 
     #[test]
+    fn kcl_activation_requires_circuit_specific_language() {
+        let law = built_in_packs()
+            .iter()
+            .find(|pack| pack.pack_id == "circuits")
+            .unwrap()
+            .laws
+            .iter()
+            .find(|law| law.id == "kirchhoff-current-law")
+            .unwrap();
+        assert!(law.activation_phrases.iter().any(|phrase| phrase == "kcl"));
+        assert!(
+            law.activation_phrases
+                .iter()
+                .all(|phrase| phrase == "kcl" || phrase.split_whitespace().count() >= 2)
+        );
+        assert!(
+            !law.activation_phrases
+                .iter()
+                .any(|phrase| phrase == "balance")
+        );
+    }
+
+    #[test]
     fn rejects_legacy_and_incoherent_law_conditions() {
         let pack = built_in_packs()
             .iter()
