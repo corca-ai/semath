@@ -1575,8 +1575,14 @@ fn collect_semantic_evidence(
                             .get(&clause.start)
                             .map(Vec::as_slice)
                             .unwrap_or_default();
+                        let identified_construction_targets = construction_targets
+                            .iter()
+                            .filter(|target| {
+                                activation_target_identifies_formula(source, index, &range, target)
+                            })
+                            .collect::<Vec<_>>();
                         attached_formula_ranges.extend(
-                            construction_targets
+                            identified_construction_targets
                                 .iter()
                                 .map(|target| target.range.clone()),
                         );
@@ -1594,9 +1600,7 @@ fn collect_semantic_evidence(
                                 .get(&clause.start)
                                 .map(Vec::is_empty)
                                 .unwrap_or(true)
-                                || construction_targets
-                                    .iter()
-                                    .any(|target| target.identifies_formula)
+                                || !identified_construction_targets.is_empty()
                                 || activation_identifies_formula(
                                     source,
                                     index,
@@ -1768,7 +1772,7 @@ fn construction_formula_targets(
                 frame.act,
                 CommunicativeAct::Definition | CommunicativeAct::Result
             );
-        if identifies_formula
+        if frame.establishes()
             && candidate.distance_bytes <= MAX_ATTACHMENT_DISTANCE_BYTES
             && attachment.permits(&evidence_range, &target_range)
         {
@@ -1785,6 +1789,70 @@ fn construction_formula_targets(
                     }),
                     range: target_range,
                     identifies_formula,
+                });
+        }
+    }
+    for construction in constructions {
+        let DiscourseConstruction::EquationFlow {
+            mention_index,
+            prose_start,
+            prose_end,
+            precedes_formula: false,
+            candidate,
+            frame,
+            ..
+        } = construction
+        else {
+            continue;
+        };
+        let Some((clause, mention)) = clause_at(clauses, *prose_start)
+            .or_else(|| {
+                clauses
+                    .iter()
+                    .find(|clause| *prose_start <= clause.start && clause.start < *prose_end)
+            })
+            .zip(mentions.get(*mention_index))
+        else {
+            continue;
+        };
+        let Some(clause_index) = clauses
+            .iter()
+            .position(|candidate| candidate.start == clause.start)
+        else {
+            continue;
+        };
+        if !frame.establishes()
+            || !events.first_event_after_is_anaphor(
+                clause_index,
+                *prose_start,
+                AnaphorKind::FormulaDemonstrative,
+            )
+            || candidate.distance_bytes > MAX_ATTACHMENT_DISTANCE_BYTES
+        {
+            continue;
+        }
+        let evidence_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        let target_range = SourceRange {
+            start_offset: index.utf16_for_byte(mention.start),
+            end_offset: index.utf16_for_byte(mention.end),
+        };
+        if attachment.permits(&target_range, &evidence_range) {
+            targets
+                .entry(clause.start)
+                .or_default()
+                .push(ConstructionFormulaTarget {
+                    relation_centered: canonical_expressions.iter().any(|expression| {
+                        ranges_overlap(&expression.range, &target_range)
+                            && matches!(
+                                expression.kind,
+                                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                            )
+                    }),
+                    range: target_range,
+                    identifies_formula: true,
                 });
         }
     }
@@ -1927,6 +1995,30 @@ fn activation_identifies_formula(
         .min()
         .unwrap_or(clause.end);
     formula_identification_bridge(&source[phrase_end..formula_start])
+}
+
+fn activation_target_identifies_formula(
+    source: &str,
+    index: &SourceIndex,
+    phrase: &SourceRange,
+    target: &ConstructionFormulaTarget,
+) -> bool {
+    if !target.relation_centered {
+        return false;
+    }
+    if target.identifies_formula {
+        return true;
+    }
+    if target.range.start_offset < phrase.end_offset {
+        return false;
+    }
+    let phrase_end = index.byte_for_utf16(phrase.end_offset);
+    let target_start = index.byte_for_utf16(target.range.start_offset);
+    let bridge = source.get(phrase_end..target_start).unwrap_or_default();
+    bridge.len() <= MAX_ATTACHMENT_DISTANCE_BYTES
+        && !bridge
+            .chars()
+            .any(|character| matches!(character, '.' | '!' | '?' | ';'))
 }
 
 fn formula_identification_bridge(value: &str) -> bool {
@@ -3475,6 +3567,7 @@ mod tests {
         for source in [
             "The screening Reynolds number is therefore\n\\[\\mathrm{Re}_{D_h}=\\frac{\\rho v D_h}{\\mu}.\\]",
             "The model stage defines the transfer function in the Laplace domain as\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+            "The propagation step is based on the continuous-time state equation\n\\[\\dot{x}=Ax+Bu.\\]",
         ] {
             let analysis = analyze(source);
             assert!(
@@ -3488,6 +3581,21 @@ mod tests {
                 analysis.semantic_evidence.law_activations
             );
         }
+
+        let analysis = analyze(
+            "We advance the pulse by matching\n\\[\\frac{\\partial^2 \\psi}{\\partial t^2}=c^2\\nabla^2\\psi.\\] This is the scalar wave equation used by the solver.",
+        );
+        assert!(
+            analysis
+                .semantic_evidence
+                .law_activations
+                .iter()
+                .any(|activation| activation.law_id == "scalar-wave-equation"
+                    && activation.identifies_attached_formula
+                    && !activation.attached_formula_ranges.is_empty()),
+            "{:?}",
+            analysis.semantic_evidence.law_activations
+        );
     }
 
     #[test]
