@@ -1004,25 +1004,8 @@ fn collect_law_expressions<'a>(
     output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
 ) {
     if let SemanticExprKind::System(expressions) = &expression.kind {
-        let disjoint = expressions
-            .windows(2)
-            .all(|pair| pair[0].range.end_offset <= pair[1].range.start_offset);
-        for (index, expression) in expressions.iter().enumerate() {
-            let segment = disjoint.then(|| {
-                let fallback = expression_source_envelope(expression);
-                SourceRange {
-                    start_offset: if index == 0 {
-                        formula_range.map_or(fallback.start_offset, |range| range.start_offset)
-                    } else {
-                        fallback.start_offset
-                    },
-                    end_offset: expressions.get(index + 1).map_or_else(
-                        || formula_range.map_or(fallback.end_offset, |range| range.end_offset),
-                        |next| next.range.start_offset,
-                    ),
-                }
-            });
-            collect_law_expressions(expression, segment.as_ref(), output);
+        for expression in expressions {
+            collect_law_expressions(expression, formula_range, output);
         }
     } else {
         let source_envelope = formula_range
@@ -3860,7 +3843,7 @@ mod tests {
     }
 
     #[test]
-    fn neighboring_relations_keep_disjoint_source_envelopes() {
+    fn neighboring_relations_share_their_authored_formula_envelope() {
         let source = "B=A^T,\\qquad C=AB";
         let expression = lower_template(source);
         let formula_range = SourceRange {
@@ -3877,15 +3860,7 @@ mod tests {
             })
             .collect::<Vec<_>>();
         assert_eq!(ranges.len(), 2);
-        assert!(ranges[0].end_offset <= ranges[1].start_offset);
-        assert!(
-            ranges[0].start_offset <= source.find("B=A^T").unwrap() as u32
-                && source.find("B=A^T").unwrap() as u32 + 5 <= ranges[0].end_offset
-        );
-        assert!(
-            ranges[1].start_offset <= source.find("C=AB").unwrap() as u32
-                && source.find("C=AB").unwrap() as u32 + 4 <= ranges[1].end_offset
-        );
+        assert_eq!(ranges, [formula_range.clone(), formula_range]);
     }
 
     #[test]
