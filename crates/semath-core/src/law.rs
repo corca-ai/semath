@@ -4551,6 +4551,31 @@ mod tests {
     }
 
     #[test]
+    fn reviewed_mean_velocity_phrase_proves_the_mass_flow_condition() {
+        let positive = recognized_law_observations(
+            "Let $\\rho$ be density and $A$ area. Particle tracking supplied the area-mean exit speed $v_e$. The mass flow rate is $\\dot m=\\rho A v_e$.",
+        )
+        .into_iter()
+        .find(|law| law.law_id == "mass-flow-rate")
+        .unwrap();
+        assert_eq!(positive.status, LawRecognitionStatus::Verified);
+        assert!(
+            positive.conditions[0]
+                .evidence
+                .iter()
+                .any(|evidence| evidence.rule_id == "english-scientific-assumption")
+        );
+
+        let unsupported = recognized_law_observations(
+            "Let $\\rho$ be density, $A$ area, and $v_e$ exit speed. The mass flow rate is $\\dot m=\\rho A v_e$.",
+        )
+        .into_iter()
+        .find(|law| law.law_id == "mass-flow-rate")
+        .unwrap();
+        assert_eq!(unsupported.status, LawRecognitionStatus::ConditionMissing);
+    }
+
+    #[test]
     fn an_explicit_declaration_resets_unrelated_prior_discourse_for_its_formula() {
         assert_eq!(
             recognized_laws(

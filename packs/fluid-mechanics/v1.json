@@ -334,12 +334,16 @@
         {
           "id": "uniform-section-values",
           "kind": "uniform",
-          "subjects": [
-            "density",
-            "area",
-            "velocity"
-          ],
-          "label": "Density and mean normal velocity are uniform over the stated section."
+        "subjects": [
+          "density",
+          "area",
+          "velocity"
+        ],
+        "label": "Density and mean normal velocity are uniform over the stated section.",
+        "evidencePhrases": [
+          "area-mean exit speed",
+          "mean normal flow velocity"
+        ]
         }
       ],
       "references": [
