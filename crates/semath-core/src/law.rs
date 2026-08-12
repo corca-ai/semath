@@ -3143,6 +3143,14 @@ mod tests {
     }
 
     #[test]
+    fn postposed_formula_references_attach_a_law_name_to_the_nearby_formula() {
+        assert_eq!(
+            recognized_laws("$P=Fv$. This relation is the mechanical power relation."),
+            ["mechanical-power"]
+        );
+    }
+
+    #[test]
     fn recognizes_new_probability_and_learning_relations_from_explicit_roles() {
         assert_eq!(
             recognized_laws(

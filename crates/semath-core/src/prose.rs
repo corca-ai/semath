@@ -292,9 +292,6 @@ pub(crate) fn observe_prose(
     let citation_ranges = citation_byte_ranges(document, &index);
     let clauses = segment_scientific_clauses(source, document.language, &citation_ranges);
     analysis.match_stats.clauses = clauses.len() as u32;
-    analysis.semantic_evidence =
-        collect_semantic_evidence(document, source, &index, &clauses, canonical_expressions);
-    analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     let mentions = parsed
         .iter()
         .enumerate()
@@ -309,6 +306,15 @@ pub(crate) fn observe_prose(
         })
         .collect::<Vec<_>>();
     let events = normalize_prose_events(source, &clauses, &mentions);
+    analysis.semantic_evidence = collect_semantic_evidence(
+        document,
+        source,
+        &index,
+        &clauses,
+        &events,
+        canonical_expressions,
+    );
+    analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     let discourse_constructions = events.discourse_constructions(source, &mentions, &clauses);
     collect_assumptions(&index, &clauses, &mentions, &events, &mut analysis);
 
@@ -1307,6 +1313,7 @@ fn collect_semantic_evidence(
     source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
+    events: &ProseEventStream,
     canonical_expressions: &[SemanticExpr],
 ) -> ScientificSemanticEvidence {
     let clause_evidence = clauses
@@ -1328,6 +1335,8 @@ fn collect_semantic_evidence(
         clauses,
         canonical_expressions,
     );
+    let postposed_targets =
+        postposed_formula_targets(document, index, clauses, events, canonical_expressions);
     let mut formula_operations = Vec::new();
     for clause in clauses {
         for range in phrase_ranges(source, index, clause, "vector dot product") {
@@ -1401,6 +1410,20 @@ fn collect_semantic_evidence(
                 phrases.dedup();
                 for phrase in phrases {
                     for range in phrase_ranges(source, index, clause, phrase) {
+                        let mut attached_formula_ranges = reference_targets
+                            .get(&clause.start)
+                            .cloned()
+                            .unwrap_or_default();
+                        attached_formula_ranges.extend(
+                            postposed_targets
+                                .get(&clause.start)
+                                .into_iter()
+                                .flatten()
+                                .cloned(),
+                        );
+                        attached_formula_ranges
+                            .sort_by_key(|range| (range.start_offset, range.end_offset));
+                        attached_formula_ranges.dedup();
                         law_activations.push(LawActivationEvidence {
                             pack_id: pack.pack_id.clone(),
                             law_id: law.id.clone(),
@@ -1408,17 +1431,15 @@ fn collect_semantic_evidence(
                                 start_offset: index.utf16_for_byte(clause.start),
                                 end_offset: index.utf16_for_byte(clause.end),
                             },
-                            attached_formula_ranges: reference_targets
-                                .get(&clause.start)
-                                .cloned()
-                                .unwrap_or_default(),
-                            identifies_attached_formula: activation_identifies_formula(
-                                source,
-                                index,
-                                clause,
-                                &range,
-                                canonical_expressions,
-                            ),
+                            identifies_attached_formula: !attached_formula_ranges.is_empty()
+                                || activation_identifies_formula(
+                                    source,
+                                    index,
+                                    clause,
+                                    &range,
+                                    canonical_expressions,
+                                ),
+                            attached_formula_ranges,
                             frame: clause.frame.clone(),
                             evidence: Evidence {
                                 rule_id: format!(
@@ -1504,6 +1525,55 @@ fn explicit_equation_reference_targets(
         let ranges = targets.entry(clause.start).or_default();
         if !ranges.contains(target) {
             ranges.push(target.clone());
+        }
+    }
+    targets
+}
+
+fn postposed_formula_targets(
+    document: &ProjectDocument,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    events: &ProseEventStream,
+    canonical_expressions: &[SemanticExpr],
+) -> BTreeMap<usize, Vec<SourceRange>> {
+    let attachment = AttachmentGraph::new(document);
+    let mut targets = BTreeMap::new();
+    for (clause_index, clause) in clauses.iter().enumerate() {
+        if !clause.frame.establishes() || !events.starts_with_anaphor(clause_index, clause.start) {
+            continue;
+        }
+        let Some(previous_clause) = clauses
+            .iter()
+            .filter(|candidate| candidate.end <= clause.start)
+            .max_by_key(|candidate| candidate.end)
+        else {
+            continue;
+        };
+        let previous_range = SourceRange {
+            start_offset: index.utf16_for_byte(previous_clause.start),
+            end_offset: index.utf16_for_byte(previous_clause.end),
+        };
+        let Some(target) = canonical_expressions
+            .iter()
+            .filter(|expression| ranges_overlap(&expression.range, &previous_range))
+            .filter(|expression| {
+                index
+                    .utf16_for_byte(clause.start)
+                    .saturating_sub(expression.range.end_offset)
+                    <= MAX_ATTACHMENT_DISTANCE_BYTES as u32
+            })
+            .max_by_key(|expression| expression.range.end_offset)
+            .map(|expression| expression.range.clone())
+        else {
+            continue;
+        };
+        let clause_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        if attachment.permits(&target, &clause_range) {
+            targets.insert(clause.start, vec![target]);
         }
     }
     targets
@@ -3210,6 +3280,39 @@ Define the mean axial speed by the flow relation
                 definition.evidence.kind == "attached-prose"
                     && definition.evidence.source_ranges.len() == 2
             }));
+        }
+    }
+
+    #[test]
+    fn postposed_formula_reference_requires_a_typed_head_and_bounded_adjacency() {
+        let attached = analyze("$P=Fv$. This relation is the mechanical power relation.");
+        assert!(
+            attached
+                .semantic_evidence
+                .law_activations
+                .iter()
+                .any(|activation| {
+                    activation.law_id == "mechanical-power"
+                        && !activation.attached_formula_ranges.is_empty()
+                })
+        );
+
+        for source in [
+            "$P=Fv$. According to this study, the mechanical power relation is useful.",
+            "$P=Fv$. Background material separates the statements. This relation is the mechanical power relation.",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis
+                    .semantic_evidence
+                    .law_activations
+                    .iter()
+                    .all(|activation| {
+                        activation.law_id != "mechanical-power"
+                            || activation.attached_formula_ranges.is_empty()
+                    }),
+                "{source}"
+            );
         }
     }
 

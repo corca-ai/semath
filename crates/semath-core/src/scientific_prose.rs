@@ -238,6 +238,14 @@ impl ProseEventStream {
             .is_some_and(|items| items.contains(&kind))
     }
 
+    pub(crate) fn starts_with_anaphor(&self, clause_index: usize, clause_start: usize) -> bool {
+        self.events.iter().any(|event| {
+            event.clause_index == clause_index
+                && event.start == clause_start
+                && matches!(event.kind, ProseEventKind::Anaphor(_))
+        })
+    }
+
     pub(crate) fn has_connective(
         &self,
         clause_index: usize,
@@ -698,6 +706,9 @@ fn emit_lexical_events(
         ("this symbol", AnaphorKind::SingularDemonstrative),
         ("this variable", AnaphorKind::SingularDemonstrative),
         ("this equation", AnaphorKind::SingularDemonstrative),
+        ("this identity", AnaphorKind::SingularDemonstrative),
+        ("this relation", AnaphorKind::SingularDemonstrative),
+        ("this formula", AnaphorKind::SingularDemonstrative),
         ("the former", AnaphorKind::Former),
         ("the latter", AnaphorKind::Latter),
         ("they", AnaphorKind::PluralPronoun),
