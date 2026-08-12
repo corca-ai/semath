@@ -2349,6 +2349,11 @@ fn role_symbol_support(
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     let notation_symbol = symbol;
+    let activated_notation_support = notation_context_activated
+        && role
+            .notation
+            .iter()
+            .any(|notation| notation_matches_symbol(notation, symbol));
     let required_quantity = role
         .quantity
         .as_deref()
@@ -2365,6 +2370,12 @@ fn role_symbol_support(
     if required_quantity == RoleSupport::Refuted {
         return RoleSupport::Refuted;
     }
+    let required_quantity =
+        if required_quantity == RoleSupport::Unresolved && activated_notation_support {
+            RoleSupport::Supported
+        } else {
+            required_quantity
+        };
     let declared_roles = consistency.roles_at(symbol, offset).0;
     let has_exact_role = declared_roles
         .iter()
@@ -2379,11 +2390,6 @@ fn role_symbol_support(
     {
         return RoleSupport::Refuted;
     }
-    let activated_notation_support = notation_context_activated
-        && role
-            .notation
-            .iter()
-            .any(|notation| notation_matches_symbol(notation, symbol));
     let mut matching_shape = false;
     if let Some(expected_shape) = role.shape.as_deref() {
         let mut explicit = shapes.claims_at(symbol, offset).0;
@@ -3359,7 +3365,13 @@ fn assumption_condition_evidence(
             let attaches_after_formula = assumption.evidence.kind == "attached-prose"
                 && formula_range.end_offset <= start
                 && start - formula_range.end_offset <= MAX_ASSUMPTION_DISTANCE;
-            (precedes_formula || attaches_after_formula) && subjects_match(assumption)
+            let targets_formula = assumption.evidence.kind == "attached-prose"
+                && assumption.evidence.source_ranges.iter().any(|range| {
+                    range.start_offset < formula_range.end_offset
+                        && formula_range.start_offset < range.end_offset
+                });
+            (precedes_formula || attaches_after_formula || targets_formula)
+                && subjects_match(assumption)
         })
         .chain(external_assumptions.iter().filter(subjects_match))
         .find(|assumption| {
@@ -4269,6 +4281,38 @@ mod tests {
             recognized_laws("An electric circuit model is compared with electromagnetism. $P=VI$.")
                 .is_empty()
         );
+
+        let period =
+            recognized_law_observations("For a periodic signal, the asserted relation is $f=1/T$.")
+                .into_iter()
+                .find(|law| law.law_id == "period-frequency-reciprocity")
+                .expect("reviewed notation supplies the frequency quantity roles");
+        assert_eq!(period.status, LawRecognitionStatus::ConditionMissing);
+        assert!(period.conditions.iter().any(|condition| {
+            condition.kind == ScientificConstraintKind::Positive
+                && condition.status == ConstraintStatus::Required
+        }));
+    }
+
+    #[test]
+    fn explicit_measurement_context_verifies_frequency_conversions() {
+        let source = r"The measured-period stage estimates the oscillator period from successive rising edges.
+The computed ordinary-frequency stage uses
+\[f=1/T.\]
+The same oscillator's converted angular-frequency stage then supplies the phase accumulator with
+\[\omega=2\pi f.\]
+This conversion is performed once per accepted timing sample so the accumulator and diagnostic display share one estimate.";
+        let recognized = recognized_law_observations(source);
+        for law_id in [
+            "period-frequency-reciprocity",
+            "angular-frequency-definition",
+        ] {
+            let law = recognized
+                .iter()
+                .find(|law| law.law_id == law_id)
+                .unwrap_or_else(|| panic!("missing {law_id}: {recognized:?}"));
+            assert_eq!(law.status, LawRecognitionStatus::Verified, "{law:?}");
+        }
     }
 
     #[test]

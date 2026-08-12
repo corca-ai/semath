@@ -158,6 +158,10 @@
           "subjects": [
             "period"
           ],
+          "evidencePhrases": [
+            "measured period",
+            "positive period"
+          ],
           "label": "The period is positive."
         },
         {
@@ -166,6 +170,12 @@
           "subjects": [
             "frequency",
             "period"
+          ],
+          "evidencePhrases": [
+            "oscillator period",
+            "same periodic signal",
+            "same oscillator",
+            "share one estimate"
           ],
           "label": "Frequency and period refer to the same periodic signal."
         }
@@ -229,6 +239,11 @@
             "angular-frequency",
             "frequency"
           ],
+          "evidencePhrases": [
+            "same oscillation",
+            "same oscillator",
+            "share one estimate"
+          ],
           "label": "Frequency and angular frequency describe the same oscillation."
         }
       ],
@@ -278,15 +293,15 @@
         {
           "id": "common-propagation-mode",
           "kind": "same-context",
-        "subjects": [
-          "wave-speed",
-          "frequency",
-          "wavelength"
-        ],
-        "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium.",
-        "evidencePhrases": [
-          "same-phase"
-        ]
+          "subjects": [
+            "wave-speed",
+            "frequency",
+            "wavelength"
+          ],
+          "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium.",
+          "evidencePhrases": [
+            "same-phase"
+          ]
         }
       ],
       "references": [

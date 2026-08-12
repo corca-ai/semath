@@ -319,6 +319,7 @@ pub(crate) fn observe_prose(
         &events,
         &discourse_constructions,
         &mentions,
+        canonical_expressions,
     );
     analysis.semantic_evidence = collect_semantic_evidence(
         document,
@@ -329,7 +330,15 @@ pub(crate) fn observe_prose(
         &construction_targets,
     );
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
-    collect_assumptions(source, &index, &clauses, &mentions, &events, &mut analysis);
+    collect_assumptions(
+        source,
+        &index,
+        &clauses,
+        &mentions,
+        &events,
+        &construction_targets,
+        &mut analysis,
+    );
 
     collect_role_first_nominal_definitions(
         document,
@@ -1690,6 +1699,7 @@ fn explicit_equation_reference_targets(
 struct ConstructionFormulaTarget {
     range: SourceRange,
     identifies_formula: bool,
+    relation_centered: bool,
 }
 
 fn construction_formula_targets(
@@ -1699,6 +1709,7 @@ fn construction_formula_targets(
     events: &ProseEventStream,
     constructions: &[DiscourseConstruction],
     mentions: &[ScientificMention],
+    canonical_expressions: &[SemanticExpr],
 ) -> BTreeMap<usize, Vec<ConstructionFormulaTarget>> {
     let attachment = AttachmentGraph::new(document);
     let mut targets = BTreeMap::<usize, Vec<ConstructionFormulaTarget>>::new();
@@ -1765,6 +1776,13 @@ fn construction_formula_targets(
                 .entry(clause.start)
                 .or_default()
                 .push(ConstructionFormulaTarget {
+                    relation_centered: canonical_expressions.iter().any(|expression| {
+                        ranges_overlap(&expression.range, &target_range)
+                            && matches!(
+                                expression.kind,
+                                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                            )
+                    }),
                     range: target_range,
                     identifies_formula,
                 });
@@ -1810,6 +1828,13 @@ fn construction_formula_targets(
                     .entry(clause.start)
                     .or_default()
                     .push(ConstructionFormulaTarget {
+                        relation_centered: canonical_expressions.iter().any(|expression| {
+                            ranges_overlap(&expression.range, &target_range)
+                                && matches!(
+                                    expression.kind,
+                                    SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                                )
+                        }),
                         range: target_range,
                         identifies_formula: true,
                     });
@@ -2351,6 +2376,7 @@ fn collect_assumptions(
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
+    construction_targets: &BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
     output: &mut ProseObservations,
 ) {
     let condition_phrases = built_in_packs()
@@ -2366,8 +2392,15 @@ fn collect_assumptions(
         })
         .collect::<Vec<_>>();
     for (clause_index, clause) in clauses.iter().enumerate() {
-        let attached_to_preceding_math =
-            clause_attaches_to_preceding_math(clause_index, mentions, events);
+        let typed_targets = construction_targets
+            .get(&clause.start)
+            .into_iter()
+            .flatten()
+            .filter(|target| target.identifies_formula && target.relation_centered)
+            .map(|target| target.range.clone())
+            .collect::<Vec<_>>();
+        let attached_to_preceding_math = !typed_targets.is_empty()
+            || clause_attaches_to_preceding_math(clause_index, mentions, events);
         for assumption in extract_assumptions_with_phrases(clause, mentions, &condition_phrases) {
             let mut source_ranges = assumption
                 .subjects
@@ -2377,6 +2410,7 @@ fn collect_assumptions(
                     end_offset: index.utf16_for_byte(subject.end),
                 })
                 .collect::<Vec<_>>();
+            source_ranges.extend(typed_targets.iter().cloned());
             source_ranges.push(SourceRange {
                 start_offset: index.utf16_for_byte(assumption.phrase_start),
                 end_offset: index.utf16_for_byte(assumption.phrase_end),
