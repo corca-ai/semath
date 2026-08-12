@@ -1,7 +1,7 @@
 {
   "schemaVersion": 9,
   "packId": "quantities-units",
-  "packVersion": "1.1.0",
+  "packVersion": "1.2.0",
   "packKind": "capability",
   "namespace": "quantities-units",
   "title": "Scientific quantities and SI units",
@@ -737,7 +737,9 @@
       "description": "Mass transported per unit time.",
       "aliases": [
         "mass flow",
-        "mass flow rate"
+        "mass flow rate",
+        "mass rate",
+        "mass per unit time"
       ],
       "dimension": [
         {
@@ -760,6 +762,7 @@
       "title": "Volumetric flow rate",
       "description": "Volume transported per unit time.",
       "aliases": [
+        "volume rate",
         "volume flow",
         "volumetric flow",
         "volumetric flow rate"

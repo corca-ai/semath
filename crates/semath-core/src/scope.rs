@@ -3,6 +3,14 @@ use crate::{DocumentLanguage, SourceIndex};
 use crate::{ProjectDocument, SourceRange, SyntaxBlockKind};
 use std::collections::BTreeMap;
 
+pub(crate) fn scope_visible(declaration: &[u32], occurrence: &[u32]) -> bool {
+    declaration.len() <= occurrence.len()
+        && declaration
+            .iter()
+            .zip(occurrence)
+            .all(|(left, right)| left == right)
+}
+
 #[derive(Clone, Debug)]
 struct Scope {
     id: usize,

@@ -190,6 +190,10 @@ impl DocumentSemanticObservations {
         &self.semantic_evidence.law_activations
     }
 
+    pub(crate) fn semantic_evidence(&self) -> &ScientificSemanticEvidence {
+        &self.semantic_evidence
+    }
+
     pub fn assumptions(&self) -> &[AssumptionInfo] {
         &self.assumptions
     }
@@ -233,12 +237,15 @@ impl DocumentSemanticObservations {
         &mut self,
         document: &ProjectDocument,
         canonical_expressions: &[SemanticExpr],
+        formula_ranges: &[crate::SourceRange],
         external: &ExternalTypeEnvironment,
     ) {
         self.laws = observe_laws(
             canonical_expressions,
             &self.semantic_evidence,
             &LawAnalysisContext {
+                source: &document.content,
+                formula_ranges,
                 shapes: &self.shapes,
                 quantities: &self.quantities,
                 consistency: &self.roles,
@@ -262,6 +269,7 @@ impl DocumentSemanticObservations {
         entity_id: Option<EntityId>,
         offset: u32,
         external: Option<&ExternalTypeEnvironment>,
+        formulas: Vec<LawRecognition>,
     ) -> SemanticContextInfo {
         let mut roles = symbol
             .as_deref()
@@ -286,7 +294,6 @@ impl DocumentSemanticObservations {
             quantities.sort_by(|left, right| left.display.cmp(&right.display));
             quantities.dedup();
         }
-        let formulas = self.laws.at(offset);
         let relations = formulas
             .iter()
             .filter_map(|formula| formula.relation.clone())

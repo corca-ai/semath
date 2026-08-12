@@ -3,7 +3,9 @@ use std::collections::BTreeMap;
 use crate::binder::{binder_at, binders};
 use crate::parser::ParsedMath;
 use crate::scope::ScopeGraph;
-use crate::{DefinitionInfo, Evidence, ProjectDocument, SemanticDiagnostic, SourceRange};
+use crate::{
+    DefinitionInfo, Evidence, ProjectDocument, SemanticDiagnostic, SourceIndex, SourceRange,
+};
 
 const MAX_HYGIENE_DIAGNOSTICS: usize = 8;
 
@@ -70,7 +72,9 @@ pub(crate) fn analyze_hygiene(
         let [definition] = candidates.as_slice() else {
             continue;
         };
-        if !eligible_definition(definition, parsed) || has_unclosed_occurrence(symbol, parsed) {
+        if !eligible_definition(document, definition, parsed)
+            || has_unclosed_occurrence(symbol, parsed)
+        {
             continue;
         }
         let scope_id = scopes.id_at(definition.location.range.start_offset);
@@ -114,10 +118,15 @@ pub(crate) fn analyze_hygiene(
     }
 }
 
-fn eligible_definition(definition: &DefinitionInfo, parsed: &[ParsedMath]) -> bool {
+fn eligible_definition(
+    document: &ProjectDocument,
+    definition: &DefinitionInfo,
+    parsed: &[ParsedMath],
+) -> bool {
     definition.evidence.kind == "explicit-prose"
         && definition.evidence.strength == "strong"
         && definition.evidence.rule_id != "notation-table-definition"
+        && atomic_source_notation(document, &definition.location.range)
         && parsed.iter().any(|math| {
             math.region.closed
                 && math
@@ -125,6 +134,20 @@ fn eligible_definition(definition: &DefinitionInfo, parsed: &[ParsedMath]) -> bo
                     .content_range
                     .contains(definition.location.range.start_offset)
         })
+}
+
+fn atomic_source_notation(document: &ProjectDocument, range: &SourceRange) -> bool {
+    let index = SourceIndex::new(&document.content);
+    let start = index.byte_for_utf16(range.start_offset);
+    let end = index.byte_for_utf16(range.end_offset);
+    let Some(notation) = document.content.get(start..end) else {
+        return false;
+    };
+    if let Some(command) = notation.strip_prefix('\\') {
+        !command.is_empty() && command.chars().all(char::is_alphabetic)
+    } else {
+        !notation.is_empty() && notation.chars().all(char::is_alphanumeric)
+    }
 }
 
 fn has_unclosed_occurrence(symbol: &str, parsed: &[ParsedMath]) -> bool {
@@ -193,7 +216,7 @@ mod tests {
     use crate::canonical::lower_document_region;
     use serde::Deserialize;
 
-    use super::analyze_hygiene;
+    use super::{analyze_hygiene, atomic_source_notation};
     use crate::parser::{parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::{DocumentLanguage, ProjectDocument};
@@ -211,6 +234,39 @@ mod tests {
         id: String,
         content: String,
         expected: Vec<String>,
+    }
+
+    #[test]
+    fn hygiene_hints_require_stably_atomic_source_notation() {
+        let document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: "x \\rho ECE \\Delta t x_i \\hat{y}".into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: Vec::new(),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        let ranges = [(0, 1), (2, 6), (7, 10), (11, 19), (20, 23), (24, 31)];
+        assert_eq!(
+            ranges.map(|(start_offset, end_offset)| atomic_source_notation(
+                &document,
+                &crate::SourceRange {
+                    start_offset,
+                    end_offset,
+                },
+            )),
+            [true, true, true, false, false, false]
+        );
     }
 
     #[test]

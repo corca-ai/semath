@@ -1,4 +1,4 @@
-use crate::concept::classify_role;
+use crate::concept::{classify_role_candidates, concepts_share_lineage};
 use crate::prose::definition_available_from;
 use crate::scope::ScopeGraph;
 use crate::shape::{ExplicitShapeClaim, ShapeObservations};
@@ -128,7 +128,7 @@ pub(crate) fn observe_roles(
     let scopes = ScopeGraph::new(document);
     let roles = definitions
         .iter()
-        .filter_map(|definition| role_claim(definition, &scopes))
+        .flat_map(|definition| role_claims(definition, &scopes))
         .collect::<Vec<_>>();
     let shape_claims = shapes
         .explicit_claims()
@@ -192,26 +192,28 @@ pub(crate) fn observe_roles(
     }
 }
 
-fn role_claim(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Option<ScopedRoleClaim> {
-    let role = classify_role(&definition.description)?;
+fn role_claims(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Vec<ScopedRoleClaim> {
     let symbol_range = definition.location.range.clone();
     let available_from = definition_available_from(definition);
-    Some(ScopedRoleClaim {
-        info: RoleInfo {
-            symbol: definition.symbol.clone(),
-            concept_id: role.clone(),
-            description: definition.description.clone(),
-            evidence: Evidence {
-                rule_id: format!("{}/concept-{role}", definition.evidence.rule_id),
-                kind: "explicit-prose".into(),
-                strength: "strong".into(),
-                source_ranges: definition.evidence.source_ranges.clone(),
+    classify_role_candidates(&definition.description)
+        .into_iter()
+        .map(|role| ScopedRoleClaim {
+            info: RoleInfo {
+                symbol: definition.symbol.clone(),
+                concept_id: role.clone(),
+                description: definition.description.clone(),
+                evidence: Evidence {
+                    rule_id: format!("{}/concept-{role}", definition.evidence.rule_id),
+                    kind: "explicit-prose".into(),
+                    strength: "strong".into(),
+                    source_ranges: definition.evidence.source_ranges.clone(),
+                },
             },
-        },
-        scope_id: scopes.id_at(symbol_range.start_offset),
-        symbol_range,
-        available_from,
-    })
+            scope_id: scopes.id_at(symbol_range.start_offset),
+            symbol_range: symbol_range.clone(),
+            available_from,
+        })
+        .collect()
 }
 
 fn role_conflict_diagnostic(
@@ -332,6 +334,9 @@ fn role_type_conflict_diagnostic(
 }
 
 pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
+    if concepts_share_lineage(left, right) {
+        return false;
+    }
     let left = concept_leaf(left);
     let right = concept_leaf(right);
     if left == right {
@@ -400,8 +405,9 @@ fn first_source_offset(evidence: &Evidence) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use super::{classify_role, observe_roles};
+    use super::observe_roles;
     use crate::canonical::lower_document_region;
+    use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::shape::observe_shapes;

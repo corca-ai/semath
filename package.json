@@ -35,7 +35,7 @@
     "budget": "bun scripts/check-budget.ts",
     "budget:report": "SEMATH_BUDGET_REPORT=.artifacts/performance-budget.json bun scripts/check-budget.ts",
     "budget:scale": "SEMATH_BUDGET_DOCUMENTS=500 SEMATH_BUDGET_DELTA_RUNS=10 bun scripts/check-budget.ts",
-    "budget:stable": "SEMATH_BUDGET_STABLE=1 bun scripts/check-budget.ts && SEMATH_BUDGET_STABLE=1 SEMATH_BUDGET_DOCUMENTS=500 SEMATH_BUDGET_DELTA_RUNS=10 bun scripts/check-budget.ts",
+    "budget:stable": "bun scripts/check-stable-budget.ts",
     "challenge": "bun scripts/check-challenge.ts",
     "challenge:baseline": "SEMATH_CHALLENGE_ALLOW_FAILURES=1 SEMATH_CHALLENGE_REPORT=.artifacts/recognition-challenge.json bun scripts/check-challenge.ts",
     "challenge:report": "SEMATH_CHALLENGE_REPORT=.artifacts/recognition-challenge.json bun scripts/check-challenge.ts",

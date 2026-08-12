@@ -351,6 +351,11 @@
             "temperature-change",
             "length"
           ],
+          "evidencePhrases": [
+            "steady one dimensional conduction",
+            "one dimensional steady conduction",
+            "steady one-dimensional conduction"
+          ],
           "label": "Conduction is steady and one-dimensional with constant conductivity and no internal generation."
         }
       ],
@@ -414,6 +419,9 @@
             "heat-transfer",
             "work"
           ],
+          "evidencePhrases": [
+            "closed system"
+          ],
           "label": "The document states a closed system."
         },
         {
@@ -422,6 +430,11 @@
           "subjects": [
             "heat-transfer",
             "work"
+          ],
+          "evidencePhrases": [
+            "heat in and work out",
+            "heat into the system and work done by the system",
+            "heat into the gas and work done by the gas"
           ],
           "label": "The sign convention is heat-in/work-out."
         }

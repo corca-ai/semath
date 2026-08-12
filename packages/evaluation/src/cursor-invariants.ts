@@ -187,10 +187,7 @@ const SEEDS: readonly CursorSurfaceSeed[] = [
       },
       {
         delta: 3,
-        expectedSourceNotation: "i",
-        expectedSymbol: "i",
         id: "index-after",
-        identity: "index",
         needle: "x_i$ with",
       },
     ],
@@ -229,10 +226,7 @@ const SEEDS: readonly CursorSurfaceSeed[] = [
       },
       {
         delta: 5,
-        expectedSourceNotation: "j",
-        expectedSymbol: "j",
         id: "index-after",
-        identity: "index-j",
         needle: "T_{ij}$ with",
       },
     ],

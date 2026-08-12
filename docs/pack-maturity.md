@@ -13,10 +13,10 @@ holds approved support policy; GitHub issues hold planned work.
   seeds; generated cases are not called independently authored evidence.
 - 453 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
-- All law families currently score 100% for recall, role binding, and
-  source-linked evidence. The manual v0.27 baseline retains four known
-  precision/refusal failures for `event-intersection`; the release must resolve
-  them without lowering thresholds.
+- All 61 evaluated laws score 100% for recall, precision, role binding,
+  source-linked evidence, and refusal preservation across 5,826 cases. The 453
+  metamorphic observations also pass. Generated breadth remains regression
+  evidence rather than independently authored language.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
   unit, dimension, propagation diagnostics, notation, prose, and role evidence.
 - The shared scientific-kernel and scientific-prose foundations pass 166 of 166
@@ -28,10 +28,9 @@ holds approved support policy; GitHub issues hold planned work.
   are useful verticals, not claims of field completeness.
 - The independent frozen challenge v3 preserves 48 semantic boundaries across
   binding, constraints, packs, presentation, resolution, and syntax, then
-  composes them into six realistic document shapes. The v0.27 baseline passes
-  33 of 48; all 15 misses are unsafe meaning establishment in cases that should
-  remain partial without meaning. Full execution remains a manual release gate,
-  and the release must remove these regressions without changing the fixture.
+  composes them into six realistic document shapes. The pre-change baseline
+  passed 33 of 48; the current engine passes 48 of 48 without changing the
+  fixture. Full execution remains a manual release gate.
 - The guarded-equivalence challenge freezes 24 separately authored orientation,
   scalar permutation, isolation, reciprocal, grouping, and noncommutative
   refusal cases. The pre-change `a978d2e` baseline passed 21; the current engine
@@ -47,30 +46,49 @@ holds approved support policy; GitHub issues hold planned work.
   eight notation, discourse, lifecycle, safety, mathematics, and engineering
   families. The current engine passes 32 of 32 with zero false establishment,
   false conflict, or missed-coverage risk under the reviewed targets.
+- Final stable x86_64 full-path measurements use five isolated processes per
+  size and retain every raw sample. At 61 documents, median peak and live
+  retained RSS growth are 125,005,824 and 90,054,656 bytes, edit p95 is 8.60
+  ms, and semantic-view p95 is 1.85 ms. At 501 documents, the corresponding
+  values are 155,803,648 and 152,989,696 bytes, 29.06 ms, and 3.10 ms. The
+  same-host `956d89c` baseline records 7.30/27.06 ms edit p95 and
+  116,846,592/149,200,896 bytes retained RSS; semantic-only edits record
+  7.92/25.29 ms versus 9.30/29.30 ms. All approved limits remain unchanged. The
+  stored semantic entity count falls from 1,010/8,347 to 1,007/8,291 despite
+  broader source-grounded claims. Dispatch visits 1,385 and 11,501 law rules at
+  61 and 501 documents, below the unchanged 24-per-document caps; the release
+  WASM is 3,560,914 bytes.
 - The v0.27 authored document baseline was run manually against Semath commit
   `0380421` after its 96 development scenarios were reviewed and its 48 holdout
-  scenarios were separately reviewed and frozen before engine execution.
-  Development passes 7 of 115 probes
-  with risk 484; the now-exposed historical holdout passes 4 of 97 with risk
-  732. Both splits have zero false establishment and zero false conflict. The
-  failures localize as follows:
+  scenarios were separately reviewed and frozen before engine execution. The
+  baseline passed 7 of 115 development probes with risk 484 and 4 of 97 holdout
+  probes with risk 732. The current release passes 17 development probes with
+  risk 404 and 6 historical holdout probes with risk 720. Development has no
+  false establishment or false conflict. The holdout reports one raw false
+  establishment because its stage-6 expectation asks prose in a disconnected
+  file to retract an established relation in another component; preserving the
+  component boundary is the safer engine behavior, so the frozen expectation is
+  retained and documented rather than matched by global string retraction. The
+  current first losses localize as follows:
 
   | First loss | Development | Holdout |
   | --- | ---: | ---: |
   | Neutral syntax | 0 | 0 |
-  | Prose attachment | 28 | 18 |
-  | Identity or scope | 30 | 49 |
-  | Canonical IR | 11 | 1 |
-  | Typed fact or condition | 6 | 0 |
-  | Local-to-observation propagation | 0 | 0 |
-  | Pack unification | 29 | 24 |
-  | Decision | 4 | 1 |
+  | Prose attachment | 26 | 19 |
+  | Identity or scope | 26 | 48 |
+  | Canonical IR | 0 | 0 |
+  | Typed fact or condition | 9 | 3 |
+  | Local-to-observation propagation | 1 | 0 |
+  | Pack unification | 21 | 18 |
+  | Decision | 15 | 3 |
   | Host projection | Not exercised | Not exercised |
 
-  The baseline reuses the existing recognition-frontier signals and queries
-  each reviewed relation at its original equation. A zero propagation count
-  therefore means no failing expected relation survived local recognition; it
-  does not prove that propagation is complete. The measured order of work is
+  The scorer reuses the existing recognition-frontier signals and queries
+  each reviewed relation at its original equation. A low propagation count
+  does not by itself prove that propagation is complete. The one development
+  propagation expectation asks an unrelated earlier relation to appear at a
+  later equation with no shared entity or derivation edge; Semath safely keeps
+  it local. The measured order of work is
   identity/scope, local pack and prose recognition, then canonical or typed
   gaps. Host parity remains release evidence rather than a native-baseline
   inference.
@@ -108,15 +126,20 @@ field completeness.
 | Scientific operators | Gradient, divergence, curl, Laplacian, conditional arguments, and callable role placeholders lost reusable structure | One shared canonical IR and generic unifier represent them without field-specific runtime branches |
 | Decorated and indexed roles | Decorated optima and indexed state families lost identity or role evidence | Canonical decorated atoms and indexed-family lookup preserve exact source notation while sharing declared family evidence |
 | Opaque expansions | Macro resolution status conflated ordinary commands with truly opaque generated notation | Only opaque/cyclic/truncated structure yields an engine-limit decision; no Problems diagnostic is invented |
+| Canonical relations | Labels, chained equalities, and comma-separated systems could distort the relation extent or lose reusable constraints | Exact equation ranges and one canonical system path now preserve relation heads and all source-linked constraints |
+| Scoped comparisons | A rendered spelling could accidentally stand in for semantic identity | Comparison and retraction authority now follows resolved entities, source order, scopes, and connected components |
+| Document conditions | Included roles propagated but their typed assumptions stopped at the file boundary | The existing ordered external type environment now carries subject-bound assumptions and retracts them through the same dependency closure |
+| Prose composition | Result actions, role-first clauses, and formula-following `where` or `Here` assumptions used separate narrow branches | The normalized event stream composes these bounded forms and rejects cited, hedged, hypothetical, negated, or contradictory evidence |
+| Law runtime | A legacy single-result unifier coexisted with bounded multi-result matching | One bounded unifier remains, preserving structural recognition while deleting the obsolete path |
 
 ## Remaining measured gaps
 
 | Category | Current limitation | Affected evidence |
 | --- | --- | --- |
 | Coverage | Evaluated vertical slices do not yet provide broad field recognition | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
-| Document identity | Realistic symbol boundaries, declarations, edits, and scoped reuse frequently lose the intended entity | 79 of 201 failed authored probes localize first to identity or scope |
-| Local recognition | Existing prose events and pack unification do not yet retain enough evidence from realistic exposition | 105 of 201 failed authored probes localize to attachment, typed facts, or pack unification |
-| Canonical structure | A smaller set of reviewed formulas loses reusable structure before matching | 12 of 201 failed authored probes localize to canonical IR |
+| Document identity | Realistic declarations, edits, scoped reuse, and navigation projections still frequently lose the intended entity | 74 of 189 failed authored probes localize first to identity or scope |
+| Local recognition | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | 96 of 189 failed authored probes localize to attachment, typed facts, or pack unification |
+| Decision projection | Available evidence still produces the wrong calm/established distinction in some realistic scenes | 18 of 189 failed authored probes localize first to the decision boundary |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by

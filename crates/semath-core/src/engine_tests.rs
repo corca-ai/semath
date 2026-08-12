@@ -1,11 +1,15 @@
-use super::{SemathEngine, notation_occurrence_range};
+use std::collections::BTreeSet;
+
+use super::{SemathEngine, notation_occurrence_range, stable_text_digest};
+use crate::canonical::{lower_document_region, render_canonical};
 use crate::parser::test_math_regions;
 use crate::{
-    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, MathRootState,
-    MeaningDecision, NotationArgument, NotationNode, NotationNodeKind, NotationNodeRanges,
-    PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectInclude, ProjectMacro,
-    ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot,
-    ProjectSourceRef, Query, QueryEnvelope, QueryValue, SourceRange, SyntaxScope, SyntaxState,
+    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, LexicalClass,
+    MathRoot, MathRootState, MeaningDecision, NotationArgument, NotationNode, NotationNodeKind,
+    NotationNodeRanges, PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectInclude,
+    ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind,
+    ProjectSnapshot, ProjectSourceRef, Query, QueryEnvelope, QueryValue, SourceRange, SyntaxScope,
+    SyntaxState,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -38,6 +42,23 @@ fn snapshot(content: &str) -> ProjectSnapshot {
         main_file_id: Some("main".into()),
         documents: vec![document("main", "main.tex", content, 1)],
     }
+}
+
+#[test]
+fn chained_equality_stores_operands_and_source_linked_relations_without_a_system_placeholder() {
+    let mut engine = SemathEngine::default();
+    let update = engine.reset(snapshot("$a=b=c$")).unwrap();
+
+    assert_eq!(update.stats.semantic_entities, 5);
+}
+
+#[test]
+fn chained_metric_formula_does_not_store_relation_placeholder_entities() {
+    let content = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
+    let mut engine = SemathEngine::default();
+    let update = engine.reset(snapshot(content)).unwrap();
+
+    assert_eq!(update.stats.semantic_entities, 18);
 }
 
 fn query(query: Query, inventory_version: u64, document_version: u64) -> QueryEnvelope {
@@ -113,6 +134,134 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
         };
         assert_eq!(locations.len(), 1);
         assert_eq!(locations[0].range.start_offset, 5);
+    }
+}
+
+#[test]
+fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
+    let content = "Let $x$ denote the input.";
+    let offset = content.find('x').unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    for query_kind in [
+        Query::Definition {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::References {
+            file_id: "main".into(),
+            offset,
+        },
+    ] {
+        let result = engine.query(query(query_kind, 1, 1)).unwrap();
+        let QueryValue::Locations { locations } = result.value else {
+            panic!("expected locations")
+        };
+        assert!(locations.is_empty());
+    }
+}
+
+#[test]
+fn complete_indexed_notation_owns_its_shared_right_edge() {
+    let content = "$P_s$";
+    let mut input = document("main", "main.tex", content, 1);
+    input.nodes = vec![
+        NotationNode {
+            kind: NotationNodeKind::Token,
+            parent: Some(2),
+            children: Vec::new(),
+            ranges: NotationNodeRanges {
+                full: range(1, 2),
+                command: None,
+                name: None,
+                nucleus: None,
+                editable: Some(range(1, 2)),
+            },
+            state: SyntaxState::Complete,
+            name: None,
+            text: Some("P".into()),
+            arguments: Vec::new(),
+            lexical_class: Some(LexicalClass::Identifier),
+            math_class: None,
+            provenance: None,
+        },
+        NotationNode {
+            kind: NotationNodeKind::Token,
+            parent: Some(2),
+            children: Vec::new(),
+            ranges: NotationNodeRanges {
+                full: range(3, 4),
+                command: None,
+                name: None,
+                nucleus: None,
+                editable: Some(range(3, 4)),
+            },
+            state: SyntaxState::Complete,
+            name: None,
+            text: Some("s".into()),
+            arguments: Vec::new(),
+            lexical_class: Some(LexicalClass::Identifier),
+            math_class: None,
+            provenance: None,
+        },
+        NotationNode {
+            kind: NotationNodeKind::Script,
+            parent: None,
+            children: vec![0, 1],
+            ranges: NotationNodeRanges {
+                full: range(1, 4),
+                command: None,
+                name: None,
+                nucleus: Some(range(1, 2)),
+                editable: Some(range(1, 4)),
+            },
+            state: SyntaxState::Complete,
+            name: Some("subscript".into()),
+            text: None,
+            arguments: Vec::new(),
+            lexical_class: None,
+            math_class: None,
+            provenance: None,
+        },
+    ];
+    input.math_roots = vec![MathRoot {
+        node: 2,
+        delimiter: "inline-dollar".into(),
+        full_range: range(0, 5),
+        content_range: range(1, 4),
+        state: MathRootState::Complete,
+    }];
+    input.scopes = vec![SyntaxScope {
+        kind: "document".into(),
+        parent: None,
+        range: range(0, 5),
+        state: MathRootState::Complete,
+        name: None,
+        level: None,
+        source: None,
+    }];
+    let mut engine = SemathEngine::default();
+    let mut project = snapshot(content);
+    project.documents = vec![input];
+    engine.reset(project).unwrap();
+    for offset in [1, 4] {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert_eq!(
+            view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
+            Some("P_s")
+        );
     }
 }
 
@@ -408,6 +557,40 @@ fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
 }
 
 #[test]
+fn non_asserting_formula_mentions_do_not_create_constraint_problems() {
+    let declarations =
+        "$A \\in \\mathbb{R}^{m \\times n}, B \\in \\mathbb{R}^{n \\times p}, p \\ne m$.\n";
+    for mention in [
+        "The reverse product $BA$ is not shape-compatible.",
+        "If the operands were reversed, $BA$ would be considered.",
+        "As reported in the reference, $BA$ is the implementation order.",
+        "Alternatively, use $BA$.",
+    ] {
+        let content = format!("{declarations}{mention}");
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(&content)).unwrap();
+        let result = engine
+            .query(query(
+                Query::Diagnostics {
+                    file_id: "main".into(),
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::Diagnostics { diagnostics } = result.value else {
+            panic!("expected diagnostics")
+        };
+        assert!(
+            diagnostics
+                .iter()
+                .all(|diagnostic| diagnostic.code != "constraint-product-shape-conflict"),
+            "{mention}: {diagnostics:?}"
+        );
+    }
+}
+
+#[test]
 fn symbolic_comparisons_do_not_cross_sibling_document_scopes() {
     let content = [
         "# North",
@@ -513,6 +696,194 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
             "offset {offset}"
         );
     }
+}
+
+#[test]
+fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
+    let content = "\\[\nQ=Av.\n\\label{eq:flow}\n\\]";
+    let period_end = content.find("Q=Av.").unwrap() as u32 + "Q=Av.".len() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    for offset in [period_end, content.len() as u32] {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert_eq!(
+            view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
+            Some("Q")
+        );
+    }
+
+    let result = engine
+        .query(query(
+            Query::PrepareRename {
+                file_id: "main".into(),
+                offset: period_end,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::RenamePreparation { range, .. } = result.value else {
+        panic!("expected rename preparation")
+    };
+    assert!(range.is_none());
+}
+
+#[test]
+fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
+    let base = "The preliminary station model treats the suction pipe as a uniform section. Here \\(A\\) is internal area and \\(v\\) is section-averaged speed.\n\\[\nQ=Av.\n\\]\nThis is the initial definition of reported volume flow.\n\\input{revision}\n";
+    let revision = "The operations review no longer publishes the preliminary volume-flow estimate \\(Q=Av\\): the installed meter reports mass flow directly, and the area-average velocity is not retained as a certified output. The reviewed calculation still uses\n\\[\n\\dot m=\\rho A v_{\\mathrm{bulk}}.\n\\]\n";
+    let mut base_document = document("base", "base.tex", base, 1);
+    let include_start = base.find("\\input{revision}").unwrap() as u32;
+    base_document.includes.push(ProjectInclude {
+        path: "revision".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "base".into(),
+            path: "base.tex".into(),
+            range: SourceRange {
+                start_offset: include_start,
+                end_offset: include_start + "\\input{revision}".len() as u32,
+            },
+        },
+    });
+    let expression = lower_document_region(
+        &base_document,
+        &base_document.math_regions.last().unwrap().content_range,
+    );
+    let digest = stable_text_digest(&render_canonical(&expression));
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("base".into()),
+            documents: vec![
+                base_document,
+                document("revision", "revision.tex", revision, 1),
+            ],
+        })
+        .unwrap();
+    let relation_start = base.find("Q=Av").unwrap() as u32;
+    let occurrence = engine.index.occurrences_by_range
+        [&("base".into(), relation_start, relation_start + 1)]
+        .clone();
+    assert!(
+        engine
+            .index
+            .semantic
+            .relation_is_retracted(&digest, &occurrence)
+    );
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "base".into(),
+                offset: base.find("Q=Av").unwrap() as u32 + 4,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(view.context.relations.is_empty());
+}
+
+#[test]
+fn a_negative_formula_in_a_disconnected_document_does_not_retract_a_relation() {
+    let base = "The preliminary station model treats the suction pipe as a uniform section. Here \\(A\\) is internal area and \\(v\\) is section-averaged speed.\n\\[\nQ=Av.\n\\]\n";
+    let revision = "The operations review no longer publishes the preliminary volume-flow estimate \\(Q=Av\\).";
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("base".into()),
+            documents: vec![
+                document("base", "base.tex", base, 1),
+                document("revision", "revision.tex", revision, 1),
+            ],
+        })
+        .unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "base".into(),
+                offset: base.find("Q=Av").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert_eq!(
+        view.context.relations[0].relation_id,
+        "fluid-mechanics:volumetric-flow-rate"
+    );
+}
+
+#[test]
+fn formula_meaning_includes_a_source_ordered_relation_linked_by_entity_identity() {
+    let content = "The bore determines area $A$ and the meter reports cross-section mean speed $v$. The preliminary volume rate is\n\\[Q=A v.\\]\nDensity $\\rho$ was sampled at the same temperature, allowing the corresponding mass rate to be written as\n\\[\\dot m=\\rho Q=\\rho A v.\\]";
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![document("main", "main.tex", content, 1)],
+        })
+        .unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.find("\\dot m").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let relation_ids = view
+        .context
+        .relations
+        .iter()
+        .map(|relation| relation.relation_id.as_str())
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        relation_ids,
+        BTreeSet::from([
+            "fluid-mechanics:mass-flow-rate",
+            "fluid-mechanics:volumetric-flow-rate",
+        ])
+    );
 }
 
 #[test]
@@ -867,6 +1238,89 @@ fn included_type_declarations_drive_project_law_inference() {
     let symbol = view.symbol.expect("expected V symbol information");
     assert_eq!(symbol.roles[0].concept_id, "quantities-units:voltage");
     assert_eq!(symbol.roles[0].evidence.source_ranges[0].start_offset, 0);
+}
+
+#[test]
+fn included_assumptions_verify_conditions_without_cross_component_leakage() {
+    let main = "\\input{definitions}\n$A \\cap B$";
+    let definitions = "Let $A$ and $B$ be events in the same probability space.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "definitions".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(0, "\\input{definitions}".len() as u32),
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("definitions", "definitions.tex", definitions, 1),
+            ],
+        })
+        .unwrap();
+    let formula_offset = main.find("A \\cap B").unwrap() as u32;
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: formula_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+
+    let local = "Let $A$ be an event. Let $B$ be an event.\n$A \\cap B$";
+    let mut disconnected_engine = SemathEngine::default();
+    disconnected_engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                document("main", "main.tex", local, 1),
+                document(
+                    "disconnected",
+                    "disconnected.tex",
+                    "Events $A$ and $B$ belong to the same probability space.",
+                    1,
+                ),
+            ],
+        })
+        .unwrap();
+    let result = disconnected_engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: local.find("A \\cap B").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
 }
 
 #[test]

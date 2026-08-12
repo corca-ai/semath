@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 use thiserror::Error;
@@ -8,17 +8,17 @@ use crate::candidate::{
     StructuralCandidateOption, append_semantic_candidates, application_end_offset,
     structural_candidate_options,
 };
-use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, render_canonical};
-use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
-use crate::cursor::{
-    CursorOccurrence, interior_offset, item_at_cursor_with_trailing_edge, occurrence_at_cursor,
+use crate::canonical::{
+    SemanticExpr, SemanticExprKind, lower_document_region, relation_head, render_canonical,
 };
-use crate::decision::{MeaningDecisionInput, decide_meaning};
+use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
+use crate::cursor::{CursorOccurrence, interior_offset, occurrence_at_cursor};
+use crate::decision::{MeaningDecisionInput, decide_meaning, symbol_has_source_meaning};
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
-use crate::prose::{LawActivationEvidence, definition_available_from};
+use crate::prose::{LawActivationEvidence, ScientificSemanticEvidence, definition_available_from};
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
@@ -30,13 +30,13 @@ use crate::semantic_index::{
     occurrence_binding_key,
 };
 use crate::{
-    AnalysisStats, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo, Evidence, Location,
-    PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
-    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue,
-    RenamePreparation, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
-    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    AnalysisStats, AssumptionInfo, ChangeEnvelope, DefinitionInfo, DimensionExponentInfo,
+    DomainActivation, Evidence, Location, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
+    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
+    QueryResult, QueryValue, RenamePreparation, RoleInfo, SemanticCandidateInfo,
+    SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
+    SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -76,6 +76,7 @@ struct AnalyzedDocument {
     component_id: String,
     analysis_fingerprint: u64,
     canonical_expressions: Vec<SemanticExpr>,
+    formula_ranges: Vec<SourceRange>,
     semantic_occurrences: Vec<SemanticOccurrenceSeed>,
     cross_modal_bindings: Vec<CrossModalBinding>,
     engine_limited_ranges: Vec<SourceRange>,
@@ -125,6 +126,14 @@ struct IndexedLawActivation {
     source_offset: u32,
 }
 
+#[derive(Clone)]
+struct IndexedAssumption {
+    assumption: AssumptionInfo,
+    component_id: String,
+    file_id: String,
+    source_offset: u32,
+}
+
 impl AnalyzedDocument {
     fn analyze(mut document: ProjectDocument) -> Result<Self, EngineError> {
         #[cfg(test)]
@@ -138,11 +147,7 @@ impl AnalyzedDocument {
         let scopes = ScopeGraph::new(&document);
         let canonical_expressions = parsed
             .iter()
-            .map(|math| {
-                let mut expression = lower_document_region(&document, &math.region.content_range);
-                expression.range = math.region.content_range.clone();
-                expression
-            })
+            .map(|math| lower_document_region(&document, &math.region.content_range))
             .collect::<Vec<_>>();
         let observations =
             DocumentSemanticObservations::build(&document, &parsed, &canonical_expressions);
@@ -200,6 +205,22 @@ impl AnalyzedDocument {
                 });
             }
         }
+        semantic_occurrences.sort_by(|left, right| {
+            (
+                left.selection_range.start_offset,
+                left.selection_range.end_offset,
+                left.range.start_offset,
+                left.range.end_offset,
+                left.surface.as_str(),
+            )
+                .cmp(&(
+                    right.selection_range.start_offset,
+                    right.selection_range.end_offset,
+                    right.range.start_offset,
+                    right.range.end_offset,
+                    right.surface.as_str(),
+                ))
+        });
         let analysis_fingerprint = analysis_fingerprint(&document);
         let engine_limited_ranges = document
             .macros
@@ -226,6 +247,11 @@ impl AnalyzedDocument {
                     .chain(event.expansion.input_range.iter().cloned())
             })
             .collect();
+        let formula_ranges = document
+            .math_roots
+            .iter()
+            .map(|root| root.content_range.clone())
+            .collect();
         compact_analyzed_document(&mut document);
         Ok(Self {
             component_id: document.file_id.clone(),
@@ -235,6 +261,7 @@ impl AnalyzedDocument {
             scopes,
             analysis_fingerprint,
             canonical_expressions,
+            formula_ranges,
             semantic_occurrences,
             cross_modal_bindings,
             engine_limited_ranges,
@@ -397,6 +424,13 @@ impl ProjectState {
                         .flat_map(|activation| activation.evidence.source_ranges.iter())
                         .map(|range| range.start_offset),
                 )
+                .chain(
+                    observations
+                        .assumptions()
+                        .iter()
+                        .flat_map(|assumption| assumption.evidence.source_ranges.iter())
+                        .map(|range| range.start_offset),
+                )
                 .collect(),
             path: document.document.path.clone(),
         })
@@ -501,9 +535,7 @@ fn append_relation_occurrences(
                 selection_range: range.clone(),
                 scope_path: scopes.path_at(range.start_offset),
                 structural_path: Vec::new(),
-                availability_order: order
-                    .position(&document.file_id, range.start_offset)
-                    .unwrap_or(u64::MAX),
+                availability_order: expression_availability_order(document, &range, order, output),
                 surface: source_text(document, &range),
                 source_text: source_text(document, &range),
                 notation: Vec::new(),
@@ -511,6 +543,28 @@ fn append_relation_occurrences(
             Vec::new(),
         ));
     }
+}
+
+fn expression_availability_order(
+    document: &ProjectDocument,
+    range: &SourceRange,
+    order: &ProjectOrder,
+    occurrences: &[(SourceOccurrence, Vec<StructuralCandidateOption>)],
+) -> u64 {
+    order
+        .position(&document.file_id, range.start_offset)
+        .or_else(|| {
+            occurrences
+                .iter()
+                .filter(|(occurrence, _)| {
+                    range.start_offset <= occurrence.range.start_offset
+                        && occurrence.range.end_offset <= range.end_offset
+                })
+                .map(|(occurrence, _)| occurrence.availability_order)
+                .filter(|position| *position != u64::MAX)
+                .max()
+        })
+        .unwrap_or(u64::MAX)
 }
 
 fn collect_relation_ranges(expression: &SemanticExpr, output: &mut Vec<SourceRange>) {
@@ -786,11 +840,12 @@ fn lower_semantic_document(
             .iter()
             .map(|(entity, definition)| (entity.clone(), definition.clone())),
     );
-    let relations = lower_canonical_relation_facts(
+    let mut relations = lower_canonical_relation_facts(
         source,
         &document.canonical_expressions,
         &occurrences,
         &definitions,
+        observations.semantic_evidence(),
     );
     let typed = lower_typed_observation_facts(
         source,
@@ -799,6 +854,7 @@ fn lower_semantic_document(
         &definitions,
         &relations.entities,
     );
+    relations.prune_unreferenced_entities(&typed.claims);
     evidence.extend(typed.evidence);
     claims.extend(typed.claims);
     entities.extend(relations.entities);
@@ -1089,10 +1145,27 @@ struct LoweredRelationFacts {
     claims: Vec<Claim>,
 }
 
+impl LoweredRelationFacts {
+    fn prune_unreferenced_entities(&mut self, typed_claims: &[Claim]) {
+        let mut referenced = BTreeSet::new();
+        for claim in self.claims.iter().chain(typed_claims) {
+            referenced.insert(claim.subject.clone());
+            if let ClaimObject::Entity(entity) = &claim.object {
+                referenced.insert(entity.clone());
+            }
+            if let ClaimObject::Value(ClaimValue::Relation(relation)) = &claim.object {
+                referenced.extend(relation.entities().into_iter().cloned());
+            }
+        }
+        self.entities.retain(|entity| referenced.contains(entity));
+    }
+}
+
 struct RelationLowerer<'a> {
     source: &'a ProjectDocument,
     occurrences: &'a [SourceOccurrence],
     definitions: &'a BTreeMap<EntityId, DefinitionInfo>,
+    semantic_evidence: &'a ScientificSemanticEvidence,
     output: LoweredRelationFacts,
     entities_by_expression: BTreeMap<(u32, u32, String), EntityId>,
     implicit_entities_by_identity: BTreeMap<(Vec<u32>, String), EntityId>,
@@ -1103,11 +1176,13 @@ fn lower_canonical_relation_facts(
     expressions: &[SemanticExpr],
     occurrences: &[SourceOccurrence],
     definitions: &BTreeMap<EntityId, DefinitionInfo>,
+    semantic_evidence: &ScientificSemanticEvidence,
 ) -> LoweredRelationFacts {
     let mut lowerer = RelationLowerer {
         source,
         occurrences,
         definitions,
+        semantic_evidence,
         output: LoweredRelationFacts::default(),
         entities_by_expression: BTreeMap::new(),
         implicit_entities_by_identity: BTreeMap::new(),
@@ -1121,6 +1196,19 @@ fn lower_canonical_relation_facts(
 }
 
 impl RelationLowerer<'_> {
+    fn disposition_for(&self, anchor: &SourceOccurrenceId) -> (EvidencePolarity, EvidenceModality) {
+        self.occurrences
+            .iter()
+            .find(|occurrence| occurrence.id == *anchor)
+            .map_or(
+                (EvidencePolarity::Positive, EvidenceModality::Asserted),
+                |occurrence| {
+                    self.semantic_evidence
+                        .formula_disposition(&occurrence.range)
+                },
+            )
+    }
+
     fn lower_expression(&mut self, expression: &SemanticExpr) -> Option<EntityId> {
         let result = self.entity_for(expression)?;
         let canonical = render_canonical(expression);
@@ -1506,13 +1594,16 @@ impl RelationLowerer<'_> {
             "{}:{}:canonical-symbol-identity-evidence:{ordinal}",
             self.source.file_id, self.source.document_version
         ));
+        let (polarity, modality) = self
+            .semantic_evidence
+            .formula_disposition(&occurrence.range);
         self.output.evidence.push(EvidenceRecord {
             id: evidence_id.clone(),
             source: occurrence.id.clone(),
             scope_path: occurrence.scope_path.clone(),
             available_after: occurrence.availability_order,
-            polarity: EvidencePolarity::Positive,
-            modality: EvidenceModality::Asserted,
+            polarity,
+            modality,
             origin: EvidenceOrigin::Explicit,
             provenance: vec![occurrence.id.clone()],
             parent_claims: Vec::new(),
@@ -1612,13 +1703,14 @@ impl RelationLowerer<'_> {
             })
             .max()
             .unwrap_or(0);
+        let (polarity, modality) = self.disposition_for(&subject.anchor);
         self.output.evidence.push(EvidenceRecord {
             id: evidence_id.clone(),
             source: subject.anchor.clone(),
             scope_path: subject.scope_path.clone(),
             available_after,
-            polarity: EvidencePolarity::Positive,
-            modality: EvidenceModality::Asserted,
+            polarity,
+            modality,
             origin: EvidenceOrigin::Explicit,
             provenance,
             parent_claims: Vec::new(),
@@ -1650,6 +1742,7 @@ impl RelationLowerer<'_> {
             "{}:{}:canonical-constant-evidence:{ordinal}",
             self.source.file_id, self.source.document_version
         ));
+        let (polarity, modality) = self.disposition_for(&subject.anchor);
         self.output.evidence.push(EvidenceRecord {
             id: evidence_id.clone(),
             source: subject.anchor.clone(),
@@ -1659,8 +1752,8 @@ impl RelationLowerer<'_> {
                 .iter()
                 .find(|occurrence| occurrence.id == subject.anchor)
                 .map_or(0, |occurrence| occurrence.availability_order),
-            polarity: EvidencePolarity::Positive,
-            modality: EvidenceModality::Asserted,
+            polarity,
+            modality,
             origin: EvidenceOrigin::Explicit,
             provenance: vec![subject.anchor.clone()],
             parent_claims: Vec::new(),
@@ -1712,6 +1805,35 @@ fn stable_text_digest(value: &str) -> String {
         hash = hash.wrapping_mul(0x100000001b3);
     }
     format!("{hash:016x}")
+}
+
+fn canonical_expression_at_range<'a>(
+    expressions: &'a [SemanticExpr],
+    range: &SourceRange,
+) -> Option<&'a SemanticExpr> {
+    let mut candidates = Vec::new();
+    for expression in expressions {
+        collect_canonical_expressions(expression, &mut candidates);
+    }
+    candidates
+        .into_iter()
+        .filter(|expression| {
+            expression.range.start_offset == range.start_offset
+                && expression.range.end_offset <= range.end_offset
+        })
+        .max_by_key(|expression| expression.range.end_offset - expression.range.start_offset)
+}
+
+fn collect_canonical_expressions<'a>(
+    expression: &'a SemanticExpr,
+    output: &mut Vec<&'a SemanticExpr>,
+) {
+    output.push(expression);
+    if let SemanticExprKind::System(expressions) = &expression.kind {
+        for expression in expressions {
+            collect_canonical_expressions(expression, output);
+        }
+    }
 }
 
 fn closest_definition<'a>(
@@ -1976,6 +2098,7 @@ fn explicit_candidate_types(description: &str) -> Vec<&'static str> {
         .collect::<HashSet<_>>();
     [
         ("function", "function"),
+        ("antiderivative", "function"),
         ("operator", "operator"),
         ("mapping", "map"),
         ("map", "map"),
@@ -2459,7 +2582,9 @@ impl SemathEngine {
                 locations: symbol
                     .as_ref()
                     .and_then(|(name, occurrence)| {
-                        self.resolve_definition(file_id, occurrence, name)
+                        self.visible_definitions(file_id, occurrence, name)
+                            .into_iter()
+                            .next()
                     })
                     .map(|definition| self.references_for(&definition))
                     .unwrap_or_default(),
@@ -2725,7 +2850,9 @@ impl SemathEngine {
     ) -> Option<DefinitionInfo> {
         self.visible_definitions(file_id, occurrence, symbol)
             .into_iter()
-            .next()
+            .find(|definition| {
+                definition.location.file_id != file_id || definition.location.range != *occurrence
+            })
     }
 
     fn references_for(&self, definition: &DefinitionInfo) -> Vec<Location> {
@@ -2752,7 +2879,11 @@ impl SemathEngine {
                 .cmp(&right.path)
                 .then(left.range.start_offset.cmp(&right.range.start_offset))
         });
-        locations
+        if locations.len() > 1 {
+            locations
+        } else {
+            Vec::new()
+        }
     }
 
     fn resolved_entity(&self, file_id: &str, range: &SourceRange) -> Option<EntityId> {
@@ -2835,6 +2966,7 @@ impl SemathEngine {
         file_id: &str,
         symbol: Option<&(String, SourceRange)>,
         offset: u32,
+        formulas: &[crate::LawRecognition],
     ) -> SemanticContextInfo {
         let (definitions, entity_id, symbol_name) = symbol
             .map(|(name, occurrence)| {
@@ -2851,6 +2983,7 @@ impl SemathEngine {
             entity_id.clone(),
             offset,
             self.index.external_types.get(file_id),
+            formulas.to_vec(),
         );
         let semantic_occurrence = symbol.and_then(|(_, occurrence)| {
             self.index
@@ -2927,7 +3060,45 @@ impl SemathEngine {
         offset: u32,
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
-        let symbol_info = symbol.as_ref().and_then(|(name, occurrence)| {
+        let formula_boundary = symbol.is_none();
+        let queried_relation = parsed.and_then(|math| {
+            document.canonical_expressions.iter().find(|expression| {
+                math.region.content_range.start_offset <= expression.range.start_offset
+                    && expression.range.end_offset <= math.region.content_range.end_offset
+                    && relation_head(expression).is_some()
+            })
+        });
+        let mut local_formulas = observations.laws.at(offset);
+        if local_formulas.is_empty()
+            && formula_boundary
+            && let Some(math) = parsed
+        {
+            local_formulas = observations.laws.overlapping(&math.region.content_range);
+        }
+        local_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
+        let display_focus = symbol
+            .cloned()
+            .or_else(|| queried_relation.and_then(relation_head));
+        let semantic_focus = (!parsed
+            .is_some_and(|math| cursor_is_structural_environment_marker(&math.root, offset)))
+        .then_some(display_focus.as_ref())
+        .flatten();
+        let mut context_formulas = local_formulas.clone();
+        if !local_formulas.is_empty() {
+            let linked =
+                self.source_linked_preceding_formulas(document, observations, &local_formulas);
+            for formula in linked {
+                if !context_formulas.iter().any(|existing| {
+                    existing.pack_id == formula.pack_id
+                        && existing.law_id == formula.law_id
+                        && existing.range == formula.range
+                }) {
+                    context_formulas.push(formula);
+                }
+            }
+        }
+        context_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
+        let symbol_info = display_focus.as_ref().and_then(|(name, occurrence)| {
             self.symbol_info(
                 document,
                 observations,
@@ -2937,8 +3108,13 @@ impl SemathEngine {
                 hygiene_enabled,
             )
         });
-        let context =
-            self.semantic_context(observations, &document.document.file_id, symbol, offset);
+        let context = self.semantic_context(
+            observations,
+            &document.document.file_id,
+            semantic_focus,
+            offset,
+            &context_formulas,
+        );
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -2986,17 +3162,45 @@ impl SemathEngine {
             || domains_truncated
             || context.truncated
             || symbol_info.as_ref().is_some_and(|info| info.truncated);
-        let formulas = observations.laws.at(offset);
         let engine_limited = document
             .engine_limited_ranges
             .iter()
-            .any(|range| range.contains(offset));
+            .any(|range| range.contains(offset))
+            || symbol_info.as_ref().is_some_and(|symbol| {
+                !symbol_has_source_meaning(symbol)
+                    && local_formulas.is_empty()
+                    && context.candidates.is_empty()
+                    && unresolved_control_sequence(symbol)
+            });
+        let unsupported_relation_context = local_formulas.is_empty()
+            && queried_relation.is_some_and(|relation| {
+                observations
+                    .semantic_evidence()
+                    .formula_is_asserted(&relation.range)
+                    && domain_has_correlated_evidence(&domains)
+                    && context.candidates.is_empty()
+                    && !self.formula_has_source_meaning(document, &relation.range)
+            })
+            || queried_relation.is_none()
+                && symbol_info.as_ref().is_some_and(|symbol| {
+                    !symbol_has_source_meaning(symbol)
+                        && (self
+                            .index
+                            .semantic
+                            .has_future_external_binding_evidence(&symbol.occurrence_id)
+                            || self.has_prior_excluding_occurrence(
+                                observations,
+                                &symbol.occurrence_id,
+                            )
+                            || explicitly_excludes_external_evidence(&context, symbol))
+                });
         let decision = decide_meaning(MeaningDecisionInput {
-            formulas: &formulas,
-            symbol: symbol_info.as_ref(),
+            formulas: &local_formulas,
+            symbol: semantic_focus.and(symbol_info.as_ref()),
             candidates: &context.candidates,
             diagnostics: &diagnostics,
             engine_limited,
+            unsupported_relation_context,
             truncated,
         });
         SemanticViewInfo {
@@ -3008,6 +3212,146 @@ impl SemathEngine {
             domains,
             truncated,
         }
+    }
+
+    fn formula_is_retracted(
+        &self,
+        document: &AnalyzedDocument,
+        formula: &crate::LawRecognition,
+    ) -> bool {
+        let Some(expression) =
+            canonical_expression_at_range(&document.canonical_expressions, &formula.range)
+        else {
+            return false;
+        };
+        let Some((_, subject_range)) = relation_head(expression) else {
+            return false;
+        };
+        let Some(occurrence) = self.index.occurrences_by_range.get(&(
+            document.document.file_id.clone(),
+            subject_range.start_offset,
+            subject_range.end_offset,
+        )) else {
+            return false;
+        };
+        self.index.semantic.relation_is_retracted(
+            &stable_text_digest(&render_canonical(expression)),
+            occurrence,
+        )
+    }
+
+    fn source_linked_preceding_formulas(
+        &self,
+        document: &AnalyzedDocument,
+        observations: &DocumentSemanticObservations,
+        current: &[crate::LawRecognition],
+    ) -> Vec<crate::LawRecognition> {
+        let current_start = current
+            .iter()
+            .map(|formula| formula.range.start_offset)
+            .min()
+            .unwrap_or(0);
+        let current_entities = current
+            .iter()
+            .flat_map(|formula| self.entities_in_formula(document, &formula.range))
+            .collect::<BTreeSet<_>>();
+        if current_entities.is_empty() {
+            return Vec::new();
+        }
+        observations
+            .laws
+            .all()
+            .iter()
+            .filter(|formula| formula.range.end_offset <= current_start)
+            .filter(|formula| {
+                self.entities_in_formula(document, &formula.range)
+                    .iter()
+                    .any(|entity| current_entities.contains(entity))
+            })
+            .cloned()
+            .collect()
+    }
+
+    fn entities_in_formula(
+        &self,
+        document: &AnalyzedDocument,
+        range: &SourceRange,
+    ) -> BTreeSet<EntityId> {
+        let start = document.semantic_occurrences.partition_point(|occurrence| {
+            occurrence.selection_range.start_offset < range.start_offset
+        });
+        let end = document.semantic_occurrences.partition_point(|occurrence| {
+            occurrence.selection_range.start_offset < range.end_offset
+        });
+        document.semantic_occurrences[start..end]
+            .iter()
+            .filter(|occurrence| {
+                range.start_offset <= occurrence.selection_range.start_offset
+                    && occurrence.selection_range.end_offset <= range.end_offset
+            })
+            .filter_map(|occurrence| {
+                self.index.occurrences_by_range.get(&(
+                    document.document.file_id.clone(),
+                    occurrence.selection_range.start_offset,
+                    occurrence.selection_range.end_offset,
+                ))
+            })
+            .flat_map(|occurrence| self.index.semantic.resolve(occurrence).candidates)
+            .filter(|candidate| {
+                !candidate.supporting_claims.is_empty() && candidate.rejecting_claims.is_empty()
+            })
+            .map(|candidate| candidate.entity_id)
+            .collect()
+    }
+
+    fn formula_has_source_meaning(&self, document: &AnalyzedDocument, range: &SourceRange) -> bool {
+        document
+            .semantic_occurrences
+            .iter()
+            .filter(|occurrence| {
+                range.start_offset <= occurrence.selection_range.start_offset
+                    && occurrence.selection_range.end_offset <= range.end_offset
+            })
+            .take(32)
+            .filter_map(|occurrence| {
+                self.index.occurrences_by_range.get(&(
+                    document.document.file_id.clone(),
+                    occurrence.selection_range.start_offset,
+                    occurrence.selection_range.end_offset,
+                ))
+            })
+            .any(|occurrence| {
+                self.index
+                    .semantic
+                    .occurrence_has_source_meaning(occurrence)
+            })
+    }
+
+    fn has_prior_excluding_occurrence(
+        &self,
+        observations: &DocumentSemanticObservations,
+        current_id: &SourceOccurrenceId,
+    ) -> bool {
+        let Some(current) = self.index.semantic.occurrence(current_id) else {
+            return false;
+        };
+        let binding = occurrence_binding_key(current);
+        self.index.semantic.occurrences().any(|candidate| {
+            if candidate.id.file_id != current.id.file_id
+                || candidate.range.start_offset >= current.range.start_offset
+                || occurrence_binding_key(candidate) != binding
+            {
+                return false;
+            }
+            let (polarity, modality) = observations
+                .semantic_evidence()
+                .formula_disposition(&candidate.range);
+            polarity == EvidencePolarity::Negative
+                || matches!(
+                    modality,
+                    EvidenceModality::Hypothetical | EvidenceModality::Cited
+                )
+        })
     }
 
     fn symbol_info(
@@ -3193,6 +3537,39 @@ impl SemathEngine {
                 roles.chain(quantities).chain(shapes)
             })
             .collect::<Vec<_>>();
+        let mut assumptions = self
+            .index
+            .documents
+            .iter()
+            .filter(|(_, document)| target_components.contains(&document.component_id))
+            .flat_map(|(file_id, document)| {
+                document
+                    .observations
+                    .assumptions()
+                    .iter()
+                    .filter(|assumption| !assumption.subjects.is_empty())
+                    .cloned()
+                    .map({
+                        let component_id = document.component_id.clone();
+                        let file_id = file_id.clone();
+                        move |assumption| IndexedAssumption {
+                            component_id: component_id.clone(),
+                            source_offset: evidence_anchor(&assumption.evidence),
+                            file_id: file_id.clone(),
+                            assumption,
+                        }
+                    })
+            })
+            .collect::<Vec<_>>();
+        assumptions.sort_by(|left, right| {
+            left.component_id
+                .cmp(&right.component_id)
+                .then(left.file_id.cmp(&right.file_id))
+                .then(left.source_offset.cmp(&right.source_offset))
+                .then(left.assumption.kind.cmp(&right.assumption.kind))
+                .then(left.assumption.value.cmp(&right.assumption.value))
+                .then(left.assumption.subjects.cmp(&right.assumption.subjects))
+        });
         let mut facts_by_symbol = HashMap::<String, Vec<IndexedTypeFact>>::new();
         for fact in facts {
             facts_by_symbol
@@ -3208,6 +3585,7 @@ impl SemathEngine {
                 let mut environment = ExternalTypeEnvironment::default();
                 for math in target.parsed.iter().filter(|math| math.region.closed) {
                     let semantic_offset = math.region.content_range.start_offset;
+                    environment.begin_formula(&math.region.content_range);
                     let order_offset = math
                         .symbols
                         .first()
@@ -3217,6 +3595,25 @@ impl SemathEngine {
                         .iter()
                         .map(|(symbol, _)| symbol.as_str())
                         .collect::<HashSet<_>>();
+                    for assumption in &assumptions {
+                        if assumption.file_id != *file_id
+                            && assumption.component_id == target.component_id
+                            && assumption
+                                .assumption
+                                .subjects
+                                .iter()
+                                .all(|subject| symbols.contains(subject.as_str()))
+                            && self.index.order.precedes(
+                                &assumption.file_id,
+                                assumption.source_offset,
+                                file_id,
+                                order_offset,
+                            )
+                        {
+                            environment
+                                .add_assumption(semantic_offset, assumption.assumption.clone());
+                        }
+                    }
                     for activation in activations.get(&target.component_id).into_iter().flatten() {
                         if activation.file_id != *file_id
                             && self.index.order.precedes(
@@ -3264,9 +3661,11 @@ impl SemathEngine {
             let document = self.index.documents.get(&file_id).unwrap();
             let source = document.document.clone();
             let canonical_expressions = document.canonical_expressions.clone();
+            let formula_ranges = document.formula_ranges.clone();
             self.index.observations_mut(&file_id).refresh_laws(
                 &source,
                 &canonical_expressions,
+                &formula_ranges,
                 &environment,
             );
             self.index.external_types.insert(file_id, environment);
@@ -3378,9 +3777,6 @@ fn semantic_symbol_at_cursor(
     math: &ParsedMath,
     offset: u32,
 ) -> Option<(String, SourceRange)> {
-    if let Some((symbol, range)) = symbol_range_at_cursor(&math.symbols, offset) {
-        return Some((symbol.clone(), range.clone()));
-    }
     let candidates = document
         .semantic_occurrences
         .iter()
@@ -3401,15 +3797,8 @@ fn semantic_symbol_at_cursor(
             }),
         })
         .collect::<Vec<_>>();
-    let selected = candidates[occurrence_at_cursor(&ownership, offset)?];
-    Some((selected.surface.clone(), selected.selection_range.clone()))
-}
-
-fn symbol_range_at_cursor(
-    symbols: &[(String, SourceRange)],
-    offset: u32,
-) -> Option<(&String, &SourceRange)> {
-    item_at_cursor_with_trailing_edge(symbols, offset)
+    let selected = candidates.get(occurrence_at_cursor(&ownership, offset)?)?;
+    Some((selected.surface.clone(), selected.range.clone()))
 }
 
 fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
@@ -3418,6 +3807,55 @@ fn ranges_overlap(left: &SourceRange, right: &SourceRange) -> bool {
 
 fn equation_node_count(node: &crate::EquationNode) -> u32 {
     1 + node.children.iter().map(equation_node_count).sum::<u32>()
+}
+
+fn cursor_is_structural_environment_marker(node: &crate::EquationNode, offset: u32) -> bool {
+    if !node.range.contains(offset) {
+        return false;
+    }
+    node.children
+        .iter()
+        .find(|child| child.range.contains(offset))
+        .map_or(node.kind == "environment", |child| {
+            cursor_is_structural_environment_marker(child, offset)
+        })
+}
+
+fn unresolved_control_sequence(symbol: &SymbolInfo) -> bool {
+    symbol.source_notation.starts_with('\\')
+        && !symbol.source_notation.contains('{')
+        && matches!(
+            symbol.notation.as_slice(),
+            [NotationComponent::NamedSurface { .. }]
+        )
+}
+
+fn domain_has_correlated_evidence(domains: &[DomainActivation]) -> bool {
+    domains.iter().any(|domain| {
+        let has_prose = domain
+            .evidence
+            .iter()
+            .any(|evidence| evidence.kind == "prose-domain-prior");
+        let has_structure = domain
+            .evidence
+            .iter()
+            .any(|evidence| evidence.kind == "structural-domain-prior");
+        has_prose && has_structure
+    })
+}
+
+fn explicitly_excludes_external_evidence(
+    context: &SemanticContextInfo,
+    symbol: &SymbolInfo,
+) -> bool {
+    context.assumptions.iter().any(|assumption| {
+        assumption.kind == "project-reachability"
+            && assumption.value == "not-included"
+            && assumption
+                .subjects
+                .iter()
+                .any(|subject| subject == &symbol.symbol)
+    })
 }
 
 fn candidate_family_name(family: CandidateFamily) -> &'static str {

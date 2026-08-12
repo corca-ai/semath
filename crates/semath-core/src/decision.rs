@@ -13,6 +13,7 @@ pub(crate) struct MeaningDecisionInput<'a> {
     pub candidates: &'a [SemanticCandidateInfo],
     pub diagnostics: &'a [SemanticDiagnostic],
     pub engine_limited: bool,
+    pub unsupported_relation_context: bool,
     pub truncated: bool,
 }
 
@@ -35,9 +36,7 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
             .candidates
             .iter()
             .any(|candidate| candidate.status == SemanticCandidateStatus::Supported)
-        || input.symbol.is_some_and(|symbol| {
-            !symbol.definitions.is_empty() || !symbol.roles.is_empty() || !symbol.shapes.is_empty()
-        });
+        || input.symbol.is_some_and(symbol_has_source_meaning);
     if input.engine_limited && !has_source_meaning {
         return MeaningDecision::Unsupported {
             reasons: vec![DecisionReason {
@@ -45,6 +44,13 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
                 label: "The notation is opaque to the current syntax engine.".into(),
                 evidence: Vec::new(),
             }],
+        };
+    }
+    if input.unsupported_relation_context {
+        return MeaningDecision::Unsupported {
+            reasons: vec![uncertainty_reason(
+                "No source-supported interpretation matches this relation in the active field.",
+            )],
         };
     }
 
@@ -92,23 +98,6 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
     }
 
     if let Some(symbol) = input.symbol {
-        let has_symbol_meaning = !symbol.definitions.is_empty()
-            || !symbol.roles.is_empty()
-            || !symbol.shapes.is_empty()
-            || !symbol.quantities.is_empty();
-        if !has_symbol_meaning {
-            return MeaningDecision::Unsupported {
-                reasons: [
-                    Some(uncertainty_reason(
-                        "No source-supported interpretation is currently available.",
-                    )),
-                    truncation_reason(input.truncated),
-                ]
-                .into_iter()
-                .flatten()
-                .collect(),
-            };
-        }
         return MeaningDecision::Partial {
             meaning: MeaningConclusion {
                 label: symbol
@@ -156,6 +145,13 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
         .flatten()
         .collect(),
     }
+}
+
+pub(crate) fn symbol_has_source_meaning(symbol: &SymbolInfo) -> bool {
+    !symbol.definitions.is_empty()
+        || !symbol.roles.is_empty()
+        || !symbol.shapes.is_empty()
+        || !symbol.quantities.is_empty()
 }
 
 fn collect_conflicts(input: &MeaningDecisionInput<'_>) -> Vec<MeaningConflict> {
@@ -429,6 +425,7 @@ mod tests {
             candidates: &[supported.clone(), unresolved.clone()],
             diagnostics: &[],
             engine_limited: false,
+            unsupported_relation_context: false,
             truncated: false,
         });
         assert!(matches!(
@@ -445,6 +442,7 @@ mod tests {
             ],
             diagnostics: &[],
             engine_limited: false,
+            unsupported_relation_context: false,
             truncated: false,
         });
         assert!(matches!(decision, MeaningDecision::Ambiguous { .. }));
@@ -458,6 +456,7 @@ mod tests {
             )],
             diagnostics: &[],
             engine_limited: false,
+            unsupported_relation_context: false,
             truncated: false,
         });
         assert!(matches!(decision, MeaningDecision::Conflicting { .. }));
@@ -475,6 +474,7 @@ mod tests {
             ],
             diagnostics: &[],
             engine_limited: false,
+            unsupported_relation_context: false,
             truncated: false,
         });
         assert!(matches!(
@@ -491,6 +491,7 @@ mod tests {
             candidates: &[],
             diagnostics: &[],
             engine_limited: true,
+            unsupported_relation_context: false,
             truncated: false,
         });
         assert!(matches!(
@@ -498,6 +499,21 @@ mod tests {
             MeaningDecision::Unsupported { reasons }
                 if reasons.len() == 1 && reasons[0].kind == DecisionReasonKind::EngineLimit
         ));
+    }
+
+    #[test]
+    fn an_explicitly_unsupported_relation_outranks_local_symbol_or_candidate_meaning() {
+        let supported = candidate("local-symbol-meaning", SemanticCandidateStatus::Supported);
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            candidates: &[supported],
+            diagnostics: &[],
+            engine_limited: false,
+            unsupported_relation_context: true,
+            truncated: false,
+        });
+        assert!(matches!(decision, MeaningDecision::Unsupported { .. }));
     }
 
     #[test]
@@ -538,6 +554,7 @@ mod tests {
             candidates: &[],
             diagnostics: &[diagnostic],
             engine_limited: false,
+            unsupported_relation_context: false,
             truncated: false,
         });
         assert!(matches!(
@@ -554,6 +571,7 @@ mod tests {
             candidates: &[],
             diagnostics: &[],
             engine_limited: false,
+            unsupported_relation_context: false,
             truncated: false,
         }
     }

@@ -97,7 +97,28 @@ if (process.env.SEMATH_CORPUS_REPORT) {
       ((item.case.expectation === "recognized" && !observation.targetPresent) ||
         (item.case.expectation === "refused" && observation.targetPresent))
     ) {
-      console.error(`case ${explanation.suiteId}/${explanation.caseId}: ${explanation.reason}`);
+      console.error(
+        `case ${explanation.suiteId}/${explanation.caseId}: status=${explanation.status} reason=${explanation.reason || "none"} relations=${JSON.stringify(explanation.observedRelations)} generatedFrom=${JSON.stringify(item.generatedFrom ?? "fixture")} source=${JSON.stringify(item.case.documents.map((document) => document.content))}`,
+      );
+    }
+    if (
+      observation &&
+      item.case.expectation === "recognized" &&
+      observation.targetPresent &&
+      !observation.rolesCorrect
+    ) {
+      const view = results[index]?.value.kind === "semanticView"
+        ? results[index].value.view
+        : undefined;
+      const lawId = "lawId" in item.case ? item.case.lawId : undefined;
+      const relation = lawId
+        ? view?.context.relations.find((candidate) =>
+            candidate.relationId.endsWith(`:${lawId}`)
+          )
+        : undefined;
+      console.error(
+        `case ${explanation.suiteId}/${explanation.caseId}: role mismatch expected=${JSON.stringify(item.case.expectedRoles)} actual=${JSON.stringify(relation?.roles ?? [])}`,
+      );
     }
   }
   for (const variation of scorecard.variations) {

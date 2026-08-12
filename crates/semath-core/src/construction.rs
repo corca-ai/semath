@@ -187,6 +187,20 @@ pub(crate) fn match_definition<'a>(
     None
 }
 
+pub(crate) fn match_active_definition(after: &str) -> Option<DefinitionConstruction<'_>> {
+    let trimmed_after = after.trim_start();
+    if trimmed_after.starts_with(',') || trimmed_after.starts_with("and ") {
+        return None;
+    }
+    let (description, suffix_end) = match_description(after, &[""], false)?;
+    valid_description(description).then_some(DefinitionConstruction {
+        description,
+        rule_id: "english-relational-definition",
+        prefix_start: 0,
+        suffix_end,
+    })
+}
+
 pub(crate) fn is_declaration_lead(before: &str) -> bool {
     let lead = current_clause(before).trim();
     [
@@ -322,6 +336,7 @@ pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruct
         }
     }
     let lower_phrase = phrase.to_ascii_lowercase();
+    let bounded_phrase = format!(" {lower_phrase} ");
     if let Some((action_start, action_length)) = [
         " reports ",
         " reported ",
@@ -331,23 +346,49 @@ pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruct
         " supplied ",
         " provides ",
         " provided ",
+        " gives ",
+        " gave ",
         " yields ",
         " yielded ",
         " records ",
         " recorded ",
         " measures ",
         " measured ",
+        " emits ",
+        " emitted ",
+        " has ",
+        " have ",
+        " had ",
+        " held at ",
+        " maintained at ",
+        " operated at ",
+        " fixed at ",
+        " set to ",
+        " allow ",
+        " allows ",
+        " allowed ",
+        " allowing ",
     ]
     .iter()
     .filter_map(|action| {
-        lower_phrase
+        bounded_phrase
             .rfind(action)
-            .map(|offset| (offset, action.len()))
+            .map(|offset| (offset, action.len() - 1))
     })
     .max_by_key(|(offset, _)| *offset)
     {
-        start += action_start + action_length;
+        start += (action_start + action_length).min(phrase.len());
         phrase = &value[start..];
+    }
+    for copula in ["is ", "are ", "was ", "were ", "be "] {
+        if phrase
+            .get(..copula.len())
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(copula))
+        {
+            start += copula.len();
+            phrase = &value[start..];
+            break;
+        }
     }
     let without_article = strip_article(phrase);
     start += phrase.len() - without_article.len();
@@ -412,9 +453,11 @@ pub(crate) fn defines_by_formula(before: &str, after: &str) -> bool {
 pub(crate) fn coordination_lead(before: &str) -> Option<(CoordinationLead, usize)> {
     let clause = current_clause(before);
     let whole = clause.trim();
-    let trimmed = whole
-        .rsplit_once(',')
-        .map_or(whole, |(_, tail)| tail.trim());
+    let trimmed = [",", ";", " while ", " whereas "]
+        .into_iter()
+        .filter_map(|boundary| whole.rfind(boundary).map(|offset| offset + boundary.len()))
+        .max()
+        .map_or(whole, |start| whole[start..].trim());
     let lower = trimmed.to_ascii_lowercase();
     let lead = if ["let", "take", "given", "suppose", "assume"].contains(&lower.as_str()) {
         CoordinationLead::Let
@@ -460,14 +503,39 @@ pub(crate) fn coordinated_descriptions(
         CoordinationLead::Write => consume_any(trimmed, &["for"]),
         CoordinationLead::DenoteBy => Some(trimmed),
     };
-    if let Some(body) = body
-        && let Some((descriptions, consumed)) = ordered_body(body, arity)
+    if let Some(body) = body {
+        if let Some((descriptions, consumed)) = ordered_body(body, arity) {
+            return Some((
+                descriptions,
+                "english-respectively-definition",
+                after.len() - body.len() + consumed,
+            ));
+        }
+        if lead == CoordinationLead::Write
+            && let Some((descriptions, consumed)) = coordinated_body(body, arity)
+        {
+            return Some((
+                descriptions,
+                "english-coordinated-definition",
+                after.len() - body.len() + consumed,
+            ));
+        }
+    }
+    if lead == CoordinationLead::Direct
+        && let Some(body) = body
     {
-        return Some((
-            descriptions,
-            "english-respectively-definition",
-            after.len() - body.len() + consumed,
-        ));
+        let end = body.find([';', '.', '\n', '$']).unwrap_or(body.len());
+        let description = body[..end].trim().trim_end_matches(',').trim_end();
+        if (description.contains(',') || description.to_ascii_lowercase().contains(" and "))
+            && let Some(descriptions) =
+                crate::scientific_prose::align_ordered_descriptions(description, arity)
+        {
+            return Some((
+                descriptions,
+                "english-coordinated-definition",
+                after.len() - body.len() + end,
+            ));
+        }
     }
     if lead == CoordinationLead::Let {
         let shared = consume_any(
@@ -650,6 +718,14 @@ fn ordered_body(value: &str, arity: usize) -> Option<(Vec<&str>, usize)> {
     None
 }
 
+fn coordinated_body(value: &str, arity: usize) -> Option<(Vec<&str>, usize)> {
+    let end = value.find([';', '.', '\n', '$']).unwrap_or(value.len());
+    let descriptions = value[..end].trim().trim_end_matches(',').trim_end();
+    (descriptions.contains(',') || descriptions.to_ascii_lowercase().contains(" and "))
+        .then(|| crate::scientific_prose::align_ordered_descriptions(descriptions, arity))?
+        .map(|descriptions| (descriptions, end))
+}
+
 fn leading_punctuation_end(value: &str) -> Option<usize> {
     value
         .char_indices()
@@ -660,19 +736,41 @@ fn leading_punctuation_end(value: &str) -> Option<usize> {
 }
 
 fn match_lead(before: &str, clause: &str, leads: &[&str]) -> Option<usize> {
-    let whole = clause.trim();
+    let whole = trim_leading_math_boundary(clause.trim());
     let tail = whole
         .rsplit_once(',')
         .map(|(_, value)| value.trim())
         .unwrap_or(whole);
-    [whole, tail].into_iter().find_map(|candidate| {
+    let direct = [whole, tail].into_iter().find_map(|candidate| {
         leads
             .iter()
             .any(|lead| {
                 candidate.eq_ignore_ascii_case(lead) && (!lead.is_empty() || whole.is_empty())
             })
             .then(|| before.len() - clause.len() + clause.rfind(candidate).unwrap_or(0))
+    });
+    direct.or_else(|| {
+        (leads.contains(&"we write")
+            && tail.is_empty()
+            && whole.to_ascii_lowercase().starts_with("we write ")
+            && whole.contains('$'))
+        .then(|| {
+            before.len() - clause.len() + clause.to_ascii_lowercase().find("we write").unwrap()
+        })
     })
+}
+
+fn trim_leading_math_boundary(mut value: &str) -> &str {
+    loop {
+        let trimmed = value.trim_start();
+        let Some(rest) = ["\\]", "\\)", "$$"]
+            .into_iter()
+            .find_map(|boundary| trimmed.strip_prefix(boundary))
+        else {
+            return trimmed;
+        };
+        value = rest;
+    }
 }
 
 fn match_description<'a>(
@@ -746,7 +844,8 @@ fn valid_plain_description(value: &str) -> bool {
 mod tests {
     use super::{
         CoordinationLead, coordinated_descriptions, defines_by_formula,
-        fronted_labeled_descriptions, match_definition, role_first_nominal_candidates,
+        fronted_labeled_descriptions, match_active_definition, match_definition,
+        role_first_nominal_candidates,
     };
 
     #[test]
@@ -764,6 +863,24 @@ mod tests {
                 "{before}_MATH_{after}",
             );
         }
+        assert_eq!(
+            match_definition(
+                "We write $i$ for electric current scalar, ",
+                " for capacitance scalar, ",
+                false,
+            )
+            .map(|item| item.description),
+            Some("capacitance scalar"),
+        );
+    }
+
+    #[test]
+    fn preserves_coordinated_descriptions_after_active_definition_actions() {
+        assert_eq!(
+            match_active_definition(" both kinetic energy and stiffness; then continue")
+                .map(|item| item.description),
+            Some("both kinetic energy and stiffness"),
+        );
     }
 
     #[test]
@@ -776,6 +893,20 @@ mod tests {
             )
             .map(|(items, _, _)| items),
             Some(vec!["input", "state", "output"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(
+                CoordinationLead::Write,
+                " for electric current scalar, capacitance scalar, voltage scalar, and duration scalar.",
+                4,
+            )
+            .map(|(items, _, _)| items),
+            Some(vec![
+                "electric current scalar",
+                "capacitance scalar",
+                "voltage scalar",
+                "duration scalar",
+            ]),
         );
         assert_eq!(
             coordinated_descriptions(
@@ -843,6 +974,40 @@ mod tests {
             .map(|item| item.description),
             Some("cross-section mean speed")
         );
+        assert_eq!(
+            role_first_nominal_candidates("allowing the corresponding mass rate ")
+                .last()
+                .map(|item| item.description),
+            Some("corresponding mass rate")
+        );
+        assert_eq!(
+            role_first_nominal_candidates(", and the machined\nbore determines the wetted area ")
+                .last()
+                .map(|item| item.description),
+            Some("wetted area")
+        );
+        assert_eq!(
+            role_first_nominal_candidates(" is the area ")
+                .last()
+                .map(|item| item.description),
+            Some("area")
+        );
         assert!(defines_by_formula("Define ", " by the following relation."));
+    }
+
+    #[test]
+    fn clips_a_role_after_a_relational_state_lemma() {
+        assert_eq!(
+            role_first_nominal_candidates(" entering a region held at potential ")
+                .into_iter()
+                .map(|candidate| candidate.description)
+                .collect::<Vec<_>>(),
+            ["potential"]
+        );
+    }
+
+    #[test]
+    fn accepts_a_relational_lemma_at_the_end_of_a_description_span() {
+        assert!(role_first_nominal_candidates("the actuator has").is_empty());
     }
 }

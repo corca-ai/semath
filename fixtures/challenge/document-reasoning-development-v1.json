@@ -24,7 +24,8 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "Corrected the relation anchor after full review: provenance belongs to the equation content and must not absorb the following label command."
         ],
         "criticId": "math-development-review",
         "finalDigest": "cdf90374e616164d1d9046f4617c7400a0e27de222caf40cfacc25591b56520e",
@@ -2459,10 +2460,10 @@
           "Applied the independent critic's source or cursor correction."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "939456d4c47aec061e055d496d1b573416f5936aee2eee9c8e07f10111d3201b",
+        "finalDigest": "fc606bd54cb938f2eb8381f282c718c0689067572c1542919d7a36fa0807fc93",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "939456d4c47aec061e055d496d1b573416f5936aee2eee9c8e07f10111d3201b",
+        "semanticReviewDigest": "fc606bd54cb938f2eb8381f282c718c0689067572c1542919d7a36fa0807fc93",
         "status": "corrected"
       },
       "snapshots": [
@@ -2845,13 +2846,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "Corrected the before-edge expectation after full review: the primary cursor and the required relation-source query resolve to the same formula-start offset, where formula meaning is intentionally available while navigation remains unavailable."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "54ac0f4d90973977b856360d7de2432987ebd28d3db49c4955ddcd8b200adf57",
+        "finalDigest": "9e7451e7a5f3f7dce62900f15bf4cb5ea9a76f57ff73b8746cf421136163b47e",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "54ac0f4d90973977b856360d7de2432987ebd28d3db49c4955ddcd8b200adf57",
+        "semanticReviewDigest": "9e7451e7a5f3f7dce62900f15bf4cb5ea9a76f57ff73b8746cf421136163b47e",
         "status": "corrected"
       },
       "snapshots": [
@@ -7624,7 +7626,7 @@
           {
             "anchor": {
               "fileId": "chapters/duct-flow.tex",
-              "needle": "Q = A v .\n  \\label{eq:uniform-volume-flux}"
+              "needle": "Q = A v ."
             },
             "relationId": "fluid-mechanics:volumetric-flow-rate",
             "roles": [
@@ -8214,14 +8216,13 @@
         "edge": "before"
       },
       "expected": {
-        "decision": "partial",
+        "decision": "established",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
           "required": []
         },
         "excludedRelationIds": [
-          "fluid-mechanics:volumetric-flow-rate",
           "fluid-mechanics:mass-flow-rate"
         ],
         "navigation": {
@@ -8247,8 +8248,32 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": false,
-        "relations": []
+        "proofGrounded": true,
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "methods/loop-reduction.tex",
+              "needle": "Q=A v ."
+            },
+            "relationId": "fluid-mechanics:volumetric-flow-rate",
+            "roles": [
+              {
+                "role": "flow-rate",
+                "symbol": "Q"
+              },
+              {
+                "role": "area",
+                "symbol": "A"
+              },
+              {
+                "role": "velocity",
+                "symbol": "v"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ],
+        "symbol": "Q"
       },
       "family": "edit-lifecycle",
       "id": "FM-DEV-010",

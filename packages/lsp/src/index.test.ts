@@ -864,6 +864,7 @@ describe("SemathLspServer", () => {
           text: [
             "Let $A$ be an event.",
             "Let $B$ be an event.",
+            "Assume $A$ and $B$ belong to a common probability space.",
             "$A \\cap B$",
           ].join("\n"),
           uri,
@@ -875,7 +876,7 @@ describe("SemathLspServer", () => {
       id: 52,
       method: "semath/semanticView",
       params: {
-        position: { character: 2, line: 2 },
+        position: { character: 2, line: 3 },
         textDocument: { uri },
       },
     });

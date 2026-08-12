@@ -1,18 +1,19 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
-use crate::canonical::{SemanticExpr, SemanticExprKind, lower_template};
+use crate::canonical::{SemanticExpr, SemanticExprKind, expression_children, lower_template};
 use crate::consistency::{RoleObservations, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{is_capability_pack, laws_share_collision};
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
-use crate::pack::{PackConditionKind, PackLaw, PackLawRole, built_in_packs};
+use crate::pack::{PackConditionKind, PackLaw, PackLawCondition, PackLawRole, built_in_packs};
 use crate::prose::{FormulaOperationKind, LawActivationEvidence, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
+use crate::source_index::SourceIndex;
 use crate::{
-    AssumptionInfo, ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognition,
-    LawRecognitionStatus, QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo,
+    AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawConditionInfo,
+    LawRecognition, LawRecognitionStatus, QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo,
     ScientificConstraintKind, SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
@@ -71,6 +72,7 @@ enum DispatchOperand {
 #[derive(Default)]
 struct LawDispatch {
     candidates: BTreeMap<DispatchKey, Vec<usize>>,
+    variadic_candidates: Vec<usize>,
 }
 
 impl LawDispatch {
@@ -94,7 +96,7 @@ impl LawDispatch {
         placeholders: &BTreeSet<String>,
         variadic: bool,
     ) {
-        let mut keys = forms
+        let keys = forms
             .iter()
             .map(|form| DispatchKey {
                 root: dispatch_root(&form.expression),
@@ -103,11 +105,7 @@ impl LawDispatch {
             })
             .collect::<BTreeSet<_>>();
         if variadic {
-            keys.insert(DispatchKey {
-                root: DispatchRoot::Relation("equals".into()),
-                feature: None,
-                operands: None,
-            });
+            self.variadic_candidates.push(index);
         }
         for key in keys {
             self.candidates.entry(key).or_default().push(index);
@@ -131,13 +129,16 @@ impl LawDispatch {
                 });
             }
         }
-        keys.into_iter()
+        let mut indices = keys
+            .into_iter()
             .filter_map(|key| self.candidates.get(&key))
             .flatten()
             .copied()
-            .collect::<BTreeSet<_>>()
-            .into_iter()
-            .collect()
+            .collect::<BTreeSet<_>>();
+        if is_variadic_balance_candidate(expression) {
+            indices.extend(self.variadic_candidates.iter().copied());
+        }
+        indices.into_iter().collect()
     }
 
     fn candidates(&self, expression: &SemanticExpr) -> Vec<&'static CompiledLaw> {
@@ -265,6 +266,17 @@ static COMPILED_LAWS: LazyLock<Vec<CompiledLaw>> = LazyLock::new(|| {
 
 static LAW_DISPATCH: LazyLock<LawDispatch> =
     LazyLock::new(|| LawDispatch::compile(COMPILED_LAWS.as_slice()));
+
+static NESTED_LAW_APPLICATIONS: LazyLock<BTreeSet<String>> = LazyLock::new(|| {
+    COMPILED_LAWS
+        .iter()
+        .flat_map(|compiled| &compiled.forms)
+        .filter_map(|form| match &form.expression.kind {
+            SemanticExprKind::Apply { operator, .. } => Some(operator.value.clone()),
+            _ => None,
+        })
+        .collect()
+});
 
 fn dispatch_root(expression: &SemanticExpr) -> DispatchRoot {
     match &expression.kind {
@@ -437,6 +449,8 @@ pub(crate) struct LawObservations {
 }
 
 struct RecognitionContext<'a> {
+    source: &'a str,
+    source_index: &'a SourceIndex,
     shapes: &'a ShapeObservations,
     quantities: &'a QuantityObservations,
     consistency: &'a RoleObservations,
@@ -445,6 +459,8 @@ struct RecognitionContext<'a> {
 }
 
 pub(crate) struct LawAnalysisContext<'a> {
+    pub(crate) source: &'a str,
+    pub(crate) formula_ranges: &'a [SourceRange],
     pub(crate) shapes: &'a ShapeObservations,
     pub(crate) quantities: &'a QuantityObservations,
     pub(crate) consistency: &'a RoleObservations,
@@ -455,6 +471,8 @@ pub(crate) struct LawAnalysisContext<'a> {
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ExternalTypeEnvironment {
+    formula_ends: BTreeMap<u32, u32>,
+    assumptions: BTreeMap<u32, Vec<AssumptionInfo>>,
     law_activations: BTreeMap<u32, Vec<LawActivationEvidence>>,
     roles: BTreeMap<u32, BTreeMap<String, Vec<RoleInfo>>>,
     quantities: BTreeMap<u32, BTreeMap<String, Vec<QuantityInfo>>>,
@@ -462,6 +480,29 @@ pub(crate) struct ExternalTypeEnvironment {
 }
 
 impl ExternalTypeEnvironment {
+    pub fn begin_formula(&mut self, range: &SourceRange) {
+        self.formula_ends
+            .insert(range.start_offset, range.end_offset);
+    }
+
+    fn formula_offset(&self, offset: u32) -> u32 {
+        self.formula_ends
+            .range(..=offset)
+            .next_back()
+            .filter(|(_, end)| offset < **end)
+            .map_or(offset, |(start, _)| *start)
+    }
+
+    pub fn add_assumption(&mut self, offset: u32, assumption: AssumptionInfo) {
+        self.assumptions.entry(offset).or_default().push(assumption);
+    }
+
+    fn assumptions_at(&self, offset: u32) -> &[AssumptionInfo] {
+        self.assumptions
+            .get(&self.formula_offset(offset))
+            .map_or(&[], Vec::as_slice)
+    }
+
     pub fn add_law_activation(&mut self, offset: u32, activation: LawActivationEvidence) {
         self.law_activations
             .entry(offset)
@@ -476,13 +517,14 @@ impl ExternalTypeEnvironment {
         law_id: &str,
     ) -> Option<&LawActivationEvidence> {
         self.law_activations
-            .get(&offset)?
+            .get(&self.formula_offset(offset))?
             .iter()
-            .find(|activation| {
+            .filter(|activation| {
                 activation.pack_id == pack_id
                     && activation.law_id == law_id
                     && activation.frame.establishes()
             })
+            .max_by_key(|activation| activation.identifies_attached_formula)
     }
 
     pub fn add_role(&mut self, offset: u32, role: RoleInfo) {
@@ -531,15 +573,15 @@ impl ExternalTypeEnvironment {
     }
 
     pub fn roles_at(&self, offset: u32, symbol: &str) -> Vec<RoleInfo> {
-        facts_at(&self.roles, offset, symbol)
+        facts_at(&self.roles, self.formula_offset(offset), symbol)
     }
 
     pub fn quantities_at(&self, offset: u32, symbol: &str) -> Vec<QuantityInfo> {
-        facts_at(&self.quantities, offset, symbol)
+        facts_at(&self.quantities, self.formula_offset(offset), symbol)
     }
 
     pub fn shapes_at(&self, offset: u32, symbol: &str) -> Vec<ShapeInfo> {
-        facts_at(&self.shapes, offset, symbol)
+        facts_at(&self.shapes, self.formula_offset(offset), symbol)
     }
 }
 
@@ -560,6 +602,17 @@ impl LawObservations {
         self.recognitions
             .iter()
             .filter(|recognition| recognition.range.contains(offset))
+            .cloned()
+            .collect()
+    }
+
+    pub fn overlapping(&self, range: &SourceRange) -> Vec<LawRecognition> {
+        self.recognitions
+            .iter()
+            .filter(|recognition| {
+                recognition.range.start_offset < range.end_offset
+                    && range.start_offset < recognition.range.end_offset
+            })
             .cloned()
             .collect()
     }
@@ -598,6 +651,16 @@ pub(crate) fn observe_laws(
     semantic_evidence: &ScientificSemanticEvidence,
     context: &LawAnalysisContext<'_>,
 ) -> LawObservations {
+    let source_index = SourceIndex::new(context.source);
+    let recognition_context = RecognitionContext {
+        source: context.source,
+        source_index: &source_index,
+        shapes: context.shapes,
+        quantities: context.quantities,
+        consistency: context.consistency,
+        assumptions: context.assumptions,
+        external: context.external,
+    };
     let mut recognitions = Vec::<LawRecognition>::new();
     let mut equivalence_states = 0;
     let mut guard_checks = 0;
@@ -605,13 +668,29 @@ pub(crate) fn observe_laws(
     let mut pack_frontier_candidates = 0;
     let mut pack_latent_candidates = 0;
     let mut pack_latent_fallbacks = 0;
-    for actual in canonical_expressions {
+    let mut actuals = Vec::new();
+    for expression in canonical_expressions {
+        let formula_range = context
+            .formula_ranges
+            .iter()
+            .filter(|range| {
+                range.start_offset <= expression.range.start_offset
+                    && expression.range.end_offset <= range.end_offset
+            })
+            .min_by_key(|range| range.end_offset - range.start_offset);
+        collect_law_expressions(expression, formula_range, &mut actuals);
+    }
+    for (actual, source_envelope) in actuals {
+        let source_envelope =
+            strip_formula_presentation(&source_envelope, context.source, &source_index);
         if !semantic_evidence.formula_is_asserted(&actual.range)
             || !formula_operations_are_well_typed(actual, semantic_evidence, context.shapes)
         {
             continue;
         }
         let mut frontier = LAW_DISPATCH.candidates(actual);
+        let dominant_context_pack =
+            dominant_frontier_context_pack(&frontier, context.domains, actual.range.start_offset);
         let recognition_start = recognitions.len();
         let mut traversed_latent = false;
         pack_frontier_candidates += frontier.len() as u32;
@@ -644,6 +723,12 @@ pub(crate) fn observe_laws(
                         &compiled.law.id,
                     )
                 });
+            let role_context_activated = relevance.as_ref().is_some_and(|relevance| {
+                matches!(
+                    relevance.support,
+                    DomainSupportTier::Explicit | DomainSupportTier::Supported
+                )
+            }) || dominant_context_pack == Some(compiled.pack_id);
             equivalence_states += compiled.forms.len() as u32;
             let candidates = compiled
                 .forms
@@ -708,18 +793,29 @@ pub(crate) fn observe_laws(
                 }
             }
             let Some((matched_form, bindings)) = candidates.into_iter().find(|(_, bindings)| {
+                let inferred_role = actual_output_role(actual, bindings);
                 let supported = roles_are_supported(
                     &compiled.law.roles,
                     bindings,
+                    inferred_role.as_deref(),
                     actual.range.start_offset,
+                    role_context_activated,
                     activation.is_some(),
+                    activation.is_some_and(|activation| activation.identifies_attached_formula),
                     context.shapes,
                     context.quantities,
                     context.consistency,
                     context.external,
                 );
                 let typed = expression_is_well_typed(actual, context.shapes);
-                supported && typed
+                supported
+                    && typed
+                    && !law_conditions_refuted(
+                        compiled.law,
+                        bindings,
+                        context.assumptions,
+                        context.external.assumptions_at(actual.range.start_offset),
+                    )
             }) else {
                 continue;
             };
@@ -727,19 +823,12 @@ pub(crate) fn observe_laws(
             let mut recognized = recognition(
                 compiled,
                 actual,
+                &source_envelope,
                 bindings,
                 matched_form,
-                &RecognitionContext {
-                    shapes: context.shapes,
-                    quantities: context.quantities,
-                    consistency: context.consistency,
-                    assumptions: context.assumptions,
-                    external: context.external,
-                },
+                &recognition_context,
+                activation,
             );
-            if let Some(activation) = activation {
-                recognized.evidence.push(activation.evidence.clone());
-            }
             recognized.rank = relevance.as_ref().map_or(
                 if is_capability_pack(compiled.pack_id) {
                     25
@@ -768,6 +857,183 @@ pub(crate) fn observe_laws(
         pack_frontier_candidates,
         pack_latent_candidates,
         pack_latent_fallbacks,
+    }
+}
+
+fn dominant_frontier_context_pack<'a>(
+    frontier: &[&'a CompiledLaw],
+    domains: &DomainObservations,
+    offset: u32,
+) -> Option<&'a str> {
+    let mut ranked = frontier
+        .iter()
+        .filter_map(|compiled| {
+            domains
+                .relevance(compiled.pack_id, offset)
+                .map(|relevance| (support_rank(relevance.support), compiled.pack_id))
+        })
+        .collect::<Vec<_>>();
+    ranked.sort_unstable();
+    ranked.dedup();
+    let best_rank = ranked.first()?.0;
+    let mut best = ranked
+        .iter()
+        .filter(|(rank, _)| *rank == best_rank)
+        .map(|(_, pack_id)| *pack_id);
+    let pack_id = best.next()?;
+    best.next().is_none().then_some(pack_id)
+}
+
+fn strip_formula_presentation(
+    range: &SourceRange,
+    source: &str,
+    source_index: &SourceIndex,
+) -> SourceRange {
+    let mut start = source_index.byte_for_utf16(range.start_offset);
+    let mut end = source_index.byte_for_utf16(range.end_offset);
+    trim_formula_whitespace(source, &mut start, &mut end);
+
+    while let Some(command_end) = presentation_command_end(source, start, end) {
+        start = command_end;
+        trim_formula_whitespace(source, &mut start, &mut end);
+    }
+
+    loop {
+        let candidate = ["\\label", "\\tag"]
+            .into_iter()
+            .filter_map(|command| source[start..end].rfind(command).map(|at| start + at))
+            .max();
+        let Some(candidate) = candidate else { break };
+        if presentation_command_end(source, candidate, end)
+            .is_some_and(|after| source[after..end].chars().all(char::is_whitespace))
+        {
+            end = candidate;
+            trim_formula_whitespace(source, &mut start, &mut end);
+        } else {
+            break;
+        }
+    }
+
+    SourceRange {
+        start_offset: source_index.utf16_for_byte(start),
+        end_offset: source_index.utf16_for_byte(end),
+    }
+}
+
+fn trim_formula_whitespace(source: &str, start: &mut usize, end: &mut usize) {
+    while *start < *end
+        && source[*start..]
+            .chars()
+            .next()
+            .is_some_and(char::is_whitespace)
+    {
+        *start += source[*start..].chars().next().unwrap().len_utf8();
+    }
+    while *start < *end
+        && source[..*end]
+            .chars()
+            .next_back()
+            .is_some_and(char::is_whitespace)
+    {
+        *end -= source[..*end].chars().next_back().unwrap().len_utf8();
+    }
+}
+
+fn presentation_command_end(source: &str, start: usize, limit: usize) -> Option<usize> {
+    let tail = &source[start..limit];
+    let command = ["\\label", "\\tag"]
+        .into_iter()
+        .find(|command| tail.starts_with(command))?;
+    let mut cursor = start + command.len();
+    while cursor < limit
+        && source[cursor..]
+            .chars()
+            .next()
+            .is_some_and(char::is_whitespace)
+    {
+        cursor += source[cursor..].chars().next()?.len_utf8();
+    }
+    if source.as_bytes().get(cursor) != Some(&b'{') {
+        return None;
+    }
+    let mut depth = 0_u32;
+    for (relative, character) in source[cursor..limit].char_indices() {
+        match character {
+            '{' => depth += 1,
+            '}' => {
+                depth = depth.checked_sub(1)?;
+                if depth == 0 {
+                    return Some(cursor + relative + character.len_utf8());
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn collect_law_expressions<'a>(
+    expression: &'a SemanticExpr,
+    formula_range: Option<&SourceRange>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
+) {
+    if let SemanticExprKind::System(expressions) = &expression.kind {
+        let disjoint = expressions
+            .windows(2)
+            .all(|pair| pair[0].range.end_offset <= pair[1].range.start_offset);
+        for (index, expression) in expressions.iter().enumerate() {
+            let segment = disjoint.then(|| {
+                let fallback = expression_source_envelope(expression);
+                SourceRange {
+                    start_offset: if index == 0 {
+                        formula_range.map_or(fallback.start_offset, |range| range.start_offset)
+                    } else {
+                        fallback.start_offset
+                    },
+                    end_offset: expressions.get(index + 1).map_or_else(
+                        || formula_range.map_or(fallback.end_offset, |range| range.end_offset),
+                        |next| next.range.start_offset,
+                    ),
+                }
+            });
+            collect_law_expressions(expression, segment.as_ref(), output);
+        }
+    } else {
+        let source_envelope = formula_range
+            .cloned()
+            .unwrap_or_else(|| expression_source_envelope(expression));
+        output.push((expression, source_envelope.clone()));
+        for child in expression_children(expression) {
+            collect_nested_law_expressions(child, &source_envelope, output);
+        }
+    }
+}
+
+fn expression_source_envelope(expression: &SemanticExpr) -> SourceRange {
+    expression
+        .provenance
+        .iter()
+        .fold(expression.range.clone(), |mut envelope, range| {
+            envelope.start_offset = envelope.start_offset.min(range.start_offset);
+            envelope.end_offset = envelope.end_offset.max(range.end_offset);
+            envelope
+        })
+}
+
+fn collect_nested_law_expressions<'a>(
+    expression: &'a SemanticExpr,
+    source_envelope: &SourceRange,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
+) {
+    if matches!(
+        &expression.kind,
+        SemanticExprKind::Apply { operator, .. }
+            if NESTED_LAW_APPLICATIONS.contains(operator.as_str())
+    ) {
+        output.push((expression, source_envelope.clone()));
+    }
+    for child in expression_children(expression) {
+        collect_nested_law_expressions(child, source_envelope, output);
     }
 }
 
@@ -806,22 +1072,17 @@ fn variadic_balance(
     actual: &SemanticExpr,
 ) -> Option<BTreeMap<String, SemanticExpr>> {
     let role = compiled.law.roles.iter().find(|role| role.variadic)?;
-    let SemanticExprKind::Relation {
-        operator,
-        left,
-        right,
-    } = &actual.kind
-    else {
-        return None;
-    };
-    if operator != "equals" || !balance_expression(left) || !balance_expression(right) {
+    if !is_variadic_balance_candidate(actual) {
         return None;
     }
+    let SemanticExprKind::Relation { left, right, .. } = &actual.kind else {
+        unreachable!("a variadic balance candidate is an equality");
+    };
     let mut terms = Vec::new();
     collect_balance_terms(left, &mut terms);
     collect_balance_terms(right, &mut terms);
     terms.retain(|term| !matches!(&term.kind, SemanticExprKind::Number(value) if value == "0"));
-    (terms.len() >= 3 || contains_sum_operator(actual)).then(|| {
+    Some(
         [(
             role.id.clone(),
             SemanticExpr {
@@ -831,8 +1092,32 @@ fn variadic_balance(
             },
         )]
         .into_iter()
-        .collect()
-    })
+        .collect(),
+    )
+}
+
+fn is_variadic_balance_candidate(expression: &SemanticExpr) -> bool {
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &expression.kind
+    else {
+        return false;
+    };
+    operator == "equals"
+        && balance_expression(left)
+        && balance_expression(right)
+        && (balance_term_count(left) + balance_term_count(right) >= 3
+            || contains_sum_operator(expression))
+}
+
+fn balance_term_count(expression: &SemanticExpr) -> usize {
+    match &expression.kind {
+        SemanticExprKind::Sum(terms) => terms.iter().map(balance_term_count).sum(),
+        SemanticExprKind::Number(value) if value == "0" => 0,
+        _ => 1,
+    }
 }
 
 fn contains_sum_operator(expression: &SemanticExpr) -> bool {
@@ -1552,288 +1837,84 @@ fn commutative_unify_all(
     output
 }
 
-fn unify(
-    template: &SemanticExpr,
-    actual: &SemanticExpr,
-    placeholders: &BTreeSet<String>,
-    bindings: &mut BTreeMap<String, SemanticExpr>,
-) -> bool {
-    if let SemanticExprKind::Symbol(name) = &template.kind
-        && placeholders.contains(name)
-    {
-        return match bindings.get(name) {
-            Some(bound) => equivalent(bound, actual),
-            None => {
-                bindings.insert(name.clone(), actual.clone());
-                true
-            }
-        };
-    }
-    match (&template.kind, &actual.kind) {
-        (SemanticExprKind::Symbol(left), SemanticExprKind::Symbol(right)) => left == right,
-        (SemanticExprKind::Number(left), SemanticExprKind::Number(right)) => left == right,
-        (SemanticExprKind::Negate(left), SemanticExprKind::Negate(right)) => {
-            unify(left, right, placeholders, bindings)
-        }
-        (SemanticExprKind::Power(lb, le), SemanticExprKind::Power(rb, re))
-        | (SemanticExprKind::Fraction(lb, le), SemanticExprKind::Fraction(rb, re)) => {
-            unify(lb, rb, placeholders, bindings) && unify(le, re, placeholders, bindings)
-        }
-        (SemanticExprKind::Dot(ll, lr), SemanticExprKind::Dot(rl, rr)) => {
-            transaction(bindings, |candidate| {
-                unify(ll, rl, placeholders, candidate) && unify(lr, rr, placeholders, candidate)
-            }) || transaction(bindings, |candidate| {
-                unify(ll, rr, placeholders, candidate) && unify(lr, rl, placeholders, candidate)
-            })
-        }
-        (SemanticExprKind::Cross(ll, lr), SemanticExprKind::Cross(rl, rr)) => {
-            unify(ll, rl, placeholders, bindings) && unify(lr, rr, placeholders, bindings)
-        }
-        (
-            SemanticExprKind::Derivative {
-                expression: left,
-                variable: left_variable,
-                order: left_order,
-            },
-            SemanticExprKind::Derivative {
-                expression: right,
-                variable: right_variable,
-                order: right_order,
-            },
-        ) => {
-            left_order == right_order
-                && bind_name(
-                    left_variable.as_str(),
-                    right_variable.as_str(),
-                    placeholders,
-                    actual,
-                    bindings,
-                )
-                && unify(left, right, placeholders, bindings)
-        }
-        (
-            SemanticExprKind::Relation {
-                operator: left_operator,
-                left,
-                right,
-            },
-            SemanticExprKind::Relation {
-                operator: right_operator,
-                left: actual_left,
-                right: actual_right,
-            },
-        ) => {
-            left_operator == right_operator
-                && (transaction(bindings, |candidate| {
-                    unify(left, actual_left, placeholders, candidate)
-                        && unify(right, actual_right, placeholders, candidate)
-                }) || left_operator == "equals"
-                    && transaction(bindings, |candidate| {
-                        unify(left, actual_right, placeholders, candidate)
-                            && unify(right, actual_left, placeholders, candidate)
-                    }))
-        }
-        (SemanticExprKind::Sum(left), SemanticExprKind::Sum(right))
-        | (SemanticExprKind::Product(left), SemanticExprKind::Product(right)) => {
-            commutative_unify(left, right, placeholders, bindings)
-        }
-        (
-            SemanticExprKind::Apply {
-                operator: left_operator,
-                arguments: left,
-            },
-            SemanticExprKind::Apply {
-                operator: right_operator,
-                arguments: right,
-            },
-        ) => {
-            left.len() == right.len()
-                && bind_name(
-                    left_operator.as_str(),
-                    right_operator.as_str(),
-                    placeholders,
-                    actual,
-                    bindings,
-                )
-                && if matches!(left_operator.as_str(), "intersection" | "union") {
-                    commutative_unify(left, right, placeholders, bindings)
-                } else {
-                    left.iter()
-                        .zip(right)
-                        .all(|(left, right)| unify(left, right, placeholders, bindings))
-                }
-        }
-        (
-            SemanticExprKind::Product(template),
-            SemanticExprKind::Apply {
-                operator,
-                arguments,
-            },
-        ) if arguments.len() == 1 => {
-            let operator = SemanticExpr {
-                kind: SemanticExprKind::Symbol(operator.value.clone()),
-                range: actual.range.clone(),
-                provenance: actual.provenance.clone(),
-            };
-            commutative_unify(
-                template,
-                &[operator, arguments[0].clone()],
-                placeholders,
-                bindings,
-            )
-        }
-        (
-            SemanticExprKind::Index {
-                base: left_base,
-                indices: left_indices,
-            },
-            SemanticExprKind::Index {
-                base: right_base,
-                indices: right_indices,
-            },
-        ) => {
-            left_indices.len() == right_indices.len()
-                && unify(left_base, right_base, placeholders, bindings)
-                && left_indices
-                    .iter()
-                    .zip(right_indices)
-                    .all(|(left, right)| unify(left, right, placeholders, bindings))
-        }
-        (
-            SemanticExprKind::Condition {
-                value: left_value,
-                predicate: left_predicate,
-            },
-            SemanticExprKind::Condition {
-                value: right_value,
-                predicate: right_predicate,
-            },
-        ) => {
-            unify(left_value, right_value, placeholders, bindings)
-                && unify(left_predicate, right_predicate, placeholders, bindings)
-        }
-        (SemanticExprKind::Unknown(left), SemanticExprKind::Unknown(right)) => left == right,
-        _ => false,
-    }
-}
-
-fn bind_name(
-    template: &str,
-    actual: &str,
-    placeholders: &BTreeSet<String>,
-    actual_expression: &SemanticExpr,
-    bindings: &mut BTreeMap<String, SemanticExpr>,
-) -> bool {
-    if !placeholders.contains(template) {
-        return template == actual;
-    }
-    let value = SemanticExpr {
-        kind: SemanticExprKind::Symbol(actual.into()),
-        range: actual_expression.range.clone(),
-        provenance: actual_expression.provenance.clone(),
-    };
-    match bindings.get(template) {
-        Some(bound) => equivalent(bound, &value),
-        None => {
-            bindings.insert(template.into(), value);
-            true
-        }
-    }
-}
-
-fn commutative_unify(
-    template: &[SemanticExpr],
-    actual: &[SemanticExpr],
-    placeholders: &BTreeSet<String>,
-    bindings: &mut BTreeMap<String, SemanticExpr>,
-) -> bool {
-    if template.len() != actual.len() {
-        return false;
-    }
-    let mut used = vec![false; actual.len()];
-    commutative_step(template, actual, placeholders, 0, &mut used, bindings)
-}
-
-fn commutative_step(
-    template: &[SemanticExpr],
-    actual: &[SemanticExpr],
-    placeholders: &BTreeSet<String>,
-    index: usize,
-    used: &mut [bool],
-    bindings: &mut BTreeMap<String, SemanticExpr>,
-) -> bool {
-    if index == template.len() {
-        return true;
-    }
-    for candidate in 0..actual.len() {
-        if used[candidate] {
-            continue;
-        }
-        let mut next = bindings.clone();
-        if unify(
-            &template[index],
-            &actual[candidate],
-            placeholders,
-            &mut next,
-        ) {
-            used[candidate] = true;
-            if commutative_step(template, actual, placeholders, index + 1, used, &mut next) {
-                *bindings = next;
-                return true;
-            }
-            used[candidate] = false;
-        }
-    }
-    false
-}
-
-fn transaction(
-    bindings: &mut BTreeMap<String, SemanticExpr>,
-    operation: impl FnOnce(&mut BTreeMap<String, SemanticExpr>) -> bool,
-) -> bool {
-    let mut candidate = bindings.clone();
-    if !operation(&mut candidate) {
-        return false;
-    }
-    *bindings = candidate;
-    true
-}
-
 fn equivalent(left: &SemanticExpr, right: &SemanticExpr) -> bool {
-    let mut bindings = BTreeMap::new();
-    unify(left, right, &BTreeSet::new(), &mut bindings)
+    !unify_all(left, right, &BTreeSet::new(), &BTreeMap::new()).is_empty()
 }
 
 #[allow(clippy::too_many_arguments)]
 fn roles_are_supported(
     roles: &[PackLawRole],
     bindings: &BTreeMap<String, SemanticExpr>,
+    inferred_role: Option<&str>,
     offset: u32,
-    law_activated: bool,
+    notation_context_activated: bool,
+    law_explicitly_activated: bool,
+    formula_identified: bool,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
 ) -> bool {
-    roles.iter().all(|role| {
-        bindings.get(&role.id).is_some_and(|expression| {
-            let symbols = semantic_symbols(expression);
-            !symbols.is_empty()
-                && (role.variadic || role_expression_is_atomic(expression))
-                && symbols.into_iter().all(|symbol| {
-                    role_symbol_is_supported(
-                        role,
-                        &symbol,
-                        offset,
-                        law_activated,
-                        shapes,
-                        quantities,
-                        consistency,
-                        external,
-                    )
-                })
-        })
-    })
+    let mut supported = 0;
+    let mut supported_roles = BTreeSet::new();
+    let mut unresolved = 0;
+    let mut unresolved_role = None;
+    for role in roles {
+        let Some(expression) = bindings.get(&role.id) else {
+            return false;
+        };
+        let symbols = semantic_symbols(expression);
+        if symbols.is_empty() || !(role.variadic || role_expression_is_atomic(expression)) {
+            return false;
+        }
+        let mut role_support = RoleSupport::Supported;
+        for symbol in symbols {
+            role_support = role_support.and(role_symbol_support(
+                role,
+                &symbol,
+                offset,
+                notation_context_activated,
+                shapes,
+                quantities,
+                consistency,
+                external,
+            ));
+        }
+        match role_support {
+            RoleSupport::Supported => {
+                supported += 1;
+                supported_roles.insert(role.id.as_str());
+            }
+            RoleSupport::Unresolved => {
+                unresolved += 1;
+                unresolved_role = Some(role.id.as_str());
+            }
+            RoleSupport::Refuted => return false,
+        }
+    }
+    unresolved == 0
+        || (unresolved == 1
+            && supported >= 2
+            && ((unresolved_role == inferred_role && roles.len() <= 3)
+                || (unresolved_role != inferred_role && supported >= 3)))
+        || (law_explicitly_activated
+            && inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role)))
+        || formula_identified
+}
+
+fn actual_output_role(
+    actual: &SemanticExpr,
+    bindings: &BTreeMap<String, SemanticExpr>,
+) -> Option<String> {
+    let SemanticExprKind::Relation { left, .. } = &actual.kind else {
+        return None;
+    };
+    let mut roles = bindings
+        .iter()
+        .filter(|(_, expression)| equivalent(expression, left))
+        .map(|(role, _)| role.clone());
+    let role = roles.next()?;
+    roles.next().is_none().then_some(role)
 }
 
 fn bindings_have_formula_attached_declared_roles(
@@ -1891,29 +1972,50 @@ fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RoleSupport {
+    Supported,
+    Unresolved,
+    Refuted,
+}
+
+impl RoleSupport {
+    fn and(self, other: Self) -> Self {
+        match (self, other) {
+            (Self::Refuted, _) | (_, Self::Refuted) => Self::Refuted,
+            (Self::Unresolved, _) | (_, Self::Unresolved) => Self::Unresolved,
+            (Self::Supported, Self::Supported) => Self::Supported,
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
-fn role_symbol_is_supported(
+fn role_symbol_support(
     role: &PackLawRole,
     symbol: &str,
     offset: u32,
-    law_activated: bool,
+    notation_context_activated: bool,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
-) -> bool {
+) -> RoleSupport {
     let notation_symbol = symbol;
-    if let Some(quantity) = role.quantity.as_deref()
-        && !quantity_is_supported(
-            quantity,
-            symbol,
-            notation_symbol,
-            offset,
-            quantities,
-            external,
-        )
-    {
-        return false;
+    let required_quantity = role
+        .quantity
+        .as_deref()
+        .map_or(RoleSupport::Supported, |quantity| {
+            quantity_support(
+                quantity,
+                symbol,
+                notation_symbol,
+                offset,
+                quantities,
+                external,
+            )
+        });
+    if required_quantity == RoleSupport::Refuted {
+        return RoleSupport::Refuted;
     }
     let declared_roles = consistency.roles_at(symbol, offset).0;
     let has_exact_role = declared_roles
@@ -1923,13 +2025,18 @@ fn role_symbol_is_supported(
         .iter()
         .filter(|claim| concepts_are_comparable(&role.concept, &claim.concept_id))
         .collect::<Vec<_>>();
-    if !comparable_roles.is_empty()
-        && comparable_roles
-            .iter()
-            .all(|claim| roles_conflict(&role.concept, &claim.concept_id))
+    if comparable_roles
+        .iter()
+        .any(|claim| roles_conflict(&role.concept, &claim.concept_id))
     {
-        return false;
+        return RoleSupport::Refuted;
     }
+    let activated_notation_support = notation_context_activated
+        && role
+            .notation
+            .iter()
+            .any(|notation| notation_matches_symbol(notation, symbol));
+    let mut matching_shape = false;
     if let Some(expected_shape) = role.shape.as_deref() {
         let mut explicit = shapes.claims_at(symbol, offset).0;
         if notation_symbol != symbol {
@@ -1944,38 +2051,30 @@ fn role_symbol_is_supported(
             .chain(&imported)
             .any(|shape| shape.kind != expected_shape)
         {
-            return false;
+            return RoleSupport::Refuted;
         }
         match shapes
             .shape_at(symbol, offset)
             .or_else(|| shapes.shape_at(notation_symbol, offset))
         {
-            Some(shape) if shape.kind != expected_shape => return false,
-            Some(_) => {}
-            None if !(has_exact_role
-                || role.quantity.is_some()
-                || role.concept.starts_with("quantities-units:")
-                || external.has_role(offset, symbol, &role.concept)
-                || external.has_shape(offset, symbol, expected_shape)) =>
-            {
-                return false;
-            }
+            Some(shape) if shape.kind != expected_shape => return RoleSupport::Refuted,
+            Some(_) => matching_shape = true,
             None => {}
         }
+        matching_shape |= external.has_shape(offset, symbol, expected_shape);
         if role.concept.split(':').next_back() == Some(expected_shape) {
-            return true;
+            return required_quantity.and(if matching_shape {
+                RoleSupport::Supported
+            } else {
+                RoleSupport::Unresolved
+            });
         }
-        if law_activated
-            && shapes
-                .shape_at(symbol, offset)
-                .or_else(|| shapes.shape_at(notation_symbol, offset))
-                .is_some_and(|shape| shape.kind == expected_shape)
-        {
-            return true;
+        if activated_notation_support && matching_shape {
+            return required_quantity;
         }
     }
-    if role.concept.starts_with("quantities-units:") {
-        return quantity_is_supported(
+    let concept_support = if role.concept.starts_with("quantities-units:") {
+        let support = quantity_support(
             &role.concept,
             symbol,
             notation_symbol,
@@ -1983,19 +2082,38 @@ fn role_symbol_is_supported(
             quantities,
             external,
         );
-    }
-    if role.concept == "linear-algebra:linear-operator" {
-        return shapes
-            .shape_at(symbol, offset)
-            .is_some_and(|shape| shape.kind == "matrix")
-            || external.has_shape(offset, symbol, "matrix");
-    }
-    consistency
-        .roles_at(symbol, offset)
-        .0
-        .iter()
-        .any(|claim| claim.concept_id == role.concept)
+        if support == RoleSupport::Unresolved && activated_notation_support {
+            RoleSupport::Supported
+        } else {
+            support
+        }
+    } else if role.concept == "linear-algebra:linear-operator" {
+        if matching_shape
+            || shapes
+                .shape_at(symbol, offset)
+                .is_some_and(|shape| shape.kind == "matrix")
+            || external.has_shape(offset, symbol, "matrix")
+        {
+            RoleSupport::Supported
+        } else {
+            RoleSupport::Unresolved
+        }
+    } else if has_exact_role
+        || activated_notation_support
         || external.has_role(offset, symbol, &role.concept)
+    {
+        RoleSupport::Supported
+    } else {
+        RoleSupport::Unresolved
+    };
+    required_quantity.and(concept_support)
+}
+
+fn notation_matches_symbol(notation: &str, symbol: &str) -> bool {
+    symbol == notation
+        || symbol
+            .strip_prefix(notation)
+            .is_some_and(|suffix| matches!(suffix.chars().next(), Some('_' | '^')))
 }
 
 fn concepts_are_comparable(left: &str, right: &str) -> bool {
@@ -2008,14 +2126,14 @@ fn concepts_are_comparable(left: &str, right: &str) -> bool {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn quantity_is_supported(
+fn quantity_support(
     expected: &str,
     symbol: &str,
     notation_symbol: &str,
     offset: u32,
     quantities: &QuantityObservations,
     external: &ExternalTypeEnvironment,
-) -> bool {
+) -> RoleSupport {
     let mut local = quantities.at(symbol, offset).0;
     if notation_symbol != symbol {
         local.extend(quantities.at(notation_symbol, offset).0);
@@ -2025,23 +2143,36 @@ fn quantity_is_supported(
             .iter()
             .filter_map(|quantity| quantity.quantity_kind_id.as_deref())
             .collect::<Vec<_>>();
-        return !declared.is_empty() && declared.iter().all(|kind| *kind == expected);
+        return if declared.is_empty() {
+            RoleSupport::Unresolved
+        } else if declared.iter().all(|kind| *kind == expected) {
+            RoleSupport::Supported
+        } else {
+            RoleSupport::Refuted
+        };
     }
-    external.has_quantity(offset, symbol, expected)
+    if external.has_quantity(offset, symbol, expected) {
+        RoleSupport::Supported
+    } else {
+        RoleSupport::Unresolved
+    }
 }
 
 fn recognition(
     compiled: &CompiledLaw,
     actual: &SemanticExpr,
+    source_envelope: &SourceRange,
     bindings: BTreeMap<String, SemanticExpr>,
     matched_form: Option<&GuardedForm>,
     context: &RecognitionContext<'_>,
+    activation: Option<&LawActivationEvidence>,
 ) -> LawRecognition {
+    let formula_range = formula_source_range(source_envelope, context);
     let formula_evidence = Evidence {
         rule_id: "semantic-law-unification".into(),
         kind: "canonical-math".into(),
         strength: "hard".into(),
-        source_ranges: vec![actual.range.clone()],
+        source_ranges: vec![formula_range.clone()],
     };
     let formula_bindings = compiled
         .law
@@ -2050,9 +2181,9 @@ fn recognition(
         .filter_map(|role| {
             let expression = bindings.get(&role.id)?;
             let symbol = if role.variadic {
-                variadic_labels(expression).join("; ")
+                variadic_labels(expression, context).join("; ")
             } else {
-                expression_label(expression)?
+                source_expression_label(expression, context)?
             };
             Some(LawBinding {
                 parameter: role.id.clone(),
@@ -2079,9 +2210,9 @@ fn recognition(
         .flat_map(|role| {
             let expression = bindings.get(&role.id)?;
             let symbols = if role.variadic {
-                variadic_labels(expression)
+                variadic_labels(expression, context)
             } else {
-                vec![expression_label(expression)?]
+                vec![source_expression_label(expression, context)?]
             };
             Some(symbols.into_iter().map(|symbol| RelationRoleInfo {
                 role: role.id.clone(),
@@ -2102,14 +2233,15 @@ fn recognition(
                 .filter(|binding| condition.subjects.contains(&binding.parameter))
                 .collect::<Vec<_>>();
             let (evidence, mechanically_verified) = condition_evidence(
-                condition.kind,
-                &condition.subjects,
+                condition,
                 &bindings,
-                actual.range.start_offset,
+                &actual.range,
                 context.shapes,
                 context.quantities,
                 context.consistency,
+                context.assumptions,
                 context.external,
+                activation.map(|activation| &activation.evidence),
             );
             LawConditionInfo {
                 condition_id: condition.id.clone(),
@@ -2133,7 +2265,8 @@ fn recognition(
             form,
             &bindings,
             context.assumptions,
-            &actual.range,
+            context.external.assumptions_at(formula_range.start_offset),
+            &formula_range,
         ));
     }
     let status = if conditions
@@ -2154,12 +2287,15 @@ fn recognition(
         LawRecognitionStatus::Verified
     };
     let mut evidence = vec![formula_evidence.clone()];
+    if let Some(activation) = activation {
+        push_evidence(&mut evidence, activation.evidence.clone());
+    }
     if let Some(form) = matched_form {
         evidence.extend(form.steps.iter().map(|step| Evidence {
             rule_id: format!("guarded-equivalence/{}", step.id()),
             kind: "equivalence-proof".into(),
             strength: "hard".into(),
-            source_ranges: vec![actual.range.clone()],
+            source_ranges: vec![formula_range.clone()],
         }));
     }
     LawRecognition {
@@ -2171,7 +2307,7 @@ fn recognition(
         status,
         pack_id: compiled.pack_id.into(),
         pack_version: compiled.pack_version.into(),
-        range: actual.range.clone(),
+        range: formula_range.clone(),
         bindings: formula_bindings,
         result: SemanticConstraint {
             kind: SemanticConstraintKind::Proposition,
@@ -2192,7 +2328,7 @@ fn recognition(
                 .map(|condition| condition.label.clone())
                 .collect(),
             evidence: evidence.clone(),
-            range: actual.range.clone(),
+            range: formula_range,
         }),
         evidence,
         relevance: None,
@@ -2200,10 +2336,35 @@ fn recognition(
     }
 }
 
+fn formula_source_range(range: &SourceRange, context: &RecognitionContext<'_>) -> SourceRange {
+    let mut range = range.clone();
+    let mut cursor = context.source_index.byte_for_utf16(range.end_offset);
+    while context.source[cursor..]
+        .chars()
+        .next()
+        .is_some_and(|character| matches!(character, ' ' | '\t'))
+    {
+        cursor += context.source[cursor..]
+            .chars()
+            .next()
+            .expect("checked character")
+            .len_utf8();
+    }
+    if let Some(character) = context.source[cursor..].chars().next()
+        && matches!(character, '.' | ',' | ';' | ':')
+    {
+        range.end_offset = context
+            .source_index
+            .utf16_for_byte(cursor + character.len_utf8());
+    }
+    range
+}
+
 fn equivalence_conditions(
     form: &GuardedForm,
     bindings: &BTreeMap<String, SemanticExpr>,
     assumptions: &[AssumptionInfo],
+    external_assumptions: &[AssumptionInfo],
     formula_range: &crate::SourceRange,
 ) -> Vec<LawConditionInfo> {
     form.guards
@@ -2212,7 +2373,8 @@ fn equivalence_conditions(
         .map(|(index, guard)| match instantiate_guard(guard, bindings) {
             EquivalenceGuard::Nonzero(subject) => {
                 let symbols = semantic_symbols(&subject);
-                let (status, mut evidence) = nonzero_status(&subject, &symbols, assumptions);
+                let (status, mut evidence) =
+                    nonzero_status(&subject, &symbols, assumptions, external_assumptions);
                 evidence.push(Evidence {
                     rule_id: "guarded-equivalence/nonzero".into(),
                     kind: "equivalence-guard".into(),
@@ -2240,6 +2402,7 @@ fn nonzero_status(
     subject: &SemanticExpr,
     symbols: &[String],
     assumptions: &[AssumptionInfo],
+    external_assumptions: &[AssumptionInfo],
 ) -> (ConstraintStatus, Vec<Evidence>) {
     if let SemanticExprKind::Number(value) = &subject.kind {
         return if value.parse::<f64>().ok() == Some(0.0) {
@@ -2250,6 +2413,7 @@ fn nonzero_status(
     }
     let supporting = assumptions
         .iter()
+        .chain(external_assumptions)
         .filter(|assumption| {
             matches!(
                 assumption.value.as_str(),
@@ -2288,14 +2452,10 @@ fn condition_status(
     if resolved_subjects == 0 {
         return ConstraintStatus::Unsupported;
     }
+    if mechanically_verified {
+        return ConstraintStatus::Verified;
+    }
     match kind {
-        PackConditionKind::DomainMembership
-        | PackConditionKind::SameContext
-        | PackConditionKind::ShapeCompatible
-            if mechanically_verified =>
-        {
-            ConstraintStatus::Verified
-        }
         PackConditionKind::Assumption
         | PackConditionKind::Differentiable
         | PackConditionKind::Positive
@@ -2309,17 +2469,49 @@ fn condition_status(
 
 #[allow(clippy::too_many_arguments)]
 fn condition_evidence(
-    kind: PackConditionKind,
-    subjects: &[String],
+    condition: &PackLawCondition,
     bindings: &BTreeMap<String, SemanticExpr>,
-    offset: u32,
+    formula_range: &SourceRange,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
+    law_activation: Option<&Evidence>,
 ) -> (Vec<Evidence>, bool) {
+    let offset = formula_range.start_offset;
+    let kind = condition.kind;
+    let subjects = &condition.subjects;
     let mut evidence = Vec::new();
     let mut proved_subjects = 0;
+    let shared_context = (kind == PackConditionKind::SameContext)
+        .then(|| {
+            same_context_evidence(
+                subjects,
+                bindings,
+                offset,
+                assumptions,
+                external.assumptions_at(offset),
+                consistency,
+            )
+        })
+        .flatten();
+    let semantic_condition = assumption_condition_evidence(
+        condition,
+        bindings,
+        formula_range,
+        assumptions,
+        external.assumptions_at(offset),
+    );
+    if let Some(condition_evidence) = &semantic_condition {
+        push_evidence(&mut evidence, condition_evidence.clone());
+    }
+    if kind == PackConditionKind::DomainMembership
+        && let Some(law_activation) = law_activation
+    {
+        push_evidence(&mut evidence, law_activation.clone());
+        return (evidence, true);
+    }
     for subject in subjects {
         let Some(expression) = bindings.get(subject) else {
             continue;
@@ -2374,17 +2566,7 @@ fn condition_evidence(
                                 .map(|quantity| quantity.evidence),
                         )
                         .collect(),
-                    PackConditionKind::SameContext
-                        if same_context_is_supported(subjects, bindings) =>
-                    {
-                        vec![Evidence {
-                            rule_id: "canonical-shared-argument".into(),
-                            kind: "canonical-binding".into(),
-                            strength: "hard".into(),
-                            source_ranges: vec![expression.range.clone()],
-                        }]
-                    }
-                    PackConditionKind::SameContext => Vec::new(),
+                    PackConditionKind::SameContext => shared_context.clone().into_iter().collect(),
                     _ => Vec::new(),
                 };
                 let has_facts = !facts.is_empty();
@@ -2395,7 +2577,211 @@ fn condition_evidence(
             });
         proved_subjects += usize::from(proved);
     }
-    (evidence, proved_subjects == subjects.len())
+    (
+        evidence,
+        semantic_condition.is_some() || proved_subjects == subjects.len(),
+    )
+}
+
+const MAX_ASSUMPTION_DISTANCE: u32 = 640;
+
+fn assumption_condition_evidence(
+    condition: &PackLawCondition,
+    bindings: &BTreeMap<String, SemanticExpr>,
+    formula_range: &SourceRange,
+    assumptions: &[AssumptionInfo],
+    external_assumptions: &[AssumptionInfo],
+) -> Option<Evidence> {
+    let symbols = bound_condition_symbols(&condition.subjects, bindings);
+    let subjects_match = |assumption: &&AssumptionInfo| {
+        assumption.subjects.is_empty()
+            || assumption
+                .subjects
+                .iter()
+                .all(|subject| symbols.contains(subject))
+    };
+    assumptions
+        .iter()
+        .filter(|assumption| {
+            let start = assumption
+                .evidence
+                .source_ranges
+                .iter()
+                .map(|range| range.start_offset)
+                .min()
+                .unwrap_or_default();
+            let end = assumption
+                .evidence
+                .source_ranges
+                .iter()
+                .map(|range| range.end_offset)
+                .max()
+                .unwrap_or_default();
+            let precedes_formula = end <= formula_range.start_offset
+                && formula_range.start_offset - end <= MAX_ASSUMPTION_DISTANCE;
+            let attaches_after_formula = assumption.evidence.kind == "attached-prose"
+                && formula_range.end_offset <= start
+                && start - formula_range.end_offset <= MAX_ASSUMPTION_DISTANCE;
+            (precedes_formula || attaches_after_formula) && subjects_match(assumption)
+        })
+        .chain(external_assumptions.iter().filter(subjects_match))
+        .find(|assumption| {
+            if assumption.value == condition.id {
+                return true;
+            }
+            match condition.kind {
+                PackConditionKind::Assumption => false,
+                PackConditionKind::Differentiable => {
+                    assumption.kind == "regularity" && assumption.value == "differentiable"
+                }
+                PackConditionKind::Positive => {
+                    assumption.kind == "sign"
+                        && matches!(assumption.value.as_str(), "positive" | "strictly-positive")
+                }
+                PackConditionKind::SignConvention => {
+                    assumption.kind == "sign-convention" && !assumption.value.starts_with("not-")
+                }
+                PackConditionKind::Uniform => {
+                    assumption.kind == "uniformity" && assumption.value == "uniform"
+                }
+                PackConditionKind::DomainMembership
+                | PackConditionKind::SameContext
+                | PackConditionKind::ShapeCompatible => false,
+            }
+        })
+        .map(|assumption| assumption.evidence.clone())
+}
+
+fn same_context_evidence(
+    subjects: &[String],
+    bindings: &BTreeMap<String, SemanticExpr>,
+    offset: u32,
+    assumptions: &[AssumptionInfo],
+    external_assumptions: &[AssumptionInfo],
+    consistency: &RoleObservations,
+) -> Option<Evidence> {
+    if same_context_is_supported(subjects, bindings) {
+        return Some(Evidence {
+            rule_id: "canonical-shared-argument".into(),
+            kind: "canonical-binding".into(),
+            strength: "hard".into(),
+            source_ranges: subjects
+                .iter()
+                .filter_map(|subject| bindings.get(subject))
+                .map(|expression| expression.range.clone())
+                .collect(),
+        });
+    }
+    let symbols = bound_condition_symbols(subjects, bindings);
+    if symbols.is_empty() {
+        return None;
+    }
+    assumptions
+        .iter()
+        .chain(external_assumptions)
+        .find(|assumption| {
+            assumption.kind == "context"
+                && symbols
+                    .iter()
+                    .all(|symbol| assumption.subjects.contains(symbol))
+        })
+        .map(|assumption| assumption.evidence.clone())
+        .or_else(|| shared_role_context_evidence(&symbols, offset, consistency))
+}
+
+fn shared_role_context_evidence(
+    symbols: &BTreeSet<String>,
+    offset: u32,
+    consistency: &RoleObservations,
+) -> Option<Evidence> {
+    let groups = symbols
+        .iter()
+        .map(|symbol| {
+            consistency
+                .roles_at(symbol, offset)
+                .0
+                .into_iter()
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    let first = groups.first()?;
+    let seed = first.iter().find(|seed| {
+        groups[1..].iter().all(|group| {
+            group.iter().any(|other| {
+                other.concept_id == seed.concept_id
+                    && evidence_ranges_overlap(&seed.evidence, &other.evidence)
+            })
+        })
+    })?;
+    let mut source_ranges = seed.evidence.source_ranges.clone();
+    for group in &groups[1..] {
+        let other = group.iter().find(|other| {
+            other.concept_id == seed.concept_id
+                && evidence_ranges_overlap(&seed.evidence, &other.evidence)
+        })?;
+        source_ranges.extend(other.evidence.source_ranges.iter().cloned());
+    }
+    source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    source_ranges.dedup();
+    Some(Evidence {
+        rule_id: "shared-role-context".into(),
+        kind: "attached-prose".into(),
+        strength: "strong".into(),
+        source_ranges,
+    })
+}
+
+fn evidence_ranges_overlap(left: &Evidence, right: &Evidence) -> bool {
+    left.source_ranges.iter().any(|left| {
+        right.source_ranges.iter().any(|right| {
+            left.start_offset < right.end_offset && right.start_offset < left.end_offset
+        })
+    })
+}
+
+fn law_conditions_refuted(
+    law: &PackLaw,
+    bindings: &BTreeMap<String, SemanticExpr>,
+    assumptions: &[AssumptionInfo],
+    external_assumptions: &[AssumptionInfo],
+) -> bool {
+    law.conditions.iter().any(|condition| {
+        let symbols = bound_condition_symbols(&condition.subjects, bindings);
+        if symbols.is_empty() {
+            return false;
+        }
+        assumptions
+            .iter()
+            .chain(external_assumptions)
+            .any(|assumption| {
+                let refutes = match condition.kind {
+                    PackConditionKind::SameContext => {
+                        assumption.kind == "context" && assumption.value == "different-context"
+                    }
+                    PackConditionKind::SignConvention => {
+                        assumption.kind == "sign-convention" && assumption.value.starts_with("not-")
+                    }
+                    _ => false,
+                };
+                refutes
+                    && (assumption.subjects.is_empty()
+                        || assumption
+                            .subjects
+                            .iter()
+                            .all(|subject| symbols.contains(subject)))
+            })
+    })
+}
+
+fn bound_condition_symbols(
+    subjects: &[String],
+    bindings: &BTreeMap<String, SemanticExpr>,
+) -> BTreeSet<String> {
+    subjects
+        .iter()
+        .filter_map(|subject| bindings.get(subject))
+        .flat_map(semantic_symbols)
+        .collect()
 }
 
 fn same_context_is_supported(
@@ -2502,6 +2888,44 @@ fn expression_label(expression: &SemanticExpr) -> Option<String> {
     }
 }
 
+fn source_expression_label(
+    expression: &SemanticExpr,
+    context: &RecognitionContext<'_>,
+) -> Option<String> {
+    let canonical = expression_label(expression)?;
+    let start = context
+        .source_index
+        .byte_for_utf16(expression.range.start_offset);
+    let end = context
+        .source_index
+        .byte_for_utf16(expression.range.end_offset);
+    let authored = context
+        .source
+        .get(start..end)
+        .map(str::trim)
+        .filter(|label| source_label_matches_expression(expression, label));
+    Some(authored.unwrap_or(&canonical).to_owned())
+}
+
+fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bool {
+    if label.is_empty() || !expression.provenance.is_empty() {
+        return false;
+    }
+    match &expression.kind {
+        SemanticExprKind::Symbol(symbol) => {
+            label == symbol || label.strip_prefix('\\') == Some(symbol.as_str())
+        }
+        SemanticExprKind::Index { .. } => !label.chars().any(char::is_whitespace),
+        SemanticExprKind::Derivative { .. } => {
+            label.starts_with("\\dot") || label.starts_with("\\ddot")
+        }
+        SemanticExprKind::Power(_, exponent) if is_decorative_star(exponent) => {
+            !label.chars().any(char::is_whitespace)
+        }
+        _ => false,
+    }
+}
+
 fn is_decorative_star(expression: &SemanticExpr) -> bool {
     matches!(
         &expression.kind,
@@ -2509,16 +2933,21 @@ fn is_decorative_star(expression: &SemanticExpr) -> bool {
     )
 }
 
-fn variadic_labels(expression: &SemanticExpr) -> Vec<String> {
+fn variadic_labels(expression: &SemanticExpr, context: &RecognitionContext<'_>) -> Vec<String> {
     match &expression.kind {
-        SemanticExprKind::Sum(items) => items.iter().flat_map(variadic_labels).collect(),
-        SemanticExprKind::Negate(inner) => variadic_labels(inner),
+        SemanticExprKind::Sum(items) => items
+            .iter()
+            .flat_map(|item| variadic_labels(item, context))
+            .collect(),
+        SemanticExprKind::Negate(inner) => variadic_labels(inner, context),
         SemanticExprKind::Product(items) if contains_sum_operator(expression) => items
             .iter()
             .filter(|item| !contains_sum_operator(item))
-            .filter_map(expression_label)
+            .filter_map(|item| source_expression_label(item, context))
             .collect(),
-        _ => expression_label(expression).into_iter().collect(),
+        _ => source_expression_label(expression, context)
+            .into_iter()
+            .collect(),
     }
 }
 
@@ -2528,9 +2957,10 @@ mod tests {
 
     use super::{
         COMPILED_LAWS, ExternalTypeEnvironment, LAW_DISPATCH, LawAnalysisContext, LawDispatch,
-        LawObservations, observe_laws, unify, unify_all,
+        LawObservations, collect_law_expressions, observe_laws, strip_formula_presentation,
+        unify_all,
     };
-    use crate::canonical::{SemanticExpr, lower_document_region, lower_template};
+    use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
     use crate::domain_signature::laws_share_collision;
     use crate::parser::{ParsedMath, parse_regions, test_math_regions};
@@ -2539,7 +2969,7 @@ mod tests {
     use crate::shape::observe_shapes;
     use crate::{
         ConstraintStatus, DocumentLanguage, LawRecognition, LawRecognitionStatus, ProjectDocument,
-        ScientificConstraintKind,
+        ScientificConstraintKind, SourceIndex, SourceRange,
     };
 
     fn canonical_expressions(
@@ -2548,11 +2978,7 @@ mod tests {
     ) -> Vec<SemanticExpr> {
         parsed
             .iter()
-            .map(|math| {
-                let mut expression = lower_document_region(document, &math.region.content_range);
-                expression.range = math.region.content_range.clone();
-                expression
-            })
+            .map(|math| lower_document_region(document, &math.region.content_range))
             .collect()
     }
 
@@ -2601,13 +3027,13 @@ mod tests {
             recognized_laws(
                 "Let $A$ and $B$ be events. Conditional probability is $P(A\\mid B)=P(A\\cap B)/P(B)$."
             ),
-            ["conditional-probability"]
+            ["conditional-probability", "event-intersection"]
         );
         assert_eq!(
             recognized_laws(
                 "Let $A$ and $B$ be events. Conditional probability is $\\mathbb{P}(A\\mid B)=\\frac{\\mathbb{P}(A\\cap B)}{\\mathbb{P}(B)}$."
             ),
-            ["conditional-probability"]
+            ["conditional-probability", "event-intersection"]
         );
         assert_eq!(
             recognized_laws(
@@ -2810,6 +3236,35 @@ mod tests {
     }
 
     #[test]
+    fn dispatch_considers_variadic_balances_only_for_sums() {
+        let variadic = COMPILED_LAWS
+            .iter()
+            .enumerate()
+            .filter_map(|(index, compiled)| {
+                compiled
+                    .law
+                    .roles
+                    .iter()
+                    .any(|role| role.variadic)
+                    .then_some(index)
+            })
+            .collect::<BTreeSet<_>>();
+        assert!(!variadic.is_empty());
+
+        let alias_candidates = LAW_DISPATCH
+            .candidate_indices(&lower_template("reported = ECE"))
+            .into_iter()
+            .collect::<BTreeSet<_>>();
+        assert!(alias_candidates.is_disjoint(&variadic));
+
+        let balance_candidates = LAW_DISPATCH
+            .candidate_indices(&lower_template("a + b = c"))
+            .into_iter()
+            .collect::<BTreeSet<_>>();
+        assert!(!balance_candidates.is_disjoint(&variadic));
+    }
+
+    #[test]
     fn equality_and_declared_scalar_products_are_presentation_independent() {
         let template = lower_template("force = mass acceleration");
         let actual = lower_template("a m = F");
@@ -2821,8 +3276,9 @@ mod tests {
         let bindings = forms
             .iter()
             .find_map(|form| {
-                let mut bindings = BTreeMap::new();
-                unify(&form.expression, &actual, &placeholders, &mut bindings).then_some(bindings)
+                unify_all(&form.expression, &actual, &placeholders, &BTreeMap::new())
+                    .into_iter()
+                    .next()
             })
             .expect("a guarded scalar permutation should match");
         assert_eq!(bindings.len(), 3);
@@ -2836,9 +3292,8 @@ mod tests {
             .into_iter()
             .map(str::to_owned)
             .collect::<BTreeSet<_>>();
-        let mut bindings = BTreeMap::new();
         assert!(
-            unify(&template, &actual, &placeholders, &mut bindings),
+            !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
             "{actual:?}"
         );
     }
@@ -2846,19 +3301,24 @@ mod tests {
     #[test]
     fn directional_relations_remain_ordered_while_set_union_is_commutative() {
         let placeholders = BTreeSet::new();
-        let mut bindings = BTreeMap::new();
-        assert!(!unify(
-            &lower_template("x \\in A"),
-            &lower_template("A \\in x"),
-            &placeholders,
-            &mut bindings,
-        ));
-        assert!(unify(
-            &lower_template("A \\cup B"),
-            &lower_template("B \\cup A"),
-            &placeholders,
-            &mut BTreeMap::new(),
-        ));
+        assert!(
+            unify_all(
+                &lower_template("x \\in A"),
+                &lower_template("A \\in x"),
+                &placeholders,
+                &BTreeMap::new(),
+            )
+            .is_empty()
+        );
+        assert!(
+            !unify_all(
+                &lower_template("A \\cup B"),
+                &lower_template("B \\cup A"),
+                &placeholders,
+                &BTreeMap::new(),
+            )
+            .is_empty()
+        );
     }
 
     #[test]
@@ -2869,6 +3329,34 @@ mod tests {
                 "Let $x$ and $u$ be vectors and $A$ and $B$ matrices. $\\dot{x}=Ax+Bu$",
             )
             .is_empty()
+        );
+    }
+
+    #[test]
+    fn a_unique_frontier_domain_prior_can_activate_existing_notation_support() {
+        assert_eq!(
+            recognized_laws(
+                "For the inductor, the passive sign convention is used. $v_L=L\\frac{di_L}{dt}$."
+            ),
+            ["inductor-voltage-law"]
+        );
+        assert!(
+            recognized_laws("An electric circuit model is compared with electromagnetism. $P=VI$.")
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn semantic_law_title_heads_activate_existing_pack_conditions() {
+        assert_eq!(
+            recognized_laws("The Reynolds number is $R_D=\\frac{\\rho vD}{\\mu}$."),
+            ["reynolds-number-definition"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Inside the calibrated interval the Newtonian shear relation is $\\tau=\\mu\\dot\\gamma$."
+            ),
+            ["newtonian-shear"]
         );
     }
 
@@ -2936,6 +3424,11 @@ mod tests {
             &canonical,
             &prose.semantic_evidence,
             &LawAnalysisContext {
+                source,
+                formula_ranges: &regions
+                    .iter()
+                    .map(|region| region.content_range.clone())
+                    .collect::<Vec<_>>(),
                 shapes: &shapes,
                 quantities: &quantities,
                 consistency: &roles,
@@ -2954,9 +3447,39 @@ mod tests {
     }
 
     #[test]
+    fn recognizes_reversed_typed_mechanical_power() {
+        assert_eq!(
+            recognized_laws(
+                "At the measured instant, $P$ denotes power while $\\mathbf{F}$ and $\\mathbf{v}$ denote force and velocity vectors. Commutativity gives $P$ denotes power scalar. $\\mathbf{F}$ denotes force. $\\mathbf{v}$ denotes velocity. $\\mathbf{v}\\cdot\\mathbf{F}=P$"
+            ),
+            ["mechanical-power"]
+        );
+    }
+
+    #[test]
     fn formula_first_where_clause_supplies_typed_roles_to_the_attached_equation() {
         let source = "$V=IR$, where $V$ denotes voltage, $I$ electric current, and $R$ resistance.";
         assert_eq!(recognized_laws(source), ["ohm-law"]);
+
+        let observations = recognized_law_observations(
+            r"The volumetric flow rate $Q$ equals the area $A$ times a measured speed.
+              \[Q=Av.\] Here $v$ is the section-averaged normal speed.",
+        );
+        let flow = observations
+            .iter()
+            .find(|recognition| recognition.law_id == "volumetric-flow-rate")
+            .expect("volumetric flow relation");
+        assert_eq!(flow.status, LawRecognitionStatus::Verified);
+
+        let observations = recognized_law_observations(
+            r"The volumetric flow rate $Q$ equals the area $A$ times a measured speed.
+              \[Q=Av.\] Later testing calls $v$ the section-averaged normal speed.",
+        );
+        let flow = observations
+            .iter()
+            .find(|recognition| recognition.law_id == "volumetric-flow-rate")
+            .expect("volumetric flow relation");
+        assert_eq!(flow.status, LawRecognitionStatus::ConditionMissing);
     }
 
     #[test]
@@ -3014,6 +3537,11 @@ mod tests {
             &canonical,
             &prose.semantic_evidence,
             &LawAnalysisContext {
+                source,
+                formula_ranges: &regions
+                    .iter()
+                    .map(|region| region.content_range.clone())
+                    .collect::<Vec<_>>(),
                 shapes: &shapes,
                 quantities: &quantities,
                 consistency: &roles,
@@ -3139,6 +3667,158 @@ mod tests {
     }
 
     #[test]
+    fn pack_compiled_expression_laws_remain_visible_inside_larger_formulas() {
+        let source = "Let $A$, $B$, and $C$ be sets. The overlap is defined by $A\\cap B=C$.";
+        let recognized = recognized_law_observations(source);
+        assert_eq!(
+            recognized
+                .iter()
+                .map(|recognition| recognition.law_id.as_str())
+                .collect::<Vec<_>>(),
+            ["set-intersection"]
+        );
+        let range = &recognized[0].range;
+        assert_eq!(
+            &source[range.start_offset as usize..range.end_offset as usize],
+            "A\\cap B=C"
+        );
+        assert!(
+            recognized_laws("No set roles are declared for $Q\\cap R=S$.")
+                .iter()
+                .all(|law| law != "set-intersection")
+        );
+    }
+
+    #[test]
+    fn formula_evidence_excludes_leading_and_trailing_presentation_commands() {
+        let display = "\\label{eq:set}\n A\\cap B=C. \\tag{4}";
+        let source_index = SourceIndex::new(display);
+        let formula = SourceRange {
+            start_offset: 0,
+            end_offset: source_index.utf16_for_byte(display.len()),
+        };
+        let range = strip_formula_presentation(&formula, display, &source_index);
+        assert_eq!(
+            &display[source_index.byte_for_utf16(range.start_offset)
+                ..source_index.byte_for_utf16(range.end_offset)],
+            "A\\cap B=C."
+        );
+    }
+
+    #[test]
+    fn neighboring_relations_keep_disjoint_source_envelopes() {
+        let source = "B=A^T,\\qquad C=AB";
+        let expression = lower_template(source);
+        let formula_range = SourceRange {
+            start_offset: 0,
+            end_offset: source.encode_utf16().count() as u32,
+        };
+        let mut actuals = Vec::new();
+        collect_law_expressions(&expression, Some(&formula_range), &mut actuals);
+        let ranges = actuals
+            .iter()
+            .filter_map(|(expression, range)| {
+                matches!(expression.kind, SemanticExprKind::Relation { .. })
+                    .then_some(range.clone())
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(ranges.len(), 2);
+        assert!(ranges[0].end_offset <= ranges[1].start_offset);
+        assert!(
+            ranges[0].start_offset <= source.find("B=A^T").unwrap() as u32
+                && source.find("B=A^T").unwrap() as u32 + 5 <= ranges[0].end_offset
+        );
+        assert!(
+            ranges[1].start_offset <= source.find("C=AB").unwrap() as u32
+                && source.find("C=AB").unwrap() as u32 + 4 <= ranges[1].end_offset
+        );
+    }
+
+    #[test]
+    fn same_context_condition_accepts_shared_evidence_and_refuses_separate_contexts() {
+        let shared = recognized_law_observations(
+            "For two events $A$ and $B$, consider their joint occurrence $A \\cap B$.",
+        );
+        assert_eq!(shared[0].law_id, "event-intersection");
+        assert_eq!(shared[0].status, LawRecognitionStatus::Verified);
+        assert_eq!(
+            recognized_laws(
+                "Events $A$ and $B$ belong to the same probability space. Their joint event is $A \\cap B$.",
+            ),
+            ["event-intersection"],
+        );
+        assert!(
+            recognized_laws(
+                "Event $A$ belongs to the first probability space, while event $B$ belongs to a different experiment. The formal surface is $A \\cap B$.",
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn sign_convention_condition_accepts_asserted_and_refuses_negated_prose() {
+        assert_eq!(
+            recognized_laws(
+                "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Under the passive sign convention, $i=C\\frac{dv}{dt}$."
+            ),
+            ["capacitor-current-law"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Current $i_{\\rm out}$ is referenced leaving the positive-voltage terminal. We write $i_{\\rm out}$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar. \\[i_{\\rm out}=-C\\,dv/dt\\]."
+            ),
+            ["capacitor-current-law"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "The next formula is presented without an assumed named law. \\begin{equation}q_{1323}\\end{equation} Current $i_{\\rm out}$ is referenced leaving the positive-voltage terminal, so We write $i_{\\rm out}$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar. \\[i_{\\rm out}=-C\\,dv/dt\\]."
+            ),
+            ["capacitor-current-law"]
+        );
+        assert!(
+            recognized_laws(
+                "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Without adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$."
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn negative_capacitor_representation_preserves_declared_roles() {
+        let actual = lower_template(r"i_{\rm out}=-C\,dv/dt");
+        let capacitor = COMPILED_LAWS
+            .iter()
+            .position(|compiled| compiled.law.id == "capacitor-current-law")
+            .expect("capacitor law");
+        assert!(LAW_DISPATCH.candidate_indices(&actual).contains(&capacitor));
+        assert!(COMPILED_LAWS[capacitor].forms.iter().any(|form| {
+            !unify_all(
+                &form.expression,
+                &actual,
+                &COMPILED_LAWS[capacitor].placeholders,
+                &BTreeMap::new(),
+            )
+            .is_empty()
+        }));
+        assert_eq!(
+            recognized_laws(
+                "Current $i_{\\rm out}$ is referenced leaving the positive-voltage terminal. We write $i_{\\rm out}$ for electric current scalar, $C$ for capacitance scalar, $v$ for voltage scalar, and $t$ for duration scalar. $i_{\\rm out}=-C\\,dv/dt$."
+            ),
+            ["capacitor-current-law"]
+        );
+    }
+
+    #[test]
+    fn explicit_symbolic_shape_mismatch_refuses_a_structural_law() {
+        assert!(
+            recognized_laws(
+                "Let $H$ be an m by n matrix, $q$ a k-dimensional vector with $k\\ne n$, and $z$ an m-dimensional vector. Consider $z=Hq$."
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
     fn promotion_laws_use_only_the_generic_compiled_runtime() {
         for (source, expected) in [
             (
@@ -3172,6 +3852,16 @@ mod tests {
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");
         }
+    }
+
+    #[test]
+    fn an_explicit_declaration_resets_unrelated_prior_discourse_for_its_formula() {
+        assert_eq!(
+            recognized_laws(
+                "The symbols below have no meaning beyond this standalone example. A grouped symbol is $q_{206}$. In discrete state equation, let $q$, $k$, $u$, $s$, and $w$ denote n-dimensional system state vector, n by n state matrix, n-dimensional system state vector, n by n input matrix, and n-dimensional control input vector, respectively. $q = k u + s w$"
+            ),
+            ["discrete-state-equation"]
+        );
     }
 
     #[test]
@@ -3244,6 +3934,91 @@ mod tests {
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");
         }
+    }
+
+    #[test]
+    fn equation_flow_roles_activate_existing_compiled_laws() {
+        let authored = recognized_law_observations(
+            "The fluid density $\\rho$ was measured. For each nozzle, the optical diameter supplied the area $A$, while particle tracking supplied the area-mean exit speed $v_e$. We computed\nthe discharged mass per unit time as\n\\[\\dot m=\\rho A v_e.\\]",
+        );
+        assert_eq!(authored[0].law_id, "mass-flow-rate");
+        let relation = authored[0].relation.as_ref().unwrap();
+        assert!(
+            relation
+                .roles
+                .iter()
+                .any(|role| { role.role == "mass-flow-rate" && role.symbol == "\\dot m" })
+        );
+        assert!(
+            relation
+                .roles
+                .iter()
+                .any(|role| role.role == "density" && role.symbol == "\\rho")
+        );
+        assert_eq!(
+            recognized_laws(
+                "The bore determines area $A$ and the meter reports cross-section mean speed $v$. Density was sampled at the same temperature, allowing the corresponding mass rate\nto be written as\n\\[\\dot m=\\rho Q=\\rho A v.\\]"
+            ),
+            ["mass-flow-rate"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "For binary label $y$, the model emits predicted probability $p$. We calculated the per-example binary\ncross-entropy as\n\\[L=-y\\log p-(1-y)\\log(1-p).\\]"
+            ),
+            ["binary-cross-entropy"]
+        );
+    }
+
+    #[test]
+    fn possessive_equation_flow_uses_the_existing_role_and_law_pipeline() {
+        let source = "A charge packet with signed charge $q_b$ entering a region held at potential $V_b$ has electric potential energy $U_b=q_bV_b$.";
+        assert_eq!(recognized_laws(source), ["electric-potential-energy"]);
+    }
+
+    #[test]
+    fn infers_one_unresolved_law_role_from_at_least_two_typed_roles() {
+        assert_eq!(
+            recognized_laws("Let $A$ be area and $v$ velocity. $Q=Av$."),
+            ["volumetric-flow-rate"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Let $M$ be mass flow rate, $A$ area, and $v$ velocity. $M=\\rho A v$."
+            ),
+            ["mass-flow-rate"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Let $M$ be mass flow rate, $A$ area, and $v$ velocity. $M=\\rho Q=\\rho A v$."
+            ),
+            ["mass-flow-rate"]
+        );
+    }
+
+    #[test]
+    fn refuses_role_completion_with_two_unknowns_or_a_conflicting_role() {
+        assert!(recognized_laws("Let $A$ be area. $Q=Ax$.").is_empty());
+        assert!(
+            !recognized_laws("Let $Q$ be voltage, $A$ area, and $v$ velocity. $Q=Av$.")
+                .iter()
+                .any(|law| law == "volumetric-flow-rate")
+        );
+        assert!(
+            recognized_laws(
+                "We write $h$ for loss value scalar. We write $h$ for loss value scalar. We write $g$ for step size scalar. We write $j$ for penalty value scalar. This notation is used in a regularized objective. $v=h+gj$."
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn an_explicitly_wrong_physical_unit_refutes_a_law_role() {
+        assert!(
+            recognized_laws(
+                "Let $K$ be energy in joules, $m$ be measured in seconds, and $v$ speed in metres per second. $K=\\frac12mv^2$."
+            )
+            .is_empty()
+        );
     }
 
     #[test]
@@ -3335,6 +4110,11 @@ mod tests {
             &canonical,
             &prose.semantic_evidence,
             &LawAnalysisContext {
+                source,
+                formula_ranges: &regions
+                    .iter()
+                    .map(|region| region.content_range.clone())
+                    .collect::<Vec<_>>(),
                 shapes: &shapes,
                 quantities: &quantities,
                 consistency: &roles,

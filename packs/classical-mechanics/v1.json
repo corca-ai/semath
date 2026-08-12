@@ -162,6 +162,10 @@
             "mass",
             "velocity"
           ],
+          "evidencePhrases": [
+            "nonrelativistic motion",
+            "non-relativistic motion"
+          ],
           "label": "The expression uses nonrelativistic translational motion."
         }
       ],

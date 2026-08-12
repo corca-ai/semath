@@ -23,12 +23,26 @@ pub(crate) fn occurrence_at_cursor(
         .enumerate()
         .filter(|(_, occurrence)| ownership_priority(**occurrence, offset) == Some(best_priority))
         .collect::<Vec<_>>();
-    candidates.sort_by_key(|(_, occurrence)| {
-        (
-            occurrence.occurrence.end_offset - occurrence.occurrence.start_offset,
-            occurrence.selection.end_offset - occurrence.selection.start_offset,
-            occurrence.selection.start_offset,
-        )
+    candidates.sort_by(|(_, left), (_, right)| {
+        let left_occurrence_width = left.occurrence.end_offset - left.occurrence.start_offset;
+        let right_occurrence_width = right.occurrence.end_offset - right.occurrence.start_offset;
+        let occurrence_order = if best_priority == 1 {
+            right_occurrence_width.cmp(&left_occurrence_width)
+        } else {
+            left_occurrence_width.cmp(&right_occurrence_width)
+        };
+        occurrence_order
+            .then_with(|| {
+                let left_selection_width = left.selection.end_offset - left.selection.start_offset;
+                let right_selection_width =
+                    right.selection.end_offset - right.selection.start_offset;
+                left_selection_width.cmp(&right_selection_width)
+            })
+            .then_with(|| {
+                left.selection
+                    .start_offset
+                    .cmp(&right.selection.start_offset)
+            })
     });
     let (selected_index, selected) = *candidates.first()?;
     if candidates.get(1).is_some_and(|(_, next)| {
@@ -59,34 +73,6 @@ fn nonempty_trailing_edge(range: &SourceRange, offset: u32) -> bool {
     range.start_offset < range.end_offset && range.end_offset == offset
 }
 
-pub(crate) fn item_at_cursor<T>(
-    items: &[(T, SourceRange)],
-    offset: u32,
-) -> Option<(&T, &SourceRange)> {
-    let mut containing = items.iter().filter(|(_, range)| range.contains(offset));
-    let selected = containing.next()?;
-    if containing.next().is_some() {
-        return None;
-    }
-    Some((&selected.0, &selected.1))
-}
-
-pub(crate) fn item_at_cursor_with_trailing_edge<T>(
-    items: &[(T, SourceRange)],
-    offset: u32,
-) -> Option<(&T, &SourceRange)> {
-    item_at_cursor(items, offset).or_else(|| {
-        let mut trailing = items.iter().filter(|(_, range)| {
-            range.start_offset < range.end_offset && range.end_offset == offset
-        });
-        let selected = trailing.next()?;
-        if trailing.next().is_some() {
-            return None;
-        }
-        Some((&selected.0, &selected.1))
-    })
-}
-
 pub(crate) fn interior_offset(range: &SourceRange, cursor_offset: u32) -> u32 {
     if range.start_offset >= range.end_offset {
         return cursor_offset;
@@ -98,9 +84,7 @@ pub(crate) fn interior_offset(range: &SourceRange, cursor_offset: u32) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        CursorOccurrence, interior_offset, item_at_cursor_with_trailing_edge, occurrence_at_cursor,
-    };
+    use super::{CursorOccurrence, occurrence_at_cursor};
     use crate::SourceRange;
 
     fn range(start_offset: u32, end_offset: u32) -> SourceRange {
@@ -108,54 +92,6 @@ mod tests {
             start_offset,
             end_offset,
         }
-    }
-
-    #[test]
-    fn accepts_start_interior_and_trailing_edge_for_nonempty_ranges() {
-        for start in 0..32 {
-            for width in 1..8 {
-                let end = start + width;
-                let items = [("target", range(start, end))];
-                for offset in start..=end {
-                    let (_, selected) = item_at_cursor_with_trailing_edge(&items, offset).unwrap();
-                    assert_eq!(selected, &range(start, end));
-                    assert!(selected.contains(interior_offset(selected, offset)));
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn exact_start_wins_over_the_left_trailing_edge() {
-        let items = [("left", range(2, 3)), ("right", range(3, 5))];
-        let (item, selected) = item_at_cursor_with_trailing_edge(&items, 3).unwrap();
-        assert_eq!(*item, "right");
-        assert_eq!(selected, &range(3, 5));
-    }
-
-    #[test]
-    fn refuses_ambiguous_overlaps_and_duplicate_trailing_edges() {
-        assert!(
-            item_at_cursor_with_trailing_edge(
-                &[("wide", range(1, 5)), ("nested", range(2, 4))],
-                3,
-            )
-            .is_none()
-        );
-        assert!(
-            item_at_cursor_with_trailing_edge(
-                &[("first", range(1, 4)), ("second", range(2, 4))],
-                4,
-            )
-            .is_none()
-        );
-    }
-
-    #[test]
-    fn does_not_snap_across_gaps_or_to_empty_ranges() {
-        let items = [("left", range(1, 2)), ("empty", range(4, 4))];
-        assert!(item_at_cursor_with_trailing_edge(&items, 3).is_none());
-        assert!(item_at_cursor_with_trailing_edge(&items, 4).is_none());
     }
 
     #[test]
@@ -189,6 +125,27 @@ mod tests {
             },
         ];
         assert_eq!(occurrence_at_cursor(&occurrences, 2), Some(1));
+    }
+
+    #[test]
+    fn complete_notation_owns_a_shared_trailing_edge() {
+        let base = range(1, 2);
+        let index = range(3, 4);
+        let indexed = range(1, 4);
+        let occurrences = [
+            CursorOccurrence {
+                occurrence: &indexed,
+                selection: &base,
+                application_end: None,
+            },
+            CursorOccurrence {
+                occurrence: &index,
+                selection: &index,
+                application_end: None,
+            },
+        ];
+        assert_eq!(occurrence_at_cursor(&occurrences, 3), Some(1));
+        assert_eq!(occurrence_at_cursor(&occurrences, 4), Some(0));
     }
 
     #[test]

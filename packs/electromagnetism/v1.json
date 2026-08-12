@@ -228,6 +228,11 @@
             "charge",
             "electric-field"
           ],
+          "evidencePhrases": [
+            "electrostatic regime",
+            "magnetic force is negligible",
+            "magnetic force is absent"
+          ],
           "label": "The field is evaluated at the charged body and magnetic-force terms are outside this relation."
         }
       ],
@@ -352,6 +357,11 @@
           "subjects": [
             "voltage",
             "current"
+          ],
+          "evidencePhrases": [
+            "consistent sign convention",
+            "passive sign convention",
+            "stated sign convention"
           ],
           "label": "Voltage and current reference directions use one explicitly stated sign convention."
         }

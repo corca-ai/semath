@@ -390,6 +390,7 @@ pub fn pack_template(pack_id: &str) -> Result<String, PackValidationError> {
                 kind: PackConditionKind::ShapeCompatible,
                 subjects: vec!["coefficient".into(), "input".into(), "output".into()],
                 label: "The coefficient, input, and output are scalar.".into(),
+                evidence_phrases: Vec::new(),
             }],
             activation_phrases: Vec::new(),
             references: vec![reference_id.clone()],

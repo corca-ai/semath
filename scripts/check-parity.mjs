@@ -21,9 +21,11 @@ const baseSources = [
     path: "main.tex",
   },
   {
-    content: ["Let $A$ be an event. Let $B$ be an event.", "$A \\cap B$."].join(
-      "\n",
-    ),
+    content: [
+      "Let $A$ be an event. Let $B$ be an event.",
+      "Assume $A$ and $B$ belong to a common probability space.",
+      "$A \\cap B$.",
+    ].join("\n"),
     documentVersion: 1,
     fileId: "probability",
     language: "latex",

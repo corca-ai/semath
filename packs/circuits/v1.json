@@ -112,6 +112,10 @@
             "voltage",
             "current"
           ],
+          "evidencePhrases": [
+            "consistent sign convention",
+            "passive sign convention"
+          ],
           "label": "Voltage polarity and current reference direction use a consistent sign convention."
         }
       ],
@@ -159,6 +163,11 @@
           "kind": "sign-convention",
           "subjects": [
             "branch-current"
+          ],
+          "evidencePhrases": [
+            "node convention",
+            "currents entering the node",
+            "currents leaving the node"
           ],
           "label": "All branch-current signs use one node convention."
         }
@@ -245,6 +254,9 @@
             "current",
             "voltage"
           ],
+          "evidencePhrases": [
+            "passive sign convention"
+          ],
           "label": "The passive sign convention is used."
         }
       ],
@@ -310,6 +322,10 @@
           "subjects": [
             "voltage",
             "current"
+          ],
+          "evidencePhrases": [
+            "passive sign convention",
+            "stated sign convention"
           ],
           "label": "The voltage and current reference directions use one stated sign convention."
         }

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::SourceRange;
 use crate::constraint::{ConstraintInputClaim, PlannedConflict, plan_constraint_derivations};
+use crate::scope::scope_visible;
 
 const MAX_DOCUMENT_OCCURRENCES: usize = 100_000;
 const MAX_DOCUMENT_CLAIMS: usize = 50_000;
@@ -673,6 +674,33 @@ impl ProjectSemanticIndex {
         }
     }
 
+    pub(crate) fn has_future_external_binding_evidence(
+        &self,
+        occurrence_id: &SourceOccurrenceId,
+    ) -> bool {
+        let Some(occurrence) = self.occurrences.get(occurrence_id) else {
+            return false;
+        };
+        let normalized = occurrence_binding_key(occurrence);
+        self.binding_claims
+            .get(&normalized)
+            .into_iter()
+            .flatten()
+            .filter_map(|claim_id| {
+                let claim = self.claims.get(claim_id)?;
+                let evidence = self.evidence.get(&claim.evidence_id)?;
+                (claim.subject.anchor != occurrence.id).then_some((claim, evidence))
+            })
+            .any(|(claim, evidence)| {
+                claim.subject.component_id == occurrence.component_id
+                    && evidence.source.file_id != occurrence.id.file_id
+                    && scope_visible(&evidence.scope_path, &occurrence.scope_path)
+                    && evidence.available_after > occurrence.availability_order
+                    && evidence.modality == EvidenceModality::Asserted
+                    && evidence.polarity == EvidencePolarity::Positive
+            })
+    }
+
     pub fn stats(&self) -> SemanticIndexStats {
         SemanticIndexStats {
             occurrences: self.occurrences.len() as u32,
@@ -713,6 +741,61 @@ impl ProjectSemanticIndex {
         self.evidence.get(id)
     }
 
+    pub(crate) fn relation_is_retracted(
+        &self,
+        canonical_digest: &str,
+        target_occurrence: &SourceOccurrenceId,
+    ) -> bool {
+        let Some(target) = self.occurrences.get(target_occurrence) else {
+            return false;
+        };
+        let mut positive = Vec::new();
+        let mut negative = Vec::new();
+        for claim in self.claims.values() {
+            let ClaimObject::Value(ClaimValue::Relation(relation)) = &claim.object else {
+                continue;
+            };
+            if claim.predicate != ClaimPredicate::Relates
+                || claim.tier != InferenceTier::ExplicitClaim
+                || relation.canonical_digest() != canonical_digest
+            {
+                continue;
+            }
+            let Some(evidence) = self.evidence.get(&claim.evidence_id) else {
+                continue;
+            };
+            let Some(source) = self.occurrences.get(&evidence.source) else {
+                continue;
+            };
+            if evidence.modality != EvidenceModality::Asserted {
+                continue;
+            }
+            if evidence.rule_id != "semath/canonical-relation" {
+                continue;
+            }
+            if source.component_id != target.component_id
+                || !scope_visible(&evidence.scope_path, &target.scope_path)
+            {
+                continue;
+            }
+            match evidence.polarity {
+                EvidencePolarity::Positive => positive.push(evidence.available_after),
+                EvidencePolarity::Negative => negative.push(evidence.available_after),
+            }
+        }
+        let Some(latest_negative) = negative.into_iter().max() else {
+            return false;
+        };
+        if positive.iter().any(|order| *order > latest_negative) {
+            return false;
+        }
+        positive
+            .into_iter()
+            .filter(|order| *order < latest_negative)
+            .count()
+            == 1
+    }
+
     pub fn claims_for_entity(&self, entity: &EntityId) -> Vec<&Claim> {
         self.claims_by_entity
             .get(entity)
@@ -740,6 +823,41 @@ impl ProjectSemanticIndex {
                     })
             })
             .collect()
+    }
+
+    pub(crate) fn occurrence_has_source_meaning(&self, occurrence_id: &SourceOccurrenceId) -> bool {
+        let Some(occurrence) = self.occurrences.get(occurrence_id) else {
+            return false;
+        };
+        self.resolve(occurrence_id)
+            .candidates
+            .into_iter()
+            .any(|candidate| {
+                self.claims_for_entity_at(&candidate.entity_id, occurrence)
+                    .into_iter()
+                    .any(|claim| {
+                        let Some(evidence) = self.evidence.get(&claim.evidence_id) else {
+                            return false;
+                        };
+                        evidence.polarity == EvidencePolarity::Positive
+                            && evidence.modality == EvidenceModality::Asserted
+                            && match claim.predicate {
+                                ClaimPredicate::Names => {
+                                    evidence.rule_id != "semath/canonical-symbol-identity"
+                                }
+                                ClaimPredicate::Defines
+                                | ClaimPredicate::Abbreviates
+                                | ClaimPredicate::Aliases
+                                | ClaimPredicate::HasRole
+                                | ClaimPredicate::HasType
+                                | ClaimPredicate::HasShape
+                                | ClaimPredicate::HasDimension
+                                | ClaimPredicate::HasQuantity
+                                | ClaimPredicate::HasUnit => true,
+                                ClaimPredicate::Assumes | ClaimPredicate::Relates => false,
+                            }
+                    })
+            })
     }
 
     pub(crate) fn constraint_conflicts_for(&self, file_id: &str) -> Vec<&PlannedConflict> {
@@ -1060,8 +1178,16 @@ impl ProjectSemanticIndex {
                 .into_iter()
                 .map(|item| (item.id.clone(), item)),
         );
+        let inserted_claim_ids = facts
+            .claims
+            .iter()
+            .map(|claim| claim.id.clone())
+            .collect::<Vec<_>>();
         self.claims
             .extend(facts.claims.into_iter().map(|item| (item.id.clone(), item)));
+        for claim_id in inserted_claim_ids {
+            self.index_claim(&claim_id);
+        }
         for candidate in facts.candidates {
             self.candidates
                 .entry(candidate.occurrence_id.clone())
@@ -1093,6 +1219,9 @@ impl ProjectSemanticIndex {
             );
         }
         self.invalidated_claims = self.invalidated_claims.saturating_add(removed.len() as u32);
+        for claim_id in &removed {
+            self.unindex_claim(claim_id);
+        }
         self.claims.retain(|id, _| !removed.contains(id));
         self.candidates
             .retain(|occurrence, _| occurrence.file_id != file_id);
@@ -1209,33 +1338,85 @@ impl ProjectSemanticIndex {
         self.dependents.clear();
         self.binding_claims.clear();
         self.claims_by_entity.clear();
-        for claim in self.claims.values() {
-            self.claims_by_entity
-                .entry(claim.subject.clone())
+        let claim_ids = self.claims.keys().cloned().collect::<Vec<_>>();
+        for claim_id in claim_ids {
+            self.index_claim(&claim_id);
+        }
+    }
+
+    fn index_claim(&mut self, claim_id: &ClaimId) {
+        let Some(claim) = self.claims.get(claim_id) else {
+            return;
+        };
+        let subject = claim.subject.clone();
+        let parents = self
+            .evidence
+            .get(&claim.evidence_id)
+            .map_or_else(Vec::new, |evidence| evidence.parent_claims.clone());
+        let binding = if matches!(
+            claim.predicate,
+            ClaimPredicate::Defines
+                | ClaimPredicate::Names
+                | ClaimPredicate::Abbreviates
+                | ClaimPredicate::Aliases
+        ) && let ClaimObject::Occurrence(occurrence_id) = &claim.object
+        {
+            self.occurrences
+                .get(occurrence_id)
+                .map(occurrence_binding_key)
+        } else {
+            None
+        };
+
+        self.claims_by_entity
+            .entry(subject)
+            .or_default()
+            .insert(claim_id.clone());
+        for parent in parents {
+            self.dependents
+                .entry(parent)
                 .or_default()
-                .insert(claim.id.clone());
-            if let Some(evidence) = self.evidence.get(&claim.evidence_id) {
-                for parent in &evidence.parent_claims {
-                    self.dependents
-                        .entry(parent.clone())
-                        .or_default()
-                        .insert(claim.id.clone());
-                }
-            }
-            if matches!(
-                claim.predicate,
-                ClaimPredicate::Defines
-                    | ClaimPredicate::Names
-                    | ClaimPredicate::Abbreviates
-                    | ClaimPredicate::Aliases
-            ) && let ClaimObject::Occurrence(occurrence_id) = &claim.object
-                && let Some(occurrence) = self.occurrences.get(occurrence_id)
-            {
-                self.binding_claims
-                    .entry(occurrence_binding_key(occurrence))
-                    .or_default()
-                    .insert(claim.id.clone());
-            }
+                .insert(claim_id.clone());
+        }
+        if let Some(binding) = binding {
+            self.binding_claims
+                .entry(binding)
+                .or_default()
+                .insert(claim_id.clone());
+        }
+    }
+
+    fn unindex_claim(&mut self, claim_id: &ClaimId) {
+        let Some(claim) = self.claims.get(claim_id) else {
+            return;
+        };
+        let subject = claim.subject.clone();
+        let parents = self
+            .evidence
+            .get(&claim.evidence_id)
+            .map_or_else(Vec::new, |evidence| evidence.parent_claims.clone());
+        let binding = if matches!(
+            claim.predicate,
+            ClaimPredicate::Defines
+                | ClaimPredicate::Names
+                | ClaimPredicate::Abbreviates
+                | ClaimPredicate::Aliases
+        ) && let ClaimObject::Occurrence(occurrence_id) = &claim.object
+        {
+            self.occurrences
+                .get(occurrence_id)
+                .map(occurrence_binding_key)
+        } else {
+            None
+        };
+
+        remove_index_value(&mut self.claims_by_entity, &subject, claim_id);
+        for parent in parents {
+            remove_index_value(&mut self.dependents, &parent, claim_id);
+        }
+        self.dependents.remove(claim_id);
+        if let Some(binding) = binding {
+            remove_index_value(&mut self.binding_claims, &binding, claim_id);
         }
     }
 
@@ -1249,6 +1430,15 @@ impl ProjectSemanticIndex {
             })
             .map(|(id, _)| id.clone())
             .collect::<BTreeSet<_>>();
+        let generated_claims = self
+            .claims
+            .values()
+            .filter(|claim| generated_evidence.contains(&claim.evidence_id))
+            .map(|claim| claim.id.clone())
+            .collect::<Vec<_>>();
+        for claim_id in &generated_claims {
+            self.unindex_claim(claim_id);
+        }
         self.claims
             .retain(|_, claim| !generated_evidence.contains(&claim.evidence_id));
         self.evidence
@@ -1315,10 +1505,24 @@ impl ProjectSemanticIndex {
                 derivation_depth: 1,
             };
             self.evidence.insert(evidence_id, evidence);
-            self.claims.insert(claim_id, claim);
+            self.claims.insert(claim_id.clone(), claim);
+            self.index_claim(&claim_id);
         }
-        self.rebuild_indexes();
         Ok(())
+    }
+}
+
+fn remove_index_value<K: Ord + Clone>(
+    index: &mut BTreeMap<K, BTreeSet<ClaimId>>,
+    key: &K,
+    value: &ClaimId,
+) {
+    let remove_key = index.get_mut(key).is_some_and(|values| {
+        values.remove(value);
+        values.is_empty()
+    });
+    if remove_key {
+        index.remove(key);
     }
 }
 
@@ -1535,14 +1739,6 @@ pub(crate) fn occurrence_binding_key(occurrence: &SourceOccurrence) -> String {
     }
     serde_json::to_string(&occurrence.notation)
         .expect("notation components always serialize to a binding key")
-}
-
-fn scope_visible(declaration: &[u32], occurrence: &[u32]) -> bool {
-    declaration.len() <= occurrence.len()
-        && declaration
-            .iter()
-            .zip(occurrence)
-            .all(|(left, right)| left == right)
 }
 
 fn unsupported(occurrence_id: SourceOccurrenceId) -> Resolution {
@@ -1876,6 +2072,70 @@ mod tests {
             index.resolve(&before.id).status,
             ResolutionStatus::Unsupported
         );
+    }
+
+    #[test]
+    fn incremental_claim_indexes_match_a_full_rebuild() {
+        let mut index = ProjectSemanticIndex::default();
+        for version in [1, 2] {
+            let declaration = occurrence("paper.tex", version, 1, 0, 10, &[], "ECE", Vec::new());
+            let metric = entity(&declaration, "expected-calibration-error");
+            let binding_evidence = evidence(
+                &format!("ece-definition-{version}"),
+                &declaration,
+                EvidencePolarity::Positive,
+                EvidenceModality::Asserted,
+            );
+            let binding = claim(
+                &format!("ece-binding-{version}"),
+                &metric,
+                ClaimPredicate::Abbreviates,
+                ClaimObject::Occurrence(declaration.id.clone()),
+                &binding_evidence.id.0,
+            );
+            let mut derived_evidence = evidence(
+                &format!("ece-type-evidence-{version}"),
+                &declaration,
+                EvidencePolarity::Positive,
+                EvidenceModality::Asserted,
+            );
+            derived_evidence.origin = EvidenceOrigin::Derived;
+            derived_evidence.parent_claims = vec![binding.id.clone()];
+            derived_evidence.rule_id = "test/derived-type".into();
+            let derived = Claim {
+                id: ClaimId(format!("ece-type-{version}")),
+                subject: metric.clone(),
+                predicate: ClaimPredicate::HasType,
+                object: ClaimObject::Value(ClaimValue::Type("metric".into())),
+                evidence_id: derived_evidence.id.clone(),
+                tier: InferenceTier::Constraint,
+                derivation_depth: 1,
+            };
+            index
+                .replace_document(facts(
+                    "paper.tex",
+                    version,
+                    vec![declaration.clone()],
+                    vec![metric],
+                    vec![declaration.id],
+                    vec![binding_evidence, derived_evidence],
+                    vec![binding, derived],
+                ))
+                .unwrap();
+
+            let dependents = index.dependents.clone();
+            let binding_claims = index.binding_claims.clone();
+            let claims_by_entity = index.claims_by_entity.clone();
+            index.rebuild_indexes();
+            assert_eq!(index.dependents, dependents);
+            assert_eq!(index.binding_claims, binding_claims);
+            assert_eq!(index.claims_by_entity, claims_by_entity);
+        }
+
+        index.remove_document("paper.tex");
+        assert!(index.dependents.is_empty());
+        assert!(index.binding_claims.is_empty());
+        assert!(index.claims_by_entity.is_empty());
     }
 
     #[test]

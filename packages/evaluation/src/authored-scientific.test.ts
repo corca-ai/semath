@@ -3,6 +3,7 @@ import {
   AUTHORED_AREA_ALLOCATION,
   DOCUMENT_REASONING_FAMILIES,
   authoredFixtureSealPayload,
+  authoredRelationRangeMatches,
   authoredScenarioReviewPayload,
   parseAuthoredScientificFixture,
   scoreAuthoredScientificFixture,
@@ -15,6 +16,39 @@ import {
 } from "./authored-scientific";
 
 describe("independently authored scientific corpus", () => {
+  test("treats trailing equation tags as presentation outside semantic relation ranges", () => {
+    const content = "i_1+i_2+i_3=0. \\tag{2}";
+    expect(
+      authoredRelationRangeMatches(
+        content,
+        { startOffset: 0, endOffset: 14 },
+        { startOffset: 0, endOffset: content.length },
+      ),
+    ).toBe(true);
+    expect(
+      authoredRelationRangeMatches(
+        "x=y+z",
+        { startOffset: 0, endOffset: 3 },
+        { startOffset: 0, endOffset: 5 },
+      ),
+    ).toBe(false);
+    const labeled = "\\label{eq:set}\n A\\cap B=C.";
+    expect(
+      authoredRelationRangeMatches(
+        labeled,
+        { startOffset: labeled.indexOf("A"), endOffset: labeled.length },
+        { startOffset: 0, endOffset: labeled.length },
+      ),
+    ).toBe(true);
+    expect(
+      authoredRelationRangeMatches(
+        "x+z=y",
+        { startOffset: 2, endOffset: 5 },
+        { startOffset: 0, endOffset: 5 },
+      ),
+    ).toBe(false);
+  });
+
   test("keeps lifecycle snapshots explicit and cursors on unique source", () => {
     const fixture = parseAuthoredScientificFixture(fixtureValue("holdout", 1));
     expect(fixture.scenarios[0]?.snapshots.map((snapshot) => snapshot.id)).toEqual([

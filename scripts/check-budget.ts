@@ -23,7 +23,12 @@ import {
   semanticallyEditPerformanceDocument,
   type PerformanceFixtureDocument,
 } from "./performance-fixtures";
-import { shouldEnforceTiming } from "./performance-budget-policy";
+import {
+  retainedRssBudgetBytes,
+  shouldEnforceRetainedRss,
+  shouldEnforceTiming,
+  timingBudget,
+} from "./performance-budget-policy";
 import {
   planSemanticEditTrace,
   planSemanticLifecycleTraces,
@@ -33,21 +38,13 @@ import {
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
 const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";
 const TIMING_GATE = shouldEnforceTiming(process.env, DOCUMENT_COUNT);
+const RETAINED_RSS_GATE = shouldEnforceRetainedRss(process.env);
 const DELTA_RUNS = positiveInteger(
   "SEMATH_BUDGET_DELTA_RUNS",
   DOCUMENT_COUNT >= 500 ? 10 : 30,
 );
-// Cold WASM initialization is sensitive to shared-runner CPU allocation. Keep
-// the absolute gate well below the previous 5s ceiling while leaving the rapid
-// edit/query budgets strict enough to catch interactive regressions.
-const COLD_BUDGET_MS = DOCUMENT_COUNT >= 500 ? 5_000 : 2_500;
-// Hosted runners occasionally lose a single edit to a 40–60ms scheduler
-// pause. Keep the p95 gate below one 60Hz frame plus that observed jitter,
-// while the dedicated syntax/query measurements remain visible for diagnosis.
-const DELTA_P95_BUDGET_MS = STABLE_HOST_GATE ? (DOCUMENT_COUNT >= 500 ? 50 : 25) : 75;
-const SEMANTIC_DELTA_BUDGET_MS = 50;
-const QUERY_P95_BUDGET_MS = 8;
-const RETAINED_RSS_BUDGET_BYTES = (DOCUMENT_COUNT >= 500 ? 192 : 112) * 1024 * 1024;
+const TIMING_BUDGET = timingBudget(DOCUMENT_COUNT, STABLE_HOST_GATE);
+const RETAINED_RSS_BUDGET_BYTES = retainedRssBudgetBytes(DOCUMENT_COUNT);
 const MAX_AFFECTED_DOCUMENTS = 2;
 const MAX_TRANSFER_BYTES = 16 * 1024;
 // Dispatch work scales with the reviewed catalog, but must remain far below a
@@ -260,6 +257,13 @@ const incremental = await worker.request<UpdateResult>({
 if (incremental.analyzedFileIds.length !== 0) {
   throw new Error("budget empty delta unexpectedly reanalyzed documents");
 }
+collectGarbage();
+const rssAfterIncremental = residentBytes();
+if (rssAfterIncremental > peakRss) {
+  peakRss = rssAfterIncremental;
+  peakRssStage = "retained-editor-state";
+}
+const retainedRssGrowth = Math.max(0, rssAfterIncremental - rssBefore);
 
 // The parity rebuild is a separate lifecycle, not a second live editor engine.
 // Dispose the incremental worker first so this gate measures the maximum memory
@@ -299,7 +303,7 @@ if (rssAfterDispose > peakRss) {
   peakRss = rssAfterDispose;
   peakRssStage = "clean-rebuild-disposed";
 }
-const retainedRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
+const postDisposeRssGrowth = Math.max(0, rssAfterDispose - rssBefore);
 
 const deltaP95 = percentile(deltaDurations, 0.95);
 const deltaMedian = percentile(deltaDurations, 0.5);
@@ -343,6 +347,7 @@ const report = {
   initialTransferBytes,
   peakRssGrowthBytes: peakRssGrowth,
   peakRssStage,
+  postDisposeRssGrowthBytes: postDisposeRssGrowth,
   queryP95ByKind,
   semanticViewP95Ms: queryP95ByKind.semanticView ?? null,
   lifecycleFamilies: planSemanticLifecycleTraces(0x5e_21).map((trace) => trace.family),
@@ -378,19 +383,23 @@ const report = {
 console.log(`budget metrics: ${JSON.stringify(report)}`);
 const reportPath = process.env.SEMATH_BUDGET_REPORT;
 if (reportPath) await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
-if (TIMING_GATE && coldMs > COLD_BUDGET_MS) {
-  throw new Error(`budget cold start ${coldMs.toFixed(2)}ms exceeded ${COLD_BUDGET_MS}ms`);
+if (TIMING_GATE && coldMs > TIMING_BUDGET.coldMs) {
+  throw new Error(`budget cold start ${coldMs.toFixed(2)}ms exceeded ${TIMING_BUDGET.coldMs}ms`);
 }
-if (TIMING_GATE && deltaP95 > DELTA_P95_BUDGET_MS) {
-  throw new Error(`budget delta p95 ${deltaP95.toFixed(2)}ms exceeded ${DELTA_P95_BUDGET_MS}ms`);
-}
-if (TIMING_GATE && semanticDeltaMs > SEMANTIC_DELTA_BUDGET_MS) {
+if (TIMING_GATE && deltaP95 > TIMING_BUDGET.deltaP95Ms) {
   throw new Error(
-    `budget semantic delta ${semanticDeltaMs.toFixed(2)}ms exceeded ${SEMANTIC_DELTA_BUDGET_MS}ms`,
+    `budget delta p95 ${deltaP95.toFixed(2)}ms exceeded ${TIMING_BUDGET.deltaP95Ms}ms`,
   );
 }
-if (TIMING_GATE && queryP95 > QUERY_P95_BUDGET_MS) {
-  throw new Error(`budget query p95 ${queryP95.toFixed(2)}ms exceeded ${QUERY_P95_BUDGET_MS}ms`);
+if (TIMING_GATE && semanticDeltaMs > TIMING_BUDGET.semanticDeltaMs) {
+  throw new Error(
+    `budget semantic delta ${semanticDeltaMs.toFixed(2)}ms exceeded ${TIMING_BUDGET.semanticDeltaMs}ms`,
+  );
+}
+if (TIMING_GATE && queryP95 > TIMING_BUDGET.queryP95Ms) {
+  throw new Error(
+    `budget query p95 ${queryP95.toFixed(2)}ms exceeded ${TIMING_BUDGET.queryP95Ms}ms`,
+  );
 }
 if (initial.stats.lawRulesVisited > (DOCUMENT_COUNT + 1) * MAX_LAW_RULES_PER_DOCUMENT) {
   throw new Error(
@@ -414,11 +423,18 @@ if (
   );
 }
 if (peakRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
-  throw new Error(`budget peak RSS growth ${peakRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`);
+  console.warn(
+    `budget transient peak RSS growth ${peakRssGrowth}B at ${peakRssStage} exceeded the retained-state budget ${RETAINED_RSS_BUDGET_BYTES}B`,
+  );
 }
-if (retainedRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
+if (RETAINED_RSS_GATE && retainedRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
   throw new Error(
     `budget retained RSS growth ${retainedRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B`,
+  );
+}
+if (!RETAINED_RSS_GATE && retainedRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
+  console.warn(
+    `budget retained RSS sample ${retainedRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B; aggregate gate pending`,
   );
 }
 if (

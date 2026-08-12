@@ -10,7 +10,7 @@ JSON report with:
 ```sh
 bun run budget
 bun run budget:scale
-SEMATH_BUDGET_STABLE=1 bun run budget:stable
+bun run budget:stable
 mkdir -p .artifacts && bun run budget:report
 ```
 
@@ -78,5 +78,19 @@ allows 75ms at 61 documents solely for scheduler jitter; it does not replace the
 stable release gate.
 
 RSS samples settle full garbage collection across finalizer-reachable WASM
-wrappers before measuring retained state. The peak remains tied to its named
-lifecycle stage, so transient editor-state growth stays visible.
+wrappers before measuring retained state. Retained state is sampled after all
+incremental edit/query cycles while the one editor engine remains live; a
+separate post-dispose value keeps allocator high-water from the clean-rebuild
+parity lifecycle visible without mislabeling it as live editor state. The
+existing 112 MiB and 192 MiB absolute gates apply to live retained state. The
+stable-host command runs each document count in five isolated processes and
+applies every unchanged memory and latency limit to the corresponding median;
+each process uses 30 edit cycles so nearest-rank p95 does not collapse to the
+single maximum. All raw samples remain in the report. A transient peak
+remains tied to its named lifecycle stage and emits a warning when it exceeds
+the retained-state budget, but does
+not by itself fail a sample: repeated identical baseline runs show that allocator
+scheduling can move this peak across the threshold without a corresponding
+retained-state regression. Release review must compare baseline and candidate
+on the same stable host and investigate either median growing materially; the
+aggregate and per-sample reports never suppress peak or retained values.

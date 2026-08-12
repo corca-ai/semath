@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::LazyLock;
 
 use crate::pack::built_in_packs;
@@ -87,7 +87,62 @@ static PACK_ROLE_TERMS: LazyLock<Vec<(Vec<String>, String, u8)>> = LazyLock::new
     terms
 });
 
+static PACK_CONCEPT_ANCESTORS: LazyLock<BTreeSet<(String, String)>> = LazyLock::new(|| {
+    let parents = built_in_packs()
+        .iter()
+        .flat_map(|pack| {
+            pack.concepts.iter().map(|concept| {
+                (
+                    format!("{}:{}", pack.namespace, concept.id),
+                    concept.parents.clone(),
+                )
+            })
+        })
+        .collect::<BTreeMap<_, _>>();
+    let mut ancestors = BTreeSet::new();
+    for concept in parents.keys() {
+        let mut frontier = parents.get(concept).cloned().unwrap_or_default();
+        let mut visited = BTreeSet::new();
+        while let Some(parent) = frontier.pop() {
+            if !visited.insert(parent.clone()) {
+                continue;
+            }
+            ancestors.insert((concept.clone(), parent.clone()));
+            frontier.extend(parents.get(&parent).cloned().unwrap_or_default());
+        }
+    }
+    ancestors
+});
+
+pub(crate) fn concepts_share_lineage(left: &str, right: &str) -> bool {
+    left == right
+        || PACK_CONCEPT_ANCESTORS.contains(&(left.to_owned(), right.to_owned()))
+        || PACK_CONCEPT_ANCESTORS.contains(&(right.to_owned(), left.to_owned()))
+}
+
 pub(crate) fn classify_role(description: &str) -> Option<String> {
+    let roles = classify_role_candidates(description);
+    (roles.len() == 1).then(|| roles.into_iter().next().unwrap())
+}
+
+pub(crate) fn classify_role_candidates(description: &str) -> Vec<String> {
+    let lower = description.to_ascii_lowercase();
+    if let Some(coordinated) = lower.strip_prefix("both ") {
+        let roles = coordinated
+            .split(" and ")
+            .flat_map(|part| part.split(" or "))
+            .filter_map(classify_single_role)
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>();
+        if !roles.is_empty() {
+            return roles;
+        }
+    }
+    classify_single_role(description).into_iter().collect()
+}
+
+fn classify_single_role(description: &str) -> Option<String> {
     let semantic_description = [" along ", " through ", " across ", " normal to "]
         .iter()
         .find_map(|separator| description.split_once(separator).map(|(head, _)| head))
@@ -180,7 +235,7 @@ fn singular_or_plural(word: &str, singular: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::classify_role;
+    use super::{classify_role, classify_role_candidates, concepts_share_lineage};
 
     #[test]
     fn classifies_pack_quantities_through_the_shared_concept_vocabulary() {
@@ -199,6 +254,46 @@ mod tests {
         assert_eq!(
             classify_role("electric potential").as_deref(),
             Some("quantities-units:voltage")
+        );
+        assert_eq!(
+            classify_role("discharged mass per unit time").as_deref(),
+            Some("quantities-units:mass-flow-rate")
+        );
+        assert_eq!(
+            classify_role("per-example binary cross-entropy").as_deref(),
+            Some("optimization-ml:loss-value")
+        );
+        assert_eq!(
+            classify_role("preliminary volume rate").as_deref(),
+            Some("quantities-units:volumetric-flow-rate")
+        );
+    }
+
+    #[test]
+    fn uses_compiled_pack_lineage_for_concept_compatibility() {
+        assert!(concepts_share_lineage(
+            "discrete-math:subset",
+            "discrete-math:set"
+        ));
+        assert!(concepts_share_lineage(
+            "linear-algebra:transpose",
+            "linear-algebra:linear-operator"
+        ));
+        assert!(!concepts_share_lineage(
+            "quantities-units:voltage",
+            "quantities-units:resistance"
+        ));
+    }
+
+    #[test]
+    fn preserves_explicitly_coordinated_role_alternatives() {
+        assert_eq!(classify_role("both kinetic energy and stiffness"), None);
+        assert_eq!(
+            classify_role_candidates("both kinetic energy and stiffness"),
+            [
+                "quantities-units:energy".to_owned(),
+                "quantities-units:stiffness".to_owned(),
+            ]
         );
     }
 }

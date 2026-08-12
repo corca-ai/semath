@@ -30,7 +30,9 @@
       "conceptKind": "operator",
       "title": "Transpose",
       "description": "An operator that exchanges matrix axes.",
-      "parents": [],
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
       "references": [
         "matrix-computations"
       ]

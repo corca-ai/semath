@@ -20,6 +20,7 @@
       "title": "Function",
       "description": "A mapping with an explicitly declared domain and codomain.",
       "aliases": [
+        "antiderivative",
         "scalar-valued function",
         "vector-valued function"
       ],
