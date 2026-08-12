@@ -75,7 +75,14 @@ describe("SemathLspServer", () => {
     expect(response(messages, 3).contents.value).toContain("the input");
     expect(response(messages, 4)).toMatchObject({
       kind: "semanticView",
-      view: { decision: { status: "partial" }, symbol: { symbol: "x" } },
+      view: {
+        decision: {
+          meaning: { label: "the input", relationId: null },
+          reasons: [expect.objectContaining({ kind: "proof" })],
+          status: "established",
+        },
+        symbol: { symbol: "x" },
+      },
     });
     expect(
       messages.some(
@@ -260,7 +267,8 @@ describe("SemathLspServer", () => {
     expect(response(messages, 66).view).toMatchObject({
       decision: {
         meaning: { label: "stress tensor component" },
-        status: "partial",
+        reasons: [expect.objectContaining({ kind: "proof" })],
+        status: "established",
       },
       symbol: {
         definitions: [
@@ -426,12 +434,12 @@ describe("SemathLspServer", () => {
     expect(response(messages, 191)).toMatchObject({
       view: {
         decision: {
-          status: "partial",
+          status: "established",
           meaning: {
             label: "expected calibration error",
             relationId: null,
           },
-          reasons: [],
+          reasons: [expect.objectContaining({ kind: "proof" })],
         },
         symbol: {
           sourceNotation: "\\operatorname{ECE}",
