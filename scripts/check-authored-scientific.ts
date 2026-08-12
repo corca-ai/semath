@@ -335,6 +335,10 @@ function runProbe(
       prepareRename: results[3],
       rename: results[4],
       diagnostics: results[5],
+      relationViews: relationTargets.map((source, index) => ({
+        fileId: source.anchor.fileId,
+        result: results[6 + index]!,
+      })),
     } as AuthoredScientificSurfaceResults,
   );
   const cursorView = semanticView(results[0], probe.id + ": cursor");
@@ -368,6 +372,9 @@ function runProbe(
           documentContent,
           relation.range,
           source.anchor.range,
+          relation.evidence.find(
+            (evidence) => evidence.ruleId === "semantic-law-unification",
+          )?.sourceRanges[0],
         ),
       );
       const rolesMatched = sameRange.some((relation) =>
@@ -418,7 +425,12 @@ function expectedRelationsMatch(
         relation.relationId === expected.relationId &&
         relation.fileId === anchor.fileId &&
         document !== undefined &&
-        authoredRelationRangeMatches(document.content, relation.range, anchor.range) &&
+        authoredRelationRangeMatches(
+          document.content,
+          relation.range,
+          anchor.range,
+          relation.formulaRange,
+        ) &&
         relation.sourceGrounded === expected.sourceGrounded &&
         roleInstancesMatch(relation.roles, expected.roles, undefined),
     );

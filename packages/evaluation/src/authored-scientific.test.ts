@@ -6,6 +6,7 @@ import {
   authoredProbeIdentityFailures,
   authoredRelationRangeMatches,
   authoredScenarioReviewPayload,
+  observeAuthoredRelations,
   parseAuthoredScientificFixture,
   scoreAuthoredScientificFixture,
   validateAuthoredScientificTranche,
@@ -48,6 +49,48 @@ describe("independently authored scientific corpus", () => {
         { startOffset: 0, endOffset: 5 },
       ),
     ).toBe(false);
+    const system = "K=\\tfrac12 mv^2, \\qquad p=mv.";
+    expect(
+      authoredRelationRangeMatches(
+        system,
+        { startOffset: 0, endOffset: system.indexOf(",") },
+        { startOffset: 0, endOffset: system.length },
+        { startOffset: 0, endOffset: system.length },
+      ),
+    ).toBe(true);
+  });
+
+  test("projects a reviewed relation from its own source anchor", () => {
+    const range = { startOffset: 10, endOffset: 15 };
+    expect(observeAuthoredRelations("earlier.tex", [{
+      relationId: "circuits:ohm-law",
+      title: "Ohm's law",
+      description: "Voltage equals resistance times current.",
+      roles: [{
+        role: "voltage",
+        label: "Voltage",
+        symbol: "V",
+        conceptId: "circuits:voltage",
+      }],
+      conditions: [],
+      evidence: [{
+        ruleId: "semantic-law-unification",
+        kind: "canonical-math",
+        strength: "hard",
+        sourceRanges: [range],
+      }],
+      range,
+    }])).toEqual([{
+      fileId: "earlier.tex",
+      relationId: "circuits:ohm-law",
+      range,
+      roles: [{
+        conceptId: "circuits:voltage",
+        role: "voltage",
+        symbol: "V",
+      }],
+      sourceGrounded: true,
+    }]);
   });
 
   test("keeps lifecycle snapshots explicit and cursors on unique source", () => {

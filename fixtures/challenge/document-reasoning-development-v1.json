@@ -639,13 +639,15 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 second adjudication: changed the flywheel decision to partial because the source does not establish the required nonrelativistic-motion condition.",
+          "v0.28 second adjudication: scoped the relation contract to kinetic energy; the later momentum relation begins beyond this probe's cursor evidence boundary."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "c5241fe4af6018e5139131c0a7b76f482c148bd30d0d889fe3edef4feca35666",
+        "finalDigest": "f393c7cd6e1c81302443634721d5bdc1d3446005ae04d9dd29870bc78ac673d9",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "c5241fe4af6018e5139131c0a7b76f482c148bd30d0d889fe3edef4feca35666",
+        "semanticReviewDigest": "f393c7cd6e1c81302443634721d5bdc1d3446005ae04d9dd29870bc78ac673d9",
         "status": "corrected"
       },
       "snapshots": [
@@ -1687,13 +1689,14 @@
         "correctionSummary": [
           "Split the exclusive intersection and union alternatives into independently scored math probes.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
-          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement.",
+          "v0.28 adjudication: moved both branch probes from the established operand B to their exact set operator, preserving the intended unresolved intersection-versus-union contract."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "622a55b5aed942a9d5d40359b18f2135f58cc625e9c8ed51db6a551a70e8e8e1",
+        "finalDigest": "a872dbab18cba46557b446548a7b5be531f443bc1fa90e0058ef55511e4b6627",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "622a55b5aed942a9d5d40359b18f2135f58cc625e9c8ed51db6a551a70e8e8e1",
+        "semanticReviewDigest": "a872dbab18cba46557b446548a7b5be531f443bc1fa90e0058ef55511e4b6627",
         "status": "corrected"
       },
       "snapshots": [
@@ -1993,13 +1996,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Separated available operands from the later inclusion-exclusion conclusion."
+          "Separated available operands from the later inclusion-exclusion conclusion.",
+          "v0.28 adjudication: moved the supplemental cursor from the formula boundary to the final B occurrence and required its source-defined entity lifecycle."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "918aebfd5e9ac84c1eca971cc37fdd126fd19b9409a2da7d99b2b3e2c8e343b8",
+        "finalDigest": "f638396457551a2f336e6259ed337512dbaf207285195b9a724a51c6c787e2bd",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "918aebfd5e9ac84c1eca971cc37fdd126fd19b9409a2da7d99b2b3e2c8e343b8",
+        "semanticReviewDigest": "f638396457551a2f336e6259ed337512dbaf207285195b9a724a51c6c787e2bd",
         "status": "corrected"
       },
       "snapshots": [
@@ -3074,13 +3078,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.28 adjudication: replaced the formula-boundary cursor with the penalty symbol R and required its explicit definition, references, and deterministic rename."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "38ccc8c70888a34f7dd7a93cad988d2673debe269c7d352432dd22513a5aef29",
+        "finalDigest": "85348d31eff4ae7b71ad3db3b68389fd362621b19920c12ff5872e9e26ea9b18",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "38ccc8c70888a34f7dd7a93cad988d2673debe269c7d352432dd22513a5aef29",
+        "semanticReviewDigest": "85348d31eff4ae7b71ad3db3b68389fd362621b19920c12ff5872e9e26ea9b18",
         "status": "corrected"
       },
       "snapshots": [
@@ -3518,13 +3523,14 @@
           "Rewrote sampled givens, positive denominator, reviewed calculation, and decision as explicit stages.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
           "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement.",
-          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
+          "v0.28 adjudication: moved the event-intersection supplemental probe onto B and required the lifecycle of the prose-defined event."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "79622e4f08845e85fd3c871206ec5c6f84b375802c3cc269ad15ca6c09605411",
+        "finalDigest": "d6ab30555be54bcd8cf71b9e0e2efa9a4bfe5b29db90dab71c29dad30229d55b",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "79622e4f08845e85fd3c871206ec5c6f84b375802c3cc269ad15ca6c09605411",
+        "semanticReviewDigest": "d6ab30555be54bcd8cf71b9e0e2efa9a4bfe5b29db90dab71c29dad30229d55b",
         "status": "corrected"
       },
       "snapshots": [
@@ -5093,7 +5099,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -5123,40 +5129,18 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
               "fileId": "cm-development-flywheel-review.md",
-              "needle": "K=\\tfrac12 mv^2, \\qquad p=mv."
+              "needle": "K=\\tfrac12 mv^2, \\qquad"
             },
             "relationId": "classical-mechanics:kinetic-energy-definition",
             "roles": [
               {
                 "role": "energy",
                 "symbol": "K"
-              },
-              {
-                "role": "mass",
-                "symbol": "m"
-              },
-              {
-                "role": "velocity",
-                "symbol": "v"
-              }
-            ],
-            "sourceGrounded": true
-          },
-          {
-            "anchor": {
-              "fileId": "cm-development-flywheel-review.md",
-              "needle": "K=\\tfrac12 mv^2, \\qquad p=mv."
-            },
-            "relationId": "classical-mechanics:linear-momentum-definition",
-            "roles": [
-              {
-                "role": "momentum",
-                "symbol": "p"
               },
               {
                 "role": "mass",
@@ -6607,9 +6591,9 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "design/filter-composition.md",
         "needle": "R=A\\cap B",
+        "offset": 3,
         "snapshotId": "current"
       },
       "expected": {
@@ -6622,85 +6606,38 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "status": "available",
-            "minimum": 1,
-            "required": [
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "\\(B\\) records passing",
-                "selection": {
-                  "offset": 2,
-                  "length": 1
-                }
-              }
-            ],
+            "status": "unavailable",
+            "minimum": 0,
+            "required": [],
             "excluded": []
           },
           "prepareRename": {
-            "status": "available",
-            "range": {
-              "fileId": "design/filter-composition.md",
-              "needle": "R=A\\cap B",
-              "selection": {
-                "offset": 8,
-                "length": 1
-              }
-            },
-            "placeholder": "B"
+            "status": "unavailable"
           },
           "references": {
-            "status": "available",
-            "minimum": 3,
-            "required": [
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "\\(B\\) records passing",
-                "selection": {
-                  "offset": 2,
-                  "length": 1
-                }
-              },
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "R=A\\cap B",
-                "selection": {
-                  "offset": 8,
-                  "length": 1
-                }
-              },
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "R=A\\cup B",
-                "selection": {
-                  "offset": 8,
-                  "length": 1
-                }
-              }
-            ],
+            "status": "unavailable",
+            "minimum": 0,
+            "required": [],
             "excluded": []
           },
           "rename": {
-            "status": "available",
-            "minimum": 1,
-            "required": [
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "R=A\\cap B",
-                "selection": {
-                  "offset": 8,
-                  "length": 1
-                }
-              }
-            ],
-            "excluded": [],
-            "newName": "C",
-            "replacementText": "C",
-            "safety": "deterministic",
-            "expectedText": "B"
+            "status": "unavailable",
+            "minimum": 0,
+            "required": [],
+            "excluded": []
           }
         },
         "proofGrounded": false,
-        "relations": []
+        "relations": [],
+        "symbol": "\\cap",
+        "cursorOccurrence": {
+          "fileId": "design/filter-composition.md",
+          "needle": "R=A\\cap B",
+          "selection": {
+            "offset": 3,
+            "length": 4
+          }
+        }
       },
       "family": "collision-unsupported",
       "id": "DMD-03",
@@ -8803,7 +8740,7 @@
         "snapshotId": "current",
         "fileId": "methods/objective.tex",
         "needle": "\\trainobj(\\theta)=L(\\theta)+\\lambda R(\\theta)",
-        "edge": "after"
+        "offset": 36
       },
       "expected": {
         "decision": "established",
@@ -8816,24 +8753,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "methods/objective.tex",
+                "needle": "R(\\theta)=\\lVert",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "R",
+            "range": {
+              "fileId": "methods/objective.tex",
+              "needle": "\\trainobj(\\theta)=L(\\theta)+\\lambda R(\\theta)",
+              "selection": {
+                "offset": 36,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "methods/objective.tex",
+                "needle": "R(\\theta)=\\lVert",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "methods/objective.tex",
+                "needle": "\\trainobj(\\theta)=L(\\theta)+\\lambda R(\\theta)",
+                "selection": {
+                  "offset": 36,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "R",
+            "minimum": 1,
+            "newName": "S",
+            "replacementText": "S",
+            "required": [
+              {
+                "fileId": "methods/objective.tex",
+                "needle": "\\trainobj(\\theta)=L(\\theta)+\\lambda R(\\theta)",
+                "selection": {
+                  "offset": 36,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -8864,7 +8849,16 @@
             ],
             "sourceGrounded": true
           }
-        ]
+        ],
+        "symbol": "R",
+        "cursorOccurrence": {
+          "fileId": "methods/objective.tex",
+          "needle": "\\trainobj(\\theta)=L(\\theta)+\\lambda R(\\theta)",
+          "selection": {
+            "offset": 36,
+            "length": 1
+          }
+        }
       },
       "family": "guarded-condition",
       "id": "OPTML-DEV-002",
@@ -10542,9 +10536,9 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "design/filter-composition.md",
         "needle": "R=A\\cup B",
+        "offset": 3,
         "snapshotId": "current"
       },
       "expected": {
@@ -10557,86 +10551,38 @@
         "excludedRelationIds": [],
         "navigation": {
           "definition": {
-            "status": "available",
-            "minimum": 1,
-            "required": [
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "\\(B\\) records passing",
-                "selection": {
-                  "offset": 2,
-                  "length": 1
-                }
-              }
-            ],
+            "status": "unavailable",
+            "minimum": 0,
+            "required": [],
             "excluded": []
           },
           "prepareRename": {
-            "status": "available",
-            "range": {
-              "fileId": "design/filter-composition.md",
-              "needle": "R=A\\cup B",
-              "selection": {
-                "offset": 8,
-                "length": 1
-              }
-            },
-            "placeholder": "B"
+            "status": "unavailable"
           },
           "references": {
-            "status": "available",
-            "minimum": 3,
-            "required": [
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "\\(B\\) records passing",
-                "selection": {
-                  "offset": 2,
-                  "length": 1
-                }
-              },
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "R=A\\cap B",
-                "selection": {
-                  "offset": 8,
-                  "length": 1
-                }
-              },
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "R=A\\cup B",
-                "selection": {
-                  "offset": 8,
-                  "length": 1
-                }
-              }
-            ],
+            "status": "unavailable",
+            "minimum": 0,
+            "required": [],
             "excluded": []
           },
           "rename": {
-            "status": "available",
-            "minimum": 1,
-            "required": [
-              {
-                "fileId": "design/filter-composition.md",
-                "needle": "R=A\\cup B",
-                "selection": {
-                  "offset": 8,
-                  "length": 1
-                }
-              }
-            ],
-            "excluded": [],
-            "newName": "C",
-            "replacementText": "C",
-            "safety": "deterministic",
-            "expectedText": "B"
+            "status": "unavailable",
+            "minimum": 0,
+            "required": [],
+            "excluded": []
           }
         },
         "proofGrounded": false,
         "relations": [],
-        "symbol": "B"
+        "symbol": "\\cup",
+        "cursorOccurrence": {
+          "fileId": "design/filter-composition.md",
+          "needle": "R=A\\cup B",
+          "selection": {
+            "offset": 3,
+            "length": 4
+          }
+        }
       },
       "family": "collision-unsupported",
       "id": "DMD-03-union-alternative",
@@ -10814,9 +10760,9 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "solutions/divisibility.tex",
         "needle": "|A\\cup B|=|A|+|B|-|A\\cap B|=20",
+        "offset": 25,
         "snapshotId": "stage-2"
       },
       "expected": {
@@ -10830,24 +10776,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "solutions/divisibility.tex",
+                "needle": "let \\(B\\) be",
+                "selection": {
+                  "offset": 6,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "B",
+            "range": {
+              "fileId": "solutions/divisibility.tex",
+              "needle": "|A\\cup B|=|A|+|B|-|A\\cap B|=20",
+              "selection": {
+                "offset": 25,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "solutions/divisibility.tex",
+                "needle": "let \\(B\\) be",
+                "selection": {
+                  "offset": 6,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "solutions/divisibility.tex",
+                "needle": "|A\\cup B|=|A|+|B|-|A\\cap B|=20",
+                "selection": {
+                  "offset": 25,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "B",
+            "minimum": 1,
+            "newName": "C",
+            "replacementText": "C",
+            "required": [
+              {
+                "fileId": "solutions/divisibility.tex",
+                "needle": "|A\\cup B|=|A|+|B|-|A\\cap B|=20",
+                "selection": {
+                  "offset": 25,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -10915,7 +10909,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "B"
+        "symbol": "B",
+        "cursorOccurrence": {
+          "fileId": "solutions/divisibility.tex",
+          "needle": "|A\\cup B|=|A|+|B|-|A\\cap B|=20",
+          "selection": {
+            "offset": 25,
+            "length": 1
+          }
+        }
       },
       "family": "edit-lifecycle",
       "id": "DMD-10-established-inclusion-exclusion",
@@ -11607,9 +11609,9 @@
     },
     {
       "cursor": {
-        "edge": "after",
         "fileId": "retry-analysis.md",
         "needle": "P(A\\cap B)=0.012",
+        "offset": 8,
         "snapshotId": "current"
       },
       "expected": {
@@ -11623,24 +11625,72 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "retry-analysis.md",
+                "needle": "\\(B\\) denote",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "prepareRename": {
-            "status": "unavailable"
+            "placeholder": "B",
+            "range": {
+              "fileId": "retry-analysis.md",
+              "needle": "P(A\\cap B)=0.012",
+              "selection": {
+                "offset": 8,
+                "length": 1
+              }
+            },
+            "status": "available"
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "retry-analysis.md",
+                "needle": "\\(B\\) denote",
+                "selection": {
+                  "offset": 2,
+                  "length": 1
+                }
+              },
+              {
+                "fileId": "retry-analysis.md",
+                "needle": "P(A\\cap B)=0.012",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "expectedText": "B",
+            "minimum": 1,
+            "newName": "C",
+            "replacementText": "C",
+            "required": [
+              {
+                "fileId": "retry-analysis.md",
+                "needle": "P(A\\cap B)=0.012",
+                "selection": {
+                  "offset": 8,
+                  "length": 1
+                }
+              }
+            ],
+            "safety": "deterministic",
+            "status": "available"
           }
         },
         "proofGrounded": true,
@@ -11664,7 +11714,15 @@
             "sourceGrounded": true
           }
         ],
-        "symbol": "B"
+        "symbol": "B",
+        "cursorOccurrence": {
+          "fileId": "retry-analysis.md",
+          "needle": "P(A\\cap B)=0.012",
+          "selection": {
+            "offset": 8,
+            "length": 1
+          }
+        }
       },
       "family": "guarded-condition",
       "id": "probability-development-retry-conditional-event-intersection-given",

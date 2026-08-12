@@ -114,6 +114,7 @@ pub(crate) enum DefinitionAction {
     Write,
     Call,
     Compute,
+    Produce,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -134,11 +135,13 @@ pub(crate) enum DiscourseConnective {
     Therefore,
     Respectively,
     InThatOrder,
+    Alternative,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum AnaphorKind {
     SingularDemonstrative,
+    FormulaDemonstrative,
     PluralDemonstrative,
     Former,
     Latter,
@@ -216,6 +219,14 @@ pub(crate) enum DiscourseConstruction {
         candidate: AttachmentCandidate,
         frame: DiscourseFrame,
     },
+    OutputDefinition {
+        producer_mention_index: usize,
+        result_mention_index: usize,
+        description_start: usize,
+        description_end: usize,
+        candidate: AttachmentCandidate,
+        frame: DiscourseFrame,
+    },
 }
 
 impl ProseEventStream {
@@ -238,11 +249,16 @@ impl ProseEventStream {
             .is_some_and(|items| items.contains(&kind))
     }
 
-    pub(crate) fn starts_with_anaphor(&self, clause_index: usize, clause_start: usize) -> bool {
+    pub(crate) fn starts_with_anaphor_kind(
+        &self,
+        clause_index: usize,
+        clause_start: usize,
+        kind: AnaphorKind,
+    ) -> bool {
         self.events.iter().any(|event| {
             event.clause_index == clause_index
                 && event.start == clause_start
-                && matches!(event.kind, ProseEventKind::Anaphor(_))
+                && event.kind == ProseEventKind::Anaphor(kind)
         })
     }
 
@@ -412,8 +428,101 @@ impl ProseEventStream {
             .map(DiscourseConstruction::Definition)
             .collect::<Vec<_>>();
         constructions.extend(self.anaphoric_constructions(clauses));
-        constructions.extend(self.equation_flow_constructions(mentions, clauses));
+        let equation_flows = self.equation_flow_constructions(mentions, clauses);
+        constructions.extend(self.output_definition_constructions(
+            source,
+            mentions,
+            clauses,
+            &equation_flows,
+        ));
+        constructions.extend(equation_flows);
         constructions
+    }
+
+    fn output_definition_constructions(
+        &self,
+        source: &str,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+        equation_flows: &[DiscourseConstruction],
+    ) -> Vec<DiscourseConstruction> {
+        self.events
+            .iter()
+            .filter(|event| {
+                event.kind == ProseEventKind::DefinitionAction(DefinitionAction::Produce)
+            })
+            .filter_map(|action| {
+                let clause = clauses.get(action.clause_index)?;
+                let producer_mention_index = self
+                    .mentions_in_clause(action.clause_index)
+                    .iter()
+                    .copied()
+                    .filter(|mention_index| mentions[*mention_index].end <= action.start)
+                    .max_by_key(|mention_index| mentions[*mention_index].end)?;
+                let producer = &mentions[producer_mention_index];
+                if !source[producer.end..action.start]
+                    .chars()
+                    .all(|character| character.is_whitespace() || matches!(character, ','))
+                {
+                    return None;
+                }
+                let flow = equation_flows
+                    .iter()
+                    .filter_map(|construction| {
+                        let DiscourseConstruction::EquationFlow {
+                            mention_index,
+                            prose_start,
+                            prose_end,
+                            precedes_formula: true,
+                            candidate,
+                            ..
+                        } = construction
+                        else {
+                            return None;
+                        };
+                        (*prose_start <= action.start
+                            && action.end <= *prose_end
+                            && producer_mention_index < *mention_index)
+                            .then_some((*mention_index, candidate))
+                    })
+                    .min_by_key(|(_, candidate)| candidate.distance_bytes)?;
+                if self
+                    .mentions_in_clause(action.clause_index)
+                    .iter()
+                    .any(|mention_index| {
+                        *mention_index != flow.0 && action.end <= mentions[*mention_index].start
+                    })
+                {
+                    return None;
+                }
+                let (description_start, description_end) =
+                    trim_range(source, action.end, clause.end.min(mentions[flow.0].start));
+                let description_end =
+                    trim_terminal_punctuation(source, description_start, description_end);
+                if description_start >= description_end {
+                    return None;
+                }
+                if self.events.iter().any(|event| {
+                    event.clause_index == action.clause_index
+                        && description_start <= event.start
+                        && event.end <= description_end
+                        && event.kind
+                            == ProseEventKind::Connective(DiscourseConnective::Alternative)
+                }) {
+                    return None;
+                }
+                let mut candidate = flow.1.clone();
+                candidate.evidence_start = producer.start;
+                Some(DiscourseConstruction::OutputDefinition {
+                    producer_mention_index,
+                    result_mention_index: flow.0,
+                    description_start,
+                    description_end,
+                    candidate,
+                    frame: clause.frame.clone(),
+                })
+            })
+            .collect()
     }
 
     fn anaphoric_constructions(
@@ -670,8 +779,12 @@ fn emit_lexical_events(
         ("obtain", DefinitionAction::Compute),
         ("gives", DefinitionAction::Compute),
         ("give", DefinitionAction::Compute),
-        ("yields", DefinitionAction::Compute),
-        ("yield", DefinitionAction::Compute),
+        ("returns", DefinitionAction::Produce),
+        ("return", DefinitionAction::Produce),
+        ("produces", DefinitionAction::Produce),
+        ("produce", DefinitionAction::Produce),
+        ("yields", DefinitionAction::Produce),
+        ("yield", DefinitionAction::Produce),
         ("expressed", DefinitionAction::Write),
         ("written", DefinitionAction::Write),
         ("write", DefinitionAction::Write),
@@ -687,6 +800,8 @@ fn emit_lexical_events(
         ("therefore", DiscourseConnective::Therefore),
         ("respectively", DiscourseConnective::Respectively),
         ("in that order", DiscourseConnective::InThatOrder),
+        ("either", DiscourseConnective::Alternative),
+        ("or", DiscourseConnective::Alternative),
     ];
     const LINKS: &[(&str, DefinitionLink)] = &[
         ("to be", DefinitionLink::ToBe),
@@ -705,10 +820,10 @@ fn emit_lexical_events(
         ("this quantity", AnaphorKind::SingularDemonstrative),
         ("this symbol", AnaphorKind::SingularDemonstrative),
         ("this variable", AnaphorKind::SingularDemonstrative),
-        ("this equation", AnaphorKind::SingularDemonstrative),
-        ("this identity", AnaphorKind::SingularDemonstrative),
-        ("this relation", AnaphorKind::SingularDemonstrative),
-        ("this formula", AnaphorKind::SingularDemonstrative),
+        ("this equation", AnaphorKind::FormulaDemonstrative),
+        ("this identity", AnaphorKind::FormulaDemonstrative),
+        ("this relation", AnaphorKind::FormulaDemonstrative),
+        ("this formula", AnaphorKind::FormulaDemonstrative),
         ("the former", AnaphorKind::Former),
         ("the latter", AnaphorKind::Latter),
         ("they", AnaphorKind::PluralPronoun),
@@ -1186,11 +1301,15 @@ fn classify_discourse_frame(
         || lower.contains(" does not apply")
         || lower.contains(" do not apply")
         || lower.contains(" did not apply")
+        || lower.contains(" inapplicable")
         || [" not define", " not denote", " not represent", " not mean"]
             .iter()
             .any(|marker| lower.contains(marker))
     {
-        first_marker(&lower, &["not", "never", "without", "no longer"])
+        first_marker(
+            &lower,
+            &["not", "never", "without", "no longer", "inapplicable"],
+        )
     } else {
         None
     };
@@ -1722,6 +1841,35 @@ mod tests {
     }
 
     #[test]
+    fn distinguishes_formula_anaphors_from_symbol_anaphors() {
+        let source = "$x=y$. This equation defines the balance. This symbol denotes input.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let mentions = [ScientificMention {
+            symbol: "x".into(),
+            start: 0,
+            end: 5,
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+
+        assert!(stream.starts_with_anaphor_kind(
+            1,
+            clauses[1].start,
+            AnaphorKind::FormulaDemonstrative
+        ));
+        assert!(!stream.starts_with_anaphor_kind(
+            1,
+            clauses[1].start,
+            AnaphorKind::SingularDemonstrative
+        ));
+        assert!(stream.starts_with_anaphor_kind(
+            2,
+            clauses[2].start,
+            AnaphorKind::SingularDemonstrative
+        ));
+    }
+
+    #[test]
     fn refuses_unbounded_anaphoric_attachment_candidates() {
         let padding = "x".repeat(MAX_ANAPHORIC_DISTANCE_BYTES + 1);
         let source = format!("$x$ is introduced.\n\n{padding}\n\nThis symbol denotes input.");
@@ -1991,12 +2139,13 @@ mod tests {
 
     #[test]
     fn treats_explicit_non_applicability_as_negative_evidence() {
-        let clauses = segment_scientific_clauses(
+        for source in [
             "Let $A$ be an event, but this law does not apply: $A \\cap B$.",
-            DocumentLanguage::Latex,
-            &[],
-        );
-        assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);
-        assert!(!clauses[0].frame.establishes());
+            "The cited gradient assumption is inapplicable to these data.",
+        ] {
+            let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+            assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);
+            assert!(!clauses[0].frame.establishes());
+        }
     }
 }

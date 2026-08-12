@@ -258,6 +258,28 @@ impl ArenaNode<'_> {
             Self::Generated(node) => node.lexical_class,
         }
     }
+
+    fn math_class(&self) -> Option<&str> {
+        match self {
+            Self::Source(node) => node.math_class.as_deref(),
+            Self::Generated(node) => node.math_class.as_deref(),
+        }
+    }
+
+    fn argument_node(&self, role: &str) -> Option<u32> {
+        match self {
+            Self::Source(node) => node
+                .arguments
+                .iter()
+                .find(|argument| argument.role == role)
+                .map(|argument| argument.node),
+            Self::Generated(node) => node
+                .arguments
+                .iter()
+                .find(|argument| argument.role == role)
+                .map(|argument| argument.node),
+        }
+    }
 }
 
 impl<'a> NotationArena<'a> {
@@ -415,6 +437,21 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
                 );
                 return;
             }
+            if is_math_class_wrapper(node.name())
+                && node.math_class().is_some()
+                && let Some(nucleus) = node.argument_node("nucleus")
+            {
+                if let Some(argument) = arena.node(nucleus)
+                    && argument.kind() == NotationNodeKind::Group
+                {
+                    for child in argument.children() {
+                        emit_notation_node(arena, *child, tokens);
+                    }
+                } else {
+                    emit_notation_node(arena, nucleus, tokens);
+                }
+                return;
+            }
             if is_presentation_command(node.name()) {
                 push(tokens, TokenKind::Presentation);
                 return;
@@ -481,6 +518,13 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
         }
         NotationNodeKind::Sequence | NotationNodeKind::Alignment => emit_children(tokens),
     }
+}
+
+fn is_math_class_wrapper(name: Option<&str>) -> bool {
+    matches!(
+        name,
+        Some("mathord" | "mathop" | "mathbin" | "mathrel" | "mathopen" | "mathclose" | "mathinner")
+    )
 }
 
 fn lower_structured_environment(
@@ -2736,6 +2780,38 @@ mod tests {
                 }
             )),
             "relation(equals,symbol(r),sum(product(symbol(a),symbol(b)),product(symbol(j),symbol(p))))"
+        );
+    }
+
+    #[test]
+    fn snapshot_lowering_treats_tex_math_class_wrappers_as_transparent() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
+            "language": "latex", "content": "$P=F\\mathbin{\\cdot}v$", "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":2}},"state":"complete","text":"P","lexicalClass":"identifier","mathClass":"ordinary"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"=","lexicalClass":"operator","mathClass":"relation"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":3,"endOffset":4}},"state":"complete","text":"F","lexicalClass":"identifier","mathClass":"ordinary"},
+                {"kind":"command","parent":4,"children":[],"ranges":{"full":{"startOffset":13,"endOffset":18}},"state":"complete","name":"cdot","mathClass":"binary"},
+                {"kind":"group","parent":5,"children":[3],"ranges":{"full":{"startOffset":12,"endOffset":19}},"state":"complete"},
+                {"kind":"command","parent":7,"children":[4],"ranges":{"full":{"startOffset":4,"endOffset":19},"command":{"startOffset":4,"endOffset":12},"nucleus":{"startOffset":12,"endOffset":19}},"state":"complete","name":"mathbin","arguments":[{"node":4,"role":"nucleus","syntax":"required","range":{"startOffset":12,"endOffset":19}}],"mathClass":"binary"},
+                {"kind":"token","parent":7,"children":[],"ranges":{"full":{"startOffset":19,"endOffset":20}},"state":"complete","text":"v","lexicalClass":"identifier","mathClass":"ordinary"},
+                {"kind":"sequence","parent":null,"children":[0,1,2,5,6],"ranges":{"full":{"startOffset":1,"endOffset":20}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":7,"delimiter":"$","fullRange":{"startOffset":0,"endOffset":21},"contentRange":{"startOffset":1,"endOffset":20},"state":"complete"}],
+            "visibleProse": [], "scopes": [], "declarations": [], "macros": [], "includes": []
+        }))
+        .unwrap();
+
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &document,
+                &SourceRange {
+                    start_offset: 1,
+                    end_offset: 20,
+                }
+            )),
+            "relation(equals,symbol(P),dot(symbol(F),symbol(v)))"
         );
     }
 

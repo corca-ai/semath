@@ -10,6 +10,7 @@ const MAX_DECISION_ITEMS: usize = 8;
 pub(crate) struct MeaningDecisionInput<'a> {
     pub formulas: &'a [LawRecognition],
     pub symbol: Option<&'a SymbolInfo>,
+    pub symbol_proof: &'a [Evidence],
     pub candidates: &'a [SemanticCandidateInfo],
     pub diagnostics: &'a [SemanticDiagnostic],
     pub engine_limited: bool,
@@ -98,6 +99,22 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
     }
 
     if let Some(symbol) = input.symbol {
+        if !input.symbol_proof.is_empty() && !input.truncated {
+            return MeaningDecision::Established {
+                meaning: MeaningConclusion {
+                    label: symbol
+                        .definitions
+                        .first()
+                        .map_or_else(|| symbol.symbol.clone(), |item| item.description.clone()),
+                    relation_id: None,
+                },
+                reasons: vec![DecisionReason {
+                    kind: DecisionReasonKind::Proof,
+                    label: "Established by an asserted source definition.".into(),
+                    evidence: deduplicate_evidence(input.symbol_proof.to_vec()),
+                }],
+            };
+        }
         return MeaningDecision::Partial {
             meaning: MeaningConclusion {
                 label: symbol
@@ -412,12 +429,39 @@ mod tests {
     }
 
     #[test]
+    fn asserted_symbol_definition_is_established_without_a_formula() {
+        let symbol = defined_symbol();
+        let proof = symbol.definitions[0].evidence.clone();
+        let mut input = input(&[]);
+        input.symbol = Some(&symbol);
+        input.symbol_proof = std::slice::from_ref(&proof);
+        assert!(matches!(
+            decide_meaning(input),
+            MeaningDecision::Established { meaning, reasons }
+                if meaning.label == "specific enthalpy"
+                    && reasons.iter().all(|reason| reason.kind == DecisionReasonKind::Proof)
+        ));
+    }
+
+    #[test]
+    fn symbol_without_typed_definition_proof_remains_partial() {
+        let symbol = defined_symbol();
+        let mut input = input(&[]);
+        input.symbol = Some(&symbol);
+        assert!(matches!(
+            decide_meaning(input),
+            MeaningDecision::Partial { .. }
+        ));
+    }
+
+    #[test]
     fn only_independently_supported_candidates_become_public_alternatives() {
         let supported = candidate("application", SemanticCandidateStatus::Supported);
         let unresolved = candidate("multiplication", SemanticCandidateStatus::Unresolved);
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[supported.clone(), unresolved.clone()],
             diagnostics: &[],
             engine_limited: false,
@@ -432,6 +476,7 @@ mod tests {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[
                 candidate("application", SemanticCandidateStatus::Unresolved),
                 unresolved,
@@ -446,6 +491,7 @@ mod tests {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[
                 candidate("application", SemanticCandidateStatus::Supported),
                 candidate("multiplication", SemanticCandidateStatus::Supported),
@@ -460,6 +506,7 @@ mod tests {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[candidate(
                 "application",
                 SemanticCandidateStatus::Conflicting,
@@ -478,6 +525,7 @@ mod tests {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: std::slice::from_ref(&verified),
             symbol: None,
+            symbol_proof: &[],
             candidates: &[
                 candidate("divergence", SemanticCandidateStatus::Unresolved),
                 candidate("gradient", SemanticCandidateStatus::Unresolved),
@@ -498,6 +546,7 @@ mod tests {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[],
             diagnostics: &[],
             engine_limited: true,
@@ -517,6 +566,7 @@ mod tests {
         let decision = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[supported],
             diagnostics: &[],
             engine_limited: false,
@@ -561,6 +611,7 @@ mod tests {
         let conflicting = decide_meaning(MeaningDecisionInput {
             formulas: &[],
             symbol: None,
+            symbol_proof: &[],
             candidates: &[],
             diagnostics: &[diagnostic],
             engine_limited: false,
@@ -578,6 +629,7 @@ mod tests {
         MeaningDecisionInput {
             formulas,
             symbol: None,
+            symbol_proof: &[],
             candidates: &[],
             diagnostics: &[],
             engine_limited: false,
@@ -606,6 +658,53 @@ mod tests {
             } else {
                 Vec::new()
             },
+        }
+    }
+
+    fn defined_symbol() -> SymbolInfo {
+        let range = SourceRange {
+            start_offset: 2,
+            end_offset: 3,
+        };
+        let evidence = Evidence {
+            rule_id: "english-scientific-definition".into(),
+            kind: "source-definition".into(),
+            strength: "hard".into(),
+            source_ranges: vec![range.clone()],
+        };
+        SymbolInfo {
+            symbol: "H".into(),
+            occurrence_id: crate::semantic_index::SourceOccurrenceId {
+                file_id: "main.tex".into(),
+                document_version: 1,
+                local_id: 1,
+            },
+            notation: vec![crate::semantic_index::NotationComponent::Identifier {
+                value: "H".into(),
+            }],
+            source_notation: "H".into(),
+            entity_id: None,
+            location: crate::Location {
+                file_id: "main.tex".into(),
+                path: "main.tex".into(),
+                range: range.clone(),
+            },
+            definitions: vec![crate::DefinitionInfo {
+                symbol: "H".into(),
+                description: "specific enthalpy".into(),
+                location: crate::Location {
+                    file_id: "main.tex".into(),
+                    path: "main.tex".into(),
+                    range,
+                },
+                evidence,
+                entity_id: None,
+            }],
+            shapes: Vec::new(),
+            quantities: Vec::new(),
+            roles: Vec::new(),
+            diagnostics: Vec::new(),
+            truncated: false,
         }
     }
 

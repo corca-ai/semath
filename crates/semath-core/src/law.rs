@@ -689,7 +689,7 @@ pub(crate) fn observe_laws(
             .min_by_key(|range| range.end_offset - range.start_offset);
         collect_law_expressions(expression, formula_range, &mut actuals);
     }
-    for (actual, source_envelope) in actuals {
+    for (actual, source_envelope, formula_envelope) in actuals {
         let source_envelope =
             strip_formula_presentation(&source_envelope, context.source, &source_index);
         if !semantic_evidence.formula_is_asserted(&actual.range)
@@ -850,6 +850,7 @@ pub(crate) fn observe_laws(
                 compiled,
                 actual,
                 &source_envelope,
+                &formula_envelope,
                 bindings,
                 matched_form,
                 &recognition_context,
@@ -1001,7 +1002,7 @@ fn presentation_command_end(source: &str, start: usize, limit: usize) -> Option<
 fn collect_law_expressions<'a>(
     expression: &'a SemanticExpr,
     formula_range: Option<&SourceRange>,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
 ) {
     if let SemanticExprKind::System(expressions) = &expression.kind {
         let disjoint = expressions
@@ -1022,16 +1023,37 @@ fn collect_law_expressions<'a>(
                     ),
                 }
             });
-            collect_law_expressions(expression, segment.as_ref(), output);
+            collect_law_expressions_with_envelope(
+                expression,
+                segment.as_ref(),
+                formula_range,
+                output,
+            );
         }
     } else {
-        let source_envelope = formula_range
-            .cloned()
-            .unwrap_or_else(|| expression_source_envelope(expression));
-        output.push((expression, source_envelope.clone()));
-        for child in expression_children(expression) {
-            collect_nested_law_expressions(child, &source_envelope, output);
-        }
+        collect_law_expressions_with_envelope(expression, formula_range, formula_range, output);
+    }
+}
+
+fn collect_law_expressions_with_envelope<'a>(
+    expression: &'a SemanticExpr,
+    relation_range: Option<&SourceRange>,
+    formula_range: Option<&SourceRange>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
+) {
+    let relation_envelope = relation_range
+        .cloned()
+        .unwrap_or_else(|| expression_source_envelope(expression));
+    let formula_envelope = formula_range
+        .cloned()
+        .unwrap_or_else(|| relation_envelope.clone());
+    output.push((
+        expression,
+        relation_envelope.clone(),
+        formula_envelope.clone(),
+    ));
+    for child in expression_children(expression) {
+        collect_nested_law_expressions(child, &relation_envelope, &formula_envelope, output);
     }
 }
 
@@ -1049,17 +1071,22 @@ fn expression_source_envelope(expression: &SemanticExpr) -> SourceRange {
 fn collect_nested_law_expressions<'a>(
     expression: &'a SemanticExpr,
     source_envelope: &SourceRange,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange)>,
+    formula_envelope: &SourceRange,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
 ) {
     if matches!(
         &expression.kind,
         SemanticExprKind::Apply { operator, .. }
             if NESTED_LAW_APPLICATIONS.contains(operator.as_str())
     ) {
-        output.push((expression, source_envelope.clone()));
+        output.push((
+            expression,
+            source_envelope.clone(),
+            formula_envelope.clone(),
+        ));
     }
     for child in expression_children(expression) {
-        collect_nested_law_expressions(child, source_envelope, output);
+        collect_nested_law_expressions(child, source_envelope, formula_envelope, output);
     }
 }
 
@@ -2001,9 +2028,16 @@ fn roles_are_supported(
         || (unresolved == 1
             && supported >= 2
             && ((unresolved_role == inferred_role && roles.len() <= 3)
+                || (roles.len() <= 3
+                    && unresolved_role.is_some_and(|unresolved| {
+                        roles
+                            .iter()
+                            .any(|role| role.id == unresolved && role.quantity.is_some())
+                    }))
                 || (unresolved_role != inferred_role && supported >= 3)))
         || (law_explicitly_activated
-            && inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role)))
+            && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
+                || (roles.len() == 2 && supported == 1 && unresolved == 1)))
         || formula_identified
 }
 
@@ -2263,21 +2297,24 @@ fn quantity_support(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn recognition(
     compiled: &CompiledLaw,
     actual: &SemanticExpr,
     source_envelope: &SourceRange,
+    formula_envelope: &SourceRange,
     bindings: BTreeMap<String, SemanticExpr>,
     matched_form: Option<&GuardedForm>,
     context: &RecognitionContext<'_>,
     activation: Option<&LawActivationEvidence>,
 ) -> LawRecognition {
     let formula_range = formula_source_range(source_envelope, context);
+    let formula_evidence_range = formula_source_range(formula_envelope, context);
     let formula_evidence = Evidence {
         rule_id: "semantic-law-unification".into(),
         kind: "canonical-math".into(),
         strength: "hard".into(),
-        source_ranges: vec![formula_range.clone()],
+        source_ranges: vec![formula_evidence_range],
     };
     let formula_bindings = compiled
         .law
@@ -3534,6 +3571,16 @@ mod tests {
     }
 
     #[test]
+    fn an_explicit_law_name_can_complete_one_unrefuted_role() {
+        assert_eq!(
+            recognized_laws(
+                "Let $T$ denote signal period. The period-frequency reciprocity is $f=1/T$."
+            ),
+            ["period-frequency-reciprocity"]
+        );
+    }
+
+    #[test]
     fn recognizes_typed_mechanical_power_without_a_law_specific_matcher() {
         let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$";
         let regions = test_math_regions(source, DocumentLanguage::Latex);
@@ -3854,7 +3901,7 @@ mod tests {
     }
 
     #[test]
-    fn neighboring_relations_keep_disjoint_source_envelopes() {
+    fn neighboring_relations_keep_exact_ownership_and_shared_formula_evidence() {
         let source = "B=A^T,\\qquad C=AB";
         let expression = lower_template(source);
         let formula_range = SourceRange {
@@ -3863,22 +3910,44 @@ mod tests {
         };
         let mut actuals = Vec::new();
         collect_law_expressions(&expression, Some(&formula_range), &mut actuals);
-        let ranges = actuals
+        let (ranges, envelopes): (Vec<_>, Vec<_>) = actuals
             .iter()
-            .filter_map(|(expression, range)| {
+            .filter_map(|(expression, range, envelope)| {
                 matches!(expression.kind, SemanticExprKind::Relation { .. })
-                    .then_some(range.clone())
+                    .then_some((range.clone(), envelope.clone()))
             })
-            .collect::<Vec<_>>();
+            .unzip();
         assert_eq!(ranges.len(), 2);
         assert!(ranges[0].end_offset <= ranges[1].start_offset);
-        assert!(
-            ranges[0].start_offset <= source.find("B=A^T").unwrap() as u32
-                && source.find("B=A^T").unwrap() as u32 + 5 <= ranges[0].end_offset
-        );
-        assert!(
-            ranges[1].start_offset <= source.find("C=AB").unwrap() as u32
-                && source.find("C=AB").unwrap() as u32 + 4 <= ranges[1].end_offset
+        assert_eq!(envelopes, [formula_range.clone(), formula_range]);
+    }
+
+    #[test]
+    fn neighboring_law_recognitions_have_disjoint_query_ranges() {
+        let source = "Let $K$ be energy, $p$ momentum, $m$ mass, and $v$ velocity. $K=\\tfrac12 mv^2, \\qquad p=mv$.";
+        let recognized = recognized_law_observations(source);
+        let kinetic = recognized
+            .iter()
+            .find(|law| law.law_id == "kinetic-energy-definition")
+            .unwrap();
+        let momentum = recognized
+            .iter()
+            .find(|law| law.law_id == "linear-momentum-definition")
+            .unwrap();
+        assert!(kinetic.range.end_offset <= momentum.range.start_offset);
+        let kinetic_formula = kinetic
+            .evidence
+            .iter()
+            .find(|evidence| evidence.rule_id == "semantic-law-unification")
+            .unwrap();
+        let momentum_formula = momentum
+            .evidence
+            .iter()
+            .find(|evidence| evidence.rule_id == "semantic-law-unification")
+            .unwrap();
+        assert_eq!(
+            kinetic_formula.source_ranges,
+            momentum_formula.source_ranges
         );
     }
 
@@ -4140,6 +4209,12 @@ mod tests {
                 "Let $M$ be mass flow rate, $A$ area, and $v$ velocity. $M=\\rho Q=\\rho A v$."
             ),
             ["mass-flow-rate"]
+        );
+        assert_eq!(
+            recognized_laws(
+                "Let $c$ be wave propagation speed and $\\lambda$ wavelength. $c=f\\lambda$."
+            ),
+            ["wave-speed-relation"]
         );
     }
 

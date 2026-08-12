@@ -1,5 +1,6 @@
 import type {
   QueryResult,
+  RelationInfo,
   SemanticViewInfo,
   SourceRange,
 } from "../../protocol/src/index";
@@ -225,6 +226,7 @@ export interface AuthoredScientificObservation {
     readonly fileId: string;
     readonly relationId: string;
     readonly range: SourceRange;
+    readonly formulaRange?: SourceRange;
     readonly roles: readonly ObservedRole[];
     readonly sourceGrounded: boolean;
   }[];
@@ -246,6 +248,10 @@ export interface AuthoredScientificSurfaceResults {
   readonly prepareRename: QueryResult;
   readonly references: QueryResult;
   readonly rename: QueryResult;
+  readonly relationViews?: readonly {
+    readonly fileId: string;
+    readonly result: QueryResult;
+  }[];
   readonly semanticView: QueryResult;
 }
 
@@ -503,6 +509,7 @@ export function scoreAuthoredScientificFixture(
             expectedDocument.content,
             item.range,
             expectedAnchor.range,
+            item.formulaRange,
           ) &&
           roleInstancesMatch(item.roles, expected.roles, undefined),
       );
@@ -607,6 +614,24 @@ export function observeAuthoredScientificProbe(
     throw new Error(`${probe.id}: public surface results are incomplete`);
   }
   const view = results.semanticView.value.view;
+  const relations = [
+    ...observeAuthoredRelations(probe.cursor.fileId, view.context.relations),
+    ...(results.relationViews ?? []).flatMap(({ fileId, result }) => {
+      if (result.value.kind !== "semanticView") {
+        throw new Error(`${probe.id}: relation source semanticView is missing`);
+      }
+      return observeAuthoredRelations(fileId, result.value.view.context.relations);
+    }),
+  ].filter(
+    (relation, index, all) =>
+      all.findIndex(
+        (candidate) =>
+          candidate.fileId === relation.fileId &&
+          candidate.relationId === relation.relationId &&
+          candidate.range.startOffset === relation.range.startOffset &&
+          candidate.range.endOffset === relation.range.endOffset,
+      ) === index,
+  );
   const proofEvidence = view.decision.reasons
     .filter((reason) => reason.kind === "proof" || reason.kind === "source-conflict")
     .flatMap((reason) => reason.evidence);
@@ -632,19 +657,7 @@ export function observeAuthoredScientificProbe(
       proofEvidence.length > 0 &&
       proofEvidence.every((evidence) => evidence.sourceRanges.length > 0),
     references: results.references.value.locations,
-    relations: view.context.relations.map((relation) => ({
-      fileId: probe.cursor.fileId,
-      relationId: relation.relationId,
-      range: relation.range,
-      roles: relation.roles.map((role) => ({
-        ...(role.conceptId ? { conceptId: role.conceptId } : {}),
-        role: role.role,
-        symbol: role.symbol,
-      })),
-      sourceGrounded:
-        relation.evidence.length > 0 &&
-        relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
-    })),
+    relations,
     renameEdits: (results.rename.value.proposal?.files ?? []).flatMap((file) =>
       file.edits.map((edit) => ({
         expectedText: edit.expectedText,
@@ -660,6 +673,33 @@ export function observeAuthoredScientificProbe(
     symbol: view.symbol?.symbol ?? null,
     ...(view.symbol ? { symbolLocation: view.symbol.location } : {}),
   };
+}
+
+export function observeAuthoredRelations(
+  fileId: string,
+  relations: readonly RelationInfo[],
+): AuthoredScientificObservation["relations"] {
+  return relations.map((relation) => {
+    const formulaRange = relation.evidence.find(
+      (evidence) => evidence.ruleId === "semantic-law-unification",
+    )?.sourceRanges[0];
+    return {
+      fileId,
+      relationId: relation.relationId,
+      range: relation.range,
+      ...(formulaRange && !sameRange(formulaRange, relation.range)
+        ? { formulaRange }
+        : {}),
+      roles: relation.roles.map((role) => ({
+        ...(role.conceptId ? { conceptId: role.conceptId } : {}),
+        role: role.role,
+        symbol: role.symbol,
+      })),
+      sourceGrounded:
+        relation.evidence.length > 0 &&
+        relation.evidence.every((evidence) => evidence.sourceRanges.length > 0),
+    };
+  });
 }
 
 export function authoredScenarioReviewPayload(
@@ -1432,7 +1472,15 @@ export function authoredRelationRangeMatches(
   content: string,
   actual: SourceRange,
   expected: SourceRange,
+  formulaEvidence?: SourceRange,
 ): boolean {
+  if (
+    formulaEvidence &&
+    !sameRange(formulaEvidence, actual) &&
+    authoredRelationRangeMatches(content, formulaEvidence, expected)
+  ) {
+    return true;
+  }
   if (sameRange(actual, expected)) return true;
   if (
     actual.startOffset < expected.startOffset ||
