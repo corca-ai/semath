@@ -5251,9 +5251,8 @@ This conversion is performed once per accepted timing sample so the accumulator 
 
     #[test]
     fn recognizes_authored_binary_cross_entropy_notation() {
-        let template = lower_template(
-            "loss = -label log probability - (1 - label) log (1 - probability)",
-        );
+        let template =
+            lower_template("loss = -label log probability - (1 - label) log (1 - probability)");
         let actual = lower_template("L(y,p) = - y log p - (1 - y) log (1 - p)");
         let placeholders = ["loss", "label", "probability"]
             .into_iter()
