@@ -16,10 +16,10 @@ use crate::construction::{
 use crate::pack::{PackActivationStructure, PackConditionKind, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
-    AnaphorKind, DefinitionAction, DiscourseConnective, DiscourseConstruction, DiscourseFrame,
-    MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent, ProseEventKind, ProseEventStream, ScientificClause,
-    ScientificMention, align_ordered_descriptions, clause_at, extract_assumptions_with_phrases,
-    normalize_prose_events, segment_scientific_clauses,
+    AnaphorKind, CommunicativeAct, DefinitionAction, DiscourseConnective, DiscourseConstruction,
+    DiscourseFrame, MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent, ProseEventKind, ProseEventStream,
+    ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
+    extract_assumptions_with_phrases, normalize_prose_events, segment_scientific_clauses,
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
 use crate::{
@@ -306,16 +306,24 @@ pub(crate) fn observe_prose(
         })
         .collect::<Vec<_>>();
     let events = normalize_prose_events(source, &clauses, &mentions);
+    let discourse_constructions = events.discourse_constructions(source, &mentions, &clauses);
+    let construction_targets = construction_formula_targets(
+        document,
+        &index,
+        &clauses,
+        &events,
+        &discourse_constructions,
+        &mentions,
+    );
     analysis.semantic_evidence = collect_semantic_evidence(
         document,
         source,
         &index,
         &clauses,
-        &events,
         canonical_expressions,
+        &construction_targets,
     );
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
-    let discourse_constructions = events.discourse_constructions(source, &mentions, &clauses);
     collect_assumptions(&index, &clauses, &mentions, &events, &mut analysis);
 
     collect_role_first_nominal_definitions(
@@ -1313,8 +1321,8 @@ fn collect_semantic_evidence(
     source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
-    events: &ProseEventStream,
     canonical_expressions: &[SemanticExpr],
+    construction_targets: &BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
 ) -> ScientificSemanticEvidence {
     let clause_evidence = clauses
         .iter()
@@ -1335,8 +1343,6 @@ fn collect_semantic_evidence(
         clauses,
         canonical_expressions,
     );
-    let postposed_targets =
-        postposed_formula_targets(document, index, clauses, events, canonical_expressions);
     let mut formula_operations = Vec::new();
     for clause in clauses {
         for range in phrase_ranges(source, index, clause, "vector dot product") {
@@ -1414,12 +1420,14 @@ fn collect_semantic_evidence(
                             .get(&clause.start)
                             .cloned()
                             .unwrap_or_default();
+                        let construction_targets = construction_targets
+                            .get(&clause.start)
+                            .map(Vec::as_slice)
+                            .unwrap_or_default();
                         attached_formula_ranges.extend(
-                            postposed_targets
-                                .get(&clause.start)
-                                .into_iter()
-                                .flatten()
-                                .cloned(),
+                            construction_targets
+                                .iter()
+                                .map(|target| target.range.clone()),
                         );
                         attached_formula_ranges
                             .sort_by_key(|range| (range.start_offset, range.end_offset));
@@ -1431,7 +1439,13 @@ fn collect_semantic_evidence(
                                 start_offset: index.utf16_for_byte(clause.start),
                                 end_offset: index.utf16_for_byte(clause.end),
                             },
-                            identifies_attached_formula: !attached_formula_ranges.is_empty()
+                            identifies_attached_formula: !reference_targets
+                                .get(&clause.start)
+                                .map(Vec::is_empty)
+                                .unwrap_or(true)
+                                || construction_targets
+                                    .iter()
+                                    .any(|target| target.identifies_formula)
                                 || activation_identifies_formula(
                                     source,
                                     index,
@@ -1530,51 +1544,145 @@ fn explicit_equation_reference_targets(
     targets
 }
 
-fn postposed_formula_targets(
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ConstructionFormulaTarget {
+    range: SourceRange,
+    identifies_formula: bool,
+}
+
+fn construction_formula_targets(
     document: &ProjectDocument,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     events: &ProseEventStream,
-    canonical_expressions: &[SemanticExpr],
-) -> BTreeMap<usize, Vec<SourceRange>> {
+    constructions: &[DiscourseConstruction],
+    mentions: &[ScientificMention],
+) -> BTreeMap<usize, Vec<ConstructionFormulaTarget>> {
     let attachment = AttachmentGraph::new(document);
-    let mut targets = BTreeMap::new();
-    for (clause_index, clause) in clauses.iter().enumerate() {
-        if !clause.frame.establishes() || !events.starts_with_anaphor(clause_index, clause.start) {
-            continue;
+    let mut targets = BTreeMap::<usize, Vec<ConstructionFormulaTarget>>::new();
+    let mut nearest_preceding_flow = BTreeMap::<usize, &DiscourseConstruction>::new();
+    for construction in constructions {
+        if let DiscourseConstruction::EquationFlow {
+            mention_index,
+            prose_start,
+            precedes_formula: true,
+            ..
+        } = construction
+        {
+            nearest_preceding_flow
+                .entry(*mention_index)
+                .and_modify(|current| {
+                    let DiscourseConstruction::EquationFlow {
+                        prose_start: current_start,
+                        ..
+                    } = current
+                    else {
+                        unreachable!()
+                    };
+                    if current_start < prose_start {
+                        *current = construction;
+                    }
+                })
+                .or_insert(construction);
         }
-        let Some(previous_clause) = clauses
-            .iter()
-            .filter(|candidate| candidate.end <= clause.start)
-            .max_by_key(|candidate| candidate.end)
+    }
+    for construction in nearest_preceding_flow.values().copied() {
+        let DiscourseConstruction::EquationFlow {
+            mention_index,
+            prose_start,
+            candidate,
+            frame,
+            ..
+        } = construction
+        else {
+            unreachable!()
+        };
+        let Some((clause, mention)) =
+            clause_at(clauses, *prose_start).zip(mentions.get(*mention_index))
         else {
             continue;
         };
-        let previous_range = SourceRange {
-            start_offset: index.utf16_for_byte(previous_clause.start),
-            end_offset: index.utf16_for_byte(previous_clause.end),
-        };
-        let Some(target) = canonical_expressions
-            .iter()
-            .filter(|expression| ranges_overlap(&expression.range, &previous_range))
-            .filter(|expression| {
-                index
-                    .utf16_for_byte(clause.start)
-                    .saturating_sub(expression.range.end_offset)
-                    <= MAX_ATTACHMENT_DISTANCE_BYTES as u32
-            })
-            .max_by_key(|expression| expression.range.end_offset)
-            .map(|expression| expression.range.clone())
-        else {
-            continue;
-        };
-        let clause_range = SourceRange {
+        let evidence_range = SourceRange {
             start_offset: index.utf16_for_byte(clause.start),
             end_offset: index.utf16_for_byte(clause.end),
         };
-        if attachment.permits(&target, &clause_range) {
-            targets.insert(clause.start, vec![target]);
+        let target_range = SourceRange {
+            start_offset: index.utf16_for_byte(mention.start),
+            end_offset: index.utf16_for_byte(mention.end),
+        };
+        let identifies_formula = frame.establishes()
+            && matches!(
+                frame.act,
+                CommunicativeAct::Definition | CommunicativeAct::Result
+            );
+        if identifies_formula
+            && candidate.distance_bytes <= MAX_ATTACHMENT_DISTANCE_BYTES
+            && attachment.permits(&evidence_range, &target_range)
+        {
+            targets
+                .entry(clause.start)
+                .or_default()
+                .push(ConstructionFormulaTarget {
+                    range: target_range,
+                    identifies_formula,
+                });
         }
+    }
+    for construction in constructions {
+        let DiscourseConstruction::Anaphoric {
+            description_clause_index,
+            candidate,
+            frame,
+            ..
+        } = construction
+        else {
+            continue;
+        };
+        let Some(clause) = clauses.get(*description_clause_index) else {
+            continue;
+        };
+        if !frame.establishes()
+            || !events.starts_with_anaphor_kind(
+                *description_clause_index,
+                clause.start,
+                AnaphorKind::FormulaDemonstrative,
+            )
+        {
+            continue;
+        }
+        let evidence_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        for mention in candidate
+            .mention_indices
+            .iter()
+            .filter_map(|index| mentions.get(*index))
+        {
+            let target_range = SourceRange {
+                start_offset: index.utf16_for_byte(mention.start),
+                end_offset: index.utf16_for_byte(mention.end),
+            };
+            if attachment.permits(&target_range, &evidence_range) {
+                targets
+                    .entry(clause.start)
+                    .or_default()
+                    .push(ConstructionFormulaTarget {
+                        range: target_range,
+                        identifies_formula: true,
+                    });
+            }
+        }
+    }
+    for values in targets.values_mut() {
+        values.sort_by_key(|target| {
+            (
+                target.range.start_offset,
+                target.range.end_offset,
+                target.identifies_formula,
+            )
+        });
+        values.dedup();
     }
     targets
 }
@@ -3097,6 +3205,60 @@ mod tests {
         assert!(!cited.definitions.iter().any(|definition| {
             definition.evidence.rule_id == "english-equation-flow-definition"
         }));
+    }
+
+    #[test]
+    fn construction_targets_attach_named_result_and_definition_formulas() {
+        for source in [
+            "The screening Reynolds number is therefore\n\\[\\mathrm{Re}_{D_h}=\\frac{\\rho v D_h}{\\mu}.\\]",
+            "The model stage defines the transfer function in the Laplace domain as\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis
+                    .semantic_evidence
+                    .law_activations
+                    .iter()
+                    .any(|activation| activation.identifies_attached_formula
+                        && !activation.attached_formula_ranges.is_empty()),
+                "{source}: {:?}",
+                analysis.semantic_evidence.law_activations
+            );
+        }
+    }
+
+    #[test]
+    fn construction_targets_preserve_nonestablishing_formula_leads() {
+        for source in [
+            "The model might define the transfer function as\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+            "According to the reference, the model defines the transfer function as\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+            "The model does not define the transfer function as\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+            "The model defines the transfer function. Background separates the formula.\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis
+                    .semantic_evidence
+                    .law_activations
+                    .iter()
+                    .all(|activation| !activation.identifies_attached_formula),
+                "{source}: {:?}",
+                analysis.semantic_evidence.law_activations
+            );
+        }
+
+        let alternative = analyze(
+            "At this point the specification permits either\n\\[R=A\\cap B\\qquad\\text{or}\\qquad R=A\\cup B.\\]",
+        );
+        assert!(
+            alternative
+                .semantic_evidence
+                .law_activations
+                .iter()
+                .all(|activation| activation.attached_formula_ranges.is_empty()),
+            "{:?}",
+            alternative.semantic_evidence.law_activations
+        );
     }
 
     #[test]

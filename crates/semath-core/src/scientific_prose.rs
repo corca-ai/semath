@@ -139,6 +139,7 @@ pub(crate) enum DiscourseConnective {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum AnaphorKind {
     SingularDemonstrative,
+    FormulaDemonstrative,
     PluralDemonstrative,
     Former,
     Latter,
@@ -238,11 +239,16 @@ impl ProseEventStream {
             .is_some_and(|items| items.contains(&kind))
     }
 
-    pub(crate) fn starts_with_anaphor(&self, clause_index: usize, clause_start: usize) -> bool {
+    pub(crate) fn starts_with_anaphor_kind(
+        &self,
+        clause_index: usize,
+        clause_start: usize,
+        kind: AnaphorKind,
+    ) -> bool {
         self.events.iter().any(|event| {
             event.clause_index == clause_index
                 && event.start == clause_start
-                && matches!(event.kind, ProseEventKind::Anaphor(_))
+                && event.kind == ProseEventKind::Anaphor(kind)
         })
     }
 
@@ -705,10 +711,10 @@ fn emit_lexical_events(
         ("this quantity", AnaphorKind::SingularDemonstrative),
         ("this symbol", AnaphorKind::SingularDemonstrative),
         ("this variable", AnaphorKind::SingularDemonstrative),
-        ("this equation", AnaphorKind::SingularDemonstrative),
-        ("this identity", AnaphorKind::SingularDemonstrative),
-        ("this relation", AnaphorKind::SingularDemonstrative),
-        ("this formula", AnaphorKind::SingularDemonstrative),
+        ("this equation", AnaphorKind::FormulaDemonstrative),
+        ("this identity", AnaphorKind::FormulaDemonstrative),
+        ("this relation", AnaphorKind::FormulaDemonstrative),
+        ("this formula", AnaphorKind::FormulaDemonstrative),
         ("the former", AnaphorKind::Former),
         ("the latter", AnaphorKind::Latter),
         ("they", AnaphorKind::PluralPronoun),
@@ -1719,6 +1725,35 @@ mod tests {
             .expect("anaphoric attachment candidate");
         assert_eq!(candidate.mention_indices, [0, 1]);
         assert!(candidate.distance_bytes <= MAX_ANAPHORIC_DISTANCE_BYTES);
+    }
+
+    #[test]
+    fn distinguishes_formula_anaphors_from_symbol_anaphors() {
+        let source = "$x=y$. This equation defines the balance. This symbol denotes input.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let mentions = [ScientificMention {
+            symbol: "x".into(),
+            start: 0,
+            end: 5,
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+
+        assert!(stream.starts_with_anaphor_kind(
+            1,
+            clauses[1].start,
+            AnaphorKind::FormulaDemonstrative
+        ));
+        assert!(!stream.starts_with_anaphor_kind(
+            1,
+            clauses[1].start,
+            AnaphorKind::SingularDemonstrative
+        ));
+        assert!(stream.starts_with_anaphor_kind(
+            2,
+            clauses[2].start,
+            AnaphorKind::SingularDemonstrative
+        ));
     }
 
     #[test]
