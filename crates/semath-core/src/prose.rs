@@ -166,6 +166,10 @@ impl ScientificSemanticEvidence {
             )
     }
 
+    pub(crate) fn formula_is_rejected(&self, range: &SourceRange) -> bool {
+        self.formula_disposition(range).0 == crate::semantic_index::EvidencePolarity::Negative
+    }
+
     pub fn law_activation(
         &self,
         pack_id: &str,

@@ -3656,10 +3656,13 @@ impl SemathEngine {
             && queried_relation.is_some_and(|relation| {
                 observations
                     .semantic_evidence()
-                    .formula_is_asserted(&relation.range)
-                    && domain_has_correlated_evidence(&domains)
-                    && context.candidates.is_empty()
-                    && !self.formula_has_source_meaning(document, &relation.range)
+                    .formula_is_rejected(&relation.range)
+                    || observations
+                        .semantic_evidence()
+                        .formula_is_asserted(&relation.range)
+                        && domain_has_correlated_evidence(&domains)
+                        && context.candidates.is_empty()
+                        && !self.formula_has_source_meaning(document, &relation.range)
             })
             || queried_relation.is_none()
                 && symbol_info.as_ref().is_some_and(|symbol| {

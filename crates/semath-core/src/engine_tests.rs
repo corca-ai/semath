@@ -1320,6 +1320,28 @@ fn unsupported_formula_refuses_instead_of_guessing() {
 }
 
 #[test]
+fn explicitly_unasserted_candidate_formula_is_unsupported() {
+    let content = "Consider $y(x)=|x|$ near the origin. Although the report asks for both $y'(0)$ and $dy/dx(0)$, neither expression has a value here. Consequently neither derivative notation is defined at zero, and the candidate equality $y'(0)=dy/dx(0)$ is not asserted.";
+    let needle = "y'(0)=dy/dx(0)";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: (content.rfind(needle).unwrap() + needle.len()) as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(matches!(view.decision, MeaningDecision::Unsupported { .. }));
+}
+
+#[test]
 fn incremental_upsert_matches_the_new_document_version() {
     let original = "Let $x$ denote the input. $y=x$";
     let changed = "Let $x$ denote the state. $y=x$";

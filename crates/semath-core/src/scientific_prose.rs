@@ -1192,11 +1192,15 @@ fn classify_discourse_frame(
         || lower.contains(" does not apply")
         || lower.contains(" do not apply")
         || lower.contains(" did not apply")
+        || lower.contains(" inapplicable")
         || [" not define", " not denote", " not represent", " not mean"]
             .iter()
             .any(|marker| lower.contains(marker))
     {
-        first_marker(&lower, &["not", "never", "without", "no longer"])
+        first_marker(
+            &lower,
+            &["not", "never", "without", "no longer", "inapplicable"],
+        )
     } else {
         None
     };
@@ -2026,12 +2030,13 @@ mod tests {
 
     #[test]
     fn treats_explicit_non_applicability_as_negative_evidence() {
-        let clauses = segment_scientific_clauses(
+        for source in [
             "Let $A$ be an event, but this law does not apply: $A \\cap B$.",
-            DocumentLanguage::Latex,
-            &[],
-        );
-        assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);
-        assert!(!clauses[0].frame.establishes());
+            "The cited gradient assumption is inapplicable to these data.",
+        ] {
+            let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+            assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);
+            assert!(!clauses[0].frame.establishes());
+        }
     }
 }
