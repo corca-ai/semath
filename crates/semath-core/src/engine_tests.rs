@@ -62,7 +62,10 @@ fn chained_metric_formula_does_not_store_relation_placeholder_entities() {
     let mut engine = SemathEngine::default();
     let update = engine.reset(snapshot(content)).unwrap();
 
-    assert_eq!(update.stats.semantic_entities, 18);
+    assert_eq!(
+        update.stats.semantic_entities, 19,
+        "the relation remains placeholder-free and the sum index is one scoped binder entity"
+    );
 }
 
 fn query(query: Query, inventory_version: u64, document_version: u64) -> QueryEnvelope {
@@ -226,6 +229,63 @@ fn indexed_relation_head_is_not_offered_as_a_partial_base_rename() {
         assert!(placeholder.is_none(), "{notation}");
         assert!(rejection.is_some(), "{notation}");
     }
+}
+
+#[test]
+fn proven_binder_component_can_be_renamed_inside_indexed_notation() {
+    let content = "External $i$.\n\n$$\n\\sum_{i=1}^n x_i\n$$\n\nExternal again $i$.";
+    let use_offset = content.find("x_i").unwrap() as u32 + 2;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let preparation = engine
+        .query(query(
+            Query::PrepareRename {
+                file_id: "main".into(),
+                offset: use_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::RenamePreparation {
+        range: preparation_range,
+        placeholder,
+        rejection,
+    } = preparation.value
+    else {
+        panic!("expected rename preparation")
+    };
+    assert_eq!(rejection, None);
+    assert_eq!(placeholder.as_deref(), Some("i"));
+    assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
+
+    let rename = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "j".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        proposal: Some(proposal),
+        rejection: None,
+    } = rename.value
+    else {
+        panic!("expected rename proposal")
+    };
+    assert_eq!(proposal.files.len(), 1);
+    assert_eq!(proposal.files[0].edits.len(), 2);
+    assert!(
+        proposal.files[0]
+            .edits
+            .iter()
+            .all(|edit| edit.expected_text == "i" && edit.replacement_text == "j")
+    );
 }
 
 #[test]

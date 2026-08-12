@@ -21,11 +21,17 @@ pub(crate) fn binder_at<'a>(
     binders: &'a [MathBinder],
     offset: u32,
 ) -> Option<&'a MathBinder> {
-    let (symbol, occurrence) = parsed
+    parsed
         .symbols
         .iter()
-        .find(|(_, range)| range.contains(offset))?;
-    resolve_binder(binders, symbol, occurrence)
+        .filter(|(_, range)| range.contains(offset))
+        .filter_map(|(symbol, occurrence)| resolve_binder(binders, symbol, occurrence))
+        .max_by_key(|binder| {
+            (
+                binder.declaration.start_offset,
+                u32::MAX - (binder.scope.end_offset - binder.scope.start_offset),
+            )
+        })
 }
 
 pub(crate) fn bound_occurrences(
@@ -236,6 +242,24 @@ mod tests {
             assert_eq!(found.len(), 1, "{source}");
             assert!(bound_occurrences(&parsed, &found, &found[0]).len() >= 2);
         }
+    }
+
+    #[test]
+    fn resolves_a_bound_index_occurrence_in_a_display_region() {
+        let source = "External $i$.\n\n$$\n\\sum_{i=1}^n x_i\n$$\n";
+        let mut expressions =
+            parse_regions(source, &test_math_regions(source, DocumentLanguage::Latex));
+        let expression = expressions.pop().expect("display expression");
+        let found = binders(&expression);
+        let use_offset = source.rfind('i').unwrap() as u32;
+
+        assert_eq!(found.len(), 1);
+        assert_eq!(
+            binder_at(&expression, &found, use_offset)
+                .expect("bound index occurrence")
+                .declaration,
+            found[0].declaration
+        );
     }
 
     #[test]
