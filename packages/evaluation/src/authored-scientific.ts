@@ -468,11 +468,20 @@ export function scoreAuthoredScientificFixture(
         authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe),
         expected.anchor,
       );
+      const expectedDocument = authoredSnapshotFor(
+        authoredScenarioFor(fixture, probe),
+        probe,
+      ).documents.find((document) => document.fileId === expectedAnchor.fileId);
       const relation = observed.relations.find(
         (item) =>
           item.relationId === expected.relationId &&
           item.fileId === expectedAnchor.fileId &&
-          sameRange(item.range, expectedAnchor.range) &&
+          expectedDocument !== undefined &&
+          authoredRelationRangeMatches(
+            expectedDocument.content,
+            item.range,
+            expectedAnchor.range,
+          ) &&
           roleInstancesMatch(item.roles, expected.roles, undefined),
       );
       if (!relation) {
@@ -1268,6 +1277,27 @@ function checkLocationExpectation(
 
 function sameRange(left: SourceRange, right: SourceRange): boolean {
   return left.startOffset === right.startOffset && left.endOffset === right.endOffset;
+}
+
+/** Accepts an exact semantic range or a reviewed anchor with only surrounding
+ * punctuation and TeX presentation metadata. */
+export function authoredRelationRangeMatches(
+  content: string,
+  actual: SourceRange,
+  expected: SourceRange,
+): boolean {
+  if (sameRange(actual, expected)) return true;
+  if (
+    actual.startOffset < expected.startOffset ||
+    actual.endOffset > expected.endOffset
+  ) {
+    return false;
+  }
+  const prefix = content.slice(expected.startOffset, actual.startOffset).trim();
+  const suffix = content.slice(actual.endOffset, expected.endOffset).trim();
+  const metadata = /^(?:(?:\\tag|\\label)\s*\{[^{}]*\}\s*)*$/u;
+  const trailing = /^(?:[.,;:]\s*)?(?:(?:\\tag|\\label)\s*\{[^{}]*\}\s*)*$/u;
+  return metadata.test(prefix) && trailing.test(suffix);
 }
 
 function countBy<const T extends string>(

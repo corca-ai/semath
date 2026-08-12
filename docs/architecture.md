@@ -176,9 +176,11 @@ structural kind derived from the canonical math model; arbitrary pattern
 strings are not a runtime policy language. The generic unifier applies every
 compiled law; selecting a pack or law in orchestration code is forbidden.
 
-Law conditions use closed kinds and validated role subjects. The runtime
-resolves them to bound symbols and source evidence; free-form labels are only a
-presentation projection, never a second constraint model.
+Law conditions use closed kinds and validated role subjects. Reviewed
+`evidencePhrases` compile through the same normalized assumption-event path as
+shared prose, while free-form labels remain presentation only. The runtime
+resolves conditions to bound symbols and source evidence; packs cannot add a
+second matcher or constraint model.
 
 Pack compilation rejects unknown fields, unresolved or wrong-kind concepts,
 invalid dependencies, cycles, and inconsistent dimensions. A build-generated,

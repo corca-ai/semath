@@ -259,8 +259,10 @@ export function scoreQuality(
       failures.push(`${planned.suiteId}/${planned.case.id}: missing metamorphic observation`);
       continue;
     }
-    const source = expected.get(caseKey(planned.suiteId, planned.sourceCaseId));
-    if (!source) {
+    const sourceKey = caseKey(planned.suiteId, planned.sourceCaseId);
+    const source = expected.get(sourceKey);
+    const sourceObservation = baseObservations.get(sourceKey);
+    if (!source || !sourceObservation) {
       failures.push(`${planned.suiteId}/${planned.case.id}: unknown metamorphic source`);
       continue;
     }
@@ -271,7 +273,7 @@ export function scoreQuality(
       failures.push(`${planned.suiteId}/${planned.case.id}: metamorphic provenance mismatch`);
       continue;
     }
-    if (casePassed(source.case, observation)) {
+    if (observationsAreEquivalent(sourceObservation, observation)) {
       metamorphicPassed += 1;
     } else {
       failures.push(
@@ -311,6 +313,20 @@ export function scoreQuality(
       }))
       .sort((left, right) => left.tag.localeCompare(right.tag)),
   };
+}
+
+function observationsAreEquivalent(
+  source: CaseObservation,
+  transformed: CaseObservation,
+): boolean {
+  return source.targetPresent === transformed.targetPresent
+    && source.rolesCorrect === transformed.rolesCorrect
+    && source.evidenceIntegrity === transformed.evidenceIntegrity
+    && source.status === transformed.status
+    && source.recognizedLawIds.length === transformed.recognizedLawIds.length
+    && source.recognizedLawIds.every(
+      (lawId, index) => lawId === transformed.recognizedLawIds[index],
+    );
 }
 
 function expectedCases(

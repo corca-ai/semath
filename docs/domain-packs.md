@@ -29,12 +29,14 @@ concepts, and typed laws. Concepts may declare reviewed English aliases. A law
 supplies exactly one `canonicalRelation`, optional presentation
 `representations`, and roles with a required semantic concept
 and optional orthogonal quantity, shape, notation, and variadic constraints.
-Each side condition has a closed kind, stable ID, validated role subjects, and
-a display label. Recognition resolves those subjects to bound source symbols,
-reports source evidence, and distinguishes verified, required, conflicting,
-and unsupported conditions without interpreting free-form prose. Activation
-rules carry reviewed prose `phrases` and closed structural kinds; the removed
-`patterns` field is not accepted as a compatibility alias.
+Each side condition has a closed kind, stable ID, validated role subjects, a
+display label, and optional reviewed English `evidencePhrases`. Those phrases
+compile into the shared assumption-event path; they do not create a pack
+matcher. Recognition resolves subjects to bound source symbols, retains phrase
+evidence, and distinguishes verified, required, conflicting, and unsupported
+conditions. Activation rules carry reviewed prose `phrases` and closed
+structural kinds; the removed `patterns` field is not accepted as a
+compatibility alias.
 
 For relation skeletons repeated across independent laws and fields, a law may
 replace `canonicalRelation` with one reviewed `archetype` and an exact

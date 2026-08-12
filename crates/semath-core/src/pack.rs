@@ -227,6 +227,8 @@ pub struct PackLawCondition {
     pub kind: PackConditionKind,
     pub subjects: Vec<String>,
     pub label: String,
+    #[serde(default)]
+    pub evidence_phrases: Vec<String>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -668,6 +670,12 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
             let condition_path = format!("{path}.conditions[{condition_index}]");
             validate_id(&format!("{condition_path}.id"), &condition.id)?;
             require_text(&format!("{condition_path}.label"), &condition.label)?;
+            for (phrase_index, phrase) in condition.evidence_phrases.iter().enumerate() {
+                require_text(
+                    &format!("{condition_path}.evidencePhrases[{phrase_index}]"),
+                    phrase,
+                )?;
+            }
             if !condition.kind.valid_arity(condition.subjects.len()) {
                 return Err(error(
                     format!("{condition_path}.subjects"),

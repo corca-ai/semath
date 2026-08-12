@@ -705,7 +705,7 @@
       },
       "documents": [
         {
-          "content": "Let $Q$ be volume flow.",
+          "content": "Let $Q$ be volume rate.",
           "fileId": "main",
           "path": "main.tex"
         }

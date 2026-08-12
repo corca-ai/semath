@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
+use crate::concept::{classify_role, classify_role_candidates};
 use crate::pack::{PackDimensionExponent, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::prose::definition_available_from;
@@ -405,6 +406,17 @@ fn explicit_diagnostics(facts: &[QuantityFact]) -> Vec<SemanticDiagnostic> {
 }
 
 fn find_quantity_kind(description: &str) -> Option<&'static QuantityKindSpec> {
+    if classify_role_candidates(description).len() > 1 {
+        return None;
+    }
+    if let Some(concept_id) = classify_role(description)
+        && let Some(kind) = QUANTITY_CATALOG
+            .kinds
+            .iter()
+            .find(|kind| kind.id == concept_id)
+    {
+        return Some(kind);
+    }
     let mut semantic_description = description;
     for separator in [" along ", " through ", " across ", " normal to "] {
         if let Some((quantity, _)) = semantic_description.split_once(separator) {
@@ -544,6 +556,10 @@ mod tests {
         assert_eq!(
             find_quantity_kind("time variable").map(|kind| kind.id.as_str()),
             Some("quantities-units:duration")
+        );
+        assert_eq!(
+            find_quantity_kind("electric force on the charge").map(|kind| kind.id.as_str()),
+            Some("quantities-units:force")
         );
     }
 

@@ -97,6 +97,19 @@ only schema, provenance, digest, coverage, anchor, and leakage checks in normal
 CI. `bun run authored:baseline` and `bun run authored` execute the six public
 query surfaces only as deliberate manual evidence gates.
 
+The 2026-08-12 v0.27 release evaluation passes 17 of 115 development probes
+(risk 404, no false establishment or false conflict) and 6 of 97 now-exposed
+historical holdout probes (risk 720). These deliberately difficult documents
+are a first-loss map, not a release pass-rate target. The holdout's single raw
+false-establishment count is a frozen contract disagreement: one lifecycle
+expects prose in a disconnected file to retract a relation in another project
+component. Semath preserves the component boundary and records the case as a
+safe remaining limit. Current first losses are 45 attachment, 74 identity or
+scope, 12 typed-fact, one safe non-propagation, 39 pack-unification, and 18
+decision cases; no current failure first localizes to neutral syntax or
+canonical IR. See
+[Pack maturity](pack-maturity.md) for interpretation by capability.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
@@ -173,8 +186,11 @@ byte-for-byte with its tracked baseline output. Full corpus execution remains a
 manual release measurement because it is expensive and does not provide useful
 pull-request latency. A same-machine development run after compaction took
 881.04 seconds and reached 3,981,983,744 bytes of peak resident memory. It
-reproduced the baseline's four existing `event-intersection` precision and
-refusal failures exactly; compaction changed neither inputs nor observations.
+reproduced the baseline's four existing precision/refusal failures exactly;
+compaction changed neither inputs nor observations. After the v0.27 semantic
+refinements, the final manual run passes all thresholds for all 5,826 cases and
+all 453 metamorphic observations: every one of the 61 evaluated laws has 100%
+recall, precision, role accuracy, evidence integrity, and refusal preservation.
 These local measurements are diagnostic evidence, not the stable x86_64 release
 budget measurement.
 

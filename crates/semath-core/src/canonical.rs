@@ -113,6 +113,46 @@ pub(crate) enum SemanticExprKind {
     Unknown(String),
 }
 
+pub(crate) fn expression_children(expression: &SemanticExpr) -> Vec<&SemanticExpr> {
+    match &expression.kind {
+        SemanticExprKind::Sum(items) | SemanticExprKind::Product(items) => items.iter().collect(),
+        SemanticExprKind::Dot(left, right)
+        | SemanticExprKind::Cross(left, right)
+        | SemanticExprKind::Fraction(left, right)
+        | SemanticExprKind::Power(left, right)
+        | SemanticExprKind::Relation { left, right, .. } => vec![left, right],
+        SemanticExprKind::Negate(inner)
+        | SemanticExprKind::Derivative {
+            expression: inner, ..
+        } => vec![inner],
+        SemanticExprKind::Apply { arguments, .. } => arguments.iter().collect(),
+        SemanticExprKind::Index { base, indices } => {
+            std::iter::once(base.as_ref()).chain(indices).collect()
+        }
+        SemanticExprKind::Condition { value, predicate } => vec![value, predicate],
+        SemanticExprKind::Binder {
+            variables,
+            lower,
+            upper,
+            body,
+            ..
+        } => variables
+            .iter()
+            .chain(lower.iter().map(Box::as_ref))
+            .chain(upper.iter().map(Box::as_ref))
+            .chain(std::iter::once(body.as_ref()))
+            .collect(),
+        SemanticExprKind::System(equations) => equations.iter().collect(),
+        SemanticExprKind::Piecewise(branches) => branches
+            .iter()
+            .flat_map(|branch| std::iter::once(&branch.value).chain(branch.condition.as_ref()))
+            .collect(),
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Number(_)
+        | SemanticExprKind::Unknown(_) => Vec::new(),
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct PiecewiseBranch {
     pub value: SemanticExpr,
@@ -132,7 +172,8 @@ enum TokenKind {
     Identifier(String),
     Number(String),
     Operator(char),
-    Open(char),
+    Presentation,
+    Open { delimiter: char, source_group: bool },
     Close(char),
     Structured(Box<SemanticExpr>),
     End,
@@ -152,7 +193,7 @@ pub(crate) fn lower_document_region(
     #[cfg(test)]
     if document.nodes.is_empty() {
         let chunks = expanded_surface(document, range);
-        return Parser::new(tokenize(&chunks, false)).parse_document();
+        return Parser::new(canonical_tokens(tokenize(&chunks, false))).parse_document();
     }
     Parser::new(snapshot_tokens(document, range)).parse_document()
 }
@@ -165,7 +206,7 @@ fn snapshot_tokens(document: &ProjectDocument, range: &SourceRange) -> Vec<Token
     }) {
         emit_notation_node(&NotationArena::Source(document), root.node, &mut tokens);
     }
-    coalesce_numbers(tokens)
+    canonical_tokens(tokens)
 }
 
 enum NotationArena<'a> {
@@ -276,7 +317,13 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
             TokenKind::Identifier(node.name().unwrap_or_default().to_owned()),
         ),
         NotationNodeKind::Group => {
-            push(tokens, TokenKind::Open('{'));
+            push(
+                tokens,
+                TokenKind::Open {
+                    delimiter: '{',
+                    source_group: true,
+                },
+            );
             emit_children(tokens);
             push(tokens, TokenKind::Close('}'));
         }
@@ -319,7 +366,39 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
             }
             emit_children(tokens);
         }
-        NotationNodeKind::Style => emit_children(tokens),
+        NotationNodeKind::Style => {
+            if matches!(
+                node.name(),
+                Some(
+                    "mathbf"
+                        | "mathrm"
+                        | "mathit"
+                        | "mathbb"
+                        | "mathcal"
+                        | "mathsf"
+                        | "boldsymbol"
+                        | "operatorname"
+                        | "vec"
+                        | "tilde"
+                        | "boxed"
+                )
+            ) {
+                let command_range = match (&arena, &node) {
+                    (NotationArena::Source(_), ArenaNode::Source(source)) => source
+                        .ranges
+                        .command
+                        .clone()
+                        .unwrap_or_else(|| range.clone()),
+                    _ => range.clone(),
+                };
+                tokens.push(Token {
+                    kind: TokenKind::Command(node.name().unwrap_or_default().to_owned()),
+                    range: command_range,
+                    provenance: provenance.clone(),
+                });
+            }
+            emit_children(tokens);
+        }
         NotationNodeKind::Command => {
             if let (NotationArena::Source(document), ArenaNode::Source(source)) = (arena, &node)
                 && let Some((tree, call_range, provenance)) =
@@ -334,6 +413,10 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
                     tree.root,
                     tokens,
                 );
+                return;
+            }
+            if is_presentation_command(node.name()) {
+                push(tokens, TokenKind::Presentation);
                 return;
             }
             if is_ignorable_command(node.name()) {
@@ -374,7 +457,13 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
                 _ => None,
             };
             if let Some((open, _)) = delimiters {
-                push(tokens, TokenKind::Open(open));
+                push(
+                    tokens,
+                    TokenKind::Open {
+                        delimiter: open,
+                        source_group: false,
+                    },
+                );
             }
             emit_children(tokens);
             if let Some((_, close)) = delimiters {
@@ -465,14 +554,14 @@ fn lower_aligned_rows(document: &ProjectDocument, rows: &[u32]) -> Vec<SemanticE
         let row_has_relation = tokens_contain_relation(&row);
         if pending_has_relation && row_has_relation {
             equations
-                .push(Parser::new(coalesce_numbers(std::mem::take(&mut pending))).parse_document());
+                .push(Parser::new(canonical_tokens(std::mem::take(&mut pending))).parse_document());
             pending_has_relation = false;
         }
         pending.extend(row);
         pending_has_relation |= row_has_relation;
     }
     if !pending.is_empty() {
-        equations.push(Parser::new(coalesce_numbers(pending)).parse_document());
+        equations.push(Parser::new(canonical_tokens(pending)).parse_document());
     }
     equations
 }
@@ -487,13 +576,8 @@ fn tokens_contain_relation(tokens: &[Token]) -> bool {
 fn lower_source_node(document: &ProjectDocument, node_id: u32) -> Option<SemanticExpr> {
     let mut tokens = Vec::new();
     emit_notation_node(&NotationArena::Source(document), node_id, &mut tokens);
-    while matches!(
-        tokens.last().map(|token| &token.kind),
-        Some(TokenKind::Operator(',' | '.'))
-    ) {
-        tokens.pop();
-    }
-    (!tokens.is_empty()).then(|| Parser::new(coalesce_numbers(tokens)).parse_document())
+    let tokens = canonical_tokens(tokens);
+    (!tokens.is_empty()).then(|| Parser::new(tokens).parse_document())
 }
 
 fn semantic_token_kind(text: &str, lexical_class: Option<LexicalClass>) -> Option<TokenKind> {
@@ -502,9 +586,11 @@ fn semantic_token_kind(text: &str, lexical_class: Option<LexicalClass>) -> Optio
         LexicalClass::Operator | LexicalClass::Punctuation => {
             text.chars().next().map(TokenKind::Operator)
         }
-        LexicalClass::Identifier | LexicalClass::Other => {
-            Some(TokenKind::Identifier(text.to_owned()))
+        LexicalClass::Identifier => Some(TokenKind::Identifier(text.to_owned())),
+        LexicalClass::Other if matches!(text, "." | "," | ";" | ":") => {
+            text.chars().next().map(TokenKind::Operator)
         }
+        LexicalClass::Other => Some(TokenKind::Identifier(text.to_owned())),
     }
 }
 
@@ -562,9 +648,18 @@ fn emit_sized_delimiter(
     };
     let kind = match (node.name.as_deref(), text) {
         (_, "." | "|") => return,
-        (Some("left"), "(") => TokenKind::Open('('),
-        (Some("left"), "[") => TokenKind::Open('['),
-        (Some("left"), "{") => TokenKind::Open('{'),
+        (Some("left"), "(") => TokenKind::Open {
+            delimiter: '(',
+            source_group: false,
+        },
+        (Some("left"), "[") => TokenKind::Open {
+            delimiter: '[',
+            source_group: false,
+        },
+        (Some("left"), "{") => TokenKind::Open {
+            delimiter: '{',
+            source_group: false,
+        },
         (Some("right"), ")") => TokenKind::Close(')'),
         (Some("right"), "]") => TokenKind::Close(']'),
         (Some("right"), "}") => TokenKind::Close('}'),
@@ -612,6 +707,13 @@ fn is_ignorable_command(name: Option<&str>) -> bool {
     )
 }
 
+fn is_presentation_command(name: Option<&str>) -> bool {
+    matches!(
+        name,
+        Some("displaystyle" | "textstyle" | "scriptstyle" | "scriptscriptstyle")
+    )
+}
+
 fn syntax_provenance(node: &crate::NotationNode) -> Vec<SourceRange> {
     let Some(provenance) = &node.provenance else {
         return Vec::new();
@@ -655,19 +757,30 @@ fn coalesce_numbers(tokens: Vec<Token>) -> Vec<Token> {
     output
 }
 
+fn canonical_tokens(tokens: Vec<Token>) -> Vec<Token> {
+    let mut tokens = coalesce_numbers(tokens);
+    while tokens.last().is_some_and(|token| {
+        matches!(token.kind, TokenKind::Operator(',' | '.'))
+            || matches!(&token.kind, TokenKind::Number(value) if value == ".")
+    }) {
+        tokens.pop();
+    }
+    tokens
+}
+
 pub(crate) fn lower_template(source: &str) -> SemanticExpr {
     let range = SourceRange {
         start_offset: 0,
         end_offset: source.encode_utf16().count() as u32,
     };
-    Parser::new(tokenize(
+    Parser::new(canonical_tokens(tokenize(
         &[SurfaceChunk {
             text: source.into(),
             range,
             provenance: Vec::new(),
         }],
         true,
-    ))
+    )))
     .parse_document()
 }
 
@@ -809,6 +922,22 @@ pub(crate) fn declared_symbols(
         .collect()
 }
 
+pub(crate) fn relation_head_symbol(
+    document: &ProjectDocument,
+    range: &SourceRange,
+) -> Option<(String, SourceRange)> {
+    let expression = lower_document_region(document, range);
+    relation_head(&expression)
+}
+
+pub(crate) fn relation_head(expression: &SemanticExpr) -> Option<(String, SourceRange)> {
+    match &expression.kind {
+        SemanticExprKind::Relation { left, .. } => declaration_head(left),
+        SemanticExprKind::System(relations) => relations.first().and_then(relation_head),
+        _ => None,
+    }
+}
+
 fn declaration_head(expression: &SemanticExpr) -> Option<(String, SourceRange)> {
     match &expression.kind {
         SemanticExprKind::Symbol(name) => Some((name.clone(), expression.range.clone())),
@@ -942,9 +1071,6 @@ fn tokenize(chunks: &[SurfaceChunk], word_identifiers: bool) -> Vec<Token> {
                         | "Bigr"
                         | "big"
                         | "Big"
-                        | "displaystyle"
-                        | "textstyle"
-                        | "scriptstyle"
                         | ","
                         | ";"
                         | "!"
@@ -956,6 +1082,14 @@ fn tokenize(chunks: &[SurfaceChunk], word_identifiers: bool) -> Vec<Token> {
                     if matches!(name, "left" | "right") && chunk.text[cursor..].starts_with('.') {
                         cursor += 1;
                     }
+                    continue;
+                }
+                if is_presentation_command(Some(name)) {
+                    tokens.push(Token {
+                        kind: TokenKind::Presentation,
+                        range: token_range(chunk, start, cursor),
+                        provenance: chunk.provenance.clone(),
+                    });
                     continue;
                 }
                 TokenKind::Command(name.into())
@@ -988,7 +1122,10 @@ fn tokenize(chunks: &[SurfaceChunk], word_identifiers: bool) -> Vec<Token> {
             } else {
                 cursor += character.len_utf8();
                 match character {
-                    '{' | '(' | '[' => TokenKind::Open(character),
+                    '{' | '(' | '[' => TokenKind::Open {
+                        delimiter: character,
+                        source_group: character == '{',
+                    },
                     '}' | ')' | ']' => TokenKind::Close(character),
                     other => TokenKind::Operator(other),
                 }
@@ -1041,11 +1178,28 @@ impl Parser {
     }
 
     fn parse_document(mut self) -> SemanticExpr {
+        let leading_presentation = self
+            .tokens
+            .iter()
+            .take_while(|token| matches!(token.kind, TokenKind::Presentation))
+            .count();
+        if leading_presentation > 0 {
+            let prefix = self.tokens[0].clone();
+            self.tokens.drain(..leading_presentation);
+            let mut expression = self.parse_document();
+            expression.range = merge_range(&prefix.range, &expression.range);
+            expression.provenance.extend(prefix.provenance);
+            expression
+                .provenance
+                .sort_by_key(|range| (range.start_offset, range.end_offset));
+            expression.provenance.dedup();
+            return expression;
+        }
         let mut depth = 0_u32;
         let mut separators = Vec::new();
         for (index, token) in self.tokens.iter().enumerate() {
             match token.kind {
-                TokenKind::Open(_) => depth += 1,
+                TokenKind::Open { .. } => depth += 1,
                 TokenKind::Close(_) => depth = depth.saturating_sub(1),
                 TokenKind::Operator(',') if depth == 0 => separators.push(index),
                 _ => {}
@@ -1095,20 +1249,47 @@ impl Parser {
     }
 
     fn parse_relation(&mut self) -> SemanticExpr {
-        let left = self.parse_set_operation();
-        if let Some(operator) = self.consume_relation() {
-            let right = self.parse_set_operation();
-            return combined(
-                &left,
-                &right,
-                SemanticExprKind::Relation {
-                    operator,
-                    left: Box::new(left.clone()),
-                    right: Box::new(right.clone()),
-                },
-            );
+        let mut operands = vec![self.parse_set_operation()];
+        let mut operators = Vec::new();
+        while let Some(operator) = self.consume_relation() {
+            operators.push(operator);
+            operands.push(self.parse_set_operation());
         }
-        left
+        if operators.is_empty() {
+            return operands.pop().expect("one relation operand");
+        }
+
+        let common_equality_left = operators.iter().all(|operator| operator == "equals");
+        let mut relations = operators
+            .into_iter()
+            .enumerate()
+            .map(|(index, operator)| {
+                let left = &operands[if common_equality_left { 0 } else { index }];
+                let right = &operands[index + 1];
+                combined(
+                    left,
+                    right,
+                    SemanticExprKind::Relation {
+                        operator,
+                        left: Box::new(left.clone()),
+                        right: Box::new(right.clone()),
+                    },
+                )
+            })
+            .collect::<Vec<_>>();
+        if relations.len() == 1 {
+            return relations.pop().expect("one relation");
+        }
+        let first = relations.first().expect("chained relations");
+        let last = relations.last().expect("chained relations");
+        SemanticExpr {
+            range: merge_range(&first.range, &last.range),
+            provenance: relations
+                .iter()
+                .flat_map(|relation| relation.provenance.clone())
+                .collect(),
+            kind: SemanticExprKind::System(relations),
+        }
     }
 
     fn parse_set_operation(&mut self) -> SemanticExpr {
@@ -1160,6 +1341,30 @@ impl Parser {
         loop {
             if self.consume_operator('/') {
                 let denominator = self.parse_power();
+                if let (Some(differential), Some(variable)) = (
+                    factors.last().and_then(split_compact_differential),
+                    split_compact_differential(&denominator),
+                ) {
+                    let numerator = factors.pop().expect("compact differential numerator");
+                    factors.push(SemanticExpr {
+                        range: merge_range(&numerator.range, &denominator.range),
+                        provenance: merge_provenance(&numerator, &denominator),
+                        kind: SemanticExprKind::Derivative {
+                            expression: Box::new(SemanticExpr {
+                                kind: SemanticExprKind::Symbol(differential.0),
+                                range: differential.1,
+                                provenance: numerator.provenance,
+                            }),
+                            variable: SemanticReference::new(
+                                variable.0,
+                                variable.1,
+                                denominator.provenance,
+                            ),
+                            order: 1,
+                        },
+                    });
+                    continue;
+                }
                 if factors.len() >= 2
                     && matches!(symbol_name(&factors[factors.len() - 2]), Some("d"))
                     && matches!(symbol_name(&denominator), Some("d"))
@@ -1218,7 +1423,7 @@ impl Parser {
                 factors.push(self.parse_power());
                 continue;
             }
-            if matches!(self.peek(), TokenKind::Open('(')) {
+            if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. }) {
                 let argument = self.parse_power();
                 if let Some(previous) = factors.last().cloned()
                     && let Some(applied) = apply_argument(previous, argument.clone())
@@ -1337,7 +1542,7 @@ impl Parser {
                         order: 1,
                     },
                 };
-            } else if matches!(self.peek(), TokenKind::Open('('))
+            } else if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. })
                 && is_callable_expression(&expression)
             {
                 let argument = self.parse_prefix();
@@ -1423,7 +1628,7 @@ impl Parser {
                         "gradient"
                     };
                     let mut argument = self.parse_power();
-                    if matches!(self.peek(), TokenKind::Open('(')) {
+                    if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. }) {
                         let application_argument = self.parse_power();
                         if let Some(applied) =
                             apply_argument(argument.clone(), application_argument)
@@ -1680,15 +1885,34 @@ impl Parser {
                 provenance: token.provenance,
             },
             TokenKind::Structured(expression) => *expression,
-            TokenKind::Open(open) => {
-                let expression = self.parse_relation();
+            TokenKind::Presentation => SemanticExpr {
+                kind: SemanticExprKind::Unknown("presentation".into()),
+                range: token.range,
+                provenance: token.provenance,
+            },
+            TokenKind::Open {
+                delimiter: open,
+                source_group,
+            } => {
+                let mut expression = self.parse_relation();
                 let expected = match open {
                     '{' => '}',
                     '(' => ')',
                     '[' => ']',
                     _ => unreachable!(),
                 };
-                self.consume_close(expected);
+                if self.consume_close(expected) && source_group {
+                    let close = &self.tokens[self.cursor - 1];
+                    expression.range = merge_range(&token.range, &close.range);
+                    expression.provenance.extend(token.provenance);
+                    expression
+                        .provenance
+                        .extend(close.provenance.iter().cloned());
+                    expression
+                        .provenance
+                        .sort_by_key(|range| (range.start_offset, range.end_offset));
+                    expression.provenance.dedup();
+                }
                 expression
             }
             other => SemanticExpr {
@@ -1747,9 +1971,12 @@ impl Parser {
         }
     }
 
-    fn consume_close(&mut self, expected: char) {
+    fn consume_close(&mut self, expected: char) -> bool {
         if matches!(self.peek(), TokenKind::Close(actual) if *actual == expected) {
             self.cursor += 1;
+            true
+        } else {
+            false
         }
     }
 
@@ -1979,7 +2206,7 @@ fn starts_atom(token: &TokenKind) -> bool {
         ),
         TokenKind::Identifier(_)
         | TokenKind::Number(_)
-        | TokenKind::Open(_)
+        | TokenKind::Open { .. }
         | TokenKind::Structured(_) => true,
         TokenKind::Operator(',') => true,
         _ => false,
@@ -2074,6 +2301,24 @@ fn derivative_parts(
             order: numerator_order,
         },
     )
+}
+
+fn split_compact_differential(expression: &SemanticExpr) -> Option<(String, SourceRange)> {
+    let SemanticExprKind::Symbol(symbol) = &expression.kind else {
+        return None;
+    };
+    let mut characters = symbol.chars();
+    (characters.next()? == 'd')
+        .then_some(())
+        .filter(|_| characters.clone().count() == 1)?;
+    let value = characters.next()?.to_string();
+    Some((
+        value,
+        SourceRange {
+            start_offset: expression.range.start_offset + 1,
+            end_offset: expression.range.end_offset,
+        },
+    ))
 }
 
 fn differential_order(expression: &SemanticExpr) -> Option<(&str, u8)> {
@@ -2198,9 +2443,10 @@ fn merge_provenance(left: &SemanticExpr, right: &SemanticExpr) -> Vec<SourceRang
 #[cfg(test)]
 mod tests {
     use super::{
-        SemanticExprKind, declared_symbols, lower_document_region, lower_template, render_canonical,
+        SemanticExprKind, TokenKind, declared_symbols, lower_document_region, lower_template,
+        render_canonical, semantic_token_kind,
     };
-    use crate::{ProjectDocument, SourceRange};
+    use crate::{LexicalClass, ProjectDocument, SourceRange};
 
     #[test]
     fn presentation_forms_share_the_same_semantic_symbol() {
@@ -2223,6 +2469,40 @@ mod tests {
     }
 
     #[test]
+    fn lowers_chained_relations_as_explicit_constraints() {
+        assert_eq!(
+            render_canonical(&lower_template("a=b=c")),
+            "system(relation(equals,symbol(a),symbol(b)),relation(equals,symbol(a),symbol(c)))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template(r"a<b\leq c")),
+            "system(relation(less-than,symbol(a),symbol(b)),relation(less-or-equal,symbol(b),symbol(c)))"
+        );
+    }
+
+    #[test]
+    fn source_ranges_preserve_tex_arguments_but_not_presentation_groups() {
+        for source in ["m_{e10}", "A_c^{(1)}", r"\mathbf{F}_{p08}"] {
+            let expression = lower_template(source);
+            assert_eq!(expression.range.start_offset, 0, "{source}");
+            assert_eq!(
+                expression.range.end_offset,
+                source.encode_utf16().count() as u32,
+                "{source}"
+            );
+        }
+
+        let grouped = lower_template("(v_{e10})");
+        assert_eq!(grouped.range.start_offset, 1);
+        assert_eq!(grouped.range.end_offset, 8);
+
+        let styled = lower_template(r"\displaystyle x=y");
+        assert!(matches!(styled.kind, SemanticExprKind::Relation { .. }));
+        assert_eq!(styled.range.start_offset, 0);
+        assert_eq!(styled.range.end_offset, 17);
+    }
+
+    #[test]
     fn lowers_engineering_operators_compositionally() {
         let state = lower_template("\\dot{x}=Ax+Bu");
         assert!(matches!(state.kind, SemanticExprKind::Relation { .. }));
@@ -2233,6 +2513,14 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template("F=m*a")),
             "relation(equals,symbol(F),product(symbol(m),symbol(a)))"
+        );
+    }
+
+    #[test]
+    fn lowers_compact_total_differentials_in_quotients() {
+        assert_eq!(
+            render_canonical(&lower_template("i=-C dv/dt")),
+            "relation(equals,symbol(i),product(negate(symbol(C)),derivative(symbol(v),t,1)))"
         );
     }
 
@@ -2424,8 +2712,20 @@ mod tests {
     #[test]
     fn equation_metadata_does_not_change_the_semantic_relation() {
         assert_eq!(
+            semantic_token_kind(".", Some(LexicalClass::Other)),
+            Some(TokenKind::Operator('.'))
+        );
+        assert_eq!(
             render_canonical(&lower_template("q=-k\\nabla T\\label{eq:flux}")),
             render_canonical(&lower_template("q=-k\\nabla T"))
+        );
+        assert_eq!(
+            render_canonical(&lower_template("q=-k\\nabla T.\\label{eq:flux}")),
+            render_canonical(&lower_template("q=-k\\nabla T"))
+        );
+        assert_eq!(
+            render_canonical(&lower_template("x=0.5")),
+            "relation(equals,symbol(x),number(0.5))"
         );
     }
 

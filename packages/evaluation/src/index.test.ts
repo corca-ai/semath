@@ -454,6 +454,59 @@ describe("multidimensional scorecard", () => {
       "mechanics/newton-second-law: evidenceIntegrity 0.0% is below 100%",
     );
   });
+
+  test("metamorphic observations preserve the complete source observation", () => {
+    const value = manifestValue();
+    value.suites[0]!.minimumPositiveCasesPerLaw = 1;
+    value.suites[0]!.minimumRefusalCasesPerLaw = 1;
+    value.suites[0]!.requiredDimensions = [];
+    const manifest = parseQualityManifest(value);
+    const positive = corpusCase();
+    const negative = refusalCase();
+    const corpora = new Map([["mechanics", corpus([positive, negative])]]);
+    const source: CaseObservation = {
+      caseId: positive.id,
+      evidenceIntegrity: true,
+      recognizedLawIds: [positive.lawId, "nested-supporting-law"],
+      rolesCorrect: true,
+      status: "partial",
+      suiteId: "mechanics",
+      targetPresent: true,
+    };
+    const negativeObservation: CaseObservation = {
+      caseId: negative.id,
+      evidenceIntegrity: false,
+      recognizedLawIds: [],
+      rolesCorrect: false,
+      status: "unsupported",
+      suiteId: "mechanics",
+      targetPresent: false,
+    };
+    const transformed = passingMetamorphicObservations(manifest, corpora).map(
+      (observation) => observation.generatedFrom?.caseId === positive.id
+        ? {
+            ...observation,
+            recognizedLawIds: source.recognizedLawIds,
+            ...(source.status === undefined ? {} : { status: source.status }),
+          }
+        : observation,
+    );
+    expect(
+      scoreQuality(manifest, corpora, [source, negativeObservation, ...transformed]).metamorphic
+        .percent,
+    ).toBe(100);
+    const changed = transformed.findIndex(
+      (observation) => observation.generatedFrom?.caseId === positive.id,
+    );
+    transformed[changed] = {
+      ...transformed[changed]!,
+      recognizedLawIds: [positive.lawId],
+    };
+    expect(
+      scoreQuality(manifest, corpora, [source, negativeObservation, ...transformed]).metamorphic
+        .percent,
+    ).toBeLessThan(100);
+  });
 });
 
 describe("pack conformance", () => {

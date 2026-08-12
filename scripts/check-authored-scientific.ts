@@ -4,6 +4,7 @@ import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   FIRST_LOSS_STAGES,
   authoredProbeIdentityMatches,
+  authoredRelationRangeMatches,
   authoredScenarioFor,
   authoredSnapshotFor,
   classifyAuthoredFirstLoss,
@@ -102,6 +103,8 @@ for (const fixture of selected) {
         probePassed: !failedIds.has(probe.id),
         relationSources: run.relationSources,
       }),
+      cursorSignals: run.cursorSignals,
+      relationSources: run.relationSources,
     };
   });
   const firstLossCounts = Object.fromEntries(
@@ -318,7 +321,12 @@ function runProbe(
         localRelationMatched: view.context.relations.some(
           (relation) =>
             relation.relationId === source.relation.relationId &&
-            sameRange(relation.range, source.anchor.range) &&
+            authoredRelationRangeMatches(
+              documents.find((document) => document.fileId === source.anchor.fileId)
+                ?.content ?? "",
+              relation.range,
+              source.anchor.range,
+            ) &&
             roleInstancesMatch(
               relation.roles,
               source.relation.roles,
@@ -357,11 +365,15 @@ function expectedRelationsMatch(
   const snapshot = authoredSnapshotFor(authoredScenarioFor(fixture, probe), probe);
   return probe.expected.relations.every((expected) => {
     const anchor = resolveAuthoredAnchor(snapshot, expected.anchor);
+    const document = snapshot.documents.find(
+      (document) => document.fileId === anchor.fileId,
+    );
     return observation.relations.some(
       (relation) =>
         relation.relationId === expected.relationId &&
         relation.fileId === anchor.fileId &&
-        sameRange(relation.range, anchor.range) &&
+        document !== undefined &&
+        authoredRelationRangeMatches(document.content, relation.range, anchor.range) &&
         relation.sourceGrounded === expected.sourceGrounded &&
         roleInstancesMatch(relation.roles, expected.roles, undefined),
     );

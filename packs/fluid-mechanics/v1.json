@@ -260,6 +260,12 @@
             "area",
             "velocity"
           ],
+          "evidencePhrases": [
+            "cross section mean",
+            "area mean",
+            "section averaged",
+            "mean normal"
+          ],
           "label": "Velocity is the area-mean component normal to the stated cross-section."
         }
       ],
@@ -404,6 +410,12 @@
             "density",
             "acceleration",
             "height"
+          ],
+          "evidencePhrases": [
+            "fluid at rest",
+            "water at rest",
+            "hydrostatic equilibrium",
+            "stationary fluid"
           ],
           "label": "The fluid is at rest, density is constant, and the stated vertical sign convention is used."
         }
