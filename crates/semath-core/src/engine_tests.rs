@@ -2,9 +2,12 @@ use std::collections::{BTreeSet, HashMap};
 
 use super::{
     SemathEngine, index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
-    stable_text_digest,
+    relation_expression_at_cursor, stable_text_digest,
 };
-use crate::canonical::{lower_document_region, render_canonical};
+use crate::canonical::{
+    SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
+    render_canonical,
+};
 use crate::parser::test_math_regions;
 use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
@@ -84,6 +87,60 @@ fn range(start_offset: u32, end_offset: u32) -> SourceRange {
         start_offset,
         end_offset,
     }
+}
+
+#[test]
+fn relation_focus_selects_the_exact_system_child_without_edge_guessing() {
+    fn symbol(name: &str, start: u32) -> SemanticExpr {
+        SemanticExpr {
+            kind: SemanticExprKind::Symbol(name.into()),
+            range: range(start, start + 1),
+            provenance: Vec::new(),
+        }
+    }
+    fn relation(left: &str, right: &str, start: u32) -> SemanticExpr {
+        SemanticExpr {
+            kind: SemanticExprKind::Relation {
+                operator: SemanticReference::new("equals", range(start + 1, start + 2), Vec::new()),
+                left: Box::new(symbol(left, start)),
+                right: Box::new(symbol(right, start + 2)),
+            },
+            range: range(start, start + 3),
+            provenance: Vec::new(),
+        }
+    }
+    let root = SemanticExpr {
+        kind: SemanticExprKind::System(vec![relation("a", "b", 10), relation("y", "x", 20)]),
+        range: range(10, 23),
+        provenance: Vec::new(),
+    };
+    let math_range = root.range.clone();
+    let y_start = 20;
+    let y_range = range(y_start, y_start + 1);
+
+    let selected = relation_expression_at_cursor(
+        std::slice::from_ref(&root),
+        &math_range,
+        Some(&y_range),
+        y_start,
+    )
+    .expect("the focused relation");
+    assert_eq!(
+        relation_head(selected).map(|(name, _)| name),
+        Some("y".into())
+    );
+
+    let trailing = relation_expression_at_cursor(
+        std::slice::from_ref(&root),
+        &math_range,
+        None,
+        math_range.end_offset,
+    )
+    .expect("the trailing relation");
+    assert_eq!(
+        relation_head(trailing).map(|(name, _)| name),
+        Some("y".into())
+    );
 }
 
 #[test]

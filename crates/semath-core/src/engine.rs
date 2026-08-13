@@ -2185,6 +2185,59 @@ fn stable_text_digest(value: &str) -> String {
     format!("{hash:016x}")
 }
 
+fn relation_expression_at_cursor<'a>(
+    expressions: &'a [SemanticExpr],
+    math_range: &SourceRange,
+    focus_range: Option<&SourceRange>,
+    offset: u32,
+) -> Option<&'a SemanticExpr> {
+    let mut candidates = Vec::new();
+    for expression in expressions {
+        collect_relation_expressions(expression, math_range, &mut candidates);
+    }
+    let exact = candidates
+        .iter()
+        .copied()
+        .filter(|expression| {
+            focus_range.map_or_else(
+                || expression.range.contains(offset) || expression.range.end_offset == offset,
+                |focus| ranges_overlap(&expression.range, focus),
+            )
+        })
+        .min_by_key(|expression| expression.range.end_offset - expression.range.start_offset);
+    if exact.is_some() {
+        return exact;
+    }
+    if candidates.len() == 1 {
+        return candidates.into_iter().next();
+    }
+    candidates
+        .into_iter()
+        .filter(|expression| expression.range.end_offset <= offset)
+        .max_by_key(|expression| expression.range.end_offset)
+}
+
+fn collect_relation_expressions<'a>(
+    expression: &'a SemanticExpr,
+    math_range: &SourceRange,
+    output: &mut Vec<&'a SemanticExpr>,
+) {
+    if expression.range.start_offset < math_range.start_offset
+        || expression.range.end_offset > math_range.end_offset
+    {
+        return;
+    }
+    match &expression.kind {
+        SemanticExprKind::Relation { .. } => output.push(expression),
+        SemanticExprKind::System(expressions) => {
+            for expression in expressions {
+                collect_relation_expressions(expression, math_range, output);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn canonical_expression_at_range<'a>(
     expressions: &'a [SemanticExpr],
     range: &SourceRange,
@@ -3556,11 +3609,12 @@ impl SemathEngine {
     ) -> SemanticViewInfo {
         let formula_boundary = focus.is_none();
         let queried_relation = parsed.and_then(|math| {
-            document.canonical_expressions.iter().find(|expression| {
-                math.region.content_range.start_offset <= expression.range.start_offset
-                    && expression.range.end_offset <= math.region.content_range.end_offset
-                    && relation_head(expression).is_some()
-            })
+            relation_expression_at_cursor(
+                &document.canonical_expressions,
+                &math.region.content_range,
+                focus.map(|focus| &focus.range),
+                offset,
+            )
         });
         let mut local_formulas = observations.laws.at(offset);
         if local_formulas.is_empty()
@@ -3636,14 +3690,12 @@ impl SemathEngine {
         )
         .into_iter()
         .filter(|diagnostic| {
-            parsed.is_some_and(|math| ranges_overlap(&diagnostic.range, &math.region.content_range))
-                || diagnostic.range.contains(offset)
+            diagnostic.range.contains(offset)
                 || diagnostic.evidence.iter().any(|evidence| {
                     evidence.source_ranges.iter().any(|range| {
                         range.contains(offset)
-                            || parsed.is_some_and(|math| {
-                                ranges_overlap(range, &math.region.content_range)
-                            })
+                            || queried_relation
+                                .is_some_and(|relation| ranges_overlap(range, &relation.range))
                     })
                 })
         })

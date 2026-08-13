@@ -1,8 +1,8 @@
 use crate::{
     ConstraintStatus, DecisionReason, DecisionReasonKind, Evidence, LawRecognition,
-    MeaningAlternative, MeaningConclusion, MeaningConflict, MeaningDecision, MeaningFact,
-    MeaningRequirement, SemanticCandidateInfo, SemanticCandidateStatus, SemanticDiagnostic,
-    SymbolInfo,
+    LawRecognitionStatus, MeaningAlternative, MeaningConclusion, MeaningConflict, MeaningDecision,
+    MeaningFact, MeaningRequirement, SemanticCandidateInfo, SemanticCandidateStatus,
+    SemanticDiagnostic, SymbolInfo,
 };
 
 const MAX_DECISION_ITEMS: usize = 8;
@@ -67,7 +67,7 @@ pub(crate) fn decide_meaning(input: MeaningDecisionInput<'_>) -> MeaningDecision
 
     if let Some(formula) = preferred_formulas(&input).into_iter().next() {
         let missing = missing_formula_requirements(formula);
-        if missing.is_empty() && !input.truncated {
+        if missing.is_empty() && formula_has_establishment_proof(formula) && !input.truncated {
             let relation = formula
                 .relation
                 .as_ref()
@@ -175,39 +175,70 @@ fn collect_conflicts(input: &MeaningDecisionInput<'_>) -> Vec<MeaningConflict> {
     let mut conflicts = input
         .diagnostics
         .iter()
-        .filter(|diagnostic| matches!(diagnostic.severity.as_str(), "error" | "warning"))
+        .filter(|diagnostic| diagnostic_has_conflict_proof(diagnostic))
         .map(|diagnostic| MeaningConflict {
             conflict_id: diagnostic.code.clone(),
             label: diagnostic.message.clone(),
             evidence: diagnostic.evidence.clone(),
         })
-        .chain(input.formulas.iter().flat_map(|formula| {
-            formula
-                .conditions
-                .iter()
-                .filter(|condition| condition.status == ConstraintStatus::Conflicting)
-                .map(|condition| MeaningConflict {
-                    conflict_id: format!("{}/condition/{}", formula.law_id, condition.condition_id),
-                    label: condition.label.clone(),
-                    evidence: condition.evidence.clone(),
-                })
-        }))
-        .chain(
-            input
-                .candidates
-                .iter()
-                .filter(|candidate| candidate.status == SemanticCandidateStatus::Conflicting)
-                .map(|candidate| MeaningConflict {
-                    conflict_id: candidate.candidate_id.clone(),
-                    label: candidate.interpretation.clone(),
-                    evidence: vec![candidate_evidence(candidate)],
-                }),
-        )
         .collect::<Vec<_>>();
     conflicts.sort_by(|left, right| left.conflict_id.cmp(&right.conflict_id));
     conflicts.dedup_by(|left, right| left.conflict_id == right.conflict_id);
     conflicts.truncate(MAX_DECISION_ITEMS);
     conflicts
+}
+
+fn diagnostic_has_conflict_proof(diagnostic: &SemanticDiagnostic) -> bool {
+    if !matches!(diagnostic.severity.as_str(), "error" | "warning") {
+        return false;
+    }
+    let mut independent_claims = diagnostic
+        .evidence
+        .iter()
+        .filter(|evidence| {
+            matches!(evidence.strength.as_str(), "hard" | "strong")
+                && !evidence.source_ranges.is_empty()
+        })
+        .map(|evidence| {
+            let first = evidence.source_ranges.first().expect("filtered evidence");
+            (
+                evidence.rule_id.as_str(),
+                evidence.kind.as_str(),
+                first.start_offset,
+                first.end_offset,
+            )
+        })
+        .collect::<Vec<_>>();
+    independent_claims.sort();
+    independent_claims.dedup();
+    independent_claims.len() >= 2
+}
+
+fn formula_has_establishment_proof(formula: &LawRecognition) -> bool {
+    matches!(
+        formula.status,
+        LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified
+    ) && formula.relation.is_some()
+        && formula.evidence.iter().any(|evidence| {
+            evidence.kind == "canonical-math"
+                && evidence.strength == "hard"
+                && evidence
+                    .source_ranges
+                    .iter()
+                    .any(|range| ranges_overlap(range, &formula.range))
+        })
+        && formula.bindings.iter().all(|binding| {
+            matches!(binding.evidence.strength.as_str(), "hard" | "strong")
+                && !binding.evidence.source_ranges.is_empty()
+        })
+        && formula
+            .conditions
+            .iter()
+            .all(|condition| condition.status == ConstraintStatus::Verified)
+}
+
+fn ranges_overlap(left: &crate::SourceRange, right: &crate::SourceRange) -> bool {
+    left.start_offset < right.end_offset && right.start_offset < left.end_offset
 }
 
 fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternative> {
@@ -256,11 +287,17 @@ fn collect_alternatives(input: &MeaningDecisionInput<'_>) -> Vec<MeaningAlternat
 
 fn preferred_formulas<'a>(input: &'a MeaningDecisionInput<'a>) -> Vec<&'a LawRecognition> {
     let explicitly_named = input.formulas.iter().any(has_law_activation);
-    let candidates = input
+    let mut candidates = input
         .formulas
         .iter()
         .filter(|formula| !explicitly_named || has_law_activation(formula))
         .collect::<Vec<_>>();
+    if candidates
+        .iter()
+        .any(|formula| formula.status != LawRecognitionStatus::Conflicting)
+    {
+        candidates.retain(|formula| formula.status != LawRecognitionStatus::Conflicting);
+    }
     let Some(best_rank) = candidates.iter().map(|formula| formula.rank).min() else {
         return Vec::new();
     };
@@ -338,7 +375,9 @@ fn missing_formula_requirements(formula: &LawRecognition) -> Vec<MeaningRequirem
         .filter(|condition| {
             matches!(
                 condition.status,
-                ConstraintStatus::Required | ConstraintStatus::Unsupported
+                ConstraintStatus::Conflicting
+                    | ConstraintStatus::Required
+                    | ConstraintStatus::Unsupported
             )
         })
         .map(|condition| MeaningRequirement {
@@ -430,7 +469,7 @@ mod tests {
     };
 
     #[test]
-    fn decision_precedence_is_conflict_then_ambiguity_then_completeness() {
+    fn decision_precedence_is_proven_conflict_then_ambiguity_then_completeness() {
         let verified = formula("verified", ConstraintStatus::Verified);
         let required = formula("required", ConstraintStatus::Required);
         assert!(matches!(
@@ -448,9 +487,40 @@ mod tests {
 
         let mut conflicting = required;
         conflicting.conditions[0].status = ConstraintStatus::Conflicting;
+        conflicting.status = LawRecognitionStatus::Conflicting;
         assert!(matches!(
             decide_meaning(input(&[verified, conflicting])),
-            MeaningDecision::Conflicting { .. }
+            MeaningDecision::Established { .. }
+        ));
+    }
+
+    #[test]
+    fn a_rejected_law_condition_is_a_missing_proof_not_a_document_conflict() {
+        let mut formula = formula("conditional", ConstraintStatus::Conflicting);
+        formula.status = LawRecognitionStatus::Conflicting;
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { requirements, .. }
+                if requirements.iter().any(|requirement| {
+                    requirement.requirement_id == "conditional/condition/condition"
+                })
+        ));
+    }
+
+    #[test]
+    fn a_formula_needs_an_exact_recognition_proof_before_establishment() {
+        let mut formula = formula("hypothesis", ConstraintStatus::Verified);
+        formula.status = LawRecognitionStatus::Conflicting;
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { .. }
+        ));
+
+        formula.status = LawRecognitionStatus::Verified;
+        formula.evidence[0].kind = "structural-candidate".into();
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { .. }
         ));
     }
 
@@ -588,7 +658,7 @@ mod tests {
             unsupported_relation_context: false,
             truncated: false,
         });
-        assert!(matches!(decision, MeaningDecision::Conflicting { .. }));
+        assert!(matches!(decision, MeaningDecision::Unsupported { .. }));
     }
 
     #[test]
@@ -669,6 +739,24 @@ mod tests {
                 if reasons.iter().all(|reason| reason.kind != DecisionReasonKind::SourceConflict)
         ));
 
+        let first = Evidence {
+            rule_id: "definition/role-a".into(),
+            kind: "explicit-prose".into(),
+            strength: "strong".into(),
+            source_ranges: vec![SourceRange {
+                start_offset: 0,
+                end_offset: 1,
+            }],
+        };
+        let second = Evidence {
+            rule_id: "definition/role-b".into(),
+            kind: "explicit-prose".into(),
+            strength: "strong".into(),
+            source_ranges: vec![SourceRange {
+                start_offset: 3,
+                end_offset: 4,
+            }],
+        };
         let diagnostic = SemanticDiagnostic {
             code: "duplicate-role".into(),
             message: "Incompatible role declarations".into(),
@@ -678,7 +766,7 @@ mod tests {
                 end_offset: 2,
             },
             explanation: "The same occurrence has incompatible explicit roles.".into(),
-            evidence: Vec::new(),
+            evidence: vec![first, second],
         };
         let conflicting = decide_meaning(MeaningDecisionInput {
             formulas: &[],
@@ -694,6 +782,82 @@ mod tests {
             conflicting,
             MeaningDecision::Conflicting { reasons, .. }
                 if reasons.iter().all(|reason| reason.kind == DecisionReasonKind::SourceConflict)
+        ));
+    }
+
+    #[test]
+    fn an_unproven_diagnostic_does_not_become_a_user_conflict() {
+        let diagnostic = SemanticDiagnostic {
+            code: "internal-rejection".into(),
+            message: "A parser hypothesis was rejected".into(),
+            severity: "warning".into(),
+            range: SourceRange {
+                start_offset: 1,
+                end_offset: 2,
+            },
+            explanation: "This is not independent source opposition.".into(),
+            evidence: Vec::new(),
+        };
+        let decision = decide_meaning(MeaningDecisionInput {
+            formulas: &[],
+            symbol: None,
+            symbol_proof: &[],
+            candidates: &[],
+            diagnostics: &[diagnostic],
+            engine_limited: false,
+            unsupported_relation_context: false,
+            truncated: false,
+        });
+        assert!(matches!(decision, MeaningDecision::Unsupported { .. }));
+    }
+
+    #[test]
+    fn weak_candidate_permutations_cannot_create_establishment_or_conflict() {
+        let statuses = [
+            SemanticCandidateStatus::Rejected,
+            SemanticCandidateStatus::Unresolved,
+            SemanticCandidateStatus::Conflicting,
+        ];
+        for first in statuses {
+            for second in statuses {
+                let candidates = [candidate("first", first), candidate("second", second)];
+                for candidates in [
+                    candidates.clone(),
+                    [candidates[1].clone(), candidates[0].clone()],
+                ] {
+                    let decision = decide_meaning(MeaningDecisionInput {
+                        formulas: &[],
+                        symbol: None,
+                        symbol_proof: &[],
+                        candidates: &candidates,
+                        diagnostics: &[],
+                        engine_limited: false,
+                        unsupported_relation_context: false,
+                        truncated: false,
+                    });
+                    assert!(matches!(decision, MeaningDecision::Unsupported { .. }));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn removing_formula_proof_never_increases_public_certainty() {
+        let mut formula = formula("law", ConstraintStatus::Verified);
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Established { .. }
+        ));
+
+        formula.evidence.clear();
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { .. }
+        ));
+        formula.bindings[0].evidence.source_ranges.clear();
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { .. }
         ));
     }
 
