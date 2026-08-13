@@ -41,6 +41,7 @@ pub(crate) struct ConstraintPlan {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct PlannedConflict {
     pub subject: EntityId,
+    pub binding_key: Option<String>,
     pub code: String,
     pub summary: String,
     pub parent_claims: Vec<ClaimId>,
@@ -75,7 +76,13 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
     let mut known = BTreeMap::<FactKey, Proof>::new();
     let mut relations = Vec::<(ClaimId, ClaimRelation, EvidenceRecord)>::new();
     let mut binding_roles = Vec::new();
+    let mut binding_keys = BTreeMap::<EntityId, String>::new();
     for item in input.iter().filter(|item| establishes(&item.evidence)) {
+        if let Some(binding_key) = &item.binding_key {
+            binding_keys
+                .entry(item.claim.subject.clone())
+                .or_insert_with(|| binding_key.clone());
+        }
         let ClaimObject::Value(value) = &item.claim.object else {
             continue;
         };
@@ -144,7 +151,13 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
         }
     }
 
-    let conflicts = collect_conflicts(&known, &relations, &binding_roles, &mut truncated);
+    let conflicts = collect_conflicts(
+        &known,
+        &relations,
+        &binding_roles,
+        &binding_keys,
+        &mut truncated,
+    );
     let mut derivations = known
         .into_iter()
         .filter_map(|(key, proof)| {
@@ -246,6 +259,7 @@ fn collect_conflicts(
     known: &BTreeMap<FactKey, Proof>,
     relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
     binding_roles: &[BindingRoleFact],
+    binding_keys: &BTreeMap<EntityId, String>,
     truncated: &mut bool,
 ) -> Vec<PlannedConflict> {
     let mut conflicts = BTreeSet::new();
@@ -278,6 +292,7 @@ fn collect_conflicts(
             parents.dedup();
             conflicts.insert(PlannedConflict {
                 subject: left.subject.clone(),
+                binding_key: binding_keys.get(&left.subject).cloned(),
                 code: match left.predicate {
                     ClaimPredicate::HasShape => "constraint-shape-conflict",
                     ClaimPredicate::HasDimension
@@ -333,6 +348,7 @@ fn collect_conflicts(
                     } else {
                         left.subject.clone()
                     },
+                    binding_key: Some(left.binding_key.clone()),
                     code: "notation-role-conflict".into(),
                     summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                     parent_claims,
@@ -355,6 +371,7 @@ fn collect_conflicts(
             parents.dedup();
             conflicts.insert(PlannedConflict {
                 subject: left.subject.clone(),
+                binding_key: binding_keys.get(&left.subject).cloned(),
                 code: "notation-role-type-conflict".into(),
                 summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                 parent_claims: parents,
@@ -392,6 +409,7 @@ fn collect_conflicts(
             }
             conflicts.insert(PlannedConflict {
                 subject: left_subject.clone(),
+                binding_key: binding_keys.get(left_subject).cloned(),
                 code: "constraint-comparison-conflict".into(),
                 summary: format!(
                     "{left_operator:?} conflicts with {right_operator:?} for the same operands"
@@ -440,6 +458,7 @@ fn collect_conflicts(
         parents.dedup();
         conflicts.insert(PlannedConflict {
             subject: result.clone(),
+            binding_key: binding_keys.get(result).cloned(),
             code: "constraint-product-shape-conflict".into(),
             summary: "Product operands have incompatible proven inner dimensions".into(),
             parent_claims: parents,

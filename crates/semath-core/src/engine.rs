@@ -3726,10 +3726,21 @@ impl SemathEngine {
             .constraint_conflicts_for(&document.document.file_id)
             .into_iter()
             .filter_map(|conflict| {
-                let entity_relevant = symbol_info
+                let focused_entity = symbol_info
                     .as_ref()
-                    .and_then(|symbol| symbol.entity_id.as_ref())
-                    .is_some_and(|entity_id| entity_id == &conflict.subject);
+                    .and_then(|symbol| symbol.entity_id.as_ref());
+                let focused_occurrence = display_focus
+                    .as_ref()
+                    .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id));
+                let entity_relevant = focused_entity.is_some_and(|entity_id| {
+                    entity_id == &conflict.subject
+                        || focused_occurrence.is_some_and(|occurrence| {
+                            conflict.binding_key.as_deref()
+                                == Some(occurrence_binding_key(occurrence).as_str())
+                                && conflict.subject.component_id == occurrence.component_id
+                                && conflict.subject.scope_path == occurrence.scope_path
+                        })
+                });
                 let (range, conflict) = meaning_conflict(&self.index.semantic, conflict)?;
                 (entity_relevant || relevant_to_query(&range, &conflict.evidence))
                     .then_some(conflict)

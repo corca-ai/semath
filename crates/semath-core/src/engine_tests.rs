@@ -1066,6 +1066,36 @@ fn incompatible_redeclarations_share_one_typed_public_conflict() {
 }
 
 #[test]
+fn a_typed_conflict_follows_every_participating_binding_to_later_uses() {
+    for content in [
+        "In this model let $u$ be a scalar temperature and let $u$ be a three-dimensional velocity vector. Use $u$ now.",
+        "In one lifetime let $t$ be duration in seconds and let $t$ be temperature in kelvin. Inspect $t$.",
+    ] {
+        let offset = (content.rfind('$').unwrap() - 1) as u32;
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert!(
+            matches!(view.decision, MeaningDecision::Conflicting { .. }),
+            "{content}: {:?}",
+            view.decision
+        );
+    }
+}
+
+#[test]
 fn non_asserting_formula_mentions_do_not_create_constraint_problems() {
     let declarations =
         "$A \\in \\mathbb{R}^{m \\times n}, B \\in \\mathbb{R}^{n \\times p}, p \\ne m$.\n";
