@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use crate::consistency::{role_shape_conflict, roles_conflict};
 use crate::semantic_index::{
     Claim, ClaimComparison, ClaimCondition, ClaimExtent, ClaimId, ClaimObject, ClaimOperation,
     ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, EntityId,
@@ -268,9 +269,31 @@ fn collect_conflicts(
                         "quantity-assignment-dimension-mismatch"
                     }
                     ClaimPredicate::HasDimension => "constraint-dimension-conflict",
+                    ClaimPredicate::HasRole => "notation-role-conflict",
                     _ => continue,
                 }
                 .into(),
+                summary: format!("{:?} conflicts with {:?}", left.value, right.value),
+                parent_claims: parents,
+            });
+        }
+    }
+    for (position, (left, left_proof)) in facts.iter().enumerate() {
+        for (right, right_proof) in facts.iter().skip(position + 1) {
+            if left.subject != right.subject || !role_and_shape_conflict(left, right) {
+                continue;
+            }
+            let mut parents = left_proof
+                .parents
+                .iter()
+                .chain(&right_proof.parents)
+                .cloned()
+                .collect::<Vec<_>>();
+            parents.sort();
+            parents.dedup();
+            conflicts.insert(PlannedConflict {
+                subject: left.subject.clone(),
+                code: "notation-role-type-conflict".into(),
                 summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                 parent_claims: parents,
             });
@@ -335,7 +358,41 @@ fn values_conflict(
             shapes_conflict(left, right, relations, boundary)
         }
         (ClaimValue::Dimension(left), ClaimValue::Dimension(right)) => left != right,
+        (ClaimValue::Concept(left), ClaimValue::Concept(right))
+        | (ClaimValue::Concept(left), ClaimValue::Role(right))
+        | (ClaimValue::Role(left), ClaimValue::Concept(right))
+        | (ClaimValue::Role(left), ClaimValue::Role(right)) => roles_conflict(left, right),
         _ => false,
+    }
+}
+
+fn role_and_shape_conflict(left: &FactKey, right: &FactKey) -> bool {
+    let (role, shape) = match (&left.predicate, &left.value, &right.predicate, &right.value) {
+        (
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept(role) | ClaimValue::Role(role),
+            ClaimPredicate::HasShape,
+            ClaimValue::Shape(shape),
+        )
+        | (
+            ClaimPredicate::HasShape,
+            ClaimValue::Shape(shape),
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept(role) | ClaimValue::Role(role),
+        ) => (role, shape),
+        _ => return false,
+    };
+    role_shape_conflict(role, claim_shape_kind(shape))
+}
+
+fn claim_shape_kind(shape: &ClaimShape) -> &str {
+    match shape {
+        ClaimShape::Scalar => "scalar",
+        ClaimShape::Vector(_) => "vector",
+        ClaimShape::Matrix(_) => "matrix",
+        ClaimShape::Tensor(_) => "tensor",
+        ClaimShape::Function { .. } => "function",
+        ClaimShape::Unknown => "unknown",
     }
 }
 
@@ -1349,6 +1406,75 @@ mod tests {
                         },
                     ])
         }));
+    }
+
+    #[test]
+    fn explicit_incompatible_roles_produce_one_typed_conflict() {
+        let symbol = entity(1);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "event-role",
+                symbol.clone(),
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("probability:event".into()),
+            ),
+            input_claim(
+                "voltage-role",
+                symbol,
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("quantities-units:voltage".into()),
+            ),
+        ]);
+
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "notation-role-conflict");
+        assert_eq!(
+            plan.conflicts[0].parent_claims,
+            [ClaimId("event-role".into()), ClaimId("voltage-role".into())]
+        );
+    }
+
+    #[test]
+    fn compatible_role_lineage_does_not_produce_a_typed_conflict() {
+        let symbol = entity(1);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "set-role",
+                symbol.clone(),
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("discrete-math:set".into()),
+            ),
+            input_claim(
+                "event-role",
+                symbol,
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("probability:event".into()),
+            ),
+        ]);
+
+        assert!(plan.conflicts.is_empty());
+    }
+
+    #[test]
+    fn explicit_role_shape_incompatibility_is_a_typed_cross_predicate_conflict() {
+        let symbol = entity(1);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "event-role",
+                symbol.clone(),
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("probability:event".into()),
+            ),
+            input_claim(
+                "vector-shape",
+                symbol,
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Vector(vec!["n".into()])),
+            ),
+        ]);
+
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "notation-role-type-conflict");
     }
 
     #[test]

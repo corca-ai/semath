@@ -357,7 +357,7 @@ pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
     )
 }
 
-fn role_shape_conflict(role: &str, shape: &str) -> bool {
+pub(crate) fn role_shape_conflict(role: &str, shape: &str) -> bool {
     let role = concept_leaf(role);
     match role {
         "event" | "set" => true,

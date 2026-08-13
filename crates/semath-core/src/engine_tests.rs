@@ -144,6 +144,41 @@ fn relation_focus_selects_the_exact_system_child_without_edge_guessing() {
 }
 
 #[test]
+fn relation_focus_refuses_unowned_gaps_in_a_math_region() {
+    let relation = SemanticExpr {
+        kind: SemanticExprKind::Relation {
+            operator: SemanticReference::new("equals", range(11, 12), Vec::new()),
+            left: Box::new(SemanticExpr {
+                kind: SemanticExprKind::Symbol("a".into()),
+                range: range(10, 11),
+                provenance: Vec::new(),
+            }),
+            right: Box::new(SemanticExpr {
+                kind: SemanticExprKind::Symbol("b".into()),
+                range: range(12, 13),
+                provenance: Vec::new(),
+            }),
+        },
+        range: range(10, 13),
+        provenance: Vec::new(),
+    };
+    let math_range = range(0, 30);
+
+    assert!(
+        relation_expression_at_cursor(std::slice::from_ref(&relation), &math_range, None, 5,)
+            .is_none()
+    );
+    assert!(
+        relation_expression_at_cursor(std::slice::from_ref(&relation), &math_range, None, 20,)
+            .is_none()
+    );
+    assert!(
+        relation_expression_at_cursor(std::slice::from_ref(&relation), &math_range, None, 29,)
+            .is_none()
+    );
+}
+
+#[test]
 fn expands_a_style_body_to_its_exact_source_notation() {
     let mut input = document("main", "main.tex", "$\\mathbf{y}$", 1);
     input.nodes.push(NotationNode {
@@ -1118,25 +1153,38 @@ fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
 
-    for offset in [period_end, content.len() as u32] {
-        let result = engine
-            .query(query(
-                Query::SemanticView {
-                    file_id: "main".into(),
-                    offset,
-                },
-                1,
-                1,
-            ))
-            .unwrap();
-        let QueryValue::SemanticView { view } = result.value else {
-            panic!("expected semantic view")
-        };
-        assert_eq!(
-            view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
-            Some("Q")
-        );
-    }
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: period_end,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert_eq!(
+        view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
+        Some("Q")
+    );
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.len() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(view.symbol.is_none());
 
     let result = engine
         .query(query(

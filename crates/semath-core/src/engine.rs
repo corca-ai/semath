@@ -11,6 +11,7 @@ use crate::candidate::{
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, lower_document_region, relation_head, render_canonical,
 };
+use crate::constraint::PlannedConflict;
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
 use crate::cursor::{CursorOccurrence, interior_offset, occurrence_at_cursor};
 use crate::decision::{MeaningDecisionInput, decide_meaning, symbol_has_source_meaning};
@@ -35,7 +36,7 @@ use crate::semantic_index::{
 };
 use crate::{
     AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, DefinitionInfo,
-    DimensionExponentInfo, DomainActivation, Evidence, Location, PROTOCOL_VERSION,
+    DimensionExponentInfo, DomainActivation, Evidence, Location, MeaningConflict, PROTOCOL_VERSION,
     PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
     ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue, RoleInfo,
     SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo,
@@ -2208,13 +2209,14 @@ fn relation_expression_at_cursor<'a>(
     if exact.is_some() {
         return exact;
     }
-    if candidates.len() == 1 {
-        return candidates.into_iter().next();
+    if focus_range.is_some() {
+        return None;
     }
-    candidates
+    let preceding = candidates
         .into_iter()
         .filter(|expression| expression.range.end_offset <= offset)
-        .max_by_key(|expression| expression.range.end_offset)
+        .max_by_key(|expression| expression.range.end_offset)?;
+    (preceding.range.end_offset.checked_add(1) == Some(offset)).then_some(preceding)
 }
 
 fn collect_relation_expressions<'a>(
@@ -3682,6 +3684,28 @@ impl SemathEngine {
             .collect::<Vec<_>>();
         let declarations_truncated = declarations.len() > MAX_VIEW_DECLARATIONS;
         declarations.truncate(MAX_VIEW_DECLARATIONS);
+        let relevant_to_query = |range: &SourceRange, evidence: &[Evidence]| {
+            range.contains(offset)
+                || evidence.iter().any(|evidence| {
+                    evidence.source_ranges.iter().any(|range| {
+                        range.contains(offset)
+                            || queried_relation
+                                .is_some_and(|relation| ranges_overlap(range, &relation.range))
+                    })
+                })
+        };
+        let mut typed_conflicts = self
+            .index
+            .semantic
+            .constraint_conflicts_for(&document.document.file_id)
+            .into_iter()
+            .filter_map(|conflict| {
+                let (range, conflict) = meaning_conflict(&self.index.semantic, conflict)?;
+                relevant_to_query(&range, &conflict.evidence).then_some(conflict)
+            })
+            .collect::<Vec<_>>();
+        typed_conflicts.sort_by(|left, right| left.conflict_id.cmp(&right.conflict_id));
+        typed_conflicts.dedup_by(|left, right| left.conflict_id == right.conflict_id);
         let mut diagnostics = document_diagnostics(
             document,
             observations,
@@ -3689,16 +3713,7 @@ impl SemathEngine {
             hygiene_enabled,
         )
         .into_iter()
-        .filter(|diagnostic| {
-            diagnostic.range.contains(offset)
-                || diagnostic.evidence.iter().any(|evidence| {
-                    evidence.source_ranges.iter().any(|range| {
-                        range.contains(offset)
-                            || queried_relation
-                                .is_some_and(|relation| ranges_overlap(range, &relation.range))
-                    })
-                })
-        })
+        .filter(|diagnostic| relevant_to_query(&diagnostic.range, &diagnostic.evidence))
         .collect::<Vec<_>>();
         diagnostics.extend(
             symbol_info
@@ -3756,7 +3771,7 @@ impl SemathEngine {
             symbol: semantic_focus.and(symbol_info.as_ref()),
             symbol_proof: &symbol_proof,
             candidates: &context.candidates,
-            diagnostics: &diagnostics,
+            conflicts: &typed_conflicts,
             engine_limited,
             unsupported_relation_context,
             truncated,
@@ -4862,35 +4877,7 @@ fn constraint_diagnostics(
                     _ => None,
                 })
                 .collect::<Vec<_>>();
-            let mut evidence = conflict
-                .parent_claims
-                .iter()
-                .filter_map(|claim_id| semantic.claim(claim_id))
-                .filter_map(|claim| semantic.evidence(&claim.evidence_id))
-                .map(|record| {
-                    let mut source_ranges = record
-                        .provenance
-                        .iter()
-                        .filter_map(|source| semantic.occurrence(source))
-                        .map(|occurrence| occurrence.range.clone())
-                        .collect::<Vec<_>>();
-                    source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
-                    source_ranges.dedup();
-                    Evidence {
-                        rule_id: record.rule_id.clone(),
-                        kind: if record.origin == EvidenceOrigin::Derived {
-                            "derived-constraint"
-                        } else {
-                            "explicit-constraint"
-                        }
-                        .into(),
-                        strength: "hard".into(),
-                        source_ranges,
-                    }
-                })
-                .collect::<Vec<_>>();
-            evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
-            evidence.dedup();
+            let evidence = constraint_conflict_evidence(semantic, conflict);
             let (message, explanation) = if conflict.code == "constraint-product-shape-conflict"
                 && shape_labels.len() >= 2
             {
@@ -4914,6 +4901,57 @@ fn constraint_diagnostics(
             })
         })
         .collect()
+}
+
+fn meaning_conflict(
+    semantic: &ProjectSemanticIndex,
+    conflict: &PlannedConflict,
+) -> Option<(SourceRange, MeaningConflict)> {
+    let anchor = semantic.occurrence(&conflict.subject.anchor)?;
+    Some((
+        anchor.range.clone(),
+        MeaningConflict {
+            conflict_id: conflict.code.clone(),
+            label: conflict.summary.clone(),
+            evidence: constraint_conflict_evidence(semantic, conflict),
+        },
+    ))
+}
+
+fn constraint_conflict_evidence(
+    semantic: &ProjectSemanticIndex,
+    conflict: &PlannedConflict,
+) -> Vec<Evidence> {
+    let mut evidence = conflict
+        .parent_claims
+        .iter()
+        .filter_map(|claim_id| semantic.claim(claim_id))
+        .filter_map(|claim| semantic.evidence(&claim.evidence_id))
+        .map(|record| {
+            let mut source_ranges = record
+                .provenance
+                .iter()
+                .filter_map(|source| semantic.occurrence(source))
+                .map(|occurrence| occurrence.range.clone())
+                .collect::<Vec<_>>();
+            source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+            source_ranges.dedup();
+            Evidence {
+                rule_id: record.rule_id.clone(),
+                kind: if record.origin == EvidenceOrigin::Derived {
+                    "derived-constraint"
+                } else {
+                    "explicit-constraint"
+                }
+                .into(),
+                strength: "hard".into(),
+                source_ranges,
+            }
+        })
+        .collect::<Vec<_>>();
+    evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
+    evidence.dedup();
+    evidence
 }
 
 fn symbol_diagnostics(

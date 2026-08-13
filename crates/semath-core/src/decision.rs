@@ -1,8 +1,7 @@
 use crate::{
     ConstraintStatus, DecisionReason, DecisionReasonKind, Evidence, LawRecognition,
     LawRecognitionStatus, MeaningAlternative, MeaningConclusion, MeaningConflict, MeaningDecision,
-    MeaningFact, MeaningRequirement, SemanticCandidateInfo, SemanticCandidateStatus,
-    SemanticDiagnostic, SymbolInfo,
+    MeaningFact, MeaningRequirement, SemanticCandidateInfo, SemanticCandidateStatus, SymbolInfo,
 };
 
 const MAX_DECISION_ITEMS: usize = 8;
@@ -12,7 +11,7 @@ pub(crate) struct MeaningDecisionInput<'a> {
     pub symbol: Option<&'a SymbolInfo>,
     pub symbol_proof: &'a [Evidence],
     pub candidates: &'a [SemanticCandidateInfo],
-    pub diagnostics: &'a [SemanticDiagnostic],
+    pub conflicts: &'a [MeaningConflict],
     pub engine_limited: bool,
     pub unsupported_relation_context: bool,
     pub truncated: bool,
@@ -172,46 +171,14 @@ pub(crate) fn symbol_has_source_meaning(symbol: &SymbolInfo) -> bool {
 }
 
 fn collect_conflicts(input: &MeaningDecisionInput<'_>) -> Vec<MeaningConflict> {
-    let mut conflicts = input
-        .diagnostics
-        .iter()
-        .filter(|diagnostic| diagnostic_has_conflict_proof(diagnostic))
-        .map(|diagnostic| MeaningConflict {
-            conflict_id: diagnostic.code.clone(),
-            label: diagnostic.message.clone(),
-            evidence: diagnostic.evidence.clone(),
-        })
-        .collect::<Vec<_>>();
+    let mut conflicts = input.conflicts.to_vec();
+    for conflict in &mut conflicts {
+        conflict.evidence = deduplicate_evidence(std::mem::take(&mut conflict.evidence));
+    }
     conflicts.sort_by(|left, right| left.conflict_id.cmp(&right.conflict_id));
     conflicts.dedup_by(|left, right| left.conflict_id == right.conflict_id);
     conflicts.truncate(MAX_DECISION_ITEMS);
     conflicts
-}
-
-fn diagnostic_has_conflict_proof(diagnostic: &SemanticDiagnostic) -> bool {
-    if !matches!(diagnostic.severity.as_str(), "error" | "warning") {
-        return false;
-    }
-    let mut independent_claims = diagnostic
-        .evidence
-        .iter()
-        .filter(|evidence| {
-            matches!(evidence.strength.as_str(), "hard" | "strong")
-                && !evidence.source_ranges.is_empty()
-        })
-        .map(|evidence| {
-            let first = evidence.source_ranges.first().expect("filtered evidence");
-            (
-                evidence.rule_id.as_str(),
-                evidence.kind.as_str(),
-                first.start_offset,
-                first.end_offset,
-            )
-        })
-        .collect::<Vec<_>>();
-    independent_claims.sort();
-    independent_claims.dedup();
-    independent_claims.len() >= 2
 }
 
 fn formula_has_establishment_proof(formula: &LawRecognition) -> bool {
@@ -605,7 +572,7 @@ mod tests {
             symbol: None,
             symbol_proof: &[],
             candidates: &[supported.clone(), unresolved.clone()],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
@@ -623,7 +590,7 @@ mod tests {
                 candidate("application", SemanticCandidateStatus::Unresolved),
                 unresolved,
             ],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
@@ -638,7 +605,7 @@ mod tests {
                 candidate("application", SemanticCandidateStatus::Supported),
                 candidate("multiplication", SemanticCandidateStatus::Supported),
             ],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
@@ -653,7 +620,7 @@ mod tests {
                 "application",
                 SemanticCandidateStatus::Conflicting,
             )],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
@@ -672,7 +639,7 @@ mod tests {
                 candidate("divergence", SemanticCandidateStatus::Unresolved),
                 candidate("gradient", SemanticCandidateStatus::Unresolved),
             ],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
@@ -690,7 +657,7 @@ mod tests {
             symbol: None,
             symbol_proof: &[],
             candidates: &[],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: true,
             unsupported_relation_context: false,
             truncated: false,
@@ -710,7 +677,7 @@ mod tests {
             symbol: None,
             symbol_proof: &[],
             candidates: &[supported],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: true,
             truncated: false,
@@ -757,15 +724,9 @@ mod tests {
                 end_offset: 4,
             }],
         };
-        let diagnostic = SemanticDiagnostic {
-            code: "duplicate-role".into(),
-            message: "Incompatible role declarations".into(),
-            severity: "warning".into(),
-            range: SourceRange {
-                start_offset: 1,
-                end_offset: 2,
-            },
-            explanation: "The same occurrence has incompatible explicit roles.".into(),
+        let conflict = MeaningConflict {
+            conflict_id: "typed-role-conflict".into(),
+            label: "Incompatible role declarations".into(),
             evidence: vec![first, second],
         };
         let conflicting = decide_meaning(MeaningDecisionInput {
@@ -773,7 +734,7 @@ mod tests {
             symbol: None,
             symbol_proof: &[],
             candidates: &[],
-            diagnostics: &[diagnostic],
+            conflicts: &[conflict],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
@@ -783,32 +744,6 @@ mod tests {
             MeaningDecision::Conflicting { reasons, .. }
                 if reasons.iter().all(|reason| reason.kind == DecisionReasonKind::SourceConflict)
         ));
-    }
-
-    #[test]
-    fn an_unproven_diagnostic_does_not_become_a_user_conflict() {
-        let diagnostic = SemanticDiagnostic {
-            code: "internal-rejection".into(),
-            message: "A parser hypothesis was rejected".into(),
-            severity: "warning".into(),
-            range: SourceRange {
-                start_offset: 1,
-                end_offset: 2,
-            },
-            explanation: "This is not independent source opposition.".into(),
-            evidence: Vec::new(),
-        };
-        let decision = decide_meaning(MeaningDecisionInput {
-            formulas: &[],
-            symbol: None,
-            symbol_proof: &[],
-            candidates: &[],
-            diagnostics: &[diagnostic],
-            engine_limited: false,
-            unsupported_relation_context: false,
-            truncated: false,
-        });
-        assert!(matches!(decision, MeaningDecision::Unsupported { .. }));
     }
 
     #[test]
@@ -830,7 +765,7 @@ mod tests {
                         symbol: None,
                         symbol_proof: &[],
                         candidates: &candidates,
-                        diagnostics: &[],
+                        conflicts: &[],
                         engine_limited: false,
                         unsupported_relation_context: false,
                         truncated: false,
@@ -867,7 +802,7 @@ mod tests {
             symbol: None,
             symbol_proof: &[],
             candidates: &[],
-            diagnostics: &[],
+            conflicts: &[],
             engine_limited: false,
             unsupported_relation_context: false,
             truncated: false,
