@@ -99,8 +99,8 @@ only schema, provenance, digest, coverage, anchor, and leakage checks in normal
 CI. `bun run authored:baseline` and `bun run authored` execute the six public
 query surfaces only as deliberate manual evidence gates.
 
-The v0.28 release adds a new 48-scenario blind tranche rather than reusing the
-historical holdout as a tuning target. It has exactly eight scenarios in each
+Each semantic release adds a new 48-scenario blind tranche rather than reusing
+the historical holdout as a tuning target. It has exactly eight scenarios in each
 document-reasoning family and covers every decision class. Isolated Codex
 subagents author its source and expectations without engine execution;
 independent subagents critique them; then the main agent reads every source and
@@ -162,6 +162,17 @@ not be used to tune or silently relabel the engine. Future one-shot receipts
 retain exact safety case IDs as well as counts and artifact digests so a failed
 run remains diagnosable without executing its fixture again.
 
+The independently sealed v0.29 fresh blind was also executed once on
+2026-08-13, after the complete pre-blind gate passed on the separate release
+host. It scored 4 of 48 with risk 426: nine false establishments, no false
+conflicts, 20 unsafe navigation or edit observations, and 29 coverage misses.
+Clean and incremental results agreed across all eight reviewed lifecycle
+stages. Its terminal receipt is `safety-failed`, so PR #304 is not a release and
+must not be merged or pinned by CorTeX. The fixture seal is
+`c4431c1203d56af5e0db55449ae0b72392d79c560b193a8ea6daf9ef68adffb8`;
+future work must treat this tranche as historical evidence rather than a
+tuning set.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
@@ -202,7 +213,7 @@ bun run scorecard
 ```
 
 The fresh blind commands are intentionally absent from the generic examples:
-they require an independently commissioned, sealed v0.28 fixture and a new
+they require an independently commissioned, sealed release fixture and a new
 receipt path. `bun run fresh-blind:validate` checks that explicit fixture without
 executing Semath. `bun run fresh-blind:run` is the one-shot evidence boundary and
 should normally be reached only through `bun run release:semantic`.
