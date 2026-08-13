@@ -198,6 +198,23 @@ documents even when wasmtex can reuse their syntax, and future execution-error
 receipts retain any completed primary evaluation before recording the tool
 failure.
 
+The independently sealed v0.33 fresh blind was executed once on 2026-08-13
+after its complete pre-blind gate passed. It scored 3 of 48 with risk 436:
+twelve false establishments, no false conflicts, five cases with unsafe
+navigation or edit results, and 41 coverage misses. All eight lifecycle stages
+agreed. Its terminal receipt is `safety-failed`, so PR #320 was closed without
+merge and CorTeX must not pin it. The fixture seal is
+`8e457adf5e653c5edaf91d305e3d64ed673f109f8b8b3a37e719874c45add0c7`.
+This fixture is historical evidence and must not be rerun or used for tuning.
+
+The v0.34 public proof-authority adjudication preserves the 50-of-115,
+risk-130 development release baseline and zero public safety risk. Eleven
+reviewed probes now remain `partial` because a formula assertion or domain
+context supplies useful recognition without independent typed role roots. The
+open semantic safety suite has 39 metamorphic observations across nine
+contracts; assertion without complete role proof is tested separately from
+exact establishment.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or

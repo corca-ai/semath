@@ -258,6 +258,12 @@ structurally derived role identity can complete an established decision;
 formula-level assertion may keep a useful relation and proposed role mapping
 visible, but cannot prove that mapping by itself. An unresolved binding is
 likewise candidate evidence only.
+Typed role evidence points to the actual declaration, shape, or quantity
+source, while structural derivations retain both their structural range and
+their parent evidence. Domain relevance and conventional notation can expose
+an asserted candidate but cannot be relabeled as typed proof. This makes
+circular formula-as-its-own-type evidence observable and prevents it from
+authorizing a meaning decision.
 Runtime concepts always use the pack-qualified identity
 `<namespace>:<concept>`; display labels are derived views, never an alternate
 identity system. Longer pack vocabulary terms take precedence over embedded

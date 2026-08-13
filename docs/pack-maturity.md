@@ -111,6 +111,16 @@ holds approved support policy; GitHub issues hold planned work.
   mismatch, so the terminal receipt is `execution-error`. The candidate is not
   a release, must not be pinned by CorTeX, and the exposed fixture is now
   historical evidence rather than a tuning set.
+- The independently sealed v0.33 fresh blind scored 3 of 48 with risk 436,
+  including twelve false establishments and five cases with unsafe navigation
+  or edit results. All eight lifecycle stages agreed. Its terminal receipt is
+  `safety-failed`; PR #320 was closed, CorTeX must not pin it, and the exposed
+  fixture is historical evidence rather than a tuning set.
+- The v0.34 public candidate separates typed, derived, asserted, and candidate
+  role support and retains the actual declaration, shape, or quantity roots.
+  Eleven development expectations were reviewed as `partial` where only
+  formula or domain context was available; the release baseline remains 50 of
+  115 with risk 130 and zero unsafe risk.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.

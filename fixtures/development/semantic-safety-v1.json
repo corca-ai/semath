@@ -5,7 +5,7 @@
     {
       "id": "v030-asserted-ohm",
       "pairId": "assertion-modality",
-      "contract": "exact-establishment",
+      "contract": "proof-incomplete",
       "lawIds": ["ohm-law"],
       "snapshots": [{
         "id": "reviewed",
@@ -20,8 +20,8 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decisions": ["established"],
-          "proofGrounded": true,
+          "decisions": ["partial"],
+          "proofGrounded": false,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
           "maximumProblems": 0,
@@ -109,8 +109,8 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "drive", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decisions": ["established"],
-          "proofGrounded": true,
+          "decisions": ["partial"],
+          "proofGrounded": false,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
           "maximumProblems": 0,

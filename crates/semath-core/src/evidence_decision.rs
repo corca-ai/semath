@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum EvidenceAuthority {
     ExplicitAuthor,
+    #[cfg(test)]
     Derived(u8),
 }
 

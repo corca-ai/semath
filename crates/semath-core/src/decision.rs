@@ -238,15 +238,10 @@ fn formula_alternative(
             relation.range.end_offset,
         ),
         proof: EvidenceProof {
-            authority: if formula
-                .bindings
-                .iter()
-                .any(|binding| binding.proof == LawBindingProof::Derived)
-            {
-                EvidenceAuthority::Derived(1)
-            } else {
-                EvidenceAuthority::ExplicitAuthor
-            },
+            // A derived role is part of the same reviewed law proof, not a
+            // weaker competing interpretation. Its derivation parents remain
+            // in the roots, where correlation and dominance are decided.
+            authority: EvidenceAuthority::ExplicitAuthor,
             roots: formula_evidence_roots(&evidence, &relation.range),
             complete: formula_has_establishment_proof(formula) && !truncated,
         },

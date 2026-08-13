@@ -836,8 +836,7 @@ pub(crate) fn observe_laws(
                     context.external,
                 ) || compiled.law.roles.iter().all(|role| {
                     bindings.get(&role.id).is_some_and(|expression| {
-                        formula_operator_role_support(role, expression, actual)
-                            == RoleSupport::Supported
+                        formula_operator_role_support(role, expression, actual).is_proven()
                     })
                 })
             });
@@ -2031,7 +2030,7 @@ fn plan_role_support(
     external: &ExternalTypeEnvironment,
 ) -> Option<RoleSupportPlan> {
     let mut supported = 0;
-    let mut supported_roles = BTreeSet::new();
+    let mut supported_roles = BTreeMap::new();
     let mut unresolved_roles = BTreeSet::new();
     for role in roles {
         let bound_expression = bindings.get(&role.id)?;
@@ -2059,15 +2058,20 @@ fn plan_role_support(
             _ => None,
         };
         let expression = projected_expression.as_ref().unwrap_or(bound_expression);
-        if formula_operator_role_support(role, expression, actual) == RoleSupport::Supported {
+        if formula_operator_role_support(role, expression, actual).is_proven() {
             supported += 1;
-            supported_roles.insert(role.id.as_str());
+            supported_roles.insert(role.id.as_str(), RoleBindingProof::Derived);
             continue;
         }
         match structural_operator_role_support(role, expression, offset, consistency, external) {
-            RoleSupport::Supported => {
+            RoleSupport::Typed | RoleSupport::Derived => {
                 supported += 1;
-                supported_roles.insert(role.id.as_str());
+                supported_roles.insert(role.id.as_str(), RoleBindingProof::DerivedFromTypes);
+                continue;
+            }
+            RoleSupport::Asserted => {
+                supported += 1;
+                supported_roles.insert(role.id.as_str(), RoleBindingProof::Asserted);
                 continue;
             }
             RoleSupport::Refuted => return None,
@@ -2075,20 +2079,21 @@ fn plan_role_support(
         }
         if role.shape.as_deref() == Some("scalar") && is_numeric_scalar(expression) {
             supported += 1;
-            supported_roles.insert(role.id.as_str());
+            supported_roles.insert(role.id.as_str(), RoleBindingProof::Derived);
             continue;
         }
         let symbols = semantic_symbols(expression);
         if symbols.is_empty() || !(role.variadic || role_expression_is_atomic(expression)) {
             return None;
         }
-        let mut role_support = RoleSupport::Supported;
+        let mut role_support = RoleSupport::Typed;
         for symbol in &symbols {
             role_support = role_support.and(role_symbol_support(
                 role,
                 symbol,
                 offset,
                 notation_context_activated,
+                law_explicitly_activated,
                 shapes,
                 quantities,
                 consistency,
@@ -2096,9 +2101,17 @@ fn plan_role_support(
             ));
         }
         match role_support {
-            RoleSupport::Supported => {
+            RoleSupport::Typed => {
                 supported += 1;
-                supported_roles.insert(role.id.as_str());
+                supported_roles.insert(role.id.as_str(), RoleBindingProof::Typed);
+            }
+            RoleSupport::Derived => {
+                supported += 1;
+                supported_roles.insert(role.id.as_str(), RoleBindingProof::Derived);
+            }
+            RoleSupport::Asserted => {
+                supported += 1;
+                supported_roles.insert(role.id.as_str(), RoleBindingProof::Asserted);
             }
             RoleSupport::Unresolved => {
                 unresolved_roles.insert(role.id.as_str());
@@ -2110,8 +2123,19 @@ fn plan_role_support(
     let unresolved_role = (unresolved == 1)
         .then(|| unresolved_roles.first().copied())
         .flatten();
+    let proved = supported_roles
+        .values()
+        .filter(|proof| {
+            matches!(
+                proof,
+                RoleBindingProof::Typed
+                    | RoleBindingProof::Derived
+                    | RoleBindingProof::DerivedFromTypes
+            )
+        })
+        .count();
     let inferred = unresolved == 1
-        && supported >= 2
+        && proved >= 2
         && ((unresolved_role == inferred_role && roles.len() <= 3)
             || (roles.len() <= 3
                 && unresolved_role.is_some_and(|unresolved| {
@@ -2119,9 +2143,9 @@ fn plan_role_support(
                         .iter()
                         .any(|role| role.id == unresolved && role.quantity.is_some())
                 }))
-            || (unresolved_role != inferred_role && supported >= 3));
+            || (unresolved_role != inferred_role && proved >= 3));
     let admitted_by_assertion = (law_explicitly_activated
-        && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
+        && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains_key(role))
             || (roles.len() == 2 && supported == 1 && unresolved == 1)))
         || formula_identified;
     if unresolved != 0 && !inferred && !admitted_by_assertion {
@@ -2129,7 +2153,7 @@ fn plan_role_support(
     }
     let mut proofs = supported_roles
         .into_iter()
-        .map(|role| (role.to_owned(), RoleBindingProof::Typed))
+        .map(|(role, proof)| (role.to_owned(), proof))
         .collect::<BTreeMap<_, _>>();
     for role in unresolved_roles {
         let proof = if inferred && Some(role) == unresolved_role {
@@ -2148,6 +2172,7 @@ fn plan_role_support(
 enum RoleBindingProof {
     Typed,
     Derived,
+    DerivedFromTypes,
     Asserted,
     Candidate,
 }
@@ -2170,12 +2195,86 @@ fn role_binding_evidence_ranges(
     expression: &SemanticExpr,
     proof: RoleBindingProof,
     activation: Option<&LawActivationEvidence>,
+    mut ranges: Vec<SourceRange>,
 ) -> Vec<SourceRange> {
-    let mut ranges = vec![expression.range.clone()];
+    if ranges.is_empty() {
+        ranges.push(expression.range.clone());
+    }
     if proof == RoleBindingProof::Asserted
         && let Some(activation) = activation
     {
         ranges.extend(activation.evidence.source_ranges.iter().cloned());
+    }
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
+    ranges
+}
+
+#[allow(clippy::too_many_arguments)]
+fn role_source_evidence_ranges(
+    role: &PackLawRole,
+    expression: &SemanticExpr,
+    offset: u32,
+    shapes: &ShapeObservations,
+    quantities: &QuantityObservations,
+    consistency: &RoleObservations,
+    external: &ExternalTypeEnvironment,
+) -> Vec<SourceRange> {
+    let mut ranges = Vec::new();
+    for symbol in semantic_symbols(expression) {
+        ranges.extend(
+            consistency
+                .roles_at(&symbol, offset)
+                .0
+                .into_iter()
+                .filter(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
+                .flat_map(|claim| claim.evidence.source_ranges),
+        );
+        ranges.extend(
+            external
+                .roles_at(offset, &symbol)
+                .into_iter()
+                .filter(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
+                .flat_map(|claim| claim.evidence.source_ranges),
+        );
+        if let Some(quantity) = role.quantity.as_deref().or_else(|| {
+            role.concept
+                .starts_with("quantities-units:")
+                .then_some(role.concept.as_str())
+        }) {
+            ranges.extend(
+                quantities
+                    .at(&symbol, offset)
+                    .0
+                    .into_iter()
+                    .filter(|claim| claim.quantity_kind_id.as_deref() == Some(quantity))
+                    .flat_map(|claim| claim.evidence.source_ranges),
+            );
+            ranges.extend(
+                external
+                    .quantities_at(offset, &symbol)
+                    .into_iter()
+                    .filter(|claim| claim.quantity_kind_id.as_deref() == Some(quantity))
+                    .flat_map(|claim| claim.evidence.source_ranges),
+            );
+        }
+        if let Some(shape) = role.shape.as_deref() {
+            ranges.extend(
+                shapes
+                    .claims_at(&symbol, offset)
+                    .0
+                    .into_iter()
+                    .filter(|claim| claim.kind == shape)
+                    .flat_map(|claim| claim.evidence.source_ranges),
+            );
+            ranges.extend(
+                external
+                    .shapes_at(offset, &symbol)
+                    .into_iter()
+                    .filter(|claim| claim.kind == shape)
+                    .flat_map(|claim| claim.evidence.source_ranges),
+            );
+        }
     }
     ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
     ranges.dedup();
@@ -2225,7 +2324,7 @@ fn formula_operator_role_support(
         })
     });
     if supported {
-        RoleSupport::Supported
+        RoleSupport::Derived
     } else {
         RoleSupport::Unresolved
     }
@@ -2255,6 +2354,11 @@ fn structural_operator_role_support(
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
+    if matches!(expression.kind, SemanticExprKind::Derivative { .. })
+        && role.concept.split(':').next_back() == Some("derivative")
+    {
+        return RoleSupport::Derived;
+    }
     let SemanticExprKind::Apply {
         operator,
         arguments,
@@ -2275,7 +2379,7 @@ fn structural_operator_role_support(
     }) {
         matched = true;
         let candidate = arguments.iter().zip(&signature.operand_concepts).fold(
-            RoleSupport::Supported,
+            RoleSupport::Typed,
             |support, (argument, concept)| {
                 support.and(expression_concept_support(
                     argument,
@@ -2286,8 +2390,8 @@ fn structural_operator_role_support(
                 ))
             },
         );
-        if candidate == RoleSupport::Supported {
-            return candidate;
+        if candidate.is_proven() {
+            return RoleSupport::Derived;
         }
         support = support.and(candidate);
     }
@@ -2309,28 +2413,26 @@ fn expression_concept_support(
     if symbols.is_empty() {
         return RoleSupport::Unresolved;
     }
-    symbols
-        .iter()
-        .fold(RoleSupport::Supported, |support, symbol| {
-            let declared = consistency
-                .roles_at(symbol, offset)
-                .0
-                .into_iter()
-                .chain(external.roles_at(offset, symbol));
-            let mut found = false;
-            let mut conflicting = false;
-            for role in declared {
-                found |= concepts_share_lineage(&role.concept_id, expected);
-                conflicting |= roles_conflict(expected, &role.concept_id);
-            }
-            support.and(if conflicting {
-                RoleSupport::Refuted
-            } else if found {
-                RoleSupport::Supported
-            } else {
-                RoleSupport::Unresolved
-            })
+    symbols.iter().fold(RoleSupport::Typed, |support, symbol| {
+        let declared = consistency
+            .roles_at(symbol, offset)
+            .0
+            .into_iter()
+            .chain(external.roles_at(offset, symbol));
+        let mut found = false;
+        let mut conflicting = false;
+        for role in declared {
+            found |= concepts_share_lineage(&role.concept_id, expected);
+            conflicting |= roles_conflict(expected, &role.concept_id);
+        }
+        support.and(if conflicting {
+            RoleSupport::Refuted
+        } else if found {
+            RoleSupport::Typed
+        } else {
+            RoleSupport::Unresolved
         })
+    })
 }
 
 fn semantic_leaf_symbols(expression: &SemanticExpr) -> Vec<String> {
@@ -2428,17 +2530,25 @@ fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RoleSupport {
-    Supported,
+    Typed,
+    Derived,
+    Asserted,
     Unresolved,
     Refuted,
 }
 
 impl RoleSupport {
+    fn is_proven(self) -> bool {
+        matches!(self, Self::Typed | Self::Derived)
+    }
+
     fn and(self, other: Self) -> Self {
         match (self, other) {
             (Self::Refuted, _) | (_, Self::Refuted) => Self::Refuted,
             (Self::Unresolved, _) | (_, Self::Unresolved) => Self::Unresolved,
-            (Self::Supported, Self::Supported) => Self::Supported,
+            (Self::Asserted, _) | (_, Self::Asserted) => Self::Asserted,
+            (Self::Derived, _) | (_, Self::Derived) => Self::Derived,
+            (Self::Typed, Self::Typed) => Self::Typed,
         }
     }
 }
@@ -2449,6 +2559,7 @@ fn role_symbol_support(
     symbol: &str,
     offset: u32,
     notation_context_activated: bool,
+    law_explicitly_activated: bool,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -2459,14 +2570,14 @@ fn role_symbol_support(
         && role.shape.as_deref() == Some("scalar")
         && symbol.trim_start_matches('\\') == "pi"
     {
-        return RoleSupport::Supported;
+        return RoleSupport::Derived;
     }
     if role.shape.as_deref() == Some("scalar")
         && role.quantity.as_deref().is_some_and(|quantity| {
             crate::quantity::unit_symbol_supports_quantity(symbol, quantity)
         })
     {
-        return RoleSupport::Supported;
+        return RoleSupport::Derived;
     }
     let activated_notation_support = notation_context_activated
         && role
@@ -2476,7 +2587,7 @@ fn role_symbol_support(
     let required_quantity = role
         .quantity
         .as_deref()
-        .map_or(RoleSupport::Supported, |quantity| {
+        .map_or(RoleSupport::Typed, |quantity| {
             quantity_support(
                 quantity,
                 symbol,
@@ -2489,9 +2600,16 @@ fn role_symbol_support(
     if required_quantity == RoleSupport::Refuted {
         return RoleSupport::Refuted;
     }
+    let notation_support = || {
+        if law_explicitly_activated {
+            RoleSupport::Derived
+        } else {
+            RoleSupport::Asserted
+        }
+    };
     let required_quantity =
         if required_quantity == RoleSupport::Unresolved && activated_notation_support {
-            RoleSupport::Supported
+            notation_support()
         } else {
             required_quantity
         };
@@ -2537,13 +2655,13 @@ fn role_symbol_support(
         matching_shape |= external.has_shape(offset, symbol, expected_shape);
         if role.concept.split(':').next_back() == Some(expected_shape) {
             return required_quantity.and(if matching_shape {
-                RoleSupport::Supported
+                RoleSupport::Typed
             } else {
                 RoleSupport::Unresolved
             });
         }
         if activated_notation_support && matching_shape {
-            return required_quantity;
+            return required_quantity.and(notation_support());
         }
     }
     let concept_support = if role.concept.starts_with("quantities-units:") {
@@ -2556,7 +2674,7 @@ fn role_symbol_support(
             external,
         );
         if support == RoleSupport::Unresolved && activated_notation_support {
-            RoleSupport::Supported
+            notation_support()
         } else {
             support
         }
@@ -2567,15 +2685,14 @@ fn role_symbol_support(
                 .is_some_and(|shape| shape.kind == "matrix")
             || external.has_shape(offset, symbol, "matrix")
         {
-            RoleSupport::Supported
+            RoleSupport::Typed
         } else {
             RoleSupport::Unresolved
         }
-    } else if has_exact_role
-        || activated_notation_support
-        || external.has_role(offset, symbol, &role.concept)
-    {
-        RoleSupport::Supported
+    } else if has_exact_role || external.has_role(offset, symbol, &role.concept) {
+        RoleSupport::Typed
+    } else if activated_notation_support {
+        notation_support()
     } else {
         RoleSupport::Unresolved
     };
@@ -2608,7 +2725,7 @@ fn quantity_support(
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     if crate::quantity::unit_symbol_supports_quantity(symbol, expected) {
-        return RoleSupport::Supported;
+        return RoleSupport::Derived;
     }
     let mut local = quantities.at(symbol, offset).0;
     if notation_symbol != symbol {
@@ -2622,13 +2739,13 @@ fn quantity_support(
         return if declared.is_empty() {
             RoleSupport::Unresolved
         } else if declared.iter().all(|kind| *kind == expected) {
-            RoleSupport::Supported
+            RoleSupport::Typed
         } else {
             RoleSupport::Refuted
         };
     }
     if external.has_quantity(offset, symbol, expected) {
-        RoleSupport::Supported
+        RoleSupport::Typed
     } else {
         RoleSupport::Unresolved
     }
@@ -2660,7 +2777,29 @@ fn recognition(
         .iter()
         .filter_map(|role| {
             let expression = bindings.get(&role.id)?;
-            let proof = role_support.proof_for(&role.id);
+            let planned_proof = role_support.proof_for(&role.id);
+            let mut proof_ranges = match planned_proof {
+                RoleBindingProof::Typed | RoleBindingProof::DerivedFromTypes => {
+                    role_source_evidence_ranges(
+                        role,
+                        expression,
+                        actual.range.start_offset,
+                        context.shapes,
+                        context.quantities,
+                        context.consistency,
+                        context.external,
+                    )
+                }
+                RoleBindingProof::Candidate => vec![actual.range.clone()],
+                RoleBindingProof::Derived | RoleBindingProof::Asserted => {
+                    vec![expression.range.clone()]
+                }
+            };
+            let proof = if planned_proof == RoleBindingProof::Typed && proof_ranges.is_empty() {
+                RoleBindingProof::Asserted
+            } else {
+                planned_proof
+            };
             let symbol = if role.variadic {
                 variadic_labels(expression, role.source_projection, context).join("; ")
             } else {
@@ -2677,14 +2816,18 @@ fn recognition(
                 },
                 proof: match proof {
                     RoleBindingProof::Typed => LawBindingProof::Typed,
-                    RoleBindingProof::Derived => LawBindingProof::Derived,
+                    RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
+                        LawBindingProof::Derived
+                    }
                     RoleBindingProof::Asserted => LawBindingProof::Asserted,
                     RoleBindingProof::Candidate => LawBindingProof::Candidate,
                 },
                 evidence: Evidence {
                     rule_id: match proof {
                         RoleBindingProof::Typed => format!("typed-law-role/{}", role.id),
-                        RoleBindingProof::Derived => format!("derived-law-role/{}", role.id),
+                        RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
+                            format!("derived-law-role/{}", role.id)
+                        }
                         RoleBindingProof::Asserted => format!("asserted-law-role/{}", role.id),
                         RoleBindingProof::Candidate => {
                             format!("unresolved-law-role/{}", role.id)
@@ -2692,18 +2835,27 @@ fn recognition(
                     },
                     kind: match proof {
                         RoleBindingProof::Typed => "canonical-binding",
-                        RoleBindingProof::Derived => "derived-binding",
+                        RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
+                            "derived-binding"
+                        }
                         RoleBindingProof::Asserted => "asserted-binding",
                         RoleBindingProof::Candidate => "candidate-binding",
                     }
                     .into(),
                     strength: match proof {
                         RoleBindingProof::Typed => "hard",
-                        RoleBindingProof::Derived | RoleBindingProof::Asserted => "strong",
+                        RoleBindingProof::Derived
+                        | RoleBindingProof::DerivedFromTypes
+                        | RoleBindingProof::Asserted => "strong",
                         RoleBindingProof::Candidate => "weak",
                     }
                     .into(),
-                    source_ranges: role_binding_evidence_ranges(expression, proof, activation),
+                    source_ranges: role_binding_evidence_ranges(
+                        expression,
+                        proof,
+                        activation,
+                        std::mem::take(&mut proof_ranges),
+                    ),
                 },
             })
         })
@@ -3129,7 +3281,7 @@ fn structural_condition_evidence(
             };
             bindings.get(subject).is_some_and(|expression| {
                 structural_operator_role_support(role, expression, offset, consistency, external)
-                    == RoleSupport::Supported
+                    .is_proven()
             })
         })
     {
@@ -4652,10 +4804,61 @@ mod tests {
                 .find(|law| law.law_id == "period-frequency-reciprocity")
                 .expect("reviewed notation supplies the frequency quantity roles");
         assert_eq!(period.status, LawRecognitionStatus::ConditionMissing);
+        assert!(
+            period
+                .bindings
+                .iter()
+                .all(|binding| binding.proof == LawBindingProof::Asserted),
+            "domain routing and formula-level assertion may expose a candidate but cannot type its roles: {period:?}"
+        );
         assert!(period.conditions.iter().any(|condition| {
             condition.kind == ScientificConstraintKind::Positive
                 && condition.status == ConstraintStatus::Required
         }));
+    }
+
+    #[test]
+    fn structural_derivatives_are_derived_while_declared_operands_remain_typed() {
+        let recognition = recognized_law_observations(
+            "Let $y$ be a function. Let $x$ be a variable. The function $y$ is differentiable in $x$. $y'(x)=\\frac{dy}{dx}(x)$",
+        )
+        .into_iter()
+        .find(|law| law.law_id == "first-derivative-relation")
+        .expect("the canonical derivative relation remains visible");
+        let proofs = recognition
+            .bindings
+            .iter()
+            .map(|binding| (binding.parameter.as_str(), binding.proof))
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(proofs["derivative"], LawBindingProof::Derived);
+        assert_eq!(proofs["function"], LawBindingProof::Typed);
+        assert_eq!(proofs["variable"], LawBindingProof::Typed);
+        for binding in recognition
+            .bindings
+            .iter()
+            .filter(|binding| binding.proof == LawBindingProof::Typed)
+        {
+            assert!(
+                binding
+                    .evidence
+                    .source_ranges
+                    .iter()
+                    .all(|range| range.end_offset <= recognition.range.start_offset),
+                "typed proof must retain its independent declaration roots: {binding:?}"
+            );
+        }
+        let derivative = recognition
+            .bindings
+            .iter()
+            .find(|binding| binding.parameter == "derivative")
+            .unwrap();
+        assert!(
+            derivative
+                .evidence
+                .source_ranges
+                .iter()
+                .any(|range| recognition.range.contains(range.start_offset))
+        );
     }
 
     #[test]

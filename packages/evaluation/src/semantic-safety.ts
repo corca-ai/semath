@@ -8,6 +8,7 @@ import type { CorpusDocument } from "./model";
 
 export const SEMANTIC_SAFETY_CONTRACTS = [
   "exact-establishment",
+  "proof-incomplete",
   "explicit-opposition",
   "calm-unsupported",
   "calm-ambiguity",

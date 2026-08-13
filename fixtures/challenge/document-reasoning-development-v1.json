@@ -69,13 +69,14 @@
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
-          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "3b479fd9947e9e2596c68dd7bb7c6aaa639b3009f6b5b4b6d2ce8b9a2a8f0c2a",
+        "finalDigest": "08eaff71ccbc62c14f4658632e4993daf5e55e72f456332bfc86ed14a325da88",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "3b479fd9947e9e2596c68dd7bb7c6aaa639b3009f6b5b4b6d2ce8b9a2a8f0c2a",
+        "semanticReviewDigest": "08eaff71ccbc62c14f4658632e4993daf5e55e72f456332bfc86ed14a325da88",
         "status": "corrected"
       },
       "snapshots": [
@@ -111,13 +112,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "8da465a9731089f0e46a80a0d1b5beeb6df02e7096dc76974e8d7ac704d40dbe",
+        "finalDigest": "16cdbe09c632feff3b96233e75eabb6ef713e582a1224067db114e645f096126",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "8da465a9731089f0e46a80a0d1b5beeb6df02e7096dc76974e8d7ac704d40dbe",
+        "semanticReviewDigest": "16cdbe09c632feff3b96233e75eabb6ef713e582a1224067db114e645f096126",
         "status": "corrected"
       },
       "snapshots": [
@@ -153,13 +155,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "81066f1785f1ae77f21df1b800bacda631a7147abef2db2f003517c2af6dc90b",
+        "finalDigest": "e4acca77d6fc3a35ae8e54cd0f5e92c96252373ec2d8fb3af8936b5d88e796bb",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "81066f1785f1ae77f21df1b800bacda631a7147abef2db2f003517c2af6dc90b",
+        "semanticReviewDigest": "e4acca77d6fc3a35ae8e54cd0f5e92c96252373ec2d8fb3af8936b5d88e796bb",
         "status": "corrected"
       },
       "snapshots": [
@@ -237,13 +240,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "9236886103f614117f80c86fa07584739ed7d628f4f8c1fd0c95006a52bedde7",
+        "finalDigest": "981f58f06fb05da949c2e57c1bf717ea1261b3ec8dfe4b5f414a6a793e747d24",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "9236886103f614117f80c86fa07584739ed7d628f4f8c1fd0c95006a52bedde7",
+        "semanticReviewDigest": "981f58f06fb05da949c2e57c1bf717ea1261b3ec8dfe4b5f414a6a793e747d24",
         "status": "corrected"
       },
       "snapshots": [
@@ -512,13 +516,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "d7e8de62df774bfdc25db5ad98f08affe9e50586561dbdee57a309d327003af6",
+        "finalDigest": "309dba0317acdfa196818250ff76303630432bc90531a9e12c9d840588e02772",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "d7e8de62df774bfdc25db5ad98f08affe9e50586561dbdee57a309d327003af6",
+        "semanticReviewDigest": "309dba0317acdfa196818250ff76303630432bc90531a9e12c9d840588e02772",
         "status": "corrected"
       },
       "snapshots": [
@@ -554,13 +559,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "0e663ca34ce0202f3aff0dd757c3e08d4765c251dccdb3faaf64dd5c45912ff0",
+        "finalDigest": "1d665296eb07772e01b268ef1bdad5c188ac294e4f8ad4ff335c187c0f51d28c",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "0e663ca34ce0202f3aff0dd757c3e08d4765c251dccdb3faaf64dd5c45912ff0",
+        "semanticReviewDigest": "1d665296eb07772e01b268ef1bdad5c188ac294e4f8ad4ff335c187c0f51d28c",
         "status": "corrected"
       },
       "snapshots": [
@@ -731,13 +737,14 @@
       "review": {
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
-          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "4eb1b833ceb50850f2c682c044e618d0c4cf441b53278845979f205cfaebb3d3",
+        "finalDigest": "627a7f526ec46fbb2e476138d1fa6feaffdeb374757f2f5364d9dfa1a6c7e6ce",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "4eb1b833ceb50850f2c682c044e618d0c4cf441b53278845979f205cfaebb3d3",
+        "semanticReviewDigest": "627a7f526ec46fbb2e476138d1fa6feaffdeb374757f2f5364d9dfa1a6c7e6ce",
         "status": "corrected"
       },
       "snapshots": [
@@ -1821,13 +1828,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "96b72c3d34362efef657be9ea788d4aeb5e965f7124e5a5db85a1dd3e9013561",
+        "finalDigest": "a75dc98c5848948aa8f233595d9a11567595c19d7f339f88cdaf911ede3aa80e",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "96b72c3d34362efef657be9ea788d4aeb5e965f7124e5a5db85a1dd3e9013561",
+        "semanticReviewDigest": "a75dc98c5848948aa8f233595d9a11567595c19d7f339f88cdaf911ede3aa80e",
         "status": "corrected"
       },
       "snapshots": [
@@ -2438,13 +2446,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "b4ac018fd11a046e74587d9ce520af1a4ee66044e05eb01c05c0af00dceb2e34",
+        "finalDigest": "32c22b227684a5149f94cb422bcc4500011a1226c0800d76e4b992f4b3c01ddb",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "b4ac018fd11a046e74587d9ce520af1a4ee66044e05eb01c05c0af00dceb2e34",
+        "semanticReviewDigest": "32c22b227684a5149f94cb422bcc4500011a1226c0800d76e4b992f4b3c01ddb",
         "status": "corrected"
       },
       "snapshots": [
@@ -2566,13 +2575,14 @@
       "review": {
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
-          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity."
+          "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "d9fdbf55e0930cabd8fd26116738b7e967ccb27f1b3a8051d1efcb8cafc93693",
+        "finalDigest": "bec324101c92a5372c03fd9b8d0f5c8e06eb950b77b3bd52a2d9d790fb9c6837",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "d9fdbf55e0930cabd8fd26116738b7e967ccb27f1b3a8051d1efcb8cafc93693",
+        "semanticReviewDigest": "bec324101c92a5372c03fd9b8d0f5c8e06eb950b77b3bd52a2d9d790fb9c6837",
         "status": "corrected"
       },
       "snapshots": [
@@ -3659,13 +3669,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Corrected the wavelength role to its exact TeX symbol."
+          "Corrected the wavelength role to its exact TeX symbol.",
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "e34096142d56d4de2d0fb08b9159f704a4cc188b75cf840336e024aa078fb683",
+        "finalDigest": "b482930b9c0a1d3419bf8f1bbedcece88c97f246c67095018a6f1d5ad3efad6b",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "e34096142d56d4de2d0fb08b9159f704a4cc188b75cf840336e024aa078fb683",
+        "semanticReviewDigest": "b482930b9c0a1d3419bf8f1bbedcece88c97f246c67095018a6f1d5ad3efad6b",
         "status": "corrected"
       },
       "snapshots": [
@@ -4240,7 +4251,7 @@
         "offset": 0
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -4270,7 +4281,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -4318,7 +4329,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -4348,7 +4359,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -4387,7 +4398,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -4417,7 +4428,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -4504,7 +4515,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -4534,7 +4545,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -4891,7 +4902,7 @@
         "offset": 5
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -4921,7 +4932,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -4964,7 +4975,7 @@
         "offset": 5
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -4994,7 +5005,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -6772,7 +6783,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -6802,7 +6813,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -7708,7 +7719,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -7738,7 +7749,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -7919,7 +7930,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -7949,7 +7960,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -9632,7 +9643,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -9662,7 +9673,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -12154,7 +12165,7 @@
         "offset": 0
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -12184,7 +12195,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
