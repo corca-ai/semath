@@ -159,13 +159,30 @@ where
         .map(|alternative| alternative.proof.authority)
         .min();
     if let Some(authority) = strongest_authority {
-        let mut complete = input.alternatives.iter().filter(|alternative| {
-            alternative.proof.complete && alternative.proof.authority == authority
-        });
-        if let Some(unique_complete) = complete.next()
-            && complete.next().is_none()
-        {
+        let complete = input
+            .alternatives
+            .iter()
+            .filter(|alternative| {
+                alternative.proof.complete && alternative.proof.authority == authority
+            })
+            .collect::<Vec<_>>();
+        if let [unique_complete] = complete.as_slice() {
             return EvidenceDecision::Established(unique_complete.value.clone());
+        }
+        let dominant = complete
+            .iter()
+            .copied()
+            .filter(|candidate| {
+                complete.iter().copied().all(|other| {
+                    candidate.value == other.value
+                        || (candidate.comparison == other.comparison
+                            && other.proof.roots.is_subset(&candidate.proof.roots)
+                            && other.proof.roots != candidate.proof.roots)
+                })
+            })
+            .collect::<Vec<_>>();
+        if let [dominant] = dominant.as_slice() {
+            return EvidenceDecision::Established(dominant.value.clone());
         }
     }
     let preferred = input
@@ -249,6 +266,24 @@ mod tests {
             decide_evidence(input(vec![
                 alternative("first", &[0, 1], true),
                 alternative("second", &[0, 1], true),
+            ])),
+            EvidenceDecision::Partial(_)
+        ));
+    }
+
+    #[test]
+    fn one_sided_support_over_shared_roots_selects_the_supported_alternative() {
+        assert_eq!(
+            decide_evidence(input(vec![
+                alternative("enclosing", &[0, 1], true),
+                alternative("nested", &[0], true),
+            ])),
+            EvidenceDecision::Established("enclosing".into())
+        );
+        assert!(matches!(
+            decide_evidence(input(vec![
+                alternative("first", &[0], true),
+                alternative("second", &[0], true),
             ])),
             EvidenceDecision::Partial(_)
         ));
@@ -358,7 +393,7 @@ mod tests {
             decide_evidence(input(vec![
                 alternative("first", &[1], true),
                 weaker,
-                alternative("second", &[1, 3], true),
+                alternative("second", &[1], true),
             ])),
             EvidenceDecision::Partial(_)
         ));

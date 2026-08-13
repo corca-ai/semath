@@ -195,6 +195,25 @@ fn evidence_roots(evidence: &[Evidence]) -> BTreeSet<DecisionRoot> {
         .collect()
 }
 
+fn formula_evidence_roots(
+    evidence: &[Evidence],
+    formula_range: &crate::SourceRange,
+) -> BTreeSet<DecisionRoot> {
+    evidence
+        .iter()
+        .flat_map(|evidence| &evidence.source_ranges)
+        .map(|range| {
+            if range.start_offset < formula_range.end_offset
+                && formula_range.start_offset < range.end_offset
+            {
+                DecisionRoot::Source(formula_range.start_offset, formula_range.end_offset)
+            } else {
+                DecisionRoot::Source(range.start_offset, range.end_offset)
+            }
+        })
+        .collect()
+}
+
 fn formula_alternative(
     formula: &LawRecognition,
     truncated: bool,
@@ -228,7 +247,7 @@ fn formula_alternative(
             } else {
                 EvidenceAuthority::ExplicitAuthor
             },
-            roots: evidence_roots(&evidence),
+            roots: formula_evidence_roots(&evidence, &relation.range),
             complete: formula_has_establishment_proof(formula) && !truncated,
         },
     })
@@ -767,6 +786,18 @@ mod tests {
         assert!(matches!(
             decide_meaning(input(&[first, second])),
             MeaningDecision::Ambiguous { .. }
+        ));
+    }
+
+    #[test]
+    fn enclosing_law_support_over_a_shared_formula_root_selects_the_enclosing_law() {
+        let mut enclosing = formula("enclosing", ConstraintStatus::Verified);
+        enclosing.evidence.push(source_evidence(2, 3));
+        let nested = formula("nested", ConstraintStatus::Verified);
+        assert!(matches!(
+            decide_meaning(input(&[nested, enclosing])),
+            MeaningDecision::Established { meaning, .. }
+                if meaning.relation_id.as_deref() == Some("enclosing")
         ));
     }
 
