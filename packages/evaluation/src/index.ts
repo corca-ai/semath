@@ -22,4 +22,5 @@ export * from "./semantic-continuity";
 export * from "./semantic-continuity-release";
 export * from "./runner";
 export * from "./scorecard";
+export * from "./semantic-safety";
 export * from "./synthetic";

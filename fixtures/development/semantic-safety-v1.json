@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "v030-open-development-semantic-safety",
+  "cases": [
+    {
+      "id": "v030-asserted-ohm",
+      "pairId": "assertion-modality",
+      "contract": "exact-establishment",
+      "lawIds": ["ohm-law"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "accepted-resistor.tex",
+          "content": "Resistor R7 uses the passive sign convention: current \\(I\\) enters the terminal at positive voltage \\(V\\), and \\(R\\) is its resistance. The accepted constitutive equation is \\[V=RI.\\]"
+        }]
+      }],
+      "probes": [{
+        "id": "accepted",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
+        "expected": {
+          "decision": "established",
+          "proofGrounded": true,
+          "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["asserted-author-claim", "passive-sign-convention", "minimal-modality-pair"]
+    },
+    {
+      "id": "v030-quoted-ohm",
+      "pairId": "assertion-modality",
+      "contract": "calm-unsupported",
+      "lawIds": ["ohm-law"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "review-question.tex",
+          "content": "A reviewer asks whether the terminal data might satisfy \\(V=RI\\). The authors quote the expression only to identify that question; they define no resistance or sign convention and explicitly decline to adopt the proposed relation."
+        }]
+      }],
+      "probes": [{
+        "id": "quoted",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
+        "expected": {
+          "decision": "unsupported",
+          "proofGrounded": false,
+          "relations": [],
+          "excludedRelationIds": ["ohm-law"],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["quoted-not-asserted", "calm-refusal", "minimal-modality-pair"]
+    },
+    {
+      "id": "v030-opposed-ohm",
+      "pairId": "scope-and-opposition",
+      "contract": "explicit-opposition",
+      "lawIds": ["ohm-law"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "opposed-requirements.tex",
+          "content": "For resistor R9 at one operating point, \\(V\\), nonzero \\(I\\), and positive \\(R\\) use the passive sign convention. The first normative claim is \\[V=RI.\\]\n\nFor resistor R9 at that same operating point, the same nonzero \\(I\\), positive \\(R\\), voltage polarity, and passive sign convention apply. The second normative claim is \\[V=-RI.\\] The two claims are simultaneously binding."
+        }]
+      }],
+      "probes": [{
+        "id": "opposed",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "V=-RI", "edge": "after"},
+        "expected": {
+          "decision": "conflicting",
+          "proofGrounded": true,
+          "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 1,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["opposition-order", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["explicit-comparable-opposition", "same-operating-point", "claim-order-permutation"]
+    },
+    {
+      "id": "v030-isolated-ohm",
+      "pairId": "scope-and-opposition",
+      "contract": "cross-scope-isolation",
+      "lawIds": ["ohm-law"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [
+          {"fileId": "drive", "path": "drive.tex", "content": "In the drive-board file, local symbols \\(V\\), \\(I\\), and \\(R\\) refer only to resistor D4 and use its passive sign convention. Its accepted equation is \\[V=RI.\\]"},
+          {"fileId": "sense", "path": "sense.tex", "content": "In this disconnected sensor file, the locally reused symbols \\(V\\), \\(I\\), and \\(R\\) refer only to shunt S8. Current is referenced out of the positive-voltage terminal, so its local signed equation is \\[V=-RI.\\] These quantities are not those of D4."}
+        ]
+      }],
+      "probes": [{
+        "id": "drive-local",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "drive", "needle": "V=RI", "edge": "after"},
+        "expected": {
+          "decision": "established",
+          "proofGrounded": true,
+          "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["document-order", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["disconnected-documents", "local-symbol-reuse", "document-order-permutation"]
+    },
+    {
+      "id": "v030-ambiguous-intersection",
+      "pairId": "scope-and-opposition",
+      "contract": "calm-ambiguity",
+      "lawIds": ["set-intersection", "event-intersection"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "intersection-interface.tex",
+          "content": "One proposed reading treats \\(A\\) and \\(B\\) as maintenance-window sets in a scheduling universe. An alternative proposed reading treats \\(A\\) and \\(B\\) as events in one probability space. Both readings remain conditional alternatives, and the interface selects neither for the unqualified expression \\[A\\cap B.\\]"
+        }]
+      }],
+      "probes": [{
+        "id": "unqualified",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "A\\cap B", "edge": "after"},
+        "expected": {
+          "decision": "ambiguous",
+          "proofGrounded": false,
+          "relations": [],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["conditional-alternatives", "set-event-collision", "calm-ambiguity"]
+    },
+    {
+      "id": "v030-complete-rename",
+      "pairId": "navigation-totality",
+      "contract": "navigation-complete",
+      "lawIds": ["matrix-vector-product"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "state-projection.tex",
+          "content": "Let \\(x\\) denote the state vector, \\(y\\) the result vector, and \\(A\\) a square matrix with compatible dimensions. The model asserts \\[y=Ax.\\] After evaluation, the controller stores \\(x\\) in the trace."
+        }]
+      }],
+      "probes": [{
+        "id": "state-symbol",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "y=Ax", "edge": "after"},
+        "navigationCursor": {"fileId": "main", "needle": "y=Ax", "offset": 3},
+        "expected": {
+          "decision": "established",
+          "proofGrounded": true,
+          "relations": [{"relationId": "matrix-vector-product", "roles": [{"role": "result", "symbol": "y"}, {"role": "operator", "symbol": "A"}, {"role": "vector", "symbol": "x"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {
+            "mode": "exact",
+            "definition": [{"fileId": "main", "needle": "Let \\(x\\) denote the state vector", "selection": {"offset": 6, "length": 1}}],
+            "references": [
+              {"fileId": "main", "needle": "Let \\(x\\) denote the state vector", "selection": {"offset": 6, "length": 1}},
+              {"fileId": "main", "needle": "y=Ax", "selection": {"offset": 3, "length": 1}},
+              {"fileId": "main", "needle": "stores \\(x\\) in the trace", "selection": {"offset": 9, "length": 1}}
+            ],
+            "rename": [
+              {"fileId": "main", "needle": "Let \\(x\\) denote the state vector", "selection": {"offset": 6, "length": 1}},
+              {"fileId": "main", "needle": "y=Ax", "selection": {"offset": 3, "length": 1}},
+              {"fileId": "main", "needle": "stores \\(x\\) in the trace", "selection": {"offset": 9, "length": 1}}
+            ],
+            "placeholder": "x",
+            "newName": "z",
+            "expectedText": "x",
+            "replacementText": "z",
+            "safety": "deterministic"
+          }
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["complete-edit-set", "exact-source-ranges", "safe-atomic-rename"]
+    },
+    {
+      "id": "v030-rejected-rename",
+      "pairId": "navigation-totality",
+      "contract": "navigation-reject",
+      "lawIds": ["continuous-state-equation"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "supplier-checklist.tex",
+          "content": "One unaccepted supplier alternative would call \\(B\\) the state matrix. A different unaccepted alternative would call \\(B\\) the input matrix. The review selects neither alternative, yet the inherited checklist still says, ‘Apply \\(B\\) in the safety check.’ No unique declaration or role owns that occurrence."
+        }]
+      }],
+      "probes": [{
+        "id": "ambiguous-symbol",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "Apply \\(B\\) in the safety check", "offset": 8},
+        "navigationCursor": {"fileId": "main", "needle": "Apply \\(B\\) in the safety check", "offset": 8},
+        "expected": {
+          "decision": "ambiguous",
+          "proofGrounded": false,
+          "relations": [],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "reject"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["ambiguous-role-identity", "atomic-rejection", "no-partial-edit"]
+    },
+    {
+      "id": "v030-period-retraction",
+      "pairId": "lifecycle-period",
+      "contract": "lifecycle-retraction",
+      "lawIds": ["period-frequency-reciprocity"],
+      "snapshots": [
+        {
+          "id": "accepted",
+          "documents": [{
+            "fileId": "main",
+            "path": "period-review.tex",
+            "content": "The positive measured period \\(T\\) and frequency \\(f\\) describe the same reference oscillator. The accepted conversion is \\[f=1/T.\\]"
+          }]
+        },
+        {
+          "id": "reviewed",
+          "documents": [{
+            "fileId": "main",
+            "path": "period-review.tex",
+            "content": "The earlier worksheet displayed \\(f=1/T\\), but this review withdraws that claim. In the current controller sheet, \\(T\\) denotes a timeout and \\(f\\) a filter coefficient; no frequency-period relation is asserted."
+          }]
+        }
+      ],
+      "probes": [
+        {
+          "id": "before",
+          "snapshotId": "accepted",
+          "semanticCursor": {"fileId": "main", "needle": "f=1/T", "edge": "after"},
+          "expected": {
+            "decision": "established",
+            "proofGrounded": true,
+            "relations": [{"relationId": "period-frequency-reciprocity", "roles": [{"role": "frequency", "symbol": "f"}, {"role": "period", "symbol": "T"}], "sourceGrounded": true}],
+            "excludedRelationIds": [],
+            "maximumProblems": 0,
+            "navigation": {"mode": "skip"}
+          }
+        },
+        {
+          "id": "after",
+          "snapshotId": "reviewed",
+          "semanticCursor": {"fileId": "main", "needle": "f=1/T", "edge": "after"},
+          "expected": {
+            "decision": "unsupported",
+            "proofGrounded": false,
+            "relations": [],
+            "excludedRelationIds": ["period-frequency-reciprocity"],
+            "maximumProblems": 0,
+            "navigation": {"mode": "skip"}
+          }
+        }
+      ],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [{"kind": "retract-relation", "fromProbeId": "before", "toProbeId": "after", "relationId": "period-frequency-reciprocity"}],
+      "variationTags": ["ordered-snapshots", "withdrawn-author-claim", "clean-semantic-retraction"]
+    }
+  ]
+}
