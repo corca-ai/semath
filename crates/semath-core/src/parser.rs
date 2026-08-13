@@ -1165,6 +1165,22 @@ mod tests {
     }
 
     #[test]
+    fn accepts_blocks_that_cross_their_starting_scope_boundary() {
+        let mut document = valid_snapshot_document();
+        document.scopes = serde_json::from_value(serde_json::json!([
+            {"kind": "document", "parent": null, "range": {"startOffset": 0, "endOffset": 3}, "state": "complete"},
+            {"kind": "environment", "name": "lemma", "parent": 0, "range": {"startOffset": 0, "endOffset": 1}, "state": "complete"}
+        ]))
+        .unwrap();
+        document.blocks = serde_json::from_value(serde_json::json!([{
+            "kind": "paragraph", "parentScope": 1, "range": {"startOffset": 0, "endOffset": 3}, "state": "complete"
+        }]))
+        .unwrap();
+
+        assert!(parse_snapshot(&document).is_ok());
+    }
+
+    #[test]
     fn rejects_cycles_through_generated_argument_edges() {
         let mut document = valid_snapshot_document();
         document.macros = serde_json::from_value(serde_json::json!([{
