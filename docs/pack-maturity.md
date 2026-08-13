@@ -99,10 +99,11 @@ holds approved support policy; GitHub issues hold planned work.
   set.
 - The independently sealed v0.29 fresh blind was run once after its complete
   pre-blind gate passed. It scored 4 of 48 with risk 426, including nine false
-  establishments and 20 unsafe navigation or edit observations; all eight
-  lifecycle comparison stages agreed. Its terminal receipt is `safety-failed`,
-  so PR #304 is not a release and CorTeX must not pin it. This exposed tranche
-  is now historical evidence and is not a tuning set.
+  establishments, six cases exceeding their calm diagnostic limit, and 20
+  unsafe navigation or edit observations; all eight lifecycle comparison
+  stages agreed. Its terminal receipt is `safety-failed`, so PR #304 is not a
+  release and CorTeX must not pin it. This exposed tranche is now historical
+  evidence and is not a tuning set.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.

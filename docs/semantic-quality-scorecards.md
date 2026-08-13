@@ -164,8 +164,9 @@ run remains diagnosable without executing its fixture again.
 
 The independently sealed v0.29 fresh blind was also executed once on
 2026-08-13, after the complete pre-blind gate passed on the separate release
-host. It scored 4 of 48 with risk 426: nine false establishments, no false
-conflicts, 20 unsafe navigation or edit observations, and 29 coverage misses.
+host. It scored 4 of 48 with risk 426: nine false establishments, no conflicting
+decisions but six cases exceeding their calm diagnostic limit, 20 unsafe
+navigation or edit observations, and 29 coverage misses.
 Clean and incremental results agreed across all eight reviewed lifecycle
 stages. Its terminal receipt is `safety-failed`, so PR #304 is not a release and
 must not be merged or pinned by CorTeX. The fixture seal is
