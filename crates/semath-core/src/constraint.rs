@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use crate::consistency::{role_shape_conflict, roles_conflict};
+use crate::evidence_decision::{EqualAuthorityConflict, EvidenceAuthority};
 use crate::semantic_index::{
     Claim, ClaimComparison, ClaimCondition, ClaimExtent, ClaimId, ClaimObject, ClaimOperation,
     ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, EntityId,
@@ -42,9 +43,40 @@ pub(crate) struct ConstraintPlan {
 pub(crate) struct PlannedConflict {
     pub subject: EntityId,
     pub binding_key: Option<String>,
+    pub proof: EqualAuthorityConflict<TypedConflictKind, TypedConflictSlot, ClaimId>,
     pub code: String,
     pub summary: String,
     pub parent_claims: Vec<ClaimId>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum TypedConflictKind {
+    IncompatibleValues {
+        predicate: ClaimPredicate,
+        left: ClaimValue,
+        right: ClaimValue,
+    },
+    IncompatibleBindingRoles {
+        left: ClaimValue,
+        right: ClaimValue,
+    },
+    IncompatibleRoleAndShape {
+        role: ClaimValue,
+        shape: ClaimValue,
+    },
+    OpposedComparisons {
+        left: ClaimComparison,
+        right: ClaimComparison,
+    },
+    InvalidProductShape,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum TypedConflictSlot {
+    EntityPredicate(EntityId, ClaimPredicate),
+    BindingRole(String, Vec<u32>, String),
+    Comparison(EntityId, EntityId),
+    Operation(EntityId),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -255,6 +287,23 @@ fn apply_composed_relations(
     }
 }
 
+fn equal_authority_conflict(
+    kind: TypedConflictKind,
+    slot: TypedConflictSlot,
+    left_roots: BTreeSet<ClaimId>,
+    right_roots: BTreeSet<ClaimId>,
+) -> EqualAuthorityConflict<TypedConflictKind, TypedConflictSlot, ClaimId> {
+    EqualAuthorityConflict::new(
+        kind,
+        slot,
+        EvidenceAuthority::ExplicitAuthor,
+        left_roots,
+        EvidenceAuthority::ExplicitAuthor,
+        right_roots,
+    )
+    .expect("a planned conflict has two nonempty same-authority proof sides")
+}
+
 fn collect_conflicts(
     known: &BTreeMap<FactKey, Proof>,
     relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
@@ -290,9 +339,20 @@ fn collect_conflicts(
                 .collect::<Vec<_>>();
             parents.sort();
             parents.dedup();
+            let proof = equal_authority_conflict(
+                TypedConflictKind::IncompatibleValues {
+                    predicate: left.predicate.clone(),
+                    left: left.value.clone(),
+                    right: right.value.clone(),
+                },
+                TypedConflictSlot::EntityPredicate(left.subject.clone(), left.predicate.clone()),
+                left_proof.parents.clone(),
+                right_proof.parents.clone(),
+            );
             conflicts.insert(PlannedConflict {
                 subject: left.subject.clone(),
                 binding_key: binding_keys.get(&left.subject).cloned(),
+                proof,
                 code: match left.predicate {
                     ClaimPredicate::HasShape => "constraint-shape-conflict",
                     ClaimPredicate::HasDimension
@@ -342,6 +402,19 @@ fn collect_conflicts(
                 }
                 let mut parent_claims = vec![left.claim_id.clone(), right.claim_id.clone()];
                 parent_claims.sort();
+                let proof = equal_authority_conflict(
+                    TypedConflictKind::IncompatibleBindingRoles {
+                        left: left.value.clone(),
+                        right: right.value.clone(),
+                    },
+                    TypedConflictSlot::BindingRole(
+                        left.subject.component_id.clone(),
+                        left.subject.scope_path.clone(),
+                        left.binding_key.clone(),
+                    ),
+                    BTreeSet::from([left.claim_id.clone()]),
+                    BTreeSet::from([right.claim_id.clone()]),
+                );
                 conflicts.insert(PlannedConflict {
                     subject: if left.subject < right.subject {
                         right.subject.clone()
@@ -349,6 +422,7 @@ fn collect_conflicts(
                         left.subject.clone()
                     },
                     binding_key: Some(left.binding_key.clone()),
+                    proof,
                     code: "notation-role-conflict".into(),
                     summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                     parent_claims,
@@ -369,9 +443,20 @@ fn collect_conflicts(
                 .collect::<Vec<_>>();
             parents.sort();
             parents.dedup();
+            let (role, shape) = match (&left.predicate, &left.value) {
+                (ClaimPredicate::HasRole, role) => (role.clone(), right.value.clone()),
+                _ => (right.value.clone(), left.value.clone()),
+            };
+            let proof = equal_authority_conflict(
+                TypedConflictKind::IncompatibleRoleAndShape { role, shape },
+                TypedConflictSlot::EntityPredicate(left.subject.clone(), ClaimPredicate::HasRole),
+                left_proof.parents.clone(),
+                right_proof.parents.clone(),
+            );
             conflicts.insert(PlannedConflict {
                 subject: left.subject.clone(),
                 binding_key: binding_keys.get(&left.subject).cloned(),
+                proof,
                 code: "notation-role-type-conflict".into(),
                 summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                 parent_claims: parents,
@@ -407,9 +492,19 @@ fn collect_conflicts(
             if !comparisons_conflict(left_operator, &right_operator) {
                 continue;
             }
+            let proof = equal_authority_conflict(
+                TypedConflictKind::OpposedComparisons {
+                    left: left_operator.clone(),
+                    right: right_operator.clone(),
+                },
+                TypedConflictSlot::Comparison(left_subject.clone(), left_object.clone()),
+                BTreeSet::from([left_id.clone()]),
+                BTreeSet::from([right_id.clone()]),
+            );
             conflicts.insert(PlannedConflict {
                 subject: left_subject.clone(),
                 binding_key: binding_keys.get(left_subject).cloned(),
+                proof,
                 code: "constraint-comparison-conflict".into(),
                 summary: format!(
                     "{left_operator:?} conflicts with {right_operator:?} for the same operands"
@@ -456,9 +551,20 @@ fn collect_conflicts(
             .collect::<Vec<_>>();
         parents.sort();
         parents.dedup();
+        let factor_roots = factor_shapes
+            .iter()
+            .flat_map(|(_, proof)| proof.parents.iter().cloned())
+            .collect::<BTreeSet<_>>();
+        let proof = equal_authority_conflict(
+            TypedConflictKind::InvalidProductShape,
+            TypedConflictSlot::Operation(result.clone()),
+            factor_roots,
+            BTreeSet::from([relation_id.clone()]),
+        );
         conflicts.insert(PlannedConflict {
             subject: result.clone(),
             binding_key: binding_keys.get(result).cloned(),
+            proof,
             code: "constraint-product-shape-conflict".into(),
             summary: "Product operands have incompatible proven inner dimensions".into(),
             parent_claims: parents,
@@ -1496,6 +1602,16 @@ mod tests {
         ]);
         assert_eq!(plan.conflicts.len(), 1);
         assert_eq!(plan.conflicts[0].code, "constraint-comparison-conflict");
+        assert_eq!(
+            plan.conflicts[0].proof.authority,
+            EvidenceAuthority::ExplicitAuthor
+        );
+        assert!(matches!(
+            plan.conflicts[0].proof.value,
+            TypedConflictKind::OpposedComparisons { .. }
+        ));
+        assert!(!plan.conflicts[0].proof.left_roots.is_empty());
+        assert!(!plan.conflicts[0].proof.right_roots.is_empty());
 
         let (x, y) = (entity(3), entity(4));
         let compatible = plan_constraint_derivations(&[

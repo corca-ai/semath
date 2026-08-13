@@ -3467,6 +3467,34 @@ fn expression_asserts_derivative(
 }
 
 const MAX_ASSUMPTION_DISTANCE: u32 = 640;
+const MAX_ATTACHED_ASSUMPTION_GAP: u32 = 16;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TypedAssumption {
+    Differentiable,
+    Positive,
+    SignConvention,
+    OpposedSignConvention,
+    Uniform,
+    SameContext,
+    DifferentContext,
+    Other,
+}
+
+fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
+    match (assumption.kind.as_str(), assumption.value.as_str()) {
+        ("regularity", "differentiable") => TypedAssumption::Differentiable,
+        ("sign", "positive" | "strictly-positive") => TypedAssumption::Positive,
+        ("sign-convention", value) if value.starts_with("not-") => {
+            TypedAssumption::OpposedSignConvention
+        }
+        ("sign-convention", _) => TypedAssumption::SignConvention,
+        ("uniformity", "uniform") => TypedAssumption::Uniform,
+        ("context", "different-context") => TypedAssumption::DifferentContext,
+        ("context", _) => TypedAssumption::SameContext,
+        _ => TypedAssumption::Other,
+    }
+}
 
 fn assumption_condition_evidence(
     condition: &PackLawCondition,
@@ -3509,15 +3537,13 @@ fn assumption_condition_evidence(
                 .unwrap_or_default();
             let precedes_formula = end <= formula_range.start_offset
                 && formula_range.start_offset - end <= MAX_ASSUMPTION_DISTANCE;
-            let attaches_after_formula = assumption.evidence.kind == "attached-prose"
-                && formula_range.end_offset <= start
-                && start - formula_range.end_offset <= MAX_ASSUMPTION_DISTANCE;
-            let targets_formula = assumption.evidence.kind == "attached-prose"
-                && assumption.evidence.source_ranges.iter().any(|range| {
-                    range.start_offset < formula_range.end_offset
-                        && formula_range.start_offset < range.end_offset
-                });
-            (precedes_formula || attaches_after_formula || targets_formula)
+            let immediately_follows_formula = formula_range.end_offset <= start
+                && start - formula_range.end_offset <= MAX_ATTACHED_ASSUMPTION_GAP;
+            let targets_formula = assumption.evidence.source_ranges.iter().any(|range| {
+                range.start_offset < formula_range.end_offset
+                    && formula_range.start_offset < range.end_offset
+            });
+            (precedes_formula || immediately_follows_formula || targets_formula)
                 && subjects_match(assumption)
         })
         .chain(external_assumptions.iter().filter(subjects_match))
@@ -3525,24 +3551,19 @@ fn assumption_condition_evidence(
             if assumption.value == condition.id {
                 return true;
             }
-            match condition.kind {
-                PackConditionKind::Assumption => false,
-                PackConditionKind::Differentiable => {
-                    assumption.kind == "regularity" && assumption.value == "differentiable"
-                }
-                PackConditionKind::Positive => {
-                    assumption.kind == "sign"
-                        && matches!(assumption.value.as_str(), "positive" | "strictly-positive")
-                }
-                PackConditionKind::SignConvention => {
-                    assumption.kind == "sign-convention" && !assumption.value.starts_with("not-")
-                }
-                PackConditionKind::Uniform => {
-                    assumption.kind == "uniformity" && assumption.value == "uniform"
-                }
-                PackConditionKind::DomainMembership
-                | PackConditionKind::SameContext
-                | PackConditionKind::ShapeCompatible => false,
+            match (condition.kind, typed_assumption(assumption)) {
+                (PackConditionKind::Differentiable, TypedAssumption::Differentiable)
+                | (PackConditionKind::Positive, TypedAssumption::Positive)
+                | (PackConditionKind::SignConvention, TypedAssumption::SignConvention)
+                | (PackConditionKind::Uniform, TypedAssumption::Uniform) => true,
+                (
+                    PackConditionKind::Assumption
+                    | PackConditionKind::DomainMembership
+                    | PackConditionKind::SameContext
+                    | PackConditionKind::ShapeCompatible,
+                    _,
+                ) => false,
+                _ => false,
             }
         })
         .map(|assumption| assumption.evidence.clone())
@@ -3576,7 +3597,7 @@ fn same_context_evidence(
         .iter()
         .chain(external_assumptions)
         .find(|assumption| {
-            assumption.kind == "context"
+            typed_assumption(assumption) == TypedAssumption::SameContext
                 && symbols
                     .iter()
                     .all(|symbol| assumption.subjects.contains(symbol))
@@ -3652,10 +3673,10 @@ fn law_conditions_refuted(
             .any(|assumption| {
                 let refutes = match condition.kind {
                     PackConditionKind::SameContext => {
-                        assumption.kind == "context" && assumption.value == "different-context"
+                        typed_assumption(assumption) == TypedAssumption::DifferentContext
                     }
                     PackConditionKind::SignConvention => {
-                        assumption.kind == "sign-convention" && assumption.value.starts_with("not-")
+                        typed_assumption(assumption) == TypedAssumption::OpposedSignConvention
                     }
                     _ => false,
                 };
@@ -4001,19 +4022,22 @@ mod tests {
 
     use super::{
         COMPILED_LAWS, ExternalTypeEnvironment, LAW_DISPATCH, LawAnalysisContext, LawDispatch,
-        LawObservations, collect_law_expressions, observe_laws, source_label_matches_expression,
-        strip_formula_presentation, structural_alternatives, unify_all,
+        LawObservations, TypedAssumption, collect_law_expressions, observe_laws,
+        source_label_matches_expression, strip_formula_presentation, structural_alternatives,
+        typed_assumption, unify_all,
     };
     use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
     use crate::domain_signature::laws_share_collision;
+    use crate::pack::{PackConditionKind, PackLawCondition};
     use crate::parser::{ParsedMath, parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::quantity::observe_quantities;
     use crate::shape::observe_shapes;
     use crate::{
-        ConstraintStatus, DocumentLanguage, LawRecognition, LawRecognitionStatus, ProjectDocument,
-        ScientificConstraintKind, SourceIndex, SourceRange,
+        AssumptionInfo, ConstraintStatus, DocumentLanguage, Evidence, LawBindingProof,
+        LawRecognition, LawRecognitionStatus, ProjectDocument, ScientificConstraintKind,
+        SourceIndex, SourceRange,
     };
 
     fn canonical_expressions(
@@ -4024,6 +4048,91 @@ mod tests {
             .iter()
             .map(|math| lower_document_region(document, &math.region.content_range))
             .collect()
+    }
+
+    #[test]
+    fn condition_assumptions_lower_to_closed_typed_values() {
+        let assumption = |kind: &str, value: &str| AssumptionInfo {
+            kind: kind.into(),
+            value: value.into(),
+            subjects: Vec::new(),
+            evidence: Evidence {
+                rule_id: "test".into(),
+                kind: "display-only".into(),
+                strength: "display-only".into(),
+                source_ranges: Vec::new(),
+            },
+        };
+        assert_eq!(
+            typed_assumption(&assumption("regularity", "differentiable")),
+            TypedAssumption::Differentiable
+        );
+        assert_eq!(
+            typed_assumption(&assumption("context", "different-context")),
+            TypedAssumption::DifferentContext
+        );
+        assert_eq!(
+            typed_assumption(&assumption("sign-convention", "not-clockwise")),
+            TypedAssumption::OpposedSignConvention
+        );
+    }
+
+    #[test]
+    fn condition_proof_does_not_depend_on_presentation_evidence_kind() {
+        let condition = PackLawCondition {
+            id: "positive-input".into(),
+            kind: PackConditionKind::Positive,
+            subjects: vec!["input".into()],
+            label: "input is positive".into(),
+            evidence_phrases: Vec::new(),
+        };
+        let bindings = BTreeMap::from([(
+            "input".into(),
+            SemanticExpr {
+                kind: SemanticExprKind::Symbol("x".into()),
+                range: SourceRange {
+                    start_offset: 20,
+                    end_offset: 21,
+                },
+                provenance: Vec::new(),
+            },
+        )]);
+        let mut assumption = AssumptionInfo {
+            kind: "sign".into(),
+            value: "positive".into(),
+            subjects: vec!["x".into()],
+            evidence: Evidence {
+                rule_id: "test".into(),
+                kind: "attached-prose".into(),
+                strength: "strong".into(),
+                source_ranges: vec![SourceRange {
+                    start_offset: 35,
+                    end_offset: 45,
+                }],
+            },
+        };
+        let formula_range = SourceRange {
+            start_offset: 10,
+            end_offset: 30,
+        };
+        let first = super::assumption_condition_evidence(
+            &condition,
+            &bindings,
+            &formula_range,
+            std::slice::from_ref(&assumption),
+            &[],
+        );
+        assumption.evidence.kind = "display-only".into();
+        assumption.evidence.strength = "display-only".into();
+        let mutated = super::assumption_condition_evidence(
+            &condition,
+            &bindings,
+            &formula_range,
+            std::slice::from_ref(&assumption),
+            &[],
+        );
+        assert!(first.is_some());
+        assert!(mutated.is_some());
     }
 
     #[test]
@@ -4625,16 +4734,13 @@ This conversion is performed once per accepted timing sample so the accumulator 
         .expect("the named exact relation should remain a candidate");
 
         assert!(recognition.bindings.iter().any(|binding| {
-            binding.evidence.strength == "strong"
-                && binding.evidence.kind == "asserted-binding"
-                && binding.evidence.source_ranges.len() >= 2
+            binding.proof == LawBindingProof::Asserted && binding.evidence.source_ranges.len() >= 2
         }));
         assert!(
             recognition
                 .bindings
                 .iter()
-                .all(|binding| binding.evidence.strength != "hard"
-                    || binding.evidence.kind == "canonical-binding")
+                .all(|binding| binding.proof != LawBindingProof::Typed)
         );
     }
 
