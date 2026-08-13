@@ -930,6 +930,57 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
 }
 
 #[test]
+fn semantic_view_does_not_project_a_nested_law_onto_the_formula_head() {
+    let content = "Let $A$ and $B$ be events. The reported value is $p=P(A\\cap B)/P(B)$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let head = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.find("p=").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view: head } = head.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        !matches!(
+            head.decision,
+            MeaningDecision::Established { ref meaning, .. }
+                | MeaningDecision::Partial { ref meaning, .. }
+                if meaning.relation_id.as_deref() == Some("probability:event-intersection")
+        ),
+        "a nested relation must not own the outer formula head: {:?}",
+        head.decision
+    );
+
+    let nested = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.find("A\\cap B").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view: nested } = nested.value else {
+        panic!("expected semantic view")
+    };
+    assert!(matches!(
+        nested.decision,
+        MeaningDecision::Established { ref meaning, .. }
+            | MeaningDecision::Partial { ref meaning, .. }
+            if meaning.relation_id.as_deref() == Some("probability:event-intersection")
+    ));
+}
+
+#[test]
 fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() {
     let content = "Let $A$ be an $m$ by $n$ matrix. Let $x$ be an $n$-dimensional vector. Let $y$ denote the output. $y=Ax$. Inspect $y$.";
     let offset = content.rfind("$y$").unwrap() as u32 + 1;

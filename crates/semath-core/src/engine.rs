@@ -3653,6 +3653,18 @@ impl SemathEngine {
         {
             local_formulas = observations.laws.overlapping(&math.region.content_range);
         }
+        let focus_is_relation_head = focus.is_some_and(|focus| {
+            queried_relation
+                .and_then(relation_head)
+                .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range))
+        });
+        if focus_is_relation_head {
+            local_formulas.retain(|formula| {
+                formula.relation.as_ref().is_some_and(|relation| {
+                    focus.is_some_and(|focus| ranges_overlap(&relation.range, &focus.range))
+                })
+            });
+        }
         local_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
         let display_focus = focus.cloned().or_else(|| {
             let (name, range) = queried_relation.and_then(relation_head)?;
