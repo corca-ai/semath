@@ -1,9 +1,7 @@
 import {
   LatexLanguageService,
-  type LatexWorkspaceEdit,
   type NeutralCompletionItem,
   type NeutralHover,
-  type NeutralLocation,
   type NeutralRange,
 } from "wasmtex/lsp";
 import {
@@ -421,18 +419,22 @@ export class SemathLspServer {
       position.textDocument.uri,
       position.position,
       kind,
+      kind === "references"
+        ? {
+            includeDeclaration:
+              ((params?.context ?? {}) as { includeDeclaration?: boolean })
+                .includeDeclaration ?? true,
+          }
+        : undefined,
     );
-    const semantic =
-      result.value.kind === "locations"
-        ? result.value.locations.map((item) => this.location(item))
-        : [];
-    if (semantic.length) return kind === "definition" ? semantic[0]! : semantic;
-    const { path, line, column } = this.locate(position);
-    if (kind === "definition") {
-      const fallback = this.latex.getDefinition(path, line, column);
-      return fallback ? mapLocation(fallback) : null;
+    if (
+      result.value.kind !== "locations" ||
+      result.value.authorization.status !== "authorized"
+    ) {
+      return kind === "definition" ? null : [];
     }
-    return this.latex.getReferences(path, line, column).map(mapLocation);
+    const locations = result.value.locations.map((item) => this.location(item));
+    return kind === "definition" ? locations[0] ?? null : locations;
   }
 
   private prepareRename(params: TextDocumentPositionParams): object | null {
@@ -441,38 +443,17 @@ export class SemathLspServer {
       params.position,
       "prepareRename",
     );
-    if (result.value.kind === "renamePreparation" && result.value.range) {
+    if (
+      result.value.kind === "renamePreparation" &&
+      result.value.authorization.status === "authorized" &&
+      result.value.range
+    ) {
       return {
         placeholder: result.value.placeholder,
         range: this.lspRange(params.textDocument.uri, result.value.range),
       };
     }
-    const { path, line, column } = this.locate(params);
-    const symbol = this.latex
-      .getProjectIndex()
-      .findSymbolAt(path, line, column);
-    if (!symbol) return null;
-    const occurrence = this.latex
-      .getProjectIndex()
-      .findAllOccurrences(symbol.name, symbol.type)
-      .find(
-        (item) =>
-          item.filePath === path &&
-          item.line === line &&
-          column >= item.column &&
-          column <= item.column + item.length,
-      );
-    if (!occurrence) return null;
-    return {
-      placeholder: symbol.name,
-      range: {
-        end: {
-          character: occurrence.column - 1 + occurrence.length,
-          line: occurrence.line - 1,
-        },
-        start: { character: occurrence.column - 1, line: occurrence.line - 1 },
-      },
-    };
+    return null;
   }
 
   private rename(params: Record<string, unknown> | undefined): object | null {
@@ -487,13 +468,14 @@ export class SemathLspServer {
         newName: position.newName ?? "",
       },
     );
-    if (result.value.kind === "editProposal" && result.value.proposal) {
+    if (
+      result.value.kind === "editProposal" &&
+      result.value.authorization.status === "authorized" &&
+      result.value.proposal
+    ) {
       return this.workspaceEdit(result.value.proposal);
     }
-    const { path, line, column } = this.locate(position);
-    return mapWorkspaceEdit(
-      this.latex.getRenameEdits(path, line, column, position.newName ?? ""),
-    );
+    return null;
   }
 
   private async completion(
@@ -543,7 +525,7 @@ export class SemathLspServer {
       | "rename"
       | "selection"
       | "semanticView",
-    extra: Record<string, unknown> = {},
+    extra: Record<string, unknown> | undefined = {},
   ): QueryResult {
     const state = this.stateForUri(uri);
     const fileId = state.document.fileId;
@@ -556,12 +538,17 @@ export class SemathLspServer {
       case "prepareRename":
         return this.query(state, { fileId, kind, offset });
       case "references":
-        return this.query(state, { fileId, kind, offset });
+        return this.query(state, {
+          fileId,
+          includeDeclaration: Boolean(extra?.includeDeclaration ?? true),
+          kind,
+          offset,
+        });
       case "rename":
         return this.query(state, {
           fileId,
           kind,
-          newName: String(extra.newName ?? ""),
+          newName: String(extra?.newName ?? ""),
           offset,
         });
       case "selection":
@@ -758,34 +745,6 @@ function mapHover(hover: NeutralHover | null): object | null {
         range: mapRange(hover.range),
       }
     : null;
-}
-
-function mapLocation(location: NeutralLocation): object {
-  return { range: mapRange(location.range), uri: uriFromPath(location.file) };
-}
-
-function mapWorkspaceEdit(
-  edit: LatexWorkspaceEdit | null | undefined,
-): object | null {
-  if (!edit) return null;
-  const changes: Record<string, object[]> = {};
-  for (const item of edit.edits) {
-    const uri = uriFromPath(item.file);
-    (changes[uri] ??= []).push({
-      newText: item.newText,
-      range: {
-        end: {
-          character: item.range.endColumn - 1,
-          line: item.range.endLineNumber - 1,
-        },
-        start: {
-          character: item.range.startColumn - 1,
-          line: item.range.startLineNumber - 1,
-        },
-      },
-    });
-  }
-  return { changes };
 }
 
 function mapCompletion(

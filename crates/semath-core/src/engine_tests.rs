@@ -2,9 +2,12 @@ use std::collections::{BTreeSet, HashMap};
 
 use super::{
     SemathEngine, index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
-    stable_text_digest,
+    relation_expression_at_cursor, stable_text_digest,
 };
-use crate::canonical::{lower_document_region, render_canonical};
+use crate::canonical::{
+    SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
+    render_canonical,
+};
 use crate::parser::test_math_regions;
 use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
@@ -58,12 +61,25 @@ fn chained_equality_stores_operands_and_source_linked_relations_without_a_system
 
 #[test]
 fn chained_metric_formula_does_not_store_relation_placeholder_entities() {
-    let content = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
-    let mut engine = SemathEngine::default();
-    let update = engine.reset(snapshot(content)).unwrap();
+    let named = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
+    let expanded = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{E C E}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
 
+    let named_stats = SemathEngine::default()
+        .reset(snapshot(named))
+        .unwrap()
+        .stats;
+    let expanded_stats = SemathEngine::default()
+        .reset(snapshot(expanded))
+        .unwrap()
+        .stats;
+
+    assert!(
+        named_stats.semantic_entities < expanded_stats.semantic_entities,
+        "a Roman named operator is one entity rather than three adjacent factors"
+    );
     assert_eq!(
-        update.stats.semantic_entities, 19,
+        named_stats.semantic_entities + 4,
+        expanded_stats.semantic_entities,
         "the relation remains placeholder-free and the sum index is one scoped binder entity"
     );
 }
@@ -84,6 +100,128 @@ fn range(start_offset: u32, end_offset: u32) -> SourceRange {
         start_offset,
         end_offset,
     }
+}
+
+#[test]
+fn relation_focus_selects_the_exact_system_child_without_edge_guessing() {
+    fn symbol(name: &str, start: u32) -> SemanticExpr {
+        SemanticExpr {
+            kind: SemanticExprKind::Symbol(name.into()),
+            range: range(start, start + 1),
+            provenance: Vec::new(),
+        }
+    }
+    fn relation(left: &str, right: &str, start: u32) -> SemanticExpr {
+        SemanticExpr {
+            kind: SemanticExprKind::Relation {
+                operator: SemanticReference::new("equals", range(start + 1, start + 2), Vec::new()),
+                left: Box::new(symbol(left, start)),
+                right: Box::new(symbol(right, start + 2)),
+            },
+            range: range(start, start + 3),
+            provenance: Vec::new(),
+        }
+    }
+    let root = SemanticExpr {
+        kind: SemanticExprKind::System(vec![relation("a", "b", 10), relation("y", "x", 20)]),
+        range: range(10, 23),
+        provenance: Vec::new(),
+    };
+    let math_range = root.range.clone();
+    let y_start = 20;
+    let y_range = range(y_start, y_start + 1);
+
+    let selected = relation_expression_at_cursor(
+        std::slice::from_ref(&root),
+        &document("main", "main.tex", "          a=b       y=x", 1),
+        &math_range,
+        Some(&y_range),
+        y_start,
+    )
+    .expect("the focused relation");
+    assert_eq!(
+        relation_head(selected).map(|(name, _)| name),
+        Some("y".into())
+    );
+
+    let trailing = relation_expression_at_cursor(
+        std::slice::from_ref(&root),
+        &document("main", "main.tex", "          a=b       y=x", 1),
+        &math_range,
+        None,
+        math_range.end_offset,
+    )
+    .expect("the trailing relation");
+    assert_eq!(
+        relation_head(trailing).map(|(name, _)| name),
+        Some("y".into())
+    );
+}
+
+#[test]
+fn relation_focus_refuses_unowned_gaps_in_a_math_region() {
+    let relation = SemanticExpr {
+        kind: SemanticExprKind::Relation {
+            operator: SemanticReference::new("equals", range(11, 12), Vec::new()),
+            left: Box::new(SemanticExpr {
+                kind: SemanticExprKind::Symbol("a".into()),
+                range: range(10, 11),
+                provenance: Vec::new(),
+            }),
+            right: Box::new(SemanticExpr {
+                kind: SemanticExprKind::Symbol("b".into()),
+                range: range(12, 13),
+                provenance: Vec::new(),
+            }),
+        },
+        range: range(10, 13),
+        provenance: Vec::new(),
+    };
+    let math_range = range(0, 30);
+    let source = document("main", "main.tex", "                              ", 1);
+
+    assert!(
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &source,
+            &math_range,
+            None,
+            5,
+        )
+        .is_none()
+    );
+    assert!(
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &source,
+            &math_range,
+            None,
+            20,
+        )
+        .is_none()
+    );
+    assert!(
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &source,
+            &math_range,
+            None,
+            29,
+        )
+        .is_none()
+    );
+
+    let punctuation = document("main", "main.tex", "          a=b .               ", 1);
+    assert_eq!(
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &punctuation,
+            &math_range,
+            None,
+            15,
+        ),
+        Some(&relation),
+    );
 }
 
 #[test]
@@ -136,7 +274,7 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
                 1,
             ))
             .unwrap();
-        let QueryValue::Locations { locations } = result.value else {
+        let QueryValue::Locations { locations, .. } = result.value else {
             panic!("expected locations")
         };
         assert_eq!(locations.len(), 1);
@@ -171,12 +309,12 @@ fn differential_variable_owns_both_cursor_edges_inside_the_composite() {
 }
 
 #[test]
-fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
+fn navigation_distinguishes_an_authorized_self_definition_from_references() {
     let content = "Let $x$ denote the input.";
     let offset = content.find('x').unwrap() as u32;
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
-    for query_kind in [
+    for (query_index, query_kind) in [
         Query::Definition {
             file_id: "main".into(),
             offset,
@@ -184,13 +322,30 @@ fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
         Query::References {
             file_id: "main".into(),
             offset,
+            include_declaration: true,
         },
-    ] {
+        Query::References {
+            file_id: "main".into(),
+            offset,
+            include_declaration: false,
+        },
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let result = engine.query(query(query_kind, 1, 1)).unwrap();
-        let QueryValue::Locations { locations } = result.value else {
+        let QueryValue::Locations {
+            authorization,
+            locations,
+        } = result.value
+        else {
             panic!("expected locations")
         };
-        assert!(locations.is_empty());
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Authorized { .. }
+        ));
+        assert_eq!(locations.len(), usize::from(query_index == 1));
     }
 }
 
@@ -218,16 +373,19 @@ fn indexed_relation_head_is_not_offered_as_a_partial_base_rename() {
             ))
             .unwrap();
         let QueryValue::RenamePreparation {
+            authorization,
             range,
             placeholder,
-            rejection,
         } = result.value
         else {
             panic!("expected rename preparation")
         };
         assert!(range.is_none(), "{notation}");
         assert!(placeholder.is_none(), "{notation}");
-        assert!(rejection.is_some(), "{notation}");
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Refused { .. }
+        ));
     }
 }
 
@@ -249,14 +407,17 @@ fn proven_binder_component_can_be_renamed_inside_indexed_notation() {
         ))
         .unwrap();
     let QueryValue::RenamePreparation {
+        authorization,
         range: preparation_range,
         placeholder,
-        rejection,
     } = preparation.value
     else {
         panic!("expected rename preparation")
     };
-    assert_eq!(rejection, None);
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
     assert_eq!(placeholder.as_deref(), Some("i"));
     assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
 
@@ -272,12 +433,16 @@ fn proven_binder_component_can_be_renamed_inside_indexed_notation() {
         ))
         .unwrap();
     let QueryValue::EditProposal {
+        authorization,
         proposal: Some(proposal),
-        rejection: None,
     } = rename.value
     else {
         panic!("expected rename proposal")
     };
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
     assert_eq!(proposal.files.len(), 1);
     assert_eq!(proposal.files[0].edits.len(), 2);
     assert!(
@@ -300,12 +465,13 @@ fn navigation_and_rename_share_one_established_entity() {
             Query::References {
                 file_id: "main".into(),
                 offset: use_offset,
+                include_declaration: true,
             },
             1,
             1,
         ))
         .unwrap();
-    let QueryValue::Locations { locations } = references.value else {
+    let QueryValue::Locations { locations, .. } = references.value else {
         panic!("expected locations")
     };
     assert_eq!(locations.len(), 2);
@@ -321,16 +487,19 @@ fn navigation_and_rename_share_one_established_entity() {
         ))
         .unwrap();
     let QueryValue::RenamePreparation {
+        authorization,
         range: preparation_range,
         placeholder,
-        rejection,
     } = preparation.value
     else {
         panic!("expected rename preparation")
     };
     assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
     assert_eq!(placeholder.as_deref(), Some("A"));
-    assert_eq!(rejection, None);
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
 
     let rename = engine
         .query(query(
@@ -344,12 +513,16 @@ fn navigation_and_rename_share_one_established_entity() {
         ))
         .unwrap();
     let QueryValue::EditProposal {
+        authorization,
         proposal: Some(proposal),
-        rejection: None,
     } = rename.value
     else {
         panic!("expected rename proposal")
     };
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
     assert_eq!(proposal.files.len(), 1);
     assert_eq!(proposal.files[0].edits.len(), locations.len());
     assert!(
@@ -378,13 +551,147 @@ fn rename_refuses_to_merge_two_entities_in_the_same_scope() {
         ))
         .unwrap();
     let QueryValue::EditProposal {
+        authorization,
         proposal: None,
-        rejection: Some(rejection),
     } = result.value
     else {
         panic!("expected rename rejection")
     };
-    assert!(rejection.contains("merge"));
+    let crate::EntitySurfaceAuthorization::Refused { reason } = authorization else {
+        panic!("expected typed refusal")
+    };
+    assert_eq!(reason.kind, crate::EntitySurfaceRefusalKind::Capture);
+}
+
+#[test]
+fn rename_refuses_to_capture_a_visible_outer_entity() {
+    let content =
+        "Let $B$ denote the outer quantity.\n# Inner\nLet $A$ denote the inner quantity. Use $A$.";
+    let section = content.find("# Inner").unwrap() as u32;
+    let mut input = document("main", "main.md", content, 1);
+    input.language = DocumentLanguage::Markdown;
+    input.math_regions = test_math_regions(content, DocumentLanguage::Markdown);
+    input.scopes = vec![
+        SyntaxScope {
+            kind: "document".into(),
+            parent: None,
+            range: range(0, content.len() as u32),
+            state: MathRootState::Complete,
+            name: None,
+            level: None,
+            source: None,
+        },
+        SyntaxScope {
+            kind: "section".into(),
+            parent: Some(0),
+            range: range(section, content.len() as u32),
+            state: MathRootState::Complete,
+            name: Some("Inner".into()),
+            level: None,
+            source: None,
+        },
+    ];
+    let use_offset = content.rfind("$A$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    let mut project = snapshot(content);
+    project.documents = vec![input];
+    engine.reset(project).unwrap();
+
+    let captured = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "B".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        authorization: crate::EntitySurfaceAuthorization::Refused { reason },
+        proposal: None,
+    } = captured.value
+    else {
+        panic!("expected capture refusal")
+    };
+    assert_eq!(reason.kind, crate::EntitySurfaceRefusalKind::Capture);
+
+    let safe = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "C".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    assert!(matches!(
+        safe.value,
+        QueryValue::EditProposal {
+            authorization: crate::EntitySurfaceAuthorization::Authorized { .. },
+            proposal: Some(_),
+        }
+    ));
+}
+
+#[test]
+fn rename_refuses_to_capture_an_unresolved_visible_occurrence() {
+    let content = "Let $A$ denote the input. Observe free $B$ and then use $A$.";
+    let offset = content.rfind("$A$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset,
+                new_name: "B".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    assert!(matches!(
+        result.value,
+        QueryValue::EditProposal {
+            authorization: crate::EntitySurfaceAuthorization::Refused {
+                reason: crate::EntitySurfaceRefusal {
+                    kind: crate::EntitySurfaceRefusalKind::Capture,
+                    ..
+                },
+            },
+            proposal: None,
+        }
+    ));
+}
+
+#[test]
+fn prose_acronym_cursor_is_addressable_by_the_shared_surface_policy() {
+    let content = "Expected calibration error (ECE) is the metric. Use $\\operatorname{ECE}$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let offset = content.find("(ECE)").unwrap() as u32 + 2;
+    let result = engine
+        .query(query(
+            Query::References {
+                file_id: "main".into(),
+                offset,
+                include_declaration: true,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    assert!(matches!(
+        result.value,
+        QueryValue::Locations {
+            authorization: crate::EntitySurfaceAuthorization::Authorized { .. },
+            locations,
+        } if !locations.is_empty()
+    ));
 }
 
 #[test]
@@ -412,6 +719,7 @@ fn exact_occurrence_range_outranks_a_structural_selection_alias() {
             availability_order: 1,
             surface: "P".into(),
             source_text: "P".into(),
+            selection_text: "P".into(),
             notation: Vec::new(),
         },
         SourceOccurrence {
@@ -425,6 +733,7 @@ fn exact_occurrence_range_outranks_a_structural_selection_alias() {
             availability_order: 1,
             surface: "P_s".into(),
             source_text: "P_s".into(),
+            selection_text: "P".into(),
             notation: Vec::new(),
         },
     ];
@@ -795,13 +1104,59 @@ fn equality_lhs_establishes_source_ordered_symbol_identity_for_later_uses() {
             1,
         ))
         .unwrap();
-    let QueryValue::Locations { locations } = definition.value else {
+    let QueryValue::Locations { locations, .. } = definition.value else {
         panic!("expected locations")
     };
     assert!(
         locations.is_empty(),
         "an assignment is identity, not a prose definition"
     );
+}
+
+#[test]
+fn implicit_assignment_identity_cannot_authorize_navigation_or_editing() {
+    let content = "Let $d$ be length and $t$ duration. $v=d/t$. The derived value is $v$.";
+    let offset = content.rfind("$v$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    for query_kind in [
+        Query::Definition {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::References {
+            file_id: "main".into(),
+            offset,
+            include_declaration: true,
+        },
+        Query::PrepareRename {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::Rename {
+            file_id: "main".into(),
+            offset,
+            new_name: "w".into(),
+        },
+    ] {
+        let result = engine.query(query(query_kind, 1, 1)).unwrap();
+        let authorization = match result.value {
+            QueryValue::Locations { authorization, .. }
+            | QueryValue::RenamePreparation { authorization, .. }
+            | QueryValue::EditProposal { authorization, .. } => authorization,
+            _ => panic!("expected an entity surface result"),
+        };
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Refused {
+                reason: crate::EntitySurfaceRefusal {
+                    kind: crate::EntitySurfaceRefusalKind::Unsupported,
+                    ..
+                }
+            }
+        ));
+    }
 }
 
 #[test]
@@ -909,6 +1264,65 @@ fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
             .iter()
             .any(|diagnostic| diagnostic.code == "constraint-product-shape-conflict")
     );
+}
+
+#[test]
+fn incompatible_redeclarations_share_one_typed_public_conflict() {
+    let content = "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $";
+    let offset = (content.rfind("$p ").unwrap() + 1) as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert_eq!(
+        view.diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.code == "notation-role-conflict")
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn a_typed_conflict_follows_every_participating_binding_to_later_uses() {
+    for content in [
+        "In this model let $u$ be a scalar temperature and let $u$ be a three-dimensional velocity vector. Use $u$ now.",
+        "In one lifetime let $t$ be duration in seconds and let $t$ be temperature in kelvin. Inspect $t$.",
+    ] {
+        let offset = (content.rfind('$').unwrap() - 1) as u32;
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert!(
+            matches!(view.decision, MeaningDecision::Conflicting { .. }),
+            "{content}: {:?}",
+            view.decision
+        );
+    }
 }
 
 #[test]
@@ -1022,12 +1436,13 @@ fn symbolic_comparisons_do_not_cross_sibling_document_scopes() {
 
 #[test]
 fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
-    let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}$.";
+    let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}\\quad$.";
     let offsets = [
         content.find("$P=").unwrap() as u32,
         content.find("P=").unwrap() as u32,
         content.find("\\mathbf{F}").unwrap() as u32,
-        content.rfind('v').unwrap() as u32 + 1,
+        content.rfind("\\mathbf{v}").unwrap() as u32 + "\\mathbf{v}".len() as u32,
+        content.rfind("\\quad").unwrap() as u32 + "\\quad".len() as u32,
         content.rfind('$').unwrap() as u32 + 1,
     ];
     let mut engine = SemathEngine::default();
@@ -1060,25 +1475,38 @@ fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
 
-    for offset in [period_end, content.len() as u32] {
-        let result = engine
-            .query(query(
-                Query::SemanticView {
-                    file_id: "main".into(),
-                    offset,
-                },
-                1,
-                1,
-            ))
-            .unwrap();
-        let QueryValue::SemanticView { view } = result.value else {
-            panic!("expected semantic view")
-        };
-        assert_eq!(
-            view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
-            Some("Q")
-        );
-    }
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: period_end,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert_eq!(
+        view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
+        Some("Q")
+    );
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.len() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(view.symbol.is_none());
 
     let result = engine
         .query(query(
@@ -1501,7 +1929,7 @@ fn append_only_comments_advance_the_version_without_semantic_reanalysis() {
             2,
         ))
         .unwrap();
-    let QueryValue::Locations { locations } = result.value else {
+    let QueryValue::Locations { locations, .. } = result.value else {
         panic!("expected locations")
     };
     assert_eq!(locations.len(), 1);

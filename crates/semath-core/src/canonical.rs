@@ -426,15 +426,15 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
                 && let Some((tree, call_range, provenance)) =
                     composite_macro_notation(document, source)
             {
-                emit_notation_node(
-                    &NotationArena::Generated {
-                        tree,
-                        range: call_range,
-                        provenance: &provenance,
-                    },
-                    tree.root,
-                    tokens,
-                );
+                let generated = NotationArena::Generated {
+                    tree,
+                    range: call_range,
+                    provenance: &provenance,
+                };
+                let mut expansion_tokens = Vec::new();
+                emit_notation_node(&generated, tree.root, &mut expansion_tokens);
+                let expression = Parser::new(canonical_tokens(expansion_tokens)).parse_document();
+                push(tokens, TokenKind::Structured(Box::new(expression)));
                 return;
             }
             if is_math_class_wrapper(node.name())
@@ -520,7 +520,7 @@ fn emit_notation_node(arena: &NotationArena<'_>, node_id: u32, tokens: &mut Vec<
     }
 }
 
-fn is_math_class_wrapper(name: Option<&str>) -> bool {
+pub(crate) fn is_math_class_wrapper(name: Option<&str>) -> bool {
     matches!(
         name,
         Some("mathord" | "mathop" | "mathbin" | "mathrel" | "mathopen" | "mathclose" | "mathinner")
@@ -716,7 +716,7 @@ fn emit_sized_delimiter(
     });
 }
 
-fn is_ignorable_command(name: Option<&str>) -> bool {
+pub(crate) fn is_ignorable_command(name: Option<&str>) -> bool {
     matches!(
         name,
         Some(
@@ -785,7 +785,30 @@ fn syntax_provenance(node: &crate::NotationNode) -> Vec<SourceRange> {
 
 fn coalesce_numbers(tokens: Vec<Token>) -> Vec<Token> {
     let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
-    for token in tokens {
+    let mut input = tokens.into_iter().peekable();
+    while let Some(mut token) = input.next() {
+        if let TokenKind::Number(number) = &mut token.kind
+            && let Some(decimal) = input.peek()
+            && matches!(decimal.kind, TokenKind::Operator('.'))
+            && token.range.end_offset == decimal.range.start_offset
+            && token.provenance == decimal.provenance
+        {
+            let decimal = input.next().expect("peeked decimal token");
+            if let Some(fraction) = input.peek()
+                && let TokenKind::Number(fractional_digits) = &fraction.kind
+                && decimal.range.end_offset == fraction.range.start_offset
+                && decimal.provenance == fraction.provenance
+            {
+                number.push('.');
+                number.push_str(fractional_digits);
+                let fraction = input.next().expect("peeked fractional digits");
+                token.range.end_offset = fraction.range.end_offset;
+            } else {
+                output.push(token);
+                output.push(decimal);
+                continue;
+            }
+        }
         if let Some(previous) = output.last_mut()
             && let (TokenKind::Number(left), TokenKind::Number(right)) =
                 (&mut previous.kind, &token.kind)
@@ -801,8 +824,92 @@ fn coalesce_numbers(tokens: Vec<Token>) -> Vec<Token> {
     output
 }
 
+fn fold_vertical_bar_groups(tokens: Vec<Token>) -> Vec<Token> {
+    let mut output = Vec::with_capacity(tokens.len());
+    let mut cursor = 0;
+    while cursor < tokens.len() {
+        if !is_vertical_bar(&tokens[cursor].kind)
+            || !vertical_bar_can_open(output.last().map(|token: &Token| &token.kind))
+        {
+            output.push(tokens[cursor].clone());
+            cursor += 1;
+            continue;
+        }
+        let mut depth = 0_u32;
+        let close = (cursor + 1..tokens.len()).find(|index| {
+            match tokens[*index].kind {
+                TokenKind::Open { .. } => depth += 1,
+                TokenKind::Close(_) => depth = depth.saturating_sub(1),
+                _ => {}
+            }
+            depth == 0 && is_vertical_bar(&tokens[*index].kind)
+        });
+        let Some(close) = close.filter(|close| cursor + 1 < *close) else {
+            output.push(tokens[cursor].clone());
+            cursor += 1;
+            continue;
+        };
+        let inner_tokens = tokens[cursor + 1..close].to_vec();
+        if inner_tokens.iter().any(|token| {
+            matches!(token.kind, TokenKind::Operator('=' | '<' | '>'))
+                || matches!(&token.kind, TokenKind::Command(command) if is_relation_command(command))
+        }) {
+            output.push(tokens[cursor].clone());
+            cursor += 1;
+            continue;
+        }
+        let inner = Parser::new(canonical_tokens(inner_tokens)).parse_document();
+        let open = &tokens[cursor];
+        let close_token = &tokens[close];
+        let mut provenance = open.provenance.clone();
+        provenance.extend(inner.provenance.iter().cloned());
+        provenance.extend(close_token.provenance.iter().cloned());
+        provenance.sort_by_key(|range| (range.start_offset, range.end_offset));
+        provenance.dedup();
+        output.push(Token {
+            kind: TokenKind::Structured(Box::new(SemanticExpr {
+                kind: SemanticExprKind::Apply {
+                    operator: SemanticReference::new(
+                        "vertical-bars",
+                        open.range.clone(),
+                        open.provenance.clone(),
+                    ),
+                    arguments: vec![inner],
+                },
+                range: SourceRange {
+                    start_offset: open.range.start_offset,
+                    end_offset: close_token.range.end_offset,
+                },
+                provenance,
+            })),
+            range: SourceRange {
+                start_offset: open.range.start_offset,
+                end_offset: close_token.range.end_offset,
+            },
+            provenance: Vec::new(),
+        });
+        cursor = close + 1;
+    }
+    output
+}
+
+fn is_vertical_bar(token: &TokenKind) -> bool {
+    matches!(token, TokenKind::Identifier(value) if value == "|")
+        || matches!(token, TokenKind::Operator('|'))
+}
+
+fn vertical_bar_can_open(previous: Option<&TokenKind>) -> bool {
+    previous.is_none_or(|token| {
+        matches!(
+            token,
+            TokenKind::Open { .. }
+                | TokenKind::Operator('=' | '+' | '-' | '*' | '/' | ',' | '<' | '>')
+        ) || matches!(token, TokenKind::Command(command) if is_relation_command(command))
+    })
+}
+
 fn canonical_tokens(tokens: Vec<Token>) -> Vec<Token> {
-    let mut tokens = coalesce_numbers(tokens);
+    let mut tokens = fold_vertical_bar_groups(coalesce_numbers(tokens));
     while tokens.last().is_some_and(|token| {
         matches!(token.kind, TokenKind::Operator(',' | '.'))
             || matches!(&token.kind, TokenKind::Number(value) if value == ".")
@@ -1293,9 +1400,42 @@ impl Parser {
     }
 
     fn parse_relation(&mut self) -> SemanticExpr {
+        let mut expression = self.parse_logical();
+        while let Some(operator) = self.consume_statement_relation() {
+            let right = self.parse_logical();
+            expression = combined(
+                &expression,
+                &right,
+                SemanticExprKind::Relation {
+                    operator,
+                    left: Box::new(expression.clone()),
+                    right: Box::new(right.clone()),
+                },
+            );
+        }
+        expression
+    }
+
+    fn parse_logical(&mut self) -> SemanticExpr {
+        let mut expression = self.parse_comparison();
+        while let Some(operator) = self.consume_logical_connective() {
+            let right = self.parse_comparison();
+            expression = combined(
+                &expression,
+                &right,
+                SemanticExprKind::Apply {
+                    operator,
+                    arguments: vec![expression.clone(), right.clone()],
+                },
+            );
+        }
+        expression
+    }
+
+    fn parse_comparison(&mut self) -> SemanticExpr {
         let mut operands = vec![self.parse_set_operation()];
         let mut operators = Vec::new();
-        while let Some(operator) = self.consume_relation() {
+        while let Some(operator) = self.consume_comparison() {
             operators.push(operator);
             operands.push(self.parse_set_operation());
         }
@@ -1368,11 +1508,7 @@ impl Parser {
                 terms.push(self.parse_product());
             } else if self.consume_operator('-') {
                 let term = self.parse_product();
-                terms.push(SemanticExpr {
-                    range: term.range.clone(),
-                    provenance: term.provenance.clone(),
-                    kind: SemanticExprKind::Negate(Box::new(term)),
-                });
+                terms.push(negate_term(term));
             } else {
                 break;
             }
@@ -1467,7 +1603,7 @@ impl Parser {
                 factors.push(self.parse_power());
                 continue;
             }
-            if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. }) {
+            if is_argument_group(self.peek()) {
                 let argument = self.parse_power();
                 if let Some(previous) = factors.last().cloned()
                     && let Some(applied) = apply_argument(previous, argument.clone())
@@ -1549,6 +1685,7 @@ impl Parser {
                 let subscript = self.parse_group_or_atom();
                 expression = apply_subscript(expression, &subscript);
             } else if self.consume_operator('^') {
+                self.split_unbraced_transpose_prefix();
                 let exponent = self.parse_group_or_atom();
                 expression = if matches!(&exponent.kind, SemanticExprKind::Number(value) if value == "1")
                 {
@@ -1576,19 +1713,22 @@ impl Parser {
                     )
                 };
             } else if self.consume_operator('\'') {
+                let prime = &self.tokens[self.cursor - 1];
                 let variable = SemanticReference::from_expression("t", &expression);
+                let mut provenance = expression.provenance.clone();
+                provenance.extend(prime.provenance.clone());
+                provenance.sort_by_key(|range| (range.start_offset, range.end_offset));
+                provenance.dedup();
                 expression = SemanticExpr {
-                    range: expression.range.clone(),
-                    provenance: expression.provenance.clone(),
+                    range: merge_range(&expression.range, &prime.range),
+                    provenance,
                     kind: SemanticExprKind::Derivative {
                         expression: Box::new(expression),
                         variable,
                         order: 1,
                     },
                 };
-            } else if matches!(self.peek(), TokenKind::Open { delimiter: '(', .. })
-                && is_callable_expression(&expression)
-            {
+            } else if is_argument_group(self.peek()) && is_callable_expression(&expression) {
                 let argument = self.parse_prefix();
                 expression = apply_argument(expression.clone(), argument)
                     .expect("callable postfix was checked before consuming its argument");
@@ -1615,10 +1755,14 @@ impl Parser {
             match command.as_str() {
                 "mathbf" | "mathrm" | "mathit" | "mathbb" | "mathcal" | "mathsf" | "boldsymbol"
                 | "operatorname" | "vec" | "tilde" | "boxed" => {
-                    let command = self.next();
+                    let style_name = command.as_str();
+                    let command_token = self.next();
                     let mut expression = self.parse_group_or_atom();
-                    expression.range = merge_range(&command.range, &expression.range);
-                    expression.provenance.extend(command.provenance);
+                    if matches!(style_name, "mathrm" | "operatorname") {
+                        expression = coalesce_roman_identifier(expression);
+                    }
+                    expression.range = merge_range(&command_token.range, &expression.range);
+                    expression.provenance.extend(command_token.provenance);
                     return expression;
                 }
                 "dot" | "ddot" => {
@@ -1971,7 +2115,33 @@ impl Parser {
         self.parse_prefix()
     }
 
-    fn consume_relation(&mut self) -> Option<SemanticReference> {
+    fn consume_statement_relation(&mut self) -> Option<SemanticReference> {
+        if self.consume_command("iff")
+            || self.consume_command("Leftrightarrow")
+            || self.consume_command("Longleftrightarrow")
+        {
+            Some(self.previous_reference("equivalent-to"))
+        } else if self.consume_command("implies")
+            || self.consume_command("Rightarrow")
+            || self.consume_command("Longrightarrow")
+        {
+            Some(self.previous_reference("implies"))
+        } else {
+            None
+        }
+    }
+
+    fn consume_logical_connective(&mut self) -> Option<SemanticReference> {
+        if self.consume_command("land") || self.consume_command("wedge") {
+            Some(self.previous_reference("and"))
+        } else if self.consume_command("lor") || self.consume_command("vee") {
+            Some(self.previous_reference("or"))
+        } else {
+            None
+        }
+    }
+
+    fn consume_comparison(&mut self) -> Option<SemanticReference> {
         if self.consume_operator(':') {
             if self.consume_operator('=') {
                 Some(self.previous_reference("equals"))
@@ -2025,6 +2195,38 @@ impl Parser {
         }
     }
 
+    fn split_unbraced_transpose_prefix(&mut self) {
+        let Some(token) = self.tokens.get(self.cursor).cloned() else {
+            return;
+        };
+        let TokenKind::Identifier(value) = token.kind else {
+            return;
+        };
+        let Some(rest) = value.strip_prefix('T').filter(|rest| !rest.is_empty()) else {
+            return;
+        };
+        let split = token.range.start_offset + 1;
+        self.tokens[self.cursor] = Token {
+            kind: TokenKind::Identifier("T".into()),
+            range: SourceRange {
+                start_offset: token.range.start_offset,
+                end_offset: split,
+            },
+            provenance: token.provenance.clone(),
+        };
+        self.tokens.insert(
+            self.cursor + 1,
+            Token {
+                kind: TokenKind::Identifier(rest.into()),
+                range: SourceRange {
+                    start_offset: split,
+                    end_offset: token.range.end_offset,
+                },
+                provenance: token.provenance,
+            },
+        );
+    }
+
     fn consume_close(&mut self, expected: char) -> bool {
         if matches!(self.peek(), TokenKind::Close(actual) if *actual == expected) {
             self.cursor += 1;
@@ -2071,6 +2273,54 @@ impl Parser {
         });
         self.cursor += usize::from(self.cursor < self.tokens.len());
         token
+    }
+}
+
+fn coalesce_roman_identifier(expression: SemanticExpr) -> SemanticExpr {
+    let SemanticExprKind::Product(factors) = &expression.kind else {
+        return expression;
+    };
+    if factors.len() < 2 {
+        return expression;
+    }
+    let mut name = String::new();
+    let mut previous_end = None;
+    for factor in factors {
+        let SemanticExprKind::Symbol(part) = &factor.kind else {
+            return expression;
+        };
+        if part.is_empty()
+            || !part.chars().all(|character| character.is_alphanumeric())
+            || previous_end.is_some_and(|end| end != factor.range.start_offset)
+        {
+            return expression;
+        }
+        name.push_str(part);
+        previous_end = Some(factor.range.end_offset);
+    }
+    SemanticExpr {
+        kind: SemanticExprKind::Symbol(name),
+        range: expression.range,
+        provenance: expression.provenance,
+    }
+}
+
+fn negate_term(mut expression: SemanticExpr) -> SemanticExpr {
+    if let SemanticExprKind::Product(factors) = &mut expression.kind
+        && let Some(first) = factors.first_mut()
+    {
+        let negated = SemanticExpr {
+            range: first.range.clone(),
+            provenance: first.provenance.clone(),
+            kind: SemanticExprKind::Negate(Box::new(first.clone())),
+        };
+        *first = negated;
+        return expression;
+    }
+    SemanticExpr {
+        range: expression.range.clone(),
+        provenance: expression.provenance.clone(),
+        kind: SemanticExprKind::Negate(Box::new(expression)),
     }
 }
 
@@ -2191,6 +2441,16 @@ fn is_callable_expression(expression: &SemanticExpr) -> bool {
     }
 }
 
+fn is_argument_group(token: &TokenKind) -> bool {
+    matches!(
+        token,
+        TokenKind::Open {
+            delimiter: '(' | '[',
+            ..
+        }
+    )
+}
+
 fn split_arguments(argument: SemanticExpr) -> Vec<SemanticExpr> {
     let SemanticExprKind::Product(items) = &argument.kind else {
         return vec![argument];
@@ -2243,29 +2503,22 @@ fn split_arguments(argument: SemanticExpr) -> Vec<SemanticExpr> {
 
 fn starts_atom(token: &TokenKind) -> bool {
     match token {
-        TokenKind::Command(command) => !matches!(
-            command.as_str(),
-            "cap"
-                | "cdot"
-                | "circ"
-                | "coloneqq"
-                | "cup"
-                | "ge"
-                | "geq"
-                | "in"
-                | "le"
-                | "leq"
-                | "notin"
-                | "ne"
-                | "neq"
-                | "right"
-                | "subset"
-                | "subseteq"
-                | "supset"
-                | "supseteq"
-                | "times"
-                | "triangleq"
-        ),
+        TokenKind::Command(command) => {
+            !is_relation_command(command)
+                && !matches!(
+                    command.as_str(),
+                    "cap"
+                        | "cdot"
+                        | "circ"
+                        | "cup"
+                        | "land"
+                        | "lor"
+                        | "right"
+                        | "times"
+                        | "vee"
+                        | "wedge"
+                )
+        }
         TokenKind::Identifier(_)
         | TokenKind::Number(_)
         | TokenKind::Open { .. }
@@ -2286,6 +2539,12 @@ fn is_relation_command(name: &str) -> bool {
     matches!(
         name,
         "coloneqq"
+            | "iff"
+            | "implies"
+            | "Leftrightarrow"
+            | "Longleftrightarrow"
+            | "Longrightarrow"
+            | "Rightarrow"
             | "ge"
             | "geq"
             | "in"
@@ -2546,6 +2805,16 @@ mod tests {
     }
 
     #[test]
+    fn pairs_expression_boundary_vertical_bars_without_consuming_set_builders() {
+        assert_eq!(
+            render_canonical(&lower_template("|A\\cup B|=|A|+|B|-|A\\cap B|")),
+            "relation(equals,apply(vertical-bars,apply(union,symbol(A),symbol(B))),sum(apply(vertical-bars,symbol(A)),apply(vertical-bars,symbol(B)),negate(apply(vertical-bars,apply(intersection,symbol(A),symbol(B))))))"
+        );
+        assert!(!render_canonical(&lower_template("x|x>0")).contains("vertical-bars"));
+        assert!(!render_canonical(&lower_template("|x>0")).contains("vertical-bars"));
+    }
+
+    #[test]
     fn lowers_definition_equality_to_the_shared_relation_ir() {
         let expected = render_canonical(&lower_template("g(x)=\\nabla f(x)"));
         assert_eq!(
@@ -2595,6 +2864,22 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template("F=m*a")),
             "relation(equals,symbol(F),product(symbol(m),symbol(a)))"
+        );
+    }
+
+    #[test]
+    fn normalizes_reviewed_lyapunov_notation() {
+        assert_eq!(
+            render_canonical(&lower_template(
+                "(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}"
+            )),
+            "relation(equals,sum(product(apply(transpose,index(symbol(A),symbol(c))),index(symbol(P),symbol(c))),product(index(symbol(P),symbol(c)),index(symbol(A),symbol(c)))),negate(index(symbol(Q),symbol(c))))",
+        );
+        assert_eq!(
+            render_canonical(&lower_template(
+                "\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}"
+            )),
+            "relation(equals,sum(index(symbol(I),symbol(a)),index(symbol(I),symbol(b))),sum(index(symbol(I),symbol(c)),index(symbol(I),symbol(d))))",
         );
     }
 
@@ -2669,6 +2954,7 @@ mod tests {
             render_canonical(&lower_template("y'(x)")),
             "derivative(symbol(y),x,1)"
         );
+        assert_eq!(lower_template("v_m'").range.end_offset, 4);
         assert_eq!(
             render_canonical(&lower_template("\\frac{d y}{d x}(x)")),
             "derivative(symbol(y),x,1)"
@@ -2784,6 +3070,22 @@ mod tests {
     }
 
     #[test]
+    fn roman_identifiers_preserve_adjacent_letters_but_not_spaced_products() {
+        assert_eq!(
+            render_canonical(&lower_template(r"\mathrm{Hz}")),
+            "symbol(Hz)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template(r"\operatorname{ECE}")),
+            "symbol(ECE)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template(r"\mathrm{kg\,m}")),
+            "product(symbol(kg),symbol(m))"
+        );
+    }
+
+    #[test]
     fn snapshot_lowering_treats_tex_math_class_wrappers_as_transparent() {
         let document: ProjectDocument = serde_json::from_value(serde_json::json!({
             "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
@@ -2828,6 +3130,32 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template("G(s) = Y(s) / U(s)")),
             "relation(equals,apply(G,symbol(s)),fraction(apply(Y,symbol(s)),apply(U,symbol(s))))"
+        );
+    }
+
+    #[test]
+    fn lowers_square_bracket_function_application_without_naming_an_operator() {
+        assert_eq!(
+            render_canonical(&lower_template("\\mathbb E[X]")),
+            "apply(E,symbol(X))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("F[x,y]")),
+            "apply(F,symbol(x),symbol(y))"
+        );
+    }
+
+    #[test]
+    fn logical_connectives_preserve_their_relation_operands() {
+        assert_eq!(
+            render_canonical(&lower_template(
+                "x\\in A\\cup B\\iff (x\\in A)\\lor(x\\in B)"
+            )),
+            "relation(equivalent-to,relation(member-of,symbol(x),apply(union,symbol(A),symbol(B))),apply(or,relation(member-of,symbol(x),symbol(A)),relation(member-of,symbol(x),symbol(B))))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("p\\Longrightarrow q\\land r")),
+            "relation(implies,symbol(p),apply(and,symbol(q),symbol(r)))"
         );
     }
 
@@ -2891,6 +3219,55 @@ mod tests {
         assert_eq!(
             render_canonical(&expression),
             "relation(equals,apply(v,symbol(t)),product(symbol(R),apply(i,symbol(t))))"
+        );
+    }
+
+    #[test]
+    fn snapshot_lowering_keeps_decimal_relations_separate_across_spacing() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8, "proseAnnotations": [], "fileId": "main", "path": "main.tex",
+            "language": "latex", "content": "P(A\\cap B)=0.012,\\qquad P(B)=0.08>0.", "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"P","lexicalClass":"identifier"},
+                {"kind":"token","parent":4,"children":[],"ranges":{"full":{"startOffset":2,"endOffset":3}},"state":"complete","text":"A","lexicalClass":"identifier"},
+                {"kind":"command","parent":4,"children":[],"ranges":{"full":{"startOffset":3,"endOffset":7}},"state":"complete","name":"cap","mathClass":"binary"},
+                {"kind":"token","parent":4,"children":[],"ranges":{"full":{"startOffset":8,"endOffset":9}},"state":"complete","text":"B","lexicalClass":"identifier"},
+                {"kind":"delimiter","parent":24,"children":[1,2,3],"ranges":{"full":{"startOffset":1,"endOffset":10}},"state":"complete","name":"()"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":10,"endOffset":11}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":11,"endOffset":12}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":12,"endOffset":13}},"state":"complete","text":".","lexicalClass":"other"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":13,"endOffset":14}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":14,"endOffset":15}},"state":"complete","text":"1","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":15,"endOffset":16}},"state":"complete","text":"2","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":16,"endOffset":17}},"state":"complete","text":",","lexicalClass":"punctuation"},
+                {"kind":"command","parent":24,"children":[],"ranges":{"full":{"startOffset":17,"endOffset":23}},"state":"complete","name":"qquad"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":24,"endOffset":25}},"state":"complete","text":"P","lexicalClass":"identifier"},
+                {"kind":"token","parent":15,"children":[],"ranges":{"full":{"startOffset":26,"endOffset":27}},"state":"complete","text":"B","lexicalClass":"identifier"},
+                {"kind":"delimiter","parent":24,"children":[14],"ranges":{"full":{"startOffset":25,"endOffset":28}},"state":"complete","name":"()"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":28,"endOffset":29}},"state":"complete","text":"=","lexicalClass":"operator"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":29,"endOffset":30}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":30,"endOffset":31}},"state":"complete","text":".","lexicalClass":"other"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":31,"endOffset":32}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":32,"endOffset":33}},"state":"complete","text":"8","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":33,"endOffset":34}},"state":"complete","text":">","lexicalClass":"operator"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":34,"endOffset":35}},"state":"complete","text":"0","lexicalClass":"number"},
+                {"kind":"token","parent":24,"children":[],"ranges":{"full":{"startOffset":35,"endOffset":36}},"state":"complete","text":".","lexicalClass":"other"},
+                {"kind":"sequence","parent":null,"children":[0,4,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,22,23],"ranges":{"full":{"startOffset":0,"endOffset":36}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":24,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":36},"contentRange":{"startOffset":0,"endOffset":36},"state":"complete"}],
+            "visibleProse": [], "scopes": [], "blocks": [], "declarations": [], "mathRegions": [], "macros": [], "includes": []
+        }))
+        .unwrap();
+
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &document,
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 36,
+                },
+            )),
+            "system(relation(equals,apply(P,apply(intersection,symbol(A),symbol(B))),number(0.012)),system(relation(equals,apply(P,symbol(B)),number(0.08)),relation(greater-than,number(0.08),number(0))))"
         );
     }
 
@@ -3044,6 +3421,62 @@ mod tests {
         assert_eq!(
             render_canonical(&expression),
             "relation(equals,symbol(K),product(symbol(m),symbol(v)))"
+        );
+    }
+
+    #[test]
+    fn composite_macro_expansion_remains_one_operand_inside_a_formula() {
+        let document: ProjectDocument = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8,
+            "proseAnnotations": [],
+            "fileId": "main",
+            "path": "main.tex",
+            "language": "latex",
+            "content": "m\\dtemp",
+            "documentVersion": 1,
+            "nodes": [
+                {"kind":"token","parent":2,"children":[],"ranges":{"full":{"startOffset":0,"endOffset":1}},"state":"complete","text":"m","lexicalClass":"identifier"},
+                {"kind":"command","parent":2,"children":[],"ranges":{"full":{"startOffset":1,"endOffset":7},"command":{"startOffset":1,"endOffset":7}},"state":"opaque","name":"dtemp"},
+                {"kind":"sequence","parent":null,"children":[0,1],"ranges":{"full":{"startOffset":0,"endOffset":7}},"state":"complete"}
+            ],
+            "mathRoots": [{"node":2,"delimiter":"generated","fullRange":{"startOffset":0,"endOffset":7},"contentRange":{"startOffset":0,"endOffset":7},"state":"complete"}],
+            "visibleProse": [],
+            "scopes": [{"kind":"document","parent":null,"range":{"startOffset":0,"endOffset":7},"state":"complete"}],
+            "declarations": [],
+            "macros": [{
+                "kind":"call",
+                "name":"dtemp",
+                "source":{"fileId":"main","path":"main.tex","range":{"startOffset":1,"endOffset":7}},
+                "definitions":[],
+                "expansion":{
+                    "status":"expanded",
+                    "depth":0,
+                    "editable":false,
+                    "surface":"ignored by Semath",
+                    "inputRange":{"startOffset":1,"endOffset":7},
+                    "notation":{
+                        "nodes":[
+                            {"kind":"token","children":[],"state":"complete","text":"Delta","lexicalClass":"identifier"},
+                            {"kind":"token","children":[],"state":"complete","text":"T","lexicalClass":"identifier"},
+                            {"kind":"sequence","children":[0,1],"state":"complete"}
+                        ],
+                        "root":2
+                    }
+                }
+            }],
+            "includes": []
+        }))
+        .unwrap();
+
+        assert_eq!(
+            render_canonical(&lower_document_region(
+                &document,
+                &SourceRange {
+                    start_offset: 0,
+                    end_offset: 7,
+                },
+            )),
+            "product(symbol(m),symbol(DeltaT))"
         );
     }
 }

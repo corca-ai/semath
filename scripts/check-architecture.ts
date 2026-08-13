@@ -55,12 +55,30 @@ if (engine.includes("SemanticFactStore") || /\bfacts:\s*HashMap</u.test(engine))
 if (!/#\[cfg\(test\)\]\s+let parsed = if document\.nodes\.is_empty\(\)/u.test(engine)) {
   fail("the raw-TeX parser exception is not visibly test-only");
 }
+const entitySurface = engine.match(
+  /fn entity_surface\([\s\S]*?\n    fn semantic_context\(/u,
+)?.[0];
+if (!entitySurface || entitySurface.includes("definitions_by_entity")) {
+  fail("navigation or edit authorization reads the presentation definition map");
+}
 
 const parser = await Bun.file(
   join(ROOT, "crates/semath-core/src/parser.rs"),
 ).text();
 if (!/#\[cfg\(test\)\]\s+pub\(crate\) fn parse_regions/u.test(parser)) {
   fail("raw-TeX region parsing is not test-only");
+}
+
+const lsp = await Bun.file(join(ROOT, "packages/lsp/src/index.ts")).text();
+for (const marker of [
+  ".getDefinition(",
+  ".getReferences(",
+  ".getRenameEdits(",
+  ".findSymbolAt(",
+]) {
+  if (lsp.includes(marker)) {
+    fail(`packages/lsp/src/index.ts contains semantic fallback ${marker}`);
+  }
 }
 
 console.log("architecture OK: dependency direction, singular adapter, and one project authority");

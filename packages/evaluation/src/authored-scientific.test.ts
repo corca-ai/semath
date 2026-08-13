@@ -58,6 +58,28 @@ describe("independently authored scientific corpus", () => {
         { startOffset: 0, endOffset: system.length },
       ),
     ).toBe(true);
+    expect(
+      authoredRelationRangeMatches(
+        system,
+        { startOffset: 0, endOffset: system.indexOf(",") },
+        { startOffset: 0, endOffset: system.indexOf("p") - 1 },
+      ),
+    ).toBe(true);
+    const labeledStatement = "\\label{eq:d} y(x)=z(x).";
+    expect(
+      authoredRelationRangeMatches(
+        labeledStatement,
+        { startOffset: 0, endOffset: labeledStatement.length },
+        { startOffset: 0, endOffset: labeledStatement.length - 1 },
+      ),
+    ).toBe(true);
+    expect(
+      authoredRelationRangeMatches(
+        system,
+        { startOffset: 0, endOffset: system.length },
+        { startOffset: 0, endOffset: system.indexOf(",") },
+      ),
+    ).toBe(false);
   });
 
   test("projects a reviewed relation from its own source anchor", () => {

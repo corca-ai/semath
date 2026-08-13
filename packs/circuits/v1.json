@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "packId": "circuits",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -164,31 +164,28 @@
           "subjects": [
             "branch-current"
           ],
-          "evidencePhrases": [
-            "node convention",
-            "currents entering the node",
-            "currents leaving the node"
+        "evidencePhrases": [
+          "node convention",
+          "junction convention",
+          "currents entering the node",
+          "currents leaving the node",
+          "currents directed into the junction",
+          "currents directed away"
           ],
           "label": "All branch-current signs use one node convention."
         }
       ],
       "activationPhrases": [
-        "node",
-        "junction",
         "kcl",
-        "branch",
-        "balance",
-        "aggregate",
-        "entering",
-        "outgoing",
-        "feeders",
+        "charge conservation",
+        "node current balance",
+        "junction current balance",
+        "branch current balance",
         "flow groups",
-        "reference",
         "current splits",
         "currents satisfy",
         "currents obey",
         "currents balance",
-        "conservation",
         "terminal currents"
       ],
       "references": [

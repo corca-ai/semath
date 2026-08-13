@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "packId": "fluid-mechanics",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -334,12 +334,16 @@
         {
           "id": "uniform-section-values",
           "kind": "uniform",
-          "subjects": [
-            "density",
-            "area",
-            "velocity"
-          ],
-          "label": "Density and mean normal velocity are uniform over the stated section."
+        "subjects": [
+          "density",
+          "area",
+          "velocity"
+        ],
+        "label": "Density and mean normal velocity are uniform over the stated section.",
+        "evidencePhrases": [
+          "area-mean exit speed",
+          "mean normal flow velocity"
+        ]
         }
       ],
       "references": [
@@ -722,11 +726,17 @@
             "viscosity",
             "rate"
           ],
+          "evidencePhrases": [
+            "Newtonian fluid",
+            "Newtonian relation",
+            "Newtonian shear"
+          ],
           "label": "The quantities are explicitly related in a Newtonian-fluid model."
         }
       ],
       "activationPhrases": [
         "Newtonian fluid",
+        "Newtonian relation",
         "Newtonian shear"
       ],
       "references": [

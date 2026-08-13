@@ -435,6 +435,7 @@ fn template_role(pack_id: &str, id: &str, description: &str) -> PackLawRole {
         description: description.into(),
         shape: Some("scalar".into()),
         notation: Vec::new(),
+        source_projection: crate::pack::RoleSourceProjection::Expression,
         variadic: false,
     }
 }

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "packId": "electromagnetism",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -291,12 +291,16 @@
         {
           "id": "common-potential-reference",
           "kind": "same-context",
-          "subjects": [
-            "energy",
-            "charge",
-            "voltage"
-          ],
-          "label": "Charge and potential use the same reference and the electrostatic regime is explicit."
+        "subjects": [
+          "energy",
+          "charge",
+          "voltage"
+        ],
+        "label": "Charge and potential use the same reference and the electrostatic regime is explicit.",
+        "evidencePhrases": [
+          "potential relative to",
+          "region held at potential"
+        ]
         }
       ],
       "references": [
@@ -390,7 +394,8 @@
           "id": "displacement",
           "concept": "electromagnetism:electric-displacement",
           "description": "Electric displacement vector.",
-          "shape": "vector"
+          "shape": "vector",
+          "sourceProjection": "head"
         },
         {
           "id": "permittivity",
@@ -402,7 +407,8 @@
           "id": "electric-field",
           "concept": "quantities-units:electric-field",
           "description": "Electric-field vector.",
-          "shape": "vector"
+          "shape": "vector",
+          "sourceProjection": "head"
         }
       ],
       "conditions": [

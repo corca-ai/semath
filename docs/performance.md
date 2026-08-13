@@ -46,6 +46,15 @@ frontier/latent candidate work. These counters make prose-coverage growth
 reviewable independently from wall-clock noise and prevent a larger construction
 inventory from hiding unbounded matching work.
 
+Navigation and edit fanout is also bounded. Pure public cap properties cover
+both sides: the complete set at the cap is accepted, while cap-plus-one refuses
+with an engine-limit authorization and returns no partial locations or edits.
+The performance fixture measures ordinary multi-file definition, references,
+prepare-rename, and rename fanout and requires bounded authorization. Nested
+scope minimal pairs exercise replacement capture separately. Cursor ownership
+uses the document-local occurrence range instead of scanning project-wide
+occurrences.
+
 The report also names every lifecycle family, exposes semantic-view p95
 separately from other cursor queries, and records deterministic failure-shrinker
 input, output, and evaluation counts. Shrinking has a linear work budget; timing

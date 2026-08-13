@@ -1724,7 +1724,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nAt node \\(n\\), the entering currents balance the leaving branch: % semath-recognition-evidence:start\nLet $I_1$ denote electric current, $I_2$ denote electric current, and $I_3$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states terminal currents for $I_1+I_2=I_3$."
+          "content": "The next formula is presented without an assumed named law (1051). [let series]\n\\begin{equation}q_{1251}\\end{equation}\n\nAt node \\(n\\), the entering currents balance the leaving branch: % semath-recognition-evidence:start\nLet $I_1$ denote electric current, $I_2$ denote electric current, and $I_3$ denote electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; terminal currents for $I_1+I_2=I_3$."
         }
       ],
       "mainFileId": "main",
@@ -1759,7 +1759,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nThe junction equation is % semath-recognition-evidence:start\nLet $I_{\\mathrm{in}}$, $I_a$, and $I_b$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states node for \\[I_{\\mathrm{in}}=I_a+I_b\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1052). [respectively]\n\\[\\begin{aligned}q_{1252}\\end{aligned}\\]\n\nThe junction equation is % semath-recognition-evidence:start\nLet $I_{\\mathrm{in}}$, $I_a$, and $I_b$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe node current balance is stated; node for \\[I_{\\mathrm{in}}=I_a+I_b\\]."
         }
       ],
       "mainFileId": "main",
@@ -1794,7 +1794,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nWith entering currents positive, the node law is % semath-recognition-evidence:start\nWe write $I_a$ for electric current. We write $I_b$ for electric current. We write $I_c$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states junction for $I_a+I_b-I_c=0$."
+          "content": "Suppose the notation is local to this calculation, case 1053. [where clause]\nA grouped symbol is $ {q_{1253}} $.\n\nWith entering currents positive, the node law is % semath-recognition-evidence:start\nWe write $I_a$ for electric current. We write $I_b$ for electric current. We write $I_c$ for electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; junction for $I_a+I_b-I_c=0$."
         }
       ],
       "mainFileId": "main",
@@ -1829,7 +1829,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nThe same node balance is displayed as % semath-recognition-evidence:start\n$I_p$ denotes electric current. $I_q$ denotes electric current. $I_r$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states kcl for \\[0=I_p+I_q-I_r\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1054). [we write]\nA styled symbol is $\\mathbf{q}_{1254}$.\n\nThe same node balance is displayed as % semath-recognition-evidence:start\n$I_p$ denotes electric current. $I_q$ denotes electric current. $I_r$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; kcl for \\[0=I_p+I_q-I_r\\]."
         }
       ],
       "mainFileId": "main",
@@ -1864,7 +1864,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nUsing outward reference directions, KCL gives % semath-recognition-evidence:start\nHere $I_k$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states branch for $\\sum_{k=1}^{m} I_k=0$."
+          "content": "As a deliberately unsupported instance, examine relation 1055. [symbol list]\nAn indexed symbol is $q_{1255}$.\n\nUsing outward reference directions, KCL gives % semath-recognition-evidence:start\nHere $I_k$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; branch for $\\sum_{k=1}^{m} I_k=0$."
         }
       ],
       "mainFileId": "main",
@@ -1897,7 +1897,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe aggregate statement is % semath-recognition-evidence:start\nLet $i_j$ denote electric current and $i_j$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states balance for \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
+          "content": "No domain interpretation is asserted for the following formula (1056). [role first]\n\\newcommand{\\baselineprobe}{q_{1256}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe aggregate statement is % semath-recognition-evidence:start\nLet $i_j$ denote electric current and $i_j$ denote electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; balance for \\[\\sum_{j\\in\\mathrm{in}}i_j=\\sum_{j\\in\\mathrm{out}}i_j\\]."
         }
       ],
       "mainFileId": "main",
@@ -1931,7 +1931,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nAt node \\(A\\), the labeled branches satisfy % semath-recognition-evidence:start\nLet $I_{A1}$, $I_{A2}$, and $I_{A3}$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states aggregate for $I_{A1}+I_{A2}=I_{A3}$."
+          "content": "Consider the following independently stated relation in example 1057. [suppose that]\nA presentation-only symbol is $q_{1257}$.\n\nAt node \\(A\\), the labeled branches satisfy % semath-recognition-evidence:start\nLet $I_{A1}$, $I_{A2}$, and $I_{A3}$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe node current balance is stated; aggregate for $I_{A1}+I_{A2}=I_{A3}$."
         }
       ],
       "mainFileId": "main",
@@ -1966,7 +1966,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nInstantaneously, % semath-recognition-evidence:start\nWe write $i_1(t)$ for electric current. We write $i_2(t)$ for electric current. We write $i_3(t)$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states entering for \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
+          "content": "For comparison, inspect the displayed expression numbered 1058. [given that]\nA presentation-only symbol follows: \\[q_{1258}\\]\n\nInstantaneously, % semath-recognition-evidence:start\nWe write $i_1(t)$ for electric current. We write $i_2(t)$ for electric current. We write $i_3(t)$ for electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; entering for \\[i_1(t)+i_2(t)=i_3(t)\\] at the junction."
         }
       ],
       "mainFileId": "main",
@@ -2001,7 +2001,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nThe source current splits according to % semath-recognition-evidence:start\n$I_S$ denotes electric current. $I_L$ denotes electric current. $I_B$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states outgoing for $I_S=I_L+I_B$."
+          "content": "The next formula is presented without an assumed named law (1059). [define as]\n\\begin{equation}q_{1259}\\end{equation}\n\nThe source current splits according to % semath-recognition-evidence:start\n$I_S$ denotes electric current. $I_L$ denotes electric current. $I_B$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; outgoing for $I_S=I_L+I_B$."
         }
       ],
       "mainFileId": "main",
@@ -2036,7 +2036,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nThe report writes the outgoing side first: % semath-recognition-evidence:start\nHere $I_o$ denotes electric current, $I_p$ denotes electric current, and $I_s$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states feeders for \\[I_o+I_p=I_s\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1060). [in this model]\n\\[\\begin{aligned}q_{1260}\\end{aligned}\\]\n\nThe report writes the outgoing side first: % semath-recognition-evidence:start\nHere $I_o$ denotes electric current, $I_p$ denotes electric current, and $I_s$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; feeders for \\[I_o+I_p=I_s\\]."
         }
       ],
       "mainFileId": "main",
@@ -2071,7 +2071,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nFor presentation, the balance is % semath-recognition-evidence:start\nLet $I_1$ denote electric current, $I_2$ denote electric current, $I_3$ denote electric current, and $I_4$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states flow groups for $(I_1+I_2)=(I_3+I_4)$."
+          "content": "Suppose the notation is local to this calculation, case 1061. [throughout section]\nA grouped symbol is $ {q_{1261}} $.\n\nFor presentation, the balance is % semath-recognition-evidence:start\nLet $I_1$ denote electric current, $I_2$ denote electric current, $I_3$ denote electric current, and $I_4$ denote electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; flow groups for $(I_1+I_2)=(I_3+I_4)$."
         }
       ],
       "mainFileId": "main",
@@ -2107,7 +2107,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nThe selected node equation is % semath-recognition-evidence:start\nLet $i_a$, $i_b$, $i_c$, and $i_d$ denote electric current, electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states reference for \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1062). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1262}$.\n\nThe selected node equation is % semath-recognition-evidence:start\nLet $i_a$, $i_b$, $i_c$, and $i_d$ denote electric current, electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe node current balance is stated; reference for \\[\\boxed{i_a+i_b-i_c-i_d=0}\\]."
         }
       ],
       "mainFileId": "main",
@@ -2143,7 +2143,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nLet \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then % semath-recognition-evidence:start\nWe write $j_1$ for electric current. We write $j_2$ for electric current. We write $j_3$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states current splits for $j_1+j_2=j_3$."
+          "content": "As a deliberately unsupported instance, examine relation 1063. [separate sentences]\nAn indexed symbol is $q_{1263}$.\n\nLet \\(j_1,j_2\\) enter the node and \\(j_3\\) leave it. Then % semath-recognition-evidence:start\nWe write $j_1$ for electric current. We write $j_2$ for electric current. We write $j_3$ for electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; current splits for $j_1+j_2=j_3$."
         }
       ],
       "mainFileId": "main",
@@ -2178,7 +2178,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe junction obeys % semath-recognition-evidence:start\n$a$ denotes electric current. $b$ denotes electric current. $c$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states currents satisfy for \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
+          "content": "No domain interpretation is asserted for the following formula (1064). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1264}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe junction obeys % semath-recognition-evidence:start\n$a$ denotes electric current. $b$ denotes electric current. $c$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; currents satisfy for \\[a+b=c\\]. Here \\(a,b\\) are entering currents and \\(c\\) is the leaving current."
         }
       ],
       "mainFileId": "main",
@@ -2213,7 +2213,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nAll four branch arrows point away from the node, so % semath-recognition-evidence:start\nHere $i_a$ denotes electric current, $i_b$ denotes electric current, $i_c$ denotes electric current, and $i_d$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states currents obey for $i_a+i_b+i_c+i_d=0$."
+          "content": "Consider the following independently stated relation in example 1065. [let singular]\nA presentation-only symbol is $q_{1265}$.\n\nAll four branch arrows point away from the node, so % semath-recognition-evidence:start\nHere $i_a$ denotes electric current, $i_b$ denotes electric current, $i_c$ denotes electric current, and $i_d$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; currents obey for $i_a+i_b+i_c+i_d=0$."
         }
       ],
       "mainFileId": "main",
@@ -2249,7 +2249,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nWith every arrow defined toward the node, the signed currents satisfy % semath-recognition-evidence:start\nLet $j_a$ denote electric current, $j_b$ denote electric current, and $j_c$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states currents balance for \\[j_a+j_b+j_c=0\\]."
+          "content": "For comparison, inspect the displayed expression numbered 1066. [let paired]\nA presentation-only symbol follows: \\[q_{1266}\\]\n\nWith every arrow defined toward the node, the signed currents satisfy % semath-recognition-evidence:start\nLet $j_a$ denote electric current, $j_b$ denote electric current, and $j_c$ denote electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; currents balance for \\[j_a+j_b+j_c=0\\]."
         }
       ],
       "mainFileId": "main",
@@ -2284,7 +2284,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nThe measured negative branch value is retained in % semath-recognition-evidence:start\nLet $I_1$, $I_2$, and $I_3$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states conservation for $I_1+(-I_2)+I_3=0$."
+          "content": "The next formula is presented without an assumed named law (1067). [let series]\n\\begin{equation}q_{1267}\\end{equation}\n\nThe measured negative branch value is retained in % semath-recognition-evidence:start\nLet $I_1$, $I_2$, and $I_3$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe node current balance is stated; conservation for $I_1+(-I_2)+I_3=0$."
         }
       ],
       "mainFileId": "main",
@@ -2319,7 +2319,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nAt the distribution node, % semath-recognition-evidence:start\nWe write $I_{\\rm feed}$ for electric current. We write $I_1$ for electric current. We write $I_2$ for electric current. We write $I_3$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states terminal currents for \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
+          "content": "In this local discussion, only the explicit statement below is available (1068). [respectively]\n\\[\\begin{aligned}q_{1268}\\end{aligned}\\]\n\nAt the distribution node, % semath-recognition-evidence:start\nWe write $I_{\\rm feed}$ for electric current. We write $I_1$ for electric current. We write $I_2$ for electric current. We write $I_3$ for electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; terminal currents for \\[I_{\\rm feed}=I_1+I_2+I_3\\]."
         }
       ],
       "mainFileId": "main",
@@ -2355,7 +2355,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nFor the transistor terminal currents, the node equation is % semath-recognition-evidence:start\n$i_e$ denotes electric current. $i_b$ denotes electric current. $i_c$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states node for $i_e=i_b+i_c$."
+          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nFor the transistor terminal currents, the node equation is % semath-recognition-evidence:start\n$i_e$ denotes electric current. $i_b$ denotes electric current. $i_c$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; node for $i_e=i_b+i_c$."
         }
       ],
       "mainFileId": "main",
@@ -2390,7 +2390,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nAt the AC node the phasor currents obey % semath-recognition-evidence:start\nHere $\\tilde I_1$ denotes electric current, $\\tilde I_2$ denotes electric current, and $\\tilde I_3$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states junction for \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
+          "content": "The symbols below have no meaning beyond this standalone example (1070). [we write]\nA styled symbol is $\\mathbf{q}_{1270}$.\n\nAt the AC node the phasor currents obey % semath-recognition-evidence:start\nHere $\\tilde I_1$ denotes electric current, $\\tilde I_2$ denotes electric current, and $\\tilde I_3$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; junction for \\[\\tilde I_1+\\tilde I_2=\\tilde I_3\\]."
         }
       ],
       "mainFileId": "main",
@@ -2425,7 +2425,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe derivation isolates the node row as % semath-recognition-evidence:start\nLet $I_x$ denote electric current, $I_y$ denote electric current, and $I_z$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states kcl for \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1071. [symbol list]\nAn indexed symbol is $q_{1271}$.\n\nThe derivation isolates the node row as % semath-recognition-evidence:start\nLet $I_x$ denote electric current, $I_y$ denote electric current, and $I_z$ denote electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; kcl for \\[\\begin{aligned}I_x+I_y-I_z&=0\\end{aligned}\\]."
         }
       ],
       "mainFileId": "main",
@@ -2460,13 +2460,13 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe flow groups are shown as % semath-recognition-evidence:start\nLet $I_a$, $I_b$, $I_c$, and $I_d$ denote electric current, electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states branch for $\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}$."
+          "content": "No domain interpretation is asserted for the following formula (1072). [role first]\n\\newcommand{\\baselineprobe}{q_{1272}}A macro-expanded symbol is $\\baselineprobe$.\n\nThe flow groups are shown as % semath-recognition-evidence:start\nLet $I_a$, $I_b$, $I_c$, and $I_d$ denote electric current, electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe node current balance is stated for $\\left(I_a+I_b\\right)=\\left(I_c+I_d\\right)$."
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "\\underbrace{I_a+I_b}_{\\rm entering}=\\underbrace{I_c+I_d}_{\\rm leaving}",
+        "needle": "\\left(I_a+I_b\\right)=\\left(I_c+I_d\\right)",
         "edge": "after"
       },
       "expectedRoles": {
@@ -2476,7 +2476,7 @@
         "outgoingCurrent2": "I_d"
       },
       "variationTags": [
-        "underbrace",
+        "paired-delimiters",
         "presentation"
       ],
       "diversity": {
@@ -2496,7 +2496,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nCurrents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives % semath-recognition-evidence:start\nWe write $p$ for electric current. We write $q$ for electric current. We write $r$ for electric current. We write $s$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states balance for \\[p+q=r+s\\]."
+          "content": "Consider the following independently stated relation in example 1073. [suppose that]\nA presentation-only symbol is $q_{1273}$.\n\nCurrents \\(p\\) and \\(q\\) enter, while currents \\(r\\) and \\(s\\) leave. Conservation gives % semath-recognition-evidence:start\nWe write $p$ for electric current. We write $q$ for electric current. We write $r$ for electric current. We write $s$ for electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; balance for \\[p+q=r+s\\]."
         }
       ],
       "mainFileId": "main",
@@ -2532,7 +2532,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nEvery branch quantity is measured in amperes, and the junction balance is % semath-recognition-evidence:start\n$J_0$ denotes electric current. $J_1$ denotes electric current. $J_2$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states aggregate for $J_0-J_1-J_2=0$."
+          "content": "For comparison, inspect the displayed expression numbered 1074. [given that]\nA presentation-only symbol follows: \\[q_{1274}\\]\n\nEvery branch quantity is measured in amperes, and the junction balance is % semath-recognition-evidence:start\n$J_0$ denotes electric current. $J_1$ denotes electric current. $J_2$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; aggregate for $J_0-J_1-J_2=0$."
         }
       ],
       "mainFileId": "main",
@@ -2567,7 +2567,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe equation % semath-recognition-evidence:start\nHere $k_1$ denotes electric current, $k_2$ denotes electric current, and $k_3$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states entering for \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
+          "content": "The next formula is presented without an assumed named law (1075). [define as]\n\\begin{equation}q_{1275}\\end{equation}\n\nThe equation % semath-recognition-evidence:start\nHere $k_1$ denotes electric current, $k_2$ denotes electric current, and $k_3$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; entering for \\[k_1+k_2=k_3\\] applies specifically at node \\(N_7\\); all three symbols denote branch currents."
         }
       ],
       "mainFileId": "main",
@@ -2602,7 +2602,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nThe two feeders satisfy % semath-recognition-evidence:start\nLet $I_{\\mathrm{in},1}$ denote electric current, $I_{\\mathrm{in},2}$ denote electric current, and $I_{\\mathrm{out}}$ denote electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states outgoing for $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
+          "content": "In this local discussion, only the explicit statement below is available (1076). [in this model]\n\\[\\begin{aligned}q_{1276}\\end{aligned}\\]\n\nThe two feeders satisfy % semath-recognition-evidence:start\nLet $I_{\\mathrm{in},1}$ denote electric current, $I_{\\mathrm{in},2}$ denote electric current, and $I_{\\mathrm{out}}$ denote electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; outgoing for $I_{\\mathrm{in},1}+I_{\\mathrm{in},2}=I_{\\mathrm{out}}$."
         }
       ],
       "mainFileId": "main",
@@ -2637,7 +2637,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nRelative to reference node \\(n_0\\), % semath-recognition-evidence:start\nLet $i_{n0,1}$, $i_{n0,2}$, and $i_{n0,3}$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe reviewed law context states feeders for \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
+          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nRelative to reference node \\(n_0\\), % semath-recognition-evidence:start\nLet $i_{n0,1}$, $i_{n0,2}$, and $i_{n0,3}$ denote electric current, electric current, and electric current, respectively.\n% semath-recognition-evidence:end\nThe node current balance is stated; feeders for \\[i_{n0,1}-i_{n0,2}+i_{n0,3}=0\\]."
         }
       ],
       "mainFileId": "main",
@@ -2672,7 +2672,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nThe aliased branch currents satisfy % semath-recognition-evidence:start\nWe write $\\InOne$ for electric current. We write $\\InTwo$ for electric current. We write $\\OutOne$ for electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states flow groups for $\\InOne+\\InTwo=\\OutOne$."
+          "content": "The symbols below have no meaning beyond this standalone example (1078). [compact parenthetical]\nA styled symbol is $\\mathbf{q}_{1278}$.\n\nThe aliased branch currents satisfy % semath-recognition-evidence:start\nWe write $\\InOne$ for electric current. We write $\\InTwo$ for electric current. We write $\\OutOne$ for electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; flow groups for $\\InOne+\\InTwo=\\OutOne$."
         }
       ],
       "mainFileId": "main",
@@ -2721,7 +2721,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\n\\input{branches}\nAt node \\(q\\), % semath-recognition-evidence:start\n$I_u$ denotes electric current. $I_v$ denotes electric current. $I_w$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states reference for \\[I_u+I_v=I_w\\]."
+          "content": "As a deliberately unsupported instance, examine relation 1079. [separate sentences]\nAn indexed symbol is $q_{1279}$.\n\n\\input{branches}\nAt node \\(q\\), % semath-recognition-evidence:start\n$I_u$ denotes electric current. $I_v$ denotes electric current. $I_w$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; reference for \\[I_u+I_v=I_w\\]."
         },
         {
           "fileId": "branches",
@@ -2761,7 +2761,7 @@
         {
           "fileId": "main",
           "path": "main.tex",
-          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{node-macros}\nThe node law is % semath-recognition-evidence:start\nHere $\\Feed$ denotes electric current, $\\LoadA$ denotes electric current, and $\\LoadB$ denotes electric current.\n% semath-recognition-evidence:end\nThe reviewed law context states current splits for $\\Feed=\\LoadA+\\LoadB$."
+          "content": "No domain interpretation is asserted for the following formula (1080). [declaration after]\n\\newcommand{\\baselineprobe}{q_{1280}}A macro-expanded symbol is $\\baselineprobe$.\n\n\\input{node-macros}\nThe node law is % semath-recognition-evidence:start\nHere $\\Feed$ denotes electric current, $\\LoadA$ denotes electric current, and $\\LoadB$ denotes electric current.\n% semath-recognition-evidence:end\nThe node current balance is stated; current splits for $\\Feed=\\LoadA+\\LoadB$."
         },
         {
           "fileId": "node-macros",
@@ -3627,7 +3627,7 @@
       "expectedRoles": {
         "current": "i(t)",
         "capacitance": "C",
-        "voltage": "v(t)",
+        "voltage": "v",
         "time": "t"
       },
       "variationTags": [
@@ -4151,7 +4151,7 @@
       "expectedRoles": {
         "current": "j(t)",
         "capacitance": "C_s",
-        "voltage": "v_s(t)",
+        "voltage": "v_s",
         "time": "t"
       },
       "variationTags": [

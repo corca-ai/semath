@@ -116,8 +116,15 @@ static PACK_CONCEPT_ANCESTORS: LazyLock<BTreeSet<(String, String)>> = LazyLock::
 
 pub(crate) fn concepts_share_lineage(left: &str, right: &str) -> bool {
     left == right
+        || generic_concept_family(left, right)
         || PACK_CONCEPT_ANCESTORS.contains(&(left.to_owned(), right.to_owned()))
         || PACK_CONCEPT_ANCESTORS.contains(&(right.to_owned(), left.to_owned()))
+}
+
+fn generic_concept_family(left: &str, right: &str) -> bool {
+    let (left_namespace, left_leaf) = left.split_once(':').unwrap_or(("", left));
+    let (right_namespace, right_leaf) = right.split_once(':').unwrap_or(("", right));
+    left_leaf == right_leaf && (left_namespace == "semath" || right_namespace == "semath")
 }
 
 pub(crate) fn classify_role(description: &str) -> Option<String> {
@@ -126,7 +133,7 @@ pub(crate) fn classify_role(description: &str) -> Option<String> {
 }
 
 pub(crate) fn classify_role_candidates(description: &str) -> Vec<String> {
-    let lower = description.to_ascii_lowercase();
+    let lower = positive_role_description(description.to_ascii_lowercase());
     if let Some(coordinated) = lower.strip_prefix("both ") {
         let roles = coordinated
             .split(" and ")
@@ -139,7 +146,24 @@ pub(crate) fn classify_role_candidates(description: &str) -> Vec<String> {
             return roles;
         }
     }
-    classify_single_role(description).into_iter().collect()
+    let words = lower
+        .split(|character: char| !character.is_ascii_alphanumeric())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    if contains_singular_or_plural(&words, "event") && contains_singular_or_plural(&words, "set") {
+        return vec!["semath:event".into(), "semath:set".into()];
+    }
+    classify_single_role(&lower).into_iter().collect()
+}
+
+fn positive_role_description(description: String) -> String {
+    [" rather than ", ", not ", " but not "]
+        .into_iter()
+        .filter_map(|separator| description.find(separator))
+        .min()
+        .map_or(description.clone(), |offset| {
+            description[..offset].to_owned()
+        })
 }
 
 fn classify_single_role(description: &str) -> Option<String> {
@@ -283,6 +307,28 @@ mod tests {
             "quantities-units:voltage",
             "quantities-units:resistance"
         ));
+        assert!(concepts_share_lineage("semath:event", "probability:event"));
+        assert!(concepts_share_lineage("semath:set", "discrete-math:set"));
+    }
+
+    #[test]
+    fn preserves_multiple_generic_facets_in_compound_role_descriptions() {
+        assert_eq!(
+            classify_role_candidates("event sets"),
+            ["semath:event".to_owned(), "semath:set".to_owned()]
+        );
+    }
+
+    #[test]
+    fn excludes_explicitly_contrasted_roles_from_positive_classification() {
+        assert_eq!(
+            classify_role_candidates("ordinary sets rather than events"),
+            ["discrete-math:set".to_owned()]
+        );
+        assert_eq!(
+            classify_role_candidates("subsets of a graph vertex set, not random events"),
+            ["discrete-math:set".to_owned()]
+        );
     }
 
     #[test]

@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use crate::consistency::{role_shape_conflict, roles_conflict};
+use crate::evidence_decision::{EqualAuthorityConflict, EvidenceAuthority};
 use crate::semantic_index::{
     Claim, ClaimComparison, ClaimCondition, ClaimExtent, ClaimId, ClaimObject, ClaimOperation,
     ClaimPredicate, ClaimRelation, ClaimShape, ClaimValue, DimensionExponent, EntityId,
@@ -9,9 +11,11 @@ use crate::semantic_index::{
 const MAX_DERIVED_FACTS: usize = 50_000;
 const MAX_WORK_ITEMS: u32 = 200_000;
 const MAX_ROUNDS: usize = 8;
+const MAX_BINDING_ROLE_FACTS: usize = 32;
 
 #[derive(Clone)]
 pub(crate) struct ConstraintInputClaim {
+    pub binding_key: Option<String>,
     pub claim: Claim,
     pub evidence: EvidenceRecord,
 }
@@ -38,9 +42,41 @@ pub(crate) struct ConstraintPlan {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct PlannedConflict {
     pub subject: EntityId,
+    pub binding_key: Option<String>,
+    pub proof: EqualAuthorityConflict<TypedConflictKind, TypedConflictSlot, ClaimId>,
     pub code: String,
     pub summary: String,
     pub parent_claims: Vec<ClaimId>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum TypedConflictKind {
+    IncompatibleValues {
+        predicate: ClaimPredicate,
+        left: ClaimValue,
+        right: ClaimValue,
+    },
+    IncompatibleBindingRoles {
+        left: ClaimValue,
+        right: ClaimValue,
+    },
+    IncompatibleRoleAndShape {
+        role: ClaimValue,
+        shape: ClaimValue,
+    },
+    OpposedComparisons {
+        left: ClaimComparison,
+        right: ClaimComparison,
+    },
+    InvalidProductShape,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum TypedConflictSlot {
+    EntityPredicate(EntityId, ClaimPredicate),
+    BindingRole(String, Vec<u32>, String),
+    Comparison(EntityId, EntityId),
+    Operation(EntityId),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -60,13 +96,39 @@ struct Proof {
     derived: bool,
 }
 
+#[derive(Clone)]
+struct BindingRoleFact {
+    binding_key: String,
+    claim_id: ClaimId,
+    subject: EntityId,
+    value: ClaimValue,
+}
+
 pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> ConstraintPlan {
     let mut known = BTreeMap::<FactKey, Proof>::new();
     let mut relations = Vec::<(ClaimId, ClaimRelation, EvidenceRecord)>::new();
+    let mut binding_roles = Vec::new();
+    let mut binding_keys = BTreeMap::<EntityId, String>::new();
     for item in input.iter().filter(|item| establishes(&item.evidence)) {
+        if let Some(binding_key) = &item.binding_key {
+            binding_keys
+                .entry(item.claim.subject.clone())
+                .or_insert_with(|| binding_key.clone());
+        }
         let ClaimObject::Value(value) = &item.claim.object else {
             continue;
         };
+        if item.claim.predicate == ClaimPredicate::HasRole
+            && matches!(value, ClaimValue::Concept(_) | ClaimValue::Role(_))
+            && let Some(binding_key) = &item.binding_key
+        {
+            binding_roles.push(BindingRoleFact {
+                binding_key: binding_key.clone(),
+                claim_id: item.claim.id.clone(),
+                subject: item.claim.subject.clone(),
+                value: value.clone(),
+            });
+        }
         if item.claim.predicate == ClaimPredicate::Relates {
             if let ClaimValue::Relation(relation) = value {
                 relations.push((
@@ -121,7 +183,13 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
         }
     }
 
-    let conflicts = collect_conflicts(&known, &relations);
+    let conflicts = collect_conflicts(
+        &known,
+        &relations,
+        &binding_roles,
+        &binding_keys,
+        &mut truncated,
+    );
     let mut derivations = known
         .into_iter()
         .filter_map(|(key, proof)| {
@@ -219,9 +287,29 @@ fn apply_composed_relations(
     }
 }
 
+fn equal_authority_conflict(
+    kind: TypedConflictKind,
+    slot: TypedConflictSlot,
+    left_roots: BTreeSet<ClaimId>,
+    right_roots: BTreeSet<ClaimId>,
+) -> EqualAuthorityConflict<TypedConflictKind, TypedConflictSlot, ClaimId> {
+    EqualAuthorityConflict::new(
+        kind,
+        slot,
+        EvidenceAuthority::ExplicitAuthor,
+        left_roots,
+        EvidenceAuthority::ExplicitAuthor,
+        right_roots,
+    )
+    .expect("a planned conflict has two nonempty same-authority proof sides")
+}
+
 fn collect_conflicts(
     known: &BTreeMap<FactKey, Proof>,
     relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    binding_roles: &[BindingRoleFact],
+    binding_keys: &BTreeMap<EntityId, String>,
+    truncated: &mut bool,
 ) -> Vec<PlannedConflict> {
     let mut conflicts = BTreeSet::new();
     let facts = known.iter().collect::<Vec<_>>();
@@ -251,8 +339,20 @@ fn collect_conflicts(
                 .collect::<Vec<_>>();
             parents.sort();
             parents.dedup();
+            let proof = equal_authority_conflict(
+                TypedConflictKind::IncompatibleValues {
+                    predicate: left.predicate.clone(),
+                    left: left.value.clone(),
+                    right: right.value.clone(),
+                },
+                TypedConflictSlot::EntityPredicate(left.subject.clone(), left.predicate.clone()),
+                left_proof.parents.clone(),
+                right_proof.parents.clone(),
+            );
             conflicts.insert(PlannedConflict {
                 subject: left.subject.clone(),
+                binding_key: binding_keys.get(&left.subject).cloned(),
+                proof,
                 code: match left.predicate {
                     ClaimPredicate::HasShape => "constraint-shape-conflict",
                     ClaimPredicate::HasDimension
@@ -268,11 +368,148 @@ fn collect_conflicts(
                         "quantity-assignment-dimension-mismatch"
                     }
                     ClaimPredicate::HasDimension => "constraint-dimension-conflict",
+                    ClaimPredicate::HasRole => "notation-role-conflict",
                     _ => continue,
                 }
                 .into(),
                 summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                 parent_claims: parents,
+            });
+        }
+    }
+    let mut roles_by_binding = BTreeMap::<(String, Vec<u32>, String), Vec<&BindingRoleFact>>::new();
+    for fact in binding_roles {
+        let roles = roles_by_binding
+            .entry((
+                fact.subject.component_id.clone(),
+                fact.subject.scope_path.clone(),
+                fact.binding_key.clone(),
+            ))
+            .or_default();
+        if roles.len() == MAX_BINDING_ROLE_FACTS {
+            *truncated = true;
+        }
+        if roles.len() < MAX_BINDING_ROLE_FACTS {
+            roles.push(fact);
+        }
+    }
+    for roles in roles_by_binding.values() {
+        for (position, left) in roles.iter().enumerate() {
+            for right in roles.iter().skip(position + 1) {
+                if left.subject == right.subject || !role_values_conflict(&left.value, &right.value)
+                {
+                    continue;
+                }
+                let mut parent_claims = vec![left.claim_id.clone(), right.claim_id.clone()];
+                parent_claims.sort();
+                let proof = equal_authority_conflict(
+                    TypedConflictKind::IncompatibleBindingRoles {
+                        left: left.value.clone(),
+                        right: right.value.clone(),
+                    },
+                    TypedConflictSlot::BindingRole(
+                        left.subject.component_id.clone(),
+                        left.subject.scope_path.clone(),
+                        left.binding_key.clone(),
+                    ),
+                    BTreeSet::from([left.claim_id.clone()]),
+                    BTreeSet::from([right.claim_id.clone()]),
+                );
+                conflicts.insert(PlannedConflict {
+                    subject: if left.subject < right.subject {
+                        right.subject.clone()
+                    } else {
+                        left.subject.clone()
+                    },
+                    binding_key: Some(left.binding_key.clone()),
+                    proof,
+                    code: "notation-role-conflict".into(),
+                    summary: format!("{:?} conflicts with {:?}", left.value, right.value),
+                    parent_claims,
+                });
+            }
+        }
+    }
+    for (position, (left, left_proof)) in facts.iter().enumerate() {
+        for (right, right_proof) in facts.iter().skip(position + 1) {
+            if left.subject != right.subject || !role_and_shape_conflict(left, right) {
+                continue;
+            }
+            let mut parents = left_proof
+                .parents
+                .iter()
+                .chain(&right_proof.parents)
+                .cloned()
+                .collect::<Vec<_>>();
+            parents.sort();
+            parents.dedup();
+            let (role, shape) = match (&left.predicate, &left.value) {
+                (ClaimPredicate::HasRole, role) => (role.clone(), right.value.clone()),
+                _ => (right.value.clone(), left.value.clone()),
+            };
+            let proof = equal_authority_conflict(
+                TypedConflictKind::IncompatibleRoleAndShape { role, shape },
+                TypedConflictSlot::EntityPredicate(left.subject.clone(), ClaimPredicate::HasRole),
+                left_proof.parents.clone(),
+                right_proof.parents.clone(),
+            );
+            conflicts.insert(PlannedConflict {
+                subject: left.subject.clone(),
+                binding_key: binding_keys.get(&left.subject).cloned(),
+                proof,
+                code: "notation-role-type-conflict".into(),
+                summary: format!("{:?} conflicts with {:?}", left.value, right.value),
+                parent_claims: parents,
+            });
+        }
+    }
+    for (position, (left_id, left, _)) in relations.iter().enumerate() {
+        for (right_id, right, _) in relations.iter().skip(position + 1) {
+            let (
+                ClaimRelation::Comparison {
+                    operator: left_operator,
+                    left: left_subject,
+                    right: left_object,
+                    ..
+                },
+                ClaimRelation::Comparison {
+                    operator: right_operator,
+                    left: right_subject,
+                    right: right_object,
+                    ..
+                },
+            ) = (left, right)
+            else {
+                continue;
+            };
+            let right_operator = if left_subject == right_subject && left_object == right_object {
+                right_operator.clone()
+            } else if left_subject == right_object && left_object == right_subject {
+                reverse_comparison(right_operator)
+            } else {
+                continue;
+            };
+            if !comparisons_conflict(left_operator, &right_operator) {
+                continue;
+            }
+            let proof = equal_authority_conflict(
+                TypedConflictKind::OpposedComparisons {
+                    left: left_operator.clone(),
+                    right: right_operator.clone(),
+                },
+                TypedConflictSlot::Comparison(left_subject.clone(), left_object.clone()),
+                BTreeSet::from([left_id.clone()]),
+                BTreeSet::from([right_id.clone()]),
+            );
+            conflicts.insert(PlannedConflict {
+                subject: left_subject.clone(),
+                binding_key: binding_keys.get(left_subject).cloned(),
+                proof,
+                code: "constraint-comparison-conflict".into(),
+                summary: format!(
+                    "{left_operator:?} conflicts with {right_operator:?} for the same operands"
+                ),
+                parent_claims: vec![left_id.clone(), right_id.clone()],
             });
         }
     }
@@ -314,14 +551,63 @@ fn collect_conflicts(
             .collect::<Vec<_>>();
         parents.sort();
         parents.dedup();
+        let factor_roots = factor_shapes
+            .iter()
+            .flat_map(|(_, proof)| proof.parents.iter().cloned())
+            .collect::<BTreeSet<_>>();
+        let proof = equal_authority_conflict(
+            TypedConflictKind::InvalidProductShape,
+            TypedConflictSlot::Operation(result.clone()),
+            factor_roots,
+            BTreeSet::from([relation_id.clone()]),
+        );
         conflicts.insert(PlannedConflict {
             subject: result.clone(),
+            binding_key: binding_keys.get(result).cloned(),
+            proof,
             code: "constraint-product-shape-conflict".into(),
             summary: "Product operands have incompatible proven inner dimensions".into(),
             parent_claims: parents,
         });
     }
     conflicts.into_iter().collect()
+}
+
+fn role_values_conflict(left: &ClaimValue, right: &ClaimValue) -> bool {
+    role_value(left)
+        .zip(role_value(right))
+        .is_some_and(|(left, right)| roles_conflict(left, right))
+}
+
+fn role_value(value: &ClaimValue) -> Option<&str> {
+    match value {
+        ClaimValue::Concept(role) | ClaimValue::Role(role) => Some(role),
+        _ => None,
+    }
+}
+
+fn reverse_comparison(operator: &ClaimComparison) -> ClaimComparison {
+    match operator {
+        ClaimComparison::Equal => ClaimComparison::Equal,
+        ClaimComparison::NotEqual => ClaimComparison::NotEqual,
+        ClaimComparison::LessThan => ClaimComparison::GreaterThan,
+        ClaimComparison::LessOrEqual => ClaimComparison::GreaterOrEqual,
+        ClaimComparison::GreaterThan => ClaimComparison::LessThan,
+        ClaimComparison::GreaterOrEqual => ClaimComparison::LessOrEqual,
+    }
+}
+
+fn comparisons_conflict(left: &ClaimComparison, right: &ClaimComparison) -> bool {
+    use ClaimComparison::{Equal, GreaterOrEqual, GreaterThan, LessOrEqual, LessThan, NotEqual};
+    matches!(
+        (left, right),
+        (Equal, NotEqual | LessThan | GreaterThan)
+            | (NotEqual, Equal)
+            | (LessThan, Equal | GreaterThan | GreaterOrEqual)
+            | (LessOrEqual, GreaterThan)
+            | (GreaterThan, Equal | LessThan | LessOrEqual)
+            | (GreaterOrEqual, LessThan)
+    )
 }
 
 fn values_conflict(
@@ -335,7 +621,41 @@ fn values_conflict(
             shapes_conflict(left, right, relations, boundary)
         }
         (ClaimValue::Dimension(left), ClaimValue::Dimension(right)) => left != right,
+        (ClaimValue::Concept(left), ClaimValue::Concept(right))
+        | (ClaimValue::Concept(left), ClaimValue::Role(right))
+        | (ClaimValue::Role(left), ClaimValue::Concept(right))
+        | (ClaimValue::Role(left), ClaimValue::Role(right)) => roles_conflict(left, right),
         _ => false,
+    }
+}
+
+fn role_and_shape_conflict(left: &FactKey, right: &FactKey) -> bool {
+    let (role, shape) = match (&left.predicate, &left.value, &right.predicate, &right.value) {
+        (
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept(role) | ClaimValue::Role(role),
+            ClaimPredicate::HasShape,
+            ClaimValue::Shape(shape),
+        )
+        | (
+            ClaimPredicate::HasShape,
+            ClaimValue::Shape(shape),
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept(role) | ClaimValue::Role(role),
+        ) => (role, shape),
+        _ => return false,
+    };
+    role_shape_conflict(role, claim_shape_kind(shape))
+}
+
+fn claim_shape_kind(shape: &ClaimShape) -> &str {
+    match shape {
+        ClaimShape::Scalar => "scalar",
+        ClaimShape::Vector(_) => "vector",
+        ClaimShape::Matrix(_) => "matrix",
+        ClaimShape::Tensor(_) => "tensor",
+        ClaimShape::Function { .. } => "function",
+        ClaimShape::Unknown => "unknown",
     }
 }
 
@@ -1184,6 +1504,7 @@ mod tests {
             availability_order: u64::from(local_id),
             surface: format!("x{local_id}"),
             source_text: format!("x{local_id}"),
+            selection_text: format!("x{local_id}"),
             notation: Vec::new(),
         }
     }
@@ -1213,6 +1534,7 @@ mod tests {
         let source = subject.anchor.clone();
         let evidence_id = EvidenceId(format!("evidence-{id}"));
         ConstraintInputClaim {
+            binding_key: None,
             claim: Claim {
                 id: ClaimId(id.into()),
                 subject: subject.clone(),
@@ -1250,6 +1572,53 @@ mod tests {
                 canonical_digest: id.into(),
             })),
         )
+    }
+
+    fn comparison(
+        id: &str,
+        operator: ClaimComparison,
+        left: EntityId,
+        right: EntityId,
+    ) -> ConstraintInputClaim {
+        input_claim(
+            id,
+            left.clone(),
+            ClaimPredicate::Relates,
+            ClaimValue::Relation(Box::new(ClaimRelation::Comparison {
+                operator,
+                left,
+                right,
+                canonical_digest: id.into(),
+            })),
+        )
+    }
+
+    #[test]
+    fn explicit_opposed_comparisons_are_typed_conflicts() {
+        let (x, y) = (entity(1), entity(2));
+        let plan = plan_constraint_derivations(&[
+            comparison("equal", ClaimComparison::Equal, x.clone(), y.clone()),
+            comparison("not-equal", ClaimComparison::NotEqual, x, y),
+        ]);
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "constraint-comparison-conflict");
+        assert_eq!(
+            plan.conflicts[0].proof.authority,
+            EvidenceAuthority::ExplicitAuthor
+        );
+        assert!(matches!(
+            plan.conflicts[0].proof.value,
+            TypedConflictKind::OpposedComparisons { .. }
+        ));
+        assert!(!plan.conflicts[0].proof.left_roots.is_empty());
+        assert!(!plan.conflicts[0].proof.right_roots.is_empty());
+
+        let (x, y) = (entity(3), entity(4));
+        let compatible = plan_constraint_derivations(&[
+            comparison("not-equal", ClaimComparison::NotEqual, x.clone(), y.clone()),
+            comparison("less", ClaimComparison::LessThan, x, y),
+        ]);
+        assert!(compatible.conflicts.is_empty());
     }
 
     #[test]
@@ -1349,6 +1718,111 @@ mod tests {
                         },
                     ])
         }));
+    }
+
+    #[test]
+    fn explicit_incompatible_roles_produce_one_typed_conflict() {
+        let symbol = entity(1);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "event-role",
+                symbol.clone(),
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("probability:event".into()),
+            ),
+            input_claim(
+                "voltage-role",
+                symbol,
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("quantities-units:voltage".into()),
+            ),
+        ]);
+
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "notation-role-conflict");
+        assert_eq!(
+            plan.conflicts[0].parent_claims,
+            [ClaimId("event-role".into()), ClaimId("voltage-role".into())]
+        );
+    }
+
+    #[test]
+    fn incompatible_redeclarations_of_one_binding_are_a_typed_conflict() {
+        let mut distribution = input_claim(
+            "distribution-role",
+            entity(1),
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept("probability:distribution".into()),
+        );
+        distribution.binding_key = Some("p".into());
+        let mut random_variable = input_claim(
+            "random-variable-role",
+            entity(2),
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept("probability:random-variable".into()),
+        );
+        random_variable.binding_key = Some("p".into());
+
+        let plan = plan_constraint_derivations(&[distribution, random_variable]);
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "notation-role-conflict");
+
+        let crowded = (0..=MAX_BINDING_ROLE_FACTS)
+            .map(|index| {
+                let mut claim = input_claim(
+                    &format!("role-{index}"),
+                    entity(index as u32 + 10),
+                    ClaimPredicate::HasRole,
+                    ClaimValue::Concept("probability:random-variable".into()),
+                );
+                claim.binding_key = Some("shared".into());
+                claim
+            })
+            .collect::<Vec<_>>();
+        assert!(plan_constraint_derivations(&crowded).truncated);
+    }
+
+    #[test]
+    fn compatible_role_lineage_does_not_produce_a_typed_conflict() {
+        let symbol = entity(1);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "set-role",
+                symbol.clone(),
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("discrete-math:set".into()),
+            ),
+            input_claim(
+                "event-role",
+                symbol,
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("probability:event".into()),
+            ),
+        ]);
+
+        assert!(plan.conflicts.is_empty());
+    }
+
+    #[test]
+    fn explicit_role_shape_incompatibility_is_a_typed_cross_predicate_conflict() {
+        let symbol = entity(1);
+        let plan = plan_constraint_derivations(&[
+            input_claim(
+                "event-role",
+                symbol.clone(),
+                ClaimPredicate::HasRole,
+                ClaimValue::Concept("probability:event".into()),
+            ),
+            input_claim(
+                "vector-shape",
+                symbol,
+                ClaimPredicate::HasShape,
+                ClaimValue::Shape(ClaimShape::Vector(vec!["n".into()])),
+            ),
+        ]);
+
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "notation-role-type-conflict");
     }
 
     #[test]

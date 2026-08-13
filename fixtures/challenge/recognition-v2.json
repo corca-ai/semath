@@ -116,9 +116,9 @@
       "owner": "pack",
       "metric": "evidence",
       "outcome": "refusal",
-      "documents": [{ "fileId": "main", "path": "main.md", "content": "The symbols $C$ and $D$ name subsets of a graph vertex set, not random events. We use $C\\cap D$." }],
+      "documents": [{ "fileId": "main", "path": "main.md", "content": "Let $C$ and $D$ be events in one probability space. Let $C$ and $D$ be sets in one common set domain. We use $C\\cap D$." }],
       "cursor": { "fileId": "main", "needle": "C\\cap D", "edge": "after" },
-      "expectation": { "excludedRelationId": "probability:event-intersection" },
+      "expectation": { "conceptId": "discrete-math:set" },
       "variationTags": ["cross-pack", "notation-collision", "safe-refusal"]
     },
     {

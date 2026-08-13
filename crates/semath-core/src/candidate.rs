@@ -380,6 +380,7 @@ mod tests {
             availability_order: 0,
             surface: surface.into(),
             source_text: surface.into(),
+            selection_text: surface.into(),
             notation: Vec::new(),
         }
     }

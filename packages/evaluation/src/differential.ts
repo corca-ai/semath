@@ -264,7 +264,7 @@ export function planSemanticLifecycleTraces(seed: number): readonly SemanticLife
           changes: [{ content: `${probabilityDefinitions}\n$A \\cap$.`, fileId: "main", kind: "upsert", path: "main.tex" }],
           expectedDecision: "not-established",
           id: "break-expression",
-          queryNeedle: "A \\cap",
+          queryNeedle: "\\cap",
         },
         {
           changes: [{ content: localProbability, fileId: "main", kind: "upsert", path: "main.tex" }],

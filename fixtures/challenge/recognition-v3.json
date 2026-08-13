@@ -6,7 +6,7 @@
       "caseId": "binding-metric-long-short",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -33,7 +33,7 @@
       "caseId": "binding-role-collision-refusal",
       "documentShape": "multi-equation",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -51,7 +51,7 @@
       "caseId": "constraint-matrix-vector-mismatch",
       "documentShape": "sectioned",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -60,7 +60,7 @@
       "caseId": "constraint-explicit-vector-shape",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -69,7 +69,7 @@
       "caseId": "constraint-incompatible-role-refusal",
       "documentShape": "macro-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -105,8 +105,8 @@
       "caseId": "pack-set-event-collision",
       "documentShape": "sectioned",
       "decision": {
-        "status": "partial",
-        "meaning": "present",
+        "status": "ambiguous",
+        "meaning": "absent",
         "problems": "none"
       }
     },
@@ -114,8 +114,8 @@
       "caseId": "presentation-decorated-source",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },
@@ -132,7 +132,7 @@
       "caseId": "presentation-named-surface",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -150,7 +150,7 @@
       "caseId": "resolution-resource-navigation",
       "documentShape": "project-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -168,7 +168,7 @@
       "caseId": "resolution-included-definition",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -186,8 +186,8 @@
       "caseId": "syntax-partial-candidate",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },
@@ -213,8 +213,8 @@
       "caseId": "syntax-index-family",
       "documentShape": "sectioned",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },
@@ -222,7 +222,7 @@
       "caseId": "binding-asserted-ece-name",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -240,7 +240,7 @@
       "caseId": "binding-shared-matrix-declaration",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -276,7 +276,7 @@
       "caseId": "constraint-passive-sign-asserted",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -285,7 +285,7 @@
       "caseId": "constraint-passive-sign-negated-refusal",
       "documentShape": "macro-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -330,8 +330,8 @@
       "caseId": "presentation-hat-source-preserved",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },
@@ -339,8 +339,8 @@
       "caseId": "presentation-style-not-decoration",
       "documentShape": "macro-neighbor",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },
@@ -348,7 +348,7 @@
       "caseId": "presentation-declared-ece-command",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -366,7 +366,7 @@
       "caseId": "resolution-prior-section-binding",
       "documentShape": "project-neighbor",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -384,7 +384,7 @@
       "caseId": "resolution-prior-include-binding",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
@@ -402,8 +402,8 @@
       "caseId": "syntax-second-partial-structure",
       "documentShape": "malformed-neighbor",
       "decision": {
-        "status": "ambiguous",
-        "meaning": "absent",
+        "status": "partial",
+        "meaning": "present",
         "problems": "none"
       }
     },

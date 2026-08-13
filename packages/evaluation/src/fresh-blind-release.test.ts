@@ -7,6 +7,7 @@ import {
   type AuthoredScientificObservation,
 } from "./authored-scientific";
 import {
+  freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
   freshBlindSealPayload,
   parseFreshBlindReleaseFixture,
@@ -30,13 +31,27 @@ describe("fresh blind release evidence", () => {
     });
   });
 
+  test("reuses the sealed evidence contract across semantic release cycles", () => {
+    const next = fixtureValue();
+    next.release.id = "v0.29";
+    const release = finalize(next);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios).toBe(48);
+
+    const invalid = fixtureValue();
+    invalid.release.id = "release-29";
+    const unversioned = finalize(invalid);
+    expect(() =>
+      validateFreshBlindRelease(unversioned, validation(unversioned)),
+    ).toThrow("expected a semantic release id");
+  });
+
   test("requires isolated Codex authors, critics, and the complete main review", () => {
     const value = fixtureValue();
     value.fixture.scenarios[0]!.review.criticId = "main-codex";
     const release = finalize(value);
-    expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
-      "author, critic, and main reviewer must be independent",
-    );
+    expect(() =>
+      validateFreshBlindRelease(release, validation(release)),
+    ).toThrow("author, critic, and main reviewer must be independent");
 
     const sameWorker = fixtureValue();
     sameWorker.fixture.scenarios[0]!.review.criticId =
@@ -57,9 +72,116 @@ describe("fresh blind release evidence", () => {
       status: "available",
     };
     const release = finalize(value);
-    expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
+    expect(() =>
+      validateFreshBlindRelease(release, validation(release)),
+    ).toThrow(
       "available rename requires exact source, replacement, and safety evidence",
     );
+
+    const invalidFamily = fixtureValue();
+    const invalidExpected = invalidFamily.fixture.probes[0]!.expected as {
+      navigation: { rename: Record<string, unknown> };
+    };
+    invalidExpected.navigation.rename = {
+      excluded: [],
+      expectedText: "x",
+      minimum: 1,
+      newName: "renamed",
+      replacementText: "renamed",
+      required: [{ fileId: "main", needle: "$x_0=1$" }],
+      safety: "deterministic",
+      status: "available",
+    };
+    const invalidRelease = finalize(invalidFamily);
+    expect(() =>
+      validateFreshBlindRelease(invalidRelease, validation(invalidRelease)),
+    ).toThrow("rename must preserve one exact editable notation family");
+  });
+
+  test("requires complete navigation allowlists before an engine run", () => {
+    const incomplete = fixtureValue();
+    const expected = incomplete.fixture.probes[0]!.expected as {
+      navigation: { definition: Record<string, unknown> };
+    };
+    expected.navigation.definition = {
+      excluded: [],
+      minimum: 2,
+      required: [{ fileId: "main", needle: "$x_0=1$" }],
+      status: "available",
+    };
+    const release = finalize(incomplete);
+    expect(() =>
+      validateFreshBlindRelease(release, validation(release)),
+    ).toThrow("definition must enumerate its complete location allowlist");
+
+    const incompletePreparation = fixtureValue();
+    const preparation = incompletePreparation.fixture.probes[0]!.expected as {
+      navigation: { prepareRename: Record<string, unknown> };
+    };
+    preparation.navigation.prepareRename = { status: "available" };
+    const preparationRelease = finalize(incompletePreparation);
+    expect(() =>
+      validateFreshBlindRelease(
+        preparationRelease,
+        validation(preparationRelease),
+      ),
+    ).toThrow(
+      "available prepareRename requires an exact range and placeholder",
+    );
+  });
+
+  test("requires one complete atomic entity surface from v0.35 onward", () => {
+    const value = fixtureValue();
+    value.release.id = "v0.35";
+    const probe = value.fixture.probes[0]!;
+    const expected = probe.expected as AuthoredProbeExpected;
+    expected.symbol = "x_0";
+    const exact = {
+      fileId: "main",
+      needle: "$x_0=1$",
+      selection: { offset: 1, length: 3 },
+    };
+    expected.navigation.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    expected.navigation.references = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    const release = finalize(value);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios).toBe(48);
+
+    const incomplete = fixtureValue();
+    incomplete.release.id = "v0.35";
+    const incompleteProbe = incomplete.fixture.probes[0]!;
+    const incompleteExpected = incompleteProbe.expected as AuthoredProbeExpected;
+    incompleteExpected.symbol = "x_0";
+    incomplete.fixture.scenarios[0]!.snapshots[0]!.documents[0]!.content +=
+      " The same quantity is $x_0$.";
+    incompleteExpected.navigation.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    incompleteExpected.navigation.references = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    const incompleteRelease = finalize(incomplete);
+    expect(() =>
+      validateFreshBlindRelease(
+        incompleteRelease,
+        validation(incompleteRelease),
+      ),
+    ).toThrow("reference allowlist must enumerate every exact atomic source occurrence");
   });
 
   test("rejects exact evidence reuse and suspicious prose lineage", () => {
@@ -103,7 +225,11 @@ describe("fresh blind release evidence", () => {
       caseId: probe.id,
       decision: "established",
       definitions: [
-        { fileId: "main", path: "main.md", range: { startOffset: 0, endOffset: 1 } },
+        {
+          fileId: "main",
+          path: "main.md",
+          range: { startOffset: 0, endOffset: 1 },
+        },
       ],
       diagnostics: [],
       prepareRename: { range: { startOffset: 0, endOffset: 1 } },
@@ -122,10 +248,278 @@ describe("fresh blind release evidence", () => {
       symbol: null,
     };
     expect(freshBlindSafetySummary(release.fixture, [observation])).toEqual({
+      diagnosticsOverLimit: 0,
+      diagnosticsOverLimitIds: [],
       falseConflict: 0,
+      falseConflictIds: [],
       falseEstablishment: 1,
-      unsafeNavigationOrEdit: 3,
+      falseEstablishmentIds: [probe.id],
+      unsafeNavigationOrEditCaseIds: [probe.id],
+      unsafeNavigationOrEditLocations: 3,
     });
+    expect(
+      freshBlindSafetySummary(release.fixture, [
+        {
+          ...observation,
+          decision: "conflicting",
+          definitions: [],
+          prepareRename: {},
+          renameEdits: [],
+        },
+      ]),
+    ).toEqual({
+      diagnosticsOverLimit: 0,
+      diagnosticsOverLimitIds: [],
+      falseConflict: 1,
+      falseConflictIds: [probe.id],
+      falseEstablishment: 0,
+      falseEstablishmentIds: [],
+      unsafeNavigationOrEditCaseIds: [],
+      unsafeNavigationOrEditLocations: 0,
+    });
+  });
+
+  test("keeps case counts aligned with ids and gates warning diagnostics over the reviewed limit", () => {
+    const release = fixture();
+    const establishmentProbe = release.fixture.probes.find(
+      (probe) => probe.expected.decision === "unsupported",
+    )!;
+    const conflictProbe = release.fixture.probes.find(
+      (probe) => probe.expected.decision === "partial",
+    )!;
+    const diagnosticProbe = release.fixture.probes.find(
+      (probe) => probe.expected.decision === "ambiguous",
+    )!;
+    const proofProbe = release.fixture.probes.find(
+      (probe) =>
+        probe.id !== establishmentProbe.id &&
+        probe.id !== conflictProbe.id &&
+        probe.id !== diagnosticProbe.id,
+    )!;
+    const hintProbe = release.fixture.probes.find(
+      (probe) =>
+        ![
+          establishmentProbe.id,
+          conflictProbe.id,
+          diagnosticProbe.id,
+          proofProbe.id,
+        ].includes(probe.id),
+    )!;
+    const observation = (
+      probe: (typeof release.fixture.probes)[number],
+    ): AuthoredScientificObservation => ({
+      caseId: probe.id,
+      decision: probe.expected.decision,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: false,
+      references: [],
+      relations: [],
+      renameEdits: [],
+      symbol: null,
+    });
+    const summary = freshBlindSafetySummary(release.fixture, [
+      { ...observation(establishmentProbe), decision: "established" },
+      { ...observation(conflictProbe), decision: "conflicting" },
+      {
+        ...observation(diagnosticProbe),
+        diagnostics: [
+          {
+            code: "review-limit",
+            fileId: "main",
+            range: { startOffset: 0, endOffset: 1 },
+            severity: "warning",
+          },
+        ],
+      },
+      { ...observation(proofProbe), proofGrounded: true },
+    ]);
+
+    expect(summary.falseEstablishment).toBe(
+      summary.falseEstablishmentIds.length,
+    );
+    expect(summary.falseConflict).toBe(summary.falseConflictIds.length);
+    expect(summary.diagnosticsOverLimit).toBe(
+      summary.diagnosticsOverLimitIds.length,
+    );
+    expect(summary.falseEstablishmentIds).toEqual(
+      [establishmentProbe.id, proofProbe.id].sort(),
+    );
+    expect(summary.diagnosticsOverLimitIds).toEqual([diagnosticProbe.id]);
+    expect(freshBlindSafetyGateFailed(summary)).toBe(true);
+
+    const hintOnly = freshBlindSafetySummary(release.fixture, [
+      {
+        ...observation(hintProbe),
+        diagnostics: [
+          {
+            code: "informational",
+            fileId: "main",
+            range: { startOffset: 0, endOffset: 1 },
+            severity: "hint",
+          },
+        ],
+      },
+    ]);
+    expect(hintOnly.diagnosticsOverLimit).toBe(0);
+    expect(freshBlindSafetyGateFailed(hintOnly)).toBe(false);
+  });
+
+  test("reports unsafe location count separately from affected case ids", () => {
+    const release = fixture();
+    const probe = release.fixture.probes[0]!;
+    const location = (startOffset: number) => ({
+      fileId: "main",
+      path: "main.md",
+      range: { startOffset, endOffset: startOffset + 1 },
+    });
+    const summary = freshBlindSafetySummary(release.fixture, [
+      {
+        caseId: probe.id,
+        decision: probe.expected.decision,
+        definitions: [location(0), location(1)],
+        diagnostics: [],
+        prepareRename: { range: location(4).range },
+        proofGrounded: false,
+        references: [location(2), location(3)],
+        relations: [],
+        renameEdits: [
+          {
+            ...location(5),
+            expectedText: "x",
+            replacementText: "y",
+          },
+          {
+            ...location(6),
+            expectedText: "x",
+            replacementText: "y",
+          },
+        ],
+        symbol: null,
+      },
+    ]);
+
+    expect(summary.unsafeNavigationOrEditLocations).toBe(7);
+    expect(summary.unsafeNavigationOrEditCaseIds).toEqual([probe.id]);
+  });
+
+  test("rejects every available navigation or edit outside its exact allowlist", () => {
+    const release = fixture();
+    const probe = release.fixture.probes[0]!;
+    const scenario = release.fixture.scenarios[0]!;
+    const document = scenario.snapshots[0]!.documents[0]!;
+    const needle = "$x_0=1$";
+    const startOffset = document.content.indexOf(needle);
+    const range = {
+      startOffset,
+      endOffset: startOffset + needle.length,
+    };
+    const anchor = { fileId: document.fileId, needle };
+    const expected = probe.expected.navigation as unknown as {
+      definition: Record<string, unknown>;
+      references: Record<string, unknown>;
+      rename: Record<string, unknown>;
+    };
+    expected.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [anchor],
+      status: "available",
+    };
+    expected.references = {
+      excluded: [],
+      minimum: 1,
+      required: [anchor],
+      status: "available",
+    };
+    expected.rename = {
+      excluded: [],
+      expectedText: needle,
+      minimum: 1,
+      newName: "y",
+      replacementText: "y",
+      required: [anchor],
+      safety: "reviewed exact notation",
+      status: "available",
+    };
+    const location = (candidate: { startOffset: number; endOffset: number }) => ({
+      fileId: document.fileId,
+      path: document.path,
+      range: candidate,
+    });
+    const unexpectedRange = {
+      startOffset: range.startOffset + 1,
+      endOffset: range.endOffset,
+    };
+    const summary = freshBlindSafetySummary(release.fixture, [
+      {
+        caseId: probe.id,
+        decision: probe.expected.decision,
+        definitions: [location(range), location(unexpectedRange)],
+        diagnostics: [],
+        prepareRename: {},
+        proofGrounded: probe.expected.proofGrounded,
+        references: [location(range), location(unexpectedRange)],
+        relations: [],
+        renameEdits: [
+          {
+            ...location(range),
+            expectedText: needle,
+            replacementText: "y",
+          },
+          {
+            ...location(unexpectedRange),
+            expectedText: needle,
+            replacementText: "y",
+          },
+        ],
+        renameSafety: "reviewed exact notation",
+        symbol: null,
+      },
+    ]);
+
+    expect(summary.unsafeNavigationOrEditLocations).toBe(3);
+    expect(summary.unsafeNavigationOrEditCaseIds).toEqual([probe.id]);
+  });
+
+  test("gates each reviewed safety category and accepts a clean summary", () => {
+    const clean = {
+      diagnosticsOverLimit: 0,
+      diagnosticsOverLimitIds: [],
+      falseConflict: 0,
+      falseConflictIds: [],
+      falseEstablishment: 0,
+      falseEstablishmentIds: [],
+      unsafeNavigationOrEditCaseIds: [],
+      unsafeNavigationOrEditLocations: 0,
+    };
+    expect(freshBlindSafetyGateFailed(clean)).toBe(false);
+
+    for (const unsafe of [
+      {
+        ...clean,
+        diagnosticsOverLimit: 1,
+        diagnosticsOverLimitIds: ["diagnostic-case"],
+      },
+      {
+        ...clean,
+        falseConflict: 1,
+        falseConflictIds: ["conflict-case"],
+      },
+      {
+        ...clean,
+        falseEstablishment: 1,
+        falseEstablishmentIds: ["establishment-case"],
+      },
+      {
+        ...clean,
+        unsafeNavigationOrEditCaseIds: ["navigation-case"],
+        unsafeNavigationOrEditLocations: 2,
+      },
+    ]) {
+      expect(freshBlindSafetyGateFailed(unsafe)).toBe(true);
+    }
   });
 
   test("plans only actual ordered snapshot transitions", () => {
@@ -318,6 +712,13 @@ function sha256(value: string): string {
 }
 
 type FixtureValue = ReturnType<typeof fixtureValueShape>;
+type AuthoredProbeExpected = {
+  navigation: {
+    definition: Record<string, unknown>;
+    references: Record<string, unknown>;
+  };
+  symbol?: string;
+};
 
 function fixtureValueShape() {
   return {} as {

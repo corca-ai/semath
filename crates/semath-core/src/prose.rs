@@ -319,6 +319,7 @@ pub(crate) fn observe_prose(
         &events,
         &discourse_constructions,
         &mentions,
+        canonical_expressions,
     );
     analysis.semantic_evidence = collect_semantic_evidence(
         document,
@@ -329,7 +330,15 @@ pub(crate) fn observe_prose(
         &construction_targets,
     );
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
-    collect_assumptions(source, &index, &clauses, &mentions, &events, &mut analysis);
+    collect_assumptions(
+        source,
+        &index,
+        &clauses,
+        &mentions,
+        &events,
+        &construction_targets,
+        &mut analysis,
+    );
 
     collect_role_first_nominal_definitions(
         document,
@@ -1213,13 +1222,6 @@ fn opaque_application_equation_result(
     result: &ParsedMath,
 ) -> Option<(String, SourceRange)> {
     let producer_expression = lower_document_region(document, &producer.region.content_range);
-    let SemanticExprKind::Apply {
-        operator: producer_operator,
-        arguments: producer_arguments,
-    } = &producer_expression.kind
-    else {
-        return None;
-    };
     let result_expression = lower_document_region(document, &result.region.content_range);
     let SemanticExprKind::Relation {
         operator,
@@ -1232,18 +1234,12 @@ fn opaque_application_equation_result(
     if !matches!(operator.as_str(), "=" | "equals") {
         return None;
     }
-    let SemanticExprKind::Apply {
-        operator: result_operator,
-        arguments: result_arguments,
-    } = &right.kind
-    else {
-        return None;
-    };
-    if producer_operator != result_operator
-        || producer_arguments.len() != 1
-        || result_arguments.len() != 1
-        || expression_name(&producer_arguments[0]) != expression_name(&result_arguments[0])
-    {
+    if !same_transformation_application(
+        document,
+        &producer_expression,
+        &producer.region.content_range,
+        right,
+    ) {
         return None;
     }
     match &left.kind {
@@ -1253,6 +1249,45 @@ fn opaque_application_equation_result(
         }
         _ => None,
     }
+}
+
+fn same_transformation_application(
+    document: &ProjectDocument,
+    producer: &SemanticExpr,
+    producer_range: &SourceRange,
+    result: &SemanticExpr,
+) -> bool {
+    if let (
+        SemanticExprKind::Apply {
+            operator: producer_operator,
+            arguments: producer_arguments,
+        },
+        SemanticExprKind::Apply {
+            operator: result_operator,
+            arguments: result_arguments,
+        },
+    ) = (&producer.kind, &result.kind)
+    {
+        return producer_operator == result_operator
+            && producer_arguments.len() == 1
+            && result_arguments.len() == 1
+            && expression_name(&producer_arguments[0]) == expression_name(&result_arguments[0]);
+    }
+
+    macro_application_signature(document, producer_range)
+        .zip(macro_application_signature(document, &result.range))
+        .is_some_and(|(producer, result)| producer == result)
+}
+
+fn macro_application_signature(document: &ProjectDocument, range: &SourceRange) -> Option<String> {
+    document.macros.iter().find_map(|event| {
+        let input = event.expansion.input_range.as_ref()?;
+        let surface = event.expansion.surface.as_ref()?;
+        (event.kind == crate::ProjectMacroKind::Call
+            && event.expansion.status == crate::ProjectMacroExpansionStatus::Expanded
+            && input == range)
+            .then(|| format!("{}:{surface}", event.name))
+    })
 }
 
 fn conflicts_with_existing_role(
@@ -1540,8 +1575,14 @@ fn collect_semantic_evidence(
                             .get(&clause.start)
                             .map(Vec::as_slice)
                             .unwrap_or_default();
+                        let identified_construction_targets = construction_targets
+                            .iter()
+                            .filter(|target| {
+                                activation_target_identifies_formula(source, index, &range, target)
+                            })
+                            .collect::<Vec<_>>();
                         attached_formula_ranges.extend(
-                            construction_targets
+                            identified_construction_targets
                                 .iter()
                                 .map(|target| target.range.clone()),
                         );
@@ -1559,9 +1600,7 @@ fn collect_semantic_evidence(
                                 .get(&clause.start)
                                 .map(Vec::is_empty)
                                 .unwrap_or(true)
-                                || construction_targets
-                                    .iter()
-                                    .any(|target| target.identifies_formula)
+                                || !identified_construction_targets.is_empty()
                                 || activation_identifies_formula(
                                     source,
                                     index,
@@ -1664,6 +1703,7 @@ fn explicit_equation_reference_targets(
 struct ConstructionFormulaTarget {
     range: SourceRange,
     identifies_formula: bool,
+    relation_centered: bool,
 }
 
 fn construction_formula_targets(
@@ -1673,6 +1713,7 @@ fn construction_formula_targets(
     events: &ProseEventStream,
     constructions: &[DiscourseConstruction],
     mentions: &[ScientificMention],
+    canonical_expressions: &[SemanticExpr],
 ) -> BTreeMap<usize, Vec<ConstructionFormulaTarget>> {
     let attachment = AttachmentGraph::new(document);
     let mut targets = BTreeMap::<usize, Vec<ConstructionFormulaTarget>>::new();
@@ -1731,7 +1772,7 @@ fn construction_formula_targets(
                 frame.act,
                 CommunicativeAct::Definition | CommunicativeAct::Result
             );
-        if identifies_formula
+        if frame.establishes()
             && candidate.distance_bytes <= MAX_ATTACHMENT_DISTANCE_BYTES
             && attachment.permits(&evidence_range, &target_range)
         {
@@ -1739,8 +1780,79 @@ fn construction_formula_targets(
                 .entry(clause.start)
                 .or_default()
                 .push(ConstructionFormulaTarget {
+                    relation_centered: canonical_expressions.iter().any(|expression| {
+                        ranges_overlap(&expression.range, &target_range)
+                            && matches!(
+                                expression.kind,
+                                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                            )
+                    }),
                     range: target_range,
                     identifies_formula,
+                });
+        }
+    }
+    for construction in constructions {
+        let DiscourseConstruction::EquationFlow {
+            mention_index,
+            prose_start,
+            prose_end,
+            precedes_formula: false,
+            candidate,
+            frame,
+            ..
+        } = construction
+        else {
+            continue;
+        };
+        let Some((clause, mention)) = clause_at(clauses, *prose_start)
+            .or_else(|| {
+                clauses
+                    .iter()
+                    .find(|clause| *prose_start <= clause.start && clause.start < *prose_end)
+            })
+            .zip(mentions.get(*mention_index))
+        else {
+            continue;
+        };
+        let Some(clause_index) = clauses
+            .iter()
+            .position(|candidate| candidate.start == clause.start)
+        else {
+            continue;
+        };
+        if !frame.establishes()
+            || !events.first_event_after_is_anaphor(
+                clause_index,
+                *prose_start,
+                AnaphorKind::FormulaDemonstrative,
+            )
+            || candidate.distance_bytes > MAX_ATTACHMENT_DISTANCE_BYTES
+        {
+            continue;
+        }
+        let evidence_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        let target_range = SourceRange {
+            start_offset: index.utf16_for_byte(mention.start),
+            end_offset: index.utf16_for_byte(mention.end),
+        };
+        if attachment.permits(&target_range, &evidence_range) {
+            targets
+                .entry(clause.start)
+                .or_default()
+                .push(ConstructionFormulaTarget {
+                    relation_centered: canonical_expressions.iter().any(|expression| {
+                        ranges_overlap(&expression.range, &target_range)
+                            && matches!(
+                                expression.kind,
+                                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                            )
+                    }),
+                    range: target_range,
+                    identifies_formula: true,
                 });
         }
     }
@@ -1784,6 +1896,13 @@ fn construction_formula_targets(
                     .entry(clause.start)
                     .or_default()
                     .push(ConstructionFormulaTarget {
+                        relation_centered: canonical_expressions.iter().any(|expression| {
+                            ranges_overlap(&expression.range, &target_range)
+                                && matches!(
+                                    expression.kind,
+                                    SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                                )
+                        }),
                         range: target_range,
                         identifies_formula: true,
                     });
@@ -1876,6 +1995,30 @@ fn activation_identifies_formula(
         .min()
         .unwrap_or(clause.end);
     formula_identification_bridge(&source[phrase_end..formula_start])
+}
+
+fn activation_target_identifies_formula(
+    source: &str,
+    index: &SourceIndex,
+    phrase: &SourceRange,
+    target: &ConstructionFormulaTarget,
+) -> bool {
+    if !target.relation_centered {
+        return false;
+    }
+    if target.identifies_formula {
+        return true;
+    }
+    if target.range.start_offset < phrase.end_offset {
+        return false;
+    }
+    let phrase_end = index.byte_for_utf16(phrase.end_offset);
+    let target_start = index.byte_for_utf16(target.range.start_offset);
+    let bridge = source.get(phrase_end..target_start).unwrap_or_default();
+    bridge.len() <= MAX_ATTACHMENT_DISTANCE_BYTES
+        && !bridge
+            .chars()
+            .any(|character| matches!(character, '.' | '!' | '?' | ';'))
 }
 
 fn formula_identification_bridge(value: &str) -> bool {
@@ -2325,6 +2468,7 @@ fn collect_assumptions(
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
+    construction_targets: &BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
     output: &mut ProseObservations,
 ) {
     let condition_phrases = built_in_packs()
@@ -2340,9 +2484,20 @@ fn collect_assumptions(
         })
         .collect::<Vec<_>>();
     for (clause_index, clause) in clauses.iter().enumerate() {
-        let attached_to_preceding_math =
-            clause_attaches_to_preceding_math(clause_index, mentions, events);
+        let typed_targets = construction_targets
+            .get(&clause.start)
+            .into_iter()
+            .flatten()
+            .filter(|target| target.identifies_formula && target.relation_centered)
+            .map(|target| target.range.clone())
+            .collect::<Vec<_>>();
+        let attached_to_preceding_math = !typed_targets.is_empty()
+            || clause_attaches_to_preceding_math(clause_index, mentions, events);
         for assumption in extract_assumptions_with_phrases(clause, mentions, &condition_phrases) {
+            let has_following_math_subject = assumption
+                .subjects
+                .iter()
+                .any(|subject| assumption.phrase_end <= subject.start);
             let mut source_ranges = assumption
                 .subjects
                 .iter()
@@ -2351,6 +2506,7 @@ fn collect_assumptions(
                     end_offset: index.utf16_for_byte(subject.end),
                 })
                 .collect::<Vec<_>>();
+            source_ranges.extend(typed_targets.iter().cloned());
             source_ranges.push(SourceRange {
                 start_offset: index.utf16_for_byte(assumption.phrase_start),
                 end_offset: index.utf16_for_byte(assumption.phrase_end),
@@ -2365,7 +2521,7 @@ fn collect_assumptions(
                     .collect(),
                 evidence: Evidence {
                     rule_id: "english-scientific-assumption".into(),
-                    kind: if attached_to_preceding_math {
+                    kind: if attached_to_preceding_math || has_following_math_subject {
                         "attached-prose"
                     } else {
                         "explicit-prose"
@@ -3095,19 +3251,19 @@ fn deduplicate(analysis: &mut ProseObservations) {
 
 fn definition_priority(definition: &DefinitionInfo) -> u8 {
     match definition.evidence.rule_id.as_str() {
+        "english-output-definition"
+        | "english-former-latter-definition"
+        | "english-anaphoric-definition" => 6,
         "english-imperative-definition"
         | "english-write-for-definition"
         | "english-use-definition"
         | "english-formula-definition"
         | "english-math-assignment-definition"
-        | "english-output-definition"
-        | "english-former-latter-definition"
-        | "english-anaphoric-definition" => 5,
+        | "english-respectively-definition"
+        | "english-coordinated-definition" => 5,
         "english-equation-reference-definition"
         | "english-clause-definition"
-        | "english-clause-ordered-definition"
-        | "english-respectively-definition"
-        | "english-coordinated-definition" => 4,
+        | "english-clause-ordered-definition" => 4,
         "english-apposition-definition"
         | "english-equation-flow-definition"
         | "english-construction-definition"
@@ -3128,7 +3284,10 @@ mod tests {
     use crate::canonical::lower_document_region;
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
-    use crate::{DocumentLanguage, ProjectDocument};
+    use crate::{
+        DocumentLanguage, ProjectDocument, ProjectMacro, ProjectMacroExpansion,
+        ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSourceRef, SourceRange,
+    };
 
     fn analyze(source: &str) -> super::ProseObservations {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
@@ -3150,12 +3309,16 @@ mod tests {
             macros: Vec::new(),
             includes: Vec::new(),
         };
-        let parsed = parse_regions(source, &regions);
+        analyze_document(&document)
+    }
+
+    fn analyze_document(document: &ProjectDocument) -> super::ProseObservations {
+        let parsed = parse_regions(&document.content, &document.math_regions);
         let canonical = parsed
             .iter()
-            .map(|math| lower_document_region(&document, &math.region.content_range))
+            .map(|math| lower_document_region(document, &math.region.content_range))
             .collect::<Vec<_>>();
-        observe_prose(&document, &parsed, &canonical)
+        observe_prose(document, &parsed, &canonical)
     }
 
     #[test]
@@ -3237,6 +3400,36 @@ mod tests {
         assert_eq!(
             analysis.shapes[5].evidence.rule_id,
             "english-relational-definition"
+        );
+    }
+
+    #[test]
+    fn shared_nominal_heads_type_coordinated_assumption_subjects() {
+        let analysis = analyze(
+            "Assume $A$ and $B$ are finite sets of respondents who selected alpha and beta, respectively.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| {
+                (
+                    definition.symbol.as_str(),
+                    definition.description.as_str(),
+                    definition.evidence.rule_id.as_str(),
+                )
+            })
+            .collect::<Vec<_>>();
+        assert!(
+            definitions.iter().any(|(symbol, description, _)| {
+                *symbol == "A" && *description == "finite sets of respondents"
+            }),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.iter().any(|(symbol, description, _)| {
+                *symbol == "B" && *description == "finite sets of respondents"
+            }),
+            "{definitions:?}"
         );
     }
 
@@ -3378,6 +3571,7 @@ mod tests {
         for source in [
             "The screening Reynolds number is therefore\n\\[\\mathrm{Re}_{D_h}=\\frac{\\rho v D_h}{\\mu}.\\]",
             "The model stage defines the transfer function in the Laplace domain as\n\\[H(s)=\\frac{Y(s)}{X(s)}.\\]",
+            "The propagation step is based on the continuous-time state equation\n\\[\\dot{x}=Ax+Bu.\\]",
         ] {
             let analysis = analyze(source);
             assert!(
@@ -3391,6 +3585,21 @@ mod tests {
                 analysis.semantic_evidence.law_activations
             );
         }
+
+        let analysis = analyze(
+            "We advance the pulse by matching\n\\[\\frac{\\partial^2 \\psi}{\\partial t^2}=c^2\\nabla^2\\psi.\\] This is the scalar wave equation used by the solver.",
+        );
+        assert!(
+            analysis
+                .semantic_evidence
+                .law_activations
+                .iter()
+                .any(|activation| activation.law_id == "scalar-wave-equation"
+                    && activation.identifies_attached_formula
+                    && !activation.attached_formula_ranges.is_empty()),
+            "{:?}",
+            analysis.semantic_evidence.law_activations
+        );
     }
 
     #[test]
@@ -3514,6 +3723,67 @@ mod tests {
     }
 
     #[test]
+    fn attaches_outputs_through_matching_opaque_macro_calls() {
+        let source = "The sealed transformation $\\vendorcal{z}$ returns calibrated range:\n\\[r=\\vendorcal{z}.\\]";
+        let mut document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: test_math_regions(source, DocumentLanguage::Latex),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        let invocation = "\\vendorcal{z}";
+        document.macros = source
+            .match_indices(invocation)
+            .map(|(start, _)| {
+                let input_range = SourceRange {
+                    start_offset: start as u32,
+                    end_offset: (start + invocation.len()) as u32,
+                };
+                ProjectMacro {
+                    kind: ProjectMacroKind::Call,
+                    name: "vendorcal".into(),
+                    source: ProjectSourceRef {
+                        file_id: "main".into(),
+                        path: "main.tex".into(),
+                        range: SourceRange {
+                            start_offset: start as u32,
+                            end_offset: (start + "\\vendorcal".len()) as u32,
+                        },
+                    },
+                    definitions: Vec::new(),
+                    expansion: ProjectMacroExpansion {
+                        status: ProjectMacroExpansionStatus::Expanded,
+                        depth: 0,
+                        editable: false,
+                        surface: Some("\\mathsf{VendorCal}(z)".into()),
+                        input_range: Some(input_range),
+                        notation: None,
+                    },
+                }
+            })
+            .collect();
+
+        let analysis = analyze_document(&document);
+        assert!(analysis.definitions.iter().any(|definition| {
+            definition.symbol == "r"
+                && definition.description == "calibrated range"
+                && definition.evidence.rule_id == "english-output-definition"
+        }));
+    }
+
+    #[test]
     fn refuses_nonasserted_or_ambiguous_transformation_outputs() {
         for source in [
             "According to [1], the transform $F(z)$ returns calibrated range:\n\\[r=F(z).\\]",
@@ -3531,6 +3801,70 @@ mod tests {
                 analysis.definitions
             );
         }
+    }
+
+    #[test]
+    fn refuses_mismatched_opaque_macro_outputs() {
+        let source =
+            "The transform $\\vendorcal{z}$ returns calibrated range:\n\\[r=\\vendorcal{x}.\\]";
+        let mut document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: test_math_regions(source, DocumentLanguage::Latex),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        document.macros = [
+            ("\\vendorcal{z}", "\\mathsf{VendorCal}(z)"),
+            ("\\vendorcal{x}", "\\mathsf{VendorCal}(x)"),
+        ]
+        .into_iter()
+        .map(|(invocation, surface)| {
+            let start = source.find(invocation).unwrap();
+            ProjectMacro {
+                kind: ProjectMacroKind::Call,
+                name: "vendorcal".into(),
+                source: ProjectSourceRef {
+                    file_id: "main".into(),
+                    path: "main.tex".into(),
+                    range: SourceRange {
+                        start_offset: start as u32,
+                        end_offset: (start + "\\vendorcal".len()) as u32,
+                    },
+                },
+                definitions: Vec::new(),
+                expansion: ProjectMacroExpansion {
+                    status: ProjectMacroExpansionStatus::Expanded,
+                    depth: 0,
+                    editable: false,
+                    surface: Some(surface.into()),
+                    input_range: Some(SourceRange {
+                        start_offset: start as u32,
+                        end_offset: (start + invocation.len()) as u32,
+                    }),
+                    notation: None,
+                },
+            }
+        })
+        .collect();
+
+        assert!(
+            analyze_document(&document)
+                .definitions
+                .iter()
+                .all(|definition| { definition.evidence.rule_id != "english-output-definition" })
+        );
     }
 
     #[test]
@@ -3621,6 +3955,27 @@ mod tests {
                 crate::semantic_index::EvidenceModality::Asserted,
             )
         );
+    }
+
+    #[test]
+    fn attaches_a_condition_phrase_to_its_explicit_inline_math_subject() {
+        let source =
+            "For a Newtonian fluid, the constitutive relation is $\\tau=\\mu\\dot\\gamma$.";
+        let analysis = analyze(source);
+        let formula = test_math_regions(source, DocumentLanguage::Latex)
+            .into_iter()
+            .next()
+            .unwrap();
+        let assumption = analysis
+            .assumptions
+            .iter()
+            .find(|assumption| assumption.value == "newtonian-fluid")
+            .expect("the declarative pack condition phrase should be extracted");
+        assert_eq!(assumption.evidence.kind, "attached-prose");
+        assert!(assumption.evidence.source_ranges.iter().any(|range| {
+            range.start_offset < formula.content_range.end_offset
+                && formula.content_range.start_offset < range.end_offset
+        }));
     }
 
     #[test]

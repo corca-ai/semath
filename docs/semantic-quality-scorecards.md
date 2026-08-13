@@ -5,22 +5,22 @@ accuracy number. The checked-in [quality manifest](../fixtures/corpus-manifest.j
 owns suite discovery, support tiers, coverage dimensions, transforms, and
 thresholds.
 
-| Signal | Meaning | It does not mean |
-| --- | --- | --- |
-| Recall | reviewed positive cases that recognize one target law | field-wide notation coverage |
-| Precision | target recognitions absent from reviewed refusal cases | probabilistic confidence |
-| Role accuracy | expected roles bind the intended symbols | universal validity of the formula |
-| Evidence integrity | conclusions retain conditions and source ranges | sufficiency outside the source context |
-| Refusal preservation | negative cases avoid recognizing the target law | proof that the input is false |
-| Adversarial refusal | unknown and cross-pack collision cases recognize no law | refusal of a different, valid law in the same formula |
-| Variation coverage | labeled notation, prose, role, constraint, project, macro, and mutation families | equal real-world frequency |
-| Diversity cells | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles | real-world prevalence |
-| Metamorphic invariance | irrelevant prose, comments, and document ordering preserve outcomes | arbitrary source rewrites are safe |
-| Pack-derived properties | every law receives positive, refusal, scope, mutation, macro/project, and cursor cells | production recognition agrees with itself |
-| Differential equivalence | clean, incremental, native, WASM, Worker, and LSP projections agree exactly | a second semantic engine exists |
-| Prose association | declared symbols receive their exact descriptions | the description is a supported domain concept |
-| Assumption extraction | explicit assumptions retain subjects and evidence | hypothetical or cited properties are assumptions |
-| Prose scope | declarations and assumptions obey section and include order | later or disconnected evidence is visible |
+| Signal                   | Meaning                                                                                | It does not mean                                      |
+| ------------------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Recall                   | reviewed positive cases that recognize one target law                                  | field-wide notation coverage                          |
+| Precision                | target recognitions absent from reviewed refusal cases                                 | probabilistic confidence                              |
+| Role accuracy            | expected roles bind the intended symbols                                               | universal validity of the formula                     |
+| Evidence integrity       | conclusions retain conditions and source ranges                                        | sufficiency outside the source context                |
+| Refusal preservation     | negative cases avoid recognizing the target law                                        | proof that the input is false                         |
+| Adversarial refusal      | unknown and cross-pack collision cases recognize no law                                | refusal of a different, valid law in the same formula |
+| Variation coverage       | labeled notation, prose, role, constraint, project, macro, and mutation families       | equal real-world frequency                            |
+| Diversity cells          | distinct semantic skeleton, syntax, prose, project topology, and mutation profiles     | real-world prevalence                                 |
+| Metamorphic invariance   | irrelevant prose, comments, and document ordering preserve outcomes                    | arbitrary source rewrites are safe                    |
+| Pack-derived properties  | every law receives positive, refusal, scope, mutation, macro/project, and cursor cells | production recognition agrees with itself             |
+| Differential equivalence | clean, incremental, native, WASM, Worker, and LSP projections agree exactly            | a second semantic engine exists                       |
+| Prose association        | declared symbols receive their exact descriptions                                      | the description is a supported domain concept         |
+| Assumption extraction    | explicit assumptions retain subjects and evidence                                      | hypothetical or cited properties are assumptions      |
+| Prose scope              | declarations and assumptions obey section and include order                            | later or disconnected evidence is visible             |
 
 Thresholds apply to every law, so a broad suite cannot hide a weak law. The
 evaluator also rejects missing or unexpected generated observations rather than
@@ -79,8 +79,10 @@ target. The scorer weights false establishment, false conflict, and identity
 leakage above missed coverage and reports every family independently.
 Normalized holdout documents must not occur in development or generated
 fixtures. `bun run continuity:fixture` checks schema, diversity, leakage, and
-the pure scorer in ordinary CI; `bun run continuity` executes the engine only
-as a deliberate manual release gate.
+the pure scorer in ordinary CI; `bun run continuity` preserves the original
+frozen-target report. `bun run continuity:release` is the deliberate release
+gate. It applies only the reviewed decision transitions listed in release code
+and still scores every other expectation from the immutable fixture.
 
 The v0.27 authored scientific tranche adds 96 editable development scenarios
 and 48 separately authored frozen holdout scenarios. Its 212 probes observe
@@ -97,8 +99,8 @@ only schema, provenance, digest, coverage, anchor, and leakage checks in normal
 CI. `bun run authored:baseline` and `bun run authored` execute the six public
 query surfaces only as deliberate manual evidence gates.
 
-The v0.28 release adds a new 48-scenario blind tranche rather than reusing the
-historical holdout as a tuning target. It has exactly eight scenarios in each
+Each semantic release adds a new 48-scenario blind tranche rather than reusing
+the historical holdout as a tuning target. It has exactly eight scenarios in each
 document-reasoning family and covers every decision class. Isolated Codex
 subagents author its source and expectations without engine execution;
 independent subagents critique them; then the main agent reads every source and
@@ -122,18 +124,135 @@ is reported honestly; false establishment, false conflict, or unsafe navigation
 and edit fail the release. After that single run, the tranche becomes historical
 evidence and must not guide implementation changes.
 
-The 2026-08-12 v0.27 release evaluation passes 17 of 115 development probes
-(risk 404, no false establishment or false conflict) and 6 of 97 now-exposed
-historical holdout probes (risk 720). These deliberately difficult documents
-are a first-loss map, not a release pass-rate target. The holdout's single raw
-false-establishment count is a frozen contract disagreement: one lifecycle
-expects prose in a disconnected file to retract a relation in another project
-component. Semath preserves the component boundary and records the case as a
-safe remaining limit. Current first losses are 45 attachment, 74 identity or
-scope, 12 typed-fact, one safe non-propagation, 39 pack-unification, and 18
-decision cases; no current failure first localizes to neutral syntax or
-canonical IR. See
+The editable development tranche is a reviewed coverage frontier, not a
+115/115 conformance suite. Its release gate permits documented misses but
+rejects any false establishment, false conflict, navigation or identity risk,
+fewer than 50 passing probes, or risk above 130. Tighten this dated baseline
+when coverage improves; do not weaken it to admit a regression.
+
+The 2026-08-13 v0.28 pre-blind evaluation passes 50 of 115 editable development
+probes (risk 130, no false establishment, false conflict, or navigation risk).
+The immutable semantic-continuity report is 22 of 48 with raw risk 202; fifteen
+reviewed `partial` to `established` transitions now have exact source-backed
+definitions or relations. Applying only those explicit adjudications produces
+the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
+cases stay visible as coverage work.
+
+The now-exposed historical authored holdout remains 6 of 97 with raw risk 728.
+These deliberately difficult documents are a first-loss map, not a release
+pass-rate target. Its two raw false-establishment counts are exact, reviewed
+frozen-contract disagreements. One lifecycle expects prose in a disconnected
+project component to retract a relation in another component; Semath preserves
+the dependency boundary. The other expects `partial` for prose that directly
+asserts an overlap as \(A\cap B\); the current source-grounded entity decision is
+`established`. The release gate permits only these named, proof-grounded cases
+and rejects substitution by any new false establishment. It also adjudicates
+one frozen cursor contract that asks an `edge: after` formula-boundary query to
+select an arbitrary internal symbol; exact boundary ownership correctly returns
+no symbol. The adjusted risk is 718 and adjusted identity/navigation count is
+54, both within the prior gate. Current historical first losses are 28
+attachment, 37 identity or scope, eight typed-fact, 14 pack-unification, and
+four decision cases. See
 [Pack maturity](pack-maturity.md) for interpretation by capability.
+
+The sealed v0.28 fresh blind was executed once on 2026-08-13 after every
+pre-blind gate passed. It scored 7 of 48 with risk 490: four false
+establishments, two false conflicts, 35 identity or navigation expectation
+misses, and 34 coverage misses. Clean and incremental results agreed across all
+12 reviewed lifecycle stages, and no unsafe navigation or edit was observed.
+The terminal receipt is `safety-failed`, so this candidate is not a release and
+must not be pinned by CorTeX. The fixture is now historical evidence and must
+not be used to tune or silently relabel the engine. Future one-shot receipts
+retain exact safety case IDs as well as counts and artifact digests so a failed
+run remains diagnosable without executing its fixture again.
+
+The independently sealed v0.29 fresh blind was also executed once on
+2026-08-13, after the complete pre-blind gate passed on the separate release
+host. It scored 4 of 48 with risk 426: nine false establishments, no conflicting
+decisions but six cases exceeding their calm diagnostic limit, 20 unsafe
+navigation or edit observations, and 29 coverage misses.
+Clean and incremental results agreed across all eight reviewed lifecycle
+stages. Its terminal receipt is `safety-failed`, so PR #304 is not a release and
+must not be merged or pinned by CorTeX. The fixture seal is
+`c4431c1203d56af5e0db55449ae0b72392d79c560b193a8ea6daf9ef68adffb8`;
+future work must treat this tranche as historical evidence rather than a
+tuning set.
+
+The independently sealed v0.30 fresh blind was executed once on 2026-08-13
+after every pre-blind gate passed. Development was 51 of 115 with risk 128 and
+no false establishment, false conflict, or identity risk; open semantic safety
+was 27 of 27, recognition frontier 32 of 32, and the adjudicated continuity
+release score was 37 of 48 with risk 22 and no unsafe risk. The primary fresh
+evaluation completed with 0 of
+48 probes passing and raw risk 390: four false establishments, no false
+conflicts, 26 identity or navigation misses, and 41 coverage misses. The
+lifecycle runner then stopped with a document-version mismatch, so the atomic
+terminal receipt is `execution-error` rather than a semantic release receipt.
+The fixture seal is
+`cdddd29c75891320ad6e643cb60e02b9e8cec08af26fab1facca4311b782f8f5` and the
+evaluated Semath commit is `695b6d0cc3386b3ef117837baf1bd3596b49a800`.
+This candidate is not a release and must not be merged or pinned by CorTeX.
+The exposed fixture is historical evidence and must not be rerun or used to
+tune the engine. The lifecycle planner now always forwards directly edited
+documents even when wasmtex can reuse their syntax, and future execution-error
+receipts retain any completed primary evaluation before recording the tool
+failure.
+
+The independently sealed v0.33 fresh blind was executed once on 2026-08-13
+after its complete pre-blind gate passed. It scored 3 of 48 with risk 436:
+twelve false establishments, no false conflicts, five cases with unsafe
+navigation or edit results, and 41 coverage misses. All eight lifecycle stages
+agreed. Its terminal receipt is `safety-failed`, so PR #320 was closed without
+merge and CorTeX must not pin it. The fixture seal is
+`8e457adf5e653c5edaf91d305e3d64ed673f109f8b8b3a37e719874c45add0c7`.
+This fixture is historical evidence and must not be rerun or used for tuning.
+
+The v0.34 public proof-authority adjudication preserves the 50-of-115,
+risk-130 development release baseline and zero public safety risk. Eleven
+reviewed probes now remain `partial` because a formula assertion or domain
+context supplies useful recognition without independent typed role roots. The
+open semantic safety suite has 39 metamorphic observations across nine
+contracts; assertion without complete role proof is tested separately from
+exact establishment.
+
+The immutable historical release gate records one explicit v0.34 policy
+adjudication: `CA-HO-06-probe` retains its source-grounded derivative relation
+but is conservatively `partial` because its complete independent role proof is
+not available. The gate subtracts only that exact, validated decision miss; it
+does not change the fixture or widen any aggregate threshold, and it rejects
+the adjudication if the source-grounded relation disappears.
+
+The independently sealed v0.34 fresh blind was executed once on 2026-08-13.
+It scored 2 of 48 with risk 308: no false establishments, no false conflicts,
+44 coverage misses, and four cases containing 18 source locations outside the
+reviewed navigation/edit allowlists. All 18 lifecycle stages agreed and no
+diagnostic exceeded its reviewed limit. The terminal receipt is
+`safety-failed`; its fixture seal is
+`405a28155369fb9544712b83752a500cae8403193489eb7fb504ff110fe14c36`.
+This fixture is historical evidence and must not be rerun or used for tuning.
+
+Starting with v0.35, static commissioning requires definition and references
+to share one entity authorization and prepare/rename to share one edit
+authorization. An available atomic surface must enumerate every exact source
+spelling; every definition must be a reference, and a rename must edit exactly
+the complete reference set. This strengthens the blind oracle before any
+engine execution instead of weakening the release safety gate afterward.
+
+The independently sealed v0.35 fresh blind was executed once on 2026-08-13
+after the complete release gate passed on a separate x86_64 Linux host. It
+scored 0 of 48 with raw risk 570: no false establishments, no false conflicts,
+45 coverage misses, and 48 identity or navigation expectation misses. The
+important release boundary passed: there were zero unsafe navigation or edit
+locations, zero excessive diagnostic cases, and all eight clean/incremental
+lifecycle stages agreed. The terminal receipt is `completed`; its fixture seal
+is `a11c0d4dcb89a3574af83b5182a566f0ca09768a90d9c50702f46ef53040f9ae`,
+its evaluated Semath commit is
+`67f901226a91c4f3619ebb7de58c2eda62037a44`, and the receipt digest is
+`76bfbe71ca679847cf38062b4692fe65bbf1e362e04d18bf0f500408fe9d89a3`.
+This is a safety release, not a claim of broad fresh-document coverage. The
+exposed fixture is now historical evidence and must not be rerun or used for
+case-specific tuning; coverage must continue through public development and
+new independently sealed evidence.
 
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
@@ -161,9 +280,12 @@ mkdir -p .artifacts && bun run domain:baseline
 bun run domain:challenge
 mkdir -p .artifacts && bun run continuity:baseline
 bun run continuity
+bun run continuity:release
 mkdir -p .artifacts && bun run authored:baseline
 bun run authored
 bun run authored:development
+bun run authored:development:release
+bun run authored:historical:release
 bun run corpus
 bun run corpus:generate:check
 bun run foundation
@@ -172,7 +294,7 @@ bun run scorecard
 ```
 
 The fresh blind commands are intentionally absent from the generic examples:
-they require an independently commissioned, sealed v0.28 fixture and a new
+they require an independently commissioned, sealed release fixture and a new
 receipt path. `bun run fresh-blind:validate` checks that explicit fixture without
 executing Semath. `bun run fresh-blind:run` is the one-shot evidence boundary and
 should normally be reached only through `bun run release:semantic`.

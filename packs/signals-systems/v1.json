@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "packId": "signals-systems",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -158,6 +158,10 @@
           "subjects": [
             "period"
           ],
+          "evidencePhrases": [
+            "measured period",
+            "positive period"
+          ],
           "label": "The period is positive."
         },
         {
@@ -166,6 +170,12 @@
           "subjects": [
             "frequency",
             "period"
+          ],
+          "evidencePhrases": [
+            "oscillator period",
+            "same periodic signal",
+            "same oscillator",
+            "share one estimate"
           ],
           "label": "Frequency and period refer to the same periodic signal."
         }
@@ -229,6 +239,12 @@
             "angular-frequency",
             "frequency"
           ],
+          "evidencePhrases": [
+            "converted as",
+            "same oscillation",
+            "same oscillator",
+            "share one estimate"
+          ],
           "label": "Frequency and angular frequency describe the same oscillation."
         }
       ],
@@ -283,7 +299,10 @@
             "frequency",
             "wavelength"
           ],
-          "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium."
+          "label": "Speed, frequency, and wavelength refer to one propagation mode in one medium.",
+          "evidencePhrases": [
+            "same-phase"
+          ]
         }
       ],
       "references": [
@@ -309,17 +328,20 @@
         {
           "id": "transfer",
           "concept": "signals-systems:transfer-function",
-          "description": "Transfer function."
+          "description": "Transfer function.",
+          "sourceProjection": "head"
         },
         {
           "id": "output",
           "concept": "signals-systems:output-transform",
-          "description": "Output transform."
+          "description": "Output transform.",
+          "sourceProjection": "head"
         },
         {
           "id": "input",
           "concept": "signals-systems:input-transform",
-          "description": "Input transform."
+          "description": "Input transform.",
+          "sourceProjection": "head"
         }
       ],
       "conditions": [

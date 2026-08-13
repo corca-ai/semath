@@ -13,6 +13,7 @@ mod domain_signature;
 mod engine;
 mod entity_policy;
 mod equivalence;
+mod evidence_decision;
 mod hygiene;
 mod law;
 mod pack;

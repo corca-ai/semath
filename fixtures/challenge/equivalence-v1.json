@@ -440,7 +440,7 @@
         "fileId": "main",
         "needle": "y=xA"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "established",
       "expectedRelationId": null,
       "variationTags": [
         "noncommutative",
@@ -461,7 +461,7 @@
         "fileId": "main",
         "needle": "C=BA"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "established",
       "expectedRelationId": null,
       "variationTags": [
         "noncommutative",
@@ -503,7 +503,7 @@
         "fileId": "main",
         "needle": "e≤r"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "established",
       "expectedRelationId": null,
       "variationTags": [
         "directional",

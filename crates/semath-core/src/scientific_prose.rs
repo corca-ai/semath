@@ -262,6 +262,33 @@ impl ProseEventStream {
         })
     }
 
+    pub(crate) fn first_event_after_is_anaphor(
+        &self,
+        clause_index: usize,
+        lower_bound: usize,
+        kind: AnaphorKind,
+    ) -> bool {
+        let first_start = self
+            .events
+            .iter()
+            .filter(|event| event.clause_index == clause_index && lower_bound <= event.start)
+            .filter(|event| {
+                !matches!(
+                    event.kind,
+                    ProseEventKind::ClauseEnd | ProseEventKind::DiscourseFeature(_)
+                )
+            })
+            .map(|event| event.start)
+            .min();
+        first_start.is_some_and(|start| {
+            self.events.iter().any(|event| {
+                event.clause_index == clause_index
+                    && event.start == start
+                    && event.kind == ProseEventKind::Anaphor(kind)
+            })
+        })
+    }
+
     pub(crate) fn has_connective(
         &self,
         clause_index: usize,
@@ -574,7 +601,11 @@ impl ProseEventStream {
                 equation_flow_windows(clauses, mentions, mention_index, mention)
                     .into_iter()
                     .filter_map(move |(prose_start, prose_end, precedes_formula)| {
-                        let clause = clause_at(clauses, prose_start)?;
+                        let clause = clause_at(clauses, prose_start).or_else(|| {
+                            clauses.iter().find(|clause| {
+                                prose_start <= clause.start && clause.start < prose_end
+                            })
+                        })?;
                         Some(DiscourseConstruction::EquationFlow {
                             mention_index,
                             prose_start,
@@ -821,8 +852,14 @@ fn emit_lexical_events(
         ("this symbol", AnaphorKind::SingularDemonstrative),
         ("this variable", AnaphorKind::SingularDemonstrative),
         ("this equation", AnaphorKind::FormulaDemonstrative),
+        ("this calculation", AnaphorKind::FormulaDemonstrative),
+        ("this conversion", AnaphorKind::FormulaDemonstrative),
+        ("this derivation", AnaphorKind::FormulaDemonstrative),
+        ("this equality", AnaphorKind::FormulaDemonstrative),
+        ("this expression", AnaphorKind::FormulaDemonstrative),
         ("this identity", AnaphorKind::FormulaDemonstrative),
         ("this relation", AnaphorKind::FormulaDemonstrative),
+        ("this result", AnaphorKind::FormulaDemonstrative),
         ("this formula", AnaphorKind::FormulaDemonstrative),
         ("the former", AnaphorKind::Former),
         ("the latter", AnaphorKind::Latter),
@@ -863,6 +900,31 @@ fn emit_lexical_events(
             ProseEventKind::Anaphor(*kind),
             output,
         );
+    }
+    let lower = clause.text.to_ascii_lowercase();
+    let copular_start = lower
+        .char_indices()
+        .find_map(|(offset, character)| character.is_ascii_alphabetic().then_some(offset))
+        .unwrap_or_default();
+    let copular_text = &lower[copular_start..];
+    let copular_formula_reference = ["this is ", "this was "]
+        .iter()
+        .any(|prefix| copular_text.starts_with(prefix))
+        && copular_text
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .any(|word| {
+                matches!(
+                    word,
+                    "equation" | "expression" | "formula" | "identity" | "law" | "relation"
+                )
+            });
+    if copular_formula_reference {
+        output.push(ProseEvent {
+            clause_index,
+            start: clause.start + copular_start,
+            end: clause.start + copular_start + "this".len(),
+            kind: ProseEventKind::Anaphor(AnaphorKind::FormulaDemonstrative),
+        });
     }
     for phrase in ["and", "while", "whereas"] {
         emit_phrase_events(
@@ -1134,16 +1196,22 @@ pub(crate) fn extract_assumptions_with_phrases(
         })
         .collect::<Vec<_>>();
     matches.sort_by(|left, right| left.0.cmp(&right.0).then(right.1.cmp(&left.1)));
-    let mut occupied = Vec::<(usize, usize)>::new();
+    let mut accepted = Vec::<(usize, usize, String, String)>::new();
     matches
         .into_iter()
         .filter_map(|(start, length, candidate)| {
             let end = start + length;
-            (!occupied
-                .iter()
-                .any(|(used_start, used_end)| start < *used_end && *used_start < end))
-            .then(|| {
-                occupied.push((start, end));
+            let duplicate = accepted.iter().any(|(used_start, used_end, kind, value)| {
+                start == *used_start
+                    && end == *used_end
+                    && candidate.kind == *kind
+                    && candidate.value == *value
+            });
+            let conflicting_overlap = accepted.iter().any(|(used_start, used_end, _, _)| {
+                start < *used_end && *used_start < end && (start != *used_start || end != *used_end)
+            });
+            (!duplicate && !conflicting_overlap).then(|| {
+                accepted.push((start, end, candidate.kind.clone(), candidate.value.clone()));
                 candidate
             })
         })
@@ -1810,6 +1878,35 @@ mod tests {
     }
 
     #[test]
+    fn composes_postposed_formula_anaphor_flow() {
+        let source = "We advance the pulse by matching\n$x=y$. This is the scalar wave equation used by the solver.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let start = source.find("$x=y$").unwrap();
+        let mentions = [ScientificMention {
+            symbol: "x".into(),
+            start,
+            end: start + "$x=y$".len(),
+            math_index: 0,
+        }];
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+
+        assert!(
+            stream
+                .discourse_constructions(source, &mentions, &clauses)
+                .iter()
+                .any(|construction| matches!(
+                    construction,
+                    DiscourseConstruction::EquationFlow {
+                        precedes_formula: false,
+                        ..
+                    }
+                )),
+            "clauses={clauses:?}; events={:?}",
+            stream.events
+        );
+    }
+
+    #[test]
     fn composes_bounded_anaphoric_attachment_candidates_from_typed_events() {
         let source = "$x$ and $y$ are introduced. They denote input and output, respectively.";
         let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
@@ -1866,6 +1963,48 @@ mod tests {
             2,
             clauses[2].start,
             AnaphorKind::SingularDemonstrative
+        ));
+
+        for head in [
+            "This calculation",
+            "This conversion",
+            "This derivation",
+            "This equality",
+            "This expression",
+            "This result",
+        ] {
+            let source = format!("$x=y$. {head} establishes the claimed value.");
+            let clauses = segment_scientific_clauses(&source, DocumentLanguage::Latex, &[]);
+            let mentions = [ScientificMention {
+                symbol: "x".into(),
+                start: 0,
+                end: 5,
+                math_index: 0,
+            }];
+            let stream = normalize_prose_events(&source, &clauses, &mentions);
+            assert!(stream.starts_with_anaphor_kind(
+                1,
+                clauses[1].start,
+                AnaphorKind::FormulaDemonstrative
+            ));
+        }
+
+        let source = "$x=y$. This is the wave equation used by the solver.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+        assert!(stream.starts_with_anaphor_kind(
+            1,
+            clauses[1].start,
+            AnaphorKind::FormulaDemonstrative
+        ));
+
+        let source = "$x=y$. This is the input symbol used by the solver.";
+        let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+        let stream = normalize_prose_events(source, &clauses, &mentions);
+        assert!(!stream.starts_with_anaphor_kind(
+            1,
+            clauses[1].start,
+            AnaphorKind::FormulaDemonstrative
         ));
     }
 
@@ -2120,6 +2259,28 @@ mod tests {
                 && assumption.value == "uniform"
                 && assumption.subjects.is_empty()
         }));
+
+        let source = "The stages share one estimate.";
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .into_iter()
+            .next()
+            .unwrap();
+        let assumptions = extract_assumptions_with_phrases(
+            &clause,
+            &[],
+            &[
+                ("share one estimate", "context", "same-input"),
+                ("share one estimate", "context", "same-output"),
+                ("share one estimate", "context", "same-output"),
+            ],
+        );
+        assert_eq!(
+            assumptions
+                .iter()
+                .map(|assumption| assumption.value.as_str())
+                .collect::<Vec<_>>(),
+            ["same-input", "same-output"]
+        );
     }
 
     #[test]

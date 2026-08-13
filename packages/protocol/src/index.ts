@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 12 as const;
+export const SEMATH_PROTOCOL_VERSION = 14 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 8 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -53,7 +53,12 @@ export type SemathQuery =
   | { fileId: string; kind: "selection"; offset: number }
   | { fileId: string; kind: "semanticView"; offset: number }
   | { fileId: string; kind: "definition"; offset: number }
-  | { fileId: string; kind: "references"; offset: number }
+  | {
+      fileId: string;
+      includeDeclaration?: boolean;
+      kind: "references";
+      offset: number;
+    }
   | { fileId: string; kind: "prepareRename"; offset: number }
   | { fileId: string; kind: "rename"; newName: string; offset: number }
   | { fileId: string; kind: "diagnostics" }
@@ -288,6 +293,7 @@ export interface LawBinding {
   constraint: SemanticConstraint;
   evidence: Evidence;
   parameter: string;
+  proof: "typed" | "derived" | "asserted" | "candidate";
   symbol: string;
 }
 
@@ -328,11 +334,28 @@ export interface LawRecognition {
   title: string;
 }
 
-export interface RenamePreparation {
-  placeholder?: string;
-  range?: SourceRange;
-  rejection?: string;
+export type EntitySurfaceRefusalKind =
+  | "unsupported"
+  | "ambiguous"
+  | "conflicting"
+  | "engine-limit"
+  | "incomplete-source"
+  | "non-editable"
+  | "invalid-replacement"
+  | "capture";
+
+export interface EntitySurfaceRefusal {
+  kind: EntitySurfaceRefusalKind;
+  message: string;
 }
+
+export type EntitySurfaceAuthorization =
+  | {
+      entityId: EntityId;
+      focusOccurrenceId: SourceOccurrenceId;
+      status: "authorized";
+    }
+  | { reason: EntitySurfaceRefusal; status: "refused" };
 
 export interface SemanticViewInfo {
   context: SemanticContextInfo;
@@ -439,17 +462,21 @@ export interface SemanticEditProposal {
 export type QueryValue =
   | { kind: "selection"; ranges: readonly SourceRange[] }
   | { kind: "semanticView"; view: SemanticViewInfo }
-  | { kind: "locations"; locations: readonly Location[] }
   | {
+      authorization: EntitySurfaceAuthorization;
+      kind: "locations";
+      locations: readonly Location[];
+    }
+  | {
+      authorization: EntitySurfaceAuthorization;
       kind: "renamePreparation";
       placeholder?: string;
       range?: SourceRange;
-      rejection?: string;
     }
   | {
+      authorization: EntitySurfaceAuthorization;
       kind: "editProposal";
       proposal?: SemanticEditProposal;
-      rejection?: string;
     }
   | { diagnostics: readonly SemanticDiagnostic[]; kind: "diagnostics" }
   | {

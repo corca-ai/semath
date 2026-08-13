@@ -2483,13 +2483,13 @@
         {
           "fileId": "main",
           "path": "lyap19.tex",
-          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\n\\newcommand{\\tr}{^{\\mathsf T}}\nLet $F_m,X_m,R_m\\in\\mathbb R^{p\\times p}$.\n% semath-recognition-evidence:start\n$F_m$ denotes state matrix. $X_m$ denotes lyapunov certificate matrix. $R_m$ denotes forcing matrix.\n% semath-recognition-evidence:end\n\\[F_m\\tr X_m+X_mF_m=-R_m\\]"
+          "content": "Suppose the notation is local to this calculation, case 1069. [where clause]\nA grouped symbol is $ {q_{1269}} $.\n\nLet $F_m,X_m,R_m\\in\\mathbb R^{p\\times p}$.\n% semath-recognition-evidence:start\n$F_m$ denotes state matrix. $X_m$ denotes lyapunov certificate matrix. $R_m$ denotes forcing matrix.\n% semath-recognition-evidence:end\nThe continuous Lyapunov equation is \\[F_m^{\\mathsf T} X_m+X_mF_m=-R_m\\]"
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "F_m\\tr X_m+X_mF_m=-R_m",
+        "needle": "F_m^{\\mathsf T} X_m+X_mF_m=-R_m",
         "edge": "before"
       },
       "expectedRoles": {
@@ -2498,15 +2498,7 @@
         "forcing": "R_m"
       },
       "variationTags": [
-        "transparent-macros",
-        "transpose-macro",
         "mathsf-transpose"
-      ],
-      "macros": [
-        {
-          "name": "\\tr",
-          "definition": "^{\\mathsf T}"
-        }
       ],
       "diversity": {
         "batch": "baseline-05",
@@ -2797,13 +2789,13 @@
         {
           "fileId": "main",
           "path": "lyap27.tex",
-          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nLet $A_c^{(1)},P_c^{(1)},Q_c^{(1)}\\in\\mathbb R^{n\\times n}$.\n% semath-recognition-evidence:start\nLet $A_c^{(1)}$, $P_c^{(1)}$, and $Q_c^{(1)}$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\n\\[(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}\\]"
+          "content": "Suppose the notation is local to this calculation, case 1077. [throughout section]\nA grouped symbol is $ {q_{1277}} $.\n\nLet $A_c^{(1)},P_c^{(1)},Q_c^{(1)}\\in\\mathbb R^{n\\times n}$.\n% semath-recognition-evidence:start\nLet $A_c^{(1)}$, $P_c^{(1)}$, and $Q_c^{(1)}$ denote state matrix, lyapunov certificate matrix, and forcing matrix, respectively.\n% semath-recognition-evidence:end\nThe continuous Lyapunov equation is \\[{A_c^{(1)}}^T P_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}\\]"
         }
       ],
       "mainFileId": "main",
       "cursor": {
         "fileId": "main",
-        "needle": "(A_c^{(1)})^TP_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}",
+        "needle": "{A_c^{(1)}}^T P_c^{(1)}+P_c^{(1)}A_c^{(1)}=-Q_c^{(1)}",
         "edge": "before"
       },
       "expectedRoles": {

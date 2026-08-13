@@ -16,6 +16,7 @@ import {
 } from "../packages/protocol/src/index";
 import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index";
 import { loadFreshBlindEvidence } from "./fresh-blind-evidence";
+import { completeLifecycleUpsertIds } from "./fresh-blind-lifecycle-plan";
 import { semanticEvaluationCursorOffset } from "./semantic-evaluation-runner";
 
 const path = process.env.SEMATH_FRESH_BLIND_FIXTURE;
@@ -136,6 +137,7 @@ function transition(
     | { readonly fileId: string; readonly kind: "path-change"; readonly path: string }
   > = [];
   const explicitlyChanged = new Set<string>();
+  const directlyChanged = new Set<string>();
   for (const fileId of sources.keys()) {
     if (target.has(fileId)) continue;
     sources.delete(fileId);
@@ -161,11 +163,19 @@ function transition(
     };
     sources.set(document.fileId, source);
     syntax.upsert(source);
+    directlyChanged.add(document.fileId);
   }
-  const upserts = syntax.getInvalidatedFiles().flatMap((fileSyntax) => {
-    if (explicitlyChanged.has(fileSyntax.fileId)) return [];
-    const source = sources.get(fileSyntax.fileId);
+  const invalidated = syntax.getInvalidatedFiles();
+  const invalidatedById = new Map(invalidated.map((file) => [file.fileId, file]));
+  const upserts = completeLifecycleUpsertIds(
+    directlyChanged,
+    invalidated.map((file) => file.fileId),
+  ).flatMap((fileId) => {
+    if (explicitlyChanged.has(fileId)) return [];
+    const source = sources.get(fileId);
     if (!source) return [];
+    const fileSyntax = invalidatedById.get(fileId) ?? syntax.getFile(fileId);
+    if (!fileSyntax) throw new Error(`${fileId}: missing wasmtex syntax after upsert`);
     return [
       {
         document: adaptWasmtexDocument({
@@ -201,22 +211,31 @@ function compareSnapshot(
   for (const probe of selected) {
     const queries = queriesFor(probe, sources);
     for (const query of queries) {
-      const incrementalResult = queryEngine(
-        incremental,
-        query,
-        sources,
-        epoch,
-        inventoryVersion,
-        analysisGeneration,
-      );
-      const cleanResult = queryEngine(
-        clean,
-        query,
-        sources,
-        epoch,
-        inventoryVersion,
-        analysisGeneration,
-      );
+      let incrementalResult: QueryResult;
+      let cleanResult: QueryResult;
+      try {
+        incrementalResult = queryEngine(
+          incremental,
+          query,
+          sources,
+          epoch,
+          inventoryVersion,
+          analysisGeneration,
+        );
+        cleanResult = queryEngine(
+          clean,
+          query,
+          sources,
+          epoch,
+          inventoryVersion,
+          analysisGeneration,
+        );
+      } catch (error) {
+        throw new Error(
+          `${scenarioId}/${snapshot.id}/${probe.id}/${query.kind}: ${error instanceof Error ? error.message : String(error)}`,
+          { cause: error },
+        );
+      }
       const failure = firstDifferentialFailure([
         { name: "clean", value: cleanResult.value },
         { name: "incremental", value: incrementalResult.value },

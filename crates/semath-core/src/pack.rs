@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 9;
+pub const PACK_SCHEMA_VERSION: u32 = 10;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -267,8 +267,24 @@ pub struct PackLawRole {
     pub shape: Option<String>,
     #[serde(default)]
     pub notation: Vec<String>,
+    #[serde(default, skip_serializing_if = "RoleSourceProjection::is_expression")]
+    pub source_projection: RoleSourceProjection,
     #[serde(default)]
     pub variadic: bool,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum RoleSourceProjection {
+    #[default]
+    Expression,
+    Head,
+}
+
+impl RoleSourceProjection {
+    fn is_expression(value: &Self) -> bool {
+        *value == Self::Expression
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -301,6 +317,12 @@ pub struct PackVocabularyEntry {
     pub description: String,
     #[serde(default)]
     pub notation: Vec<String>,
+    #[serde(default)]
+    pub operand_concepts: Vec<String>,
+    #[serde(default)]
+    pub result_concept: Option<String>,
+    #[serde(default)]
+    pub result_shape: Option<String>,
     pub references: Vec<String>,
 }
 
@@ -805,7 +827,56 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
                 &format!("{collection}[{index}].description"),
                 &entry.description,
             )?;
+            if collection == "roles"
+                && (!entry.operand_concepts.is_empty()
+                    || entry.result_concept.is_some()
+                    || entry.result_shape.is_some())
+            {
+                return Err(error(
+                    format!("{collection}[{index}].signature"),
+                    "operator signatures are allowed only on operators",
+                ));
+            }
+            for (concept_index, concept) in entry.operand_concepts.iter().enumerate() {
+                validate_pack_concept_reference(
+                    pack,
+                    &concepts,
+                    &format!("{collection}[{index}].operandConcepts[{concept_index}]"),
+                    concept,
+                )?;
+            }
+            if let Some(concept) = &entry.result_concept {
+                validate_pack_concept_reference(
+                    pack,
+                    &concepts,
+                    &format!("{collection}[{index}].resultConcept"),
+                    concept,
+                )?;
+            }
+            if let Some(shape) = &entry.result_shape
+                && !matches!(shape.as_str(), "scalar" | "vector" | "matrix" | "tensor")
+            {
+                return Err(error(
+                    format!("{collection}[{index}].resultShape"),
+                    "must be scalar, vector, matrix, or tensor",
+                ));
+            }
         }
+    }
+    Ok(())
+}
+
+fn validate_pack_concept_reference(
+    pack: &DomainPack,
+    concepts: &HashSet<&str>,
+    path: &str,
+    concept: &str,
+) -> Result<(), PackValidationError> {
+    let Some((namespace, id)) = concept.split_once(':') else {
+        return Err(error(path, "must be a qualified concept ID"));
+    };
+    if namespace != pack.namespace || !concepts.contains(id) {
+        return Err(error(path, format!("unknown concept {concept}")));
     }
     Ok(())
 }
@@ -979,7 +1050,7 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 9);
+        assert_eq!(PACK_SCHEMA_VERSION, 10);
         assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }
@@ -990,6 +1061,100 @@ mod tests {
         source["patterns"] = serde_json::json!([]);
         let error = compile_pack(&serde_json::to_string(&source).unwrap()).unwrap_err();
         assert!(error.message.contains("unknown field"));
+    }
+
+    #[test]
+    fn validates_typed_operator_signatures_against_pack_concepts() {
+        let pack = built_in_packs()
+            .iter()
+            .find(|pack| pack.pack_id == "discrete-math")
+            .unwrap();
+        let cardinality = pack
+            .operators
+            .iter()
+            .find(|operator| operator.id == "cardinality")
+            .unwrap();
+        assert_eq!(cardinality.operand_concepts, ["discrete-math:set"]);
+        assert_eq!(
+            cardinality.result_concept.as_deref(),
+            Some("discrete-math:cardinality")
+        );
+        assert_eq!(cardinality.result_shape.as_deref(), Some("scalar"));
+
+        let mut unknown = pack.clone();
+        unknown.operators[0].operand_concepts = vec!["discrete-math:missing".into()];
+        let error = validate_pack(&unknown).unwrap_err();
+        assert!(error.path.ends_with("operators[0].operandConcepts[0]"));
+        assert!(error.message.contains("unknown concept"));
+
+        let mut role_signature = pack.clone();
+        role_signature.roles[0].result_shape = Some("scalar".into());
+        let error = validate_pack(&role_signature).unwrap_err();
+        assert!(error.path.ends_with("roles[0].signature"));
+    }
+
+    #[test]
+    fn retains_reviewed_condition_phrase_families_declaratively() {
+        for (pack_id, law_id, required) in [
+            (
+                "circuits",
+                "kirchhoff-current-law",
+                &[
+                    "junction convention",
+                    "currents directed into the junction",
+                    "currents directed away",
+                ][..],
+            ),
+            (
+                "signals-systems",
+                "wave-speed-relation",
+                &["same-phase"][..],
+            ),
+            (
+                "electromagnetism",
+                "electric-potential-energy",
+                &["potential relative to", "region held at potential"][..],
+            ),
+        ] {
+            let condition = &built_in_packs()
+                .iter()
+                .find(|pack| pack.pack_id == pack_id)
+                .unwrap()
+                .laws
+                .iter()
+                .find(|law| law.id == law_id)
+                .unwrap()
+                .conditions[0];
+            assert!(required.iter().all(|phrase| {
+                condition
+                    .evidence_phrases
+                    .iter()
+                    .any(|candidate| candidate == phrase)
+            }));
+        }
+    }
+
+    #[test]
+    fn kcl_activation_requires_circuit_specific_language() {
+        let law = built_in_packs()
+            .iter()
+            .find(|pack| pack.pack_id == "circuits")
+            .unwrap()
+            .laws
+            .iter()
+            .find(|law| law.id == "kirchhoff-current-law")
+            .unwrap();
+        assert!(law.activation_phrases.iter().any(|phrase| phrase == "kcl"));
+        assert!(
+            law.activation_phrases
+                .iter()
+                .all(|phrase| phrase == "kcl" || phrase.split_whitespace().count() >= 2)
+        );
+        assert!(
+            !law.activation_phrases
+                .iter()
+                .any(|phrase| phrase == "balance")
+        );
     }
 
     #[test]

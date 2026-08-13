@@ -546,7 +546,7 @@ function measuredQueries(document: PerformanceFixtureDocument): readonly SemathQ
     { ...target, kind: "selection" },
     { ...target, kind: "semanticView" },
     { ...target, kind: "definition" },
-    { ...target, kind: "references" },
+    { ...target, kind: "references", includeDeclaration: true },
     { ...target, kind: "prepareRename" },
     { ...target, kind: "rename", newName: "w" },
   ];
@@ -575,6 +575,16 @@ function queryResultCount(result: QueryResult): number {
 }
 
 function assertFanoutResult(query: SemathQuery, result: QueryResult): void {
+  if (
+    (result.value.kind === "locations" ||
+      result.value.kind === "editProposal" ||
+      result.value.kind === "renamePreparation") &&
+    result.value.authorization.status !== "authorized"
+  ) {
+    throw new Error(
+      `budget ${query.kind} was refused by the bounded entity authority: ${JSON.stringify(result.value.authorization.reason)}`,
+    );
+  }
   if (query.kind === "references" || query.kind === "rename") {
     const count = queryResultCount(result);
     const expectedFanout = performanceEntityFanout(DOCUMENT_COUNT);

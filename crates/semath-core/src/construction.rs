@@ -524,6 +524,15 @@ pub(crate) fn coordinated_descriptions(
         }
     }
     if lead == CoordinationLead::Let {
+        if let Some(body) = consume_any(trimmed, &["be"])
+            && let Some((descriptions, consumed)) = ordered_body(body, arity)
+        {
+            return Some((
+                descriptions,
+                "english-respectively-definition",
+                after.len() - body.len() + consumed,
+            ));
+        }
         let shared = consume_any(
             trimmed,
             &[
@@ -542,7 +551,7 @@ pub(crate) fn coordinated_descriptions(
         let end = shared
             .find([',', ';', '.', '\n', '$'])
             .unwrap_or(shared.len());
-        let description = shared[..end].trim();
+        let description = shared_nominal_head(shared[..end].trim());
         if valid_plain_description(description)
             && !description.to_ascii_lowercase().contains(" and ")
         {
@@ -554,6 +563,16 @@ pub(crate) fn coordinated_descriptions(
         }
     }
     None
+}
+
+fn shared_nominal_head(description: &str) -> &str {
+    let lower = description.to_ascii_lowercase();
+    let end = [" who ", " that ", " which ", " whose "]
+        .into_iter()
+        .filter_map(|marker| lower.find(marker))
+        .min()
+        .unwrap_or(description.len());
+    description[..end].trim_end()
 }
 
 pub(crate) fn fronted_shared_description<'a>(
@@ -690,12 +709,14 @@ fn consume_any<'a>(value: &'a str, phrases: &[&str]) -> Option<&'a str> {
 }
 
 fn ordered_body(value: &str, arity: usize) -> Option<(Vec<&str>, usize)> {
+    let boundary = value.find(['.', '\n']).unwrap_or(value.len());
+    let clause = &value[..boundary];
     for marker in ["respectively", "in that order"] {
-        let lower = value.to_ascii_lowercase();
+        let lower = clause.to_ascii_lowercase();
         let Some(marker_start) = lower.find(marker) else {
             continue;
         };
-        let descriptions = value[..marker_start]
+        let descriptions = clause[..marker_start]
             .trim_end_matches(|character: char| character.is_whitespace() || character == ',');
         let aligned = crate::scientific_prose::align_ordered_descriptions(descriptions, arity)?;
         let consumed = marker_start + marker.len();
@@ -892,6 +913,32 @@ mod tests {
             )
             .map(|(items, _, _)| items),
             Some(vec!["gain", "bias", "scale", "offset"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(
+                CoordinationLead::Let,
+                " be kinetic energy, mass, and speed, respectively.",
+                3,
+            )
+            .map(|(items, _, _)| items),
+            Some(vec!["kinetic energy", "mass", "speed"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(CoordinationLead::Let, " be matrices.", 2)
+                .map(|(items, _, _)| items),
+            Some(vec!["matrices", "matrices"]),
+        );
+        assert_eq!(
+            coordinated_descriptions(
+                CoordinationLead::Let,
+                " are finite sets of respondents who selected alpha and beta, respectively.",
+                2,
+            )
+            .map(|(items, _, _)| items),
+            Some(vec![
+                "finite sets of respondents",
+                "finite sets of respondents"
+            ]),
         );
     }
 

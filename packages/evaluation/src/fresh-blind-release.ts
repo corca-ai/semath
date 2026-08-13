@@ -7,6 +7,7 @@ import {
   resolveAuthoredAnchor,
   scoreAuthoredScientificFixture,
   type AuthoredLawCatalogEntry,
+  type AuthoredLocationExpectation,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
 } from "./authored-scientific";
@@ -16,6 +17,7 @@ import {
 } from "./authored-integrity";
 
 const DIGEST = /^[0-9a-f]{64}$/u;
+const RELEASE_ID = /^v0\.[1-9][0-9]*$/u;
 const REQUIRED_SCENARIOS = 48;
 const REQUIRED_FAMILY_SCENARIOS = 8;
 
@@ -60,9 +62,16 @@ export interface FreshBlindValidationSummary {
 }
 
 export interface FreshBlindSafetySummary {
+  readonly diagnosticsOverLimit: number;
+  readonly diagnosticsOverLimitIds: readonly string[];
   readonly falseConflict: number;
+  readonly falseConflictIds: readonly string[];
   readonly falseEstablishment: number;
-  readonly unsafeNavigationOrEdit: number;
+  readonly falseEstablishmentIds: readonly string[];
+  /** Concrete source locations exposed or edited outside the review contract. */
+  readonly unsafeNavigationOrEditLocations: number;
+  /** Probe ids with at least one unsafe navigation or edit location. */
+  readonly unsafeNavigationOrEditCaseIds: readonly string[];
 }
 
 export interface FreshBlindSnapshotTransition {
@@ -137,7 +146,10 @@ export function parseFreshBlindReleaseFixture(
     },
     fixture: parseAuthoredScientificFixture(root.fixture),
     release: {
-      createdAt: date(release.createdAt, "fresh blind release.release.createdAt"),
+      createdAt: date(
+        release.createdAt,
+        "fresh blind release.release.createdAt",
+      ),
       frozenAt: timestamp(
         release.frozenAt,
         "fresh blind release.release.frozenAt",
@@ -165,8 +177,10 @@ export function validateFreshBlindRelease(
   input: FreshBlindValidationInput,
 ): FreshBlindValidationSummary {
   const fixture = release.fixture;
-  if (release.release.id !== "v0.28") {
-    throw new Error("fresh blind release.release.id: expected v0.28");
+  if (!RELEASE_ID.test(release.release.id)) {
+    throw new Error(
+      "fresh blind release.release.id: expected a semantic release id such as v0.29",
+    );
   }
   if (fixture.batch.split !== "holdout") {
     throw new Error("fresh blind fixture must use the frozen holdout split");
@@ -178,19 +192,64 @@ export function validateFreshBlindRelease(
     throw new Error("fresh blind outer release and authored batch disagree");
   }
   if (release.release.seal !== input.sealDigest) {
-    throw new Error("fresh blind release seal does not cover the frozen fixture");
+    throw new Error(
+      "fresh blind release seal does not cover the frozen fixture",
+    );
   }
   if (fixture.batch.seal !== input.authoredSealDigest) {
-    throw new Error("fresh blind authored seal does not cover the frozen fixture");
+    throw new Error(
+      "fresh blind authored seal does not cover the frozen fixture",
+    );
   }
   if (fixture.scenarios.length !== REQUIRED_SCENARIOS) {
-    throw new Error(`fresh blind fixture requires exactly ${REQUIRED_SCENARIOS} scenarios`);
+    throw new Error(
+      `fresh blind fixture requires exactly ${REQUIRED_SCENARIOS} scenarios`,
+    );
   }
   const primary = fixture.probes.filter((probe) => probe.kind === "primary");
   if (primary.length !== REQUIRED_SCENARIOS) {
-    throw new Error("fresh blind fixture requires one primary probe per scenario");
+    throw new Error(
+      "fresh blind fixture requires one primary probe per scenario",
+    );
   }
   for (const probe of fixture.probes) {
+    const scenario = authoredScenarioFor(fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    validateExactLocationContract(
+      probe.id,
+      "definition",
+      probe.expected.navigation.definition,
+      snapshot,
+    );
+    validateExactLocationContract(
+      probe.id,
+      "references",
+      probe.expected.navigation.references,
+      snapshot,
+    );
+    validateExactLocationContract(
+      probe.id,
+      "rename",
+      probe.expected.navigation.rename,
+      snapshot,
+    );
+    const preparation = probe.expected.navigation.prepareRename;
+    if (
+      preparation.status === "available" &&
+      (preparation.range === undefined || preparation.placeholder === undefined)
+    ) {
+      throw new Error(
+        `${probe.id}: available prepareRename requires an exact range and placeholder`,
+      );
+    }
+    if (
+      preparation.status === "unavailable" &&
+      (preparation.range !== undefined || preparation.placeholder !== undefined)
+    ) {
+      throw new Error(
+        `${probe.id}: unavailable prepareRename cannot define a range or placeholder`,
+      );
+    }
     const rename = probe.expected.navigation.rename;
     const contract = [
       rename.expectedText,
@@ -207,10 +266,24 @@ export function validateFreshBlindRelease(
       );
     }
     if (
+      rename.status === "available" &&
+      (rename.newName !== rename.replacementText ||
+        !sameRenameNotationFamily(rename.expectedText!, rename.newName!))
+    ) {
+      throw new Error(
+        `${probe.id}: rename must preserve one exact editable notation family`,
+      );
+    }
+    if (
       rename.status === "unavailable" &&
       contract.some((value) => value !== undefined)
     ) {
-      throw new Error(`${probe.id}: unavailable rename cannot define an edit contract`);
+      throw new Error(
+        `${probe.id}: unavailable rename cannot define an edit contract`,
+      );
+    }
+    if (semanticReleaseNumber(release.release.id) >= 35) {
+      validateEntitySurfaceCommissioning(probe.id, probe.expected, snapshot);
     }
   }
   const families = count(primary.map((probe) => probe.family));
@@ -230,7 +303,9 @@ export function validateFreshBlindRelease(
     "unsupported",
   ]) {
     if (!decisions[decision]) {
-      throw new Error(`${decision}: fresh blind fixture requires reviewed coverage`);
+      throw new Error(
+        `${decision}: fresh blind fixture requires reviewed coverage`,
+      );
     }
   }
   validateCommissioning(release);
@@ -248,7 +323,9 @@ export function validateFreshBlindRelease(
   if (input.freshProfiles.length !== fixture.scenarios.length) {
     throw new Error("fresh blind integrity profiles must cover every scenario");
   }
-  const freshProfileIds = new Set(input.freshProfiles.map((profile) => profile.id));
+  const freshProfileIds = new Set(
+    input.freshProfiles.map((profile) => profile.id),
+  );
   if (
     freshProfileIds.size !== fixture.scenarios.length ||
     fixture.scenarios.some((scenario) => !freshProfileIds.has(scenario.id))
@@ -264,6 +341,147 @@ export function validateFreshBlindRelease(
     probes: fixture.probes.length,
     scenarios: fixture.scenarios.length,
   };
+}
+
+function validateEntitySurfaceCommissioning(
+  probeId: string,
+  expected: AuthoredScientificFixture["probes"][number]["expected"],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): void {
+  const { definition, prepareRename, references, rename } = expected.navigation;
+  if (definition.status !== references.status) {
+    throw new Error(
+      `${probeId}: definition and references must share one entity-surface authorization`,
+    );
+  }
+  if (prepareRename.status !== rename.status) {
+    throw new Error(
+      `${probeId}: prepareRename and rename must share one edit authorization`,
+    );
+  }
+  if (definition.status === "available") {
+    const definitions = resolvedLocationKeys(definition.required, snapshot);
+    const referenceKeys = new Set(
+      resolvedLocationKeys(references.required, snapshot),
+    );
+    if (definitions.some((location) => !referenceKeys.has(location))) {
+      throw new Error(
+        `${probeId}: every definition must be present in the complete reference surface`,
+      );
+    }
+    const symbol = expected.symbol;
+    if (!symbol || !references.required.every((anchor) => selectedAnchorText(anchor, snapshot) === symbol)) {
+      throw new Error(
+        `${probeId}: authorized references require one exact atomic source spelling`,
+      );
+    }
+    const authoredOccurrences = exactAtomicOccurrences(snapshot, symbol);
+    if (authoredOccurrences.length !== references.required.length) {
+      throw new Error(
+        `${probeId}: reference allowlist must enumerate every exact atomic source occurrence`,
+      );
+    }
+  }
+  if (rename.status === "available") {
+    const referenceKeys = resolvedLocationKeys(references.required, snapshot);
+    const renameKeys = resolvedLocationKeys(rename.required, snapshot);
+    if (
+      referenceKeys.length !== renameKeys.length ||
+      referenceKeys.some((location, index) => location !== renameKeys[index])
+    ) {
+      throw new Error(
+        `${probeId}: rename edits must equal the complete ordered reference surface`,
+      );
+    }
+    if (
+      expected.symbol !== rename.expectedText ||
+      prepareRename.placeholder !== rename.expectedText ||
+      !prepareRename.range ||
+      !renameKeys.includes(
+        resolvedLocationKeys([prepareRename.range], snapshot)[0]!,
+      )
+    ) {
+      throw new Error(
+        `${probeId}: prepareRename must select the same exact notation authorized for rename`,
+      );
+    }
+  }
+}
+
+function semanticReleaseNumber(releaseId: string): number {
+  return Number.parseInt(releaseId.slice("v0.".length), 10);
+}
+
+function resolvedLocationKeys(
+  anchors: readonly AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["references"]["required"][number][],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): string[] {
+  return anchors
+    .map((anchor) => {
+      const resolved = resolveAuthoredAnchor(snapshot, anchor);
+      return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
+    })
+    .sort();
+}
+
+function selectedAnchorText(
+  anchor: AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["references"]["required"][number],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): string {
+  const document = snapshot.documents.find((candidate) => candidate.fileId === anchor.fileId)!;
+  const range = resolveAuthoredAnchor(snapshot, anchor).range;
+  return document.content.slice(range.startOffset, range.endOffset);
+}
+
+function exactAtomicOccurrences(
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+  symbol: string,
+): string[] {
+  const output: string[] = [];
+  const identifier = /[\p{L}\p{N}_]/u;
+  for (const document of snapshot.documents) {
+    for (let start = document.content.indexOf(symbol); start >= 0;) {
+      const end = start + symbol.length;
+      const before = document.content.slice(Math.max(0, start - 1), start);
+      const after = document.content.slice(end, end + 1);
+      if (!identifier.test(before) && !identifier.test(after)) {
+        output.push(`${document.fileId}:${start}:${end}`);
+      }
+      start = document.content.indexOf(symbol, start + Math.max(symbol.length, 1));
+    }
+  }
+  return output.sort();
+}
+
+function validateExactLocationContract(
+  probeId: string,
+  surface: string,
+  expected: AuthoredLocationExpectation,
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): void {
+  if (expected.minimum !== expected.required.length) {
+    throw new Error(
+      `${probeId}: ${surface} must enumerate its complete location allowlist`,
+    );
+  }
+  if (expected.status === "available" && expected.required.length === 0) {
+    throw new Error(`${probeId}: available ${surface} requires a source location`);
+  }
+  const locations = expected.required.map((anchor) => {
+    const resolved = resolveAuthoredAnchor(snapshot, anchor);
+    return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
+  });
+  if (new Set(locations).size !== locations.length) {
+    throw new Error(`${probeId}: ${surface} repeats a reviewed source location`);
+  }
+}
+
+function sameRenameNotationFamily(current: string, replacement: string): boolean {
+  const controlSequence = /^\\\p{L}+$/u;
+  const plainIdentifier = /^\p{L}$/u;
+  return controlSequence.test(current)
+    ? controlSequence.test(replacement)
+    : plainIdentifier.test(current) && plainIdentifier.test(replacement);
 }
 
 /** Keep similarity policy pure; the effectful validator supplies fingerprints
@@ -305,43 +523,108 @@ export function freshBlindSafetySummary(
   fixture: AuthoredScientificFixture,
   observations: readonly AuthoredScientificObservation[],
 ): FreshBlindSafetySummary {
-  const byId = new Map(observations.map((observation) => [observation.caseId, observation]));
-  const risk = scoreAuthoredScientificFixture(fixture, observations).risk;
-  let unsafeNavigationOrEdit = 0;
+  const probeIds = new Set(fixture.probes.map((probe) => probe.id));
+  const byId = new Map<string, AuthoredScientificObservation>();
+  for (const observation of observations) {
+    if (!probeIds.has(observation.caseId)) {
+      throw new Error(
+        `${observation.caseId}: unexpected fresh blind observation`,
+      );
+    }
+    if (byId.has(observation.caseId)) {
+      throw new Error(
+        `${observation.caseId}: duplicate fresh blind observation`,
+      );
+    }
+    byId.set(observation.caseId, observation);
+  }
+  let unsafeNavigationOrEditLocations = 0;
+  const diagnosticsOverLimitIds: string[] = [];
+  const falseConflictIds: string[] = [];
+  const falseEstablishmentIds: string[] = [];
+  const unsafeNavigationOrEditCaseIds = new Set<string>();
   for (const probe of fixture.probes) {
     const observed = byId.get(probe.id);
     if (!observed) continue;
-    const snapshot = authoredSnapshotFor(
-      authoredScenarioFor(fixture, probe),
-      probe,
+    const scenario = authoredScenarioFor(fixture, probe);
+    const risk = scoreAuthoredScientificFixture(
+      { ...fixture, probes: [probe], scenarios: [scenario] },
+      [observed],
+    ).risk;
+    if (risk.falseEstablishment) {
+      falseEstablishmentIds.push(probe.id);
+    }
+    if (risk.falseConflict) {
+      falseConflictIds.push(probe.id);
+    }
+    const problems = observed.diagnostics.filter(
+      (diagnostic) =>
+        diagnostic.severity === "error" || diagnostic.severity === "warning",
     );
-    unsafeNavigationOrEdit += unsafeLocations(
+    if (problems.length > probe.expected.diagnostics.maximum) {
+      diagnosticsOverLimitIds.push(probe.id);
+    }
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    const unsafeDefinitions = unsafeLocations(
       observed.definitions,
       probe.expected.navigation.definition,
       snapshot,
     );
-    unsafeNavigationOrEdit += unsafeLocations(
+    const unsafeReferences = unsafeLocations(
       observed.references,
       probe.expected.navigation.references,
       snapshot,
     );
-    if (
-      probe.expected.navigation.prepareRename.status === "unavailable" &&
-      observed.prepareRename.range
-    ) {
-      unsafeNavigationOrEdit += 1;
-    }
-    unsafeNavigationOrEdit += unsafeLocations(
+    const unsafePreparation = unsafePrepareRenameLocation(
+      observed.prepareRename,
+      probe.expected.navigation.prepareRename,
+      snapshot,
+    );
+    const unsafeRename = unsafeLocations(
       observed.renameEdits,
       probe.expected.navigation.rename,
       snapshot,
+      (edit) =>
+        (probe.expected.navigation.rename.expectedText !== undefined &&
+          edit.expectedText !==
+            probe.expected.navigation.rename.expectedText) ||
+        (probe.expected.navigation.rename.replacementText !== undefined &&
+          edit.replacementText !==
+            probe.expected.navigation.rename.replacementText) ||
+        (probe.expected.navigation.rename.safety !== undefined &&
+          observed.renameSafety !== probe.expected.navigation.rename.safety),
     );
+    const unsafeCaseLocations =
+      unsafeDefinitions +
+      unsafeReferences +
+      unsafePreparation +
+      unsafeRename;
+    unsafeNavigationOrEditLocations += unsafeCaseLocations;
+    if (unsafeCaseLocations > 0) {
+      unsafeNavigationOrEditCaseIds.add(probe.id);
+    }
   }
   return {
-    falseConflict: risk.falseConflict,
-    falseEstablishment: risk.falseEstablishment,
-    unsafeNavigationOrEdit,
+    diagnosticsOverLimit: diagnosticsOverLimitIds.length,
+    diagnosticsOverLimitIds: diagnosticsOverLimitIds.sort(),
+    falseConflict: falseConflictIds.length,
+    falseConflictIds: falseConflictIds.sort(),
+    falseEstablishment: falseEstablishmentIds.length,
+    falseEstablishmentIds: falseEstablishmentIds.sort(),
+    unsafeNavigationOrEditCaseIds: [...unsafeNavigationOrEditCaseIds].sort(),
+    unsafeNavigationOrEditLocations,
   };
+}
+
+export function freshBlindSafetyGateFailed(
+  summary: FreshBlindSafetySummary,
+): boolean {
+  return (
+    summary.diagnosticsOverLimit > 0 ||
+    summary.falseConflict > 0 ||
+    summary.falseEstablishment > 0 ||
+    summary.unsafeNavigationOrEditLocations > 0
+  );
 }
 
 export function planFreshBlindSnapshotTransitions(
@@ -360,10 +643,14 @@ function validateCommissioning(release: FreshBlindReleaseFixture): void {
   const seenGroups = new Set<string>();
   for (const scenario of release.fixture.scenarios) {
     if (scenario.provenance.taskCardDigest !== release.release.taskCardDigest) {
-      throw new Error(`${scenario.id}: authored task card differs from the frozen release`);
+      throw new Error(
+        `${scenario.id}: authored task card differs from the frozen release`,
+      );
     }
     if (scenario.review.frozenAt !== release.release.frozenAt) {
-      throw new Error(`${scenario.id}: review freeze differs from the frozen release`);
+      throw new Error(
+        `${scenario.id}: review freeze differs from the frozen release`,
+      );
     }
     if (!seenGroups.add(scenario.provenance.independenceGroup)) {
       throw new Error(`${scenario.id}: independence group is reused`);
@@ -386,11 +673,13 @@ function validateLaws(
   catalog: readonly AuthoredLawCatalogEntry[],
 ): number {
   const byId = new Map(catalog.map((law) => [law.lawId, law]));
-  if (byId.size !== catalog.length) throw new Error("law catalog ids are not unique");
+  if (byId.size !== catalog.length)
+    throw new Error("law catalog ids are not unique");
   const covered = new Set<string>();
   for (const scenario of fixture.scenarios) {
     for (const lawId of scenario.lawIds) {
-      if (!byId.has(lawId)) throw new Error(`${scenario.id}: unknown law ${lawId}`);
+      if (!byId.has(lawId))
+        throw new Error(`${scenario.id}: unknown law ${lawId}`);
       covered.add(lawId);
     }
   }
@@ -399,17 +688,25 @@ function validateLaws(
     for (const relation of probe.expected.relations) {
       const law = byId.get(relation.relationId);
       if (!law || !scenario.lawIds.includes(relation.relationId)) {
-        throw new Error(`${probe.id}: expected relation is absent from scenario law coverage`);
+        throw new Error(
+          `${probe.id}: expected relation is absent from scenario law coverage`,
+        );
       }
       for (const role of law.roles) {
-        const matches = relation.roles.filter((candidate) => candidate.role === role.id);
+        const matches = relation.roles.filter(
+          (candidate) => candidate.role === role.id,
+        );
         if (role.variadic ? matches.length === 0 : matches.length !== 1) {
-          throw new Error(`${probe.id}: ${relation.relationId} has invalid role coverage`);
+          throw new Error(
+            `${probe.id}: ${relation.relationId} has invalid role coverage`,
+          );
         }
       }
       const knownRoles = new Set(law.roles.map((role) => role.id));
       if (relation.roles.some((role) => !knownRoles.has(role.role))) {
-        throw new Error(`${probe.id}: ${relation.relationId} has an unknown role`);
+        throw new Error(
+          `${probe.id}: ${relation.relationId} has an unknown role`,
+        );
       }
     }
   }
@@ -425,17 +722,27 @@ function rejectExactLeakage(
     for (const snapshot of scenario.snapshots) {
       for (const document of snapshot.documents) {
         if (known.has(normalizeDocument(document.content))) {
-          throw new Error(`${scenario.id}: frozen document duplicates existing evidence`);
+          throw new Error(
+            `${scenario.id}: frozen document duplicates existing evidence`,
+          );
         }
       }
     }
   }
 }
 
-function unsafeLocations(
-  observed: readonly { readonly fileId: string; readonly range: SourceRange }[],
+function unsafeLocations<
+  Location extends { readonly fileId: string; readonly range: SourceRange },
+>(
+  observed: readonly Location[],
   expected: {
     readonly excluded: readonly {
+      readonly fileId: string;
+      readonly needle: string;
+      readonly occurrence?: number;
+      readonly selection?: { readonly length: number; readonly offset: number };
+    }[];
+    readonly required: readonly {
       readonly fileId: string;
       readonly needle: string;
       readonly occurrence?: number;
@@ -444,23 +751,59 @@ function unsafeLocations(
     readonly status: "available" | "unavailable";
   },
   snapshot: ReturnType<typeof authoredSnapshotFor>,
+  additionalUnsafe: (location: Location) => boolean = () => false,
 ): number {
-  if (expected.status === "unavailable") return observed.length ? 1 : 0;
+  if (expected.status === "unavailable") return observed.length;
+  const required = expected.required.map((anchor) =>
+    resolveAuthoredAnchor(snapshot, anchor),
+  );
   const excluded = expected.excluded.map((anchor) =>
     resolveAuthoredAnchor(snapshot, anchor),
   );
-  return observed.some((location) =>
-    excluded.some(
-      (anchor) =>
-        location.fileId === anchor.fileId && sameRange(location.range, anchor.range),
-    ),
-  )
+  return observed.filter(
+    (location) =>
+      additionalUnsafe(location) ||
+      !required.some(
+        (anchor) =>
+          location.fileId === anchor.fileId &&
+          sameRange(location.range, anchor.range),
+      ) ||
+      excluded.some(
+        (anchor) =>
+          location.fileId === anchor.fileId &&
+          sameRange(location.range, anchor.range),
+      ),
+  ).length;
+}
+
+function unsafePrepareRenameLocation(
+  observed: AuthoredScientificObservation["prepareRename"],
+  expected: AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["prepareRename"],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): number {
+  if (!observed.range) return 0;
+  if (expected.status === "unavailable") return 1;
+  if (
+    expected.range &&
+    !sameRange(
+      observed.range,
+      resolveAuthoredAnchor(snapshot, expected.range).range,
+    )
+  ) {
+    return 1;
+  }
+  return expected.placeholder !== undefined &&
+    observed.placeholder !== expected.placeholder
     ? 1
     : 0;
 }
 
 function normalizeDocument(value: string): string {
-  return value.normalize("NFKC").toLocaleLowerCase("en-US").replaceAll(/\s+/gu, " ").trim();
+  return value
+    .normalize("NFKC")
+    .toLocaleLowerCase("en-US")
+    .replaceAll(/\s+/gu, " ")
+    .trim();
 }
 
 function count(values: readonly string[]): Record<string, number> {
@@ -511,7 +854,11 @@ function exact(
   }
 }
 
-function literal<T extends string>(value: unknown, expected: T, path: string): T {
+function literal<T extends string>(
+  value: unknown,
+  expected: T,
+  path: string,
+): T {
   if (value !== expected) throw new Error(`${path}: must be ${expected}`);
   return expected;
 }
@@ -525,20 +872,24 @@ function text(value: unknown, path: string): string {
 
 function digest(value: unknown, path: string): string {
   const result = text(value, path);
-  if (!DIGEST.test(result)) throw new Error(`${path}: expected a lowercase SHA-256 digest`);
+  if (!DIGEST.test(result))
+    throw new Error(`${path}: expected a lowercase SHA-256 digest`);
   return result;
 }
 
 function date(value: unknown, path: string): string {
   const result = text(value, path);
-  if (!/^\d{4}-\d{2}-\d{2}$/u.test(result)) throw new Error(`${path}: expected YYYY-MM-DD`);
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(result))
+    throw new Error(`${path}: expected YYYY-MM-DD`);
   return result;
 }
 
 function timestamp(value: unknown, path: string): string {
   const result = text(value, path);
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(result)) {
-    throw new Error(`${path}: expected a UTC timestamp without fractional seconds`);
+    throw new Error(
+      `${path}: expected a UTC timestamp without fractional seconds`,
+    );
   }
   return result;
 }
