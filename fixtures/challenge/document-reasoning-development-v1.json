@@ -1690,13 +1690,14 @@
           "Split the exclusive intersection and union alternatives into independently scored math probes.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
           "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement.",
-          "v0.28 adjudication: moved both branch probes from the established operand B to their exact set operator, preserving the intended unresolved intersection-versus-union contract."
+          "v0.28 adjudication: moved both branch probes from the established operand B to their exact set operator, preserving the intended unresolved intersection-versus-union contract.",
+          "v0.30 adjudication: unselected conditional alternatives remain partial rather than becoming user-visible ambiguity without independent support."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "a872dbab18cba46557b446548a7b5be531f443bc1fa90e0058ef55511e4b6627",
+        "finalDigest": "3e0545d13a9ed1b9e1bc2695c1d35fec1caa725957a938074b1244768f6636c6",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "a872dbab18cba46557b446548a7b5be531f443bc1fa90e0058ef55511e4b6627",
+        "semanticReviewDigest": "3e0545d13a9ed1b9e1bc2695c1d35fec1caa725957a938074b1244768f6636c6",
         "status": "corrected"
       },
       "snapshots": [
@@ -6598,7 +6599,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "ambiguous",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -10543,7 +10544,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "ambiguous",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,

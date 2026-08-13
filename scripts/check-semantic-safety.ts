@@ -34,39 +34,7 @@ interface PlannedQueries {
 
 const spec = await loadSemanticSafetySpec();
 const plan = planSemanticSafetySuite(spec);
-const { documents, plannedQueries, queries } = planNativeRun(plan);
-const native = spawnSync(
-  "cargo",
-  ["run", "--quiet", "--locked", "-p", "semath-native"],
-  {
-    encoding: "utf8",
-    input: JSON.stringify({
-      queries,
-      snapshot: {
-        documents,
-        epoch: spec.id,
-        inventoryVersion: 1,
-        projectId: spec.id,
-        protocolVersion: SEMATH_PROTOCOL_VERSION,
-      },
-    }),
-    maxBuffer: 64 * 1024 * 1024,
-  },
-);
-if (native.status !== 0) {
-  throw new Error(native.stderr || "semantic safety native evaluation failed");
-}
-const results: unknown = JSON.parse(native.stdout);
-if (!Array.isArray(results) || results.length !== queries.length) {
-  throw new Error(
-    `semantic safety native evaluation returned ${
-      Array.isArray(results) ? results.length : "invalid"
-    }/${queries.length} results`,
-  );
-}
-const cleanObservations = plannedQueries.map(({ item, resultIndexes }) =>
-  observeSemanticSafetyCase(item, pickResults(results as QueryResult[], resultIndexes)),
-);
+const cleanObservations = plan.map(runIsolatedNativeCase);
 const lifecycle = await runSemanticSafetyLifecycle(spec, plan);
 const lifecycleById = new Map(
   lifecycle.observations.map((observation) => [observation.caseId, observation]),
@@ -74,6 +42,45 @@ const lifecycleById = new Map(
 const observations = cleanObservations.map(
   (observation) => lifecycleById.get(observation.caseId) ?? observation,
 );
+
+function runIsolatedNativeCase(item: PlannedSemanticSafetyCase): SemanticSafetyObservation {
+  const { documents, plannedQueries, queries } = planNativeRun([item]);
+  const native = spawnSync(
+    "cargo",
+    ["run", "--quiet", "--locked", "-p", "semath-native"],
+    {
+      encoding: "utf8",
+      input: JSON.stringify({
+        queries,
+        snapshot: {
+          documents,
+          epoch: spec.id,
+          inventoryVersion: 1,
+          projectId: item.id,
+          protocolVersion: SEMATH_PROTOCOL_VERSION,
+        },
+      }),
+      maxBuffer: 64 * 1024 * 1024,
+    },
+  );
+  if (native.status !== 0) {
+    throw new Error(native.stderr || `${item.id}: semantic safety native evaluation failed`);
+  }
+  const results: unknown = JSON.parse(native.stdout);
+  if (!Array.isArray(results) || results.length !== queries.length) {
+    throw new Error(
+      `${item.id}: semantic safety native evaluation returned ${
+        Array.isArray(results) ? results.length : "invalid"
+      }/${queries.length} results`,
+    );
+  }
+  const planned = plannedQueries[0];
+  if (!planned) throw new Error(`${item.id}: missing planned queries`);
+  return observeSemanticSafetyCase(
+    planned.item,
+    pickResults(results as QueryResult[], planned.resultIndexes),
+  );
+}
 const score = scoreSemanticSafetySuite(spec, plan, observations);
 const safetyFailures = [
   ...score.safetyFailures,

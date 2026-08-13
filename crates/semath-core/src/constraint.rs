@@ -299,6 +299,45 @@ fn collect_conflicts(
             });
         }
     }
+    for (position, (left_id, left, _)) in relations.iter().enumerate() {
+        for (right_id, right, _) in relations.iter().skip(position + 1) {
+            let (
+                ClaimRelation::Comparison {
+                    operator: left_operator,
+                    left: left_subject,
+                    right: left_object,
+                    ..
+                },
+                ClaimRelation::Comparison {
+                    operator: right_operator,
+                    left: right_subject,
+                    right: right_object,
+                    ..
+                },
+            ) = (left, right)
+            else {
+                continue;
+            };
+            let right_operator = if left_subject == right_subject && left_object == right_object {
+                right_operator.clone()
+            } else if left_subject == right_object && left_object == right_subject {
+                reverse_comparison(right_operator)
+            } else {
+                continue;
+            };
+            if !comparisons_conflict(left_operator, &right_operator) {
+                continue;
+            }
+            conflicts.insert(PlannedConflict {
+                subject: left_subject.clone(),
+                code: "constraint-comparison-conflict".into(),
+                summary: format!(
+                    "{left_operator:?} conflicts with {right_operator:?} for the same operands"
+                ),
+                parent_claims: vec![left_id.clone(), right_id.clone()],
+            });
+        }
+    }
     for (relation_id, relation, evidence) in relations {
         let ClaimRelation::Product {
             result, factors, ..
@@ -345,6 +384,30 @@ fn collect_conflicts(
         });
     }
     conflicts.into_iter().collect()
+}
+
+fn reverse_comparison(operator: &ClaimComparison) -> ClaimComparison {
+    match operator {
+        ClaimComparison::Equal => ClaimComparison::Equal,
+        ClaimComparison::NotEqual => ClaimComparison::NotEqual,
+        ClaimComparison::LessThan => ClaimComparison::GreaterThan,
+        ClaimComparison::LessOrEqual => ClaimComparison::GreaterOrEqual,
+        ClaimComparison::GreaterThan => ClaimComparison::LessThan,
+        ClaimComparison::GreaterOrEqual => ClaimComparison::LessOrEqual,
+    }
+}
+
+fn comparisons_conflict(left: &ClaimComparison, right: &ClaimComparison) -> bool {
+    use ClaimComparison::{Equal, GreaterOrEqual, GreaterThan, LessOrEqual, LessThan, NotEqual};
+    matches!(
+        (left, right),
+        (Equal, NotEqual | LessThan | GreaterThan)
+            | (NotEqual, Equal)
+            | (LessThan, Equal | GreaterThan | GreaterOrEqual)
+            | (LessOrEqual, GreaterThan)
+            | (GreaterThan, Equal | LessThan | LessOrEqual)
+            | (GreaterOrEqual, LessThan)
+    )
 }
 
 fn values_conflict(
@@ -1307,6 +1370,43 @@ mod tests {
                 canonical_digest: id.into(),
             })),
         )
+    }
+
+    fn comparison(
+        id: &str,
+        operator: ClaimComparison,
+        left: EntityId,
+        right: EntityId,
+    ) -> ConstraintInputClaim {
+        input_claim(
+            id,
+            left.clone(),
+            ClaimPredicate::Relates,
+            ClaimValue::Relation(Box::new(ClaimRelation::Comparison {
+                operator,
+                left,
+                right,
+                canonical_digest: id.into(),
+            })),
+        )
+    }
+
+    #[test]
+    fn explicit_opposed_comparisons_are_typed_conflicts() {
+        let (x, y) = (entity(1), entity(2));
+        let plan = plan_constraint_derivations(&[
+            comparison("equal", ClaimComparison::Equal, x.clone(), y.clone()),
+            comparison("not-equal", ClaimComparison::NotEqual, x, y),
+        ]);
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "constraint-comparison-conflict");
+
+        let (x, y) = (entity(3), entity(4));
+        let compatible = plan_constraint_derivations(&[
+            comparison("not-equal", ClaimComparison::NotEqual, x.clone(), y.clone()),
+            comparison("less", ClaimComparison::LessThan, x, y),
+        ]);
+        assert!(compatible.conflicts.is_empty());
     }
 
     #[test]

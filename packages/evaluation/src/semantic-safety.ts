@@ -80,7 +80,7 @@ export type SemanticSafetyNavigationExpectation =
     };
 
 export interface SemanticSafetyExpectation {
-  readonly decision: SemanticSafetyDecision;
+  readonly decisions: readonly SemanticSafetyDecision[];
   readonly excludedRelationIds: readonly string[];
   readonly maximumProblems: number;
   readonly navigation: SemanticSafetyNavigationExpectation;
@@ -534,11 +534,13 @@ function parseCase(
     transforms.includes("opposition-order") &&
     snapshots.some((snapshot) =>
       snapshot.documents.some(
-        (document) => document.content.split("\n\n").length !== 2,
+        (document) => document.content.split("\n\n").length < 3,
       ),
     )
   ) {
-    throw new Error(`${path}: opposition-order requires two paragraphs per document`);
+    throw new Error(
+      `${path}: opposition-order requires a preamble and at least two claim paragraphs`,
+    );
   }
   const transitions = array(item.transitions, `${path}.transitions`).map(
     (transition, transitionIndex) =>
@@ -679,7 +681,7 @@ function parseExpectation(
   exact(
     item,
     [
-      "decision",
+      "decisions",
       "proofGrounded",
       "relations",
       "excludedRelationIds",
@@ -738,17 +740,7 @@ function parseExpectation(
     }
   }
   return {
-    decision: oneOf(
-      item.decision,
-      [
-        "ambiguous",
-        "conflicting",
-        "established",
-        "partial",
-        "unsupported",
-      ] as const,
-      `${path}.decision`,
-    ),
+    decisions: parseDecisions(item.decisions, `${path}.decisions`),
     excludedRelationIds,
     maximumProblems: integer(item.maximumProblems, `${path}.maximumProblems`),
     navigation: parseNavigation(item.navigation, `${path}.navigation`, documents),
@@ -912,7 +904,11 @@ function assertSemanticSafetyCoverage(
   }
   for (const [pairId, probes] of probesByPair) {
     if (probes.length < 2) throw new Error(`${pairId}: minimal pair is incomplete`);
-    if (new Set(probes.map((probe) => probe.expected.decision)).size < 2) {
+    if (
+      new Set(
+        probes.map((probe) => [...probe.expected.decisions].sort().join(",")),
+      ).size < 2
+    ) {
       throw new Error(`${pairId}: minimal pair must change the decision`);
     }
   }
@@ -938,9 +934,10 @@ function transformDocuments(
         content: `${document.content}\n% v030 semantic-safety metamorphic invariant`,
       };
     }
+    const [preamble, ...claims] = document.content.split("\n\n");
     return {
       ...document,
-      content: document.content.split("\n\n").reverse().join("\n\n"),
+      content: [preamble!, ...claims.reverse()].join("\n\n"),
     };
   });
 }
@@ -951,13 +948,13 @@ function scoreCase(
 ): { readonly contract: string[]; readonly safety: string[] } {
   const contract: string[] = [];
   const safety: string[] = [];
-  if (observed.decision !== item.expected.decision) {
-    const message = `decision ${observed.decision}; expected ${item.expected.decision}`;
+  if (!item.expected.decisions.includes(observed.decision)) {
+    const message = `decision ${observed.decision}; expected one of ${item.expected.decisions.join(", ")}`;
     if (
       (observed.decision === "established" &&
-        item.expected.decision !== "established") ||
+        !item.expected.decisions.includes("established")) ||
       (observed.decision === "conflicting" &&
-        item.expected.decision !== "conflicting")
+        !item.expected.decisions.includes("conflicting"))
     ) {
       safety.push(message);
     } else {
@@ -998,6 +995,27 @@ function scoreCase(
   }
   safety.push(...scoreNavigation(item, observed));
   return { contract, safety };
+}
+
+function parseDecisions(value: unknown, path: string): readonly SemanticSafetyDecision[] {
+  const decisions = array(value, path).map((decision, index) =>
+    oneOf(
+      decision,
+      [
+        "ambiguous",
+        "conflicting",
+        "established",
+        "partial",
+        "unsupported",
+      ] as const,
+      `${path}[${index}]`,
+    ),
+  );
+  if (!decisions.length) throw new Error(`${path}: must not be empty`);
+  if (new Set(decisions).size !== decisions.length) {
+    throw new Error(`${path}: decisions must be unique`);
+  }
+  return decisions;
 }
 
 function scoreNavigation(

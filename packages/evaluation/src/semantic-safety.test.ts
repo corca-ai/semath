@@ -104,6 +104,20 @@ describe("v0.30 open semantic safety planning", () => {
       ),
     ).toBe(false);
   });
+
+  test("reorders opposed claims without moving their declaration preamble", async () => {
+    const plan = planSemanticSafetySuite(await loadSemanticSafetySpec());
+    const reordered = plan.find(
+      (item) =>
+        item.sourceCaseId === "v030-opposed-comparison" &&
+        item.transform === "opposition-order",
+    )!;
+    const content = reordered.documents[0]!.content;
+    expect(content.startsWith("Let \\(x\\) denote")).toBe(true);
+    expect(content.indexOf("second normative claim")).toBeLessThan(
+      content.indexOf("first normative claim"),
+    );
+  });
 });
 
 function expectedObservation(
@@ -138,7 +152,7 @@ function expectedObservation(
     : undefined;
   return {
     caseId: item.id,
-    decision: item.expected.decision,
+    decision: item.expected.decisions[0]!,
     definitions,
     prepareRename:
       navigation.mode === "exact" &&

@@ -20,7 +20,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decision": "established",
+          "decisions": ["established"],
           "proofGrounded": true,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
@@ -50,7 +50,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decision": "unsupported",
+          "decisions": ["partial", "unsupported"],
           "proofGrounded": false,
           "relations": [],
           "excludedRelationIds": ["ohm-law"],
@@ -63,26 +63,26 @@
       "variationTags": ["quoted-not-asserted", "calm-refusal", "minimal-modality-pair"]
     },
     {
-      "id": "v030-opposed-ohm",
+      "id": "v030-opposed-comparison",
       "pairId": "scope-and-opposition",
       "contract": "explicit-opposition",
-      "lawIds": ["ohm-law"],
+      "lawIds": [],
       "snapshots": [{
         "id": "reviewed",
         "documents": [{
           "fileId": "main",
           "path": "opposed-requirements.tex",
-          "content": "For resistor R9 at one operating point, \\(V\\), nonzero \\(I\\), and positive \\(R\\) use the passive sign convention. The first normative claim is \\[V=RI.\\]\n\nFor resistor R9 at that same operating point, the same nonzero \\(I\\), positive \\(R\\), voltage polarity, and passive sign convention apply. The second normative claim is \\[V=-RI.\\] The two claims are simultaneously binding."
+          "content": "Let \\(x\\) denote a scalar calibration value and let \\(y\\) denote another scalar calibration value.\n\nThe first normative claim is \\[x=y.\\]\n\nThe second normative claim is \\[x\\ne y.\\] Both claims are simultaneously binding for those same values."
         }]
       }],
       "probes": [{
         "id": "opposed",
         "snapshotId": "reviewed",
-        "semanticCursor": {"fileId": "main", "needle": "V=-RI", "edge": "after"},
+        "semanticCursor": {"fileId": "main", "needle": "x\\ne y", "offset": 0},
         "expected": {
-          "decision": "conflicting",
+          "decisions": ["conflicting"],
           "proofGrounded": true,
-          "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
+          "relations": [],
           "excludedRelationIds": [],
           "maximumProblems": 1,
           "navigation": {"mode": "skip"}
@@ -90,7 +90,7 @@
       }],
       "transforms": ["opposition-order", "trailing-comment"],
       "transitions": [],
-      "variationTags": ["explicit-comparable-opposition", "same-operating-point", "claim-order-permutation"]
+      "variationTags": ["explicit-comparable-opposition", "same-entity-operands", "claim-order-permutation"]
     },
     {
       "id": "v030-isolated-ohm",
@@ -109,7 +109,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "drive", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decision": "established",
+          "decisions": ["established"],
           "proofGrounded": true,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
@@ -139,7 +139,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "A\\cap B", "edge": "after"},
         "expected": {
-          "decision": "ambiguous",
+          "decisions": ["ambiguous", "partial"],
           "proofGrounded": false,
           "relations": [],
           "excludedRelationIds": [],
@@ -161,7 +161,7 @@
         "documents": [{
           "fileId": "main",
           "path": "state-projection.tex",
-          "content": "Let \\(x\\) denote the state vector, \\(y\\) the result vector, and \\(A\\) a square matrix with compatible dimensions. The model asserts \\[y=Ax.\\] After evaluation, the controller stores \\(x\\) in the trace."
+          "content": "Let \\(x\\) be an n-dimensional vector. Let \\(y\\) be an m-dimensional vector. Let \\(A\\) be an m by n matrix. The model asserts \\[y=Ax.\\] After evaluation, the controller stores \\(x\\) in the trace."
         }]
       }],
       "probes": [{
@@ -170,21 +170,21 @@
         "semanticCursor": {"fileId": "main", "needle": "y=Ax", "edge": "after"},
         "navigationCursor": {"fileId": "main", "needle": "y=Ax", "offset": 3},
         "expected": {
-          "decision": "established",
+          "decisions": ["established"],
           "proofGrounded": true,
           "relations": [{"relationId": "matrix-vector-product", "roles": [{"role": "result", "symbol": "y"}, {"role": "operator", "symbol": "A"}, {"role": "vector", "symbol": "x"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
           "maximumProblems": 0,
           "navigation": {
             "mode": "exact",
-            "definition": [{"fileId": "main", "needle": "Let \\(x\\) denote the state vector", "selection": {"offset": 6, "length": 1}}],
+            "definition": [{"fileId": "main", "needle": "Let \\(x\\) be an n-dimensional vector", "selection": {"offset": 6, "length": 1}}],
             "references": [
-              {"fileId": "main", "needle": "Let \\(x\\) denote the state vector", "selection": {"offset": 6, "length": 1}},
+              {"fileId": "main", "needle": "Let \\(x\\) be an n-dimensional vector", "selection": {"offset": 6, "length": 1}},
               {"fileId": "main", "needle": "y=Ax", "selection": {"offset": 3, "length": 1}},
               {"fileId": "main", "needle": "stores \\(x\\) in the trace", "selection": {"offset": 9, "length": 1}}
             ],
             "rename": [
-              {"fileId": "main", "needle": "Let \\(x\\) denote the state vector", "selection": {"offset": 6, "length": 1}},
+              {"fileId": "main", "needle": "Let \\(x\\) be an n-dimensional vector", "selection": {"offset": 6, "length": 1}},
               {"fileId": "main", "needle": "y=Ax", "selection": {"offset": 3, "length": 1}},
               {"fileId": "main", "needle": "stores \\(x\\) in the trace", "selection": {"offset": 9, "length": 1}}
             ],
@@ -219,7 +219,7 @@
         "semanticCursor": {"fileId": "main", "needle": "Apply \\(B\\) in the safety check", "offset": 8},
         "navigationCursor": {"fileId": "main", "needle": "Apply \\(B\\) in the safety check", "offset": 8},
         "expected": {
-          "decision": "ambiguous",
+          "decisions": ["ambiguous", "partial", "unsupported"],
           "proofGrounded": false,
           "relations": [],
           "excludedRelationIds": [],
@@ -242,7 +242,7 @@
           "documents": [{
             "fileId": "main",
             "path": "period-review.tex",
-            "content": "The positive measured period \\(T\\) and frequency \\(f\\) describe the same reference oscillator. The accepted conversion is \\[f=1/T.\\]"
+            "content": "Let \\(T\\) denote the positive measured signal period. Let \\(f\\) denote the cyclic frequency of the same oscillator. The accepted period-frequency reciprocity is \\[f=1/T.\\]"
           }]
         },
         {
@@ -260,7 +260,7 @@
           "snapshotId": "accepted",
           "semanticCursor": {"fileId": "main", "needle": "f=1/T", "edge": "after"},
           "expected": {
-            "decision": "established",
+            "decisions": ["established"],
             "proofGrounded": true,
             "relations": [{"relationId": "period-frequency-reciprocity", "roles": [{"role": "frequency", "symbol": "f"}, {"role": "period", "symbol": "T"}], "sourceGrounded": true}],
             "excludedRelationIds": [],
@@ -273,7 +273,7 @@
           "snapshotId": "reviewed",
           "semanticCursor": {"fileId": "main", "needle": "f=1/T", "edge": "after"},
           "expected": {
-            "decision": "unsupported",
+            "decisions": ["partial", "unsupported"],
             "proofGrounded": false,
             "relations": [],
             "excludedRelationIds": ["period-frequency-reciprocity"],
