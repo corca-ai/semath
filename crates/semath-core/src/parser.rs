@@ -277,10 +277,7 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
         return Err("syntax blocks must be ordered and non-overlapping".to_owned());
     }
     for declaration in &document.declarations {
-        if declaration_references(declaration)
-            .into_iter()
-            .any(|source| !valid_owned_reference(document, source_length, source))
-        {
+        if !valid_declaration_references(document, source_length, declaration) {
             return Err("structural declaration has invalid source provenance".to_owned());
         }
     }
@@ -396,38 +393,44 @@ fn valid_prose_annotation(annotation: &crate::ProseAnnotation) -> bool {
     }
 }
 
-fn declaration_references(declaration: &StructuralDeclaration) -> Vec<&ProjectSourceRef> {
+fn valid_declaration_references(
+    document: &ProjectDocument,
+    source_length: u32,
+    declaration: &StructuralDeclaration,
+) -> bool {
+    let valid = |source| valid_owned_reference(document, source_length, source);
     match declaration {
         StructuralDeclaration::Class { source, .. }
         | StructuralDeclaration::Package { source, .. }
-        | StructuralDeclaration::Environment { source, .. } => vec![source],
+        | StructuralDeclaration::Environment { source, .. } => valid(source),
         StructuralDeclaration::Macro {
             source,
             body_source,
             ..
-        } => std::iter::once(source).chain(body_source).collect(),
+        } => valid(source) && body_source.as_ref().is_none_or(|source| valid(source)),
         StructuralDeclaration::Operator {
             source,
             name_source,
             surface_source,
             ..
-        } => vec![source, name_source, surface_source],
+        } => valid(source) && valid(name_source) && valid(surface_source),
         StructuralDeclaration::PairedDelimiter {
             source,
             name_source,
             ..
-        } => vec![source, name_source],
+        } => valid(source) && valid(name_source),
         StructuralDeclaration::Glossary {
             source,
             key_source,
             options,
             fields,
             ..
-        } => std::iter::once(source)
-            .chain(std::iter::once(key_source))
-            .chain(options.iter().map(|field| &field.source))
-            .chain(fields.iter().map(|field| &field.source))
-            .collect(),
+        } => {
+            valid(source)
+                && valid(key_source)
+                && options.iter().all(|field| valid(&field.source))
+                && fields.iter().all(|field| valid(&field.source))
+        }
         StructuralDeclaration::Acronym {
             source,
             key_source,
@@ -435,10 +438,13 @@ fn declaration_references(declaration: &StructuralDeclaration) -> Vec<&ProjectSo
             long_source,
             options,
             ..
-        } => vec![source, key_source, short_source, long_source]
-            .into_iter()
-            .chain(options.iter().map(|field| &field.source))
-            .collect(),
+        } => {
+            valid(source)
+                && valid(key_source)
+                && valid(short_source)
+                && valid(long_source)
+                && options.iter().all(|field| valid(&field.source))
+        }
     }
 }
 
