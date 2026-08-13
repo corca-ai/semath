@@ -79,20 +79,7 @@ export class SemathWorkerHost {
       while (!this.disposed && this.queue.length > 0) {
         const pending = this.queue.shift()!;
         const { request } = pending;
-        if (this.cancelled.delete(request.id)) {
-          this.respond({ id: request.id, kind: "cancelled" });
-          continue;
-        }
-        const stale = staleProjectMessage(request, this.latestProject);
-        if (stale) {
-          this.error(
-            request.id,
-            "stale-generation",
-            stale,
-            true,
-          );
-          continue;
-        }
+        if (this.rejectPending(request)) continue;
 
         let engine: SemathWorkerOperations;
         try {
@@ -103,6 +90,8 @@ export class SemathWorkerHost {
           this.failure(request.id, "initialization-failed", error);
           continue;
         }
+
+        if (this.rejectPending(request)) continue;
 
         try {
           const result = execute(engine, request);
@@ -127,6 +116,26 @@ export class SemathWorkerHost {
   private getEngine(): Promise<SemathWorkerOperations> {
     this.enginePromise ??= this.createEngine();
     return this.enginePromise;
+  }
+
+  private rejectPending(request: WorkRequest): boolean {
+    if (this.cancelled.delete(request.id) || this.disposed) {
+      this.respond({ id: request.id, kind: "cancelled" });
+      return true;
+    }
+    if (this.lifecycle.status === "terminal") {
+      this.error(
+        request.id,
+        "runtime-failed",
+        "Worker runtime stopped after three consecutive failures.",
+        false,
+      );
+      return true;
+    }
+    const stale = staleProjectMessage(request, this.latestProject);
+    if (!stale) return false;
+    this.error(request.id, "stale-generation", stale, true);
+    return true;
   }
 
   private dispose(id: number): void {

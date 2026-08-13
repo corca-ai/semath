@@ -62,6 +62,14 @@ async function turn(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+
 describe("SemathWorkerHost", () => {
   test("prioritizes mutations and skips stale or cancelled queries", async () => {
     const responses: SemathWorkerResponse[] = [];
@@ -148,6 +156,72 @@ describe("SemathWorkerHost", () => {
       ["initialization-failed", true],
       ["runtime-failed", false],
       ["runtime-failed", false],
+    ]);
+  });
+
+  test("does not retry work already queued after the runtime becomes terminal", async () => {
+    const responses: SemathWorkerResponse[] = [];
+    let attempts = 0;
+    const host = new SemathWorkerHost(async () => {
+      attempts++;
+      throw new Error("WASM unavailable");
+    }, (value) => responses.push(value));
+
+    for (const id of [1, 2, 3, 4]) host.accept({ id, kind: "reset", snapshot });
+    await turn();
+
+    expect(attempts).toBe(3);
+    expect(
+      responses.map((response) =>
+        response.kind === "error" ? response.error.code : response.kind,
+      ),
+    ).toEqual([
+      "initialization-failed",
+      "initialization-failed",
+      "runtime-failed",
+      "runtime-failed",
+    ]);
+  });
+
+  test("rechecks project freshness after asynchronous initialization", async () => {
+    const ready = deferred<SemathWorkerOperations>();
+    const responses: SemathWorkerResponse[] = [];
+    const log: string[] = [];
+    const host = new SemathWorkerHost(() => ready.promise, (value) => responses.push(value));
+    const nextSnapshot = {
+      ...snapshot,
+      epoch: "next:1",
+      projectId: "next",
+    };
+
+    host.accept({ id: 1, kind: "reset", snapshot });
+    await Promise.resolve();
+    host.accept({ id: 2, kind: "reset", snapshot: nextSnapshot });
+    ready.resolve(fakeEngine(log));
+    await turn();
+
+    expect(log).toEqual(["reset"]);
+    expect(responses.map((response) => [response.id, response.kind])).toEqual([
+      [1, "error"],
+      [2, "result"],
+    ]);
+  });
+
+  test("rechecks cancellation after asynchronous initialization", async () => {
+    const ready = deferred<SemathWorkerOperations>();
+    const responses: SemathWorkerResponse[] = [];
+    const log: string[] = [];
+    const host = new SemathWorkerHost(() => ready.promise, (value) => responses.push(value));
+
+    host.accept({ id: 1, kind: "reset", snapshot });
+    await Promise.resolve();
+    host.accept({ kind: "cancel", requestId: 1 });
+    ready.resolve(fakeEngine(log));
+    await turn();
+
+    expect(log).toEqual([]);
+    expect(responses.map((response) => [response.id, response.kind])).toEqual([
+      [1, "cancelled"],
     ]);
   });
 

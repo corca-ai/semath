@@ -58,10 +58,49 @@ describe("pure Worker host policy", () => {
 
   test("accepts only current query generations", () => {
     expect(staleGenerationMessage(query(4), 4)).toBeUndefined();
-    expect(staleGenerationMessage(query(5), 4)).toBeUndefined();
+    expect(staleGenerationMessage(query(5), 4)).toBe(
+      "Skipped future generation 5; current generation is 4.",
+    );
     expect(staleGenerationMessage(query(3), 4)).toBe(
       "Skipped generation 3; current generation is 4.",
     );
+    expect(
+      staleProjectMessage(query(5), {
+        analysisGeneration: 4,
+        epoch: "test:1",
+        inventoryVersion: 1,
+      }),
+    ).toBe("Skipped future generation 5; current generation is 4.");
+  });
+
+  test("does not let an older same-epoch reset move freshness backwards", () => {
+    const current: Extract<WorkRequest, { kind: "reset" }> = {
+      id: 1,
+      kind: "reset",
+      snapshot: {
+        documents: [],
+        epoch: "test:1",
+        inventoryVersion: 4,
+        projectId: "test",
+        protocolVersion: SEMATH_PROTOCOL_VERSION,
+      },
+    };
+    const stale: Extract<WorkRequest, { kind: "reset" }> = {
+      ...current,
+      id: 2,
+      snapshot: { ...current.snapshot, inventoryVersion: 3 },
+    };
+
+    const latest = advanceProjectFreshness(
+      advanceProjectFreshness(undefined, current),
+      stale,
+    );
+
+    expect(latest).toEqual({
+      analysisGeneration: 0,
+      epoch: "test:1",
+      inventoryVersion: 4,
+    });
   });
 
   test("rejects stale inventories and cross-project work before it reaches WASM", () => {
