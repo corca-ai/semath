@@ -215,6 +215,13 @@ open semantic safety suite has 39 metamorphic observations across nine
 contracts; assertion without complete role proof is tested separately from
 exact establishment.
 
+The immutable historical release gate records one explicit v0.34 policy
+adjudication: `CA-HO-06-probe` retains its source-grounded derivative relation
+but is conservatively `partial` because its complete independent role proof is
+not available. The gate subtracts only that exact, validated decision miss; it
+does not change the fixture or widen any aggregate threshold, and it rejects
+the adjudication if the source-grounded relation disappears.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or

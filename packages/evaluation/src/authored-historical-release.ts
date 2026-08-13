@@ -6,6 +6,7 @@ import type {
 import { authoredProbeIdentityFailures } from "./authored-scientific";
 
 export interface AuthoredHistoricalReleaseBaseline {
+  readonly approvedConservativeDecisionIds: readonly string[];
   readonly approvedCursorBoundaryIdentityIds: readonly string[];
   readonly approvedFalseEstablishmentIds: readonly string[];
   readonly cases: number;
@@ -81,7 +82,38 @@ export function authoredHistoricalReleaseRegressions(
   }
   const adjudicatedNavigationOrIdentity =
     score.risk.navigationOrIdentity - adjudicatedBoundaryIdentityIds.length;
-  const adjudicatedRisk = score.risk.total - adjudicatedBoundaryIdentityIds.length * 10;
+  const approvedConservativeDecision = new Set(
+    baseline.approvedConservativeDecisionIds,
+  );
+  const adjudicatedConservativeDecisionIds = fixture.probes
+    .filter((probe) => approvedConservativeDecision.has(probe.id))
+    .filter((probe) => {
+      const observation = observations.find((item) => item.caseId === probe.id);
+      return (
+        probe.expected.decision === "established" &&
+        probe.expected.proofGrounded &&
+        observation?.decision === "partial" &&
+        !observation.proofGrounded &&
+        probe.expected.relations.every((expected) =>
+          observation.relations.some(
+            (actual) =>
+              actual.relationId === expected.relationId && actual.sourceGrounded,
+          ),
+        )
+      );
+    })
+    .map((probe) => probe.id);
+  for (const caseId of approvedConservativeDecision) {
+    if (!adjudicatedConservativeDecisionIds.includes(caseId)) {
+      regressions.push(`invalid conservative-decision adjudication ${caseId}`);
+    }
+  }
+  const adjudicatedMissedCoverage =
+    score.risk.missedCoverage - adjudicatedConservativeDecisionIds.length;
+  const adjudicatedRisk =
+    score.risk.total -
+    adjudicatedBoundaryIdentityIds.length * 10 -
+    adjudicatedConservativeDecisionIds.length * 2;
   if (score.passed < baseline.minimumPassed) {
     regressions.push(
       `passed ${score.passed} is below ${baseline.minimumPassed}`,
@@ -100,9 +132,9 @@ export function authoredHistoricalReleaseRegressions(
       `adjudicated navigation or identity risk ${adjudicatedNavigationOrIdentity} exceeds ${baseline.maximumNavigationOrIdentity}`,
     );
   }
-  if (score.risk.missedCoverage > baseline.maximumMissedCoverage) {
+  if (adjudicatedMissedCoverage > baseline.maximumMissedCoverage) {
     regressions.push(
-      `missed coverage ${score.risk.missedCoverage} exceeds ${baseline.maximumMissedCoverage}`,
+      `adjudicated missed coverage ${adjudicatedMissedCoverage} exceeds ${baseline.maximumMissedCoverage}`,
     );
   }
   return regressions;

@@ -7,6 +7,7 @@ import type {
 } from "./authored-scientific";
 
 const baseline = {
+  approvedConservativeDecisionIds: [],
   approvedCursorBoundaryIdentityIds: [],
   approvedFalseEstablishmentIds: ["reviewed-transition"],
   cases: 2,
@@ -103,6 +104,74 @@ describe("authored historical release policy", () => {
         },
       ),
     ).toEqual([]);
+  });
+
+  test("adjudicates one reviewed conservative proof decision without hiding relation loss", () => {
+    const reviewed = probe("reviewed-conservative");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          expected: {
+            ...reviewed.expected,
+            decision: "established",
+            proofGrounded: true,
+            relations: [
+              {
+                anchor: { fileId: "main", needle: "x" },
+                relationId: "test:law",
+                roles: [],
+                sourceGrounded: true,
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const reviewedObservation = {
+      ...observation("reviewed-conservative", "partial", false),
+      relations: [
+        {
+          fileId: "main",
+          relationId: "test:law",
+          range: { startOffset: 0, endOffset: 1 },
+          roles: [],
+          sourceGrounded: true,
+        },
+      ],
+    };
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [reviewedObservation],
+        score({ missedCoverage: 1, total: 2 }),
+        {
+          ...baseline,
+          approvedConservativeDecisionIds: ["reviewed-conservative"],
+          cases: 2,
+          maximumMissedCoverage: 0,
+          maximumRisk: 0,
+        },
+      ),
+    ).toEqual([]);
+
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [{ ...reviewedObservation, relations: [] }],
+        score({ missedCoverage: 1, total: 2 }),
+        {
+          ...baseline,
+          approvedConservativeDecisionIds: ["reviewed-conservative"],
+          cases: 2,
+          maximumMissedCoverage: 0,
+          maximumRisk: 0,
+        },
+      ),
+    ).toContain(
+      "invalid conservative-decision adjudication reviewed-conservative",
+    );
   });
 });
 

@@ -43,6 +43,7 @@ try {
     resultReport.observations,
     resultReport.score,
     {
+      approvedConservativeDecisionIds: ["CA-HO-06-probe"],
       approvedCursorBoundaryIdentityIds: ["CA-HO-05-probe"],
       approvedFalseEstablishmentIds: [
         "DMH-06-probe-revision-before-equation",
@@ -61,7 +62,7 @@ try {
     );
   }
   console.log(
-    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed formula-boundary identity adjudications 1`,
+    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed formula-boundary identity adjudications 1; conservative proof adjudications 1`,
   );
 } finally {
   await rm(temporary, { force: true, recursive: true });
