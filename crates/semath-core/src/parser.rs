@@ -212,7 +212,9 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
         let Some(parent) = document.scopes.get(block.parent_scope as usize) else {
             return Err(format!("syntax block {id} has an invalid parent scope"));
         };
-        if !valid_range(&block.range) || !range_contains(&parent.range, &block.range) {
+        if !valid_range(&block.range)
+            || !range_contains_offset(&parent.range, block.range.start_offset)
+        {
             return Err(format!("syntax block {id} has an invalid range"));
         }
         if block
@@ -245,6 +247,10 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
 
 fn range_contains(container: &SourceRange, nested: &SourceRange) -> bool {
     container.start_offset <= nested.start_offset && nested.end_offset <= container.end_offset
+}
+
+fn range_contains_offset(range: &SourceRange, offset: u32) -> bool {
+    range.start_offset <= offset && offset < range.end_offset
 }
 
 fn valid_source_range(range: &SourceRange, source_length: u32) -> bool {
