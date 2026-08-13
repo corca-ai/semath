@@ -3,7 +3,10 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, resolve } from "node:path";
 import {
+  freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
+} from "../packages/evaluation/src/fresh-blind-release";
+import {
   type AuthoredScientificObservation,
   type AuthoredScientificScorecard,
 } from "../packages/evaluation/src/index";
@@ -39,13 +42,14 @@ const started: FreshBlindReleaseReceipt = {
   startedAt: new Date().toISOString(),
   status: "started",
 };
-await reserveFreshBlindReceipt(receiptPath, started);
-
 const temporary = await mkdtemp(join(tmpdir(), "semath-fresh-blind-release-"));
 const evaluationPath = join(temporary, "evaluation.json");
 const lifecyclePath = join(temporary, "lifecycle.json");
+let receiptReserved = false;
 let terminalReceiptWritten = false;
 try {
+  await reserveFreshBlindReceipt(receiptPath, started);
+  receiptReserved = true;
   run("bun", ["scripts/check-authored-scientific.ts"], {
     SEMATH_AUTHORED_ALLOW_FAILURES: "1",
     SEMATH_AUTHORED_FIXTURE: evidence.path,
@@ -68,10 +72,7 @@ try {
     evidence.release.fixture,
     result.observations,
   );
-  const safetyFailed =
-    safety.falseConflict > 0 ||
-    safety.falseEstablishment > 0 ||
-    safety.unsafeNavigationOrEdit > 0;
+  const safetyFailed = freshBlindSafetyGateFailed(safety);
   const completed: FreshBlindReleaseReceipt = {
     ...started,
     artifacts: {
@@ -104,7 +105,7 @@ try {
       `receipt ${receiptPath}`,
   );
 } catch (error) {
-  if (!terminalReceiptWritten) {
+  if (receiptReserved && !terminalReceiptWritten) {
     const failed: FreshBlindReleaseReceipt = {
       ...started,
       completedAt: new Date().toISOString(),

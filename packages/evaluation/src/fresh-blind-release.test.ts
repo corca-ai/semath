@@ -7,6 +7,7 @@ import {
   type AuthoredScientificObservation,
 } from "./authored-scientific";
 import {
+  freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
   freshBlindSealPayload,
   parseFreshBlindReleaseFixture,
@@ -142,12 +143,14 @@ describe("fresh blind release evidence", () => {
       symbol: null,
     };
     expect(freshBlindSafetySummary(release.fixture, [observation])).toEqual({
+      diagnosticsOverLimit: 0,
+      diagnosticsOverLimitIds: [],
       falseConflict: 0,
       falseConflictIds: [],
       falseEstablishment: 1,
       falseEstablishmentIds: [probe.id],
-      unsafeNavigationOrEdit: 3,
-      unsafeNavigationOrEditIds: [probe.id],
+      unsafeNavigationOrEditCaseIds: [probe.id],
+      unsafeNavigationOrEditLocations: 3,
     });
     expect(
       freshBlindSafetySummary(release.fixture, [
@@ -160,13 +163,179 @@ describe("fresh blind release evidence", () => {
         },
       ]),
     ).toEqual({
+      diagnosticsOverLimit: 0,
+      diagnosticsOverLimitIds: [],
       falseConflict: 1,
       falseConflictIds: [probe.id],
       falseEstablishment: 0,
       falseEstablishmentIds: [],
-      unsafeNavigationOrEdit: 0,
-      unsafeNavigationOrEditIds: [],
+      unsafeNavigationOrEditCaseIds: [],
+      unsafeNavigationOrEditLocations: 0,
     });
+  });
+
+  test("keeps case counts aligned with ids and gates warning diagnostics over the reviewed limit", () => {
+    const release = fixture();
+    const establishmentProbe = release.fixture.probes.find(
+      (probe) => probe.expected.decision === "unsupported",
+    )!;
+    const conflictProbe = release.fixture.probes.find(
+      (probe) => probe.expected.decision === "partial",
+    )!;
+    const diagnosticProbe = release.fixture.probes.find(
+      (probe) => probe.expected.decision === "ambiguous",
+    )!;
+    const proofProbe = release.fixture.probes.find(
+      (probe) =>
+        probe.id !== establishmentProbe.id &&
+        probe.id !== conflictProbe.id &&
+        probe.id !== diagnosticProbe.id,
+    )!;
+    const hintProbe = release.fixture.probes.find(
+      (probe) =>
+        ![
+          establishmentProbe.id,
+          conflictProbe.id,
+          diagnosticProbe.id,
+          proofProbe.id,
+        ].includes(probe.id),
+    )!;
+    const observation = (
+      probe: (typeof release.fixture.probes)[number],
+    ): AuthoredScientificObservation => ({
+      caseId: probe.id,
+      decision: probe.expected.decision,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: false,
+      references: [],
+      relations: [],
+      renameEdits: [],
+      symbol: null,
+    });
+    const summary = freshBlindSafetySummary(release.fixture, [
+      { ...observation(establishmentProbe), decision: "established" },
+      { ...observation(conflictProbe), decision: "conflicting" },
+      {
+        ...observation(diagnosticProbe),
+        diagnostics: [
+          {
+            code: "review-limit",
+            fileId: "main",
+            range: { startOffset: 0, endOffset: 1 },
+            severity: "warning",
+          },
+        ],
+      },
+      { ...observation(proofProbe), proofGrounded: true },
+    ]);
+
+    expect(summary.falseEstablishment).toBe(
+      summary.falseEstablishmentIds.length,
+    );
+    expect(summary.falseConflict).toBe(summary.falseConflictIds.length);
+    expect(summary.diagnosticsOverLimit).toBe(
+      summary.diagnosticsOverLimitIds.length,
+    );
+    expect(summary.falseEstablishmentIds).toEqual(
+      [establishmentProbe.id, proofProbe.id].sort(),
+    );
+    expect(summary.diagnosticsOverLimitIds).toEqual([diagnosticProbe.id]);
+    expect(freshBlindSafetyGateFailed(summary)).toBe(true);
+
+    const hintOnly = freshBlindSafetySummary(release.fixture, [
+      {
+        ...observation(hintProbe),
+        diagnostics: [
+          {
+            code: "informational",
+            fileId: "main",
+            range: { startOffset: 0, endOffset: 1 },
+            severity: "hint",
+          },
+        ],
+      },
+    ]);
+    expect(hintOnly.diagnosticsOverLimit).toBe(0);
+    expect(freshBlindSafetyGateFailed(hintOnly)).toBe(false);
+  });
+
+  test("reports unsafe location count separately from affected case ids", () => {
+    const release = fixture();
+    const probe = release.fixture.probes[0]!;
+    const location = (startOffset: number) => ({
+      fileId: "main",
+      path: "main.md",
+      range: { startOffset, endOffset: startOffset + 1 },
+    });
+    const summary = freshBlindSafetySummary(release.fixture, [
+      {
+        caseId: probe.id,
+        decision: probe.expected.decision,
+        definitions: [location(0), location(1)],
+        diagnostics: [],
+        prepareRename: { range: location(4).range },
+        proofGrounded: false,
+        references: [location(2), location(3)],
+        relations: [],
+        renameEdits: [
+          {
+            ...location(5),
+            expectedText: "x",
+            replacementText: "y",
+          },
+          {
+            ...location(6),
+            expectedText: "x",
+            replacementText: "y",
+          },
+        ],
+        symbol: null,
+      },
+    ]);
+
+    expect(summary.unsafeNavigationOrEditLocations).toBe(7);
+    expect(summary.unsafeNavigationOrEditCaseIds).toEqual([probe.id]);
+  });
+
+  test("gates each reviewed safety category and accepts a clean summary", () => {
+    const clean = {
+      diagnosticsOverLimit: 0,
+      diagnosticsOverLimitIds: [],
+      falseConflict: 0,
+      falseConflictIds: [],
+      falseEstablishment: 0,
+      falseEstablishmentIds: [],
+      unsafeNavigationOrEditCaseIds: [],
+      unsafeNavigationOrEditLocations: 0,
+    };
+    expect(freshBlindSafetyGateFailed(clean)).toBe(false);
+
+    for (const unsafe of [
+      {
+        ...clean,
+        diagnosticsOverLimit: 1,
+        diagnosticsOverLimitIds: ["diagnostic-case"],
+      },
+      {
+        ...clean,
+        falseConflict: 1,
+        falseConflictIds: ["conflict-case"],
+      },
+      {
+        ...clean,
+        falseEstablishment: 1,
+        falseEstablishmentIds: ["establishment-case"],
+      },
+      {
+        ...clean,
+        unsafeNavigationOrEditCaseIds: ["navigation-case"],
+        unsafeNavigationOrEditLocations: 2,
+      },
+    ]) {
+      expect(freshBlindSafetyGateFailed(unsafe)).toBe(true);
+    }
   });
 
   test("plans only actual ordered snapshot transitions", () => {
