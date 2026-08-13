@@ -492,6 +492,18 @@ mod tests {
     }
 
     #[test]
+    fn an_unresolved_role_binding_cannot_establish_a_recognized_formula() {
+        let mut formula = formula("candidate", ConstraintStatus::Verified);
+        formula.bindings[0].evidence.kind = "candidate-binding".into();
+        formula.bindings[0].evidence.strength = "weak".into();
+
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { .. }
+        ));
+    }
+
+    #[test]
     fn stronger_scoped_domain_evidence_resolves_cross_pack_alternatives() {
         let mut preferred = formula("preferred", ConstraintStatus::Verified);
         preferred.rank = 10;

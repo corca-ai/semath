@@ -878,32 +878,34 @@ pub(crate) fn observe_laws(
                     traversed_latent = true;
                 }
             }
-            let Some((matched_form, bindings)) = candidates.into_iter().find(|(_, bindings)| {
-                let inferred_role = actual_output_role(actual, bindings);
-                let supported = roles_are_supported(
-                    &compiled.law.roles,
-                    bindings,
-                    actual,
-                    inferred_role.as_deref(),
-                    actual.range.start_offset,
-                    role_context_activated || activation.is_some(),
-                    activation.is_some(),
-                    activation.is_some_and(|activation| activation.identifies_attached_formula),
-                    context.shapes,
-                    context.quantities,
-                    context.consistency,
-                    context.external,
-                );
-                let typed = expression_is_well_typed(actual, context.shapes);
-                supported
-                    && typed
-                    && !law_conditions_refuted(
-                        compiled.law,
-                        bindings,
-                        context.assumptions,
-                        context.external.assumptions_at(actual.range.start_offset),
-                    )
-            }) else {
+            let Some((matched_form, bindings, role_support)) =
+                candidates.into_iter().find_map(|(matched_form, bindings)| {
+                    let inferred_role = actual_output_role(actual, &bindings);
+                    let role_support = plan_role_support(
+                        &compiled.law.roles,
+                        &bindings,
+                        actual,
+                        inferred_role.as_deref(),
+                        actual.range.start_offset,
+                        role_context_activated || activation.is_some(),
+                        activation.is_some(),
+                        activation.is_some_and(|activation| activation.identifies_attached_formula),
+                        context.shapes,
+                        context.quantities,
+                        context.consistency,
+                        context.external,
+                    )?;
+                    let typed = expression_is_well_typed(actual, context.shapes);
+                    (typed
+                        && !law_conditions_refuted(
+                            compiled.law,
+                            &bindings,
+                            context.assumptions,
+                            context.external.assumptions_at(actual.range.start_offset),
+                        ))
+                    .then_some((matched_form, bindings, role_support))
+                })
+            else {
                 continue;
             };
             guard_checks += matched_form.map_or(0, |form| form.guards.len() as u32);
@@ -913,6 +915,7 @@ pub(crate) fn observe_laws(
                 &source_envelope,
                 &formula_envelope,
                 bindings,
+                &role_support,
                 matched_form,
                 &recognition_context,
                 activation,
@@ -2012,7 +2015,7 @@ fn equivalent(left: &SemanticExpr, right: &SemanticExpr) -> bool {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn roles_are_supported(
+fn plan_role_support(
     roles: &[PackLawRole],
     bindings: &BTreeMap<String, SemanticExpr>,
     actual: &SemanticExpr,
@@ -2025,15 +2028,12 @@ fn roles_are_supported(
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
     external: &ExternalTypeEnvironment,
-) -> bool {
+) -> Option<RoleSupportPlan> {
     let mut supported = 0;
     let mut supported_roles = BTreeSet::new();
-    let mut unresolved = 0;
-    let mut unresolved_role = None;
+    let mut unresolved_roles = BTreeSet::new();
     for role in roles {
-        let Some(bound_expression) = bindings.get(&role.id) else {
-            return false;
-        };
+        let bound_expression = bindings.get(&role.id)?;
         let projected_expression = match (&bound_expression.kind, role.source_projection) {
             (SemanticExprKind::Apply { operator, .. }, RoleSourceProjection::Head) => {
                 Some(SemanticExpr {
@@ -2069,7 +2069,7 @@ fn roles_are_supported(
                 supported_roles.insert(role.id.as_str());
                 continue;
             }
-            RoleSupport::Refuted => return false,
+            RoleSupport::Refuted => return None,
             RoleSupport::Unresolved => {}
         }
         if role.shape.as_deref() == Some("scalar") && is_numeric_scalar(expression) {
@@ -2079,7 +2079,7 @@ fn roles_are_supported(
         }
         let symbols = semantic_symbols(expression);
         if symbols.is_empty() || !(role.variadic || role_expression_is_atomic(expression)) {
-            return false;
+            return None;
         }
         let mut role_support = RoleSupport::Supported;
         for symbol in &symbols {
@@ -2100,27 +2100,85 @@ fn roles_are_supported(
                 supported_roles.insert(role.id.as_str());
             }
             RoleSupport::Unresolved => {
-                unresolved += 1;
-                unresolved_role = Some(role.id.as_str());
+                unresolved_roles.insert(role.id.as_str());
             }
-            RoleSupport::Refuted => return false,
+            RoleSupport::Refuted => return None,
         }
     }
-    unresolved == 0
-        || (unresolved == 1
-            && supported >= 2
-            && ((unresolved_role == inferred_role && roles.len() <= 3)
-                || (roles.len() <= 3
-                    && unresolved_role.is_some_and(|unresolved| {
-                        roles
-                            .iter()
-                            .any(|role| role.id == unresolved && role.quantity.is_some())
-                    }))
-                || (unresolved_role != inferred_role && supported >= 3)))
-        || (law_explicitly_activated
-            && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
-                || (roles.len() == 2 && supported == 1 && unresolved == 1)))
-        || formula_identified
+    let unresolved = unresolved_roles.len();
+    let unresolved_role = (unresolved == 1)
+        .then(|| unresolved_roles.first().copied())
+        .flatten();
+    let inferred = unresolved == 1
+        && supported >= 2
+        && ((unresolved_role == inferred_role && roles.len() <= 3)
+            || (roles.len() <= 3
+                && unresolved_role.is_some_and(|unresolved| {
+                    roles
+                        .iter()
+                        .any(|role| role.id == unresolved && role.quantity.is_some())
+                }))
+            || (unresolved_role != inferred_role && supported >= 3));
+    let admitted_by_assertion = (law_explicitly_activated
+        && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains(role))
+            || (roles.len() == 2 && supported == 1 && unresolved == 1)))
+        || formula_identified;
+    if unresolved != 0 && !inferred && !admitted_by_assertion {
+        return None;
+    }
+    let mut proofs = supported_roles
+        .into_iter()
+        .map(|role| (role.to_owned(), RoleBindingProof::Typed))
+        .collect::<BTreeMap<_, _>>();
+    for role in unresolved_roles {
+        let proof = if inferred && Some(role) == unresolved_role {
+            RoleBindingProof::Derived
+        } else if formula_identified {
+            RoleBindingProof::Asserted
+        } else {
+            RoleBindingProof::Candidate
+        };
+        proofs.insert(role.to_owned(), proof);
+    }
+    Some(RoleSupportPlan { proofs })
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RoleBindingProof {
+    Typed,
+    Derived,
+    Asserted,
+    Candidate,
+}
+
+#[derive(Clone, Debug)]
+struct RoleSupportPlan {
+    proofs: BTreeMap<String, RoleBindingProof>,
+}
+
+impl RoleSupportPlan {
+    fn proof_for(&self, role: &str) -> RoleBindingProof {
+        self.proofs
+            .get(role)
+            .copied()
+            .unwrap_or(RoleBindingProof::Candidate)
+    }
+}
+
+fn role_binding_evidence_ranges(
+    expression: &SemanticExpr,
+    proof: RoleBindingProof,
+    activation: Option<&LawActivationEvidence>,
+) -> Vec<SourceRange> {
+    let mut ranges = vec![expression.range.clone()];
+    if proof == RoleBindingProof::Asserted
+        && let Some(activation) = activation
+    {
+        ranges.extend(activation.evidence.source_ranges.iter().cloned());
+    }
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
+    ranges
 }
 
 fn is_numeric_scalar(expression: &SemanticExpr) -> bool {
@@ -2582,6 +2640,7 @@ fn recognition(
     source_envelope: &SourceRange,
     formula_envelope: &SourceRange,
     bindings: BTreeMap<String, SemanticExpr>,
+    role_support: &RoleSupportPlan,
     matched_form: Option<&GuardedForm>,
     context: &RecognitionContext<'_>,
     activation: Option<&LawActivationEvidence>,
@@ -2600,6 +2659,7 @@ fn recognition(
         .iter()
         .filter_map(|role| {
             let expression = bindings.get(&role.id)?;
+            let proof = role_support.proof_for(&role.id);
             let symbol = if role.variadic {
                 variadic_labels(expression, role.source_projection, context).join("; ")
             } else {
@@ -2615,10 +2675,28 @@ fn recognition(
                     refinements: Vec::new(),
                 },
                 evidence: Evidence {
-                    rule_id: format!("typed-law-role/{}", role.id),
-                    kind: "canonical-binding".into(),
-                    strength: "hard".into(),
-                    source_ranges: vec![expression.range.clone()],
+                    rule_id: match proof {
+                        RoleBindingProof::Typed => format!("typed-law-role/{}", role.id),
+                        RoleBindingProof::Derived => format!("derived-law-role/{}", role.id),
+                        RoleBindingProof::Asserted => format!("asserted-law-role/{}", role.id),
+                        RoleBindingProof::Candidate => {
+                            format!("unresolved-law-role/{}", role.id)
+                        }
+                    },
+                    kind: match proof {
+                        RoleBindingProof::Typed => "canonical-binding",
+                        RoleBindingProof::Derived => "derived-binding",
+                        RoleBindingProof::Asserted => "asserted-binding",
+                        RoleBindingProof::Candidate => "candidate-binding",
+                    }
+                    .into(),
+                    strength: match proof {
+                        RoleBindingProof::Typed => "hard",
+                        RoleBindingProof::Derived | RoleBindingProof::Asserted => "strong",
+                        RoleBindingProof::Candidate => "weak",
+                    }
+                    .into(),
+                    source_ranges: role_binding_evidence_ranges(expression, proof, activation),
                 },
             })
         })
@@ -4527,6 +4605,29 @@ This conversion is performed once per accepted timing sample so the accumulator 
             recognition.status,
             LawRecognitionStatus::ConditionMissing,
             "{recognition:?}"
+        );
+    }
+
+    #[test]
+    fn an_explicit_law_name_does_not_turn_unresolved_roles_into_hard_evidence() {
+        let recognition = recognized_law_observations(
+            "The Newtonian shear relation is $x=y\\dot z$, but the report does not identify these symbols.",
+        )
+        .into_iter()
+        .find(|recognition| recognition.law_id == "newtonian-shear")
+        .expect("the named exact relation should remain a candidate");
+
+        assert!(recognition.bindings.iter().any(|binding| {
+            binding.evidence.strength == "strong"
+                && binding.evidence.kind == "asserted-binding"
+                && binding.evidence.source_ranges.len() >= 2
+        }));
+        assert!(
+            recognition
+                .bindings
+                .iter()
+                .all(|binding| binding.evidence.strength != "hard"
+                    || binding.evidence.kind == "canonical-binding")
         );
     }
 

@@ -250,6 +250,11 @@ counts are capped. Conclusions preserve their derivation and source ranges.
 Every law role has a semantic concept and may additionally constrain a physical
 quantity. These are orthogonal: a calculus variable can carry a duration, while
 two different physical quantities remain incompatible.
+Candidate admission and establishment remain separate. Each bound law role
+carries one proof disposition: independently typed, structurally derived,
+explicitly asserted with the attached formula, or unresolved candidate. The
+first three retain their exact sources; an unresolved binding may keep a useful
+relation candidate visible but can never complete an established decision.
 Runtime concepts always use the pack-qualified identity
 `<namespace>:<concept>`; display labels are derived views, never an alternate
 identity system. Longer pack vocabulary terms take precedence over embedded
