@@ -147,6 +147,28 @@ static QUANTITY_CATALOG: LazyLock<QuantityCatalog> = LazyLock::new(|| {
     catalog
 });
 
+pub(crate) fn unit_symbol_supports_quantity(symbol: &str, quantity_kind_id: &str) -> bool {
+    let symbol = symbol.trim_start_matches('\\');
+    let Some(kind) = QUANTITY_CATALOG
+        .kinds
+        .iter()
+        .find(|kind| kind.id == quantity_kind_id)
+    else {
+        return false;
+    };
+    let Some(default_unit) = &kind.default_unit else {
+        return false;
+    };
+    QUANTITY_CATALOG.units.iter().any(|unit| {
+        &unit.id == default_unit
+            && (unit.symbol == symbol
+                || unit
+                    .aliases
+                    .iter()
+                    .any(|alias| alias.eq_ignore_ascii_case(symbol)))
+    })
+}
+
 #[derive(Clone, Debug)]
 struct QuantityFact {
     symbol: String,
@@ -512,7 +534,9 @@ const fn gcd(mut left: u32, mut right: u32) -> u32 {
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{Dimension, Exponent, find_quantity_kind, observe_quantities};
+    use super::{
+        Dimension, Exponent, find_quantity_kind, observe_quantities, unit_symbol_supports_quantity,
+    };
     use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{
@@ -561,6 +585,26 @@ mod tests {
             find_quantity_kind("electric force on the charge").map(|kind| kind.id.as_str()),
             Some("quantities-units:force")
         );
+    }
+
+    #[test]
+    fn default_unit_symbols_support_only_their_declared_quantity_kind() {
+        assert!(unit_symbol_supports_quantity(
+            "Hz",
+            "quantities-units:frequency"
+        ));
+        assert!(unit_symbol_supports_quantity(
+            "hertz",
+            "quantities-units:frequency"
+        ));
+        assert!(!unit_symbol_supports_quantity(
+            "Hz",
+            "quantities-units:velocity"
+        ));
+        assert!(!unit_symbol_supports_quantity(
+            "m",
+            "quantities-units:frequency"
+        ));
     }
 
     #[test]

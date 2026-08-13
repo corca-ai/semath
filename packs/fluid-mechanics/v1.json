@@ -726,11 +726,17 @@
             "viscosity",
             "rate"
           ],
+          "evidencePhrases": [
+            "Newtonian fluid",
+            "Newtonian relation",
+            "Newtonian shear"
+          ],
           "label": "The quantities are explicitly related in a Newtonian-fluid model."
         }
       ],
       "activationPhrases": [
         "Newtonian fluid",
+        "Newtonian relation",
         "Newtonian shear"
       ],
       "references": [

@@ -2356,6 +2356,13 @@ fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
         SemanticExprKind::Apply { arguments, .. } => {
             arguments.iter().all(role_expression_is_atomic)
         }
+        SemanticExprKind::Product(factors) => {
+            semantic_symbols(expression).len() == 1
+                && factors.iter().all(|factor| {
+                    matches!(factor.kind, SemanticExprKind::Number(_))
+                        || role_expression_is_atomic(factor)
+                })
+        }
         _ => false,
     }
 }
@@ -2389,6 +2396,19 @@ fn role_symbol_support(
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     let notation_symbol = symbol;
+    if role.concept == "quantities-units:dimensionless"
+        && role.shape.as_deref() == Some("scalar")
+        && symbol.trim_start_matches('\\') == "pi"
+    {
+        return RoleSupport::Supported;
+    }
+    if role.shape.as_deref() == Some("scalar")
+        && role.quantity.as_deref().is_some_and(|quantity| {
+            crate::quantity::unit_symbol_supports_quantity(symbol, quantity)
+        })
+    {
+        return RoleSupport::Supported;
+    }
     let activated_notation_support = notation_context_activated
         && role
             .notation
@@ -2528,6 +2548,9 @@ fn quantity_support(
     quantities: &QuantityObservations,
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
+    if crate::quantity::unit_symbol_supports_quantity(symbol, expected) {
+        return RoleSupport::Supported;
+    }
     let mut local = quantities.at(symbol, offset).0;
     if notation_symbol != symbol {
         local.extend(quantities.at(notation_symbol, offset).0);
@@ -2645,7 +2668,6 @@ fn recognition(
                 context.assumptions,
                 context.external,
                 context.positive_facts,
-                activation.map(|activation| &activation.evidence),
             );
             LawConditionInfo {
                 condition_id: condition.id.clone(),
@@ -2884,7 +2906,6 @@ fn condition_evidence(
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
     positive_facts: &[PositiveFormulaFact],
-    law_activation: Option<&Evidence>,
 ) -> (Vec<Evidence>, bool) {
     let offset = formula_range.start_offset;
     let kind = condition.kind;
@@ -2932,19 +2953,6 @@ fn condition_evidence(
         .flatten();
     if let Some(condition_evidence) = &formula_fact {
         push_evidence(&mut evidence, condition_evidence.clone());
-    }
-    if kind == PackConditionKind::DomainMembership
-        && let Some(law_activation) = law_activation
-    {
-        push_evidence(&mut evidence, law_activation.clone());
-        return (evidence, true);
-    }
-    if kind == PackConditionKind::ShapeCompatible
-        && expression_is_well_typed(actual, shapes)
-        && let Some(law_activation) = law_activation
-    {
-        push_evidence(&mut evidence, law_activation.clone());
-        return (evidence, true);
     }
     for subject in subjects {
         let Some(expression) = bindings.get(subject) else {
@@ -3391,11 +3399,11 @@ fn assumption_condition_evidence(
             return assumption
                 .subjects
                 .iter()
-                .all(|subject| symbols.contains(subject));
+                .all(|subject| condition_symbols_contain(&symbols, subject));
         }
         symbols
             .iter()
-            .all(|symbol| assumption.subjects.contains(symbol))
+            .all(|symbol| condition_symbols_contain(&assumption.subjects, symbol))
     };
     assumptions
         .iter()
@@ -3571,7 +3579,7 @@ fn law_conditions_refuted(
                         || assumption
                             .subjects
                             .iter()
-                            .all(|subject| symbols.contains(subject)))
+                            .all(|subject| condition_symbols_contain(&symbols, subject)))
             })
     })
 }
@@ -3584,7 +3592,19 @@ fn bound_condition_symbols(
         .iter()
         .filter_map(|subject| bindings.get(subject))
         .flat_map(semantic_symbols)
+        .map(|symbol| symbol.trim_start_matches('\\').to_owned())
         .collect()
+}
+
+fn condition_symbols_contain<'a>(
+    symbols: impl IntoIterator<Item = &'a String>,
+    target: &str,
+) -> bool {
+    symbols.into_iter().any(|symbol| {
+        symbol == target
+            || notation_matches_symbol(symbol, target)
+            || notation_matches_symbol(target, symbol)
+    })
 }
 
 fn same_context_is_supported(
@@ -3651,6 +3671,7 @@ fn semantic_symbols(expression: &SemanticExpr) -> Vec<String> {
                 .collect()
         }
         SemanticExprKind::Negate(inner) => semantic_symbols(inner),
+        SemanticExprKind::Number(_) => Vec::new(),
         SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
             semantic_symbols(base)
         }
@@ -3662,6 +3683,7 @@ fn semantic_symbols(expression: &SemanticExpr) -> Vec<String> {
 fn expression_label(expression: &SemanticExpr) -> Option<String> {
     match &expression.kind {
         SemanticExprKind::Symbol(symbol) => Some(symbol.clone()),
+        SemanticExprKind::Number(number) => Some(number.clone()),
         SemanticExprKind::Power(base, exponent) if is_decorative_star(exponent) => {
             Some(format!("{}^*", expression_label(base)?))
         }
@@ -3673,6 +3695,13 @@ fn expression_label(expression: &SemanticExpr) -> Option<String> {
                 .map(expression_label)
                 .collect::<Option<Vec<_>>>()?
                 .join(", "),
+        ),
+        SemanticExprKind::Product(items) => Some(
+            items
+                .iter()
+                .map(expression_label)
+                .collect::<Option<Vec<_>>>()?
+                .join(" "),
         ),
         SemanticExprKind::Negate(inner) => expression_label(inner),
         SemanticExprKind::Apply {
@@ -3999,8 +4028,9 @@ mod tests {
             .into_iter()
             .map(str::to_owned)
             .collect();
+        let bindings = unify_all(&template, &actual, &placeholders, &BTreeMap::new());
         assert!(
-            !unify_all(&template, &actual, &placeholders, &BTreeMap::new()).is_empty(),
+            !bindings.is_empty(),
             "template={template:?} actual={actual:?}"
         );
         assert_eq!(recognized_laws(source), ["fick-diffusion"]);
@@ -4456,17 +4486,71 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
-    fn semantic_law_title_heads_activate_existing_pack_conditions() {
-        assert_eq!(
-            recognized_laws("The Reynolds number is $R_D=\\frac{\\rho vD}{\\mu}$."),
-            ["reynolds-number-definition"]
+    fn recognizes_a_frequency_conversion_with_an_explicit_unit_literal() {
+        let actual = lower_template("\\omega_c=2\\pi(20\\,\\mathrm{Hz})");
+        let template = lower_template("angular-frequency = 2 pi ordinary-frequency");
+        let placeholders = ["angular-frequency", "ordinary-frequency"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        let bindings = unify_all(&template, &actual, &placeholders, &BTreeMap::new());
+        assert!(
+            !bindings.is_empty(),
+            "template={} actual={}",
+            crate::canonical::render_canonical(&template),
+            crate::canonical::render_canonical(&actual)
         );
-        assert_eq!(
-            recognized_laws(
-                "Inside the calibrated interval the Newtonian shear relation is $\\tau=\\mu\\dot\\gamma$."
-            ),
-            ["newtonian-shear"]
+        let source = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz})$.";
+        let recognized = recognized_law_observations(source);
+        let law = recognized
+            .iter()
+            .find(|law| law.law_id == "angular-frequency-definition")
+            .unwrap_or_else(|| panic!("missing angular-frequency-definition: {recognized:?}"));
+        assert_eq!(law.status, LawRecognitionStatus::Verified, "{law:?}");
+        assert!(
+            recognized_law_observations(
+                "A symbolic product is not a measured frequency: $\\omega=2\\pi(ab)$."
+            )
+            .iter()
+            .all(|law| law.law_id != "angular-frequency-definition")
         );
+    }
+
+    #[test]
+    fn semantic_law_title_heads_select_candidates_but_do_not_prove_conditions() {
+        let recognition =
+            recognized_law_observations("The Reynolds number is $R_D=\\frac{\\rho vD}{\\mu}$.")
+                .into_iter()
+                .find(|recognition| recognition.law_id == "reynolds-number-definition")
+                .expect("the exact named relation should remain visible");
+        assert_eq!(
+            recognition.status,
+            LawRecognitionStatus::ConditionMissing,
+            "{recognition:?}"
+        );
+    }
+
+    #[test]
+    fn declarative_condition_phrases_can_prove_a_named_law_condition() {
+        let recognition = recognized_law_observations(
+            "For a Newtonian fluid, the constitutive relation is $\\tau=\\mu\\dot\\gamma$.",
+        )
+        .into_iter()
+        .find(|recognition| recognition.law_id == "newtonian-shear")
+        .expect("the exact named relation should remain visible");
+        assert_eq!(
+            recognition.status,
+            LawRecognitionStatus::Verified,
+            "{recognition:?}"
+        );
+        assert!(recognition.conditions.iter().any(|condition| {
+            condition.condition_id == "newtonian-fluid"
+                && condition.status == ConstraintStatus::Verified
+                && condition
+                    .evidence
+                    .iter()
+                    .any(|evidence| evidence.rule_id == "english-scientific-assumption")
+        }));
     }
 
     #[test]
@@ -5355,11 +5439,7 @@ L(y,p)=-y\log p-(1-y)\log(1-p).
     #[test]
     fn verifies_normal_equation_from_declared_matrix_dimensions() {
         let observations = recognized_law_observations(
-            r"Consider the unconstrained least-squares problem
-\[
-  \min_{\theta\in\mathbb{R}^n}\frac12\lVert A\theta-b\rVert_2^2,
-  \qquad A\in\mathbb{R}^{m\times n},\quad b\in\mathbb R^m.
-\]
+            r"Let $A$ be a 2 by 3 matrix, $\theta$ a 3-dimensional vector, and $b$ a 2-dimensional vector.
 Consequently every least-squares minimizer obeys the normal equation
 \[
   A^\top A\theta=A^\top b.
@@ -5383,6 +5463,20 @@ The normal equation is $A^\top A\theta=A^\top b$.",
                 .iter()
                 .all(|recognition| recognition.law_id != "least-squares-normal-equation")
         );
+    }
+
+    #[test]
+    fn named_normal_equation_does_not_prove_unknown_shapes() {
+        let recognition =
+            recognized_law_observations("The normal equation is $A^\\top A\\theta=A^\\top b$.")
+                .into_iter()
+                .find(|recognition| recognition.law_id == "least-squares-normal-equation")
+                .expect("the exact named relation should remain visible");
+        assert_eq!(recognition.status, LawRecognitionStatus::ConditionMissing);
+        assert!(recognition.conditions.iter().any(|condition| {
+            condition.kind == ScientificConstraintKind::ShapeCompatible
+                && condition.status == ConstraintStatus::Required
+        }));
     }
 
     #[test]

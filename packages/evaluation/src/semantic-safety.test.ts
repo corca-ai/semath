@@ -17,11 +17,11 @@ describe("v0.30 open semantic safety planning", () => {
     const before = JSON.stringify(spec);
     const first = planSemanticSafetySuite(spec);
     expect(first).toEqual(planSemanticSafetySuite(spec));
-    expect(first).toHaveLength(27);
+    expect(first).toHaveLength(39);
     expect(new Set(first.map((item) => item.contract))).toEqual(
       new Set(SEMANTIC_SAFETY_CONTRACTS),
     );
-    expect(first.filter((item) => item.transform !== "identity")).toHaveLength(18);
+    expect(first.filter((item) => item.transform !== "identity")).toHaveLength(26);
     expect(JSON.stringify(spec)).toBe(before);
   });
 

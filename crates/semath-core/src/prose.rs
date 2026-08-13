@@ -2494,6 +2494,10 @@ fn collect_assumptions(
         let attached_to_preceding_math = !typed_targets.is_empty()
             || clause_attaches_to_preceding_math(clause_index, mentions, events);
         for assumption in extract_assumptions_with_phrases(clause, mentions, &condition_phrases) {
+            let has_following_math_subject = assumption
+                .subjects
+                .iter()
+                .any(|subject| assumption.phrase_end <= subject.start);
             let mut source_ranges = assumption
                 .subjects
                 .iter()
@@ -2517,7 +2521,7 @@ fn collect_assumptions(
                     .collect(),
                 evidence: Evidence {
                     rule_id: "english-scientific-assumption".into(),
-                    kind: if attached_to_preceding_math {
+                    kind: if attached_to_preceding_math || has_following_math_subject {
                         "attached-prose"
                     } else {
                         "explicit-prose"
@@ -3951,6 +3955,27 @@ mod tests {
                 crate::semantic_index::EvidenceModality::Asserted,
             )
         );
+    }
+
+    #[test]
+    fn attaches_a_condition_phrase_to_its_explicit_inline_math_subject() {
+        let source =
+            "For a Newtonian fluid, the constitutive relation is $\\tau=\\mu\\dot\\gamma$.";
+        let analysis = analyze(source);
+        let formula = test_math_regions(source, DocumentLanguage::Latex)
+            .into_iter()
+            .next()
+            .unwrap();
+        let assumption = analysis
+            .assumptions
+            .iter()
+            .find(|assumption| assumption.value == "newtonian-fluid")
+            .expect("the declarative pack condition phrase should be extracted");
+        assert_eq!(assumption.evidence.kind, "attached-prose");
+        assert!(assumption.evidence.source_ranges.iter().any(|range| {
+            range.start_offset < formula.content_range.end_offset
+                && formula.content_range.start_offset < range.end_offset
+        }));
     }
 
     #[test]

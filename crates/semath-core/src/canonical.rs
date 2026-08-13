@@ -1755,10 +1755,14 @@ impl Parser {
             match command.as_str() {
                 "mathbf" | "mathrm" | "mathit" | "mathbb" | "mathcal" | "mathsf" | "boldsymbol"
                 | "operatorname" | "vec" | "tilde" | "boxed" => {
-                    let command = self.next();
+                    let style_name = command.as_str();
+                    let command_token = self.next();
                     let mut expression = self.parse_group_or_atom();
-                    expression.range = merge_range(&command.range, &expression.range);
-                    expression.provenance.extend(command.provenance);
+                    if matches!(style_name, "mathrm" | "operatorname") {
+                        expression = coalesce_roman_identifier(expression);
+                    }
+                    expression.range = merge_range(&command_token.range, &expression.range);
+                    expression.provenance.extend(command_token.provenance);
                     return expression;
                 }
                 "dot" | "ddot" => {
@@ -2269,6 +2273,35 @@ impl Parser {
         });
         self.cursor += usize::from(self.cursor < self.tokens.len());
         token
+    }
+}
+
+fn coalesce_roman_identifier(expression: SemanticExpr) -> SemanticExpr {
+    let SemanticExprKind::Product(factors) = &expression.kind else {
+        return expression;
+    };
+    if factors.len() < 2 {
+        return expression;
+    }
+    let mut name = String::new();
+    let mut previous_end = None;
+    for factor in factors {
+        let SemanticExprKind::Symbol(part) = &factor.kind else {
+            return expression;
+        };
+        if part.is_empty()
+            || !part.chars().all(|character| character.is_alphanumeric())
+            || previous_end.is_some_and(|end| end != factor.range.start_offset)
+        {
+            return expression;
+        }
+        name.push_str(part);
+        previous_end = Some(factor.range.end_offset);
+    }
+    SemanticExpr {
+        kind: SemanticExprKind::Symbol(name),
+        range: expression.range,
+        provenance: expression.provenance,
     }
 }
 
@@ -3033,6 +3066,22 @@ mod tests {
                 }
             )),
             "relation(equals,symbol(r),sum(product(symbol(a),symbol(b)),product(symbol(j),symbol(p))))"
+        );
+    }
+
+    #[test]
+    fn roman_identifiers_preserve_adjacent_letters_but_not_spaced_products() {
+        assert_eq!(
+            render_canonical(&lower_template(r"\mathrm{Hz}")),
+            "symbol(Hz)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template(r"\operatorname{ECE}")),
+            "symbol(ECE)"
+        );
+        assert_eq!(
+            render_canonical(&lower_template(r"\mathrm{kg\,m}")),
+            "product(symbol(kg),symbol(m))"
         );
     }
 

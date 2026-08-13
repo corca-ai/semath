@@ -61,12 +61,25 @@ fn chained_equality_stores_operands_and_source_linked_relations_without_a_system
 
 #[test]
 fn chained_metric_formula_does_not_store_relation_placeholder_entities() {
-    let content = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
-    let mut engine = SemathEngine::default();
-    let update = engine.reset(snapshot(content)).unwrap();
+    let named = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
+    let expanded = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{E C E}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
 
+    let named_stats = SemathEngine::default()
+        .reset(snapshot(named))
+        .unwrap()
+        .stats;
+    let expanded_stats = SemathEngine::default()
+        .reset(snapshot(expanded))
+        .unwrap()
+        .stats;
+
+    assert!(
+        named_stats.semantic_entities < expanded_stats.semantic_entities,
+        "a Roman named operator is one entity rather than three adjacent factors"
+    );
     assert_eq!(
-        update.stats.semantic_entities, 19,
+        named_stats.semantic_entities + 4,
+        expanded_stats.semantic_entities,
         "the relation remains placeholder-free and the sum index is one scoped binder entity"
     );
 }

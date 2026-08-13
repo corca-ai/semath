@@ -285,6 +285,126 @@
       "transforms": ["neutral-prefix", "trailing-comment"],
       "transitions": [{"kind": "retract-relation", "fromProbeId": "before", "toProbeId": "after", "relationId": "period-frequency-reciprocity"}],
       "variationTags": ["ordered-snapshots", "withdrawn-author-claim", "clean-semantic-retraction"]
+    },
+    {
+      "id": "v031-named-normal-equation-without-shapes",
+      "pairId": "condition-proof-authority",
+      "contract": "calm-unsupported",
+      "lawIds": ["least-squares-normal-equation"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "untyped-normal-equation.tex",
+          "content": "The report names the normal equation as \\[A^\\top A\\theta=A^\\top b.\\] It provides no dimensions or compatible-shape declarations for these symbols."
+        }]
+      }],
+      "probes": [{
+        "id": "name-only",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "A^\\top A\\theta=A^\\top b", "edge": "after"},
+        "expected": {
+          "decisions": ["partial"],
+          "proofGrounded": false,
+          "relations": [{"relationId": "least-squares-normal-equation", "roles": [{"role": "design", "symbol": "A"}, {"role": "parameter", "symbol": "\\theta"}, {"role": "observation", "symbol": "b"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["law-name-is-not-condition-proof", "missing-shape-contract", "calm-partial"]
+    },
+    {
+      "id": "v031-typed-normal-equation",
+      "pairId": "condition-proof-authority",
+      "contract": "exact-establishment",
+      "lawIds": ["least-squares-normal-equation"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "typed-normal-equation.tex",
+          "content": "Let \\(A\\) be a 2 by 3 matrix, \\(\\theta\\) a 3-dimensional vector, and \\(b\\) a 2-dimensional vector. The normal equation is \\[A^\\top A\\theta=A^\\top b.\\]"
+        }]
+      }],
+      "probes": [{
+        "id": "typed",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "A^\\top A\\theta=A^\\top b", "edge": "after"},
+        "expected": {
+          "decisions": ["established"],
+          "proofGrounded": true,
+          "relations": [{"relationId": "least-squares-normal-equation", "roles": [{"role": "design", "symbol": "A"}, {"role": "parameter", "symbol": "\\theta"}, {"role": "observation", "symbol": "b"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["typed-shape-contract", "source-grounded-condition", "minimal-condition-pair"]
+    },
+    {
+      "id": "v031-unit-bearing-frequency",
+      "pairId": "unit-literal-authority",
+      "contract": "exact-establishment",
+      "lawIds": ["angular-frequency-definition"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "frequency-conversion.tex",
+          "content": "A 20 Hz crossover is converted as \\[\\omega_c=2\\pi(20\\,\\mathrm{Hz}).\\]"
+        }]
+      }],
+      "probes": [{
+        "id": "unit-bearing",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "\\omega_c=2\\pi(20\\,\\mathrm{Hz})", "edge": "after"},
+        "expected": {
+          "decisions": ["established"],
+          "proofGrounded": true,
+          "relations": [{"relationId": "angular-frequency-definition", "roles": [{"role": "angular-frequency", "symbol": "\\omega_c"}, {"role": "pi", "symbol": "pi"}, {"role": "frequency", "symbol": "20\\,\\mathrm{Hz}"}], "sourceGrounded": true}],
+          "excludedRelationIds": [],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["roman-unit-token", "quantity-catalog-proof", "indexed-result"]
+    },
+    {
+      "id": "v031-symbolic-frequency-lookalike",
+      "pairId": "unit-literal-authority",
+      "contract": "calm-unsupported",
+      "lawIds": ["angular-frequency-definition"],
+      "snapshots": [{
+        "id": "reviewed",
+        "documents": [{
+          "fileId": "main",
+          "path": "symbolic-product.tex",
+          "content": "The appendix records the untyped symbolic product \\[\\omega=2\\pi(ab).\\] It does not identify \\(ab\\) as a measured cyclic frequency."
+        }]
+      }],
+      "probes": [{
+        "id": "symbolic-product",
+        "snapshotId": "reviewed",
+        "semanticCursor": {"fileId": "main", "needle": "\\omega=2\\pi(ab)", "edge": "after"},
+        "expected": {
+          "decisions": ["partial", "unsupported"],
+          "proofGrounded": false,
+          "relations": [],
+          "excludedRelationIds": ["angular-frequency-definition"],
+          "maximumProblems": 0,
+          "navigation": {"mode": "skip"}
+        }
+      }],
+      "transforms": ["neutral-prefix", "trailing-comment"],
+      "transitions": [],
+      "variationTags": ["symbolic-product-not-unit", "no-quantity-proof", "calm-refusal"]
     }
   ]
 }
