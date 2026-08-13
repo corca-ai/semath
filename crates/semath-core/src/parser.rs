@@ -136,8 +136,8 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
                 return Err(format!("notation node {id} has an invalid argument range"));
             }
         }
-        if let Some(provenance) = &node.provenance {
-            if !matches!(
+        if let Some(provenance) = &node.provenance
+            && (!matches!(
                 provenance.origin.as_str(),
                 "source" | "call-site" | "definition" | "expansion" | "generated"
             ) || !valid_reference(document, source_length, &provenance.source)
@@ -148,10 +148,9 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
                 || provenance
                     .definitions
                     .iter()
-                    .any(|source| !valid_reference(document, source_length, source))
-            {
-                return Err(format!("notation node {id} has invalid provenance"));
-            }
+                    .any(|source| !valid_reference(document, source_length, source)))
+        {
+            return Err(format!("notation node {id} has invalid provenance"));
         }
     }
     for root in &document.math_roots {
@@ -407,7 +406,7 @@ fn valid_declaration_references(
             source,
             body_source,
             ..
-        } => valid(source) && body_source.as_ref().is_none_or(|source| valid(source)),
+        } => valid(source) && body_source.as_ref().is_none_or(&valid),
         StructuralDeclaration::Operator {
             source,
             name_source,
