@@ -43,6 +43,7 @@ pub(crate) fn decide_entity(resolution: &Resolution) -> EntityEvidenceDecision {
 pub(crate) struct AuthorizedEntitySurface {
     pub focus_occurrence_id: SourceOccurrenceId,
     pub entity_id: EntityId,
+    pub declaration_occurrence_id: SourceOccurrenceId,
     pub occurrences: Vec<SourceOccurrence>,
 }
 
@@ -59,6 +60,7 @@ pub(crate) fn authorize_entity_surface(
     focus_occurrence_id: &SourceOccurrenceId,
     decision: EntityEvidenceDecision,
     occurrences: Result<Vec<SourceOccurrence>, ()>,
+    declaration_occurrence_id: Result<Option<SourceOccurrenceId>, ()>,
 ) -> Result<AuthorizedEntitySurface, EntitySurfaceRefusal> {
     let EntityEvidenceDecision::Established(entity_id) = decision else {
         return Err(entity_decision_refusal(decision));
@@ -71,10 +73,26 @@ pub(crate) fn authorize_entity_surface(
             ),
         )
     })?;
+    let declaration_occurrence_id = declaration_occurrence_id
+        .map_err(|()| {
+            refusal(
+                EntitySurfaceRefusalKind::EngineLimit,
+                "The declaration evidence exceeds the entity-surface safety cap.",
+            )
+        })?
+        .ok_or_else(|| {
+            refusal(
+                EntitySurfaceRefusalKind::Unsupported,
+                "The established identity has no authoritative source declaration.",
+            )
+        })?;
     if occurrences.is_empty()
         || !occurrences
             .iter()
             .any(|occurrence| occurrence.id == *focus_occurrence_id)
+        || !occurrences
+            .iter()
+            .any(|occurrence| occurrence.id == declaration_occurrence_id)
     {
         return Err(refusal(
             EntitySurfaceRefusalKind::IncompleteSource,
@@ -84,6 +102,7 @@ pub(crate) fn authorize_entity_surface(
     Ok(AuthorizedEntitySurface {
         focus_occurrence_id: focus_occurrence_id.clone(),
         entity_id,
+        declaration_occurrence_id,
         occurrences,
     })
 }
@@ -489,15 +508,26 @@ mod tests {
             authorize_entity_surface(
                 &focus,
                 EntityEvidenceDecision::Established(entity()),
-                Ok(accepted),
+                Ok(accepted.clone()),
+                Ok(Some(entity().anchor)),
             )
             .is_ok()
         );
+
+        let undeclared = authorize_entity_surface(
+            &focus,
+            EntityEvidenceDecision::Established(entity()),
+            Ok(accepted),
+            Ok(None),
+        )
+        .unwrap_err();
+        assert_eq!(undeclared.kind, EntitySurfaceRefusalKind::Unsupported);
 
         let refusal = authorize_entity_surface(
             &focus,
             EntityEvidenceDecision::Established(entity()),
             Err(()),
+            Ok(Some(entity().anchor)),
         )
         .unwrap_err();
         assert_eq!(refusal.kind, EntitySurfaceRefusalKind::EngineLimit);

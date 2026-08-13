@@ -273,7 +273,7 @@ function runProbe(
   const queries = [
     { ...target, kind: "semanticView" },
     { ...target, kind: "definition" },
-    { ...target, kind: "references" },
+    { ...target, kind: "references", includeDeclaration: true },
     { ...target, kind: "prepareRename" },
     {
       ...target,

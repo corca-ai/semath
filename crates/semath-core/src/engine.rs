@@ -1188,6 +1188,18 @@ fn lower_binder_facts(
             rule_id: "semath/structural-binder-identity".into(),
             rule_version: 1,
         });
+        output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:binder-definition:{binder_index}",
+                source.file_id, source.document_version
+            )),
+            subject: entity.clone(),
+            predicate: ClaimPredicate::Defines,
+            object: ClaimObject::Occurrence(declaration.id.clone()),
+            evidence_id: evidence_id.clone(),
+            tier: InferenceTier::ExplicitClaim,
+            derivation_depth: 0,
+        });
         for (occurrence_index, occurrence) in bound.iter().enumerate() {
             output.claims.push(Claim {
                 id: ClaimId(format!(
@@ -2479,7 +2491,7 @@ fn lower_cross_modal_facts(
             )),
             subject: entity.clone(),
             predicate: ClaimPredicate::Defines,
-            object: ClaimObject::Occurrence(anchor),
+            object: ClaimObject::Occurrence(short.clone()),
             evidence_id: evidence_id.clone(),
             tier: InferenceTier::ExplicitClaim,
             derivation_depth: 0,
@@ -3299,7 +3311,17 @@ impl SemathEngine {
             | EntityEvidenceDecision::Unsupported
             | EntityEvidenceDecision::EngineLimited => Ok(Vec::new()),
         };
-        authorize_entity_surface(&focus.occurrence_id, decision, occurrences)
+        let declaration = match &decision {
+            EntityEvidenceDecision::Established(entity) => self
+                .index
+                .semantic
+                .bounded_authoritative_declaration_for_entity(entity),
+            EntityEvidenceDecision::Ambiguous
+            | EntityEvidenceDecision::Conflicting
+            | EntityEvidenceDecision::Unsupported
+            | EntityEvidenceDecision::EngineLimited => Ok(None),
+        };
+        authorize_entity_surface(&focus.occurrence_id, decision, occurrences, declaration)
     }
 
     fn definition_value(&self, focus: Option<&CursorFocus>) -> QueryValue {
@@ -3355,11 +3377,10 @@ impl SemathEngine {
         &'a self,
         surface: &'a AuthorizedEntitySurface,
     ) -> Option<&'a SourceOccurrence> {
-        let definition = self.index.definitions_by_entity.get(&surface.entity_id)?;
-        surface.occurrences.iter().find(|occurrence| {
-            occurrence.id.file_id == definition.location.file_id
-                && occurrence.range == definition.location.range
-        })
+        surface
+            .occurrences
+            .iter()
+            .find(|occurrence| occurrence.id == surface.declaration_occurrence_id)
     }
 
     fn location_for_occurrence(&self, occurrence: &SourceOccurrence) -> Location {

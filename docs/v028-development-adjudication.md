@@ -17,6 +17,8 @@ symbol.
 | `probability-development-retry-conditional-event-intersection-given` | after the formula; resolved `P` at `145..146` | intersection operand `B` at relative offset 8, absolute `153..154` | Definition `64..65`, references, and deterministic `B` to `C` rename are available. |
 | `DMD-03` | after the branch formula; resolved the defined operand `B` | `\cap` at relative offset 3, absolute `270..274` | The unresolved branch remains ambiguous; entity navigation and rename are unavailable for the operator. |
 | `DMD-03-union-alternative` | after the branch formula; resolved the defined operand `B` | `\cup` at relative offset 3, absolute `302..306` | The unresolved branch remains ambiguous; entity navigation and rename are unavailable for the operator. |
+| `EM-DEV-002-packet-energy` | declaration-only references were marked unavailable | `U_b` at `137..140` in `notes/bias-supply.md` | Protocol 14 references include the asserted source declaration; definition-at-self and editing remain unavailable. |
+| `thermo-dev-010-established-after-role-declarations` | declaration-only references were marked unavailable | `A` at `378..379` in `procedures/air-jet-reduction.tex` | Protocol 14 references include the asserted source declaration; the reviewed prepare/rename contract is unchanged. |
 
 The replacement names are valid within their reviewed scopes: `S` does not
 collide in the regularized-objective document, and `C` does not collide in the
@@ -41,6 +43,15 @@ momentum relation starts after this probe's cursor evidence boundary and cannot
 be required by the same query. No cursor or navigation expectation was
 weakened.
 
+Three decision contracts were corrected against the typed decision surface.
+`DMD-08` and `DMD-08-intersection-membership` remain partial and ungrounded
+because the same source roots support correlated discrete and probability
+interpretations; domain rank cannot establish either one. Their exact `B`
+identity navigation remains independently available. `FM-DEV-001` remains
+partial and ungrounded because the source does not prove the
+`volumetric-flow-rate/condition/mean-normal-velocity` condition for `A` and
+`v`; its source-grounded relation and roles remain unchanged.
+
 ## Final convergence review
 
 The final development-only review was performed on 2026-08-13. It did not load
@@ -57,40 +68,37 @@ relabelled successes and their fixture contracts remain unchanged.
 | --- | ---: | --- |
 | Attachment | 25 | The source requires relation commentary, later refutation, alternatives, derivation references, or cross-sentence condition attachment beyond the closed typed constructions admitted in v0.28. Nearest-text or broad asserted-formula fallbacks produced unsafe establishment and were rejected. |
 | Identity | 3 | The cursor owns a real composite/operator occurrence, while the expected decision depends on formula-level scientific meaning. Guessing a neighboring symbol would violate the exact occurrence contract. |
-| Typed fact or condition | 23 | The relation skeleton or decision is often present, but a domain, shape, context, sign, or role fact is not proven at the exact source occurrence. Vocabulary alone is not proof. |
-| Pack unification | 13 | The formula needs a still-missing generic equivalent form, composite role binding, guarded dispatch, or source projection. Per-law Rust branches were rejected. |
-| Decision | 1 | The document contains a rejected calculation and a later accepted calculation; the remaining query needs exact source-linked opposition rather than document-wide conflict inference. |
+| Typed fact or condition | 18 | The relation skeleton or decision is often present, but a domain, shape, context, sign, or role fact is not proven at the exact source occurrence. Vocabulary alone is not proof. |
+| Pack unification | 19 | The formula needs a still-missing generic equivalent form, composite role binding, guarded dispatch, or source projection. Per-law Rust branches were rejected. |
 
 The retained probe IDs are recorded here so the dated score is reproducible:
 
-- Attachment: `CA-DEV-09`, `CFCD-01`, `CFCD-03`, `CFCD-06`,
-  `CFQ-DEV-001`, `DEV-CFS-05`, `DMD-03`, `DMD-04`, `DMD-05`,
-  `DMD-09`, `DMD-10`, `EM-DEV-007`, `FM-DEV-006`, `OPTML-DEV-002`,
-  `OPTML-DEV-003`, `OPTML-DEV-005`, `OPTML-DEV-007`, `OPTML-DEV-008`,
-  `thermo-dev-005`, `thermo-dev-008`, `thermo-dev-009`,
-  `DMD-03-union-alternative`, `DMD-05-accepted-directed-identity`,
-  `DMD-10-established-inclusion-exclusion`, and
-  `probability-development-retry-conditional-event-intersection-given`.
+- Attachment: `CA-DEV-09`, `CFCD-01`, `CFCD-03`, `CFCD-06`, `DEV-CFS-05`,
+  `DMD-04`, `DMD-05`, `DMD-05-accepted-directed-identity`, `DMD-09`,
+  `DMD-10`, `DMD-10-established-inclusion-exclusion`, `EM-DEV-007`,
+  `FM-DEV-007`, `OPTML-DEV-002`, `OPTML-DEV-003`, `OPTML-DEV-005`,
+  `OPTML-DEV-006`, `OPTML-DEV-007`, `OPTML-DEV-008`,
+  `probability-development-release-overlap`,
+  `probability-development-retry-conditional-event-intersection-given`,
+  `signals-systems-development-03`, `thermo-dev-005`, `thermo-dev-008`, and
+  `thermo-dev-009`.
 - Identity: `CFCD-04`, `DEV-CFS-03`, and `EM-DEV-006`.
 - Typed fact or condition: `cm-development-impulse-cart`,
   `cm-development-power-symbol-collision`, `control-systems-development-03`,
-  `CFCD-02`, `CFQ-DEV-004`, `CFQ-DEV-006`, `DEV-CFS-06`, `EM-DEV-002`,
-  `EM-DEV-009`, `FM-DEV-004`, `FM-DEV-007`, `FM-DEV-008`,
-  `OPTML-DEV-001`, `probability-development-metric-name-collision`,
-  `thermo-dev-002`, `thermo-dev-004`, `thermo-dev-006`,
-  `CA-DEV-10-established-specialization`,
-  `OPTML-DEV-010-established-stationarity`,
-  `probability-development-metric-name-collision-accepted-variance-scaling`,
-  `FM-DEV-008-stagnant-cell-fick-law`,
-  `probability-development-metric-name-collision-established-expectation-linearity`,
-  and `cm-development-power-symbol-collision-lowercase-momentum-after-definition`.
+  `CFCD-02`, `DEV-CFS-06`, `EM-DEV-002`, `EM-DEV-005`, `EM-DEV-009`,
+  `FM-DEV-004`, `FM-DEV-006`, `FM-DEV-008`,
+  `FM-DEV-008-stagnant-cell-fick-law`, `OPTML-DEV-001`,
+  `OPTML-DEV-010-established-stationarity`, `thermo-dev-001`,
+  `thermo-dev-002`, `thermo-dev-004`, and `thermo-dev-006`.
 - Pack unification: `CA-DEV-01`, `CA-DEV-07`, `CA-DEV-08`,
+  `CA-DEV-10-established-specialization`, `CFQ-DEV-001`, `CFQ-DEV-004`,
   `control-systems-development-01`, `control-systems-development-02`,
   `EM-DEV-001`, `EM-DEV-004`, `FM-DEV-005`, `FM-DEV-009`,
-  `thermo-dev-003`, `OPTML-DEV-009-stopping-rule`,
-  `probability-development-release-overlap-accepted-union`, and
-  `thermo-dev-010-established-after-role-declarations`.
-- Decision: `probability-development-release-overlap`.
+  `OPTML-DEV-009-stopping-rule`, `probability-development-metric-name-collision`,
+  `probability-development-metric-name-collision-accepted-variance-scaling`,
+  `probability-development-metric-name-collision-established-expectation-linearity`,
+  `probability-development-release-overlap-accepted-union`, `thermo-dev-003`,
+  and `thermo-dev-010-established-after-role-declarations`.
 
 The implementation tranches that reduced the original risk preserve one
 identity authority, one typed discourse path, one canonical IR and generic

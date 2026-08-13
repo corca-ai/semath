@@ -79,6 +79,10 @@ formula does not establish the identity of every symbol inside it. References
 are complete for that entity or unavailable—hosts must not merge a fallback
 symbol scan into an empty semantic result.
 
+The authoritative declaration is the exact occurrence named by an asserted,
+positive, explicit `Defines` claim in the project semantic index. Presentation
+metadata may describe that declaration but cannot authorize navigation or edits.
+
 Rename has a stricter contract than navigation. `prepareRename` and `rename`
 must agree on the same established entity and complete occurrence set. Every
 edit must target real source, preserve one notation family, avoid capture or an

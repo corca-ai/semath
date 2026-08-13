@@ -1114,6 +1114,52 @@ fn equality_lhs_establishes_source_ordered_symbol_identity_for_later_uses() {
 }
 
 #[test]
+fn implicit_assignment_identity_cannot_authorize_navigation_or_editing() {
+    let content = "Let $d$ be length and $t$ duration. $v=d/t$. The derived value is $v$.";
+    let offset = content.rfind("$v$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    for query_kind in [
+        Query::Definition {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::References {
+            file_id: "main".into(),
+            offset,
+            include_declaration: true,
+        },
+        Query::PrepareRename {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::Rename {
+            file_id: "main".into(),
+            offset,
+            new_name: "w".into(),
+        },
+    ] {
+        let result = engine.query(query(query_kind, 1, 1)).unwrap();
+        let authorization = match result.value {
+            QueryValue::Locations { authorization, .. }
+            | QueryValue::RenamePreparation { authorization, .. }
+            | QueryValue::EditProposal { authorization, .. } => authorization,
+            _ => panic!("expected an entity surface result"),
+        };
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Refused {
+                reason: crate::EntitySurfaceRefusal {
+                    kind: crate::EntitySurfaceRefusalKind::Unsupported,
+                    ..
+                }
+            }
+        ));
+    }
+}
+
+#[test]
 fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
     let content = "Let $A$ be a $2$ by $3$ matrix. Let $x$ be a $4$-dimensional vector. Let $y$ denote the output. $y=Ax$.";
     let mut engine = SemathEngine::default();

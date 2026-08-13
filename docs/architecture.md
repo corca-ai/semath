@@ -309,6 +309,9 @@ capture reason. Empty authorized results are distinct from refusals. Hosts
 project this decision and never invoke a second symbol index when Semath
 refuses. Rename is all-or-refuse: it checks the complete bounded source
 occurrence set and every visible replacement identity before emitting any edit.
+The semantic index derives the declaration occurrence from an asserted positive
+explicit `Defines` claim. Navigation and edit authorization never consult the
+presentation-only definition map.
 
 Breaking API or UI changes are acceptable before 1.0 when they remove a
 duplicate path or produce a cleaner architecture. Compatibility layers must not

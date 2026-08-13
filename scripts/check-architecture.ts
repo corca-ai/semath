@@ -55,6 +55,12 @@ if (engine.includes("SemanticFactStore") || /\bfacts:\s*HashMap</u.test(engine))
 if (!/#\[cfg\(test\)\]\s+let parsed = if document\.nodes\.is_empty\(\)/u.test(engine)) {
   fail("the raw-TeX parser exception is not visibly test-only");
 }
+const entitySurface = engine.match(
+  /fn entity_surface\([\s\S]*?\n    fn semantic_context\(/u,
+)?.[0];
+if (!entitySurface || entitySurface.includes("definitions_by_entity")) {
+  fail("navigation or edit authorization reads the presentation definition map");
+}
 
 const parser = await Bun.file(
   join(ROOT, "crates/semath-core/src/parser.rs"),

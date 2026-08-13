@@ -806,6 +806,36 @@ impl ProjectSemanticIndex {
         Ok(occurrences)
     }
 
+    pub(crate) fn bounded_authoritative_declaration_for_entity(
+        &self,
+        entity: &EntityId,
+    ) -> Result<Option<SourceOccurrenceId>, ()> {
+        let mut visited = 0usize;
+        let mut declarations = BTreeSet::new();
+        for claim_id in self.claims_by_entity.get(entity).into_iter().flatten() {
+            visited += 1;
+            if visited > MAX_ENTITY_SURFACE_OCCURRENCES {
+                return Err(());
+            }
+            let Some(claim) = self.claims.get(claim_id) else {
+                continue;
+            };
+            let Some(evidence) = self.evidence.get(&claim.evidence_id) else {
+                continue;
+            };
+            if claim.predicate == ClaimPredicate::Defines
+                && evidence.polarity == EvidencePolarity::Positive
+                && evidence.modality == EvidenceModality::Asserted
+                && evidence.origin == EvidenceOrigin::Explicit
+                && let ClaimObject::Occurrence(occurrence_id) = &claim.object
+                && self.occurrences.contains_key(occurrence_id)
+            {
+                declarations.insert(occurrence_id.clone());
+            }
+        }
+        Ok((declarations.len() == 1).then(|| declarations.pop_first().unwrap()))
+    }
+
     pub(crate) fn established_selection_would_merge(
         &self,
         target: &EntityId,
@@ -2327,6 +2357,102 @@ mod tests {
                 ResolutionStatus::Unsupported
             );
         }
+    }
+
+    #[test]
+    fn authoritative_declaration_is_unique_and_claim_scan_is_bounded() {
+        let first = occurrence("main.tex", 1, 1, 0, 1, &[], "x", Vec::new());
+        let second = occurrence("main.tex", 1, 2, 5, 2, &[], "x", Vec::new());
+        let declared_entity = entity(&first, "definition");
+        let source_evidence = evidence(
+            "identity",
+            &first,
+            EvidencePolarity::Positive,
+            EvidenceModality::Asserted,
+        );
+
+        let mut exact = ProjectSemanticIndex::default();
+        exact
+            .replace_document(facts(
+                "main.tex",
+                1,
+                vec![first.clone()],
+                vec![declared_entity.clone()],
+                vec![first.id.clone()],
+                vec![source_evidence.clone()],
+                vec![claim(
+                    "definition",
+                    &declared_entity,
+                    ClaimPredicate::Defines,
+                    ClaimObject::Occurrence(first.id.clone()),
+                    "identity",
+                )],
+            ))
+            .unwrap();
+        assert_eq!(
+            exact.bounded_authoritative_declaration_for_entity(&declared_entity),
+            Ok(Some(first.id.clone()))
+        );
+
+        let mut ambiguous = ProjectSemanticIndex::default();
+        ambiguous
+            .replace_document(facts(
+                "main.tex",
+                1,
+                vec![first.clone(), second.clone()],
+                vec![declared_entity.clone()],
+                vec![first.id.clone(), second.id.clone()],
+                vec![source_evidence.clone()],
+                vec![
+                    claim(
+                        "first-definition",
+                        &declared_entity,
+                        ClaimPredicate::Defines,
+                        ClaimObject::Occurrence(first.id.clone()),
+                        "identity",
+                    ),
+                    claim(
+                        "second-definition",
+                        &declared_entity,
+                        ClaimPredicate::Defines,
+                        ClaimObject::Occurrence(second.id),
+                        "identity",
+                    ),
+                ],
+            ))
+            .unwrap();
+        assert_eq!(
+            ambiguous.bounded_authoritative_declaration_for_entity(&declared_entity),
+            Ok(None)
+        );
+
+        let claims = (0..=MAX_ENTITY_SURFACE_OCCURRENCES)
+            .map(|index| {
+                claim(
+                    &format!("definition-{index}"),
+                    &declared_entity,
+                    ClaimPredicate::Defines,
+                    ClaimObject::Occurrence(first.id.clone()),
+                    "identity",
+                )
+            })
+            .collect();
+        let mut oversized = ProjectSemanticIndex::default();
+        oversized
+            .replace_document(facts(
+                "main.tex",
+                1,
+                vec![first.clone()],
+                vec![declared_entity.clone()],
+                vec![first.id],
+                vec![source_evidence],
+                claims,
+            ))
+            .unwrap();
+        assert_eq!(
+            oversized.bounded_authoritative_declaration_for_entity(&declared_entity),
+            Err(())
+        );
     }
 
     #[test]

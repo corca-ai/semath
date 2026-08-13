@@ -1907,13 +1907,14 @@
       "review": {
         "correctionSummary": [
           "Split union and intersection membership semantics into exact mathematical probes.",
-          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
+          "Protocol 14 adjudication: correlated discrete and probability interpretations remain partial while exact entity navigation stays available."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "5bcb7f64bdc7cd5bddb6126bf0850e4c492e618d67c2ec8e8e6752bf392e3716",
+        "finalDigest": "96eccb0df75b5b80a695d238d6828fe28ef67bde5513dffcc77e757efc8dc41d",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "5bcb7f64bdc7cd5bddb6126bf0850e4c492e618d67c2ec8e8e6752bf392e3716",
+        "semanticReviewDigest": "96eccb0df75b5b80a695d238d6828fe28ef67bde5513dffcc77e757efc8dc41d",
         "status": "corrected"
       },
       "snapshots": [
@@ -2095,13 +2096,14 @@
       "review": {
         "correctionSummary": [
           "Replaced non-portable display-dollar equation tags with equation environments.",
-          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement.",
+          "Protocol 14 adjudication: references explicitly include the reviewed U_b source declaration when requested."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "ea43a2774baaeb150145c8bf044266ebf69396eddc10f63ea56d948c561aa293",
+        "finalDigest": "17bbce5ac721200907189a6a3b429b4a333016ff4ad9f9ad8e786e956de7b6b6",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "ea43a2774baaeb150145c8bf044266ebf69396eddc10f63ea56d948c561aa293",
+        "semanticReviewDigest": "17bbce5ac721200907189a6a3b429b4a333016ff4ad9f9ad8e786e956de7b6b6",
         "status": "corrected"
       },
       "snapshots": [
@@ -2478,13 +2480,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "Protocol 14 adjudication: mean-normal-velocity is an unproven typed condition, so the source-grounded flow relation remains partial."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "fc606bd54cb938f2eb8381f282c718c0689067572c1542919d7a36fa0807fc93",
+        "finalDigest": "a3daf8d751d53a7b4b9dbed379f02aa67178085b72529e84b648854c3054213c",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "fc606bd54cb938f2eb8381f282c718c0689067572c1542919d7a36fa0807fc93",
+        "semanticReviewDigest": "a3daf8d751d53a7b4b9dbed379f02aa67178085b72529e84b648854c3054213c",
         "status": "corrected"
       },
       "snapshots": [
@@ -4131,13 +4134,14 @@
       "review": {
         "correctionSummary": [
           "Kept the pre-declaration query partial instead of granting a relation from later role declarations.",
-          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement."
+          "v0.28 adjudication: navigation and rename now share the same reviewed entity occurrence and notation-valid replacement.",
+          "Protocol 14 adjudication: references explicitly include the reviewed source declaration when requested."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "4021e44b958b8532c3a7118969270e81c2ea701547b3b9a45e6978a798d7018b",
+        "finalDigest": "2d16b6abf0119a9e4c45b95373da314429dfad9a4ccf53debbcfa9992f7233e6",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "4021e44b958b8532c3a7118969270e81c2ea701547b3b9a45e6978a798d7018b",
+        "semanticReviewDigest": "2d16b6abf0119a9e4c45b95373da314429dfad9a4ccf53debbcfa9992f7233e6",
         "status": "corrected"
       },
       "snapshots": [
@@ -6925,7 +6929,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -7003,7 +7007,7 @@
             "status": "available"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -7773,7 +7777,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -7803,7 +7807,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -10655,7 +10659,7 @@
         "snapshotId": "current"
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -10733,7 +10737,7 @@
             "status": "available"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {
@@ -11318,9 +11322,18 @@
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "notes/bias-supply.md",
+                "needle": "U_b=q_bV_b.",
+                "selection": {
+                  "offset": 0,
+                  "length": 3
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "excluded": [],
@@ -11936,9 +11949,18 @@
           },
           "references": {
             "excluded": [],
-            "minimum": 0,
-            "required": [],
-            "status": "unavailable"
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "procedures/air-jet-reduction.tex",
+                "needle": "A$ is the exposed plate area",
+                "selection": {
+                  "offset": 0,
+                  "length": 1
+                }
+              }
+            ],
+            "status": "available"
           },
           "rename": {
             "status": "available",
