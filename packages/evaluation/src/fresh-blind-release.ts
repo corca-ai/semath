@@ -16,6 +16,7 @@ import {
 } from "./authored-integrity";
 
 const DIGEST = /^[0-9a-f]{64}$/u;
+const RELEASE_ID = /^v0\.[1-9][0-9]*$/u;
 const REQUIRED_SCENARIOS = 48;
 const REQUIRED_FAMILY_SCENARIOS = 8;
 
@@ -171,8 +172,10 @@ export function validateFreshBlindRelease(
   input: FreshBlindValidationInput,
 ): FreshBlindValidationSummary {
   const fixture = release.fixture;
-  if (release.release.id !== "v0.28") {
-    throw new Error("fresh blind release.release.id: expected v0.28");
+  if (!RELEASE_ID.test(release.release.id)) {
+    throw new Error(
+      "fresh blind release.release.id: expected a semantic release id such as v0.29",
+    );
   }
   if (fixture.batch.split !== "holdout") {
     throw new Error("fresh blind fixture must use the frozen holdout split");

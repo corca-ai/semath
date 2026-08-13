@@ -30,6 +30,20 @@ describe("fresh blind release evidence", () => {
     });
   });
 
+  test("reuses the sealed evidence contract across semantic release cycles", () => {
+    const next = fixtureValue();
+    next.release.id = "v0.29";
+    const release = finalize(next);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios).toBe(48);
+
+    const invalid = fixtureValue();
+    invalid.release.id = "release-29";
+    const unversioned = finalize(invalid);
+    expect(() =>
+      validateFreshBlindRelease(unversioned, validation(unversioned)),
+    ).toThrow("expected a semantic release id");
+  });
+
   test("requires isolated Codex authors, critics, and the complete main review", () => {
     const value = fixtureValue();
     value.fixture.scenarios[0]!.review.criticId = "main-codex";
