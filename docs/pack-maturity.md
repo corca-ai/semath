@@ -104,6 +104,13 @@ holds approved support policy; GitHub issues hold planned work.
   stages agreed. Its terminal receipt is `safety-failed`, so PR #304 is not a
   release and CorTeX must not pin it. This exposed tranche is now historical
   evidence and is not a tuning set.
+- The independently sealed v0.30 fresh blind completed its primary evaluation
+  at 0 of 48 with raw risk 390, including four false establishments, no false
+  conflicts, 26 identity or navigation misses, and 41 coverage misses. Its
+  lifecycle comparison then stopped on an evaluation-tool document-version
+  mismatch, so the terminal receipt is `execution-error`. The candidate is not
+  a release, must not be pinned by CorTeX, and the exposed fixture is now
+  historical evidence rather than a tuning set.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.

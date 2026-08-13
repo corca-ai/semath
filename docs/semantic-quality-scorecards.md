@@ -138,7 +138,7 @@ definitions or relations. Applying only those explicit adjudications produces
 the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
 cases stay visible as coverage work.
 
-The now-exposed historical authored holdout remains 6 of 97 with risk 720.
+The now-exposed historical authored holdout remains 6 of 97 with raw risk 728.
 These deliberately difficult documents are a first-loss map, not a release
 pass-rate target. Its two raw false-establishment counts are exact, reviewed
 frozen-contract disagreements. One lifecycle expects prose in a disconnected
@@ -146,9 +146,13 @@ project component to retract a relation in another component; Semath preserves
 the dependency boundary. The other expects `partial` for prose that directly
 asserts an overlap as \(A\cap B\); the current source-grounded entity decision is
 `established`. The release gate permits only these named, proof-grounded cases
-and rejects substitution by any new false establishment. Current historical
-first losses are 23 attachment, 42 identity or scope, 10 typed-fact, 12
-pack-unification, and four decision cases. See
+and rejects substitution by any new false establishment. It also adjudicates
+one frozen cursor contract that asks an `edge: after` formula-boundary query to
+select an arbitrary internal symbol; exact boundary ownership correctly returns
+no symbol. The adjusted risk is 718 and adjusted identity/navigation count is
+54, both within the prior gate. Current historical first losses are 28
+attachment, 37 identity or scope, eight typed-fact, 14 pack-unification, and
+four decision cases. See
 [Pack maturity](pack-maturity.md) for interpretation by capability.
 
 The sealed v0.28 fresh blind was executed once on 2026-08-13 after every
@@ -173,6 +177,26 @@ must not be merged or pinned by CorTeX. The fixture seal is
 `c4431c1203d56af5e0db55449ae0b72392d79c560b193a8ea6daf9ef68adffb8`;
 future work must treat this tranche as historical evidence rather than a
 tuning set.
+
+The independently sealed v0.30 fresh blind was executed once on 2026-08-13
+after every pre-blind gate passed. Development was 51 of 115 with risk 128 and
+no false establishment, false conflict, or identity risk; open semantic safety
+was 27 of 27, recognition frontier 32 of 32, and the adjudicated continuity
+release score was 37 of 48 with risk 22 and no unsafe risk. The primary fresh
+evaluation completed with 0 of
+48 probes passing and raw risk 390: four false establishments, no false
+conflicts, 26 identity or navigation misses, and 41 coverage misses. The
+lifecycle runner then stopped with a document-version mismatch, so the atomic
+terminal receipt is `execution-error` rather than a semantic release receipt.
+The fixture seal is
+`cdddd29c75891320ad6e643cb60e02b9e8cec08af26fab1facca4311b782f8f5` and the
+evaluated Semath commit is `695b6d0cc3386b3ef117837baf1bd3596b49a800`.
+This candidate is not a release and must not be merged or pinned by CorTeX.
+The exposed fixture is historical evidence and must not be rerun or used to
+tune the engine. The lifecycle planner now always forwards directly edited
+documents even when wasmtex can reuse their syntax, and future execution-error
+receipts retain any completed primary evaluation before recording the tool
+failure.
 
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at

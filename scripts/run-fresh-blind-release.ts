@@ -47,6 +47,13 @@ const evaluationPath = join(temporary, "evaluation.json");
 const lifecyclePath = join(temporary, "lifecycle.json");
 let receiptReserved = false;
 let terminalReceiptWritten = false;
+let completedEvaluation:
+  | {
+      readonly bytes: Uint8Array;
+      readonly result: EvaluationReport["results"][number];
+      readonly safety: ReturnType<typeof freshBlindSafetySummary>;
+    }
+  | undefined;
 try {
   await reserveFreshBlindReceipt(receiptPath, started);
   receiptReserved = true;
@@ -57,36 +64,45 @@ try {
     SEMATH_AUTHORED_SPLIT: "holdout",
     SEMATH_AUTHORED_SKIP_BUILD: "1",
   });
-  run("bun", ["scripts/check-fresh-blind-lifecycle.ts"], {
-    SEMATH_FRESH_BLIND_FIXTURE: evidence.path,
-    SEMATH_FRESH_BLIND_LIFECYCLE_REPORT: lifecyclePath,
-  });
   const evaluationBytes = await readFile(evaluationPath);
-  const lifecycleBytes = await readFile(lifecyclePath);
   const evaluation = JSON.parse(evaluationBytes.toString()) as EvaluationReport;
   const result = evaluation.results[0];
   if (!result || evaluation.results.length !== 1) {
     throw new Error("fresh blind evaluation must produce exactly one result");
   }
-  const safety = freshBlindSafetySummary(
-    evidence.release.fixture,
-    result.observations,
-  );
+  completedEvaluation = {
+    bytes: evaluationBytes,
+    result,
+    safety: freshBlindSafetySummary(evidence.release.fixture, result.observations),
+  };
+  run("bun", ["scripts/check-fresh-blind-lifecycle.ts"], {
+    SEMATH_FRESH_BLIND_FIXTURE: evidence.path,
+    SEMATH_FRESH_BLIND_LIFECYCLE_REPORT: lifecyclePath,
+  });
+  const lifecycleBytes = await readFile(lifecyclePath);
+  if (!completedEvaluation) {
+    throw new Error("fresh blind evaluation evidence is unavailable");
+  }
+  const {
+    bytes: finalEvaluationBytes,
+    result: finalResult,
+    safety,
+  } = completedEvaluation;
   const safetyFailed = freshBlindSafetyGateFailed(safety);
   const completed: FreshBlindReleaseReceipt = {
     ...started,
     artifacts: {
-      evaluationSha256: sha256(evaluationBytes),
+      evaluationSha256: sha256(finalEvaluationBytes),
       lifecycleSha256: sha256(lifecycleBytes),
     },
     completedAt: new Date().toISOString(),
     result: {
-      firstLossAtlas: result.firstLossAtlas,
+      firstLossAtlas: finalResult.firstLossAtlas,
       lifecycle: JSON.parse(lifecycleBytes.toString()) as unknown,
       score: {
-        cases: result.score.cases,
-        passed: result.score.passed,
-        risk: result.score.risk,
+        cases: finalResult.score.cases,
+        passed: finalResult.score.passed,
+        risk: finalResult.score.risk,
       },
       safety,
       validation: evidence.summary,
@@ -101,13 +117,31 @@ try {
     );
   }
   console.log(
-    `fresh blind release recorded: ${result.score.passed}/${result.score.cases}; ` +
+    `fresh blind release recorded: ${finalResult.score.passed}/${finalResult.score.cases}; ` +
       `receipt ${receiptPath}`,
   );
 } catch (error) {
   if (receiptReserved && !terminalReceiptWritten) {
     const failed: FreshBlindReleaseReceipt = {
       ...started,
+      ...(completedEvaluation
+        ? {
+            artifacts: {
+              evaluationSha256: sha256(completedEvaluation.bytes),
+            },
+            result: {
+              firstLossAtlas: completedEvaluation.result.firstLossAtlas,
+              lifecycle: null,
+              score: {
+                cases: completedEvaluation.result.score.cases,
+                passed: completedEvaluation.result.score.passed,
+                risk: completedEvaluation.result.score.risk,
+              },
+              safety: completedEvaluation.safety,
+              validation: evidence.summary,
+            },
+          }
+        : {}),
       completedAt: new Date().toISOString(),
       error: error instanceof Error ? error.message : String(error),
       status: "execution-error",
