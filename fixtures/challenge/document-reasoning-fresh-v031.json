@@ -3,9 +3,9 @@
   "release": {
     "id": "v0.31",
     "createdAt": "2026-08-13",
-    "frozenAt": "2026-08-13T06:15:00Z",
-    "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
-    "seal": "3296d7479a6f286b7e6e53cc130efde790ca9656215dbb64bb01e77e8bb3639c"
+    "frozenAt": "2026-08-13T06:43:00Z",
+    "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
+    "seal": "49d6668aaa606163d87a176935f5c79dcfc6d7d91aca68b125338a0d1912ba24"
   },
   "commissioning": {
     "authoringMethod": "isolated-codex-subagents",
@@ -20,10 +20,10 @@
       "id": "v031-fresh-blind",
       "split": "holdout",
       "createdAt": "2026-08-13",
-      "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+      "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
       "reviewPolicyVersion": 2,
-      "frozenAt": "2026-08-13T06:15:00Z",
-      "seal": "25dde04f9fe6e239926b5e8d40c1b852c79b923746e3cfbad72a5f3f97f8f91a"
+      "frozenAt": "2026-08-13T06:43:00Z",
+      "seal": "1204e54825b003b0c0f6b10b5465607d370696eb1053052e6230dd6b3212310d"
     },
     "scenarios": [
       {
@@ -60,7 +60,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-scope-ducts",
           "rawDigest": "812c0f9c107cf8ec3ae4edcca177b52d83e470d126d5115f2bd9d57a17f593e8",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -68,12 +68,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "28fd2aaaef2f1e018b9ed97ea8cc49b5e5daf51867587f6577dadc0a4cf685a3",
-          "semanticReviewDigest": "28fd2aaaef2f1e018b9ed97ea8cc49b5e5daf51867587f6577dadc0a4cf685a3",
+          "finalDigest": "03b1a45b189c8918e9aadc0c8feda57df077d46359e7086fa47e401fa522a241",
+          "semanticReviewDigest": "03b1a45b189c8918e9aadc0c8feda57df077d46359e7086fa47e401fa522a241",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -110,7 +111,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-scope-wall-panels",
           "rawDigest": "a3aa70791cb68614f51b3f95b9fe3877ebfed9758c8e024a6c1194595f73c641",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -119,12 +120,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Replaced a notation-family-changing rename with an indexed atomic identifier replacement.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "4e1541ff91fc6b889181aff370c64a73bcf212af4902912b0412d65cbfdfbf43",
-          "semanticReviewDigest": "4e1541ff91fc6b889181aff370c64a73bcf212af4902912b0412d65cbfdfbf43",
+          "finalDigest": "4d4fe2f3093c3d42956574d87a9050d06d1c536bf7c62abedaa568811324d70a",
+          "semanticReviewDigest": "4d4fe2f3093c3d42956574d87a9050d06d1c536bf7c62abedaa568811324d70a",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -166,7 +168,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-scope-alpha",
           "rawDigest": "29e8470ea992b32e113a62c917da9905c0a817d86c8c19e8f6a9adba48177afc",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -175,12 +177,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Made navigation and editing unavailable because the cursor has two independently scoped alpha candidates and no unique entity.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "e2b3ce837072680b4f3a7a5ab4734a351665392b3bbc24b0ab5858df8866d702",
-          "semanticReviewDigest": "e2b3ce837072680b4f3a7a5ab4734a351665392b3bbc24b0ab5858df8866d702",
+          "finalDigest": "01febba3d99a3be9d7d76b39cc72d0e1c786bccb9e01e8929e7a04b8219afe8f",
+          "semanticReviewDigest": "01febba3d99a3be9d7d76b39cc72d0e1c786bccb9e01e8929e7a04b8219afe8f",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -213,7 +216,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-derivation-power",
           "rawDigest": "3a7a59d6a2b51b481cf4296d7c5ca3f7e01c2d37da111420390092ec1c76bce0",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -221,12 +224,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "4138f5911522f33ee669b73c17462d8fa7c984e71ca4a94821f76c05bb3ad1e7",
-          "semanticReviewDigest": "4138f5911522f33ee669b73c17462d8fa7c984e71ca4a94821f76c05bb3ad1e7",
+          "finalDigest": "e8a2197d2386d6d369095d42cfabb6e77b938a5cebb86637cf25a5cc89b9d530",
+          "semanticReviewDigest": "e8a2197d2386d6d369095d42cfabb6e77b938a5cebb86637cf25a5cc89b9d530",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -258,7 +262,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-derivation-slope",
           "rawDigest": "a714b2120f6e803a1f401bb18079a1e13ca4fe73ec0cec7c9b924b3744e17af7",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -266,12 +270,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "dd02f5c21b5a12a70f1b5f2e16d00ae8b33fca4ac1d79a75977378437c7f60c8",
-          "semanticReviewDigest": "dd02f5c21b5a12a70f1b5f2e16d00ae8b33fca4ac1d79a75977378437c7f60c8",
+          "finalDigest": "204d0670d8ab10bc9a4e2ea1ab6f9aa7eecc51c0e2096b9a1cbd93b4f5547160",
+          "semanticReviewDigest": "204d0670d8ab10bc9a4e2ea1ab6f9aa7eecc51c0e2096b9a1cbd93b4f5547160",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -303,7 +308,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-derivation-resistor",
           "rawDigest": "cdf7067ade86a22455a6423ce9669a21dc84594f10ae3d99c2b4be53b430f64d",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -311,12 +316,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "77cbf76b57153768993954d75c7de3c1fea2e1c2857586ecec5755e352ad471c",
-          "semanticReviewDigest": "77cbf76b57153768993954d75c7de3c1fea2e1c2857586ecec5755e352ad471c",
+          "finalDigest": "b5a3747dce777ab0dd96285e0cd3f0877b7dc3a66179f31c25e010a860de965e",
+          "semanticReviewDigest": "b5a3747dce777ab0dd96285e0cd3f0877b7dc3a66179f31c25e010a860de965e",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -348,7 +354,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-guard-capacitor",
           "rawDigest": "ff117a900d92077e29ce657a18469000fe9fc2ae990a164070a2e65ced603cfd",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -356,12 +362,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "aaae19a13fbbad9d3b0d77f7900f09a2fcb1bf3dd4c93bb8fd73a5b824fa96c0",
-          "semanticReviewDigest": "aaae19a13fbbad9d3b0d77f7900f09a2fcb1bf3dd4c93bb8fd73a5b824fa96c0",
+          "finalDigest": "50795c9f7b904847f881e202293880e8e3758534f9058b392ae22e549bc5eb21",
+          "semanticReviewDigest": "50795c9f7b904847f881e202293880e8e3758534f9058b392ae22e549bc5eb21",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -393,7 +400,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-guard-gas",
           "rawDigest": "510b31bde29b659faff0db8007fa842e1ee9e3c84ecfc62c612e8f9b4e4ce8d7",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -401,12 +408,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "044d06ab2bb95d3d72f6a6becef31413d055b7f0fcea04b87b82dd3225d8f938",
-          "semanticReviewDigest": "044d06ab2bb95d3d72f6a6becef31413d055b7f0fcea04b87b82dd3225d8f938",
+          "finalDigest": "c6b0a132b03fe42347401f7f8a33a69892a45aa8722231f1a4b29e43cd89d4af",
+          "semanticReviewDigest": "c6b0a132b03fe42347401f7f8a33a69892a45aa8722231f1a4b29e43cd89d4af",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -436,7 +444,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-guard-fatigue",
           "rawDigest": "d2738d450b57ac62e1534e604f0bc291f8c0d362e5858d9957d412183a420681",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -444,12 +452,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "d5b15285b3f2b7dd4cb34ae8c33ad1aff539650dd49ac22139170aa753fc83c3",
-          "semanticReviewDigest": "d5b15285b3f2b7dd4cb34ae8c33ad1aff539650dd49ac22139170aa753fc83c3",
+          "finalDigest": "24c2812613a35e5bf8f93f621f722f09f82a33c6596518c57c38bf4d2c5d7ace",
+          "semanticReviewDigest": "24c2812613a35e5bf8f93f621f722f09f82a33c6596518c57c38bf4d2c5d7ace",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -481,7 +490,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-discourse-ohm",
           "rawDigest": "596a50bce67f264c178df32d5d1a300faf660c17216f05eee58dad5a4a98d748",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -489,12 +498,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "0bf7302b9057aac24d7aff9ce4606ecc70ec3b10143cca707611602401d6cff1",
-          "semanticReviewDigest": "0bf7302b9057aac24d7aff9ce4606ecc70ec3b10143cca707611602401d6cff1",
+          "finalDigest": "551da05609b7f5255166f65be25b684cababef30929f29dffc1e58847da97c67",
+          "semanticReviewDigest": "551da05609b7f5255166f65be25b684cababef30929f29dffc1e58847da97c67",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -527,7 +537,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-discourse-flux",
           "rawDigest": "a8e2c684633ebf15cf2846777e70abc904c6dc8522b21be38378b6966693003c",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -535,12 +545,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "d216cd43c3a180e6f8af08f286d2e3d6380a2de0e10b661c0d7fe1c3e4de53a9",
-          "semanticReviewDigest": "d216cd43c3a180e6f8af08f286d2e3d6380a2de0e10b661c0d7fe1c3e4de53a9",
+          "finalDigest": "4f455b24ca338ce1e795a74bad493e9e6e8d478a558c938664566c72a78b1826",
+          "semanticReviewDigest": "4f455b24ca338ce1e795a74bad493e9e6e8d478a558c938664566c72a78b1826",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -572,7 +583,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-discourse-velocity",
           "rawDigest": "ffe7a7f5050d4c05503d00df1c008f37aa0038eb4d1e62a94fec4144c21b5785",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -580,12 +591,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "6739f951683b2c8a8047f596b3cab70d1bab00c6e867e0debdd0cd545bedfe7d",
-          "semanticReviewDigest": "6739f951683b2c8a8047f596b3cab70d1bab00c6e867e0debdd0cd545bedfe7d",
+          "finalDigest": "5a9bbd377c9a717714129928f343bfc48dfb7ad17efaaecadf16bcf711204963",
+          "semanticReviewDigest": "5a9bbd377c9a717714129928f343bfc48dfb7ad17efaaecadf16bcf711204963",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -628,7 +640,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-collision-kappa",
           "rawDigest": "590701da5f713a294f81aca5699fe4aac2f40927b33a206607c04214731340cd",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -637,12 +649,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Made navigation and editing unavailable because conductivity and wave-number kappa remain genuinely ambiguous at the merged cursor.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "82b83c6ed5c39f74f8091df9ae551fb960d82879a0c9b7cc7361e96ffd8557f3",
-          "semanticReviewDigest": "82b83c6ed5c39f74f8091df9ae551fb960d82879a0c9b7cc7361e96ffd8557f3",
+          "finalDigest": "968ea5e846b2dcdd9feae9923b1750e10ce271394651d74db8ea258893b034b1",
+          "semanticReviewDigest": "968ea5e846b2dcdd9feae9923b1750e10ce271394651d74db8ea258893b034b1",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -677,7 +690,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-collision-coherence",
           "rawDigest": "5b90e84eab25259feaca2f2289bace4f72e8aa6f4e36bed864558ffa7f9e2e69",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -685,12 +698,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "cc058a4837e70a3bb4ee0f92d6ab2a2d33bd1b0acda20b0f7e0c95ef6aa06c8c",
-          "semanticReviewDigest": "cc058a4837e70a3bb4ee0f92d6ab2a2d33bd1b0acda20b0f7e0c95ef6aa06c8c",
+          "finalDigest": "67dfa6c4e01b04eb2aa00010b37be4d284f24e7cd36aa46f4a1ce2041c1c40ad",
+          "semanticReviewDigest": "67dfa6c4e01b04eb2aa00010b37be4d284f24e7cd36aa46f4a1ce2041c1c40ad",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -732,7 +746,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-lifecycle-convection",
           "rawDigest": "a3d102bdc79f5f018633346eca1f7c555882d97102eec8d705da72fbc4b6dd3a",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -740,12 +754,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "28f51753c8985de09f3ba1ae3c1286b09dbd3ba54420462b52b2adf79f14f7a3",
-          "semanticReviewDigest": "28f51753c8985de09f3ba1ae3c1286b09dbd3ba54420462b52b2adf79f14f7a3",
+          "finalDigest": "c85deff9e1cc3743ed0bf82e6957db84f2d853175e2420db8724137443e9da50",
+          "semanticReviewDigest": "c85deff9e1cc3743ed0bf82e6957db84f2d853175e2420db8724137443e9da50",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -787,7 +802,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-atlas-lifecycle-dispersive",
           "rawDigest": "aff4d5f5153e873bc4da027056f69c0be8245e5b89a25d88347331974d6992d7",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-cygnus",
@@ -795,12 +810,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "bbd06f19ffcc6b25152953d287a49b0b3e572f958c8385c7c8c8735c103c3533",
-          "semanticReviewDigest": "bbd06f19ffcc6b25152953d287a49b0b3e572f958c8385c7c8c8735c103c3533",
+          "finalDigest": "7a412e6d8fe9c21c4ea13e4b3916f5424f458865d05e1bc57cda257aec10ffe8",
+          "semanticReviewDigest": "7a412e6d8fe9c21c4ea13e4b3916f5424f458865d05e1bc57cda257aec10ffe8",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -836,7 +852,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-scope-ohm-file-local",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "d7fcfaf5726666bc0309f9850062b17bd685c3ef3a097de3a42262c2a692646a"
         },
         "review": {
@@ -845,12 +861,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "419463188041831c0689afe5c2f092dfb1bfaccfb07bb93f087faf5c8ecbe386",
-          "semanticReviewDigest": "419463188041831c0689afe5c2f092dfb1bfaccfb07bb93f087faf5c8ecbe386",
+          "finalDigest": "98276b29be907bcca9b1c7ef75768b81c61852d461aa824395335885cc8b427b",
+          "semanticReviewDigest": "98276b29be907bcca9b1c7ef75768b81c61852d461aa824395335885cc8b427b",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -886,7 +903,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-scope-convection-open-sign",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "ef8b8af044e8fa23886f481a61d500ebbac2a3f19ddfbc056b16d65a3a050590"
         },
         "review": {
@@ -896,12 +913,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Classified the explicitly adopted symbolic convection relation as established; a missing numerical ambient measurement does not make its meaning partial.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "3bb737c64472b499c49a4b154c164a70abaeee75a6abb1f4e3e01081a48d6827",
-          "semanticReviewDigest": "3bb737c64472b499c49a4b154c164a70abaeee75a6abb1f4e3e01081a48d6827",
+          "finalDigest": "2f7ee5d576203f5f4ebc9ba0448ad6940ab1e9f8f703d0b039a6671c6e71c6ea",
+          "semanticReviewDigest": "2f7ee5d576203f5f4ebc9ba0448ad6940ab1e9f8f703d0b039a6671c6e71c6ea",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -943,7 +961,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-scope-crossfield-temperature-period",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "b53157cfe10eaf9fe6130bf0d8f93700c725166086f4eb98f508b35070b922b7"
         },
         "review": {
@@ -952,12 +970,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "61332e62ad651d7e752edb05cf9acc9c140455afd462fc666525b035231df5c0",
-          "semanticReviewDigest": "61332e62ad651d7e752edb05cf9acc9c140455afd462fc666525b035231df5c0",
+          "finalDigest": "362e85100566ba141693872f8052604ecb52c4904badc24cc5a3ac26c6bb87e0",
+          "semanticReviewDigest": "362e85100566ba141693872f8052604ecb52c4904badc24cc5a3ac26c6bb87e0",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -988,7 +1007,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-derivation-mechanical-power",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "f5c032ebd4a9ec56f0d8eaed62505afa8facf326e4a1259c67bb22eecfb08dfe"
         },
         "review": {
@@ -997,12 +1016,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "466c9301b5be3a3dae5f8a5321e609f9a8e44bf79be075215f44251771ff142c",
-          "semanticReviewDigest": "466c9301b5be3a3dae5f8a5321e609f9a8e44bf79be075215f44251771ff142c",
+          "finalDigest": "5b2145794026acc38e3797d88a5b3a4a59a6749a6122912103a77bac5512fcfa",
+          "semanticReviewDigest": "5b2145794026acc38e3797d88a5b3a4a59a6749a6122912103a77bac5512fcfa",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1034,7 +1054,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-derivation-wave-speed-missing-wavelength",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "3a3f2f747981f3b180a55a5e419be039a176d15ac2971903b0fee1afb076e768"
         },
         "review": {
@@ -1044,12 +1064,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Classified the complete symbolic period and wave-speed chain as established; an unevaluated wavelength does not weaken the asserted relation.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "f313bdf2f4278026e09b3e214da281399c76cb744e1a28ef821d08d2ae83805f",
-          "semanticReviewDigest": "f313bdf2f4278026e09b3e214da281399c76cb744e1a28ef821d08d2ae83805f",
+          "finalDigest": "1cebb9e75211d1f04f85ac7fd7563503871c472fbc87793fc429243108f08fce",
+          "semanticReviewDigest": "1cebb9e75211d1f04f85ac7fd7563503871c472fbc87793fc429243108f08fce",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1080,7 +1101,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-derivation-gradient-sign-conflict",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "26c78cf917b86f7f19bcb072dced8976d5a547c199f4da97168bd20da0ae4f2e"
         },
         "review": {
@@ -1090,12 +1111,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Kept the conflicting value evidence separate from the uniquely established theta_1 entity and completed its reviewed navigation and rename allowlist.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "ef0b0e058dd290de905c076f3e9122cd287e66e8384ab81ee335c4552fb4cfbb",
-          "semanticReviewDigest": "ef0b0e058dd290de905c076f3e9122cd287e66e8384ab81ee335c4552fb4cfbb",
+          "finalDigest": "674028b7f49e3bbfc47855601b9eb0e101de560af57f00a5d4879538bc04c53f",
+          "semanticReviewDigest": "674028b7f49e3bbfc47855601b9eb0e101de560af57f00a5d4879538bc04c53f",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1126,7 +1148,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-guarded-convection-positive-coefficient",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "900e11ae6df478a99863328ea1b25da2315e08679e378ccec82361324e8bf714"
         },
         "review": {
@@ -1135,12 +1157,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "94a100db4b59062b9e3b7f8927c57793e09f80691fed58c52f1f968897ee3b57",
-          "semanticReviewDigest": "94a100db4b59062b9e3b7f8927c57793e09f80691fed58c52f1f968897ee3b57",
+          "finalDigest": "9720f86a0e1690fea324a88f1a1ca6a4ff298b3f86114092abfeddef8007a589",
+          "semanticReviewDigest": "9720f86a0e1690fea324a88f1a1ca6a4ff298b3f86114092abfeddef8007a589",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1171,7 +1194,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-guarded-empirical-inverse-cube",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "4b819fd012c647def3b9c15873692faf74718cc126a335a0aead6ecb24d1de83"
         },
         "review": {
@@ -1180,12 +1203,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "4cc19e9c50c4a2354173001692712965db104903d533f66df733acd112afa078",
-          "semanticReviewDigest": "4cc19e9c50c4a2354173001692712965db104903d533f66df733acd112afa078",
+          "finalDigest": "953363b23f72ee38c8f01a9ee52b47a4915105a77d983b9734e332fe9c2d0d0e",
+          "semanticReviewDigest": "953363b23f72ee38c8f01a9ee52b47a4915105a77d983b9734e332fe9c2d0d0e",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1216,7 +1240,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-discourse-conditional-event",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "d20367b5c83dae8a71e18377e8550f6d07368fe1f372b41bf167c6f160b16eea"
         },
         "review": {
@@ -1225,12 +1249,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "b32de6c49271bef20e016c0ee0b0b3e4b1019bfb2bc20c4c640e6f74028f3667",
-          "semanticReviewDigest": "b32de6c49271bef20e016c0ee0b0b3e4b1019bfb2bc20c4c640e6f74028f3667",
+          "finalDigest": "1cd8f5c7fa46821bd2f1ef9fc6aa7fe26b1f2eecd486d742124f1ff861e944e5",
+          "semanticReviewDigest": "1cd8f5c7fa46821bd2f1ef9fc6aa7fe26b1f2eecd486d742124f1ff861e944e5",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1262,7 +1287,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-discourse-this-reading-ambiguous",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "4b45f7835d1b9ce0225a3262900205cbfa01f5747002cfb2e1d3044fa452155b"
         },
         "review": {
@@ -1271,12 +1296,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "958cb7d2e81cbfd8964e98ce32985d0252378aaf2691655ef84a0b6d0376f993",
-          "semanticReviewDigest": "958cb7d2e81cbfd8964e98ce32985d0252378aaf2691655ef84a0b6d0376f993",
+          "finalDigest": "49846e6e92b316d2c8e696b53f4e95f5618962c7aa86bff60adc746875741e2e",
+          "semanticReviewDigest": "49846e6e92b316d2c8e696b53f4e95f5618962c7aa86bff60adc746875741e2e",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1308,7 +1334,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-collision-conductivity-wavenumber",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "ccc99d96eb1c551aa7e3a0fcc846aad729ff9a9a00700d3ada7d438b8524bcf6"
         },
         "review": {
@@ -1317,12 +1343,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "4ad5d97f26b78a65f4047cfbf89c2e1209ba10377cf86c6089708af323524f11",
-          "semanticReviewDigest": "4ad5d97f26b78a65f4047cfbf89c2e1209ba10377cf86c6089708af323524f11",
+          "finalDigest": "7e85ce9a3cdd915d8e4d1d8d1d56ce19205d6490d070d963b6ec5e26cd02f77e",
+          "semanticReviewDigest": "7e85ce9a3cdd915d8e4d1d8d1d56ce19205d6490d070d963b6ec5e26cd02f77e",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1354,7 +1381,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-collision-custom-star-operator",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "32a0e9a93edc5af96f15e2578a81a240acbce9f461a1827287b90c170581c2ce"
         },
         "review": {
@@ -1364,12 +1391,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Included the ordinary set-union subrelation while retaining refusal of the project-specific star operator.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "1128a454b6722785bdce16851f3344b21a83155698fd3f1596f4d3d28eb8365a",
-          "semanticReviewDigest": "1128a454b6722785bdce16851f3344b21a83155698fd3f1596f4d3d28eb8365a",
+          "finalDigest": "01835eda5a78397fa2e4207d269541c6d5c03b60698e6a9229723d2053839d64",
+          "semanticReviewDigest": "01835eda5a78397fa2e4207d269541c6d5c03b60698e6a9229723d2053839d64",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1400,7 +1428,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-collision-continuity-legacy-area",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "e4ef5646fd9d27501bad5a3d44bf261fa78a975e87033862965acf3682835af3"
         },
         "review": {
@@ -1411,12 +1439,13 @@
             "Qualified declarative law and relation identities with their owning pack.",
             "Added explicit steady and incompressible applicability evidence while retaining the unresolved inlet-area identity.",
             "Disambiguated the repeated A_1 source anchor with an explicit occurrence index.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "7ac82567419c0301c0e5b407ec00828a49b5d8658f2fec48ddb7de733c51c2f7",
-          "semanticReviewDigest": "7ac82567419c0301c0e5b407ec00828a49b5d8658f2fec48ddb7de733c51c2f7",
+          "finalDigest": "ecbac503652d38c3659bdd6d489de0d4f7e17381056f0768869a7e4e37473f37",
+          "semanticReviewDigest": "ecbac503652d38c3659bdd6d489de0d4f7e17381056f0768869a7e4e37473f37",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1457,7 +1486,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-lifecycle-period-temperature-added",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "944772c783ec18b9fb06b9012e48d750d87ed36f1dc8bd377fc4e2fd1e954f32"
         },
         "review": {
@@ -1466,12 +1495,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "60030d24c73c23b204d9db9e6ccb3e8b1512f3557f3bb3fd243d4e96a6bfac35",
-          "semanticReviewDigest": "60030d24c73c23b204d9db9e6ccb3e8b1512f3557f3bb3fd243d4e96a6bfac35",
+          "finalDigest": "00a2c5454ea852a1acbb15d67bb9481a9f489aa8ebb2acfcd71f855f30eecfb7",
+          "semanticReviewDigest": "00a2c5454ea852a1acbb15d67bb9481a9f489aa8ebb2acfcd71f855f30eecfb7",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1512,7 +1542,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-lifecycle-gas-temperature-edited",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "52f636549c7858d0e98286de13a45fa3eb6e5512fae08deefb429e7e7a3c0879"
         },
         "review": {
@@ -1521,12 +1551,13 @@
           "status": "corrected",
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "11f7fde979340b6d06bdb5746e30cb079717e3fec5788886a1a847f2cd2dbfa8",
-          "semanticReviewDigest": "11f7fde979340b6d06bdb5746e30cb079717e3fec5788886a1a847f2cd2dbfa8",
+          "finalDigest": "ddb4fc3f6bf1b8925d7a03c2179082b2252e155b6b4fecf89aea1f5968b7876c",
+          "semanticReviewDigest": "ddb4fc3f6bf1b8925d7a03c2179082b2252e155b6b4fecf89aea1f5968b7876c",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1567,7 +1598,7 @@
           "authorId": "v031-author-borealis",
           "engineBlind": true,
           "independenceGroup": "v031-borealis-lifecycle-nonohmic-exponent",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1",
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196",
           "rawDigest": "c36b160121126b4aa4d5fe1eb43997f04d523610281722c63b5bd89f071df24c"
         },
         "review": {
@@ -1577,12 +1608,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Replaced the dimensionally invalid nonlinear fit with a normalized empirical voltage-current relation.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "17cdcfc12a010282d982b14026db7dd65bae231f2e0c3173e5015aa86d42a2f2",
-          "semanticReviewDigest": "17cdcfc12a010282d982b14026db7dd65bae231f2e0c3173e5015aa86d42a2f2",
+          "finalDigest": "cb82d3c4a721f2ac23303ce0e75d164c48b44622eb0a505e8a751d45a4f25c76",
+          "semanticReviewDigest": "cb82d3c4a721f2ac23303ce0e75d164c48b44622eb0a505e8a751d45a4f25c76",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1620,7 +1652,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-01-ohmic-scope",
           "rawDigest": "da1bcb0bc0f2e4747c7453e44fb80d2574bb64b91b53503b933418e268300145",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1629,12 +1661,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "6b07cb738cf5293c43579e39ee653f14e30f616f13bac4a594983d9265cd2aac",
-          "semanticReviewDigest": "6b07cb738cf5293c43579e39ee653f14e30f616f13bac4a594983d9265cd2aac",
+          "finalDigest": "6cb484db03f44f0d551147aa4299988d5b87cc14cb66d985c348a406f5796e9b",
+          "semanticReviewDigest": "6cb484db03f44f0d551147aa4299988d5b87cc14cb66d985c348a406f5796e9b",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1671,7 +1704,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-02-gas-audit-conflict",
           "rawDigest": "c35b286a8431d35593e9a2ea68acd4e462ffdda3f4c74edaf0f0e1ad42c70c08",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1680,12 +1713,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "ca095c5f25cbf3c18c13a6cb05ac08cc4cc0894bed98a8ee8ae10a09ee472c8c",
-          "semanticReviewDigest": "ca095c5f25cbf3c18c13a6cb05ac08cc4cc0894bed98a8ee8ae10a09ee472c8c",
+          "finalDigest": "58fa3a0f8eaf808134c373f0bef03299adfcba1f8a1e49bcdb594bf1063f9be2",
+          "semanticReviewDigest": "58fa3a0f8eaf808134c373f0bef03299adfcba1f8a1e49bcdb594bf1063f9be2",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1718,7 +1752,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-03-clock-chain",
           "rawDigest": "c794d719b56240c937dd848888b72bb856d90c78adbd12af773cfba2cb3ae03e",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1727,12 +1761,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "1b561e4c3c7e055988ae97bee60e0bb13df5e7a868f9d2df66407ddfef9c6ae0",
-          "semanticReviewDigest": "1b561e4c3c7e055988ae97bee60e0bb13df5e7a868f9d2df66407ddfef9c6ae0",
+          "finalDigest": "8f3bad507a3c8d1e786a4bd728898825da1822d28f9934885cc501d4fd243f6f",
+          "semanticReviewDigest": "8f3bad507a3c8d1e786a4bd728898825da1822d28f9934885cc501d4fd243f6f",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1764,7 +1799,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-04-work-energy-gap",
           "rawDigest": "6d2eb62aa65f817061672bfee30bc12f698a8644d7b33bee28038f084e7d0691",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1773,12 +1808,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "136b5754e861a896391b9dd78de24574eb80e47ba5b2a79bc101cc83781211d5",
-          "semanticReviewDigest": "136b5754e861a896391b9dd78de24574eb80e47ba5b2a79bc101cc83781211d5",
+          "finalDigest": "18e583dfdac7b281056a01a6dc6d47d6683c2f804df1b3499a2eed5f81175827",
+          "semanticReviewDigest": "18e583dfdac7b281056a01a6dc6d47d6683c2f804df1b3499a2eed5f81175827",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1810,7 +1846,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-05-capacitor-guard",
           "rawDigest": "6a1bffa8b5b7bd9c028735ba41d8387823bece92174bf508550636254295275a",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1819,12 +1855,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "60c0690522a5605b891b221fa167fa5e9cdc34ac396deb66e70db4f5259caa35",
-          "semanticReviewDigest": "60c0690522a5605b891b221fa167fa5e9cdc34ac396deb66e70db4f5259caa35",
+          "finalDigest": "c6530b75825ebbcce5b0ce5f41cf0a50826288d071e56cf3c341071389d32902",
+          "semanticReviewDigest": "c6530b75825ebbcce5b0ce5f41cf0a50826288d071e56cf3c341071389d32902",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1856,7 +1893,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-06-density-guard-missing",
           "rawDigest": "4e9a9b09abbfcf2ac5c06e13e6f4517d5fa156d91323180ac34ccb2dcd4233ee",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1865,12 +1902,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "c5d0c9c5904b36ca86916f4720b724982055fbed9f087e55ec847e90efdcaff9",
-          "semanticReviewDigest": "c5d0c9c5904b36ca86916f4720b724982055fbed9f087e55ec847e90efdcaff9",
+          "finalDigest": "edfc00039c03a41574d12b48a32801f5f2b1e7730f0529a926133688832a1415",
+          "semanticReviewDigest": "edfc00039c03a41574d12b48a32801f5f2b1e7730f0529a926133688832a1415",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1902,7 +1940,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-07-viscosity-kind-ambiguous",
           "rawDigest": "3bbbc296391c4baf9c65b529c133032fc06b5118739b646bdbe3ebe8c7e69cc0",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1912,12 +1950,13 @@
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
             "Classified unresolved viscosity metadata as partial evidence for the displayed Reynolds relation, not as two independently supported meanings.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "01d2a0a1936b5bea3566c545a7d85aef961e8ea13419892d7625abe5ff262bed",
-          "semanticReviewDigest": "01d2a0a1936b5bea3566c545a7d85aef961e8ea13419892d7625abe5ff262bed",
+          "finalDigest": "5b6161adb55543a76e499bfb755bd20ffc816e073dc39d3c1d7c7ff6ee3cf703",
+          "semanticReviewDigest": "5b6161adb55543a76e499bfb755bd20ffc816e073dc39d3c1d7c7ff6ee3cf703",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1949,7 +1988,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-08-field-anaphora",
           "rawDigest": "56780ad6d8016fa474b61ec65af53460e3308411e2a68fdca13320ae84c5a45c",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -1958,12 +1997,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "645c9481e4bf6c7b53d32bac2557b90fefebd4862a9e57240ebf0cce5435c923",
-          "semanticReviewDigest": "645c9481e4bf6c7b53d32bac2557b90fefebd4862a9e57240ebf0cce5435c923",
+          "finalDigest": "63773332232e7fd6c5ca7327d0582f48e0d2adf949005a3d02889b150a9ea666",
+          "semanticReviewDigest": "63773332232e7fd6c5ca7327d0582f48e0d2adf949005a3d02889b150a9ea666",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -1995,7 +2035,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-09-body-anaphora-ambiguous",
           "rawDigest": "811e66177e93ee1ee58225e5ca25df706dbb6c3a137adb5b0454787439d4cd0e",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2004,12 +2044,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "baddd1235b871e9069ea9374c28d710e7fb1ffc9e666b9e4807d492d23cc3933",
-          "semanticReviewDigest": "baddd1235b871e9069ea9374c28d710e7fb1ffc9e666b9e4807d492d23cc3933",
+          "finalDigest": "758351db457ddde9dc7baea2664671122df41739716cf6bca732a2c85d2314f6",
+          "semanticReviewDigest": "758351db457ddde9dc7baea2664671122df41739716cf6bca732a2c85d2314f6",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2041,7 +2082,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-10-power-direction-gap",
           "rawDigest": "0bfa8de955e91fcfd84f780879d88de7274bfb570752c77423d2b769dd504d76",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2050,12 +2091,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "0dc063e7f870baf421b08d05a3ca8f8feac13d9371a3a0b59669a2df8acc7f1b",
-          "semanticReviewDigest": "0dc063e7f870baf421b08d05a3ca8f8feac13d9371a3a0b59669a2df8acc7f1b",
+          "finalDigest": "6e661100bb4d984f481e289b3eb41aa2bcd85490653d3ffa4d304bd64c797b1f",
+          "semanticReviewDigest": "6e661100bb4d984f481e289b3eb41aa2bcd85490653d3ffa4d304bd64c797b1f",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2093,7 +2135,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-11-resistance-unit-conflict",
           "rawDigest": "5b04bdab03af5b85b680b20135082fc1d8238b95d830970419d8deb6156e6250",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2102,12 +2144,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "2422fcc7bfb0f0cb90ffb82f28a49ea9c080990c56caf13eaefa76d490b4c94b",
-          "semanticReviewDigest": "2422fcc7bfb0f0cb90ffb82f28a49ea9c080990c56caf13eaefa76d490b4c94b",
+          "finalDigest": "39d080b7b6d75e0c911582c6d0d0eaeeedb222d2701a0888c74c94356fed0ddb",
+          "semanticReviewDigest": "39d080b7b6d75e0c911582c6d0d0eaeeedb222d2701a0888c74c94356fed0ddb",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2140,7 +2183,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-12-temperature-period-collision",
           "rawDigest": "7f74b8d3b4a38a09f3dea32505e6467e6bec81da91cef7b87af4ffdbc8b1a6d0",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2149,12 +2192,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "83b170fd33c13aff8eec360a6e376de308fc850bc8c086cfc26310aa48a5754c",
-          "semanticReviewDigest": "83b170fd33c13aff8eec360a6e376de308fc850bc8c086cfc26310aa48a5754c",
+          "finalDigest": "d953a2810b30808fe5a032ba3104a1b534e25de664773d7d037f940b745eed7b",
+          "semanticReviewDigest": "d953a2810b30808fe5a032ba3104a1b534e25de664773d7d037f940b745eed7b",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2186,7 +2230,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-13-poiseuille-unsupported",
           "rawDigest": "9449645beb2704f0f8c34555d137c308acdec359252f462927d5f7e8953b5a60",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2195,12 +2239,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "4d678397510c8de3cd19f5db0f1fa3f80b0a0196bf886d1b44f81704dedea5e3",
-          "semanticReviewDigest": "4d678397510c8de3cd19f5db0f1fa3f80b0a0196bf886d1b44f81704dedea5e3",
+          "finalDigest": "86a886493cc4edbf599d643e17bd392946b6035c9ec02127ef8e111434bf57ad",
+          "semanticReviewDigest": "86a886493cc4edbf599d643e17bd392946b6035c9ec02127ef8e111434bf57ad",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2242,7 +2287,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-14-ohm-edit-conflict",
           "rawDigest": "5da9aeae9fd12992488a261d33526a36314189aad4695c67c87badf7294118e6",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2251,12 +2296,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "2b4fe0c67f80a7aa39afb534962effff53be3acc24b5016df6b9ff955a45edff",
-          "semanticReviewDigest": "2b4fe0c67f80a7aa39afb534962effff53be3acc24b5016df6b9ff955a45edff",
+          "finalDigest": "3a909d2fdf6cc9918cdd10c3da2f23ac5a289018aa27e41a9a7581b0a684eefe",
+          "semanticReviewDigest": "3a909d2fdf6cc9918cdd10c3da2f23ac5a289018aa27e41a9a7581b0a684eefe",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2298,7 +2344,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-15-dispersion-edit-unsupported",
           "rawDigest": "5b8e0d1badebc2cd400e73eb931840418874e1c071f94ccb98273acb750df6df",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2307,12 +2353,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "cd43d483575413d3d2388522129023cadae64e215cb894a7da094ac36f306ac1",
-          "semanticReviewDigest": "cd43d483575413d3d2388522129023cadae64e215cb894a7da094ac36f306ac1",
+          "finalDigest": "4858aa191c48bd51bdbab807c541d7ccdecd5e7eb34369b131fd0cbc5b8e4f0c",
+          "semanticReviewDigest": "4858aa191c48bd51bdbab807c541d7ccdecd5e7eb34369b131fd0cbc5b8e4f0c",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       },
       {
@@ -2354,7 +2401,7 @@
           "engineBlind": true,
           "independenceGroup": "v031-cygnus-16-radiation-edit-unsupported",
           "rawDigest": "f80c3bad4911f4fdbcb6e6003d304a0ce2cc901f766a0a36ed42bdb2cbf33c1a",
-          "taskCardDigest": "dee25e80b9279b8afe69a327526d48a42a3cacb717c9c43eae1bf74fc7441ec1"
+          "taskCardDigest": "9081ea23abfa2ebed4208c82b5a2850b55e60fc4f99a0bf59a9fbfb1da6a8196"
         },
         "review": {
           "criticId": "v031-critic-borealis",
@@ -2363,12 +2410,13 @@
           "correctionSummary": [
             "Qualified declarative law and relation identities with their owning pack.",
             "Applied the independent scientific and contract critique, including exact formula anchors, reviewed metadata, and source-grounded decision semantics.",
-            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing."
+            "The main reviewer read the complete source, cursor, relation roles, decision, diagnostics, navigation, rename, and lifecycle contract before sealing.",
+            "The main reviewer re-sealed this unchanged scenario after a pre-blind performance-only exact rename-collision index amendment; no blind engine execution had occurred."
           ],
-          "finalDigest": "4e4fed340b0eeff5d4f89f2dbabcfc3cde1c8c2a6f6a461d5dabcf507f4ac176",
-          "semanticReviewDigest": "4e4fed340b0eeff5d4f89f2dbabcfc3cde1c8c2a6f6a461d5dabcf507f4ac176",
+          "finalDigest": "659a7981f94b25a61ac57edb7deaa0298b4804e1d0486f05bc409272bd03fa13",
+          "semanticReviewDigest": "659a7981f94b25a61ac57edb7deaa0298b4804e1d0486f05bc409272bd03fa13",
           "reviewedAt": "2026-08-13",
-          "frozenAt": "2026-08-13T06:15:00Z"
+          "frozenAt": "2026-08-13T06:43:00Z"
         }
       }
     ],
