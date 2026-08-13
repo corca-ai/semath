@@ -282,6 +282,9 @@ export function validateFreshBlindRelease(
         `${probe.id}: unavailable rename cannot define an edit contract`,
       );
     }
+    if (semanticReleaseNumber(release.release.id) >= 35) {
+      validateEntitySurfaceCommissioning(probe.id, probe.expected, snapshot);
+    }
   }
   const families = count(primary.map((probe) => probe.family));
   for (const family of DOCUMENT_REASONING_FAMILIES) {
@@ -338,6 +341,116 @@ export function validateFreshBlindRelease(
     probes: fixture.probes.length,
     scenarios: fixture.scenarios.length,
   };
+}
+
+function validateEntitySurfaceCommissioning(
+  probeId: string,
+  expected: AuthoredScientificFixture["probes"][number]["expected"],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): void {
+  const { definition, prepareRename, references, rename } = expected.navigation;
+  if (definition.status !== references.status) {
+    throw new Error(
+      `${probeId}: definition and references must share one entity-surface authorization`,
+    );
+  }
+  if (prepareRename.status !== rename.status) {
+    throw new Error(
+      `${probeId}: prepareRename and rename must share one edit authorization`,
+    );
+  }
+  if (definition.status === "available") {
+    const definitions = resolvedLocationKeys(definition.required, snapshot);
+    const referenceKeys = new Set(
+      resolvedLocationKeys(references.required, snapshot),
+    );
+    if (definitions.some((location) => !referenceKeys.has(location))) {
+      throw new Error(
+        `${probeId}: every definition must be present in the complete reference surface`,
+      );
+    }
+    const symbol = expected.symbol;
+    if (!symbol || !references.required.every((anchor) => selectedAnchorText(anchor, snapshot) === symbol)) {
+      throw new Error(
+        `${probeId}: authorized references require one exact atomic source spelling`,
+      );
+    }
+    const authoredOccurrences = exactAtomicOccurrences(snapshot, symbol);
+    if (authoredOccurrences.length !== references.required.length) {
+      throw new Error(
+        `${probeId}: reference allowlist must enumerate every exact atomic source occurrence`,
+      );
+    }
+  }
+  if (rename.status === "available") {
+    const referenceKeys = resolvedLocationKeys(references.required, snapshot);
+    const renameKeys = resolvedLocationKeys(rename.required, snapshot);
+    if (
+      referenceKeys.length !== renameKeys.length ||
+      referenceKeys.some((location, index) => location !== renameKeys[index])
+    ) {
+      throw new Error(
+        `${probeId}: rename edits must equal the complete ordered reference surface`,
+      );
+    }
+    if (
+      expected.symbol !== rename.expectedText ||
+      prepareRename.placeholder !== rename.expectedText ||
+      !prepareRename.range ||
+      !renameKeys.includes(
+        resolvedLocationKeys([prepareRename.range], snapshot)[0]!,
+      )
+    ) {
+      throw new Error(
+        `${probeId}: prepareRename must select the same exact notation authorized for rename`,
+      );
+    }
+  }
+}
+
+function semanticReleaseNumber(releaseId: string): number {
+  return Number.parseInt(releaseId.slice("v0.".length), 10);
+}
+
+function resolvedLocationKeys(
+  anchors: readonly AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["references"]["required"][number][],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): string[] {
+  return anchors
+    .map((anchor) => {
+      const resolved = resolveAuthoredAnchor(snapshot, anchor);
+      return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
+    })
+    .sort();
+}
+
+function selectedAnchorText(
+  anchor: AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["references"]["required"][number],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): string {
+  const document = snapshot.documents.find((candidate) => candidate.fileId === anchor.fileId)!;
+  const range = resolveAuthoredAnchor(snapshot, anchor).range;
+  return document.content.slice(range.startOffset, range.endOffset);
+}
+
+function exactAtomicOccurrences(
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+  symbol: string,
+): string[] {
+  const output: string[] = [];
+  const identifier = /[\p{L}\p{N}_]/u;
+  for (const document of snapshot.documents) {
+    for (let start = document.content.indexOf(symbol); start >= 0;) {
+      const end = start + symbol.length;
+      const before = document.content.slice(Math.max(0, start - 1), start);
+      const after = document.content.slice(end, end + 1);
+      if (!identifier.test(before) && !identifier.test(after)) {
+        output.push(`${document.fileId}:${start}:${end}`);
+      }
+      start = document.content.indexOf(symbol, start + Math.max(symbol.length, 1));
+    }
+  }
+  return output.sort();
 }
 
 function validateExactLocationContract(

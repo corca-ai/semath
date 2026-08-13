@@ -130,6 +130,60 @@ describe("fresh blind release evidence", () => {
     );
   });
 
+  test("requires one complete atomic entity surface from v0.35 onward", () => {
+    const value = fixtureValue();
+    value.release.id = "v0.35";
+    const probe = value.fixture.probes[0]!;
+    const expected = probe.expected as AuthoredProbeExpected;
+    expected.symbol = "x_0";
+    const exact = {
+      fileId: "main",
+      needle: "$x_0=1$",
+      selection: { offset: 1, length: 3 },
+    };
+    expected.navigation.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    expected.navigation.references = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    const release = finalize(value);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios).toBe(48);
+
+    const incomplete = fixtureValue();
+    incomplete.release.id = "v0.35";
+    const incompleteProbe = incomplete.fixture.probes[0]!;
+    const incompleteExpected = incompleteProbe.expected as AuthoredProbeExpected;
+    incompleteExpected.symbol = "x_0";
+    incomplete.fixture.scenarios[0]!.snapshots[0]!.documents[0]!.content +=
+      " The same quantity is $x_0$.";
+    incompleteExpected.navigation.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    incompleteExpected.navigation.references = {
+      excluded: [],
+      minimum: 1,
+      required: [exact],
+      status: "available",
+    };
+    const incompleteRelease = finalize(incomplete);
+    expect(() =>
+      validateFreshBlindRelease(
+        incompleteRelease,
+        validation(incompleteRelease),
+      ),
+    ).toThrow("reference allowlist must enumerate every exact atomic source occurrence");
+  });
+
   test("rejects exact evidence reuse and suspicious prose lineage", () => {
     const release = fixture();
     const input = validation(release);
@@ -658,6 +712,13 @@ function sha256(value: string): string {
 }
 
 type FixtureValue = ReturnType<typeof fixtureValueShape>;
+type AuthoredProbeExpected = {
+  navigation: {
+    definition: Record<string, unknown>;
+    references: Record<string, unknown>;
+  };
+  symbol?: string;
+};
 
 function fixtureValueShape() {
   return {} as {

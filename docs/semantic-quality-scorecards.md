@@ -222,6 +222,22 @@ not available. The gate subtracts only that exact, validated decision miss; it
 does not change the fixture or widen any aggregate threshold, and it rejects
 the adjudication if the source-grounded relation disappears.
 
+The independently sealed v0.34 fresh blind was executed once on 2026-08-13.
+It scored 2 of 48 with risk 308: no false establishments, no false conflicts,
+44 coverage misses, and four cases containing 18 source locations outside the
+reviewed navigation/edit allowlists. All 18 lifecycle stages agreed and no
+diagnostic exceeded its reviewed limit. The terminal receipt is
+`safety-failed`; its fixture seal is
+`405a28155369fb9544712b83752a500cae8403193489eb7fb504ff110fe14c36`.
+This fixture is historical evidence and must not be rerun or used for tuning.
+
+Starting with v0.35, static commissioning requires definition and references
+to share one entity authorization and prepare/rename to share one edit
+authorization. An available atomic surface must enumerate every exact source
+spelling; every definition must be a reference, and a rename must edit exactly
+the complete reference set. This strengthens the blind oracle before any
+engine execution instead of weakening the release safety gate afterward.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
