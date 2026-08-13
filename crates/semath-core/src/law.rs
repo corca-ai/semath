@@ -745,9 +745,11 @@ pub(crate) fn observe_laws(
             .min_by_key(|range| range.end_offset - range.start_offset);
         collect_law_expressions(expression, formula_range, &mut actuals);
     }
-    for (actual, source_envelope, formula_envelope) in actuals {
+    for (actual, source_envelope, formula_envelope, ownership_range) in actuals {
         let source_envelope =
             strip_formula_presentation(&source_envelope, context.source, &source_index);
+        let ownership_range =
+            strip_formula_presentation(&ownership_range, context.source, &source_index);
         if !semantic_evidence.formula_is_asserted(&actual.range)
             || !formula_operations_are_well_typed(actual, semantic_evidence, context.shapes)
         {
@@ -914,6 +916,7 @@ pub(crate) fn observe_laws(
                 actual,
                 &source_envelope,
                 &formula_envelope,
+                &ownership_range,
                 bindings,
                 &role_support,
                 matched_form,
@@ -1066,7 +1069,7 @@ fn presentation_command_end(source: &str, start: usize, limit: usize) -> Option<
 fn collect_law_expressions<'a>(
     expression: &'a SemanticExpr,
     formula_range: Option<&SourceRange>,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange, SourceRange)>,
 ) {
     if let SemanticExprKind::System(expressions) = &expression.kind {
         for expression in expressions {
@@ -1091,7 +1094,7 @@ fn collect_law_expressions_with_envelope<'a>(
     expression: &'a SemanticExpr,
     relation_range: Option<&SourceRange>,
     formula_range: Option<&SourceRange>,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange, SourceRange)>,
 ) {
     let relation_envelope = relation_range
         .cloned()
@@ -1103,9 +1106,16 @@ fn collect_law_expressions_with_envelope<'a>(
         expression,
         relation_envelope.clone(),
         formula_envelope.clone(),
+        relation_envelope.clone(),
     ));
     for child in expression_children(expression) {
-        collect_nested_law_expressions(child, &relation_envelope, &formula_envelope, output);
+        collect_nested_law_expressions(
+            child,
+            &relation_envelope,
+            &formula_envelope,
+            matches!(expression.kind, SemanticExprKind::Relation { .. }),
+            output,
+        );
     }
 }
 
@@ -1113,7 +1123,8 @@ fn collect_nested_law_expressions<'a>(
     expression: &'a SemanticExpr,
     source_envelope: &SourceRange,
     formula_envelope: &SourceRange,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange)>,
+    owns_relation_operand: bool,
+    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange, SourceRange)>,
 ) {
     if matches!(
         &expression.kind,
@@ -1124,10 +1135,26 @@ fn collect_nested_law_expressions<'a>(
             expression,
             source_envelope.clone(),
             formula_envelope.clone(),
+            if owns_relation_operand {
+                source_envelope.clone()
+            } else {
+                expression.range.clone()
+            },
         ));
     }
+    let child_owns_relation_operand = match &expression.kind {
+        SemanticExprKind::Relation { .. } => true,
+        SemanticExprKind::Apply { arguments, .. } if arguments.len() == 1 => owns_relation_operand,
+        _ => false,
+    };
     for child in expression_children(expression) {
-        collect_nested_law_expressions(child, source_envelope, formula_envelope, output);
+        collect_nested_law_expressions(
+            child,
+            source_envelope,
+            formula_envelope,
+            child_owns_relation_operand,
+            output,
+        );
     }
 }
 
@@ -2757,6 +2784,7 @@ fn recognition(
     actual: &SemanticExpr,
     source_envelope: &SourceRange,
     formula_envelope: &SourceRange,
+    ownership_range: &SourceRange,
     bindings: BTreeMap<String, SemanticExpr>,
     role_support: &RoleSupportPlan,
     matched_form: Option<&GuardedForm>,
@@ -2991,7 +3019,7 @@ fn recognition(
                 .map(|condition| condition.label.clone())
                 .collect(),
             evidence: evidence.clone(),
-            range: formula_range,
+            range: ownership_range.clone(),
         }),
         evidence,
         relevance: None,
@@ -4462,6 +4490,63 @@ mod tests {
     }
 
     #[test]
+    fn nested_law_recognition_owns_only_its_exact_application_range() {
+        let source = "Let $A$ and $B$ be events. The reported value is $p=P(A\\cap B)/P(B)$.";
+        let intersection = recognized_law_observations(source)
+            .into_iter()
+            .find(|law| law.law_id == "event-intersection")
+            .expect("expected the nested event intersection law");
+        let expected_start = source.find("A\\cap B").unwrap() as u32;
+        let expected_end = source.find(")/P").unwrap() as u32;
+
+        assert_eq!(
+            intersection
+                .relation
+                .as_ref()
+                .expect("expected public relation")
+                .range,
+            SourceRange {
+                start_offset: expected_start,
+                end_offset: expected_end,
+            }
+        );
+        assert!(
+            intersection
+                .evidence
+                .iter()
+                .find(|evidence| evidence.rule_id == "semantic-law-unification")
+                .is_some_and(|evidence| evidence.source_ranges.iter().any(|range| {
+                    range.start_offset < expected_start && expected_end <= range.end_offset
+                })),
+            "the exact query range must retain the enclosing formula as evidence"
+        );
+    }
+
+    #[test]
+    fn unary_application_preserves_nested_law_relation_ownership() {
+        let source = "Let $A$ and $B$ be events. The observed probability is $P(A\\cap B)=0.012$.";
+        let intersection = recognized_law_observations(source)
+            .into_iter()
+            .find(|law| law.law_id == "event-intersection")
+            .expect("expected the nested event intersection law");
+        let expected_start = source.find("P(A\\cap B)").unwrap() as u32;
+        let expected_end = source.find("=0.012").unwrap() as u32 + "=0.012".len() as u32;
+
+        assert_eq!(
+            intersection.range,
+            SourceRange {
+                start_offset: expected_start,
+                end_offset: expected_end,
+            }
+        );
+        let relation = intersection.relation.expect("expected public relation");
+        assert_eq!(
+            &source[relation.range.start_offset as usize..relation.range.end_offset as usize],
+            "P(A\\cap B)=0.012"
+        );
+    }
+
+    #[test]
     fn recognizes_v025_vertical_relations() {
         let wave_template = lower_template(
             "\\nabla^2 field = \\frac{1}{speed^2} \\frac{\\partial^2 field}{\\partial time^2}",
@@ -5421,7 +5506,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
         collect_law_expressions(&expression, Some(&formula_range), &mut actuals);
         let (ranges, envelopes): (Vec<_>, Vec<_>) = actuals
             .iter()
-            .filter_map(|(expression, range, envelope)| {
+            .filter_map(|(expression, range, envelope, _)| {
                 matches!(expression.kind, SemanticExprKind::Relation { .. })
                     .then_some((range.clone(), envelope.clone()))
             })

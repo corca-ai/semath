@@ -547,7 +547,25 @@ fn candidate_evidence(candidate: &SemanticCandidateInfo) -> Evidence {
 }
 
 fn missing_formula_requirements(formula: &LawRecognition) -> Vec<MeaningRequirement> {
-    let mut missing = formula
+    let binding_requirements = formula
+        .bindings
+        .iter()
+        .filter(|binding| {
+            matches!(
+                binding.proof,
+                LawBindingProof::Asserted | LawBindingProof::Candidate
+            )
+        })
+        .map(|binding| MeaningRequirement {
+            requirement_id: format!("{}/binding/{}", formula.law_id, binding.parameter),
+            label: format!(
+                "The {} role is not independently established.",
+                binding.parameter
+            ),
+            subjects: vec![binding.symbol.clone()],
+            evidence: vec![binding.evidence.clone()],
+        });
+    let condition_requirements = formula
         .conditions
         .iter()
         .filter(|condition| {
@@ -563,7 +581,9 @@ fn missing_formula_requirements(formula: &LawRecognition) -> Vec<MeaningRequirem
             label: condition.label.clone(),
             subjects: condition.subjects.clone(),
             evidence: condition.evidence.clone(),
-        })
+        });
+    let mut missing = binding_requirements
+        .chain(condition_requirements)
         .collect::<Vec<_>>();
     missing.truncate(MAX_DECISION_ITEMS);
     missing
@@ -573,6 +593,12 @@ fn formula_facts(formula: &LawRecognition) -> Vec<MeaningFact> {
     formula
         .bindings
         .iter()
+        .filter(|binding| {
+            matches!(
+                binding.proof,
+                LawBindingProof::Typed | LawBindingProof::Derived
+            )
+        })
         .take(MAX_DECISION_ITEMS)
         .map(|binding| MeaningFact {
             fact_id: format!("{}/binding/{}", formula.law_id, binding.parameter),
@@ -724,8 +750,30 @@ mod tests {
 
         assert!(matches!(
             decide_meaning(input(std::slice::from_ref(&formula))),
-            MeaningDecision::Partial { facts, .. }
-                if facts.iter().any(|fact| fact.label == "x is value")
+            MeaningDecision::Partial { facts, requirements, .. }
+                if facts.is_empty()
+                    && requirements.iter().any(|requirement| {
+                        requirement.requirement_id == "asserted/binding/value"
+                            && requirement.subjects == ["x"]
+                    })
+        ));
+    }
+
+    #[test]
+    fn unresolved_role_binding_is_a_requirement_not_a_fact() {
+        let mut formula = formula("candidate", ConstraintStatus::Verified);
+        formula.bindings[0].proof = LawBindingProof::Candidate;
+        formula.bindings[0].evidence.kind = "candidate-binding".into();
+        formula.bindings[0].evidence.strength = "weak".into();
+
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { facts, requirements, .. }
+                if facts.is_empty()
+                    && requirements.iter().any(|requirement| {
+                        requirement.requirement_id == "candidate/binding/value"
+                            && requirement.subjects == ["x"]
+                    })
         ));
     }
 
