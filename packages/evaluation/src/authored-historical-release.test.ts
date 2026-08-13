@@ -7,6 +7,7 @@ import type {
 } from "./authored-scientific";
 
 const baseline = {
+  approvedCursorBoundaryIdentityIds: [],
   approvedFalseEstablishmentIds: ["reviewed-transition"],
   cases: 2,
   maximumMissedCoverage: 1,
@@ -39,6 +40,69 @@ describe("authored historical release policy", () => {
       "unreviewed false establishment ordinary-miss",
       "false establishment ordinary-miss is not source grounded",
     ]);
+  });
+
+  test("adjudicates only a reviewed unsupported cursor at a formula boundary", () => {
+    const reviewed = probe("reviewed-boundary");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          cursor: { ...reviewed.cursor, edge: "after" as const },
+          expected: {
+            ...reviewed.expected,
+            decision: "unsupported" as const,
+          },
+        },
+      ],
+      scenarios: [
+        {
+          field: "calculus-analysis",
+          genre: "test",
+          id: "scenario",
+          lawIds: [],
+          provenance: {
+            authorId: "test",
+            engineBlind: true,
+            independenceGroup: "test",
+            rawDigest: "digest",
+            taskCardDigest: "digest",
+          },
+          review: {
+            correctionSummary: [],
+            criticId: "test",
+            finalDigest: "digest",
+            frozenAt: "2026-08-13T00:00:00Z",
+            mainReviewer: "test",
+            reviewedAt: "2026-08-13",
+            semanticReviewDigest: "digest",
+            status: "corrected" as const,
+          },
+          snapshots: [
+            {
+              documents: [{ content: "x", fileId: "main", path: "main" }],
+              id: "snapshot",
+            },
+          ],
+          variationTags: [],
+        },
+      ],
+    };
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [{ ...observation("reviewed-boundary", "unsupported", false), symbol: null }],
+        score({ navigationOrIdentity: 1, total: 10 }),
+        {
+          ...baseline,
+          approvedCursorBoundaryIdentityIds: ["reviewed-boundary"],
+          cases: 2,
+          maximumNavigationOrIdentity: 0,
+          maximumRisk: 0,
+        },
+      ),
+    ).toEqual([]);
   });
 });
 

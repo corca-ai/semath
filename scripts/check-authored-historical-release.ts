@@ -43,6 +43,7 @@ try {
     resultReport.observations,
     resultReport.score,
     {
+      approvedCursorBoundaryIdentityIds: ["CA-HO-05-probe"],
       approvedFalseEstablishmentIds: [
         "DMH-06-probe-revision-before-equation",
         "FMH-027-06-probe-stage-6-retracted-volume-flow",
@@ -60,7 +61,7 @@ try {
     );
   }
   console.log(
-    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; risk ${resultReport.score.risk.total}`,
+    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed formula-boundary identity adjudications 1`,
   );
 } finally {
   await rm(temporary, { force: true, recursive: true });

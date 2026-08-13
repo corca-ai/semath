@@ -3,8 +3,10 @@ import type {
   AuthoredScientificObservation,
   AuthoredScientificScorecard,
 } from "./authored-scientific";
+import { authoredProbeIdentityFailures } from "./authored-scientific";
 
 export interface AuthoredHistoricalReleaseBaseline {
+  readonly approvedCursorBoundaryIdentityIds: readonly string[];
   readonly approvedFalseEstablishmentIds: readonly string[];
   readonly cases: number;
   readonly maximumMissedCoverage: number;
@@ -53,22 +55,49 @@ export function authoredHistoricalReleaseRegressions(
       `case count ${score.cases} differs from ${baseline.cases}`,
     );
   }
+  const approvedBoundaryIdentity = new Set(
+    baseline.approvedCursorBoundaryIdentityIds,
+  );
+  const adjudicatedBoundaryIdentityIds = fixture.probes
+    .filter((probe) => approvedBoundaryIdentity.has(probe.id))
+    .filter((probe) => {
+      const observation = observations.find((item) => item.caseId === probe.id);
+      if (!observation) return false;
+      const failures = authoredProbeIdentityFailures(fixture, probe, observation);
+      return (
+        probe.cursor.edge === "after" &&
+        probe.expected.decision === "unsupported" &&
+        probe.expected.symbol !== undefined &&
+        observation.symbol === null &&
+        failures.length === 1 &&
+        failures[0]?.area === "cursor-symbol"
+      );
+    })
+    .map((probe) => probe.id);
+  for (const caseId of approvedBoundaryIdentity) {
+    if (!adjudicatedBoundaryIdentityIds.includes(caseId)) {
+      regressions.push(`invalid cursor-boundary identity adjudication ${caseId}`);
+    }
+  }
+  const adjudicatedNavigationOrIdentity =
+    score.risk.navigationOrIdentity - adjudicatedBoundaryIdentityIds.length;
+  const adjudicatedRisk = score.risk.total - adjudicatedBoundaryIdentityIds.length * 10;
   if (score.passed < baseline.minimumPassed) {
     regressions.push(
       `passed ${score.passed} is below ${baseline.minimumPassed}`,
     );
   }
-  if (score.risk.total > baseline.maximumRisk) {
+  if (adjudicatedRisk > baseline.maximumRisk) {
     regressions.push(
-      `risk ${score.risk.total} exceeds ${baseline.maximumRisk}`,
+      `adjudicated risk ${adjudicatedRisk} exceeds ${baseline.maximumRisk}`,
     );
   }
   if (score.risk.falseConflict > 0) {
     regressions.push(`false conflict ${score.risk.falseConflict} is unsafe`);
   }
-  if (score.risk.navigationOrIdentity > baseline.maximumNavigationOrIdentity) {
+  if (adjudicatedNavigationOrIdentity > baseline.maximumNavigationOrIdentity) {
     regressions.push(
-      `navigation or identity risk ${score.risk.navigationOrIdentity} exceeds ${baseline.maximumNavigationOrIdentity}`,
+      `adjudicated navigation or identity risk ${adjudicatedNavigationOrIdentity} exceeds ${baseline.maximumNavigationOrIdentity}`,
     );
   }
   if (score.risk.missedCoverage > baseline.maximumMissedCoverage) {
