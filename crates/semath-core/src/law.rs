@@ -17,9 +17,10 @@ use crate::quantity::QuantityObservations;
 use crate::shape::ShapeObservations;
 use crate::source_index::SourceIndex;
 use crate::{
-    AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawConditionInfo,
-    LawRecognition, LawRecognitionStatus, QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo,
-    ScientificConstraintKind, SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
+    AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawBindingProof,
+    LawConditionInfo, LawRecognition, LawRecognitionStatus, QuantityInfo, RelationInfo,
+    RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
+    SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -2673,6 +2674,12 @@ fn recognition(
                     concepts: vec![role.concept.clone()],
                     dimensions: Vec::new(),
                     refinements: Vec::new(),
+                },
+                proof: match proof {
+                    RoleBindingProof::Typed => LawBindingProof::Typed,
+                    RoleBindingProof::Derived => LawBindingProof::Derived,
+                    RoleBindingProof::Asserted => LawBindingProof::Asserted,
+                    RoleBindingProof::Candidate => LawBindingProof::Candidate,
                 },
                 evidence: Evidence {
                     rule_id: match proof {

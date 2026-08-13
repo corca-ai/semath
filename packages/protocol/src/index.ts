@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 12 as const;
+export const SEMATH_PROTOCOL_VERSION = 13 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 8 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -288,6 +288,7 @@ export interface LawBinding {
   constraint: SemanticConstraint;
   evidence: Evidence;
   parameter: string;
+  proof: "typed" | "derived" | "asserted" | "candidate";
   symbol: string;
 }
 

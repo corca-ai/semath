@@ -7,6 +7,7 @@ import {
   resolveAuthoredAnchor,
   scoreAuthoredScientificFixture,
   type AuthoredLawCatalogEntry,
+  type AuthoredLocationExpectation,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
 } from "./authored-scientific";
@@ -212,6 +213,43 @@ export function validateFreshBlindRelease(
     );
   }
   for (const probe of fixture.probes) {
+    const scenario = authoredScenarioFor(fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    validateExactLocationContract(
+      probe.id,
+      "definition",
+      probe.expected.navigation.definition,
+      snapshot,
+    );
+    validateExactLocationContract(
+      probe.id,
+      "references",
+      probe.expected.navigation.references,
+      snapshot,
+    );
+    validateExactLocationContract(
+      probe.id,
+      "rename",
+      probe.expected.navigation.rename,
+      snapshot,
+    );
+    const preparation = probe.expected.navigation.prepareRename;
+    if (
+      preparation.status === "available" &&
+      (preparation.range === undefined || preparation.placeholder === undefined)
+    ) {
+      throw new Error(
+        `${probe.id}: available prepareRename requires an exact range and placeholder`,
+      );
+    }
+    if (
+      preparation.status === "unavailable" &&
+      (preparation.range !== undefined || preparation.placeholder !== undefined)
+    ) {
+      throw new Error(
+        `${probe.id}: unavailable prepareRename cannot define a range or placeholder`,
+      );
+    }
     const rename = probe.expected.navigation.rename;
     const contract = [
       rename.expectedText,
@@ -225,6 +263,15 @@ export function validateFreshBlindRelease(
     ) {
       throw new Error(
         `${probe.id}: available rename requires exact source, replacement, and safety evidence`,
+      );
+    }
+    if (
+      rename.status === "available" &&
+      (rename.newName !== rename.replacementText ||
+        !sameRenameNotationFamily(rename.expectedText!, rename.newName!))
+    ) {
+      throw new Error(
+        `${probe.id}: rename must preserve one exact editable notation family`,
       );
     }
     if (
@@ -291,6 +338,37 @@ export function validateFreshBlindRelease(
     probes: fixture.probes.length,
     scenarios: fixture.scenarios.length,
   };
+}
+
+function validateExactLocationContract(
+  probeId: string,
+  surface: string,
+  expected: AuthoredLocationExpectation,
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+): void {
+  if (expected.minimum !== expected.required.length) {
+    throw new Error(
+      `${probeId}: ${surface} must enumerate its complete location allowlist`,
+    );
+  }
+  if (expected.status === "available" && expected.required.length === 0) {
+    throw new Error(`${probeId}: available ${surface} requires a source location`);
+  }
+  const locations = expected.required.map((anchor) => {
+    const resolved = resolveAuthoredAnchor(snapshot, anchor);
+    return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
+  });
+  if (new Set(locations).size !== locations.length) {
+    throw new Error(`${probeId}: ${surface} repeats a reviewed source location`);
+  }
+}
+
+function sameRenameNotationFamily(current: string, replacement: string): boolean {
+  const controlSequence = /^\\\p{L}+$/u;
+  const plainIdentifier = /^\p{L}$/u;
+  return controlSequence.test(current)
+    ? controlSequence.test(replacement)
+    : plainIdentifier.test(current) && plainIdentifier.test(replacement);
 }
 
 /** Keep similarity policy pure; the effectful validator supplies fingerprints

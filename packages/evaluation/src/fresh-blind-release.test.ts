@@ -77,6 +77,57 @@ describe("fresh blind release evidence", () => {
     ).toThrow(
       "available rename requires exact source, replacement, and safety evidence",
     );
+
+    const invalidFamily = fixtureValue();
+    const invalidExpected = invalidFamily.fixture.probes[0]!.expected as {
+      navigation: { rename: Record<string, unknown> };
+    };
+    invalidExpected.navigation.rename = {
+      excluded: [],
+      expectedText: "x",
+      minimum: 1,
+      newName: "renamed",
+      replacementText: "renamed",
+      required: [{ fileId: "main", needle: "$x_0=1$" }],
+      safety: "deterministic",
+      status: "available",
+    };
+    const invalidRelease = finalize(invalidFamily);
+    expect(() =>
+      validateFreshBlindRelease(invalidRelease, validation(invalidRelease)),
+    ).toThrow("rename must preserve one exact editable notation family");
+  });
+
+  test("requires complete navigation allowlists before an engine run", () => {
+    const incomplete = fixtureValue();
+    const expected = incomplete.fixture.probes[0]!.expected as {
+      navigation: { definition: Record<string, unknown> };
+    };
+    expected.navigation.definition = {
+      excluded: [],
+      minimum: 2,
+      required: [{ fileId: "main", needle: "$x_0=1$" }],
+      status: "available",
+    };
+    const release = finalize(incomplete);
+    expect(() =>
+      validateFreshBlindRelease(release, validation(release)),
+    ).toThrow("definition must enumerate its complete location allowlist");
+
+    const incompletePreparation = fixtureValue();
+    const preparation = incompletePreparation.fixture.probes[0]!.expected as {
+      navigation: { prepareRename: Record<string, unknown> };
+    };
+    preparation.navigation.prepareRename = { status: "available" };
+    const preparationRelease = finalize(incompletePreparation);
+    expect(() =>
+      validateFreshBlindRelease(
+        preparationRelease,
+        validation(preparationRelease),
+      ),
+    ).toThrow(
+      "available prepareRename requires an exact range and placeholder",
+    );
   });
 
   test("rejects exact evidence reuse and suspicious prose lineage", () => {

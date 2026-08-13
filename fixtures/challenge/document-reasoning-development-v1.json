@@ -686,13 +686,14 @@
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
-          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
+          "v0.32 adjudication: an asserted momentum formula preserves its proposed roles but remains partial until mass and velocity receive independent typed proof."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "189a4e491db61327a3b24aeffe46b0643ea1cb86bc5c19f42bd68779d223f4fd",
+        "finalDigest": "1578461f0399460d8356f0f68ad9146a29545df6a88e008f82a138922391036b",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "189a4e491db61327a3b24aeffe46b0643ea1cb86bc5c19f42bd68779d223f4fd",
+        "reviewedAt": "2026-08-13",
+        "semanticReviewDigest": "1578461f0399460d8356f0f68ad9146a29545df6a88e008f82a138922391036b",
         "status": "corrected"
       },
       "snapshots": [
@@ -12003,7 +12004,7 @@
         "offset": 1
       },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -12083,7 +12084,7 @@
             "status": "available"
           }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [
           {
             "anchor": {

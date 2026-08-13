@@ -1,7 +1,8 @@
 use crate::{
-    ConstraintStatus, DecisionReason, DecisionReasonKind, Evidence, LawRecognition,
-    LawRecognitionStatus, MeaningAlternative, MeaningConclusion, MeaningConflict, MeaningDecision,
-    MeaningFact, MeaningRequirement, SemanticCandidateInfo, SemanticCandidateStatus, SymbolInfo,
+    ConstraintStatus, DecisionReason, DecisionReasonKind, Evidence, LawBindingProof,
+    LawRecognition, LawRecognitionStatus, MeaningAlternative, MeaningConclusion, MeaningConflict,
+    MeaningDecision, MeaningFact, MeaningRequirement, SemanticCandidateInfo,
+    SemanticCandidateStatus, SymbolInfo,
 };
 
 const MAX_DECISION_ITEMS: usize = 8;
@@ -195,8 +196,10 @@ fn formula_has_establishment_proof(formula: &LawRecognition) -> bool {
                     .any(|range| ranges_overlap(range, &formula.range))
         })
         && formula.bindings.iter().all(|binding| {
-            matches!(binding.evidence.strength.as_str(), "hard" | "strong")
-                && !binding.evidence.source_ranges.is_empty()
+            matches!(
+                binding.proof,
+                LawBindingProof::Typed | LawBindingProof::Derived
+            ) && !binding.evidence.source_ranges.is_empty()
         })
         && formula
             .conditions
@@ -431,8 +434,9 @@ fn deduplicate_evidence(mut evidence: Vec<Evidence>) -> Vec<Evidence> {
 mod tests {
     use super::*;
     use crate::{
-        ConstraintStatus, Evidence, LawBinding, LawConditionInfo, LawRecognitionStatus,
-        RelationInfo, SemanticConstraint, SemanticConstraintKind, SourceRange,
+        ConstraintStatus, Evidence, LawBinding, LawBindingProof, LawConditionInfo,
+        LawRecognitionStatus, RelationInfo, SemanticConstraint, SemanticConstraintKind,
+        SourceRange,
     };
 
     #[test]
@@ -494,13 +498,45 @@ mod tests {
     #[test]
     fn an_unresolved_role_binding_cannot_establish_a_recognized_formula() {
         let mut formula = formula("candidate", ConstraintStatus::Verified);
-        formula.bindings[0].evidence.kind = "candidate-binding".into();
-        formula.bindings[0].evidence.strength = "weak".into();
+        formula.bindings[0].proof = LawBindingProof::Candidate;
 
         assert!(matches!(
             decide_meaning(input(std::slice::from_ref(&formula))),
             MeaningDecision::Partial { .. }
         ));
+    }
+
+    #[test]
+    fn an_asserted_formula_does_not_invent_role_identity() {
+        let mut formula = formula("asserted", ConstraintStatus::Verified);
+        formula.bindings[0].proof = LawBindingProof::Asserted;
+        formula.bindings[0].evidence.kind = "asserted-binding".into();
+        formula.bindings[0].evidence.strength = "strong".into();
+
+        assert!(matches!(
+            decide_meaning(input(std::slice::from_ref(&formula))),
+            MeaningDecision::Partial { facts, .. }
+                if facts.iter().any(|fact| fact.label == "x is value")
+        ));
+    }
+
+    #[test]
+    fn only_typed_or_derived_role_proof_can_establish_a_formula() {
+        for (proof, established) in [
+            (LawBindingProof::Typed, true),
+            (LawBindingProof::Derived, true),
+            (LawBindingProof::Asserted, false),
+            (LawBindingProof::Candidate, false),
+        ] {
+            let mut formula = formula("proof", ConstraintStatus::Verified);
+            formula.bindings[0].proof = proof;
+            let decision = decide_meaning(input(std::slice::from_ref(&formula)));
+            assert_eq!(
+                matches!(decision, MeaningDecision::Established { .. }),
+                established,
+                "{proof:?}",
+            );
+        }
     }
 
     #[test]
@@ -921,6 +957,7 @@ mod tests {
                     dimensions: Vec::new(),
                     refinements: Vec::new(),
                 },
+                proof: LawBindingProof::Typed,
                 evidence: evidence.clone(),
             }],
             result: SemanticConstraint {

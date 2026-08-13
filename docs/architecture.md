@@ -156,7 +156,7 @@ visible there, so same-spelling dimensions in sibling scopes never become proof.
 Constraint conflicts require incompatible established values or a demonstrably
 invalid typed operation. Missing operands, unresolved symbolic extents, and
 work limits remain partial evidence rather than Problems. Work and truncation
-counters are part of protocol 12 so hosts can enforce performance budgets.
+counters are part of protocol 13 so hosts can enforce performance budgets.
 
 Transparent macro structure supplied by wasmtex may contribute meaning in both
 formulas and prose declarations. Generated nodes inherit only the real call
@@ -253,8 +253,11 @@ two different physical quantities remain incompatible.
 Candidate admission and establishment remain separate. Each bound law role
 carries one proof disposition: independently typed, structurally derived,
 explicitly asserted with the attached formula, or unresolved candidate. The
-first three retain their exact sources; an unresolved binding may keep a useful
-relation candidate visible but can never complete an established decision.
+first three retain their exact sources. Only independently typed or
+structurally derived role identity can complete an established decision;
+formula-level assertion may keep a useful relation and proposed role mapping
+visible, but cannot prove that mapping by itself. An unresolved binding is
+likewise candidate evidence only.
 Runtime concepts always use the pack-qualified identity
 `<namespace>:<concept>`; display labels are derived views, never an alternate
 identity system. Longer pack vocabulary terms take precedence over embedded
@@ -284,7 +287,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 12 exposes selection, `semanticView`, definition, references, rename,
+Protocol 13 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is

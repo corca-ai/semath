@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 12 is a deliberate
+Semath is a library and language-service runtime. Protocol 13 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -42,10 +42,16 @@ unsupported law conditions and truncated evidence cannot produce `established`.
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 12 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 13 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
+
+Every `LawBinding` exposes a typed `proof` disposition. `typed` and `derived`
+bindings may participate in an established decision. `asserted` preserves a
+source-backed formula-level proposal without inventing the role identity, and
+`candidate` remains unresolved. Hosts display this state; they do not infer it
+from evidence labels or strength strings.
 
 Source selection exposes a revision-local `SourceOccurrenceId`; established
 meaning exposes a scoped `EntityId` anchored to one such occurrence. Notation
