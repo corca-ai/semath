@@ -2,7 +2,8 @@
 use crate::{DocumentLanguage, SourceIndex};
 use crate::{
     EquationNode, GeneratedNotationTree, MathRegion, MathRootState, NotationNode, NotationNodeKind,
-    ProjectDocument, SourceRange, WASMTEX_SYNTAX_SCHEMA_VERSION,
+    ProjectDocument, ProjectSourceRef, SourceRange, StructuralDeclaration,
+    WASMTEX_SYNTAX_SCHEMA_VERSION,
 };
 
 #[derive(Clone, Debug)]
@@ -86,6 +87,13 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
             ));
         }
         if node
+            .math_class
+            .as_deref()
+            .is_some_and(|class| !valid_math_class(class))
+        {
+            return Err(format!("notation node {id} has an invalid math class"));
+        }
+        if node
             .parent
             .is_some_and(|parent| parent as usize >= document.nodes.len())
         {
@@ -113,21 +121,37 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
                 return Err(format!("notation node {id} has no reciprocal parent edge"));
             }
         }
+        let mut unique_arguments = std::collections::BTreeSet::new();
         for argument in &node.arguments {
             let Some(argument_node) = document.nodes.get(argument.node as usize) else {
                 return Err(format!("notation node {id} has an invalid argument"));
             };
-            if !valid_range(&argument.range)
+            if !unique_arguments.insert(argument.node)
+                || !node.children.contains(&argument.node)
+                || !matches!(argument.syntax.as_str(), "required" | "optional")
+                || !valid_range(&argument.range)
                 || !range_contains(&node.ranges.full, &argument.range)
                 || !range_contains(&argument.range, &argument_node.ranges.full)
             {
                 return Err(format!("notation node {id} has an invalid argument range"));
             }
         }
-        if node.provenance.as_ref().is_some_and(|provenance| {
-            provenance.source.file_id == document.file_id && !valid_range(&provenance.source.range)
-        }) {
-            return Err(format!("notation node {id} has invalid provenance"));
+        if let Some(provenance) = &node.provenance {
+            if !matches!(
+                provenance.origin.as_str(),
+                "source" | "call-site" | "definition" | "expansion" | "generated"
+            ) || !valid_reference(document, source_length, &provenance.source)
+                || provenance
+                    .call_site
+                    .as_ref()
+                    .is_some_and(|source| !valid_reference(document, source_length, source))
+                || provenance
+                    .definitions
+                    .iter()
+                    .any(|source| !valid_reference(document, source_length, source))
+            {
+                return Err(format!("notation node {id} has invalid provenance"));
+            }
         }
     }
     for root in &document.math_roots {
@@ -153,6 +177,22 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
     }) {
         return Err("math roots overlap".to_owned());
     }
+    let mut reachable = vec![false; document.nodes.len()];
+    let mut stack = document
+        .math_roots
+        .iter()
+        .map(|root| root.node)
+        .collect::<Vec<_>>();
+    while let Some(id) = stack.pop() {
+        if reachable[id as usize] {
+            continue;
+        }
+        reachable[id as usize] = true;
+        stack.extend(document.nodes[id as usize].children.iter().copied());
+    }
+    if reachable.iter().any(|reachable| !reachable) {
+        return Err("notation arena contains unreachable nodes".to_owned());
+    }
     let document_scopes = document
         .scopes
         .iter()
@@ -170,6 +210,11 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
     for (id, scope) in document.scopes.iter().enumerate() {
         if !valid_range(&scope.range) {
             return Err(format!("syntax scope {id} has an invalid range"));
+        }
+        if !matches!(scope.kind.as_str(), "document" | "section" | "environment")
+            || scope.kind == "document" && scope.parent.is_some()
+        {
+            return Err(format!("syntax scope {id} has an invalid kind"));
         }
         if let Some(parent) = scope.parent {
             let Some(parent_scope) = document.scopes.get(parent as usize) else {
@@ -192,15 +237,15 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
             cursor = document.scopes[parent].parent;
         }
     }
-    if document
-        .visible_prose
-        .iter()
-        .any(|span| !valid_range(&span.range))
-    {
+    if !ordered_non_overlapping(
+        document.visible_prose.iter().map(|span| &span.range),
+        source_length,
+    ) {
         return Err("visible prose span has an invalid range".to_owned());
     }
     for annotation in &document.prose_annotations {
-        if !valid_range(&annotation.range)
+        if !valid_prose_annotation(annotation)
+            || !valid_range(&annotation.range)
             || annotation.value_range.as_ref().is_some_and(|range| {
                 !valid_range(range) || !range_contains(&annotation.range, range)
             })
@@ -224,6 +269,45 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
         {
             return Err(format!("syntax block {id} has an invalid content range"));
         }
+    }
+    if !ordered_non_overlapping(
+        document.blocks.iter().map(|block| &block.range),
+        source_length,
+    ) {
+        return Err("syntax blocks must be ordered and non-overlapping".to_owned());
+    }
+    for declaration in &document.declarations {
+        if declaration_references(declaration)
+            .into_iter()
+            .any(|source| !valid_owned_reference(document, source_length, source))
+        {
+            return Err("structural declaration has invalid source provenance".to_owned());
+        }
+    }
+    for event in &document.macros {
+        if !valid_owned_reference(document, source_length, &event.source)
+            || event
+                .definitions
+                .iter()
+                .any(|source| !valid_reference(document, source_length, source))
+            || event
+                .expansion
+                .input_range
+                .as_ref()
+                .is_some_and(|range| !valid_source_range(range, source_length))
+        {
+            return Err(format!(
+                "macro {} has invalid source provenance",
+                event.name
+            ));
+        }
+    }
+    if document
+        .includes
+        .iter()
+        .any(|include| !valid_owned_reference(document, source_length, &include.source))
+    {
+        return Err("include has invalid source provenance".to_owned());
     }
     let mut generated_nodes = 0usize;
     for (event, tree) in document
@@ -257,6 +341,107 @@ fn valid_source_range(range: &SourceRange, source_length: u32) -> bool {
     range.start_offset <= range.end_offset && range.end_offset <= source_length
 }
 
+fn valid_math_class(class: &str) -> bool {
+    matches!(
+        class,
+        "ordinary"
+            | "operator"
+            | "binary"
+            | "relation"
+            | "opening"
+            | "closing"
+            | "punctuation"
+            | "inner"
+    )
+}
+
+fn valid_reference(
+    document: &ProjectDocument,
+    source_length: u32,
+    source: &ProjectSourceRef,
+) -> bool {
+    source.file_id != document.file_id
+        || source.path == document.path && valid_source_range(&source.range, source_length)
+}
+
+fn valid_owned_reference(
+    document: &ProjectDocument,
+    source_length: u32,
+    source: &ProjectSourceRef,
+) -> bool {
+    source.file_id == document.file_id
+        && source.path == document.path
+        && valid_source_range(&source.range, source_length)
+}
+
+fn ordered_non_overlapping<'a>(
+    ranges: impl IntoIterator<Item = &'a SourceRange>,
+    source_length: u32,
+) -> bool {
+    let mut previous_end = 0;
+    for range in ranges {
+        if !valid_source_range(range, source_length) || range.start_offset < previous_end {
+            return false;
+        }
+        previous_end = range.end_offset;
+    }
+    true
+}
+
+fn valid_prose_annotation(annotation: &crate::ProseAnnotation) -> bool {
+    match annotation.kind.as_str() {
+        "citation" => !annotation.name.is_empty() && annotation.value_range.is_none(),
+        "document-field" => matches!(annotation.name.as_str(), "title" | "author" | "keywords"),
+        _ => false,
+    }
+}
+
+fn declaration_references(declaration: &StructuralDeclaration) -> Vec<&ProjectSourceRef> {
+    match declaration {
+        StructuralDeclaration::Class { source, .. }
+        | StructuralDeclaration::Package { source, .. }
+        | StructuralDeclaration::Environment { source, .. } => vec![source],
+        StructuralDeclaration::Macro {
+            source,
+            body_source,
+            ..
+        } => std::iter::once(source).chain(body_source).collect(),
+        StructuralDeclaration::Operator {
+            source,
+            name_source,
+            surface_source,
+            ..
+        } => vec![source, name_source, surface_source],
+        StructuralDeclaration::PairedDelimiter {
+            source,
+            name_source,
+            ..
+        } => vec![source, name_source],
+        StructuralDeclaration::Glossary {
+            source,
+            key_source,
+            options,
+            fields,
+            ..
+        } => std::iter::once(source)
+            .chain(std::iter::once(key_source))
+            .chain(options.iter().map(|field| &field.source))
+            .chain(fields.iter().map(|field| &field.source))
+            .collect(),
+        StructuralDeclaration::Acronym {
+            source,
+            key_source,
+            short_source,
+            long_source,
+            options,
+            ..
+        } => vec![source, key_source, short_source, long_source]
+            .into_iter()
+            .chain(options.iter().map(|field| &field.source))
+            .collect(),
+    }
+}
+
 fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static str> {
     if tree.nodes.is_empty() || tree.nodes.len() > 10_000 {
         return Err("node count is outside the per-expansion cap");
@@ -264,7 +449,16 @@ fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static 
     if tree.root as usize >= tree.nodes.len() {
         return Err("root does not exist");
     }
+    let mut incoming = vec![0usize; tree.nodes.len()];
     for node in &tree.nodes {
+        let mut unique_children = std::collections::BTreeSet::new();
+        if node
+            .children
+            .iter()
+            .any(|child| !unique_children.insert(*child))
+        {
+            return Err("node contains a duplicate child");
+        }
         if node
             .children
             .iter()
@@ -272,6 +466,9 @@ fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static 
             .any(|child| *child as usize >= tree.nodes.len())
         {
             return Err("child does not exist");
+        }
+        for child in &node.children {
+            incoming[*child as usize] += 1;
         }
     }
     let mut active = vec![false; tree.nodes.len()];
@@ -308,6 +505,17 @@ fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static 
         {
             stack.push((*child, false, depth + 1));
         }
+    }
+    if visited.iter().any(|visited| !visited) {
+        return Err("tree contains unreachable nodes");
+    }
+    if incoming[tree.root as usize] != 0
+        || incoming
+            .iter()
+            .enumerate()
+            .any(|(index, count)| index != tree.root as usize && *count != 1)
+    {
+        return Err("nodes do not form one rooted tree");
     }
     Ok(())
 }
