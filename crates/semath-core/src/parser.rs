@@ -47,12 +47,31 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
     if document.nodes.len() > 100_000 {
         return Err("notation arena exceeds the Semath ingestion cap".to_owned());
     }
-    let valid_range = |range: &SourceRange| {
-        range.start_offset <= range.end_offset && range.end_offset <= source_length
-    };
+    let valid_range = |range: &SourceRange| valid_source_range(range, source_length);
     for (id, node) in document.nodes.iter().enumerate() {
         if !valid_range(&node.ranges.full) {
             return Err(format!("notation node {id} has an invalid source range"));
+        }
+        for range in [
+            node.ranges.command.as_ref(),
+            node.ranges.name.as_ref(),
+            node.ranges.nucleus.as_ref(),
+            node.ranges.editable.as_ref(),
+        ]
+        .into_iter()
+        .flatten()
+        {
+            if !valid_range(range) || !range_contains(&node.ranges.full, range) {
+                return Err(format!("notation node {id} has an invalid optional range"));
+            }
+        }
+        let mut unique_children = std::collections::BTreeSet::new();
+        if node
+            .children
+            .iter()
+            .any(|child| !unique_children.insert(*child))
+        {
+            return Err(format!("notation node {id} has a duplicate child"));
         }
         if node
             .children
@@ -73,10 +92,36 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
             return Err(format!("notation node {id} has an invalid parent"));
         }
         for child in &node.children {
-            if document.nodes[*child as usize].parent != Some(id as u32) {
+            let child = &document.nodes[*child as usize];
+            if child.parent != Some(id as u32) {
                 return Err(format!(
                     "notation node {id} has an inconsistent child parent"
                 ));
+            }
+            if !range_contains(&node.ranges.full, &child.ranges.full) {
+                return Err(format!("notation node {id} has a child outside its range"));
+            }
+        }
+        if let Some(parent) = node.parent {
+            let parent = &document.nodes[parent as usize];
+            let linked = parent.children.contains(&(id as u32))
+                || parent
+                    .arguments
+                    .iter()
+                    .any(|argument| argument.node == id as u32);
+            if !linked {
+                return Err(format!("notation node {id} has no reciprocal parent edge"));
+            }
+        }
+        for argument in &node.arguments {
+            let Some(argument_node) = document.nodes.get(argument.node as usize) else {
+                return Err(format!("notation node {id} has an invalid argument"));
+            };
+            if !valid_range(&argument.range)
+                || !range_contains(&node.ranges.full, &argument.range)
+                || !range_contains(&argument.range, &argument_node.ranges.full)
+            {
+                return Err(format!("notation node {id} has an invalid argument range"));
             }
         }
         if node.provenance.as_ref().is_some_and(|provenance| {
@@ -92,9 +137,21 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
             || !valid_range(&root.content_range)
             || root.content_range.start_offset < root.full_range.start_offset
             || root.content_range.end_offset > root.full_range.end_offset
+            || !range_contains(
+                &root.content_range,
+                &document.nodes[root.node as usize].ranges.full,
+            )
         {
             return Err("math root is corrupt".to_owned());
         }
+    }
+    let mut roots = document.math_roots.iter().collect::<Vec<_>>();
+    roots.sort_by_key(|root| (root.full_range.start_offset, root.full_range.end_offset));
+    if roots.windows(2).any(|pair| {
+        pair[0].full_range.start_offset < pair[1].full_range.end_offset
+            && pair[1].full_range.start_offset < pair[0].full_range.end_offset
+    }) {
+        return Err("math roots overlap".to_owned());
     }
     let document_scopes = document
         .scopes
@@ -142,6 +199,30 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
     {
         return Err("visible prose span has an invalid range".to_owned());
     }
+    for annotation in &document.prose_annotations {
+        if !valid_range(&annotation.range)
+            || annotation.value_range.as_ref().is_some_and(|range| {
+                !valid_range(range) || !range_contains(&annotation.range, range)
+            })
+        {
+            return Err("prose annotation has an invalid range".to_owned());
+        }
+    }
+    for (id, block) in document.blocks.iter().enumerate() {
+        let Some(parent) = document.scopes.get(block.parent_scope as usize) else {
+            return Err(format!("syntax block {id} has an invalid parent scope"));
+        };
+        if !valid_range(&block.range) || !range_contains(&parent.range, &block.range) {
+            return Err(format!("syntax block {id} has an invalid range"));
+        }
+        if block
+            .content_range
+            .as_ref()
+            .is_some_and(|range| !valid_range(range) || !range_contains(&block.range, range))
+        {
+            return Err(format!("syntax block {id} has an invalid content range"));
+        }
+    }
     let mut generated_nodes = 0usize;
     for (event, tree) in document
         .macros
@@ -160,6 +241,14 @@ fn validate_snapshot(document: &ProjectDocument, source_length: u32) -> Result<(
         })?;
     }
     Ok(())
+}
+
+fn range_contains(container: &SourceRange, nested: &SourceRange) -> bool {
+    container.start_offset <= nested.start_offset && nested.end_offset <= container.end_offset
+}
+
+fn valid_source_range(range: &SourceRange, source_length: u32) -> bool {
+    range.start_offset <= range.end_offset && range.end_offset <= source_length
 }
 
 fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static str> {
@@ -200,7 +289,17 @@ fn validate_generated_tree(tree: &GeneratedNotationTree) -> Result<(), &'static 
         }
         active[index] = true;
         stack.push((node_id, true, depth));
-        for child in tree.nodes[index].children.iter().rev() {
+        for child in tree.nodes[index]
+            .children
+            .iter()
+            .chain(
+                tree.nodes[index]
+                    .arguments
+                    .iter()
+                    .map(|argument| &argument.node),
+            )
+            .rev()
+        {
             stack.push((*child, false, depth + 1));
         }
     }
@@ -922,6 +1021,166 @@ mod tests {
         ProjectDocument, SyntaxState,
     };
 
+    fn valid_snapshot_document() -> ProjectDocument {
+        serde_json::from_value(serde_json::json!({
+            "schemaVersion": 8,
+            "proseAnnotations": [],
+            "fileId": "main",
+            "path": "main.tex",
+            "language": "latex",
+            "content": "$x$",
+            "documentVersion": 1,
+            "nodes": [
+                {
+                    "kind": "token", "parent": 1, "children": [],
+                    "ranges": {"full": {"startOffset": 1, "endOffset": 2}, "editable": {"startOffset": 1, "endOffset": 2}},
+                    "state": "complete", "text": "x", "lexicalClass": "identifier"
+                },
+                {
+                    "kind": "sequence", "parent": null, "children": [0],
+                    "ranges": {"full": {"startOffset": 1, "endOffset": 2}},
+                    "state": "complete"
+                }
+            ],
+            "mathRoots": [
+                {"node": 1, "delimiter": "$", "fullRange": {"startOffset": 0, "endOffset": 3}, "contentRange": {"startOffset": 1, "endOffset": 2}, "state": "complete"}
+            ],
+            "visibleProse": [],
+            "scopes": [{"kind": "document", "parent": null, "range": {"startOffset": 0, "endOffset": 3}, "state": "complete"}],
+            "blocks": [], "declarations": [], "macros": [], "includes": []
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn rejects_out_of_bounds_optional_node_ranges() {
+        let mut document = valid_snapshot_document();
+        document.nodes[0].ranges.editable = Some(crate::SourceRange {
+            start_offset: 1,
+            end_offset: 99,
+        });
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_missing_notation_argument_nodes() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].arguments.push(crate::NotationArgument {
+            node: 99,
+            role: "nucleus".into(),
+            syntax: "required".into(),
+            range: crate::SourceRange {
+                start_offset: 1,
+                end_offset: 2,
+            },
+        });
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_out_of_bounds_notation_argument_ranges() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].arguments.push(crate::NotationArgument {
+            node: 0,
+            role: "nucleus".into(),
+            syntax: "required".into(),
+            range: crate::SourceRange {
+                start_offset: 1,
+                end_offset: 99,
+            },
+        });
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_children_that_escape_their_parent_range() {
+        let mut document = valid_snapshot_document();
+        document.nodes[0].ranges.full = crate::SourceRange {
+            start_offset: 0,
+            end_offset: 3,
+        };
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_parent_links_missing_the_reciprocal_child() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].children.clear();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_duplicate_child_links() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].children.push(0);
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_root_nodes_that_escape_math_content() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].ranges.full = crate::SourceRange {
+            start_offset: 0,
+            end_offset: 3,
+        };
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_duplicate_overlapping_math_roots() {
+        let mut document = valid_snapshot_document();
+        document.math_roots.push(document.math_roots[0].clone());
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_out_of_bounds_prose_annotations() {
+        let mut document = valid_snapshot_document();
+        document.prose_annotations = serde_json::from_value(serde_json::json!([{
+            "kind": "citation", "name": "cite", "range": {"startOffset": 2, "endOffset": 99}, "state": "complete"
+        }]))
+        .unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_blocks_with_missing_parent_scopes() {
+        let mut document = valid_snapshot_document();
+        document.blocks = serde_json::from_value(serde_json::json!([{
+            "kind": "paragraph", "parentScope": 99, "range": {"startOffset": 0, "endOffset": 3}, "state": "complete"
+        }]))
+        .unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_block_content_that_escapes_its_block() {
+        let mut document = valid_snapshot_document();
+        document.blocks = serde_json::from_value(serde_json::json!([{
+            "kind": "paragraph", "parentScope": 0, "range": {"startOffset": 1, "endOffset": 2},
+            "contentRange": {"startOffset": 0, "endOffset": 3}, "state": "complete"
+        }]))
+        .unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_cycles_through_generated_argument_edges() {
+        let mut document = valid_snapshot_document();
+        document.macros = serde_json::from_value(serde_json::json!([{
+            "kind": "call", "name": "bad", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 1, "endOffset": 2}},
+            "definitions": [],
+            "expansion": {
+                "status": "expanded", "depth": 1, "editable": true, "inputRange": {"startOffset": 1, "endOffset": 2},
+                "notation": {"root": 0, "nodes": [{
+                    "kind": "command", "children": [], "state": "complete", "name": "bad",
+                    "arguments": [{"node": 0, "role": "nucleus", "syntax": "required"}]
+                }]}
+            }
+        }]))
+        .unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
     #[test]
     fn rejects_cyclic_generated_macro_notation() {
         let tree = GeneratedNotationTree {

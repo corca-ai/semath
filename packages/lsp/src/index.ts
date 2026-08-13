@@ -707,28 +707,44 @@ function languageOf(uri: string, languageId?: string): DocumentLanguage {
   return "latex";
 }
 
-function lineStarts(content: string): number[] {
-  const starts = [0];
+interface TextLine {
+  end: number;
+  start: number;
+}
+
+function textLines(content: string): TextLine[] {
+  const lines: TextLine[] = [];
+  let start = 0;
   for (let index = 0; index < content.length; index++) {
-    if (content.charCodeAt(index) === 10) starts.push(index + 1);
+    const code = content.charCodeAt(index);
+    if (code !== 10 && code !== 13) continue;
+    lines.push({ end: index, start });
+    if (code === 13 && content.charCodeAt(index + 1) === 10) index++;
+    start = index + 1;
   }
-  return starts;
+  lines.push({ end: content.length, start });
+  return lines;
 }
 
 export function offsetAt(content: string, position: LspPosition): number {
-  const starts = lineStarts(content);
-  const line = Math.max(0, Math.min(position.line, starts.length - 1));
-  const start = starts[line]!;
-  const next = starts[line + 1] ?? content.length;
-  return Math.max(start, Math.min(start + position.character, next));
+  const lines = textLines(content);
+  const lineIndex = boundedInteger(position.line, lines.length - 1);
+  const line = lines[lineIndex]!;
+  const character = boundedInteger(position.character, Number.MAX_SAFE_INTEGER);
+  return Math.min(line.start + character, line.end);
 }
 
 export function positionAt(content: string, offset: number): LspPosition {
-  const starts = lineStarts(content);
-  const clamped = Math.max(0, Math.min(offset, content.length));
+  const lines = textLines(content);
+  const clamped = boundedInteger(offset, content.length);
   let line = 0;
-  while (line + 1 < starts.length && starts[line + 1]! <= clamped) line++;
-  return { character: clamped - starts[line]!, line };
+  while (line + 1 < lines.length && lines[line + 1]!.start <= clamped) line++;
+  const selected = lines[line]!;
+  return { character: Math.min(clamped, selected.end) - selected.start, line };
+}
+
+function boundedInteger(value: number, maximum: number): number {
+  return Math.max(0, Math.min(Math.floor(value), maximum));
 }
 
 function mapRange(range: NeutralRange): LspRange {

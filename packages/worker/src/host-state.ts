@@ -59,13 +59,13 @@ export function staleGenerationMessage(
   request: WorkRequest,
   latestGeneration: number,
 ): string | undefined {
-  if (
-    request.kind !== "query" ||
-    request.envelope.analysisGeneration >= latestGeneration
-  ) {
+  if (request.kind !== "query" || request.envelope.analysisGeneration === latestGeneration) {
     return undefined;
   }
-  return `Skipped generation ${request.envelope.analysisGeneration}; current generation is ${latestGeneration}.`;
+  return generationMismatchMessage(
+    request.envelope.analysisGeneration,
+    latestGeneration,
+  );
 }
 
 export function advanceProjectFreshness(
@@ -73,6 +73,12 @@ export function advanceProjectFreshness(
   request: WorkRequest,
 ): ProjectFreshness | undefined {
   if (request.kind === "reset") {
+    if (
+      current?.epoch === request.snapshot.epoch &&
+      request.snapshot.inventoryVersion < current.inventoryVersion
+    ) {
+      return current;
+    }
     return {
       analysisGeneration: 0,
       epoch: request.snapshot.epoch,
@@ -109,10 +115,18 @@ export function staleProjectMessage(
   if (requested.inventoryVersion !== latest.inventoryVersion) {
     return `Skipped inventory ${requested.inventoryVersion}; current inventory is ${latest.inventoryVersion}.`;
   }
-  if (requested.analysisGeneration < latest.analysisGeneration) {
-    return `Skipped generation ${requested.analysisGeneration}; current generation is ${latest.analysisGeneration}.`;
+  if (requested.analysisGeneration !== latest.analysisGeneration) {
+    return generationMismatchMessage(
+      requested.analysisGeneration,
+      latest.analysisGeneration,
+    );
   }
   return undefined;
+}
+
+function generationMismatchMessage(requested: number, current: number): string {
+  const direction = requested < current ? "generation" : "future generation";
+  return `Skipped ${direction} ${requested}; current generation is ${current}.`;
 }
 
 function requestFreshness(request: WorkRequest): ProjectFreshness {

@@ -1105,3 +1105,19 @@ test("offset/position conversion is UTF-16 and clamps malformed positions", () =
   expect(offsetAt(content, { character: 99, line: 99 })).toBe(content.length);
   expect(positionAt(content, 99)).toEqual({ character: 3, line: 1 });
 });
+
+test("offset conversion clamps to the line content before line endings", () => {
+  expect(offsetAt("ab\ncd", { character: 99, line: 0 })).toBe(2);
+  expect(offsetAt("ab\r\ncd", { character: 99, line: 0 })).toBe(2);
+});
+
+test("offset and position conversion recognize standalone carriage returns", () => {
+  const content = "ab\rcd";
+  expect(offsetAt(content, { character: 0, line: 1 })).toBe(3);
+  expect(positionAt(content, 3)).toEqual({ character: 0, line: 1 });
+});
+
+test("offset and position conversion return integer coordinates for fractional input", () => {
+  expect(offsetAt("abc", { character: 1.75, line: 0.5 })).toBe(1);
+  expect(positionAt("abc", 1.75)).toEqual({ character: 1, line: 0 });
+});
