@@ -3726,8 +3726,13 @@ impl SemathEngine {
             .constraint_conflicts_for(&document.document.file_id)
             .into_iter()
             .filter_map(|conflict| {
+                let entity_relevant = symbol_info
+                    .as_ref()
+                    .and_then(|symbol| symbol.entity_id.as_ref())
+                    .is_some_and(|entity_id| entity_id == &conflict.subject);
                 let (range, conflict) = meaning_conflict(&self.index.semantic, conflict)?;
-                relevant_to_query(&range, &conflict.evidence).then_some(conflict)
+                (entity_relevant || relevant_to_query(&range, &conflict.evidence))
+                    .then_some(conflict)
             })
             .collect::<Vec<_>>();
         typed_conflicts.sort_by(|left, right| left.conflict_id.cmp(&right.conflict_id));

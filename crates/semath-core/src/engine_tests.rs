@@ -1039,7 +1039,7 @@ fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
 #[test]
 fn incompatible_redeclarations_share_one_typed_public_conflict() {
     let content = "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $";
-    let offset = content.find("p$ is").unwrap() as u32;
+    let offset = (content.rfind("$p ").unwrap() + 1) as u32;
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
     let result = engine
