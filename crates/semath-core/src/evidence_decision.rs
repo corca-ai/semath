@@ -97,6 +97,9 @@ where
         return EvidenceDecision::Unsupported;
     }
 
+    for alternative in &mut input.alternatives {
+        alternative.proof.complete &= !alternative.proof.roots.is_empty();
+    }
     input.alternatives.sort_by(|left, right| {
         left.value
             .cmp(&right.value)
@@ -150,13 +153,12 @@ where
         );
     }
 
-    let best_complete_authority = input
+    let strongest_authority = input
         .alternatives
         .iter()
-        .filter(|alternative| alternative.proof.complete)
         .map(|alternative| alternative.proof.authority)
         .min();
-    if let Some(authority) = best_complete_authority {
+    if let Some(authority) = strongest_authority {
         let mut complete = input.alternatives.iter().filter(|alternative| {
             alternative.proof.complete && alternative.proof.authority == authority
         });
@@ -166,7 +168,18 @@ where
             return EvidenceDecision::Established(unique_complete.value.clone());
         }
     }
-    EvidenceDecision::Partial(first.value.clone())
+    let preferred = input
+        .alternatives
+        .iter()
+        .min_by_key(|alternative| {
+            (
+                alternative.proof.authority,
+                !alternative.proof.complete,
+                &alternative.value,
+            )
+        })
+        .expect("nonempty alternatives have a preferred partial result");
+    EvidenceDecision::Partial(preferred.value.clone())
 }
 
 #[cfg(test)]
@@ -211,6 +224,14 @@ mod tests {
         );
         assert_eq!(
             decide_evidence(input(vec![alternative("law", &[1], false)])),
+            EvidenceDecision::Partial("law".into())
+        );
+    }
+
+    #[test]
+    fn removing_the_last_proof_root_revokes_establishment() {
+        assert_eq!(
+            decide_evidence(input(vec![alternative("law", &[], true)])),
             EvidenceDecision::Partial("law".into())
         );
     }
@@ -289,6 +310,30 @@ mod tests {
         assert_eq!(
             decide_evidence(input(vec![derived, alternative("explicit", &[1], true)])),
             EvidenceDecision::Established("explicit".into())
+        );
+    }
+
+    #[test]
+    fn weaker_complete_proof_cannot_override_stronger_incomplete_evidence() {
+        let explicit_incomplete = alternative("explicit", &[1], false);
+        let mut derived_complete = alternative("derived", &[2], true);
+        derived_complete.proof.authority = EvidenceAuthority::Derived(1);
+        assert_eq!(
+            decide_evidence(input(vec![derived_complete, explicit_incomplete])),
+            EvidenceDecision::Partial("explicit".into())
+        );
+    }
+
+    #[test]
+    fn partial_projection_prefers_authority_over_lexical_order() {
+        let mut lexical_first = alternative("a-derived", &[1], false);
+        lexical_first.proof.authority = EvidenceAuthority::Derived(1);
+        assert_eq!(
+            decide_evidence(input(vec![
+                lexical_first,
+                alternative("z-explicit", &[1], false),
+            ])),
+            EvidenceDecision::Partial("z-explicit".into())
         );
     }
 
