@@ -276,7 +276,7 @@
       "caseId": "constraint-passive-sign-asserted",
       "documentShape": "distant-prose",
       "decision": {
-        "status": "partial",
+        "status": "established",
         "meaning": "present",
         "problems": "none"
       }
