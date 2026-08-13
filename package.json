@@ -72,7 +72,7 @@
     "legacy:audit": "bun scripts/audit-legacy-semantic-paths.ts",
     "legacy:audit:check": "bun scripts/audit-legacy-semantic-paths.ts --check",
     "notation:conformance": "bun test packages/evaluation/src/notation-conformance.test.ts",
-    "package:smoke": "node scripts/check-package-smoke.mjs",
+    "package:smoke": "bun scripts/check-package-smoke.mjs",
     "pack:authoring": "bun packages/authoring/cli.mjs validate packs/*/v1.json && bun packages/authoring/cli.mjs audit-runtime packs/*/v1.json",
     "pack:conformance": "bun scripts/check-pack-conformance.ts",
     "parity": "bun scripts/check-parity.mjs && bun scripts/check-lifecycle.mjs",
