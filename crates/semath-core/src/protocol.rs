@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 13;
+pub const PROTOCOL_VERSION: u32 = 14;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -454,6 +454,8 @@ pub enum Query {
         #[serde(rename = "fileId")]
         file_id: String,
         offset: u32,
+        #[serde(default = "default_true")]
+        include_declaration: bool,
     },
     PrepareRename {
         #[serde(rename = "fileId")]
@@ -477,6 +479,10 @@ pub enum Query {
         code: String,
         offset: u32,
     },
+}
+
+const fn default_true() -> bool {
+    true
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -854,12 +860,38 @@ pub struct EquationNode {
     pub children: Vec<EquationNode>,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum EntitySurfaceRefusalKind {
+    Unsupported,
+    Ambiguous,
+    Conflicting,
+    EngineLimit,
+    IncompleteSource,
+    NonEditable,
+    InvalidReplacement,
+    Capture,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct RenamePreparation {
-    pub range: Option<SourceRange>,
-    pub placeholder: Option<String>,
-    pub rejection: Option<String>,
+pub struct EntitySurfaceRefusal {
+    pub kind: EntitySurfaceRefusalKind,
+    pub message: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(tag = "status", rename_all = "kebab-case")]
+pub enum EntitySurfaceAuthorization {
+    Authorized {
+        #[serde(rename = "focusOccurrenceId")]
+        focus_occurrence_id: SourceOccurrenceId,
+        #[serde(rename = "entityId")]
+        entity_id: EntityId,
+    },
+    Refused {
+        reason: EntitySurfaceRefusal,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1001,16 +1033,17 @@ pub enum QueryValue {
         view: Box<SemanticViewInfo>,
     },
     Locations {
+        authorization: EntitySurfaceAuthorization,
         locations: Vec<Location>,
     },
     RenamePreparation {
+        authorization: EntitySurfaceAuthorization,
         range: Option<SourceRange>,
         placeholder: Option<String>,
-        rejection: Option<String>,
     },
     EditProposal {
+        authorization: EntitySurfaceAuthorization,
         proposal: Option<SemanticEditProposal>,
-        rejection: Option<String>,
     },
     Diagnostics {
         diagnostics: Vec<SemanticDiagnostic>,

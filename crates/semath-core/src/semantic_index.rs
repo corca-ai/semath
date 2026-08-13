@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::SourceRange;
 use crate::constraint::{ConstraintInputClaim, PlannedConflict, plan_constraint_derivations};
-use crate::entity_policy::{EntityEvidenceDecision, decide_entity};
+use crate::entity_policy::{EntityEvidenceDecision, MAX_ENTITY_SURFACE_OCCURRENCES, decide_entity};
 use crate::scope::scope_visible;
 
 const MAX_DOCUMENT_OCCURRENCES: usize = 100_000;
@@ -13,6 +13,9 @@ const MAX_DOCUMENT_CANDIDATES: usize = 50_000;
 const MAX_DERIVATION_DEPTH: u8 = 8;
 const MAX_RESOLUTION_CANDIDATES: usize = 32;
 const MAX_CANDIDATE_EVIDENCE: usize = 32;
+
+type OccurrencesByScope = BTreeMap<Vec<u32>, BTreeSet<SourceOccurrenceId>>;
+type OccurrencesBySelection = BTreeMap<(String, String), OccurrencesByScope>;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
@@ -517,9 +520,9 @@ pub struct ProjectSemanticIndex {
     claims_by_file_dependency: BTreeMap<String, BTreeSet<ClaimId>>,
     binding_claims: BTreeMap<String, BTreeSet<ClaimId>>,
     occurrences_by_binding: BTreeMap<String, BTreeSet<SourceOccurrenceId>>,
+    occurrences_by_selection: OccurrencesBySelection,
     claims_by_entity: BTreeMap<EntityId, BTreeSet<ClaimId>>,
     established_occurrences_by_entity: BTreeMap<EntityId, BTreeSet<SourceOccurrenceId>>,
-    established_entities_by_selection: BTreeMap<(String, Vec<u32>, String), BTreeSet<EntityId>>,
     invalidated_claims: u32,
     constraint_work: u32,
     constraint_truncated: bool,
@@ -744,6 +747,25 @@ impl ProjectSemanticIndex {
         self.occurrences.values()
     }
 
+    pub(crate) fn occurrences_for_file<'a>(
+        &'a self,
+        file_id: &str,
+    ) -> impl Iterator<Item = &'a SourceOccurrence> + 'a {
+        let first = SourceOccurrenceId {
+            file_id: file_id.to_owned(),
+            document_version: 0,
+            local_id: 0,
+        };
+        let last = SourceOccurrenceId {
+            file_id: file_id.to_owned(),
+            document_version: u64::MAX,
+            local_id: u32::MAX,
+        };
+        self.occurrences
+            .range(first..=last)
+            .map(|(_, occurrence)| occurrence)
+    }
+
     pub(crate) fn entity_decision(
         &self,
         occurrence_id: &SourceOccurrenceId,
@@ -751,6 +773,7 @@ impl ProjectSemanticIndex {
         decide_entity(&self.resolve(occurrence_id))
     }
 
+    #[cfg(test)]
     pub(crate) fn established_occurrences_for_entity(
         &self,
         entity: &EntityId,
@@ -763,18 +786,62 @@ impl ProjectSemanticIndex {
             .collect()
     }
 
+    pub(crate) fn bounded_established_occurrences_for_entity(
+        &self,
+        entity: &EntityId,
+    ) -> Result<Vec<SourceOccurrence>, ()> {
+        let mut occurrences = self
+            .established_occurrences_by_entity
+            .get(entity)
+            .into_iter()
+            .flatten()
+            .take(MAX_ENTITY_SURFACE_OCCURRENCES + 1)
+            .filter_map(|occurrence_id| self.occurrences.get(occurrence_id))
+            .cloned()
+            .collect::<Vec<_>>();
+        if occurrences.len() > MAX_ENTITY_SURFACE_OCCURRENCES {
+            return Err(());
+        }
+        occurrences.sort_by(|left, right| left.id.cmp(&right.id));
+        Ok(occurrences)
+    }
+
     pub(crate) fn established_selection_would_merge(
         &self,
         target: &EntityId,
         replacement: &str,
-    ) -> bool {
-        self.established_entities_by_selection
-            .get(&(
-                target.component_id.clone(),
-                target.scope_path.clone(),
-                replacement.to_owned(),
-            ))
-            .is_some_and(|entities| entities.iter().any(|entity| entity != target))
+        target_occurrences: &[SourceOccurrence],
+    ) -> Result<bool, ()> {
+        let mut visited = 0usize;
+        let target_ids = target_occurrences
+            .iter()
+            .map(|occurrence| occurrence.id.clone())
+            .collect::<BTreeSet<_>>();
+        for (candidate_scope, occurrences) in self
+            .occurrences_by_selection
+            .get(&(target.component_id.clone(), replacement.to_owned()))
+            .into_iter()
+            .flatten()
+        {
+            visited += occurrences.len();
+            if visited > MAX_ENTITY_SURFACE_OCCURRENCES {
+                return Err(());
+            }
+            if occurrences
+                .iter()
+                .all(|occurrence_id| target_ids.contains(occurrence_id))
+            {
+                continue;
+            }
+            if target_occurrences.iter().any(|occurrence| {
+                occurrence.component_id == target.component_id
+                    && (scope_visible(candidate_scope, &occurrence.scope_path)
+                        || scope_visible(&occurrence.scope_path, candidate_scope))
+            }) {
+                return Ok(true);
+            }
+        }
+        Ok(false)
     }
 
     pub fn claim(&self, id: &ClaimId) -> Option<&Claim> {
@@ -1234,6 +1301,7 @@ impl ProjectSemanticIndex {
                 .entry(occurrence_binding_key(&occurrence))
                 .or_default()
                 .insert(occurrence.id.clone());
+            self.index_occurrence_selection(&occurrence);
             self.occurrences.insert(occurrence.id.clone(), occurrence);
         }
         self.entities.extend(facts.entities);
@@ -1320,6 +1388,7 @@ impl ProjectSemanticIndex {
                     &occurrence_binding_key(&occurrence),
                     &occurrence_id,
                 );
+                remove_occurrence_selection_index(&mut self.occurrences_by_selection, &occurrence);
             }
         }
     }
@@ -1419,12 +1488,17 @@ impl ProjectSemanticIndex {
         self.claims_by_file_dependency.clear();
         self.binding_claims.clear();
         self.occurrences_by_binding.clear();
+        self.occurrences_by_selection.clear();
         self.claims_by_entity.clear();
         for occurrence in self.occurrences.values() {
             self.occurrences_by_binding
                 .entry(occurrence_binding_key(occurrence))
                 .or_default()
                 .insert(occurrence.id.clone());
+        }
+        let occurrences = self.occurrences.values().cloned().collect::<Vec<_>>();
+        for occurrence in &occurrences {
+            self.index_occurrence_selection(occurrence);
         }
         let claim_ids = self.claims.keys().cloned().collect::<Vec<_>>();
         for claim_id in claim_ids {
@@ -1435,7 +1509,6 @@ impl ProjectSemanticIndex {
 
     fn rebuild_resolution_index(&mut self) {
         self.established_occurrences_by_entity.clear();
-        self.established_entities_by_selection.clear();
         let resolved = self
             .occurrences
             .keys()
@@ -1454,7 +1527,6 @@ impl ProjectSemanticIndex {
                 .entry(entity.clone())
                 .or_default()
                 .insert(occurrence_id.clone());
-            self.index_established_selection(&entity, &occurrence_id);
         }
     }
 
@@ -1527,44 +1599,21 @@ impl ProjectSemanticIndex {
                 .or_default()
                 .insert(occurrence_id);
         }
-        self.rebuild_established_selection_index();
     }
 
-    fn rebuild_established_selection_index(&mut self) {
-        self.established_entities_by_selection.clear();
-        let resolved = self
-            .established_occurrences_by_entity
-            .iter()
-            .flat_map(|(entity, occurrences)| {
-                occurrences
-                    .iter()
-                    .map(move |occurrence| (entity.clone(), occurrence.clone()))
-            })
-            .collect::<Vec<_>>();
-        for (entity, occurrence) in resolved {
-            self.index_established_selection(&entity, &occurrence);
-        }
-    }
-
-    fn index_established_selection(
-        &mut self,
-        entity: &EntityId,
-        occurrence_id: &SourceOccurrenceId,
-    ) {
-        let Some(occurrence) = self.occurrences.get(occurrence_id) else {
-            return;
-        };
+    fn index_occurrence_selection(&mut self, occurrence: &SourceOccurrence) {
         if occurrence.kind != OccurrenceKind::Notation {
             return;
         }
-        self.established_entities_by_selection
+        self.occurrences_by_selection
             .entry((
                 occurrence.component_id.clone(),
-                occurrence.scope_path.clone(),
                 occurrence.selection_text.clone(),
             ))
             .or_default()
-            .insert(entity.clone());
+            .entry(occurrence.scope_path.clone())
+            .or_default()
+            .insert(occurrence.id.clone());
     }
 
     fn index_claim(&mut self, claim_id: &ClaimId) {
@@ -1775,6 +1824,34 @@ fn remove_occurrence_index_value<K: Ord + Clone>(
     });
     if remove_key {
         index.remove(key);
+    }
+}
+
+fn remove_occurrence_selection_index(
+    index: &mut OccurrencesBySelection,
+    occurrence: &SourceOccurrence,
+) {
+    if occurrence.kind != OccurrenceKind::Notation {
+        return;
+    }
+    let key = (
+        occurrence.component_id.clone(),
+        occurrence.selection_text.clone(),
+    );
+    let remove_key = index.get_mut(&key).is_some_and(|by_scope| {
+        let remove_scope = by_scope
+            .get_mut(&occurrence.scope_path)
+            .is_some_and(|occurrences| {
+                occurrences.remove(&occurrence.id);
+                occurrences.is_empty()
+            });
+        if remove_scope {
+            by_scope.remove(&occurrence.scope_path);
+        }
+        by_scope.is_empty()
+    });
+    if remove_key {
+        index.remove(&key);
     }
 }
 
@@ -2256,6 +2333,7 @@ mod tests {
     fn established_occurrence_index_replaces_and_retracts_atomically() {
         let declaration = occurrence("main.tex", 1, 1, 0, 1, &[], "x", Vec::new());
         let reference = occurrence("main.tex", 1, 2, 5, 2, &[], "x", Vec::new());
+        let target_occurrences = vec![declaration.clone(), reference.clone()];
         let declared_entity = entity(&declaration, "definition");
         let source_evidence = evidence(
             "identity",
@@ -2286,7 +2364,7 @@ mod tests {
                 1,
                 vec![declaration.clone(), reference.clone()],
                 vec![declared_entity.clone()],
-                vec![declaration.id, reference.id],
+                vec![declaration.id.clone(), reference.id.clone()],
                 vec![source_evidence],
                 claims,
             ))
@@ -2297,17 +2375,32 @@ mod tests {
                 .len(),
             2
         );
-        assert!(!index.established_selection_would_merge(&declared_entity, "x"));
-        let unrelated_target = EntityId {
-            kind: "other-definition".into(),
-            anchor: SourceOccurrenceId {
+        assert_eq!(
+            index.established_selection_would_merge(&declared_entity, "x", &target_occurrences,),
+            Ok(false)
+        );
+        let unrelated_occurrence = SourceOccurrence {
+            id: SourceOccurrenceId {
                 file_id: "other.tex".into(),
                 document_version: 1,
                 local_id: 0,
             },
+            component_id: declared_entity.component_id.clone(),
+            ..declaration.clone()
+        };
+        let unrelated_target = EntityId {
+            kind: "other-definition".into(),
+            anchor: unrelated_occurrence.id.clone(),
             ..declared_entity.clone()
         };
-        assert!(index.established_selection_would_merge(&unrelated_target, "x"));
+        assert_eq!(
+            index.established_selection_would_merge(
+                &unrelated_target,
+                "x",
+                std::slice::from_ref(&unrelated_occurrence),
+            ),
+            Ok(true)
+        );
 
         let replacement = occurrence("main.tex", 2, 1, 0, 1, &[], "y", Vec::new());
         index
@@ -2326,12 +2419,48 @@ mod tests {
                 .established_occurrences_for_entity(&declared_entity)
                 .is_empty()
         );
-        assert!(!index.established_selection_would_merge(&unrelated_target, "x"));
+        assert_eq!(
+            index.established_selection_would_merge(
+                &unrelated_target,
+                "x",
+                &[unrelated_occurrence],
+            ),
+            Ok(false)
+        );
         index.remove_document("main.tex");
         assert!(
             index
                 .established_occurrences_for_entity(&declared_entity)
                 .is_empty()
+        );
+    }
+
+    #[test]
+    fn bounded_entity_surface_never_materializes_cap_plus_one() {
+        let mut index = ProjectSemanticIndex::default();
+        let anchor = occurrence("main.tex", 1, 0, 0, 1, &[], "x", Vec::new());
+        let target = entity(&anchor, "definition");
+        for local_id in 0..=MAX_ENTITY_SURFACE_OCCURRENCES as u32 {
+            let item = occurrence(
+                "main.tex",
+                1,
+                local_id,
+                local_id.saturating_mul(2),
+                u64::from(local_id.saturating_mul(2).saturating_add(1)),
+                &[],
+                "x",
+                Vec::new(),
+            );
+            index
+                .established_occurrences_by_entity
+                .entry(target.clone())
+                .or_default()
+                .insert(item.id.clone());
+            index.occurrences.insert(item.id.clone(), item);
+        }
+        assert_eq!(
+            index.bounded_established_occurrences_for_entity(&target),
+            Err(())
         );
     }
 

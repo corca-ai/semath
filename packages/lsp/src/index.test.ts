@@ -410,6 +410,14 @@ describe("SemathLspServer", () => {
     const named = content.indexOf("\\operatorname{ECE}") + 15;
     const plain = content.lastIndexOf("$ECE$") + 2;
     await server.handle({
+      id: 189,
+      method: "semath/semanticView",
+      params: {
+        position: positionAt(content, content.indexOf("(ECE)") + 2),
+        textDocument: { uri },
+      },
+    });
+    await server.handle({
       id: 190,
       method: "textDocument/definition",
       params: { position: positionAt(content, named), textDocument: { uri } },
@@ -447,6 +455,9 @@ describe("SemathLspServer", () => {
         },
       },
     });
+    expect(response(messages, 189).view.symbol.entityId).toEqual(
+      response(messages, 191).view.symbol.entityId,
+    );
     expect(response(messages, 192)).toBeNull();
 
     const revised = content.replace(
@@ -654,7 +665,7 @@ describe("SemathLspServer", () => {
     }
   });
 
-  test("falls back to wasmtex for cross-file LaTeX navigation", async () => {
+  test("never falls back to a second symbol authority after semantic refusal", async () => {
     const { messages, server } = await setup();
     await server.handle({
       method: "textDocument/didOpen",
@@ -686,8 +697,26 @@ describe("SemathLspServer", () => {
         textDocument: { uri: "file:///main.tex" },
       },
     });
+    for (const [id, method, extra] of [
+      [6, "textDocument/references", { context: { includeDeclaration: true } }],
+      [7, "textDocument/prepareRename", {}],
+      [8, "textDocument/rename", { newName: "sec:renamed" }],
+    ] as const) {
+      await server.handle({
+        id,
+        method,
+        params: {
+          ...extra,
+          position: { character: 10, line: 0 },
+          textDocument: { uri: "file:///main.tex" },
+        },
+      });
+    }
 
-    expect(response(messages, 5)).toMatchObject({ uri: "file:///chapter.tex" });
+    expect(response(messages, 5)).toBeNull();
+    expect(response(messages, 6)).toEqual([]);
+    expect(response(messages, 7)).toBeNull();
+    expect(response(messages, 8)).toBeNull();
 
     await server.handle({
       id: 51,

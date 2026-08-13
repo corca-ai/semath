@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 13 is a deliberate
+Semath is a library and language-service runtime. Protocol 14 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -42,7 +42,7 @@ unsupported law conditions and truncated evidence cannot produce `established`.
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 13 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 14 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
@@ -60,9 +60,20 @@ of the occurrence and never become flat string identities. Definitions and
 references resolve through the project semantic index, not a project-wide
 symbol scan.
 
+Every definition, references, prepare-rename, and rename result carries an
+`authorization`. Authorized results expose the exact focus `SourceOccurrenceId`
+and resolved `EntityId`; refused results expose a typed reason. An authorized
+empty definition (for example, querying an entity at its own declaration) is
+therefore distinct from unsupported, ambiguous, conflicting, engine-limited,
+incomplete, non-editable, invalid-replacement, and capture refusals. Hosts must
+not fall back to another symbol or rename index after a refusal. References can
+include or exclude the source declaration explicitly, and rename never returns a
+partial edit set.
+
 Navigation and meaning decisions answer different questions. Definition and
 references are available only when the exact cursor occurrence resolves to one
-source-grounded entity with a real definition; they may remain available when
+source-grounded entity; definition returns a location only when that entity has
+a real source declaration. Navigation may remain available when
 the surrounding formula is partial or unsupported. Conversely, an established
 formula does not establish the identity of every symbol inside it. References
 are complete for that entity or unavailable—hosts must not merge a fallback

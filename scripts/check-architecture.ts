@@ -63,4 +63,16 @@ if (!/#\[cfg\(test\)\]\s+pub\(crate\) fn parse_regions/u.test(parser)) {
   fail("raw-TeX region parsing is not test-only");
 }
 
+const lsp = await Bun.file(join(ROOT, "packages/lsp/src/index.ts")).text();
+for (const marker of [
+  ".getDefinition(",
+  ".getReferences(",
+  ".getRenameEdits(",
+  ".findSymbolAt(",
+]) {
+  if (lsp.includes(marker)) {
+    fail(`packages/lsp/src/index.ts contains semantic fallback ${marker}`);
+  }
+}
+
 console.log("architecture OK: dependency direction, singular adapter, and one project authority");

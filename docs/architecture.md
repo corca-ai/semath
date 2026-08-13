@@ -156,7 +156,7 @@ visible there, so same-spelling dimensions in sibling scopes never become proof.
 Constraint conflicts require incompatible established values or a demonstrably
 invalid typed operation. Missing operands, unresolved symbolic extents, and
 work limits remain partial evidence rather than Problems. Work and truncation
-counters are part of protocol 13 so hosts can enforce performance budgets.
+counters are part of protocol 14 so hosts can enforce performance budgets.
 
 Transparent macro structure supplied by wasmtex may contribute meaning in both
 formulas and prose declarations. Generated nodes inherit only the real call
@@ -287,7 +287,7 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 13 exposes selection, `semanticView`, definition, references, rename,
+Protocol 14 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is
@@ -300,6 +300,15 @@ structural selection, and complete-application boundaries. Exact containment
 outranks trailing edges; gaps and ambiguous containers fail locally. Every
 valid component position therefore resolves through the same occurrence and
 entity instead of a query-specific cursor patch.
+
+Definition, references, prepare-rename, and rename share one bounded
+entity-surface authorization. An authorized result names the exact focus
+occurrence and entity; a refused result carries a typed unsupported, ambiguity,
+conflict, engine-limit, source-completeness, editability, replacement, or
+capture reason. Empty authorized results are distinct from refusals. Hosts
+project this decision and never invoke a second symbol index when Semath
+refuses. Rename is all-or-refuse: it checks the complete bounded source
+occurrence set and every visible replacement identity before emitting any edit.
 
 Breaking API or UI changes are acceptable before 1.0 when they remove a
 duplicate path or produce a cleaner architecture. Compatibility layers must not

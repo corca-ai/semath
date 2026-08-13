@@ -1,10 +1,13 @@
-use crate::SourceRange;
 use crate::semantic_index::{
     EntityId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, Resolution,
     ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
 };
+use crate::{
+    EntitySurfaceAuthorization, EntitySurfaceRefusal, EntitySurfaceRefusalKind, SourceRange,
+};
 
 pub(crate) const MAX_RENAME_OCCURRENCES: usize = 4_096;
+pub(crate) const MAX_ENTITY_SURFACE_OCCURRENCES: usize = MAX_RENAME_OCCURRENCES;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum EntityEvidenceDecision {
@@ -33,6 +36,90 @@ pub(crate) fn decide_entity(resolution: &Resolution) -> EntityEvidenceDecision {
         ResolutionStatus::Established | ResolutionStatus::Unsupported => {
             EntityEvidenceDecision::Unsupported
         }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct AuthorizedEntitySurface {
+    pub focus_occurrence_id: SourceOccurrenceId,
+    pub entity_id: EntityId,
+    pub occurrences: Vec<SourceOccurrence>,
+}
+
+impl AuthorizedEntitySurface {
+    pub(crate) fn authorization(&self) -> EntitySurfaceAuthorization {
+        EntitySurfaceAuthorization::Authorized {
+            focus_occurrence_id: self.focus_occurrence_id.clone(),
+            entity_id: self.entity_id.clone(),
+        }
+    }
+}
+
+pub(crate) fn authorize_entity_surface(
+    focus_occurrence_id: &SourceOccurrenceId,
+    decision: EntityEvidenceDecision,
+    occurrences: Result<Vec<SourceOccurrence>, ()>,
+) -> Result<AuthorizedEntitySurface, EntitySurfaceRefusal> {
+    let EntityEvidenceDecision::Established(entity_id) = decision else {
+        return Err(entity_decision_refusal(decision));
+    };
+    let occurrences = occurrences.map_err(|()| {
+        refusal(
+            EntitySurfaceRefusalKind::EngineLimit,
+            format!(
+                "The complete entity surface exceeds the {MAX_ENTITY_SURFACE_OCCURRENCES}-occurrence safety cap."
+            ),
+        )
+    })?;
+    if occurrences.is_empty()
+        || !occurrences
+            .iter()
+            .any(|occurrence| occurrence.id == *focus_occurrence_id)
+    {
+        return Err(refusal(
+            EntitySurfaceRefusalKind::IncompleteSource,
+            "The established identity does not have one complete source-backed occurrence set.",
+        ));
+    }
+    Ok(AuthorizedEntitySurface {
+        focus_occurrence_id: focus_occurrence_id.clone(),
+        entity_id,
+        occurrences,
+    })
+}
+
+pub(crate) fn refused_authorization(reason: EntitySurfaceRefusal) -> EntitySurfaceAuthorization {
+    EntitySurfaceAuthorization::Refused { reason }
+}
+
+fn entity_decision_refusal(decision: EntityEvidenceDecision) -> EntitySurfaceRefusal {
+    match decision {
+        EntityEvidenceDecision::Ambiguous => refusal(
+            EntitySurfaceRefusalKind::Ambiguous,
+            "The symbol has more than one source-supported identity.",
+        ),
+        EntityEvidenceDecision::Conflicting => refusal(
+            EntitySurfaceRefusalKind::Conflicting,
+            "The symbol identity has conflicting source evidence.",
+        ),
+        EntityEvidenceDecision::EngineLimited => refusal(
+            EntitySurfaceRefusalKind::EngineLimit,
+            "The complete identity decision exceeds an engine evidence limit.",
+        ),
+        EntityEvidenceDecision::Unsupported | EntityEvidenceDecision::Established(_) => refusal(
+            EntitySurfaceRefusalKind::Unsupported,
+            "The symbol does not have one established source identity.",
+        ),
+    }
+}
+
+pub(crate) fn refusal(
+    kind: EntitySurfaceRefusalKind,
+    message: impl Into<String>,
+) -> EntitySurfaceRefusal {
+    EntitySurfaceRefusal {
+        kind,
+        message: message.into(),
     }
 }
 
@@ -101,32 +188,28 @@ pub(crate) fn plan_entity_rename(
     old_name: &str,
     new_name: &str,
     mut occurrences: Vec<RenameSourceOccurrence>,
-) -> Result<PlannedRename, String> {
+) -> Result<PlannedRename, EntitySurfaceRefusal> {
     let EntityEvidenceDecision::Established(entity_id) = decision else {
-        return Err(match decision {
-            EntityEvidenceDecision::Ambiguous => {
-                "The symbol has more than one source-supported identity.".into()
-            }
-            EntityEvidenceDecision::Conflicting => {
-                "The symbol identity has conflicting source evidence.".into()
-            }
-            EntityEvidenceDecision::EngineLimited => {
-                "The complete rename set exceeds an engine evidence limit.".into()
-            }
-            EntityEvidenceDecision::Unsupported | EntityEvidenceDecision::Established(_) => {
-                "The symbol does not have one established source identity.".into()
-            }
-        });
+        return Err(entity_decision_refusal(decision));
     };
     if old_name == new_name {
-        return Err("The new name is unchanged.".into());
+        return Err(refusal(
+            EntitySurfaceRefusalKind::InvalidReplacement,
+            "The new name is unchanged.",
+        ));
     }
     if occurrences.is_empty() {
-        return Err("The established entity has no editable source occurrences.".into());
+        return Err(refusal(
+            EntitySurfaceRefusalKind::IncompleteSource,
+            "The established entity has no editable source occurrences.",
+        ));
     }
     if occurrences.len() > MAX_RENAME_OCCURRENCES {
-        return Err(format!(
-            "The complete rename set exceeds the {MAX_RENAME_OCCURRENCES}-occurrence safety cap."
+        return Err(refusal(
+            EntitySurfaceRefusalKind::EngineLimit,
+            format!(
+                "The complete rename set exceeds the {MAX_RENAME_OCCURRENCES}-occurrence safety cap."
+            ),
         ));
     }
     occurrences.sort_by(|left, right| {
@@ -144,12 +227,17 @@ pub(crate) fn plan_entity_rename(
             || occurrence.family != family
             || occurrence.current_text != old_name
             || !valid_replacement(occurrence.family, &occurrence.current_text)
-            || !valid_replacement(occurrence.family, new_name)
     }) {
-        return Err(
-            "Every edit must be a real, exact source occurrence in the same notation family."
-                .into(),
-        );
+        return Err(refusal(
+            EntitySurfaceRefusalKind::NonEditable,
+            "Every edit must be a real, exact source occurrence in the same notation family.",
+        ));
+    }
+    if !valid_replacement(family, new_name) {
+        return Err(refusal(
+            EntitySurfaceRefusalKind::InvalidReplacement,
+            "The new name is not valid for the established notation family.",
+        ));
     }
     Ok(PlannedRename {
         entity_id,
@@ -370,7 +458,7 @@ mod tests {
         let rejected = (0..=MAX_RENAME_OCCURRENCES as u32)
             .map(occurrence)
             .collect();
-        assert!(
+        assert_eq!(
             plan_entity_rename(
                 EntityEvidenceDecision::Established(entity()),
                 "x",
@@ -378,34 +466,71 @@ mod tests {
                 rejected,
             )
             .unwrap_err()
-            .contains("safety cap")
+            .kind,
+            EntitySurfaceRefusalKind::EngineLimit
         );
+    }
+
+    #[test]
+    fn shared_surface_refuses_cap_plus_one_without_a_partial_identity() {
+        let focus = occurrence(0).occurrence_id;
+        let accepted = (0..MAX_ENTITY_SURFACE_OCCURRENCES as u32)
+            .map(|local_id| {
+                let item = occurrence(local_id);
+                source_occurrence(item.range.clone(), item.range, Vec::new())
+            })
+            .enumerate()
+            .map(|(local_id, mut item)| {
+                item.id.local_id = local_id as u32;
+                item
+            })
+            .collect::<Vec<_>>();
+        assert!(
+            authorize_entity_surface(
+                &focus,
+                EntityEvidenceDecision::Established(entity()),
+                Ok(accepted),
+            )
+            .is_ok()
+        );
+
+        let refusal = authorize_entity_surface(
+            &focus,
+            EntityEvidenceDecision::Established(entity()),
+            Err(()),
+        )
+        .unwrap_err();
+        assert_eq!(refusal.kind, EntitySurfaceRefusalKind::EngineLimit);
     }
 
     #[test]
     fn rename_rejects_partial_or_cross_family_edits() {
         let mut inexact = occurrence(0);
         inexact.current_text = "x_i".into();
-        assert!(
+        assert_eq!(
             plan_entity_rename(
                 EntityEvidenceDecision::Established(entity()),
                 "x_i",
                 "y",
                 vec![inexact],
             )
-            .is_err()
+            .unwrap_err()
+            .kind,
+            EntitySurfaceRefusalKind::NonEditable
         );
         let mut command = occurrence(0);
         command.current_text = "\\alpha".into();
         command.family = RenameNotationFamily::ControlSequence;
-        assert!(
+        assert_eq!(
             plan_entity_rename(
                 EntityEvidenceDecision::Established(entity()),
                 "\\alpha",
                 "beta",
                 vec![command],
             )
-            .is_err()
+            .unwrap_err()
+            .kind,
+            EntitySurfaceRefusalKind::InvalidReplacement
         );
     }
 }

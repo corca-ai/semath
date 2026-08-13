@@ -3,7 +3,7 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 
 use thiserror::Error;
 
-use crate::binder::{MathBinder, binder_at, binders, bound_occurrences, rename_rejection};
+use crate::binder::{MathBinder, binders, bound_occurrences};
 use crate::candidate::{
     StructuralCandidateOption, append_semantic_candidates, application_end_offset,
     structural_candidate_options,
@@ -16,8 +16,9 @@ use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_moda
 use crate::cursor::{CursorOccurrence, interior_offset, occurrence_at_cursor};
 use crate::decision::{MeaningDecisionInput, decide_meaning, symbol_has_source_meaning};
 use crate::entity_policy::{
-    EntityEvidenceDecision, EntityFactDisposition, RenameNotationFamily, RenameSourceOccurrence,
-    decide_fact, plan_entity_rename,
+    AuthorizedEntitySurface, EntityEvidenceDecision, EntityFactDisposition, RenameNotationFamily,
+    RenameSourceOccurrence, authorize_entity_surface, decide_fact, plan_entity_rename, refusal,
+    refused_authorization,
 };
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
 use crate::law::ExternalTypeEnvironment;
@@ -36,12 +37,13 @@ use crate::semantic_index::{
 };
 use crate::{
     AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, DefinitionInfo,
-    DimensionExponentInfo, DomainActivation, Evidence, Location, MeaningConflict, PROTOCOL_VERSION,
-    PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
-    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue, RoleInfo,
-    SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo,
-    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
-    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
+    DimensionExponentInfo, DomainActivation, EntitySurfaceRefusal, EntitySurfaceRefusalKind,
+    Evidence, Location, MeaningConflict, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
+    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
+    QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
+    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
+    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
+    UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -460,21 +462,12 @@ impl ProjectState {
         })
     }
 
-    fn cursor_focus_at(
-        &self,
-        file_id: &str,
-        math: &ParsedMath,
-        offset: u32,
-    ) -> Option<CursorFocus> {
+    fn cursor_focus_at(&self, file_id: &str, offset: u32) -> Option<CursorFocus> {
         let document = self.documents.get(file_id)?;
+        let source_length = document.document.content.encode_utf16().count() as u32;
         let candidates = self
             .semantic
-            .occurrences()
-            .filter(|occurrence| occurrence.id.file_id == file_id)
-            .filter(|occurrence| {
-                math.region.full_range.start_offset <= occurrence.range.start_offset
-                    && occurrence.range.end_offset <= math.region.full_range.end_offset
-            })
+            .occurrences_for_file(file_id)
             .filter(|occurrence| {
                 !occurrence.notation.is_empty()
                     || self
@@ -497,7 +490,7 @@ impl ProjectState {
                             && seed.surface == occurrence.surface
                     })
                     .and_then(|seed| seed.application_end_offset)
-                    .filter(|end| *end <= math.region.full_range.end_offset),
+                    .filter(|end| *end <= source_length),
             })
             .collect::<Vec<_>>();
         let occurrence = candidates.get(occurrence_at_cursor(&ownership, offset)?)?;
@@ -2421,26 +2414,23 @@ fn lower_cross_modal_facts(
         else {
             continue;
         };
-        let Some(anchor_occurrence) = occurrences
-            .iter()
-            .find(|occurrence| occurrence.id == anchor)
-        else {
+        if !occurrences.iter().any(|occurrence| occurrence.id == anchor) {
             continue;
-        };
+        }
         let Some(short_occurrence) = occurrences.iter().find(|occurrence| occurrence.id == short)
         else {
             continue;
         };
         let entity = EntityId {
             component_id: document.component_id.clone(),
-            scope_path: anchor_occurrence.scope_path.clone(),
+            scope_path: short_occurrence.scope_path.clone(),
             kind: match binding.predicate {
                 BindingPredicate::Abbreviates => "acronym",
                 BindingPredicate::Aliases => "alias",
                 BindingPredicate::Names => "named-operator",
             }
             .to_owned(),
-            anchor: anchor.clone(),
+            anchor: short.clone(),
         };
         let evidence_id = EvidenceId(format!(
             "{}:{}:cross-modal-evidence:{binding_index}",
@@ -2969,7 +2959,9 @@ impl SemathEngine {
             Query::Selection { file_id, offset }
             | Query::SemanticView { file_id, offset }
             | Query::Definition { file_id, offset }
-            | Query::References { file_id, offset }
+            | Query::References {
+                file_id, offset, ..
+            }
             | Query::PrepareRename { file_id, offset }
             | Query::Rename {
                 file_id, offset, ..
@@ -2991,7 +2983,7 @@ impl SemathEngine {
         let offset = query_offset.unwrap_or(0);
         let parsed =
             query_offset.and_then(|offset| parsed_math_at_cursor(&document.parsed, offset));
-        let focus = parsed.and_then(|math| self.index.cursor_focus_at(file_id, math, offset));
+        let focus = query_offset.and_then(|offset| self.index.cursor_focus_at(file_id, offset));
         let cursor_offset = focus.as_ref().map_or_else(
             || {
                 parsed.map_or(offset, |math| {
@@ -3023,30 +3015,15 @@ impl SemathEngine {
                     hygiene_enabled,
                 )),
             },
-            Query::Definition { .. } => QueryValue::Locations {
-                locations: focus
-                    .as_ref()
-                    .and_then(|focus| self.resolve_definition(focus))
-                    .map(|definition| vec![definition.location])
-                    .unwrap_or_default(),
-            },
-            Query::References { .. } => QueryValue::Locations {
-                locations: focus
-                    .as_ref()
-                    .and_then(|focus| self.visible_definitions(focus).into_iter().next())
-                    .map(|definition| self.references_for(&definition))
-                    .unwrap_or_default(),
-            },
-            Query::PrepareRename { .. } => {
-                self.prepare_entity_rename(document, parsed, focus.as_ref(), cursor_offset)
+            Query::Definition { .. } => self.definition_value(focus.as_ref()),
+            Query::References {
+                include_declaration,
+                ..
+            } => self.references_value(focus.as_ref(), include_declaration),
+            Query::PrepareRename { .. } => self.prepare_entity_rename(focus.as_ref()),
+            Query::Rename { new_name, .. } => {
+                self.entity_rename_proposal(focus.as_ref(), &new_name)
             }
-            Query::Rename { new_name, .. } => self.entity_rename_proposal(
-                document,
-                parsed,
-                focus.as_ref(),
-                cursor_offset,
-                &new_name,
-            ),
             Query::Diagnostics { .. } => QueryValue::Diagnostics {
                 diagnostics: document_diagnostics(
                     document,
@@ -3291,45 +3268,6 @@ impl SemathEngine {
             .collect()
     }
 
-    fn resolve_definition(&self, focus: &CursorFocus) -> Option<DefinitionInfo> {
-        self.visible_definitions(focus)
-            .into_iter()
-            .find(|definition| {
-                definition.location.file_id != focus.occurrence_id.file_id
-                    || definition.location.range != focus.range
-            })
-    }
-
-    fn references_for(&self, definition: &DefinitionInfo) -> Vec<Location> {
-        let Some(entity) = &definition.entity_id else {
-            return Vec::new();
-        };
-        let mut locations = self
-            .index
-            .semantic
-            .established_occurrences_for_entity(entity)
-            .into_iter()
-            .map(|occurrence| {
-                let document = &self.index.documents[&occurrence.id.file_id];
-                Location {
-                    file_id: occurrence.id.file_id.clone(),
-                    path: document.document.path.clone(),
-                    range: occurrence.range.clone(),
-                }
-            })
-            .collect::<Vec<_>>();
-        locations.sort_by(|left, right| {
-            left.path
-                .cmp(&right.path)
-                .then(left.range.start_offset.cmp(&right.range.start_offset))
-        });
-        if locations.len() > 1 {
-            locations
-        } else {
-            Vec::new()
-        }
-    }
-
     fn resolved_entity(&self, occurrence_id: &SourceOccurrenceId) -> Option<EntityId> {
         match self.index.semantic.entity_decision(occurrence_id) {
             EntityEvidenceDecision::Established(entity) => Some(entity),
@@ -3340,77 +3278,196 @@ impl SemathEngine {
         }
     }
 
-    fn prepare_entity_rename(
+    fn entity_surface(
         &self,
-        document: &AnalyzedDocument,
-        parsed: Option<&ParsedMath>,
         focus: Option<&CursorFocus>,
-        offset: u32,
-    ) -> QueryValue {
-        let target = self.entity_rename_target(document, parsed, focus, offset);
-        let Some((decision, old_name, occurrences)) = target else {
-            return rename_preparation_value_rejection(
-                "The cursor does not resolve to one complete editable entity.",
-            );
+    ) -> Result<AuthorizedEntitySurface, EntitySurfaceRefusal> {
+        let Some(focus) = focus else {
+            return Err(refusal(
+                EntitySurfaceRefusalKind::Unsupported,
+                "The cursor does not own a real semantic source occurrence.",
+            ));
         };
-        let Some(first) = occurrences.first() else {
-            return rename_preparation_value_rejection(
-                "The complete entity has no editable source occurrences.",
-            );
+        let decision = self.index.semantic.entity_decision(&focus.occurrence_id);
+        let occurrences = match &decision {
+            EntityEvidenceDecision::Established(entity) => self
+                .index
+                .semantic
+                .bounded_established_occurrences_for_entity(entity),
+            EntityEvidenceDecision::Ambiguous
+            | EntityEvidenceDecision::Conflicting
+            | EntityEvidenceDecision::Unsupported
+            | EntityEvidenceDecision::EngineLimited => Ok(Vec::new()),
         };
-        let replacement = alternate_name(&old_name, first.family);
-        match plan_entity_rename(decision, &old_name, &replacement, occurrences) {
-            Ok(plan) => QueryValue::RenamePreparation {
-                range: focus
-                    .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id))
-                    .map(|occurrence| occurrence.selection_range.clone())
-                    .or_else(|| {
-                        parsed.and_then(|math| {
-                            math.symbols
-                                .iter()
-                                .find(|(_, range)| range.contains(offset))
-                                .map(|(_, range)| range.clone())
-                        })
-                    }),
-                placeholder: Some(plan.old_name),
-                rejection: None,
-            },
-            Err(rejection) => rename_preparation_value_rejection(&rejection),
+        authorize_entity_surface(&focus.occurrence_id, decision, occurrences)
+    }
+
+    fn definition_value(&self, focus: Option<&CursorFocus>) -> QueryValue {
+        let surface = match self.entity_surface(focus) {
+            Ok(surface) => surface,
+            Err(reason) => return locations_refusal(reason),
+        };
+        let authorization = surface.authorization();
+        let locations = self
+            .definition_occurrence(&surface)
+            .filter(|definition| definition.id != surface.focus_occurrence_id)
+            .map(|definition| vec![self.location_for_occurrence(definition)])
+            .unwrap_or_default();
+        QueryValue::Locations {
+            authorization,
+            locations,
         }
     }
 
-    fn entity_rename_proposal(
+    fn references_value(
         &self,
-        document: &AnalyzedDocument,
-        parsed: Option<&ParsedMath>,
         focus: Option<&CursorFocus>,
-        offset: u32,
-        new_name: &str,
+        include_declaration: bool,
     ) -> QueryValue {
-        let binder = parsed.and_then(|math| {
-            let found = binders(math);
-            let target = binder_at(math, &found, offset).cloned()?;
-            Some((math, found, target))
+        let surface = match self.entity_surface(focus) {
+            Ok(surface) => surface,
+            Err(reason) => return locations_refusal(reason),
+        };
+        let authorization = surface.authorization();
+        let declaration = self
+            .definition_occurrence(&surface)
+            .map(|occurrence| occurrence.id.clone());
+        let mut locations = surface
+            .occurrences
+            .iter()
+            .filter(|occurrence| {
+                include_declaration || declaration.as_ref() != Some(&occurrence.id)
+            })
+            .map(|occurrence| self.location_for_occurrence(occurrence))
+            .collect::<Vec<_>>();
+        locations.sort_by(|left, right| {
+            left.path
+                .cmp(&right.path)
+                .then(left.range.start_offset.cmp(&right.range.start_offset))
         });
-        if let Some((math, found, target)) = &binder
-            && let Some(rejection) = rename_rejection(math, found, target, new_name)
-        {
-            return edit_proposal_rejection(&rejection);
+        QueryValue::Locations {
+            authorization,
+            locations,
         }
-        let target = self.entity_rename_target(document, parsed, focus, offset);
-        let Some((decision, old_name, occurrences)) = target else {
-            return edit_proposal_rejection(
-                "The cursor does not resolve to one complete editable entity.",
-            );
+    }
+
+    fn definition_occurrence<'a>(
+        &'a self,
+        surface: &'a AuthorizedEntitySurface,
+    ) -> Option<&'a SourceOccurrence> {
+        let definition = self.index.definitions_by_entity.get(&surface.entity_id)?;
+        surface.occurrences.iter().find(|occurrence| {
+            occurrence.id.file_id == definition.location.file_id
+                && occurrence.range == definition.location.range
+        })
+    }
+
+    fn location_for_occurrence(&self, occurrence: &SourceOccurrence) -> Location {
+        let document = &self.index.documents[&occurrence.id.file_id];
+        Location {
+            file_id: occurrence.id.file_id.clone(),
+            path: document.document.path.clone(),
+            range: occurrence.range.clone(),
+        }
+    }
+
+    fn prepare_entity_rename(&self, focus: Option<&CursorFocus>) -> QueryValue {
+        let surface = match self.entity_surface(focus) {
+            Ok(surface) => surface,
+            Err(reason) => return rename_preparation_refusal(reason),
         };
-        let plan = match plan_entity_rename(decision, &old_name, new_name, occurrences) {
+        let Some(focus_occurrence) = self.index.semantic.occurrence(&surface.focus_occurrence_id)
+        else {
+            return rename_preparation_refusal(refusal(
+                EntitySurfaceRefusalKind::IncompleteSource,
+                "The focused occurrence is no longer present in the project index.",
+            ));
+        };
+        if !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
+            return rename_preparation_refusal(refusal(
+                EntitySurfaceRefusalKind::NonEditable,
+                "The cursor owns only a non-editable part of a composite identity.",
+            ));
+        }
+        let occurrences = surface
+            .occurrences
+            .iter()
+            .map(|occurrence| self.rename_occurrence(occurrence))
+            .collect::<Vec<_>>();
+        let Some(first) = occurrences.first() else {
+            return rename_preparation_refusal(refusal(
+                EntitySurfaceRefusalKind::IncompleteSource,
+                "The complete entity has no source occurrences.",
+            ));
+        };
+        let old_name = focus_occurrence.selection_text.clone();
+        let replacement = alternate_name(&old_name, first.family);
+        match plan_entity_rename(
+            EntityEvidenceDecision::Established(surface.entity_id.clone()),
+            &old_name,
+            &replacement,
+            occurrences,
+        ) {
+            Ok(plan) => QueryValue::RenamePreparation {
+                authorization: surface.authorization(),
+                range: Some(focus_occurrence.selection_range.clone()),
+                placeholder: Some(plan.old_name),
+            },
+            Err(reason) => rename_preparation_refusal(reason),
+        }
+    }
+
+    fn entity_rename_proposal(&self, focus: Option<&CursorFocus>, new_name: &str) -> QueryValue {
+        let surface = match self.entity_surface(focus) {
+            Ok(surface) => surface,
+            Err(reason) => return edit_proposal_refusal(reason),
+        };
+        let Some(focus_occurrence) = self.index.semantic.occurrence(&surface.focus_occurrence_id)
+        else {
+            return edit_proposal_refusal(refusal(
+                EntitySurfaceRefusalKind::IncompleteSource,
+                "The focused occurrence is no longer present in the project index.",
+            ));
+        };
+        if !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
+            return edit_proposal_refusal(refusal(
+                EntitySurfaceRefusalKind::NonEditable,
+                "The cursor owns only a non-editable part of a composite identity.",
+            ));
+        }
+        let old_name = focus_occurrence.selection_text.clone();
+        let occurrences = surface
+            .occurrences
+            .iter()
+            .map(|occurrence| self.rename_occurrence(occurrence))
+            .collect::<Vec<_>>();
+        let plan = match plan_entity_rename(
+            EntityEvidenceDecision::Established(surface.entity_id.clone()),
+            &old_name,
+            new_name,
+            occurrences,
+        ) {
             Ok(plan) => plan,
-            Err(rejection) => return edit_proposal_rejection(&rejection),
+            Err(reason) => return edit_proposal_refusal(reason),
         };
-        if self.rename_would_merge_entity(&plan.entity_id, new_name) {
-            return edit_proposal_rejection(
-                "The replacement would merge this entity with another established identity.",
-            );
+        match self.index.semantic.established_selection_would_merge(
+            &plan.entity_id,
+            new_name,
+            &surface.occurrences,
+        ) {
+            Ok(true) => {
+                return edit_proposal_refusal(refusal(
+                    EntitySurfaceRefusalKind::Capture,
+                    "The replacement would capture or merge another visible established identity.",
+                ));
+            }
+            Err(()) => {
+                return edit_proposal_refusal(refusal(
+                    EntitySurfaceRefusalKind::EngineLimit,
+                    "The replacement collision frontier exceeds the surface safety cap.",
+                ));
+            }
+            Ok(false) => {}
         }
         let mut by_file = BTreeMap::<String, Vec<RenameSourceOccurrence>>::new();
         for occurrence in plan.occurrences {
@@ -3440,6 +3497,7 @@ impl SemathEngine {
             .collect::<Vec<_>>();
         files.sort_by(|left, right| left.path.cmp(&right.path));
         QueryValue::EditProposal {
+            authorization: surface.authorization(),
             proposal: Some(SemanticEditProposal {
                 title: format!("Rename `{}` to `{}`", plan.old_name, plan.new_name),
                 safety: "deterministic".into(),
@@ -3454,73 +3512,11 @@ impl SemathEngine {
                 }],
                 files,
             }),
-            rejection: None,
         }
-    }
-
-    fn entity_rename_target(
-        &self,
-        document: &AnalyzedDocument,
-        parsed: Option<&ParsedMath>,
-        focus: Option<&CursorFocus>,
-        offset: u32,
-    ) -> Option<(EntityEvidenceDecision, String, Vec<RenameSourceOccurrence>)> {
-        let focus = focus?;
-        let focus_occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
-        let binder = parsed.filter(|math| math.region.closed).and_then(|math| {
-            let found = binders(math);
-            let target = binder_at(math, &found, offset).cloned()?;
-            Some((math, found, target))
-        });
-        if binder.is_none() && !crate::entity_policy::rename_focus_is_complete(focus_occurrence) {
-            return Some((
-                EntityEvidenceDecision::Unsupported,
-                focus.name.clone(),
-                Vec::new(),
-            ));
-        }
-        let decision = self.index.semantic.entity_decision(&focus.occurrence_id);
-        let EntityEvidenceDecision::Established(entity) = &decision else {
-            return Some((decision, focus.name.clone(), Vec::new()));
-        };
-        let occurrences = if let Some((math, found, target)) = binder {
-            bound_occurrences(math, &found, &target)
-                .into_iter()
-                .map(|range| {
-                    let mut matches = self
-                        .index
-                        .semantic
-                        .occurrences()
-                        .filter(|occurrence| {
-                            occurrence.id.file_id == document.document.file_id
-                                && occurrence.selection_range == range
-                                && matches!(
-                                    self.index.semantic.entity_decision(&occurrence.id),
-                                    EntityEvidenceDecision::Established(candidate) if candidate == *entity
-                                )
-                        })
-                        .collect::<Vec<_>>();
-                    matches.sort_by_key(|occurrence| occurrence.id.local_id);
-                    matches.dedup_by_key(|occurrence| occurrence.id.clone());
-                    (matches.len() == 1).then(|| self.rename_occurrence(matches[0]))
-                })
-                .collect::<Option<Vec<_>>>()?
-        } else {
-            self.index.definitions_by_entity.get(entity)?;
-            self.index
-                .semantic
-                .established_occurrences_for_entity(entity)
-                .into_iter()
-                .map(|occurrence| self.rename_occurrence(occurrence))
-                .collect()
-        };
-        let old_name = occurrences.first()?.current_text.clone();
-        Some((decision, old_name, occurrences))
     }
 
     fn rename_occurrence(&self, occurrence: &SourceOccurrence) -> RenameSourceOccurrence {
-        let analyzed = &self.index.documents[&occurrence.id.file_id];
-        let current_text = source_text(&analyzed.document, &occurrence.selection_range);
+        let current_text = occurrence.selection_text.clone();
         let family = if current_text.starts_with('\\') {
             RenameNotationFamily::ControlSequence
         } else {
@@ -3536,12 +3532,6 @@ impl SemathEngine {
                 && occurrence.range.start_offset <= occurrence.selection_range.start_offset
                 && occurrence.selection_range.end_offset <= occurrence.range.end_offset,
         }
-    }
-
-    fn rename_would_merge_entity(&self, target: &EntityId, new_name: &str) -> bool {
-        self.index
-            .semantic
-            .established_selection_would_merge(target, new_name)
     }
 
     fn semantic_context(
@@ -5057,11 +5047,18 @@ fn symbol_diagnostics(
     (diagnostics, truncated)
 }
 
-fn rename_preparation_value_rejection(message: &str) -> QueryValue {
+fn locations_refusal(reason: EntitySurfaceRefusal) -> QueryValue {
+    QueryValue::Locations {
+        authorization: refused_authorization(reason),
+        locations: Vec::new(),
+    }
+}
+
+fn rename_preparation_refusal(reason: EntitySurfaceRefusal) -> QueryValue {
     QueryValue::RenamePreparation {
+        authorization: refused_authorization(reason),
         range: None,
         placeholder: None,
-        rejection: Some(message.into()),
     }
 }
 
@@ -5077,10 +5074,10 @@ fn alternate_name(current: &str, family: RenameNotationFamily) -> String {
     }
 }
 
-fn edit_proposal_rejection(message: &str) -> QueryValue {
+fn edit_proposal_refusal(reason: EntitySurfaceRefusal) -> QueryValue {
     QueryValue::EditProposal {
+        authorization: refused_authorization(reason),
         proposal: None,
-        rejection: Some(message.into()),
     }
 }
 

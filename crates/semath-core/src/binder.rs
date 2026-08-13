@@ -51,6 +51,7 @@ pub(crate) fn bound_occurrences(
         .collect()
 }
 
+#[cfg(test)]
 pub(crate) fn rename_rejection(
     parsed: &ParsedMath,
     binders: &[MathBinder],
@@ -102,6 +103,7 @@ fn valid_binder_name(name: &str) -> bool {
     characters.next().is_some_and(char::is_alphabetic) && characters.next().is_none()
 }
 
+#[cfg(test)]
 fn nested_in(candidate: &MathBinder, target: &MathBinder) -> bool {
     candidate.declaration.start_offset > target.declaration.start_offset
         && candidate.scope.end_offset <= target.scope.end_offset

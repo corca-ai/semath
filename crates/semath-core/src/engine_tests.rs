@@ -274,7 +274,7 @@ fn resolves_definition_on_both_edges_of_a_symbol() {
                 1,
             ))
             .unwrap();
-        let QueryValue::Locations { locations } = result.value else {
+        let QueryValue::Locations { locations, .. } = result.value else {
             panic!("expected locations")
         };
         assert_eq!(locations.len(), 1);
@@ -309,12 +309,12 @@ fn differential_variable_owns_both_cursor_edges_inside_the_composite() {
 }
 
 #[test]
-fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
+fn navigation_distinguishes_an_authorized_self_definition_from_references() {
     let content = "Let $x$ denote the input.";
     let offset = content.find('x').unwrap() as u32;
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
-    for query_kind in [
+    for (query_index, query_kind) in [
         Query::Definition {
             file_id: "main".into(),
             offset,
@@ -322,13 +322,30 @@ fn navigation_does_not_offer_a_noop_self_definition_or_singleton_reference() {
         Query::References {
             file_id: "main".into(),
             offset,
+            include_declaration: true,
         },
-    ] {
+        Query::References {
+            file_id: "main".into(),
+            offset,
+            include_declaration: false,
+        },
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let result = engine.query(query(query_kind, 1, 1)).unwrap();
-        let QueryValue::Locations { locations } = result.value else {
+        let QueryValue::Locations {
+            authorization,
+            locations,
+        } = result.value
+        else {
             panic!("expected locations")
         };
-        assert!(locations.is_empty());
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Authorized { .. }
+        ));
+        assert_eq!(locations.len(), usize::from(query_index == 1));
     }
 }
 
@@ -356,16 +373,19 @@ fn indexed_relation_head_is_not_offered_as_a_partial_base_rename() {
             ))
             .unwrap();
         let QueryValue::RenamePreparation {
+            authorization,
             range,
             placeholder,
-            rejection,
         } = result.value
         else {
             panic!("expected rename preparation")
         };
         assert!(range.is_none(), "{notation}");
         assert!(placeholder.is_none(), "{notation}");
-        assert!(rejection.is_some(), "{notation}");
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Refused { .. }
+        ));
     }
 }
 
@@ -387,14 +407,17 @@ fn proven_binder_component_can_be_renamed_inside_indexed_notation() {
         ))
         .unwrap();
     let QueryValue::RenamePreparation {
+        authorization,
         range: preparation_range,
         placeholder,
-        rejection,
     } = preparation.value
     else {
         panic!("expected rename preparation")
     };
-    assert_eq!(rejection, None);
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
     assert_eq!(placeholder.as_deref(), Some("i"));
     assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
 
@@ -410,12 +433,16 @@ fn proven_binder_component_can_be_renamed_inside_indexed_notation() {
         ))
         .unwrap();
     let QueryValue::EditProposal {
+        authorization,
         proposal: Some(proposal),
-        rejection: None,
     } = rename.value
     else {
         panic!("expected rename proposal")
     };
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
     assert_eq!(proposal.files.len(), 1);
     assert_eq!(proposal.files[0].edits.len(), 2);
     assert!(
@@ -438,12 +465,13 @@ fn navigation_and_rename_share_one_established_entity() {
             Query::References {
                 file_id: "main".into(),
                 offset: use_offset,
+                include_declaration: true,
             },
             1,
             1,
         ))
         .unwrap();
-    let QueryValue::Locations { locations } = references.value else {
+    let QueryValue::Locations { locations, .. } = references.value else {
         panic!("expected locations")
     };
     assert_eq!(locations.len(), 2);
@@ -459,16 +487,19 @@ fn navigation_and_rename_share_one_established_entity() {
         ))
         .unwrap();
     let QueryValue::RenamePreparation {
+        authorization,
         range: preparation_range,
         placeholder,
-        rejection,
     } = preparation.value
     else {
         panic!("expected rename preparation")
     };
     assert_eq!(preparation_range, Some(range(use_offset, use_offset + 1)));
     assert_eq!(placeholder.as_deref(), Some("A"));
-    assert_eq!(rejection, None);
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
 
     let rename = engine
         .query(query(
@@ -482,12 +513,16 @@ fn navigation_and_rename_share_one_established_entity() {
         ))
         .unwrap();
     let QueryValue::EditProposal {
+        authorization,
         proposal: Some(proposal),
-        rejection: None,
     } = rename.value
     else {
         panic!("expected rename proposal")
     };
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Authorized { .. }
+    ));
     assert_eq!(proposal.files.len(), 1);
     assert_eq!(proposal.files[0].edits.len(), locations.len());
     assert!(
@@ -516,13 +551,147 @@ fn rename_refuses_to_merge_two_entities_in_the_same_scope() {
         ))
         .unwrap();
     let QueryValue::EditProposal {
+        authorization,
         proposal: None,
-        rejection: Some(rejection),
     } = result.value
     else {
         panic!("expected rename rejection")
     };
-    assert!(rejection.contains("merge"));
+    let crate::EntitySurfaceAuthorization::Refused { reason } = authorization else {
+        panic!("expected typed refusal")
+    };
+    assert_eq!(reason.kind, crate::EntitySurfaceRefusalKind::Capture);
+}
+
+#[test]
+fn rename_refuses_to_capture_a_visible_outer_entity() {
+    let content =
+        "Let $B$ denote the outer quantity.\n# Inner\nLet $A$ denote the inner quantity. Use $A$.";
+    let section = content.find("# Inner").unwrap() as u32;
+    let mut input = document("main", "main.md", content, 1);
+    input.language = DocumentLanguage::Markdown;
+    input.math_regions = test_math_regions(content, DocumentLanguage::Markdown);
+    input.scopes = vec![
+        SyntaxScope {
+            kind: "document".into(),
+            parent: None,
+            range: range(0, content.len() as u32),
+            state: MathRootState::Complete,
+            name: None,
+            level: None,
+            source: None,
+        },
+        SyntaxScope {
+            kind: "section".into(),
+            parent: Some(0),
+            range: range(section, content.len() as u32),
+            state: MathRootState::Complete,
+            name: Some("Inner".into()),
+            level: None,
+            source: None,
+        },
+    ];
+    let use_offset = content.rfind("$A$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    let mut project = snapshot(content);
+    project.documents = vec![input];
+    engine.reset(project).unwrap();
+
+    let captured = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "B".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::EditProposal {
+        authorization: crate::EntitySurfaceAuthorization::Refused { reason },
+        proposal: None,
+    } = captured.value
+    else {
+        panic!("expected capture refusal")
+    };
+    assert_eq!(reason.kind, crate::EntitySurfaceRefusalKind::Capture);
+
+    let safe = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset: use_offset,
+                new_name: "C".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    assert!(matches!(
+        safe.value,
+        QueryValue::EditProposal {
+            authorization: crate::EntitySurfaceAuthorization::Authorized { .. },
+            proposal: Some(_),
+        }
+    ));
+}
+
+#[test]
+fn rename_refuses_to_capture_an_unresolved_visible_occurrence() {
+    let content = "Let $A$ denote the input. Observe free $B$ and then use $A$.";
+    let offset = content.rfind("$A$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Rename {
+                file_id: "main".into(),
+                offset,
+                new_name: "B".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    assert!(matches!(
+        result.value,
+        QueryValue::EditProposal {
+            authorization: crate::EntitySurfaceAuthorization::Refused {
+                reason: crate::EntitySurfaceRefusal {
+                    kind: crate::EntitySurfaceRefusalKind::Capture,
+                    ..
+                },
+            },
+            proposal: None,
+        }
+    ));
+}
+
+#[test]
+fn prose_acronym_cursor_is_addressable_by_the_shared_surface_policy() {
+    let content = "Expected calibration error (ECE) is the metric. Use $\\operatorname{ECE}$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let offset = content.find("(ECE)").unwrap() as u32 + 2;
+    let result = engine
+        .query(query(
+            Query::References {
+                file_id: "main".into(),
+                offset,
+                include_declaration: true,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    assert!(matches!(
+        result.value,
+        QueryValue::Locations {
+            authorization: crate::EntitySurfaceAuthorization::Authorized { .. },
+            locations,
+        } if !locations.is_empty()
+    ));
 }
 
 #[test]
@@ -935,7 +1104,7 @@ fn equality_lhs_establishes_source_ordered_symbol_identity_for_later_uses() {
             1,
         ))
         .unwrap();
-    let QueryValue::Locations { locations } = definition.value else {
+    let QueryValue::Locations { locations, .. } = definition.value else {
         panic!("expected locations")
     };
     assert!(
@@ -1714,7 +1883,7 @@ fn append_only_comments_advance_the_version_without_semantic_reanalysis() {
             2,
         ))
         .unwrap();
-    let QueryValue::Locations { locations } = result.value else {
+    let QueryValue::Locations { locations, .. } = result.value else {
         panic!("expected locations")
     };
     assert_eq!(locations.len(), 1);
