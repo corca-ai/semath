@@ -1203,6 +1203,224 @@ mod tests {
         .unwrap();
         assert!(parse_snapshot(&document).is_err());
     }
+
+    #[test]
+    fn rejects_unreachable_source_notation_nodes() {
+        let mut document = valid_snapshot_document();
+        document.nodes.push(
+            serde_json::from_value(serde_json::json!({
+                "kind": "token", "parent": null, "children": [],
+                "ranges": {"full": {"startOffset": 1, "endOffset": 2}},
+                "state": "complete", "text": "orphan", "lexicalClass": "identifier"
+            }))
+            .unwrap(),
+        );
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_duplicate_source_notation_arguments() {
+        let mut document = valid_snapshot_document();
+        let argument = crate::NotationArgument {
+            node: 0,
+            role: "body".into(),
+            syntax: "required".into(),
+            range: crate::SourceRange {
+                start_offset: 1,
+                end_offset: 2,
+            },
+        };
+        document.nodes[1].arguments = vec![argument.clone(), argument];
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_arguments_that_are_not_structural_children() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].children.clear();
+        document.nodes[1].arguments.push(crate::NotationArgument {
+            node: 0,
+            role: "body".into(),
+            syntax: "required".into(),
+            range: crate::SourceRange {
+                start_offset: 1,
+                end_offset: 2,
+            },
+        });
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_unknown_source_argument_syntax() {
+        let mut document = valid_snapshot_document();
+        document.nodes[1].arguments.push(crate::NotationArgument {
+            node: 0,
+            role: "body".into(),
+            syntax: "invented".into(),
+            range: crate::SourceRange {
+                start_offset: 1,
+                end_offset: 2,
+            },
+        });
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_unknown_math_classes() {
+        let mut document = valid_snapshot_document();
+        document.nodes[0].math_class = Some("invented".into());
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_unknown_provenance_origins() {
+        let mut document = valid_snapshot_document();
+        document.nodes[0].provenance = serde_json::from_value(serde_json::json!({
+            "origin": "invented", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 1, "endOffset": 2}},
+            "editable": true
+        })).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_local_provenance_references() {
+        let mut document = valid_snapshot_document();
+        document.nodes[0].provenance = serde_json::from_value(serde_json::json!({
+            "origin": "source", "source": {"fileId": "main", "path": "wrong.tex", "range": {"startOffset": 1, "endOffset": 2}},
+            "editable": true
+        })).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_overlapping_visible_prose_spans() {
+        let mut document = valid_snapshot_document();
+        document.visible_prose = serde_json::from_value(serde_json::json!([
+            {"range": {"startOffset": 0, "endOffset": 2}, "state": "complete"},
+            {"range": {"startOffset": 1, "endOffset": 3}, "state": "complete"}
+        ]))
+        .unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_unknown_prose_annotation_kinds() {
+        let mut document = valid_snapshot_document();
+        document.prose_annotations = serde_json::from_value(serde_json::json!([{
+            "kind": "invented", "name": "value", "range": {"startOffset": 0, "endOffset": 1}, "state": "complete"
+        }])).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_nested_document_scopes() {
+        let mut document = valid_snapshot_document();
+        document.scopes.push(serde_json::from_value(serde_json::json!({
+            "kind": "document", "parent": 0, "range": {"startOffset": 1, "endOffset": 2}, "state": "complete"
+        })).unwrap());
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_unknown_scope_kinds() {
+        let mut document = valid_snapshot_document();
+        document.scopes.push(serde_json::from_value(serde_json::json!({
+            "kind": "invented", "parent": 0, "range": {"startOffset": 1, "endOffset": 2}, "state": "complete"
+        })).unwrap());
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_overlapping_syntax_blocks() {
+        let mut document = valid_snapshot_document();
+        document.blocks = serde_json::from_value(serde_json::json!([
+            {"kind": "paragraph", "parentScope": 0, "range": {"startOffset": 0, "endOffset": 2}, "state": "complete"},
+            {"kind": "paragraph", "parentScope": 0, "range": {"startOffset": 1, "endOffset": 3}, "state": "complete"}
+        ])).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_out_of_order_syntax_blocks() {
+        let mut document = valid_snapshot_document();
+        document.blocks = serde_json::from_value(serde_json::json!([
+            {"kind": "paragraph", "parentScope": 0, "range": {"startOffset": 2, "endOffset": 3}, "state": "complete"},
+            {"kind": "paragraph", "parentScope": 0, "range": {"startOffset": 0, "endOffset": 1}, "state": "complete"}
+        ])).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_local_declaration_references() {
+        let mut document = valid_snapshot_document();
+        document.declarations = serde_json::from_value(serde_json::json!([{
+            "kind": "environment", "name": "lemma",
+            "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 0, "endOffset": 99}}
+        }])).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_macro_input_ranges() {
+        let mut document = valid_snapshot_document();
+        document.macros = serde_json::from_value(serde_json::json!([{
+            "kind": "call", "name": "m", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 1, "endOffset": 2}},
+            "definitions": [], "expansion": {"status": "expanded", "depth": 0, "editable": true, "inputRange": {"startOffset": 1, "endOffset": 99}}
+        }])).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_local_include_references() {
+        let mut document = valid_snapshot_document();
+        document.includes = serde_json::from_value(serde_json::json!([{
+            "path": "other.tex", "type": "input",
+            "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 0, "endOffset": 99}}
+        }])).unwrap();
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_duplicate_generated_notation_edges() {
+        let mut document = valid_snapshot_document();
+        document.macros = generated_macro(serde_json::json!({"root": 0, "nodes": [
+            {"kind": "sequence", "children": [1, 1], "state": "complete"},
+            {"kind": "token", "children": [], "state": "complete", "text": "x", "lexicalClass": "identifier"}
+        ]}));
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_shared_generated_notation_nodes() {
+        let mut document = valid_snapshot_document();
+        document.macros = generated_macro(serde_json::json!({"root": 0, "nodes": [
+            {"kind": "sequence", "children": [1, 2], "state": "complete"},
+            {"kind": "group", "children": [3], "state": "complete"},
+            {"kind": "group", "children": [3], "state": "complete"},
+            {"kind": "token", "children": [], "state": "complete", "text": "x", "lexicalClass": "identifier"}
+        ]}));
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    #[test]
+    fn rejects_unreachable_generated_notation_nodes() {
+        let mut document = valid_snapshot_document();
+        document.macros = generated_macro(serde_json::json!({"root": 0, "nodes": [
+            {"kind": "token", "children": [], "state": "complete", "text": "x", "lexicalClass": "identifier"},
+            {"kind": "token", "children": [], "state": "complete", "text": "orphan", "lexicalClass": "identifier"}
+        ]}));
+        assert!(parse_snapshot(&document).is_err());
+    }
+
+    fn generated_macro(notation: serde_json::Value) -> Vec<crate::ProjectMacro> {
+        serde_json::from_value(serde_json::json!([{
+            "kind": "call", "name": "m", "source": {"fileId": "main", "path": "main.tex", "range": {"startOffset": 1, "endOffset": 2}},
+            "definitions": [], "expansion": {
+                "status": "expanded", "depth": 0, "editable": true,
+                "inputRange": {"startOffset": 1, "endOffset": 2}, "notation": notation
+            }
+        }])).unwrap()
+    }
     #[test]
     fn rejects_cyclic_generated_macro_notation() {
         let tree = GeneratedNotationTree {
