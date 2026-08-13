@@ -3384,11 +3384,18 @@ fn assumption_condition_evidence(
 ) -> Option<Evidence> {
     let symbols = bound_condition_symbols(&condition.subjects, bindings);
     let subjects_match = |assumption: &&AssumptionInfo| {
-        assumption.subjects.is_empty()
-            || assumption
+        if assumption.subjects.is_empty() {
+            return true;
+        }
+        if assumption.value == condition.id {
+            return assumption
                 .subjects
                 .iter()
-                .all(|subject| symbols.contains(subject))
+                .all(|subject| symbols.contains(subject));
+        }
+        symbols
+            .iter()
+            .all(|symbol| assumption.subjects.contains(symbol))
     };
     assumptions
         .iter()
@@ -5472,6 +5479,15 @@ The normal equation is $A^\top A\theta=A^\top b$.",
         let json = serde_json::to_value(&matrix[0].conditions[0]).unwrap();
         assert_eq!(json["kind"], "shape-compatible");
         assert_eq!(json["status"], "verified");
+
+        let circuit = recognized_law_observations(
+            "Current $I$, voltage $V$, and resistance $R$ use the passive sign convention. The accepted equation is $V=RI$.",
+        );
+        let ohm = circuit
+            .iter()
+            .find(|law| law.law_id == "ohm-law")
+            .expect("Ohm's law");
+        assert_eq!(ohm.conditions[0].status, ConstraintStatus::Verified);
 
         let unspecified = recognized_law_observations(
             "Let $x$ be a state vector, $u$ a control input vector, $A$ a state matrix, and $B$ an input matrix. The state-space equation is $\\dot{x}=Ax+Bu$.",
