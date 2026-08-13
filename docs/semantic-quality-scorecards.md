@@ -238,6 +238,22 @@ spelling; every definition must be a reference, and a rename must edit exactly
 the complete reference set. This strengthens the blind oracle before any
 engine execution instead of weakening the release safety gate afterward.
 
+The independently sealed v0.35 fresh blind was executed once on 2026-08-13
+after the complete release gate passed on a separate x86_64 Linux host. It
+scored 0 of 48 with raw risk 570: no false establishments, no false conflicts,
+45 coverage misses, and 48 identity or navigation expectation misses. The
+important release boundary passed: there were zero unsafe navigation or edit
+locations, zero excessive diagnostic cases, and all eight clean/incremental
+lifecycle stages agreed. The terminal receipt is `completed`; its fixture seal
+is `a11c0d4dcb89a3574af83b5182a566f0ca09768a90d9c50702f46ef53040f9ae`,
+its evaluated Semath commit is
+`67f901226a91c4f3619ebb7de58c2eda62037a44`, and the receipt digest is
+`76bfbe71ca679847cf38062b4692fe65bbf1e362e04d18bf0f500408fe9d89a3`.
+This is a safety release, not a claim of broad fresh-document coverage. The
+exposed fixture is now historical evidence and must not be rerun or used for
+case-specific tuning; coverage must continue through public development and
+new independently sealed evidence.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
