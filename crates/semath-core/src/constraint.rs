@@ -1398,6 +1398,7 @@ mod tests {
             availability_order: u64::from(local_id),
             surface: format!("x{local_id}"),
             source_text: format!("x{local_id}"),
+            selection_text: format!("x{local_id}"),
             notation: Vec::new(),
         }
     }

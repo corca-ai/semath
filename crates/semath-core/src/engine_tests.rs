@@ -550,6 +550,7 @@ fn exact_occurrence_range_outranks_a_structural_selection_alias() {
             availability_order: 1,
             surface: "P".into(),
             source_text: "P".into(),
+            selection_text: "P".into(),
             notation: Vec::new(),
         },
         SourceOccurrence {
@@ -563,6 +564,7 @@ fn exact_occurrence_range_outranks_a_structural_selection_alias() {
             availability_order: 1,
             surface: "P_s".into(),
             source_text: "P_s".into(),
+            selection_text: "P".into(),
             notation: Vec::new(),
         },
     ];

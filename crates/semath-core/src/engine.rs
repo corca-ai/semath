@@ -708,6 +708,7 @@ fn append_relation_occurrences(
                 availability_order: expression_availability_order(document, &range, order, output),
                 surface: source_text(document, &range),
                 source_text: source_text(document, &range),
+                selection_text: source_text(document, &range),
                 notation: Vec::new(),
             },
             Vec::new(),
@@ -870,6 +871,7 @@ fn lower_semantic_document(
                     .unwrap_or(u64::MAX),
                 surface: seed.surface.clone(),
                 source_text: source_text(source, &seed.range),
+                selection_text: source_text(source, &seed.selection_range),
                 notation: seed.notation.clone(),
             },
             seed.candidate_options.clone(),
@@ -3537,19 +3539,9 @@ impl SemathEngine {
     }
 
     fn rename_would_merge_entity(&self, target: &EntityId, new_name: &str) -> bool {
-        self.index.semantic.occurrences().any(|occurrence| {
-            occurrence.kind == OccurrenceKind::Notation
-                && occurrence.component_id == target.component_id
-                && occurrence.scope_path == target.scope_path
-                && source_text(
-                    &self.index.documents[&occurrence.id.file_id].document,
-                    &occurrence.selection_range,
-                ) == new_name
-                && matches!(
-                    self.index.semantic.entity_decision(&occurrence.id),
-                    EntityEvidenceDecision::Established(entity) if entity != *target
-                )
-        })
+        self.index
+            .semantic
+            .established_selection_would_merge(target, new_name)
     }
 
     fn semantic_context(

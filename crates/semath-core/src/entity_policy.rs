@@ -192,6 +192,7 @@ mod tests {
             availability_order: 0,
             surface: "x_s".into(),
             source_text: "x_s".into(),
+            selection_text: "x".into(),
             notation,
         }
     }
