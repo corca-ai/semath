@@ -54,6 +54,22 @@ of the occurrence and never become flat string identities. Definitions and
 references resolve through the project semantic index, not a project-wide
 symbol scan.
 
+Navigation and meaning decisions answer different questions. Definition and
+references are available only when the exact cursor occurrence resolves to one
+source-grounded entity with a real definition; they may remain available when
+the surrounding formula is partial or unsupported. Conversely, an established
+formula does not establish the identity of every symbol inside it. References
+are complete for that entity or unavailable—hosts must not merge a fallback
+symbol scan into an empty semantic result.
+
+Rename has a stricter contract than navigation. `prepareRename` and `rename`
+must agree on the same established entity and complete occurrence set. Every
+edit must target real source, preserve one notation family, avoid capture or an
+entity merge, and fit the bounded fan-out limit. Generated macro text, a base
+inside an indexed or decorated occurrence, mixed aliases, ambiguous scope, or
+an incomplete result makes the whole operation unavailable; Semath never emits
+a partial edit.
+
 Selection identity is lowered before the syntax arena is compacted. Composite
 notation retains its exact identity range, and callable occurrences retain only
 the exact end of a complete following argument. Cursor queries therefore do

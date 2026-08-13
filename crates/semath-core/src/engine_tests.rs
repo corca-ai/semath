@@ -120,6 +120,7 @@ fn relation_focus_selects_the_exact_system_child_without_edge_guessing() {
 
     let selected = relation_expression_at_cursor(
         std::slice::from_ref(&root),
+        &document("main", "main.tex", "          a=b       y=x", 1),
         &math_range,
         Some(&y_range),
         y_start,
@@ -132,6 +133,7 @@ fn relation_focus_selects_the_exact_system_child_without_edge_guessing() {
 
     let trailing = relation_expression_at_cursor(
         std::slice::from_ref(&root),
+        &document("main", "main.tex", "          a=b       y=x", 1),
         &math_range,
         None,
         math_range.end_offset,
@@ -163,18 +165,49 @@ fn relation_focus_refuses_unowned_gaps_in_a_math_region() {
         provenance: Vec::new(),
     };
     let math_range = range(0, 30);
+    let source = document("main", "main.tex", "                              ", 1);
 
     assert!(
-        relation_expression_at_cursor(std::slice::from_ref(&relation), &math_range, None, 5,)
-            .is_none()
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &source,
+            &math_range,
+            None,
+            5,
+        )
+        .is_none()
     );
     assert!(
-        relation_expression_at_cursor(std::slice::from_ref(&relation), &math_range, None, 20,)
-            .is_none()
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &source,
+            &math_range,
+            None,
+            20,
+        )
+        .is_none()
     );
     assert!(
-        relation_expression_at_cursor(std::slice::from_ref(&relation), &math_range, None, 29,)
-            .is_none()
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &source,
+            &math_range,
+            None,
+            29,
+        )
+        .is_none()
+    );
+
+    let punctuation = document("main", "main.tex", "          a=b .               ", 1);
+    assert_eq!(
+        relation_expression_at_cursor(
+            std::slice::from_ref(&relation),
+            &punctuation,
+            &math_range,
+            None,
+            15,
+        ),
+        Some(&relation),
     );
 }
 

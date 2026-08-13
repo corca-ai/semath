@@ -2188,6 +2188,7 @@ fn stable_text_digest(value: &str) -> String {
 
 fn relation_expression_at_cursor<'a>(
     expressions: &'a [SemanticExpr],
+    document: &ProjectDocument,
     math_range: &SourceRange,
     focus_range: Option<&SourceRange>,
     offset: u32,
@@ -2216,7 +2217,27 @@ fn relation_expression_at_cursor<'a>(
         .into_iter()
         .filter(|expression| expression.range.end_offset <= offset)
         .max_by_key(|expression| expression.range.end_offset)?;
-    (preceding.range.end_offset.checked_add(1) == Some(offset)).then_some(preceding)
+    relation_trailing_gap_is_owned(document, preceding, offset).then_some(preceding)
+}
+
+fn relation_trailing_gap_is_owned(
+    document: &ProjectDocument,
+    relation: &SemanticExpr,
+    offset: u32,
+) -> bool {
+    let gap = offset.saturating_sub(relation.range.end_offset);
+    if gap == 0 || gap > 3 {
+        return false;
+    }
+    source_text(
+        document,
+        &SourceRange {
+            start_offset: relation.range.end_offset,
+            end_offset: offset,
+        },
+    )
+    .chars()
+    .all(|character| character.is_whitespace() || matches!(character, '.' | ',' | ';' | ':'))
 }
 
 fn collect_relation_expressions<'a>(
@@ -3613,11 +3634,15 @@ impl SemathEngine {
         let queried_relation = parsed.and_then(|math| {
             relation_expression_at_cursor(
                 &document.canonical_expressions,
+                &document.document,
                 &math.region.content_range,
                 focus.map(|focus| &focus.range),
                 offset,
             )
         });
+        let queried_formula_range = parsed.map(|math| &math.region.content_range);
+        let queried_formula_is_rejected = queried_formula_range
+            .is_some_and(|range| observations.semantic_evidence().formula_is_rejected(range));
         let mut local_formulas = observations.laws.at(offset);
         if local_formulas.is_empty()
             && formula_boundary
@@ -3661,11 +3686,12 @@ impl SemathEngine {
         });
         let context =
             self.semantic_context(observations, semantic_focus, offset, &context_formulas);
-        let symbol_definition_may_establish = queried_relation.is_none_or(|relation| {
-            observations
-                .semantic_evidence()
-                .formula_is_asserted(&relation.range)
-        });
+        let symbol_definition_may_establish = !queried_formula_is_rejected
+            && queried_relation.is_none_or(|relation| {
+                observations
+                    .semantic_evidence()
+                    .formula_is_asserted(&relation.range)
+            });
         let symbol_proof = if symbol_definition_may_establish {
             symbol_info.as_ref().map_or_else(Vec::new, |symbol| {
                 asserted_definition_evidence(&self.index.semantic, symbol)
@@ -3742,17 +3768,18 @@ impl SemathEngine {
                     && unresolved_control_sequence(symbol)
             });
         let unsupported_relation_context = local_formulas.is_empty()
-            && queried_relation.is_some_and(|relation| {
-                observations
-                    .semantic_evidence()
-                    .formula_is_rejected(&relation.range)
-                    || observations
+            && (queried_formula_is_rejected
+                || queried_relation.is_some_and(|relation| {
+                    observations
                         .semantic_evidence()
-                        .formula_is_asserted(&relation.range)
-                        && domain_has_correlated_evidence(&domains)
-                        && context.candidates.is_empty()
-                        && !self.formula_has_source_meaning(document, &relation.range)
-            })
+                        .formula_is_rejected(&relation.range)
+                        || observations
+                            .semantic_evidence()
+                            .formula_is_asserted(&relation.range)
+                            && domain_has_correlated_evidence(&domains)
+                            && context.candidates.is_empty()
+                            && !self.formula_has_source_meaning(document, &relation.range)
+                }))
             || queried_relation.is_none()
                 && symbol_info.as_ref().is_some_and(|symbol| {
                     !symbol_has_source_meaning(symbol)
