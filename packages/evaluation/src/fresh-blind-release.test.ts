@@ -299,6 +299,85 @@ describe("fresh blind release evidence", () => {
     expect(summary.unsafeNavigationOrEditCaseIds).toEqual([probe.id]);
   });
 
+  test("rejects every available navigation or edit outside its exact allowlist", () => {
+    const release = fixture();
+    const probe = release.fixture.probes[0]!;
+    const scenario = release.fixture.scenarios[0]!;
+    const document = scenario.snapshots[0]!.documents[0]!;
+    const needle = "$x_0=1$";
+    const startOffset = document.content.indexOf(needle);
+    const range = {
+      startOffset,
+      endOffset: startOffset + needle.length,
+    };
+    const anchor = { fileId: document.fileId, needle };
+    const expected = probe.expected.navigation as unknown as {
+      definition: Record<string, unknown>;
+      references: Record<string, unknown>;
+      rename: Record<string, unknown>;
+    };
+    expected.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [anchor],
+      status: "available",
+    };
+    expected.references = {
+      excluded: [],
+      minimum: 1,
+      required: [anchor],
+      status: "available",
+    };
+    expected.rename = {
+      excluded: [],
+      expectedText: needle,
+      minimum: 1,
+      newName: "y",
+      replacementText: "y",
+      required: [anchor],
+      safety: "reviewed exact notation",
+      status: "available",
+    };
+    const location = (candidate: { startOffset: number; endOffset: number }) => ({
+      fileId: document.fileId,
+      path: document.path,
+      range: candidate,
+    });
+    const unexpectedRange = {
+      startOffset: range.startOffset + 1,
+      endOffset: range.endOffset,
+    };
+    const summary = freshBlindSafetySummary(release.fixture, [
+      {
+        caseId: probe.id,
+        decision: probe.expected.decision,
+        definitions: [location(range), location(unexpectedRange)],
+        diagnostics: [],
+        prepareRename: {},
+        proofGrounded: probe.expected.proofGrounded,
+        references: [location(range), location(unexpectedRange)],
+        relations: [],
+        renameEdits: [
+          {
+            ...location(range),
+            expectedText: needle,
+            replacementText: "y",
+          },
+          {
+            ...location(unexpectedRange),
+            expectedText: needle,
+            replacementText: "y",
+          },
+        ],
+        renameSafety: "reviewed exact notation",
+        symbol: null,
+      },
+    ]);
+
+    expect(summary.unsafeNavigationOrEditLocations).toBe(3);
+    expect(summary.unsafeNavigationOrEditCaseIds).toEqual([probe.id]);
+  });
+
   test("gates each reviewed safety category and accepts a clean summary", () => {
     const clean = {
       diagnosticsOverLimit: 0,

@@ -551,18 +551,32 @@ function unsafeLocations<
       readonly occurrence?: number;
       readonly selection?: { readonly length: number; readonly offset: number };
     }[];
+    readonly required: readonly {
+      readonly fileId: string;
+      readonly needle: string;
+      readonly occurrence?: number;
+      readonly selection?: { readonly length: number; readonly offset: number };
+    }[];
     readonly status: "available" | "unavailable";
   },
   snapshot: ReturnType<typeof authoredSnapshotFor>,
   additionalUnsafe: (location: Location) => boolean = () => false,
 ): number {
   if (expected.status === "unavailable") return observed.length;
+  const required = expected.required.map((anchor) =>
+    resolveAuthoredAnchor(snapshot, anchor),
+  );
   const excluded = expected.excluded.map((anchor) =>
     resolveAuthoredAnchor(snapshot, anchor),
   );
   return observed.filter(
     (location) =>
       additionalUnsafe(location) ||
+      !required.some(
+        (anchor) =>
+          location.fileId === anchor.fileId &&
+          sameRange(location.range, anchor.range),
+      ) ||
       excluded.some(
         (anchor) =>
           location.fileId === anchor.fileId &&
