@@ -3747,8 +3747,13 @@ impl SemathEngine {
                 .into_iter()
                 .flat_map(|symbol| symbol.diagnostics.iter().cloned()),
         );
-        diagnostics.sort_by(|left, right| left.code.cmp(&right.code));
-        diagnostics.dedup();
+        diagnostics.sort_by(|left, right| {
+            left.code.cmp(&right.code).then_with(|| {
+                diagnostic_has_typed_constraint_evidence(right)
+                    .cmp(&diagnostic_has_typed_constraint_evidence(left))
+            })
+        });
+        diagnostics.dedup_by(|left, right| left.code == right.code);
         let diagnostics_truncated = diagnostics.len() > MAX_VIEW_DIAGNOSTICS;
         diagnostics.truncate(MAX_VIEW_DIAGNOSTICS);
         let (domains, domains_truncated) = observations.domains.at(offset);
@@ -4880,6 +4885,15 @@ fn document_diagnostics(
     }
     diagnostics.sort_by_key(|diagnostic| diagnostic.range.start_offset);
     diagnostics
+}
+
+fn diagnostic_has_typed_constraint_evidence(diagnostic: &SemanticDiagnostic) -> bool {
+    diagnostic.evidence.iter().any(|evidence| {
+        matches!(
+            evidence.kind.as_str(),
+            "derived-constraint" | "explicit-constraint"
+        )
+    })
 }
 
 fn constraint_diagnostics(

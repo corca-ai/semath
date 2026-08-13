@@ -1037,6 +1037,35 @@ fn diagnostics_report_only_a_demonstrable_typed_constraint_conflict() {
 }
 
 #[test]
+fn incompatible_redeclarations_share_one_typed_public_conflict() {
+    let content = "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $";
+    let offset = content.find("p$ is").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert_eq!(
+        view.diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.code == "notation-role-conflict")
+            .count(),
+        1
+    );
+}
+
+#[test]
 fn non_asserting_formula_mentions_do_not_create_constraint_problems() {
     let declarations =
         "$A \\in \\mathbb{R}^{m \\times n}, B \\in \\mathbb{R}^{n \\times p}, p \\ne m$.\n";

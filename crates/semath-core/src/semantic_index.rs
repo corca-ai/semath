@@ -1625,6 +1625,10 @@ impl ProjectSemanticIndex {
             .filter(|claim| affected_files.contains(&claim.subject.anchor.file_id))
             .filter_map(|claim| {
                 Some(ConstraintInputClaim {
+                    binding_key: self
+                        .occurrences
+                        .get(&claim.subject.anchor)
+                        .map(occurrence_binding_key),
                     claim: claim.clone(),
                     evidence: self.evidence.get(&claim.evidence_id)?.clone(),
                 })

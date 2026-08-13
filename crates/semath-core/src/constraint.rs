@@ -10,9 +10,11 @@ use crate::semantic_index::{
 const MAX_DERIVED_FACTS: usize = 50_000;
 const MAX_WORK_ITEMS: u32 = 200_000;
 const MAX_ROUNDS: usize = 8;
+const MAX_BINDING_ROLE_FACTS: usize = 32;
 
 #[derive(Clone)]
 pub(crate) struct ConstraintInputClaim {
+    pub binding_key: Option<String>,
     pub claim: Claim,
     pub evidence: EvidenceRecord,
 }
@@ -61,13 +63,33 @@ struct Proof {
     derived: bool,
 }
 
+#[derive(Clone)]
+struct BindingRoleFact {
+    binding_key: String,
+    claim_id: ClaimId,
+    subject: EntityId,
+    value: ClaimValue,
+}
+
 pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> ConstraintPlan {
     let mut known = BTreeMap::<FactKey, Proof>::new();
     let mut relations = Vec::<(ClaimId, ClaimRelation, EvidenceRecord)>::new();
+    let mut binding_roles = Vec::new();
     for item in input.iter().filter(|item| establishes(&item.evidence)) {
         let ClaimObject::Value(value) = &item.claim.object else {
             continue;
         };
+        if item.claim.predicate == ClaimPredicate::HasRole
+            && matches!(value, ClaimValue::Concept(_) | ClaimValue::Role(_))
+            && let Some(binding_key) = &item.binding_key
+        {
+            binding_roles.push(BindingRoleFact {
+                binding_key: binding_key.clone(),
+                claim_id: item.claim.id.clone(),
+                subject: item.claim.subject.clone(),
+                value: value.clone(),
+            });
+        }
         if item.claim.predicate == ClaimPredicate::Relates {
             if let ClaimValue::Relation(relation) = value {
                 relations.push((
@@ -122,7 +144,7 @@ pub(crate) fn plan_constraint_derivations(input: &[ConstraintInputClaim]) -> Con
         }
     }
 
-    let conflicts = collect_conflicts(&known, &relations);
+    let conflicts = collect_conflicts(&known, &relations, &binding_roles, &mut truncated);
     let mut derivations = known
         .into_iter()
         .filter_map(|(key, proof)| {
@@ -223,6 +245,8 @@ fn apply_composed_relations(
 fn collect_conflicts(
     known: &BTreeMap<FactKey, Proof>,
     relations: &[(ClaimId, ClaimRelation, EvidenceRecord)],
+    binding_roles: &[BindingRoleFact],
+    truncated: &mut bool,
 ) -> Vec<PlannedConflict> {
     let mut conflicts = BTreeSet::new();
     let facts = known.iter().collect::<Vec<_>>();
@@ -276,6 +300,44 @@ fn collect_conflicts(
                 summary: format!("{:?} conflicts with {:?}", left.value, right.value),
                 parent_claims: parents,
             });
+        }
+    }
+    let mut roles_by_binding = BTreeMap::<(String, Vec<u32>, String), Vec<&BindingRoleFact>>::new();
+    for fact in binding_roles {
+        let roles = roles_by_binding
+            .entry((
+                fact.subject.component_id.clone(),
+                fact.subject.scope_path.clone(),
+                fact.binding_key.clone(),
+            ))
+            .or_default();
+        if roles.len() == MAX_BINDING_ROLE_FACTS {
+            *truncated = true;
+        }
+        if roles.len() < MAX_BINDING_ROLE_FACTS {
+            roles.push(fact);
+        }
+    }
+    for roles in roles_by_binding.values() {
+        for (position, left) in roles.iter().enumerate() {
+            for right in roles.iter().skip(position + 1) {
+                if left.subject == right.subject || !role_values_conflict(&left.value, &right.value)
+                {
+                    continue;
+                }
+                let mut parent_claims = vec![left.claim_id.clone(), right.claim_id.clone()];
+                parent_claims.sort();
+                conflicts.insert(PlannedConflict {
+                    subject: if left.subject < right.subject {
+                        right.subject.clone()
+                    } else {
+                        left.subject.clone()
+                    },
+                    code: "notation-role-conflict".into(),
+                    summary: format!("{:?} conflicts with {:?}", left.value, right.value),
+                    parent_claims,
+                });
+            }
         }
     }
     for (position, (left, left_proof)) in facts.iter().enumerate() {
@@ -384,6 +446,19 @@ fn collect_conflicts(
         });
     }
     conflicts.into_iter().collect()
+}
+
+fn role_values_conflict(left: &ClaimValue, right: &ClaimValue) -> bool {
+    role_value(left)
+        .zip(role_value(right))
+        .is_some_and(|(left, right)| roles_conflict(left, right))
+}
+
+fn role_value(value: &ClaimValue) -> Option<&str> {
+    match value {
+        ClaimValue::Concept(role) | ClaimValue::Role(role) => Some(role),
+        _ => None,
+    }
 }
 
 fn reverse_comparison(operator: &ClaimComparison) -> ClaimComparison {
@@ -1333,6 +1408,7 @@ mod tests {
         let source = subject.anchor.clone();
         let evidence_id = EvidenceId(format!("evidence-{id}"));
         ConstraintInputClaim {
+            binding_key: None,
             claim: Claim {
                 id: ClaimId(id.into()),
                 subject: subject.clone(),
@@ -1532,6 +1608,42 @@ mod tests {
             plan.conflicts[0].parent_claims,
             [ClaimId("event-role".into()), ClaimId("voltage-role".into())]
         );
+    }
+
+    #[test]
+    fn incompatible_redeclarations_of_one_binding_are_a_typed_conflict() {
+        let mut distribution = input_claim(
+            "distribution-role",
+            entity(1),
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept("probability:distribution".into()),
+        );
+        distribution.binding_key = Some("p".into());
+        let mut random_variable = input_claim(
+            "random-variable-role",
+            entity(2),
+            ClaimPredicate::HasRole,
+            ClaimValue::Concept("probability:random-variable".into()),
+        );
+        random_variable.binding_key = Some("p".into());
+
+        let plan = plan_constraint_derivations(&[distribution, random_variable]);
+        assert_eq!(plan.conflicts.len(), 1);
+        assert_eq!(plan.conflicts[0].code, "notation-role-conflict");
+
+        let crowded = (0..=MAX_BINDING_ROLE_FACTS)
+            .map(|index| {
+                let mut claim = input_claim(
+                    &format!("role-{index}"),
+                    entity(index as u32 + 10),
+                    ClaimPredicate::HasRole,
+                    ClaimValue::Concept("probability:random-variable".into()),
+                );
+                claim.binding_key = Some("shared".into());
+                claim
+            })
+            .collect::<Vec<_>>();
+        assert!(plan_constraint_derivations(&crowded).truncated);
     }
 
     #[test]
