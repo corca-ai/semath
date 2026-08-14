@@ -1,6 +1,6 @@
 # Pack maturity report
 
-This is measured repository state on 2026-08-12, not live production telemetry
+This is measured repository state on 2026-08-15, not live production telemetry
 and not a future plan. The [quality manifest](../fixtures/corpus-manifest.json)
 holds approved support policy; GitHub issues hold planned work.
 
@@ -75,13 +75,13 @@ holds approved support policy; GitHub issues hold planned work.
   | First loss                       |   Development |       Holdout |
   | -------------------------------- | ------------: | ------------: |
   | Neutral syntax                   |             0 |             0 |
-  | Prose attachment                 |            25 |            23 |
-  | Identity or scope                |             3 |            42 |
+  | Prose attachment                 |            21 |            23 |
+  | Identity or scope                |             0 |            42 |
   | Canonical IR                     |             0 |             0 |
-  | Typed fact or condition          |            23 |            10 |
+  | Typed fact or condition          |            19 |            10 |
   | Local-to-observation propagation |             0 |             0 |
-  | Pack unification                 |            13 |            12 |
-  | Decision                         |             1 |             4 |
+  | Pack unification                 |            18 |            12 |
+  | Decision                         |             0 |             4 |
   | Host projection                  | Not exercised | Not exercised |
 
   The scorer reuses the existing recognition-frontier signals and queries
@@ -126,6 +126,39 @@ holds approved support policy; GitHub issues hold planned work.
   operator assignments. Characterized operator roles now prove their matching
   domain condition without a second authority. It passes 56 of 115 probes with
   risk 118 and zero false establishment, false conflict, or identity risk.
+- The 2026-08-15 practical-STEM baseline at
+  `16e1797286fd5143144e78657230cebedd433943` passes 57 of 115 authored
+  development probes with risk 116 and zero false establishment, false
+  conflict, or identity risk. Its field-by-capability matrix references 57
+  unique reviewed probes across 47 of 50 cells; linear-algebra project
+  lifecycle and navigation plus probability/statistics project lifecycle stay
+  explicit commissioned gaps. Only 27 of those 57 probes pass every reviewed
+  public surface. Layer-aware cell totals are:
+
+  | Program field            | Passed | Cases |
+  | ------------------------ | -----: | ----: |
+  | Shared foundations       |     20 |    31 |
+  | Linear algebra           |     16 |    23 |
+  | Differential equations   |     18 |    30 |
+  | Probability/statistics   |     16 |    27 |
+  | Numerical analysis       |     13 |    30 |
+
+  | Capability            | Passed | Cases |
+  | --------------------- | -----: | ----: |
+  | Vocabulary            |     13 |    17 |
+  | Typing                |     12 |    15 |
+  | Relation recognition  |      8 |    19 |
+  | Equivalent forms      |      3 |    11 |
+  | Conditions            |      7 |    15 |
+  | Document attachment   |     12 |    15 |
+  | Project lifecycle     |      7 |     8 |
+  | Decision quality      |      7 |    17 |
+  | Navigation            |      4 |     9 |
+  | Refusal               |     10 |    15 |
+
+  These overlapping diagnostic projections cannot be summed into an accuracy
+  score. They establish the ordered coverage frontier for #347–#351 while the
+  separately commissioned sealed evaluation remains unwritten and unspent.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
