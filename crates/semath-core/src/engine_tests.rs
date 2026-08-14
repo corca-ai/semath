@@ -1,8 +1,8 @@
 use std::collections::{BTreeSet, HashMap};
 
 use super::{
-    SemathEngine, index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
-    relation_expression_at_cursor, stable_text_digest,
+    SemathEngine, canonical_expression_owner, index_occurrence_range, notation_occurrence_range,
+    occurrence_id_at_range, relation_expression_at_cursor, stable_text_digest,
 };
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
@@ -1543,6 +1543,7 @@ fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
         view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
         Some("Q")
     );
+    assert!(view.context.entity_id.is_some());
 
     let result = engine
         .query(query(
@@ -1573,6 +1574,51 @@ fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
         panic!("expected rename preparation")
     };
     assert!(range.is_none());
+}
+
+#[test]
+fn composite_formula_ownership_is_exact_and_does_not_guess_internal_symbols() {
+    let relation = SemanticExpr {
+        kind: SemanticExprKind::Relation {
+            operator: SemanticReference::new("equals", range(1, 2), Vec::new()),
+            left: Box::new(SemanticExpr {
+                kind: SemanticExprKind::Symbol("y".into()),
+                range: range(0, 1),
+                provenance: Vec::new(),
+            }),
+            right: Box::new(SemanticExpr {
+                kind: SemanticExprKind::Power(
+                    Box::new(SemanticExpr {
+                        kind: SemanticExprKind::Symbol("x".into()),
+                        range: range(2, 3),
+                        provenance: Vec::new(),
+                    }),
+                    Box::new(SemanticExpr {
+                        kind: SemanticExprKind::Number("2".into()),
+                        range: range(4, 5),
+                        provenance: Vec::new(),
+                    }),
+                ),
+                range: range(2, 5),
+                provenance: Vec::new(),
+            }),
+        },
+        range: range(0, 5),
+        provenance: Vec::new(),
+    };
+
+    assert!(matches!(
+        canonical_expression_owner(&relation, &range(2, 5), true, None)
+            .map(|expression| &expression.kind),
+        Some(SemanticExprKind::Power(_, _))
+    ));
+    assert_eq!(
+        canonical_expression_owner(&relation, &range(0, 1), false, Some(5))
+            .map(|expression| &expression.range),
+        Some(&range(0, 5))
+    );
+    assert!(canonical_expression_owner(&relation, &range(2, 3), false, None).is_none());
+    assert!(canonical_expression_owner(&relation, &range(3, 4), false, None).is_none());
 }
 
 #[test]

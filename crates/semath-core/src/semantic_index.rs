@@ -747,6 +747,10 @@ impl ProjectSemanticIndex {
         self.occurrences.values()
     }
 
+    pub(crate) fn contains_entity(&self, entity: &EntityId) -> bool {
+        self.entities.contains(entity)
+    }
+
     pub(crate) fn occurrences_for_file<'a>(
         &'a self,
         file_id: &str,
