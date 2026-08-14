@@ -272,6 +272,14 @@ mod tests {
             Some("quantities-units:electric-charge")
         );
         assert_eq!(
+            classify_role("test charge").as_deref(),
+            Some("quantities-units:electric-charge")
+        );
+        assert_eq!(
+            classify_role("test particle").as_deref(),
+            Some("electromagnetism:charged-particle")
+        );
+        assert_eq!(
             classify_role("area-mean exit speed").as_deref(),
             Some("quantities-units:velocity")
         );

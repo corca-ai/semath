@@ -1567,6 +1567,36 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
 }
 
 #[test]
+fn semantic_view_projects_a_chained_relation_at_its_trailing_boundary() {
+    let content = r"This example states a first derivative. Let $f$ be a function of $x$, $x$ the differentiation variable, and $g$ its first derivative.
+\[
+g=\frac{d f}{d x}=\lim_{h\to0}\frac{f(x+h)-f(x)}{h}.
+\]";
+    let offset = content.find("}{h}.").unwrap() as u32 + "}{h}.".len() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context.relations.iter().any(|relation| {
+            relation.relation_id == "calculus-analysis:first-derivative-relation"
+        })
+    );
+}
+
+#[test]
 fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
     let content = "\\[\nQ=Av.\n\\label{eq:flow}\n\\]";
     let period_end = content.find("Q=Av.").unwrap() as u32 + "Q=Av.".len() as u32;

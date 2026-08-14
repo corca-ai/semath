@@ -2818,6 +2818,24 @@ fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {
     document.content.get(start..end).unwrap_or("").to_owned()
 }
 
+fn is_formula_trailing_boundary(
+    document: &ProjectDocument,
+    formula_range: &SourceRange,
+    offset: u32,
+) -> bool {
+    formula_range.start_offset <= offset
+        && offset <= formula_range.end_offset
+        && source_text(
+            document,
+            &SourceRange {
+                start_offset: offset,
+                end_offset: formula_range.end_offset,
+            },
+        )
+        .chars()
+        .all(char::is_whitespace)
+}
+
 fn analysis_fingerprint(document: &ProjectDocument) -> u64 {
     let scopes = document
         .scopes
@@ -3778,7 +3796,10 @@ impl SemathEngine {
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
         let (offset, source_offset) = offsets;
-        let formula_boundary = focus.is_none();
+        let formula_boundary = focus.is_none()
+            || parsed.is_some_and(|math| {
+                is_formula_trailing_boundary(&document.document, &math.region.content_range, offset)
+            });
         let queried_relation = parsed.and_then(|math| {
             relation_expression_at_cursor(
                 &document.canonical_expressions,

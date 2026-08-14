@@ -2709,7 +2709,14 @@ fn expression_concept_support(
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
-    let symbols = semantic_leaf_symbols(expression);
+    let symbols = match &expression.kind {
+        SemanticExprKind::Apply { operator, .. }
+            if concepts_share_lineage("semath:function", expected) =>
+        {
+            vec![operator.value.clone()]
+        }
+        _ => semantic_leaf_symbols(expression),
+    };
     if symbols.is_empty() {
         return RoleSupport::Unresolved;
     }
@@ -4301,6 +4308,7 @@ fn source_expression_label(
         .source
         .get(start..end)
         .map(str::trim)
+        .map(|label| label.trim_end_matches(['.', ',', ';', ':']).trim_end())
         .map(strip_source_group)
         .filter(|label| source_label_matches_expression(expression, label));
     Some(authored.unwrap_or(&canonical).to_owned())
@@ -4390,7 +4398,14 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
                 || label.strip_prefix('\\') == Some(symbol.as_str())
                 || source_label_is_structural_operator_application(label, symbol)
         }
-        SemanticExprKind::Index { .. } => !label.chars().any(char::is_whitespace),
+        SemanticExprKind::Index { .. } => {
+            label
+                .chars()
+                .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+                .count()
+                <= MAX_COMPOSITE_SOURCE_LABEL_CHARS
+                && render_canonical(&lower_template(label)) == render_canonical(expression)
+        }
         SemanticExprKind::Derivative { .. } => {
             label.starts_with("\\dot")
                 || label.starts_with("\\ddot")
@@ -4398,7 +4413,12 @@ fn source_label_matches_expression(expression: &SemanticExpr, label: &str) -> bo
                 || label.contains('\'')
         }
         SemanticExprKind::Power(_, exponent) if is_decorative_star(exponent) => {
-            !label.chars().any(char::is_whitespace)
+            label
+                .chars()
+                .take(MAX_COMPOSITE_SOURCE_LABEL_CHARS + 1)
+                .count()
+                <= MAX_COMPOSITE_SOURCE_LABEL_CHARS
+                && render_canonical(&lower_template(label)) == render_canonical(expression)
         }
         SemanticExprKind::Apply { .. }
         | SemanticExprKind::Fraction(_, _)
@@ -6524,6 +6544,69 @@ P_s=V_sI_s.
             roles
                 .iter()
                 .any(|role| role.role == "variable" && role.symbol == "x")
+        );
+    }
+
+    #[test]
+    fn typed_structural_variants_preserve_authored_relations() {
+        let failures = [
+            (
+                r"Let $f$ be a differentiable scalar function on an open subset of $\mathbb R^3$. We define the gradient vector field by
+\[
+g(x):=\nabla f(x)=\begin{pmatrix}\partial f/\partial x_1\\\partial f/\partial x_2\\\partial f/\partial x_3\end{pmatrix}(x).
+\]",
+                "gradient-relation",
+            ),
+            (
+                r"Here $q_{\mathrm t}$ is the test charge, $\mathbf E_0$ is the electric field, and $\mathbf F_{\!e}$ denotes the resulting electric force. With magnetic force absent, therefore
+\[
+\mathbf F_{\!e}=q_{\mathrm t}\mathbf E_0.
+\]",
+                "electric-force-law",
+            ),
+        ]
+        .into_iter()
+        .filter_map(|(source, expected)| {
+            let observations = recognized_law_observations(source);
+            (!observations
+                    .iter()
+                    .any(|recognition| recognition.law_id == expected))
+            .then(|| format!("{source}: {observations:#?}"))
+        })
+        .collect::<Vec<_>>();
+        assert!(failures.is_empty(), "{}", failures.join("\n"));
+    }
+
+    #[test]
+    fn structural_variants_do_not_supply_missing_semantic_roles() {
+        for source in [
+            r"The displayed symbols are untyped: $\dot{x}=Ax+Bu$.",
+            r"The displayed symbols are untyped: $g(x)=\nabla f(x)$.",
+        ] {
+            assert!(recognized_laws(source).is_empty(), "{source}");
+        }
+    }
+
+    #[test]
+    fn styled_electric_force_uses_exact_quantity_roles_and_location_evidence() {
+        let source = r"For a sufficiently small test body, the applied field is uniform over the charge distribution. Here $q_{\mathrm t}$ is the test charge, $\mathbf E_0$ is the electric field evaluated at the body's center, and $\mathbf F_{\!e}$ denotes the resulting electric force. Therefore
+\[
+\mathbf F_{\!e}=q_{\mathrm t}\mathbf E_0.
+\]";
+        let recognition = recognized_law_observations(source)
+            .into_iter()
+            .find(|recognition| recognition.law_id == "electric-force-law")
+            .expect("electric force law");
+        assert_eq!(recognition.status, LawRecognitionStatus::Verified);
+        assert_eq!(
+            recognition
+                .relation
+                .expect("public relation")
+                .roles
+                .into_iter()
+                .map(|role| role.symbol)
+                .collect::<Vec<_>>(),
+            ["\\mathbf F_{\\!e}", "q_{\\mathrm t}", "\\mathbf E_0"]
         );
     }
 
