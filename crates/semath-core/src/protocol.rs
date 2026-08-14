@@ -792,6 +792,8 @@ pub struct LawConditionInfo {
     pub kind: ScientificConstraintKind,
     pub subjects: Vec<String>,
     pub label: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_property: Option<OperatorProperty>,
     pub status: ConstraintStatus,
     pub evidence: Vec<Evidence>,
 }
@@ -802,12 +804,28 @@ pub enum ScientificConstraintKind {
     Assumption,
     Differentiable,
     DomainMembership,
+    MapsBetween,
     Nonzero,
+    OperatorProperty,
     Positive,
+    RankCompatible,
     SameContext,
     ShapeCompatible,
     SignConvention,
     Uniform,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum OperatorProperty {
+    Adjoint,
+    Bilinear,
+    Gradient,
+    Hessian,
+    InnerProduct,
+    Jacobian,
+    Linear,
+    Norm,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]

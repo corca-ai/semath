@@ -304,13 +304,25 @@ export interface LawConditionInfo {
     | "assumption"
     | "differentiable"
     | "domain-membership"
+    | "maps-between"
     | "nonzero"
+    | "operator-property"
     | "positive"
+    | "rank-compatible"
     | "same-context"
     | "shape-compatible"
     | "sign-convention"
     | "uniform";
   label: string;
+  operatorProperty?:
+    | "adjoint"
+    | "bilinear"
+    | "gradient"
+    | "hessian"
+    | "inner-product"
+    | "jacobian"
+    | "linear"
+    | "norm";
   status: "conflicting" | "required" | "unsupported" | "verified";
   subjects: readonly string[];
 }

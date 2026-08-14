@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath compiles schema-10 JSON packs into one bounded Rust semantic
+Semath compiles schema-11 JSON packs into one bounded Rust semantic
 runtime. Packs contain concepts, roles, laws, canonical relations, optional
 representations, conditions,
 quantities, units, activation evidence, and references. They contain no
@@ -24,7 +24,7 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 10`, stable identity and SemVer, dependencies,
+Each pack declares `schemaVersion: 11`, stable identity and SemVer, dependencies,
 concepts, and typed laws. Concepts may declare reviewed English aliases. A law
 supplies exactly one `canonicalRelation`, optional presentation
 `representations`, and roles with a required semantic concept
@@ -51,6 +51,40 @@ evidence, and distinguishes verified, required, conflicting, and unsupported
 conditions. Activation rules carry reviewed prose `phrases` and closed
 structural kinds; the removed `patterns` field is not accepted as a
 compatibility alias.
+
+Schema 11 adds three compositional condition primitives without adding a second
+fact system:
+
+- `maps-between` binds an operator, domain value, and codomain value;
+- `operator-property` binds one operator and one closed `operatorProperty` value;
+- `rank-compatible` binds a ranked value and the extent or result it constrains.
+
+The closed operator properties are `linear`, `bilinear`, `inner-product`,
+`norm`, `adjoint`, `gradient`, `jacobian`, and `hessian`. They are semantic
+requirements, not keywords or display strings. A condition's `subjects` are
+resolved to exact formula bindings, and only attached source evidence can
+verify it. Missing evidence leaves the condition required; notation and domain
+relevance cannot promote it. Existing `domain-membership`, `shape-compatible`,
+and source-indexed shape facts supply membership and compatible-extents
+primitives. Law bindings now project their scalar, vector, matrix, tensor, or
+function kind and any observed symbolic extents instead of flattening every
+role to `expression`.
+
+These primitives are shared only where independently named fields need the same
+meaning:
+
+| Primitive | Independent consumers |
+| --- | --- |
+| Typed spaces, membership, and maps | Linear algebra; differential equations; optimization |
+| Rank and compatible extents | Linear algebra; statistics; numerical analysis |
+| Linear and bilinear operators | Linear algebra; probability/statistics; mechanics |
+| Inner products and norms | Linear algebra; optimization; numerical analysis |
+| Adjoints | Linear algebra; differential equations; signal processing |
+| Gradients, Jacobians, and Hessians | Calculus; optimization; numerical analysis |
+
+Field packs remain responsible for reviewed vocabulary and laws. The generic
+runtime stores these requirements, evidence, retraction edges, and work limits
+without branching on a pack or law ID.
 
 For relation skeletons repeated across independent laws and fields, a law may
 replace `canonicalRelation` with one reviewed `archetype` and an exact
@@ -100,7 +134,7 @@ reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of positive and refusal observations
 materialized from compact editable seeds, not independently authored evidence
-or evidence of maturity by itself. The checked-in schema-10 pack files and the
+or evidence of maturity by itself. The checked-in schema-11 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

@@ -10,7 +10,8 @@ use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{is_capability_pack, laws_share_collision};
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
 use crate::pack::{
-    PackConditionKind, PackLaw, PackLawCondition, PackLawRole, RoleSourceProjection, built_in_packs,
+    PackConditionKind, PackLaw, PackLawCondition, PackLawRole, PackOperatorProperty,
+    RoleSourceProjection, built_in_packs,
 };
 use crate::prose::{FormulaOperationKind, LawActivationEvidence, ScientificSemanticEvidence};
 use crate::quantity::QuantityObservations;
@@ -18,9 +19,9 @@ use crate::shape::ShapeObservations;
 use crate::source_index::SourceIndex;
 use crate::{
     AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawBindingProof,
-    LawConditionInfo, LawRecognition, LawRecognitionStatus, MeaningConflict, QuantityInfo,
-    RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
-    SemanticConstraintKind, ShapeInfo, SourceRange,
+    LawConditionInfo, LawRecognition, LawRecognitionStatus, MeaningConflict, OperatorProperty,
+    QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind,
+    SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
 const MAX_LAW_MATCHES: usize = 16;
@@ -3128,12 +3129,12 @@ fn recognition(
             Some(LawBinding {
                 parameter: role.id.clone(),
                 symbol,
-                constraint: SemanticConstraint {
-                    kind: SemanticConstraintKind::Expression,
-                    concepts: vec![role.concept.clone()],
-                    dimensions: Vec::new(),
-                    refinements: Vec::new(),
-                },
+                constraint: role_semantic_constraint(
+                    role,
+                    expression,
+                    actual.range.start_offset,
+                    context,
+                ),
                 proof: match proof {
                     RoleBindingProof::Typed => LawBindingProof::Typed,
                     RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
@@ -3235,6 +3236,7 @@ fn recognition(
                     .map(|binding| binding.symbol.clone())
                     .collect(),
                 label: condition.label.clone(),
+                operator_property: condition.operator_property.map(operator_property),
                 status: condition_status(
                     condition.kind,
                     condition_bindings.len(),
@@ -3320,6 +3322,52 @@ fn recognition(
     }
 }
 
+fn role_semantic_constraint(
+    role: &PackLawRole,
+    expression: &SemanticExpr,
+    offset: u32,
+    context: &RecognitionContext<'_>,
+) -> SemanticConstraint {
+    let observed = semantic_symbols(expression).into_iter().find_map(|symbol| {
+        context
+            .shapes
+            .shape_at(&symbol, offset)
+            .into_iter()
+            .chain(context.external.shapes_at(offset, &symbol))
+            .find(|shape| {
+                role.shape
+                    .as_deref()
+                    .is_none_or(|expected| shape.kind == expected)
+            })
+    });
+    let kind = role
+        .shape
+        .as_deref()
+        .or_else(|| observed.as_ref().map(|shape| shape.kind.as_str()))
+        .and_then(semantic_constraint_kind)
+        .unwrap_or(SemanticConstraintKind::Expression);
+    SemanticConstraint {
+        kind,
+        concepts: vec![role.concept.clone()],
+        dimensions: observed
+            .as_ref()
+            .map(|shape| shape.dimensions.clone())
+            .unwrap_or_default(),
+        refinements: observed.map(|shape| shape.refinements).unwrap_or_default(),
+    }
+}
+
+fn semantic_constraint_kind(kind: &str) -> Option<SemanticConstraintKind> {
+    Some(match kind {
+        "function" => SemanticConstraintKind::Function,
+        "matrix" => SemanticConstraintKind::Matrix,
+        "scalar" => SemanticConstraintKind::Scalar,
+        "tensor" => SemanticConstraintKind::Tensor,
+        "vector" => SemanticConstraintKind::Vector,
+        _ => return None,
+    })
+}
+
 fn formula_source_range(range: &SourceRange, context: &RecognitionContext<'_>) -> SourceRange {
     let mut range = range.clone();
     let mut cursor = context.source_index.byte_for_utf16(range.end_offset);
@@ -3374,6 +3422,7 @@ fn equivalence_conditions(
                     } else {
                         format!("{} must be nonzero.", symbols.join(" and "))
                     },
+                    operator_property: None,
                     status,
                     evidence,
                 }
@@ -3420,11 +3469,27 @@ fn scientific_constraint_kind(kind: PackConditionKind) -> ScientificConstraintKi
         PackConditionKind::Assumption => ScientificConstraintKind::Assumption,
         PackConditionKind::Differentiable => ScientificConstraintKind::Differentiable,
         PackConditionKind::DomainMembership => ScientificConstraintKind::DomainMembership,
+        PackConditionKind::MapsBetween => ScientificConstraintKind::MapsBetween,
+        PackConditionKind::OperatorProperty => ScientificConstraintKind::OperatorProperty,
         PackConditionKind::Positive => ScientificConstraintKind::Positive,
+        PackConditionKind::RankCompatible => ScientificConstraintKind::RankCompatible,
         PackConditionKind::SameContext => ScientificConstraintKind::SameContext,
         PackConditionKind::ShapeCompatible => ScientificConstraintKind::ShapeCompatible,
         PackConditionKind::SignConvention => ScientificConstraintKind::SignConvention,
         PackConditionKind::Uniform => ScientificConstraintKind::Uniform,
+    }
+}
+
+fn operator_property(property: PackOperatorProperty) -> OperatorProperty {
+    match property {
+        PackOperatorProperty::Adjoint => OperatorProperty::Adjoint,
+        PackOperatorProperty::Bilinear => OperatorProperty::Bilinear,
+        PackOperatorProperty::Gradient => OperatorProperty::Gradient,
+        PackOperatorProperty::Hessian => OperatorProperty::Hessian,
+        PackOperatorProperty::InnerProduct => OperatorProperty::InnerProduct,
+        PackOperatorProperty::Jacobian => OperatorProperty::Jacobian,
+        PackOperatorProperty::Linear => OperatorProperty::Linear,
+        PackOperatorProperty::Norm => OperatorProperty::Norm,
     }
 }
 
@@ -3447,6 +3512,9 @@ fn condition_status(
         | PackConditionKind::SignConvention
         | PackConditionKind::Uniform
         | PackConditionKind::DomainMembership
+        | PackConditionKind::MapsBetween
+        | PackConditionKind::OperatorProperty
+        | PackConditionKind::RankCompatible
         | PackConditionKind::ShapeCompatible => ConstraintStatus::Required,
     }
 }
@@ -3936,6 +4004,9 @@ enum TypedAssumption {
     Uniform,
     SameContext,
     DifferentContext,
+    MapsBetween,
+    OperatorProperty(PackOperatorProperty),
+    RankCompatible,
     Other,
 }
 
@@ -3950,6 +4021,32 @@ fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
         ("uniformity", "uniform") => TypedAssumption::Uniform,
         ("context", "different-context") => TypedAssumption::DifferentContext,
         ("context", _) => TypedAssumption::SameContext,
+        ("mapping", "maps-between") => TypedAssumption::MapsBetween,
+        ("operator-property" | "algebraic-property", "adjoint") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Adjoint)
+        }
+        ("operator-property" | "algebraic-property", "bilinear") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Bilinear)
+        }
+        ("operator-property" | "algebraic-property", "gradient") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Gradient)
+        }
+        ("operator-property" | "algebraic-property", "hessian") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Hessian)
+        }
+        ("operator-property" | "algebraic-property", "inner-product") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::InnerProduct)
+        }
+        ("operator-property" | "algebraic-property", "jacobian") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Jacobian)
+        }
+        ("operator-property" | "algebraic-property", "linear") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Linear)
+        }
+        ("operator-property" | "algebraic-property", "norm") => {
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Norm)
+        }
+        ("rank", "compatible") => TypedAssumption::RankCompatible,
         _ => TypedAssumption::Other,
     }
 }
@@ -4014,6 +4111,12 @@ fn assumption_condition_evidence(
                 | (PackConditionKind::Positive, TypedAssumption::Positive)
                 | (PackConditionKind::SignConvention, TypedAssumption::SignConvention)
                 | (PackConditionKind::Uniform, TypedAssumption::Uniform) => true,
+                (PackConditionKind::MapsBetween, TypedAssumption::MapsBetween)
+                | (PackConditionKind::RankCompatible, TypedAssumption::RankCompatible) => true,
+                (
+                    PackConditionKind::OperatorProperty,
+                    TypedAssumption::OperatorProperty(property),
+                ) => condition.operator_property == Some(property),
                 (
                     PackConditionKind::Assumption
                     | PackConditionKind::DomainMembership
@@ -4501,7 +4604,7 @@ mod tests {
     use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region, lower_template};
     use crate::consistency::observe_roles;
     use crate::domain_signature::laws_share_collision;
-    use crate::pack::{PackConditionKind, PackLawCondition};
+    use crate::pack::{PackConditionKind, PackLawCondition, PackOperatorProperty};
     use crate::parser::{ParsedMath, parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::quantity::observe_quantities;
@@ -4546,6 +4649,18 @@ mod tests {
         assert_eq!(
             typed_assumption(&assumption("sign-convention", "not-clockwise")),
             TypedAssumption::OpposedSignConvention
+        );
+        assert_eq!(
+            typed_assumption(&assumption("mapping", "maps-between")),
+            TypedAssumption::MapsBetween
+        );
+        assert_eq!(
+            typed_assumption(&assumption("operator-property", "jacobian")),
+            TypedAssumption::OperatorProperty(PackOperatorProperty::Jacobian)
+        );
+        assert_eq!(
+            typed_assumption(&assumption("rank", "compatible")),
+            TypedAssumption::RankCompatible
         );
     }
 
@@ -4627,6 +4742,7 @@ mod tests {
             kind: PackConditionKind::Positive,
             subjects: vec!["input".into()],
             label: "input is positive".into(),
+            operator_property: None,
             evidence_phrases: Vec::new(),
         };
         let bindings = BTreeMap::from([(
@@ -5667,6 +5783,34 @@ This conversion is performed once per accepted timing sample so the accumulator 
     fn recognizes_symbolic_state_space_declarations() {
         let source = "In a continuous state-space model, $z\\in\\mathbb R^p$, $v\\in\\mathbb R^r$, $F\\in\\mathbb R^{p\\times p}$, and $G\\in\\mathbb R^{p\\times r}$. Here $z$ denotes the state, $v$ the control input, $F$ the state matrix, and $G$ the input matrix. $\\dot{z} = Fz + Gv$.";
         assert_eq!(recognized_laws(source), ["continuous-state-equation"]);
+    }
+
+    #[test]
+    fn law_bindings_project_typed_shapes_and_symbolic_extents() {
+        let laws = recognized_law_observations(
+            "Let $H$ be an m by n matrix, $q$ an n-dimensional vector, and $z$ an m-dimensional vector. Then $z=Hq$.",
+        );
+        let law = laws
+            .iter()
+            .find(|law| law.law_id == "matrix-vector-product")
+            .unwrap();
+        let operator = law
+            .bindings
+            .iter()
+            .find(|binding| binding.parameter == "operator")
+            .unwrap();
+        let input = law
+            .bindings
+            .iter()
+            .find(|binding| binding.parameter == "vector")
+            .unwrap();
+        assert_eq!(
+            operator.constraint.kind,
+            crate::SemanticConstraintKind::Matrix
+        );
+        assert_eq!(operator.constraint.dimensions, ["m", "n"]);
+        assert_eq!(input.constraint.kind, crate::SemanticConstraintKind::Vector);
+        assert_eq!(input.constraint.dimensions, ["n"]);
     }
 
     #[test]

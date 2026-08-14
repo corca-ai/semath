@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 10,
+  "schemaVersion": 11,
   "packId": "quantities-units",
   "packVersion": "1.3.0",
   "packKind": "capability",

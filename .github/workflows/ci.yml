@@ -24,11 +24,16 @@ jobs:
       - run: bun run typecheck
       - run: bun test
       - run: bun run architecture
-      - run: bun run pack:conformance
       - run: sha256sum -c SHA256SUMS
         working-directory: lib/wasm
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: scripts/build-wasm.sh
+      # TEMP-CODE(issue: #347, remove-when: schema-11 WASM artifact is committed, check: after this CI run): collect the x86_64 Linux build before restoring normal gate order.
+      - run: bun run pack:conformance
+      - uses: actions/upload-artifact@v4
+        with:
+          name: semath-schema-11-wasm
+          path: lib/wasm
       - run: bun run parity
       - run: bun run budget
       - run: bun run budget:scale
