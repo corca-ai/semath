@@ -9,7 +9,8 @@ use crate::candidate::{
     structural_candidate_options,
 };
 use crate::canonical::{
-    SemanticExpr, SemanticExprKind, lower_document_region, relation_head, render_canonical,
+    SemanticExpr, SemanticExprKind, expression_children, lower_document_region, relation_head,
+    render_canonical,
 };
 use crate::constraint::PlannedConflict;
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
@@ -1811,12 +1812,7 @@ impl RelationLowerer<'_> {
             return Some(entity.clone());
         }
         let anchor = self.occurrence_for_range(&expression.range)?.clone();
-        let entity = EntityId {
-            component_id: anchor.component_id.clone(),
-            scope_path: anchor.scope_path.clone(),
-            kind: format!("expression:{}", stable_text_digest(&digest)),
-            anchor: anchor.id.clone(),
-        };
+        let entity = canonical_expression_entity(expression, &anchor);
         self.output.entities.push(entity.clone());
         self.entities_by_expression.insert(key, entity.clone());
         if matches!(expression.kind, SemanticExprKind::Derivative { .. }) {
@@ -2191,6 +2187,55 @@ fn stable_text_digest(value: &str) -> String {
         hash = hash.wrapping_mul(0x100000001b3);
     }
     format!("{hash:016x}")
+}
+
+fn canonical_expression_entity(expression: &SemanticExpr, anchor: &SourceOccurrence) -> EntityId {
+    EntityId {
+        component_id: anchor.component_id.clone(),
+        scope_path: anchor.scope_path.clone(),
+        kind: format!(
+            "expression:{}",
+            stable_text_digest(&render_canonical(expression))
+        ),
+        anchor: anchor.id.clone(),
+    }
+}
+
+fn canonical_expression_owner<'a>(
+    relation: &'a SemanticExpr,
+    focus: &SourceRange,
+    structurally_composite: bool,
+    application_end: Option<u32>,
+) -> Option<&'a SemanticExpr> {
+    let mut pending = vec![relation];
+    let mut owner = None;
+    while let Some(expression) = pending.pop() {
+        pending.extend(expression_children(expression));
+        if matches!(
+            expression.kind,
+            SemanticExprKind::Symbol(_)
+                | SemanticExprKind::Number(_)
+                | SemanticExprKind::Unknown(_)
+        ) || expression.range.start_offset > focus.start_offset
+            || focus.end_offset > expression.range.end_offset
+        {
+            continue;
+        }
+        let owns_application = application_end.is_some_and(|end| {
+            expression.range.start_offset == focus.start_offset
+                && expression.range.end_offset == end
+        });
+        if !structurally_composite && !owns_application {
+            continue;
+        }
+        if owner.is_none_or(|current: &SemanticExpr| {
+            expression.range.end_offset - expression.range.start_offset
+                < current.range.end_offset - current.range.start_offset
+        }) {
+            owner = Some(expression);
+        }
+    }
+    owner
 }
 
 fn relation_expression_at_cursor<'a>(
@@ -3559,22 +3604,26 @@ impl SemathEngine {
         &self,
         observations: &DocumentSemanticObservations,
         focus: Option<&CursorFocus>,
+        meaning_entity: Option<&EntityId>,
         offset: u32,
         formulas: &[crate::LawRecognition],
     ) -> SemanticContextInfo {
         let (entity_id, symbol_name) = focus
             .map(|focus| {
                 (
-                    self.resolved_entity(&focus.occurrence_id),
+                    meaning_entity
+                        .cloned()
+                        .or_else(|| self.resolved_entity(&focus.occurrence_id)),
                     Some(focus.name.clone()),
                 )
             })
             .unwrap_or((None, None));
         let mut context =
             observations.context(symbol_name, entity_id.clone(), offset, formulas.to_vec());
+        let claim_entity_id = focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id));
         let semantic_occurrence =
             focus.and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id));
-        if let (Some(entity), Some(semantic_occurrence)) = (&entity_id, semantic_occurrence) {
+        if let (Some(entity), Some(semantic_occurrence)) = (&claim_entity_id, semantic_occurrence) {
             let context_symbol = context.symbol.clone();
             context.quantities.extend(derived_quantity_infos(
                 &self.index.semantic,
@@ -3622,6 +3671,74 @@ impl SemathEngine {
             context.candidates = candidates;
         }
         context
+    }
+
+    fn formula_meaning_owner(
+        &self,
+        document: &AnalyzedDocument,
+        focus: &CursorFocus,
+        relation: &SemanticExpr,
+    ) -> Option<EntityId> {
+        let occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
+        let matches_occurrence = |seed: &&SemanticOccurrenceSeed| {
+            seed.kind == occurrence.kind
+                && seed.range == occurrence.range
+                && seed.selection_range == occurrence.selection_range
+                && seed.surface == occurrence.surface
+        };
+        let structurally_composite = document
+            .semantic_occurrences
+            .iter()
+            .filter(matches_occurrence)
+            .flat_map(|seed| &seed.notation)
+            .any(|component| {
+                matches!(
+                    component,
+                    NotationComponent::Subscript { .. }
+                        | NotationComponent::Superscript
+                        | NotationComponent::Argument { .. }
+                        | NotationComponent::Delimiter { .. }
+                )
+            });
+        let application_end = document
+            .semantic_occurrences
+            .iter()
+            .filter(matches_occurrence)
+            .filter_map(|seed| seed.application_end_offset)
+            .max();
+        let owner = canonical_expression_owner(
+            relation,
+            &focus.range,
+            structurally_composite,
+            application_end,
+        )?;
+        let occurrence_id = self
+            .index
+            .occurrence_id_for_range(&document.document.file_id, &owner.range)?;
+        let occurrence = self.index.semantic.occurrence(&occurrence_id)?;
+        let entity_id = canonical_expression_entity(owner, occurrence);
+        self.index
+            .semantic
+            .contains_entity(&entity_id)
+            .then_some(())?;
+        Some(entity_id)
+    }
+
+    fn canonical_meaning_owner(
+        &self,
+        document: &AnalyzedDocument,
+        expression: &SemanticExpr,
+    ) -> Option<EntityId> {
+        let occurrence_id = self
+            .index
+            .occurrence_id_for_range(&document.document.file_id, &expression.range)?;
+        let occurrence = self.index.semantic.occurrence(&occurrence_id)?;
+        let entity_id = canonical_expression_entity(expression, occurrence);
+        self.index
+            .semantic
+            .contains_entity(&entity_id)
+            .then_some(())?;
+        Some(entity_id)
     }
 
     fn semantic_view(
@@ -3681,6 +3798,21 @@ impl SemathEngine {
             .is_some_and(|math| cursor_is_structural_environment_marker(&math.root, offset)))
         .then_some(display_focus.as_ref())
         .flatten();
+        let formula_meaning_owner = if focus.is_none() {
+            queried_relation.and_then(|relation| self.canonical_meaning_owner(document, relation))
+        } else {
+            display_focus.as_ref().and_then(|focus| {
+                if semantic_focus.is_some() && self.resolved_entity(&focus.occurrence_id).is_some()
+                {
+                    return None;
+                }
+                queried_relation
+                    .and_then(|relation| self.formula_meaning_owner(document, focus, relation))
+            })
+        };
+        let meaning_entity = formula_meaning_owner.or_else(|| {
+            semantic_focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id))
+        });
         let mut context_formulas = local_formulas.clone();
         if !local_formulas.is_empty() {
             let linked =
@@ -3699,8 +3831,13 @@ impl SemathEngine {
         let symbol_info = display_focus.as_ref().and_then(|focus| {
             self.symbol_info(document, observations, focus, offset, hygiene_enabled)
         });
-        let context =
-            self.semantic_context(observations, semantic_focus, offset, &context_formulas);
+        let context = self.semantic_context(
+            observations,
+            semantic_focus,
+            meaning_entity.as_ref(),
+            offset,
+            &context_formulas,
+        );
         let symbol_definition_may_establish = !queried_formula_is_rejected
             && queried_relation.is_none_or(|relation| {
                 observations
@@ -3741,9 +3878,11 @@ impl SemathEngine {
             .constraint_conflicts_for(&document.document.file_id)
             .into_iter()
             .filter_map(|conflict| {
-                let focused_entity = symbol_info
-                    .as_ref()
-                    .and_then(|symbol| symbol.entity_id.as_ref());
+                let focused_entity = meaning_entity.as_ref().or_else(|| {
+                    symbol_info
+                        .as_ref()
+                        .and_then(|symbol| symbol.entity_id.as_ref())
+                });
                 let focused_occurrence = display_focus
                     .as_ref()
                     .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id));
