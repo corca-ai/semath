@@ -8,6 +8,7 @@ import {
   parseSyntheticDiversitySpec,
   parsePromotionSeedSpec,
 } from "../packages/evaluation/src/index";
+import { linearAlgebraFoundationSuite } from "../packages/evaluation/src/linear-algebra-foundation-seeds";
 
 const root = new URL("../", import.meta.url);
 const evidenceStart = "% semath-recognition-evidence:start";
@@ -59,6 +60,10 @@ export async function materializeSyntheticCorpora(): Promise<Map<string, Corpus>
   const promotionSeeds = parsePromotionSeedSpec(
     JSON.parse(await readFile(new URL("fixtures/promotion-law-seeds.json", root), "utf8")),
   );
+  const promotionSuites = [
+    ...promotionSeeds.suites,
+    linearAlgebraFoundationSuite,
+  ];
   const outputs = new Map<string, Corpus>();
   for (const group of groups) {
     const raw = JSON.parse(
@@ -75,7 +80,7 @@ export async function materializeSyntheticCorpora(): Promise<Map<string, Corpus>
     "corpus/global-adversarial.json",
     generateGlobalRefusalCorpus("global-adversarial", spec),
   );
-  for (const suite of promotionSeeds.suites) {
+  for (const suite of promotionSuites) {
     const pack = JSON.parse(
       await readFile(new URL(`packs/${suite.packId}/v1.json`, root), "utf8"),
     ) as PackSource;

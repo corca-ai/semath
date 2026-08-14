@@ -87,7 +87,7 @@ and still scores every other expectation from the immutable fixture.
 The v0.27 authored scientific tranche adds 96 editable development scenarios
 and 48 separately authored frozen holdout scenarios. Its 212 probes observe
 meaning, definition, references, rename preparation, rename, and Problems at
-reviewed source positions across all 61 current laws. Exactly eight holdout
+reviewed source positions across the 61-law historical baseline. Exactly eight holdout
 scenarios cover each document-reasoning family: scope-bound comparisons,
 derivation chains, guarded conditions, discourse references, collisions or
 unsupported input, and edit lifecycles. Every source and expectation was
@@ -146,15 +146,13 @@ definitions or relations. Applying only those explicit adjudications produces
 the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
 cases stay visible as coverage work.
 
-The 2026-08-14 v0.35 development frontier passes 56 of 115 probes with risk
-118 and no false establishment, false conflict, or identity risk. Its current
-first-loss atlas is 21 attachment, 19 typed-fact, and 19 pack-unification
-misses. Exact relation-source prose evidence moved three losses out of the
-attachment stage without changing any public decision; explicit project
-references now also preserve source order, component boundaries, retraction,
-and reverse-dependency invalidation. This supersedes the older
-editable-development measurement above for current release work without
-changing that historical v0.28 record.
+The current 2026-08-15 development frontier passes 80 of 138 probes with risk
+116 and no false establishment, false conflict, identity, or navigation risk.
+Its first-loss atlas is 21 attachment, 19 typed-fact, and 18 pack-unification
+misses. The additional reviewed probes cover 22 typed linear-algebra relation
+families plus declaration retraction and exact navigation behavior. This
+supersedes the older editable-development measurement above for current release
+work without changing the historical v0.28 and v0.35 records.
 
 The now-exposed historical authored holdout remains 6 of 97 with raw risk 728.
 These deliberately difficult documents are a first-loss map, not a release
@@ -360,8 +358,8 @@ pull-request latency. A same-machine development run after compaction took
 881.04 seconds and reached 3,981,983,744 bytes of peak resident memory. It
 reproduced the baseline's four existing precision/refusal failures exactly;
 compaction changed neither inputs nor observations. After the v0.27 semantic
-refinements, the final manual run passes all thresholds for all 5,826 cases and
-all 453 metamorphic observations: every one of the 61 evaluated laws has 100%
+refinements, the final manual run passes all thresholds for all 7,806 cases and
+all 651 metamorphic observations: every one of the 83 evaluated laws has 100%
 recall, precision, role accuracy, evidence integrity, and refusal preservation.
 These local measurements are diagnostic evidence, not the stable x86_64 release
 budget measurement.

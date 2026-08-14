@@ -16,6 +16,8 @@
     "fluid-mechanics",
     "global-adversarial",
     "linear-algebra-diversity",
+    "linear-algebra-foundation-diversity",
+    "linear-algebra-foundation-probe",
     "linear-products-diversity",
     "linear-products-probe",
     "mechanics-diversity",
@@ -525,7 +527,9 @@
       "capabilities": {
         "concept-vocabulary": {
           "maturity": "evaluated",
-          "suiteIds": []
+          "suiteIds": [
+            "linear-algebra-foundation-diversity"
+          ]
         },
         "declarations-roles": {
           "maturity": "evaluated",
@@ -533,14 +537,17 @@
             "linear-algebra-probe",
             "linear-algebra-diversity",
             "linear-products-probe",
-            "linear-products-diversity"
+            "linear-products-diversity",
+            "linear-algebra-foundation-probe",
+            "linear-algebra-foundation-diversity"
           ]
         },
         "shape-quantity-unit": {
           "maturity": "evaluated",
           "suiteIds": [
             "linear-algebra-diversity",
-            "linear-products-diversity"
+            "linear-products-diversity",
+            "linear-algebra-foundation-diversity"
           ]
         },
         "law-recognition": {
@@ -549,7 +556,9 @@
             "linear-algebra-probe",
             "linear-algebra-diversity",
             "linear-products-probe",
-            "linear-products-diversity"
+            "linear-products-diversity",
+            "linear-algebra-foundation-probe",
+            "linear-algebra-foundation-diversity"
           ]
         },
         "diagnostics-refusal": {
@@ -558,21 +567,25 @@
             "linear-algebra-probe",
             "linear-algebra-diversity",
             "linear-products-probe",
-            "linear-products-diversity"
+            "linear-products-diversity",
+            "linear-algebra-foundation-probe",
+            "linear-algebra-foundation-diversity"
           ]
         },
         "project-macro": {
           "maturity": "evaluated",
           "suiteIds": [
             "linear-algebra-diversity",
-            "linear-products-diversity"
+            "linear-products-diversity",
+            "linear-algebra-foundation-diversity"
           ]
         },
         "navigation-explanation": {
           "maturity": "evaluated",
           "suiteIds": [
             "linear-algebra-diversity",
-            "linear-products-diversity"
+            "linear-products-diversity",
+            "linear-algebra-foundation-diversity"
           ]
         }
       }
@@ -1549,6 +1562,58 @@
       "kind": "law",
       "packId": "linear-algebra",
       "path": "corpus/linear-products-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 6,
+          "syntaxStructure": 8,
+          "proseFamily": 16,
+          "projectTopology": 5,
+          "mutationFamily": 8
+        },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "linear-algebra-foundation-probe",
+      "kind": "law",
+      "packId": "linear-algebra",
+      "path": "corpus/linear-algebra-foundation-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": [
+        "notation",
+        "roles",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 3,
+          "syntaxStructure": 2,
+          "proseFamily": 2,
+          "projectTopology": 1,
+          "mutationFamily": 3
+        },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "linear-algebra-foundation-diversity",
+      "kind": "law",
+      "packId": "linear-algebra",
+      "path": "corpus/linear-algebra-foundation-diversity.json",
       "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,

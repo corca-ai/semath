@@ -6,15 +6,15 @@ holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 5,770 scored law cases cover 61 laws in twelve formula packs, including 48
-  positive and 32 refusal diversity cases for every promoted law. Of all 5,826
-  scored corpus cases, 420 remain readable fixture seeds and 5,406 are
+- 7,750 scored law cases cover 83 laws in twelve formula packs, including 48
+  positive and 32 refusal diversity cases for every promoted law. Of all 7,806
+  scored corpus cases, 420 remain readable fixture seeds and 7,386 are
   deterministic cases reproduced in memory from compact specs, packs, and
   seeds; generated cases are not called independently authored evidence.
-- 453 deterministic metamorphic cases preserve results under irrelevant prose,
+- 651 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
-- All 61 evaluated laws score 100% for recall, precision, role binding,
-  source-linked evidence, and refusal preservation across 5,826 cases. The 453
+- All 83 evaluated laws score 100% for recall, precision, role binding,
+  source-linked evidence, and refusal preservation across 7,806 cases. The 651
   metamorphic observations also pass. Generated breadth remains regression
   evidence rather than independently authored language.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
@@ -26,6 +26,17 @@ holds approved support policy; GitHub issues hold planned work.
   previously narrow fields now add measured constitutive/wave, heat-transfer,
   transport, nabla, graph/counting, and objective/constraint clusters. These
   are useful verticals, not claims of field completeness.
+- Linear algebra now promotes 25 typed relation families rather than three.
+  The added vertical covers matrix arithmetic and operators, inner products and
+  norms, eigenstructure, positive-definite forms, LU/QR/Cholesky/SVD
+  factorizations, pseudoinverse application, rank-nullity, basis expansion, and
+  projection. Least-squares normal equations remain owned by the optimization
+  pack and are reused rather than duplicated. Each of the 22 added families has
+  five compact reviewed positive seeds, five semantic-mutation refusals, and a
+  48-positive/32-refusal generated diversity matrix. Common inverse, adjoint,
+  diagonalization, and quadratic-form presentations remain additional guarded
+  representations; the promoted canonical forms are the variants for which
+  exact typed source evidence passes the generic matcher.
 - The independent frozen challenge v3 preserves 48 semantic boundaries across
   binding, constraints, packs, presentation, resolution, and syntax, then
   composes them into six realistic document shapes. The pre-change baseline
@@ -126,35 +137,36 @@ holds approved support policy; GitHub issues hold planned work.
   operator assignments. Characterized operator roles now prove their matching
   domain condition without a second authority. It passes 56 of 115 probes with
   risk 118 and zero false establishment, false conflict, or identity risk.
-- The 2026-08-15 practical-STEM baseline at
-  `16e1797286fd5143144e78657230cebedd433943` passes 57 of 115 authored
-  development probes with risk 116 and zero false establishment, false
-  conflict, or identity risk. Its field-by-capability matrix references 57
-  unique reviewed probes across 47 of 50 cells; linear-algebra project
-  lifecycle and navigation plus probability/statistics project lifecycle stay
-  explicit commissioned gaps. Only 27 of those 57 probes pass every reviewed
-  public surface. Layer-aware cell totals are:
+- The practical-STEM benchmark was commissioned at
+  `16e1797286fd5143144e78657230cebedd433943`, where it passed 57 of 115
+  authored development probes with risk 116. The current 2026-08-15 state
+  passes 80 of 138 with the same risk and zero false establishment, false
+  conflict, identity, or navigation risk. Its field-by-capability matrix now
+  references 76 unique reviewed probes across 49 of 50 cells. Linear algebra
+  measures all ten capabilities; only probability/statistics project lifecycle
+  remains an explicit commissioned gap. Of those 76 probes, 46 pass every
+  reviewed public surface. Layer-aware cell totals are:
 
   | Program field            | Passed | Cases |
   | ------------------------ | -----: | ----: |
   | Shared foundations       |     20 |    31 |
-  | Linear algebra           |     16 |    23 |
+  | Linear algebra           |     43 |    50 |
   | Differential equations   |     18 |    30 |
   | Probability/statistics   |     16 |    27 |
   | Numerical analysis       |     13 |    30 |
 
   | Capability            | Passed | Cases |
   | --------------------- | -----: | ----: |
-  | Vocabulary            |     13 |    17 |
-  | Typing                |     12 |    15 |
-  | Relation recognition  |      8 |    19 |
-  | Equivalent forms      |      3 |    11 |
-  | Conditions            |      7 |    15 |
-  | Document attachment   |     12 |    15 |
-  | Project lifecycle     |      7 |     8 |
-  | Decision quality      |      7 |    17 |
-  | Navigation            |      4 |     9 |
-  | Refusal               |     10 |    15 |
+  | Vocabulary            |     16 |    20 |
+  | Typing                |     14 |    17 |
+  | Relation recognition  |     12 |    23 |
+  | Equivalent forms      |      6 |    14 |
+  | Conditions            |     11 |    19 |
+  | Document attachment   |     14 |    17 |
+  | Project lifecycle     |      8 |     9 |
+  | Decision quality      |      9 |    19 |
+  | Navigation            |      8 |    13 |
+  | Refusal               |     12 |    17 |
 
   These overlapping diagnostic projections cannot be summed into an accuracy
   score. They establish the ordered coverage frontier for #347–#351 while the
@@ -205,9 +217,9 @@ field completeness.
 | Category            | Current limitation                                                                                                   | Affected evidence                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Coverage            | Evaluated vertical slices do not yet provide broad field recognition                                                 | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
-| Document identity   | Realistic declarations, edits, scoped reuse, and navigation projections still frequently lose the intended entity    | 74 of 189 failed authored probes localize first to identity or scope                                                 |
-| Local recognition   | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | 96 of 189 failed authored probes localize to attachment, typed facts, or pack unification                            |
-| Decision projection | Available evidence still produces the wrong calm/established distinction in some realistic scenes                    | 18 of 189 failed authored probes localize first to the decision boundary                                             |
+| Document identity   | Realistic declarations, edits, scoped reuse, and navigation projections still frequently lose the intended entity    | 42 of 149 failed authored probes localize first to identity or scope                                                 |
+| Local recognition   | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | 103 of 149 failed authored probes localize to attachment, typed facts, or pack unification                           |
+| Decision projection | Available evidence still produces the wrong calm/established distinction in some realistic scenes                    | 4 of 149 failed authored probes localize first to the decision boundary                                              |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by
