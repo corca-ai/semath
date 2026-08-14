@@ -2254,6 +2254,27 @@ fn asserted_project_reference_drives_and_retracts_source_ordered_law_inference()
 fn referenced_document_changes_reanalyze_dependents() {
     let main = "Following the declarations in `shared/definitions.md`, $V=RI$.";
     let definitions = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
+    let withdrawn = "This document contains no symbol declarations.";
+    let relation_ids = |engine: &SemathEngine, inventory_version| {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: main.find('=').unwrap() as u32,
+                },
+                inventory_version,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        view.context
+            .relations
+            .into_iter()
+            .map(|relation| relation.relation_id)
+            .collect::<BTreeSet<_>>()
+    };
     let mut engine = SemathEngine::default();
     engine
         .reset(ProjectSnapshot {
@@ -2268,6 +2289,7 @@ fn referenced_document_changes_reanalyze_dependents() {
             ],
         })
         .unwrap();
+    assert!(relation_ids(&engine, 1).contains("circuits:ohm-law"));
 
     let update = engine
         .apply(ChangeEnvelope {
@@ -2279,7 +2301,7 @@ fn referenced_document_changes_reanalyze_dependents() {
                 document: Box::new(document(
                     "definitions",
                     "shared/definitions.md",
-                    "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be current.",
+                    withdrawn,
                     2,
                 )),
             }],
@@ -2292,6 +2314,25 @@ fn referenced_document_changes_reanalyze_dependents() {
             .collect::<BTreeSet<_>>(),
         BTreeSet::from(["definitions".into(), "main".into()])
     );
+    let incremental_relations = relation_ids(&engine, 2);
+
+    let mut clean = SemathEngine::default();
+    clean
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                document("main", "main.tex", main, 1),
+                document("definitions", "shared/definitions.md", withdrawn, 2),
+            ],
+        })
+        .unwrap();
+    let clean_relations = relation_ids(&clean, 2);
+    assert_eq!(incremental_relations, clean_relations);
+    assert!(!incremental_relations.contains("circuits:ohm-law"));
 }
 
 #[test]
