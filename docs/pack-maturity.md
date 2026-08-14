@@ -6,15 +6,15 @@ holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 7,750 scored law cases cover 83 laws in twelve formula packs, including 48
-  positive and 32 refusal diversity cases for every promoted law. Of all 7,806
-  scored corpus cases, 420 remain readable fixture seeds and 7,386 are
+- 9,010 scored law cases cover 97 laws in twelve formula packs, including 48
+  positive and 32 refusal diversity cases for every promoted law. Of all 9,066
+  scored corpus cases, 420 remain readable fixture seeds and 8,646 are
   deterministic cases reproduced in memory from compact specs, packs, and
   seeds; generated cases are not called independently authored evidence.
-- 651 deterministic metamorphic cases preserve results under irrelevant prose,
+- 777 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
-- All 83 evaluated laws score 100% for recall, precision, role binding,
-  source-linked evidence, and refusal preservation across 7,806 cases. The 651
+- All 97 evaluated laws score 100% for recall, precision, role binding,
+  source-linked evidence, and refusal preservation across 9,066 cases. The 777
   metamorphic observations also pass. Generated breadth remains regression
   evidence rather than independently authored language.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
@@ -37,6 +37,17 @@ holds approved support policy; GitHub issues hold planned work.
   diagonalization, and quadratic-form presentations remain additional guarded
   representations; the promoted canonical forms are the variants for which
   exact typed source evidence passes the generic matcher.
+- Differential equations now promote fourteen typed model and condition
+  families: first- and second-order ODEs, linear ODEs and systems, diffusion,
+  Poisson, Laplace, conservation form, initial values, Dirichlet, Neumann,
+  Robin, interface continuity, and differential-operator eigenproblems. The
+  pack reuses the electromagnetic wave and Helmholtz laws, the control-system
+  state law, fluid-mechanics diffusivity, and linear-algebra eigenvalues rather
+  than duplicating them. Its explicit-activation capability keeps bare generic
+  derivatives and equalities unpromoted unless the local document declares the
+  model or its roles. The 1,260 model-specific positive and refusal cases and
+  126 metamorphic observations all pass; removing the declaration from an
+  authored project retracts the relation without producing an unsafe edit.
 - The independent frozen challenge v3 preserves 48 semantic boundaries across
   binding, constraints, packs, presentation, resolution, and syntax, then
   composes them into six realistic document shapes. The pre-change baseline
@@ -140,33 +151,33 @@ holds approved support policy; GitHub issues hold planned work.
 - The practical-STEM benchmark was commissioned at
   `16e1797286fd5143144e78657230cebedd433943`, where it passed 57 of 115
   authored development probes with risk 116. The current 2026-08-15 state
-  passes 80 of 138 with the same risk and zero false establishment, false
+  passes 87 of 145 with the same risk and zero false establishment, false
   conflict, identity, or navigation risk. Its field-by-capability matrix now
-  references 76 unique reviewed probes across 49 of 50 cells. Linear algebra
+  references 83 unique reviewed probes across 49 of 50 cells. Linear algebra
   measures all ten capabilities; only probability/statistics project lifecycle
-  remains an explicit commissioned gap. Of those 76 probes, 46 pass every
+  remains an explicit commissioned gap. Of those 83 probes, 53 pass every
   reviewed public surface. Layer-aware cell totals are:
 
   | Program field            | Passed | Cases |
   | ------------------------ | -----: | ----: |
   | Shared foundations       |     20 |    31 |
   | Linear algebra           |     43 |    50 |
-  | Differential equations   |     18 |    30 |
+  | Differential equations   |     41 |    53 |
   | Probability/statistics   |     16 |    27 |
   | Numerical analysis       |     13 |    30 |
 
   | Capability            | Passed | Cases |
   | --------------------- | -----: | ----: |
-  | Vocabulary            |     16 |    20 |
-  | Typing                |     14 |    17 |
-  | Relation recognition  |     12 |    23 |
-  | Equivalent forms      |      6 |    14 |
-  | Conditions            |     11 |    19 |
-  | Document attachment   |     14 |    17 |
-  | Project lifecycle     |      8 |     9 |
-  | Decision quality      |      9 |    19 |
-  | Navigation            |      8 |    13 |
-  | Refusal               |     12 |    17 |
+  | Vocabulary            |     19 |    23 |
+  | Typing                |     16 |    19 |
+  | Relation recognition  |     18 |    29 |
+  | Equivalent forms      |      7 |    15 |
+  | Conditions            |     14 |    22 |
+  | Document attachment   |     17 |    20 |
+  | Project lifecycle     |      9 |    10 |
+  | Decision quality      |     11 |    21 |
+  | Navigation            |      9 |    14 |
+  | Refusal               |     13 |    18 |
 
   These overlapping diagnostic projections cannot be summed into an accuracy
   score. They establish the ordered coverage frontier for #347–#351 while the

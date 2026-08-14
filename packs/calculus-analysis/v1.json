@@ -1,15 +1,16 @@
 {
   "schemaVersion": 11,
   "packId": "calculus-analysis",
-  "packVersion": "1.0.0",
+  "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "calculus-analysis",
   "title": "Calculus and analysis",
-  "description": "Recognition-first catalog for derivatives, integrals, limits, and series without inferred regularity assumptions.",
+  "description": "Recognition-first catalog for calculus and differential-equation models without inferred regularity or problem conditions.",
   "dependencies": [],
   "capabilities": {
     "provides": [
-      "semath:formula-recognition"
+      "semath:formula-recognition",
+      "semath:explicit-law-activation"
     ],
     "requires": []
   },
@@ -144,6 +145,130 @@
       "references": [
         "principles-analysis"
       ]
+    },
+    {
+      "id": "ode-state",
+      "conceptKind": "entity",
+      "title": "ODE state",
+      "description": "A dependent scalar or vector state in an ordinary differential equation.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "pde-field",
+      "conceptKind": "entity",
+      "title": "PDE field",
+      "description": "A dependent field over a declared spatial and temporal domain.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "evolution-source",
+      "conceptKind": "quantity",
+      "title": "Evolution source",
+      "description": "A source or forcing term in a differential equation.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "ode-coefficient",
+      "conceptKind": "quantity",
+      "title": "ODE coefficient",
+      "description": "A coefficient multiplying a state in an ordinary differential equation.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "evolution-operator",
+      "conceptKind": "operator",
+      "title": "Evolution operator",
+      "description": "A linear operator acting on a differential-equation state or field.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "conservation-flux",
+      "conceptKind": "entity",
+      "title": "Conservation flux",
+      "description": "A flux field whose divergence enters a conservation law.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "initial-time",
+      "conceptKind": "entity",
+      "title": "Initial time",
+      "description": "The source-declared time at which initial data are prescribed.",
+      "parents": [
+        "calculus-analysis:variable"
+      ],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "initial-state-value",
+      "conceptKind": "quantity",
+      "title": "Initial state value",
+      "description": "The value prescribed for an ODE state at its initial time.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "boundary-location",
+      "conceptKind": "entity",
+      "title": "Boundary location",
+      "description": "A source-declared point or trace location on a problem boundary.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "boundary-data",
+      "conceptKind": "quantity",
+      "title": "Boundary data",
+      "description": "A value prescribed on a declared problem boundary.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "boundary-normal-derivative",
+      "conceptKind": "operator",
+      "title": "Boundary normal derivative",
+      "description": "The outward normal derivative of a field at a declared boundary.",
+      "parents": [
+        "calculus-analysis:partial-derivative"
+      ],
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
+      "id": "interface-trace",
+      "conceptKind": "entity",
+      "title": "Interface trace",
+      "description": "A one-sided trace of a field at a material or subdomain interface.",
+      "parents": [],
+      "references": [
+        "principles-analysis"
+      ]
     }
   ],
   "quantityKinds": [],
@@ -235,6 +360,629 @@
         "principles-analysis"
       ],
       "canonicalRelation": "result = \\nabla function"
+    },
+    {
+      "id": "first-order-ode-model",
+      "title": "First-order ODE model",
+      "description": "The first derivative of an ODE state equals a declared source term.",
+      "activationPhrases": [
+        "first-order ode model"
+      ],
+      "roles": [
+        {
+          "id": "state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "ODE state.",
+          "shape": "function"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Independent evolution variable."
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "Evolution source."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "state-differentiable",
+          "kind": "differentiable",
+          "subjects": [
+            "state",
+            "variable"
+          ],
+          "label": "The state is differentiable with respect to the evolution variable."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\frac{d state}{d variable} = source"
+    },
+    {
+      "id": "second-order-ode-model",
+      "title": "Second-order ODE model",
+      "description": "The second derivative of an ODE state equals a declared source term.",
+      "activationPhrases": [
+        "second-order ode model"
+      ],
+      "roles": [
+        {
+          "id": "state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "ODE state.",
+          "shape": "function"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Independent evolution variable."
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "Second-order source."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "state-twice-differentiable",
+          "kind": "differentiable",
+          "subjects": [
+            "state",
+            "variable"
+          ],
+          "label": "The state has the stated second derivative."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\frac{d^2 state}{d variable^2} = source"
+    },
+    {
+      "id": "linear-first-order-ode",
+      "title": "Linear first-order ODE",
+      "description": "A first derivative plus a coefficient times the state equals a source.",
+      "activationPhrases": [
+        "linear first-order ode"
+      ],
+      "roles": [
+        {
+          "id": "state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "ODE state.",
+          "shape": "function"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Independent evolution variable."
+        },
+        {
+          "id": "coefficient",
+          "concept": "calculus-analysis:ode-coefficient",
+          "description": "ODE coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "Evolution source."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "state-differentiable",
+          "kind": "differentiable",
+          "subjects": [
+            "state",
+            "variable"
+          ],
+          "label": "The state is differentiable with respect to the evolution variable."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\frac{d state}{d variable} + coefficient state = source"
+    },
+    {
+      "id": "linear-ode-system",
+      "title": "Linear ODE system",
+      "description": "A vector state derivative equals a linear operator action plus a source.",
+      "activationPhrases": [
+        "linear ode system"
+      ],
+      "roles": [
+        {
+          "id": "state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "Vector-valued ODE state.",
+          "shape": "vector"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Independent evolution variable."
+        },
+        {
+          "id": "operator",
+          "concept": "calculus-analysis:evolution-operator",
+          "description": "Linear evolution operator.",
+          "shape": "matrix"
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "Vector-valued evolution source.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "operator-linear",
+          "kind": "operator-property",
+          "subjects": [
+            "operator"
+          ],
+          "operatorProperty": "linear",
+          "label": "The evolution operator is linear."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\frac{d state}{d variable} = operator state + source"
+    },
+    {
+      "id": "diffusion-equation",
+      "title": "Diffusion equation",
+      "description": "A field time derivative equals diffusivity times its spatial Laplacian.",
+      "activationPhrases": [
+        "diffusion equation"
+      ],
+      "roles": [
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Diffusing PDE field.",
+          "notation": [
+            "u",
+            "v",
+            "w"
+          ],
+          "shape": "function"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Evolution variable.",
+          "notation": [
+            "t",
+            "s",
+            "r"
+          ]
+        },
+        {
+          "id": "diffusivity",
+          "concept": "fluid-mechanics:diffusivity",
+          "description": "Diffusion coefficient.",
+          "notation": [
+            "kappa",
+            "D",
+            "K"
+          ],
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "field-differentiable",
+          "kind": "differentiable",
+          "subjects": [
+            "field",
+            "variable"
+          ],
+          "label": "The field is differentiable with respect to the evolution variable."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\frac{\\partial field}{\\partial variable} = diffusivity \\nabla^2 field"
+    },
+    {
+      "id": "poisson-equation",
+      "title": "Poisson equation",
+      "description": "The Laplacian of a field equals a declared source.",
+      "activationPhrases": [
+        "poisson equation"
+      ],
+      "roles": [
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Poisson field.",
+          "shape": "function"
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "Poisson source."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "field",
+            "source"
+          ],
+          "label": "The field and source belong to the declared problem domain."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\nabla^2 field = source"
+    },
+    {
+      "id": "laplace-equation",
+      "title": "Laplace equation",
+      "description": "The Laplacian of a harmonic field is zero.",
+      "activationPhrases": [
+        "laplace equation"
+      ],
+      "roles": [
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Harmonic PDE field.",
+          "shape": "function"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-domain",
+          "kind": "domain-membership",
+          "subjects": [
+            "field"
+          ],
+          "label": "The field belongs to the declared problem domain."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\nabla^2 field = 0"
+    },
+    {
+      "id": "conservation-form-equation",
+      "title": "Conservation-form PDE",
+      "description": "A field time derivative plus the divergence of its flux is zero.",
+      "activationPhrases": [
+        "conservation-form pde"
+      ],
+      "roles": [
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Conserved PDE field.",
+          "notation": [
+            "u",
+            "v",
+            "w"
+          ],
+          "shape": "function"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Evolution variable.",
+          "notation": [
+            "t",
+            "s",
+            "r"
+          ]
+        },
+        {
+          "id": "flux",
+          "concept": "calculus-analysis:conservation-flux",
+          "description": "Conservation flux.",
+          "notation": [
+            "F",
+            "G",
+            "H"
+          ],
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "field-differentiable",
+          "kind": "differentiable",
+          "subjects": [
+            "field",
+            "variable"
+          ],
+          "label": "The conserved field is differentiable with respect to the evolution variable."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\frac{\\partial field}{\\partial variable} + \\operatorname{div}(flux) = 0"
+    },
+    {
+      "id": "initial-value-condition",
+      "title": "Initial value condition",
+      "description": "An ODE state takes a prescribed value at a declared initial time.",
+      "activationPhrases": [
+        "initial value condition"
+      ],
+      "roles": [
+        {
+          "id": "state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "ODE state.",
+          "shape": "function"
+        },
+        {
+          "id": "initial-time",
+          "concept": "calculus-analysis:initial-time",
+          "description": "Initial time."
+        },
+        {
+          "id": "initial-value",
+          "concept": "calculus-analysis:initial-state-value",
+          "description": "Initial state value."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-context",
+          "kind": "same-context",
+          "subjects": [
+            "state",
+            "initial-time",
+            "initial-value"
+          ],
+          "label": "The state, time, and value belong to the same initial-value problem."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "state(initial-time) = initial-value"
+    },
+    {
+      "id": "dirichlet-boundary-condition",
+      "title": "Dirichlet boundary condition",
+      "description": "A field takes prescribed data at a declared boundary location.",
+      "activationPhrases": [
+        "dirichlet boundary condition"
+      ],
+      "roles": [
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Boundary field.",
+          "shape": "function"
+        },
+        {
+          "id": "boundary",
+          "concept": "calculus-analysis:boundary-location",
+          "description": "Boundary location."
+        },
+        {
+          "id": "value",
+          "concept": "calculus-analysis:boundary-data",
+          "description": "Dirichlet boundary data."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-context",
+          "kind": "same-context",
+          "subjects": [
+            "field",
+            "boundary",
+            "value"
+          ],
+          "label": "The field, boundary, and data belong to the same boundary-value problem."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "field(boundary) = value"
+    },
+    {
+      "id": "neumann-boundary-condition",
+      "title": "Neumann boundary condition",
+      "description": "A field normal derivative takes prescribed data at a declared boundary.",
+      "activationPhrases": [
+        "neumann boundary condition"
+      ],
+      "roles": [
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Boundary field.",
+          "shape": "function"
+        },
+        {
+          "id": "boundary",
+          "concept": "calculus-analysis:boundary-location",
+          "description": "Boundary location."
+        },
+        {
+          "id": "value",
+          "concept": "calculus-analysis:boundary-data",
+          "description": "Neumann boundary data."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-context",
+          "kind": "same-context",
+          "subjects": [
+            "field",
+            "boundary",
+            "value"
+          ],
+          "label": "The field, boundary, and data belong to the same boundary-value problem."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "\\operatorname{normalDerivative}(field,boundary) = value"
+    },
+    {
+      "id": "robin-boundary-condition",
+      "title": "Robin boundary condition",
+      "description": "A weighted field value and normal derivative equal prescribed boundary data.",
+      "activationPhrases": [
+        "robin boundary condition"
+      ],
+      "roles": [
+        {
+          "id": "normal-derivative",
+          "concept": "calculus-analysis:boundary-normal-derivative",
+          "description": "Boundary normal derivative."
+        },
+        {
+          "id": "coefficient",
+          "concept": "calculus-analysis:ode-coefficient",
+          "description": "Robin coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Boundary field.",
+          "shape": "function"
+        },
+        {
+          "id": "value",
+          "concept": "calculus-analysis:boundary-data",
+          "description": "Robin boundary data."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-context",
+          "kind": "same-context",
+          "subjects": [
+            "normal-derivative",
+            "field",
+            "value"
+          ],
+          "label": "The derivative, field, and data belong to the same boundary-value problem."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "normal-derivative + coefficient field = value"
+    },
+    {
+      "id": "interface-continuity-condition",
+      "title": "Interface continuity condition",
+      "description": "The one-sided field traces agree at a declared interface.",
+      "activationPhrases": [
+        "interface continuity condition"
+      ],
+      "roles": [
+        {
+          "id": "left-trace",
+          "concept": "calculus-analysis:interface-trace",
+          "description": "Left interface trace."
+        },
+        {
+          "id": "right-trace",
+          "concept": "calculus-analysis:interface-trace",
+          "description": "Right interface trace."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-interface",
+          "kind": "same-context",
+          "subjects": [
+            "left-trace",
+            "right-trace"
+          ],
+          "label": "Both traces belong to the same interface."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "left-trace = right-trace"
+    },
+    {
+      "id": "differential-operator-eigenproblem",
+      "title": "Differential operator eigenproblem",
+      "description": "A differential operator acting on a field equals a spectral parameter times that field.",
+      "activationPhrases": [
+        "differential operator eigenproblem"
+      ],
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "calculus-analysis:evolution-operator",
+          "description": "Differential operator.",
+          "notation": [
+            "L",
+            "M",
+            "N"
+          ]
+        },
+        {
+          "id": "field",
+          "concept": "calculus-analysis:pde-field",
+          "description": "Eigenfunction field.",
+          "notation": [
+            "u",
+            "v",
+            "w"
+          ],
+          "shape": "function"
+        },
+        {
+          "id": "eigenvalue",
+          "concept": "linear-algebra:eigenvalue",
+          "description": "Differential-equation eigenvalue.",
+          "notation": [
+            "lambda",
+            "mu",
+            "rho"
+          ],
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "operator-field-context",
+          "kind": "same-context",
+          "subjects": [
+            "operator",
+            "field"
+          ],
+          "label": "The operator and field belong to the same spectral problem."
+        }
+      ],
+      "references": [
+        "principles-analysis"
+      ],
+      "canonicalRelation": "operator(field) = eigenvalue field"
     }
   ],
   "activationRules": [

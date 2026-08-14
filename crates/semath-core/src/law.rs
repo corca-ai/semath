@@ -7,7 +7,9 @@ use crate::canonical::{
 use crate::concept::concepts_share_lineage;
 use crate::consistency::{RoleObservations, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
-use crate::domain_signature::{is_capability_pack, laws_share_collision};
+use crate::domain_signature::{
+    is_capability_pack, laws_share_collision, pack_requires_explicit_law_activation,
+};
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
 use crate::pack::{
     PackConditionKind, PackLaw, PackLawCondition, PackLawRole, PackOperatorProperty,
@@ -24,7 +26,7 @@ use crate::{
     SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
-const MAX_LAW_MATCHES: usize = 16;
+const MAX_LAW_MATCHES_PER_EXPRESSION: usize = 16;
 const MAX_UNIFICATION_CANDIDATES: usize = 64;
 const MAX_COMPOSITE_SOURCE_LABEL_CHARS: usize = 256;
 
@@ -790,7 +792,9 @@ pub(crate) fn observe_laws(
             )
         });
         for compiled in frontier {
-            if recognitions.len() >= MAX_LAW_MATCHES {
+            if recognitions.len().saturating_sub(recognition_start)
+                >= MAX_LAW_MATCHES_PER_EXPRESSION
+            {
                 break;
             }
             let relevance = context
@@ -840,19 +844,31 @@ pub(crate) fn observe_laws(
                 .chain(variadic_balance(compiled, actual).map(|bindings| (None, bindings)))
                 .take(MAX_UNIFICATION_CANDIDATES)
                 .collect::<Vec<_>>();
-            let attached_role_support = candidates.iter().any(|(_, bindings)| {
+            let attached_declared_role_support = candidates.iter().any(|(_, bindings)| {
                 bindings_have_formula_attached_declared_roles(
                     &compiled.law.roles,
                     bindings,
                     &actual.range,
                     context.consistency,
                     context.external,
-                ) || compiled.law.roles.iter().all(|role| {
+                )
+            });
+            let attached_formula_role_support = candidates.iter().any(|(_, bindings)| {
+                compiled.law.roles.iter().all(|role| {
                     bindings.get(&role.id).is_some_and(|expression| {
                         formula_operator_role_support(role, expression, actual).is_proven()
                     })
                 })
             });
+            let attached_role_support =
+                attached_declared_role_support || attached_formula_role_support;
+            if !compiled.law.activation_phrases.is_empty()
+                && pack_requires_explicit_law_activation(compiled.pack_id)
+                && activation.is_none()
+                && !attached_declared_role_support
+            {
+                continue;
+            }
             if !compiled.law.activation_phrases.is_empty()
                 && activation.is_none()
                 && (!attached_role_support
@@ -973,6 +989,10 @@ fn dominant_frontier_context_pack<'a>(
 ) -> Option<&'a str> {
     let mut ranked = frontier
         .iter()
+        .filter(|compiled| {
+            compiled.law.activation_phrases.is_empty()
+                || !pack_requires_explicit_law_activation(compiled.pack_id)
+        })
         .filter_map(|compiled| {
             domains
                 .relevance(compiled.pack_id, offset)
@@ -6201,9 +6221,38 @@ This conversion is performed once per accepted timing sample so the accumulator 
                 "This example states a gradient descent update. Let $y$, $x$, $\\alpha$, and $g$ denote iterate vector, iterate vector, step size scalar, and gradient vector, respectively. $y=x-\\alpha g$",
                 "gradient-descent-update",
             ),
+            (
+                "Let $u$, $t$, and $\\kappa$ denote pde field function, variable, and diffusivity scalar, respectively. The reviewed law context states diffusion equation for $\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u$",
+                "diffusion-equation",
+            ),
+            (
+                "Let $u$, $t$, and $F$ denote pde field function, variable, and conservation flux vector, respectively. The reviewed law context states conservation-form pde for $\\frac{\\partial u}{\\partial t}+\\operatorname{div}(F)=0$",
+                "conservation-form-equation",
+            ),
+            (
+                "Let $L$, $u$, and $\\lambda$ denote evolution operator, pde field function, and eigenvalue scalar, respectively. The reviewed law context states differential operator eigenproblem for $L(u)=\\lambda u$",
+                "differential-operator-eigenproblem",
+            ),
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");
         }
+    }
+
+    #[test]
+    fn recognition_budget_is_scoped_to_each_expression() {
+        let source = (0..20)
+            .map(|index| {
+                format!(
+                    "Here $C_{index}$, $A_{index}$, and $B_{index}$ denote linear operator matrix, linear operator matrix, and linear operator matrix, respectively. The reviewed law context states matrix addition for $C_{index}=A_{index}+B_{index}$."
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let recognized = recognized_law_observations(&source)
+            .into_iter()
+            .filter(|law| law.law_id == "matrix-addition")
+            .count();
+        assert_eq!(recognized, 20);
     }
 
     #[test]

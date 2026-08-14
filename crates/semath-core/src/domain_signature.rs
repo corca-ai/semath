@@ -364,6 +364,22 @@ pub(crate) fn is_capability_pack(pack_id: &str) -> bool {
     CAPABILITY_PACKS.contains(pack_id)
 }
 
+pub(crate) fn pack_requires_explicit_law_activation(pack_id: &str) -> bool {
+    static EXPLICIT_ACTIVATION_PACKS: LazyLock<BTreeSet<String>> = LazyLock::new(|| {
+        built_in_packs()
+            .iter()
+            .filter(|pack| {
+                pack.capabilities
+                    .provides
+                    .iter()
+                    .any(|capability| capability == "semath:explicit-law-activation")
+            })
+            .map(|pack| pack.pack_id.clone())
+            .collect()
+    });
+    EXPLICIT_ACTIVATION_PACKS.contains(pack_id)
+}
+
 pub(crate) fn laws_share_collision(
     left_pack_id: &str,
     left_law_id: &str,
@@ -575,7 +591,10 @@ fn distinguishing_evidence(
 
 #[cfg(test)]
 mod tests {
-    use super::{compile_collision_atlas, compile_domain_signatures, contains_domain_term};
+    use super::{
+        compile_collision_atlas, compile_domain_signatures, contains_domain_term,
+        pack_requires_explicit_law_activation,
+    };
     use crate::pack::built_in_packs;
 
     #[test]
@@ -607,6 +626,8 @@ mod tests {
             "electric current"
         ));
         assert!(!contains_domain_term("currentness", "current"));
+        assert!(pack_requires_explicit_law_activation("calculus-analysis"));
+        assert!(!pack_requires_explicit_law_activation("probability"));
     }
 
     #[test]
