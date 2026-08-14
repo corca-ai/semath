@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 10;
+pub const PACK_SCHEMA_VERSION: u32 = 11;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -228,6 +228,8 @@ pub struct PackLawCondition {
     pub subjects: Vec<String>,
     pub label: String,
     #[serde(default)]
+    pub operator_property: Option<PackOperatorProperty>,
+    #[serde(default)]
     pub evidence_phrases: Vec<String>,
 }
 
@@ -237,7 +239,10 @@ pub enum PackConditionKind {
     Assumption,
     Differentiable,
     DomainMembership,
+    MapsBetween,
+    OperatorProperty,
     Positive,
+    RankCompatible,
     SameContext,
     ShapeCompatible,
     SignConvention,
@@ -247,12 +252,27 @@ pub enum PackConditionKind {
 impl PackConditionKind {
     fn valid_arity(self, arity: usize) -> bool {
         match self {
-            Self::Differentiable => arity == 2,
+            Self::Differentiable | Self::RankCompatible => arity == 2,
+            Self::MapsBetween => arity == 3,
+            Self::OperatorProperty => arity == 1,
             Self::DomainMembership | Self::Positive | Self::Uniform => arity >= 1,
             Self::SameContext | Self::ShapeCompatible => arity >= 2,
             Self::Assumption | Self::SignConvention => arity >= 1,
         }
     }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum PackOperatorProperty {
+    Adjoint,
+    Bilinear,
+    Gradient,
+    Hessian,
+    InnerProduct,
+    Jacobian,
+    Linear,
+    Norm,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -708,6 +728,14 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
                     ),
                 ));
             }
+            if (condition.kind == PackConditionKind::OperatorProperty)
+                != condition.operator_property.is_some()
+            {
+                return Err(error(
+                    format!("{condition_path}.operatorProperty"),
+                    "must be present exactly for an operator-property condition",
+                ));
+            }
             let subjects = unique_ids(
                 &format!("{condition_path}.subjects"),
                 condition.subjects.iter().map(String::as_str),
@@ -723,14 +751,15 @@ fn validate_laws(pack: &DomainPack) -> Result<(), PackValidationError> {
             }
         }
         for (role_index, role) in law.roles.iter().enumerate() {
-            if role
-                .shape
-                .as_deref()
-                .is_some_and(|shape| !matches!(shape, "scalar" | "vector" | "matrix" | "tensor"))
-            {
+            if role.shape.as_deref().is_some_and(|shape| {
+                !matches!(
+                    shape,
+                    "function" | "scalar" | "vector" | "matrix" | "tensor"
+                )
+            }) {
                 return Err(error(
                     format!("{path}.roles[{role_index}].shape"),
-                    "must be scalar, vector, matrix, or tensor",
+                    "must be function, scalar, vector, matrix, or tensor",
                 ));
             }
         }
@@ -1052,7 +1081,7 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 10);
+        assert_eq!(PACK_SCHEMA_VERSION, 11);
         assert_eq!(built_in_packs().len(), 13);
         validate_catalog(built_in_packs()).unwrap();
     }
@@ -1093,6 +1122,50 @@ mod tests {
         role_signature.roles[0].result_shape = Some("scalar".into());
         let error = validate_pack(&role_signature).unwrap_err();
         assert!(error.path.ends_with("roles[0].signature"));
+    }
+
+    #[test]
+    fn compiles_closed_typed_space_operator_and_rank_conditions() {
+        let source = super::built_in_pack_sources()
+            .iter()
+            .find(|(pack_id, _)| *pack_id == "linear-algebra")
+            .unwrap()
+            .1;
+        let mut value = serde_json::from_str::<serde_json::Value>(source).unwrap();
+        value["laws"][0]["conditions"] = serde_json::json!([
+            {
+                "id": "mapping",
+                "kind": "maps-between",
+                "subjects": ["operator", "vector", "result"],
+                "label": "The operator maps the input space to the result space."
+            },
+            {
+                "id": "linear",
+                "kind": "operator-property",
+                "subjects": ["operator"],
+                "label": "The operator is linear.",
+                "operatorProperty": "linear"
+            },
+            {
+                "id": "rank",
+                "kind": "rank-compatible",
+                "subjects": ["operator", "result"],
+                "label": "The rank is compatible with the result extent."
+            }
+        ]);
+        let pack = compile_pack(&serde_json::to_string(&value).unwrap()).unwrap();
+        assert_eq!(pack.laws[0].conditions.len(), 3);
+        assert_eq!(
+            pack.laws[0].conditions[1].operator_property,
+            Some(super::PackOperatorProperty::Linear)
+        );
+
+        value["laws"][0]["conditions"][1]
+            .as_object_mut()
+            .unwrap()
+            .remove("operatorProperty");
+        let error = compile_pack(&serde_json::to_string(&value).unwrap()).unwrap_err();
+        assert!(error.path.ends_with("operatorProperty"));
     }
 
     #[test]

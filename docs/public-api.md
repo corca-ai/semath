@@ -53,6 +53,14 @@ source-backed formula-level proposal without inventing the role identity, and
 `candidate` remains unresolved. Hosts display this state; they do not infer it
 from evidence labels or strength strings.
 
+The binding `constraint` retains its closed shape kind and observed symbolic
+extents when they are known. A `LawConditionInfo` keeps bound source subjects
+separate from its display label and may expose a closed `operatorProperty` for
+an `operator-property` condition. `maps-between` and `rank-compatible` likewise
+use ordered bound subjects. These additive protocol-14 values let hosts explain
+missing evidence without parsing English labels or doing mathematical
+inference.
+
 Source selection exposes a revision-local `SourceOccurrenceId`; established
 meaning exposes a scoped `EntityId` anchored to one such occurrence. Notation
 components such as modifiers, styles, scripts, and named operators remain part

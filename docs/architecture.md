@@ -187,7 +187,7 @@ opaque, and a command name is never treated as its expansion meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 10 describes namespaced concepts and reviewed English aliases, typed law
+Schema 11 describes namespaced concepts and reviewed English aliases, typed law
 roles, one canonical relation with optional surface representations, conditions,
 activation evidence, quantities, units, and references. Activation evidence is
 either a reviewed prose phrase or a closed
@@ -276,6 +276,12 @@ counts are capped. Conclusions preserve their derivation and source ranges.
 Every law role has a semantic concept and may additionally constrain a physical
 quantity. These are orthogonal: a calculus variable can carry a duration, while
 two different physical quantities remain incompatible.
+Typed role constraints also retain closed shape and operator structure. Scalar,
+vector, matrix, tensor, function domain/codomain, membership, symbolic extent,
+mapping, rank, and operator-property facts remain source-grounded values;
+human-readable condition labels are never inference inputs. A missing mapping,
+rank, or property declaration stays a required condition rather than becoming a
+guessed fact.
 Candidate admission and establishment remain separate. Each bound law role
 carries one proof disposition: independently typed, structurally derived,
 explicitly asserted with the attached formula, or unresolved candidate. The

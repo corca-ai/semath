@@ -1305,6 +1305,7 @@ mod tests {
                 kind: crate::ScientificConstraintKind::Assumption,
                 subjects: vec!["x".into()],
                 label: "condition".into(),
+                operator_property: None,
                 status: condition_status,
                 evidence: vec![evidence.clone()],
             }],

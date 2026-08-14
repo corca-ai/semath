@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   SEMATH_PROTOCOL_VERSION,
+  type LawConditionInfo,
   type ProjectSnapshot,
   type SymbolInfo,
 } from "./index";
@@ -38,5 +39,18 @@ describe("protocol", () => {
       truncated: false,
     };
     expect(info.roles).toBeUndefined();
+  });
+
+  test("keeps operator requirements separate from display labels", () => {
+    const condition: LawConditionInfo = {
+      conditionId: "linear-map",
+      evidence: [],
+      kind: "operator-property",
+      label: "The operator is linear.",
+      operatorProperty: "linear",
+      status: "required",
+      subjects: ["A"],
+    };
+    expect(condition.operatorProperty).toBe("linear");
   });
 });
