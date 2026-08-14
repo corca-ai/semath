@@ -1,7 +1,7 @@
 {
   "schemaVersion": 11,
   "packId": "linear-algebra",
-  "packVersion": "1.2.0",
+  "packVersion": "1.3.0",
   "packKind": "field",
   "namespace": "linear-algebra",
   "title": "Linear algebra",
@@ -43,6 +43,308 @@
       "title": "Vector",
       "description": "An element of a finite-dimensional vector space.",
       "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "scalar",
+      "conceptKind": "quantity",
+      "title": "Scalar",
+      "description": "A scalar in the underlying field.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "vector-space",
+      "conceptKind": "entity",
+      "title": "Vector space",
+      "description": "A vector space over a scalar field.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "basis",
+      "conceptKind": "entity",
+      "title": "Basis",
+      "description": "A linearly independent spanning family for a vector space.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "identity-matrix",
+      "conceptKind": "operator",
+      "title": "Identity matrix",
+      "description": "The identity linear operator on a vector space.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "inverse-operator",
+      "conceptKind": "operator",
+      "title": "Inverse operator",
+      "description": "The inverse of an invertible linear operator.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "invertible-operator",
+      "conceptKind": "operator",
+      "title": "Invertible matrix",
+      "description": "A square linear operator with a two-sided inverse.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "determinant",
+      "conceptKind": "operator",
+      "title": "Determinant",
+      "description": "The scalar determinant of a square matrix.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "trace",
+      "conceptKind": "operator",
+      "title": "Trace",
+      "description": "The sum of the diagonal entries of a square matrix.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "adjoint",
+      "conceptKind": "operator",
+      "title": "Adjoint",
+      "description": "The adjoint of a linear operator for a specified inner product.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "inner-product",
+      "conceptKind": "operator",
+      "title": "Inner product",
+      "description": "A scalar-valued inner product on a vector space.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "norm",
+      "conceptKind": "operator",
+      "title": "Norm",
+      "description": "A scalar-valued norm on a vector space.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "eigenvalue",
+      "conceptKind": "quantity",
+      "title": "Eigenvalue",
+      "description": "A scalar eigenvalue of a linear operator.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "eigenvector",
+      "conceptKind": "entity",
+      "title": "Eigenvector",
+      "description": "A nonzero vector preserved up to scale by a linear operator.",
+      "parents": [
+        "linear-algebra:vector"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "diagonal-matrix",
+      "conceptKind": "operator",
+      "title": "Diagonal matrix",
+      "description": "A matrix whose off-diagonal entries vanish.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "symmetric-operator",
+      "conceptKind": "operator",
+      "title": "Symmetric matrix",
+      "description": "A real square matrix equal to its transpose.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "hermitian-operator",
+      "conceptKind": "operator",
+      "title": "Hermitian matrix",
+      "description": "A complex square matrix equal to its adjoint.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "positive-definite-operator",
+      "conceptKind": "operator",
+      "title": "Positive-definite matrix",
+      "description": "A square matrix with a positive quadratic form on nonzero vectors.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "lower-triangular-matrix",
+      "conceptKind": "operator",
+      "title": "Lower triangular matrix",
+      "description": "A matrix with zero entries above its diagonal.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "upper-triangular-matrix",
+      "conceptKind": "operator",
+      "title": "Upper triangular matrix",
+      "description": "A matrix with zero entries below its diagonal.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "orthogonal-matrix",
+      "conceptKind": "operator",
+      "title": "Orthogonal matrix",
+      "description": "A real square matrix whose transpose is its inverse.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "unitary-matrix",
+      "conceptKind": "operator",
+      "title": "Unitary matrix",
+      "description": "A complex square matrix whose adjoint is its inverse.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "singular-value-matrix",
+      "conceptKind": "operator",
+      "title": "Singular-value matrix",
+      "description": "A diagonal matrix of nonnegative singular values.",
+      "parents": [
+        "linear-algebra:diagonal-matrix"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "pseudoinverse",
+      "conceptKind": "operator",
+      "title": "Pseudoinverse",
+      "description": "The Moore-Penrose pseudoinverse of a matrix.",
+      "parents": [
+        "linear-algebra:linear-operator"
+      ],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "rank",
+      "conceptKind": "quantity",
+      "title": "Rank",
+      "description": "The dimension of the image of a linear map.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "nullity",
+      "conceptKind": "quantity",
+      "title": "Nullity",
+      "description": "The dimension of the kernel of a linear map.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "vector-space-dimension",
+      "conceptKind": "quantity",
+      "title": "Vector-space dimension",
+      "description": "The cardinality of a basis of a finite-dimensional vector space.",
+      "parents": [],
+      "references": [
+        "matrix-computations"
+      ]
+    },
+    {
+      "id": "basis-coefficient",
+      "conceptKind": "quantity",
+      "title": "Basis coefficient",
+      "description": "A scalar coefficient in a basis expansion.",
+      "parents": [
+        "linear-algebra:scalar"
+      ],
       "references": [
         "matrix-computations"
       ]
@@ -178,6 +480,955 @@
         "matrix-computations"
       ],
       "canonicalRelation": "result = operator^T"
+    },
+    {
+      "id": "matrix-addition",
+      "title": "Matrix addition",
+      "description": "Compatible matrices add entrywise without changing shape.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Sum matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "left",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Left summand.",
+          "shape": "matrix"
+        },
+        {
+          "id": "right",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Right summand.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-space",
+          "kind": "same-context",
+          "subjects": [
+            "result",
+            "left",
+            "right"
+          ],
+          "label": "All matrices act between the same typed spaces."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = left + right",
+      "activationPhrases": [
+        "matrix addition"
+      ]
+    },
+    {
+      "id": "matrix-inverse-definition",
+      "title": "Matrix inverse",
+      "description": "An inverse operator is written as the negative-first power of an invertible matrix.",
+      "roles": [
+        {
+          "id": "inverse",
+          "concept": "linear-algebra:inverse-operator",
+          "description": "Inverse matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Invertible matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-space",
+          "kind": "same-context",
+          "subjects": [
+            "inverse",
+            "operator"
+          ],
+          "label": "The square operator and inverse act on the same space."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "inverse = \\operatorname{inv}(operator)",
+      "representations": [
+        "inverse = operator^{-1}"
+      ],
+      "activationPhrases": [
+        "matrix inverse"
+      ]
+    },
+    {
+      "id": "determinant-definition",
+      "title": "Determinant",
+      "description": "The determinant maps a square matrix to a scalar.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:scalar",
+          "description": "Determinant value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Square matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "square-operator",
+          "kind": "assumption",
+          "subjects": [
+            "operator"
+          ],
+          "label": "The operator maps one finite-dimensional space to itself."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = \\det(operator)",
+      "activationPhrases": [
+        "determinant"
+      ]
+    },
+    {
+      "id": "trace-definition",
+      "title": "Matrix trace",
+      "description": "The trace maps a square matrix to the sum of its diagonal entries.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:scalar",
+          "description": "Trace value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Square matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "square-operator",
+          "kind": "assumption",
+          "subjects": [
+            "operator"
+          ],
+          "label": "The operator maps one finite-dimensional space to itself."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = \\operatorname{tr}(operator)",
+      "activationPhrases": [
+        "matrix trace"
+      ]
+    },
+    {
+      "id": "matrix-adjoint-definition",
+      "title": "Matrix adjoint",
+      "description": "The adjoint is defined relative to the active inner product.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:adjoint",
+          "description": "Adjoint matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Original matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "adjoint-structure",
+          "kind": "operator-property",
+          "subjects": [
+            "result"
+          ],
+          "operatorProperty": "adjoint",
+          "label": "The result is the adjoint under the active inner product."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = \\operatorname{adj}(operator)",
+      "representations": [
+        "result = operator^*",
+        "result = operator^H"
+      ],
+      "activationPhrases": [
+        "matrix adjoint"
+      ]
+    },
+    {
+      "id": "inner-product-definition",
+      "title": "Inner product",
+      "description": "An inner product maps two vectors to a scalar.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:scalar",
+          "description": "Inner-product value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left",
+          "concept": "linear-algebra:vector",
+          "description": "Left vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "right",
+          "concept": "linear-algebra:vector",
+          "description": "Right vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-space",
+          "kind": "same-context",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "Both vectors belong to the same inner-product space."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = \\langle left, right \\rangle",
+      "activationPhrases": [
+        "inner product"
+      ]
+    },
+    {
+      "id": "vector-norm-definition",
+      "title": "Vector norm",
+      "description": "A norm maps a vector to a nonnegative scalar.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:scalar",
+          "description": "Norm value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "vector",
+          "concept": "linear-algebra:vector",
+          "description": "Input vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "nonnegative-result",
+          "kind": "positive",
+          "subjects": [
+            "result"
+          ],
+          "label": "The norm value is nonnegative."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = \\lVert vector \\rVert",
+      "activationPhrases": [
+        "vector norm"
+      ]
+    },
+    {
+      "id": "vector-orthogonality",
+      "title": "Vector orthogonality",
+      "description": "Two vectors are orthogonal when their inner product is zero.",
+      "roles": [
+        {
+          "id": "left",
+          "concept": "linear-algebra:vector",
+          "description": "Left vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "right",
+          "concept": "linear-algebra:vector",
+          "description": "Right vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-space",
+          "kind": "same-context",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "Both vectors belong to the same inner-product space."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "\\langle left, right \\rangle = 0",
+      "activationPhrases": [
+        "vector orthogonality"
+      ]
+    },
+    {
+      "id": "eigenpair-equation",
+      "title": "Eigenpair equation",
+      "description": "An eigenvector is mapped to a scalar multiple of itself.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Square matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "vector",
+          "concept": "linear-algebra:vector",
+          "description": "Nonzero eigenvector.",
+          "shape": "vector"
+        },
+        {
+          "id": "value",
+          "concept": "linear-algebra:scalar",
+          "description": "Eigenvalue.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "nonzero-vector",
+          "kind": "assumption",
+          "subjects": [
+            "vector"
+          ],
+          "label": "The eigenvector is nonzero."
+        },
+        {
+          "id": "mapped-vector",
+          "kind": "shape-compatible",
+          "subjects": [
+            "operator",
+            "vector"
+          ],
+          "label": "The square operator maps the eigenvector space to itself."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator vector = value vector",
+      "activationPhrases": [
+        "eigenpair equation"
+      ]
+    },
+    {
+      "id": "matrix-diagonalization",
+      "title": "Matrix diagonalization",
+      "description": "A diagonalizable operator is represented by a similarity transform.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Diagonalizable matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "basis",
+          "concept": "linear-algebra:invertible-operator",
+          "description": "Eigenvector basis matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "diagonal",
+          "concept": "linear-algebra:diagonal-matrix",
+          "description": "Diagonal eigenvalue matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-spaces",
+          "kind": "same-context",
+          "subjects": [
+            "operator",
+            "basis",
+            "diagonal"
+          ],
+          "label": "All factors use compatible finite-dimensional spaces."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator basis = basis diagonal",
+      "representations": [
+        "operator = basis diagonal basis^{-1}"
+      ],
+      "activationPhrases": [
+        "matrix diagonalization"
+      ]
+    },
+    {
+      "id": "symmetric-matrix-definition",
+      "title": "Symmetric matrix",
+      "description": "A real square matrix is symmetric when it equals its transpose.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:symmetric-operator",
+          "description": "Symmetric matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "transpose-property",
+          "kind": "operator-property",
+          "subjects": [
+            "operator"
+          ],
+          "operatorProperty": "adjoint",
+          "label": "Over the stated real field, transpose is the active adjoint."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator = operator^T",
+      "activationPhrases": [
+        "symmetric matrix"
+      ]
+    },
+    {
+      "id": "hermitian-matrix-definition",
+      "title": "Hermitian matrix",
+      "description": "A complex square matrix is Hermitian when it equals its adjoint.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:hermitian-operator",
+          "description": "Hermitian matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "adjoint-property",
+          "kind": "operator-property",
+          "subjects": [
+            "operator"
+          ],
+          "operatorProperty": "adjoint",
+          "label": "The equality uses the adjoint for the stated complex inner product."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator = \\operatorname{adj}(operator)",
+      "representations": [
+        "operator = operator^*",
+        "operator = operator^H"
+      ],
+      "activationPhrases": [
+        "hermitian matrix"
+      ]
+    },
+    {
+      "id": "positive-definite-quadratic-form",
+      "title": "Positive-definite quadratic form",
+      "description": "A positive-definite matrix has a positive quadratic form on every nonzero vector.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:scalar",
+          "description": "Quadratic-form value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:positive-definite-operator",
+          "description": "Positive-definite matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "vector",
+          "concept": "linear-algebra:vector",
+          "description": "Nonzero test vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "nonzero-vector",
+          "kind": "assumption",
+          "subjects": [
+            "vector"
+          ],
+          "label": "The test vector is nonzero."
+        },
+        {
+          "id": "compatible-shape",
+          "kind": "shape-compatible",
+          "subjects": [
+            "operator",
+            "vector"
+          ],
+          "label": "The matrix shape matches the vector extent."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "result = \\operatorname{quad}(operator, vector)",
+      "representations": [
+        "result = vector^T operator vector"
+      ],
+      "activationPhrases": [
+        "positive-definite quadratic form"
+      ]
+    },
+    {
+      "id": "lu-factorization",
+      "title": "LU factorization",
+      "description": "A matrix is factored into lower- and upper-triangular factors.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Factored matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "lower",
+          "concept": "linear-algebra:lower-triangular-matrix",
+          "description": "Lower-triangular factor.",
+          "shape": "matrix"
+        },
+        {
+          "id": "upper",
+          "concept": "linear-algebra:upper-triangular-matrix",
+          "description": "Upper-triangular factor.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-shapes",
+          "kind": "shape-compatible",
+          "subjects": [
+            "lower",
+            "upper"
+          ],
+          "label": "The triangular factors have compatible inner dimensions."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "operator",
+          "left-factor": "lower",
+          "right-factor": "upper"
+        }
+      },
+      "activationPhrases": [
+        "lu factorization"
+      ]
+    },
+    {
+      "id": "qr-factorization",
+      "title": "QR factorization",
+      "description": "A matrix is factored into an orthogonal factor and an upper-triangular factor.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Factored matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "orthogonal",
+          "concept": "linear-algebra:orthogonal-matrix",
+          "description": "Orthogonal factor.",
+          "shape": "matrix"
+        },
+        {
+          "id": "upper",
+          "concept": "linear-algebra:upper-triangular-matrix",
+          "description": "Upper-triangular factor.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-shapes",
+          "kind": "shape-compatible",
+          "subjects": [
+            "orthogonal",
+            "upper"
+          ],
+          "label": "The factors have compatible inner dimensions."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "operator",
+          "left-factor": "orthogonal",
+          "right-factor": "upper"
+        }
+      },
+      "activationPhrases": [
+        "qr factorization"
+      ]
+    },
+    {
+      "id": "cholesky-factorization",
+      "title": "Cholesky factorization",
+      "description": "A positive-definite matrix factors into a lower-triangular matrix and its transpose.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:positive-definite-operator",
+          "description": "Positive-definite matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "lower",
+          "concept": "linear-algebra:lower-triangular-matrix",
+          "description": "Lower-triangular Cholesky factor.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "positive-definite",
+          "kind": "assumption",
+          "subjects": [
+            "operator"
+          ],
+          "label": "The source identifies the operator as positive definite."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator = lower lower^T",
+      "activationPhrases": [
+        "cholesky factorization"
+      ]
+    },
+    {
+      "id": "orthogonal-eigendecomposition",
+      "title": "Orthogonal eigendecomposition",
+      "description": "A real symmetric matrix factors into an orthogonal eigenvector basis and eigenvalues.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:symmetric-operator",
+          "description": "Symmetric matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "basis",
+          "concept": "linear-algebra:orthogonal-matrix",
+          "description": "Orthogonal eigenvector matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "values",
+          "concept": "linear-algebra:diagonal-matrix",
+          "description": "Diagonal eigenvalue matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "common-space",
+          "kind": "same-context",
+          "subjects": [
+            "operator",
+            "basis",
+            "values"
+          ],
+          "label": "The factors share one finite-dimensional real vector space."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator = basis values basis^T",
+      "activationPhrases": [
+        "orthogonal eigendecomposition"
+      ]
+    },
+    {
+      "id": "singular-value-decomposition",
+      "title": "Singular value decomposition",
+      "description": "A matrix factors into left and right orthogonal bases and a singular-value matrix.",
+      "roles": [
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Factored matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "left",
+          "concept": "linear-algebra:orthogonal-matrix",
+          "description": "Left singular-vector matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "values",
+          "concept": "linear-algebra:singular-value-matrix",
+          "description": "Singular-value matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "right",
+          "concept": "linear-algebra:orthogonal-matrix",
+          "description": "Right singular-vector matrix.",
+          "shape": "matrix"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-spaces",
+          "kind": "same-context",
+          "subjects": [
+            "operator",
+            "left",
+            "values",
+            "right"
+          ],
+          "label": "The factor shapes and source/target spaces are compatible."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "operator = left values right^T",
+      "activationPhrases": [
+        "singular value decomposition"
+      ]
+    },
+    {
+      "id": "pseudoinverse-solution",
+      "title": "Pseudoinverse solution",
+      "description": "A least-squares solution is obtained by applying a stated pseudoinverse.",
+      "roles": [
+        {
+          "id": "solution",
+          "concept": "linear-algebra:vector",
+          "description": "Least-squares solution vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "inverse",
+          "concept": "linear-algebra:pseudoinverse",
+          "description": "Moore-Penrose pseudoinverse.",
+          "shape": "matrix"
+        },
+        {
+          "id": "observation",
+          "concept": "linear-algebra:vector",
+          "description": "Observation vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-shape",
+          "kind": "shape-compatible",
+          "subjects": [
+            "inverse",
+            "observation"
+          ],
+          "label": "The pseudoinverse column extent matches the observation extent."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "solution",
+          "left-factor": "inverse",
+          "right-factor": "observation"
+        }
+      },
+      "activationPhrases": [
+        "pseudoinverse solution"
+      ]
+    },
+    {
+      "id": "rank-nullity-theorem",
+      "title": "Rank-nullity theorem",
+      "description": "The domain dimension is the sum of rank and nullity.",
+      "roles": [
+        {
+          "id": "dimension",
+          "concept": "linear-algebra:vector-space-dimension",
+          "description": "Domain dimension.",
+          "shape": "scalar"
+        },
+        {
+          "id": "rank",
+          "concept": "linear-algebra:rank",
+          "description": "Operator rank.",
+          "shape": "scalar"
+        },
+        {
+          "id": "nullity",
+          "concept": "linear-algebra:nullity",
+          "description": "Operator nullity.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "same-operator",
+          "kind": "same-context",
+          "subjects": [
+            "dimension",
+            "rank",
+            "nullity"
+          ],
+          "label": "Rank and nullity refer to the same map and its domain."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "dimension = rank + nullity",
+      "activationPhrases": [
+        "rank-nullity theorem"
+      ]
+    },
+    {
+      "id": "basis-expansion",
+      "title": "Basis expansion",
+      "description": "A vector is expressed as a finite linear combination of basis vectors.",
+      "roles": [
+        {
+          "id": "vector",
+          "concept": "linear-algebra:vector",
+          "description": "Expanded vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "coordinate",
+          "concept": "linear-algebra:basis-coefficient",
+          "description": "Indexed scalar coordinates.",
+          "shape": "scalar"
+        },
+        {
+          "id": "basis",
+          "concept": "linear-algebra:basis",
+          "description": "Indexed basis vectors.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "basis-space",
+          "kind": "same-context",
+          "subjects": [
+            "vector",
+            "basis"
+          ],
+          "label": "The vector and basis belong to the same vector space."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "canonicalRelation": "vector = \\sum_i coordinate_i basis_i",
+      "activationPhrases": [
+        "basis expansion"
+      ]
+    },
+    {
+      "id": "orthogonal-projection",
+      "title": "Orthogonal projection",
+      "description": "A projection maps a vector into the selected subspace.",
+      "roles": [
+        {
+          "id": "result",
+          "concept": "linear-algebra:vector",
+          "description": "Projected vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "projector",
+          "concept": "linear-algebra:orthogonal-matrix",
+          "description": "Orthogonal projector matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "vector",
+          "concept": "linear-algebra:vector",
+          "description": "Input vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-shape",
+          "kind": "shape-compatible",
+          "subjects": [
+            "projector",
+            "vector"
+          ],
+          "label": "The projector acts on the input vector space."
+        }
+      ],
+      "references": [
+        "matrix-computations"
+      ],
+      "archetype": {
+        "id": "binary-product",
+        "slots": {
+          "result": "result",
+          "left-factor": "projector",
+          "right-factor": "vector"
+        }
+      },
+      "activationPhrases": [
+        "orthogonal projection"
+      ]
     }
   ],
   "activationRules": [

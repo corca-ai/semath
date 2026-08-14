@@ -16,16 +16,16 @@ describe("practical STEM breadth benchmark", () => {
   test("validates the reviewed public-development matrix", async () => {
     const { manifest, fixture } = await inputs();
     expect(validateStemBreadthBenchmark(manifest, fixture)).toEqual({
-      commissionedGaps: 3,
+      commissionedGaps: 1,
       fields: {
         "shared-foundations": { gaps: 0, measuredCapabilities: 10 },
-        "linear-algebra": { gaps: 2, measuredCapabilities: 8 },
+        "linear-algebra": { gaps: 0, measuredCapabilities: 10 },
         "differential-equations": { gaps: 0, measuredCapabilities: 10 },
         "probability-statistics": { gaps: 1, measuredCapabilities: 9 },
         "numerical-analysis": { gaps: 0, measuredCapabilities: 10 },
       },
-      measuredCells: 47,
-      referencedProbes: 57,
+      measuredCells: 49,
+      referencedProbes: 76,
     });
   });
 
@@ -47,9 +47,9 @@ describe("practical STEM breadth benchmark", () => {
   test("keeps commissioned gaps distinct from measured cells", async () => {
     const { rawManifest } = await inputs();
     const changed = mutableManifest(rawManifest);
-    const gap = changed.fields[1]?.capabilities.find(
-      (cell) => cell.status === "commissioned-gap",
-    );
+    const gap = changed.fields
+      .flatMap((field) => field.capabilities)
+      .find((cell) => cell.status === "commissioned-gap");
     if (!gap) throw new Error("test fixture is missing a commissioned gap");
     gap.probeIds = ["linear-algebra-development-matvec-01"];
     expect(() => parseStemBreadthManifest(changed)).not.toThrow();

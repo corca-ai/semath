@@ -94,64 +94,62 @@
         {
           "capability": "vocabulary",
           "status": "measured",
-          "requirement": "Resolve matrix, vector, transpose, product, state, covariance, and Hessian terminology.",
-          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03"]
+          "requirement": "Resolve matrix, vector, transpose, inverse, determinant, decomposition, state, covariance, and Hessian terminology.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03", "linear-algebra-development-matmul-02-matrix-inverse-definition", "linear-algebra-development-transpose-03-determinant-definition", "linear-algebra-development-transpose-03-singular-value-decomposition"]
         },
         {
           "capability": "typing",
           "status": "measured",
-          "requirement": "Retain ordered operand roles, compatible extents, and matrix quantity distinctions.",
-          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "CFQ-DEV-004"]
+          "requirement": "Retain ordered operand roles, compatible extents, scalar/vector/matrix distinctions, and decomposition factors.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "CFQ-DEV-004", "linear-algebra-development-transpose-03-eigenpair-equation", "linear-algebra-development-matmul-02-lu-factorization"]
         },
         {
           "capability": "relation-recognition",
           "status": "measured",
-          "requirement": "Recognize matrix-vector, matrix-matrix, transpose, and normal-equation relations.",
-          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03", "OPTML-DEV-006"]
+          "requirement": "Recognize core matrix operations, spectral relations, factorizations, subspace identities, and normal equations.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03", "linear-algebra-development-matvec-01-matrix-addition", "linear-algebra-development-transpose-03-eigenpair-equation", "linear-algebra-development-transpose-03-singular-value-decomposition", "linear-algebra-development-matmul-02-rank-nullity-theorem", "OPTML-DEV-006"]
         },
         {
           "capability": "equivalent-forms",
           "status": "measured",
-          "requirement": "Preserve order-sensitive products and transpose structure across reviewed derivations.",
-          "probeIds": ["linear-algebra-development-transpose-03", "OPTML-DEV-006"]
+          "requirement": "Preserve order-sensitive products, adjoint notation, diagonalization, and projection structure across reviewed forms.",
+          "probeIds": ["linear-algebra-development-transpose-03", "linear-algebra-development-matmul-02-matrix-adjoint-definition", "linear-algebra-development-matvec-01-matrix-diagonalization", "linear-algebra-development-matvec-01-orthogonal-projection", "OPTML-DEV-006"]
         },
         {
           "capability": "conditions",
           "status": "measured",
-          "requirement": "Ground dimension compatibility, rank, symmetry, and definiteness guards.",
-          "probeIds": ["control-systems-development-02", "OPTML-DEV-006"]
+          "requirement": "Ground dimension compatibility, rank, symmetry, Hermitian, positive-definite, and orthogonality guards.",
+          "probeIds": ["linear-algebra-development-matmul-02-vector-orthogonality", "linear-algebra-development-matmul-02-symmetric-matrix-definition", "linear-algebra-development-transpose-03-hermitian-matrix-definition", "linear-algebra-development-matvec-01-positive-definite-quadratic-form", "control-systems-development-02", "OPTML-DEV-006"]
         },
         {
           "capability": "document-attachment",
           "status": "measured",
-          "requirement": "Attach prose shape and role evidence to the intended matrix occurrence and equation.",
-          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-transpose-03", "control-systems-development-01"]
+          "requirement": "Attach prose shape, role, and applicability evidence to the intended operation, factorization, or theorem occurrence.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-transpose-03", "linear-algebra-development-matvec-01-cholesky-factorization", "linear-algebra-development-transpose-03-basis-expansion", "control-systems-development-01"]
         },
         {
           "capability": "project-lifecycle",
-          "status": "commissioned-gap",
-          "requirement": "Add a reviewed multi-file matrix declaration, shadowing, mutation, and retraction scenario.",
-          "probeIds": [],
-          "plannedIssue": "https://github.com/corca-ai/semath/issues/348"
+          "status": "measured",
+          "requirement": "Retract matrix relations and navigation after their source declarations are removed during project edits.",
+          "probeIds": ["linear-algebra-development-project-retraction"]
         },
         {
           "capability": "decision-quality",
           "status": "measured",
-          "requirement": "Distinguish compatible products from reverse-order, covariance, Hessian, and role collisions.",
-          "probeIds": ["linear-algebra-development-matmul-02", "CFQ-DEV-004", "OPTML-DEV-008"]
+          "requirement": "Distinguish established operations from guarded decompositions, reverse-order products, covariance, Hessian, and role collisions.",
+          "probeIds": ["linear-algebra-development-matvec-01-matrix-addition", "linear-algebra-development-matmul-02-lu-factorization", "linear-algebra-development-matmul-02", "CFQ-DEV-004", "OPTML-DEV-008"]
         },
         {
           "capability": "navigation",
-          "status": "commissioned-gap",
-          "requirement": "Add exact matrix or vector definition, reference, prepare-rename, and rename surfaces without helper-name or sibling-scope leakage.",
-          "probeIds": [],
-          "plannedIssue": "https://github.com/corca-ai/semath/issues/348"
+          "status": "measured",
+          "requirement": "Expose exact matrix and vector definition, reference, and prepare-rename surfaces without helper-name or stale-evidence leakage.",
+          "probeIds": ["linear-algebra-development-matvec-01-matrix-addition", "linear-algebra-development-transpose-03-eigenpair-equation", "linear-algebra-development-matvec-01-orthogonal-projection", "linear-algebra-development-project-retraction"]
         },
         {
           "capability": "refusal",
           "status": "measured",
-          "requirement": "Refuse incompatible shapes, reversed noncommutative products, and unsupported matrix roles.",
-          "probeIds": ["linear-algebra-development-matmul-02", "CFQ-DEV-004", "OPTML-DEV-008"]
+          "requirement": "Refuse incompatible shapes, reversed noncommutative products, missing factorization guards, and unsupported matrix roles.",
+          "probeIds": ["linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03-qr-factorization", "linear-algebra-development-matvec-01-pseudoinverse-solution", "CFQ-DEV-004", "OPTML-DEV-008"]
         }
       ]
     },

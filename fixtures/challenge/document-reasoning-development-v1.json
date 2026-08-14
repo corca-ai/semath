@@ -2914,24 +2914,32 @@
       "genre": "Numerical methods lecture note",
       "id": "linear-algebra-development-matvec-01",
       "lawIds": [
-        "linear-algebra:matrix-vector-product"
+        "linear-algebra:matrix-vector-product",
+        "linear-algebra:matrix-addition",
+        "linear-algebra:trace-definition",
+        "linear-algebra:vector-norm-definition",
+        "linear-algebra:matrix-diagonalization",
+        "linear-algebra:positive-definite-quadratic-form",
+        "linear-algebra:cholesky-factorization",
+        "linear-algebra:pseudoinverse-solution",
+        "linear-algebra:orthogonal-projection"
       ],
       "provenance": {
         "authorId": "linear-algebra-development",
         "engineBlind": true,
         "independenceGroup": "linear-algebra-development",
-        "rawDigest": "5e1d2cc920d9465a5ca5fd68b79d8c80c94d303267c1aa0dc2aa5628293cb8c3",
+        "rawDigest": "318d43beab285944c448ba88c9aebc7b87838bb237616e412107900f14df0925",
         "taskCardDigest": "a0cc04314f0ba42784ea8c8cab9b1107dbfc1b32218e2f05855b8d5ae8b914d3"
       },
       "review": {
         "correctionSummary": [
-          "Capitalized the sentence following the displayed matrix-vector equation."
+          "Added reviewed typed linear-algebra foundation relations and exact cursor anchors."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "cc392dcc81c1f22ac78105f3916a264dffef7f5fadd9c5d544fc131d7bc116ba",
+        "finalDigest": "b63027f1785e0aef15fd6b9482ee46f588563226e6fc977096eb38951a3bb609",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "cc392dcc81c1f22ac78105f3916a264dffef7f5fadd9c5d544fc131d7bc116ba",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "b63027f1785e0aef15fd6b9482ee46f588563226e6fc977096eb38951a3bb609",
         "status": "corrected"
       },
       "snapshots": [
@@ -2941,9 +2949,59 @@
               "content": "At each time step, the state has \\(n\\) components and the sensor array produces \\(m\\) readings. Write the calibration matrix and current state as\n\\[\nA\\in\\mathbb R^{m\\times n},\n\\qquad x\\in\\mathbb R^n.\n\\]\nThe predicted observation is\n\\[\ny = Ax.\n\\]\nTherefore \\(y\\in\\mathbb R^m\\). This vector can be compared directly with the next sensor record.\n",
               "fileId": "linear-algebra-development-matvec-01.md",
               "path": "linear-algebra-development-matvec-01.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $C$ denotes linear operator matrix, $A$ denotes linear operator matrix, and $B$ denotes linear operator matrix.\nThe reviewed law context states matrix addition for $C=A+B$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+              "path": "linear-algebra-development-matvec-01-matrix-addition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $t$ denotes scalar and $A$ denotes linear operator matrix.\nThe reviewed law context states matrix trace for $t=\\operatorname{tr}(A)$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+              "path": "linear-algebra-development-matvec-01-trace-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $r$ denotes scalar and $x$ denotes vector.\nThe reviewed law context states vector norm for $r=\\lVert x\\rVert$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+              "path": "linear-algebra-development-matvec-01-vector-norm-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes linear operator matrix, $P$ denotes invertible operator matrix, and $D$ denotes diagonal matrix.\nThe reviewed law context states matrix diagonalization for $AP=PD$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+              "path": "linear-algebra-development-matvec-01-matrix-diagonalization.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $q$ denotes scalar, $A$ denotes positive definite operator matrix, and $x$ denotes vector.\nThe reviewed law context states positive-definite quadratic form for $q=\\operatorname{quad}(A,x)$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+              "path": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes positive definite operator matrix and $L$ denotes lower triangular matrix.\nThe reviewed law context states cholesky factorization for $A=LL^T$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+              "path": "linear-algebra-development-matvec-01-cholesky-factorization.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $x$ denotes vector, $A$ denotes pseudoinverse matrix, and $b$ denotes vector.\nThe reviewed law context states pseudoinverse solution for $x=Ab$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+              "path": "linear-algebra-development-matvec-01-pseudoinverse-solution.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $y$ denotes vector, $P$ denotes orthogonal matrix, and $x$ denotes vector.\nThe reviewed law context states orthogonal projection for $y=Px$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+              "path": "linear-algebra-development-matvec-01-orthogonal-projection.md"
             }
           ],
           "id": "current"
+        },
+        {
+          "documents": [
+            {
+              "content": "The local role declarations were removed during revision. The remaining expression is $C=A+B$ and has no adopted matrix meaning.\n",
+              "fileId": "linear-algebra-foundation-retraction.md",
+              "path": "linear-algebra-foundation-retraction.md"
+            }
+          ],
+          "id": "foundation-retracted"
         }
       ],
       "variationTags": [
@@ -2956,24 +3014,31 @@
       "genre": "Scientific-computing implementation memo",
       "id": "linear-algebra-development-matmul-02",
       "lawIds": [
-        "linear-algebra:matrix-matrix-product"
+        "linear-algebra:matrix-matrix-product",
+        "linear-algebra:matrix-inverse-definition",
+        "linear-algebra:matrix-adjoint-definition",
+        "linear-algebra:vector-orthogonality",
+        "linear-algebra:symmetric-matrix-definition",
+        "linear-algebra:lu-factorization",
+        "linear-algebra:orthogonal-eigendecomposition",
+        "linear-algebra:rank-nullity-theorem"
       ],
       "provenance": {
         "authorId": "linear-algebra-development",
         "engineBlind": true,
         "independenceGroup": "linear-algebra-development",
-        "rawDigest": "5e1d2cc920d9465a5ca5fd68b79d8c80c94d303267c1aa0dc2aa5628293cb8c3",
+        "rawDigest": "15e5a9126548b209fbe63d31830fb868a4810df28f270a1c6311871857b2c7f7",
         "taskCardDigest": "be6c6a890569262a184d9025afc3aed31ab6fca5880049939b029c1c905e9730"
       },
       "review": {
         "correctionSummary": [
-          "Capitalized the sentence following the displayed matrix-product equation."
+          "Added reviewed typed linear-algebra foundation relations and exact cursor anchors."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "612c092a2fe7c14bb96e7bbbfc04544da1d069919f790ef040a3719f170e7078",
+        "finalDigest": "d6cf1049d5c1ef0a7827dc396d5ccfc920377e3ec5ad29e321df6a2a5bea9332",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "612c092a2fe7c14bb96e7bbbfc04544da1d069919f790ef040a3719f170e7078",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "d6cf1049d5c1ef0a7827dc396d5ccfc920377e3ec5ad29e321df6a2a5bea9332",
         "status": "corrected"
       },
       "snapshots": [
@@ -2983,6 +3048,41 @@
               "content": "The projection stage receives\n\\[\nA\\in\\mathbb R^{m\\times n},\n\\qquad B\\in\\mathbb R^{n\\times p}.\n\\]\nIts combined transform is formed in the order\n\\[\nC = AB.\n\\]\nTherefore \\(C\\in\\mathbb R^{m\\times p}\\). Although the configuration file lists \\(B\\) before \\(A\\), that listing does not reverse the algebraic composition. In the usual rectangular case \\(p\\ne m\\), the reverse product \\(BA\\) is not shape-compatible.\n",
               "fileId": "linear-algebra-development-matmul-02.md",
               "path": "linear-algebra-development-matmul-02.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $B$ denotes inverse operator matrix and $A$ denotes linear operator matrix.\nThe reviewed law context states matrix inverse for $B=\\operatorname{inv}(A)$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+              "path": "linear-algebra-development-matmul-02-matrix-inverse-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $B$ denotes adjoint matrix and $A$ denotes linear operator matrix.\nThe reviewed law context states matrix adjoint for $B=\\operatorname{adj}(A)$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+              "path": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $x$ denotes vector and $y$ denotes vector.\nThe reviewed law context states vector orthogonality for $\\langle x,y\\rangle=0$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-vector-orthogonality.md",
+              "path": "linear-algebra-development-matmul-02-vector-orthogonality.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes symmetric operator matrix.\nThe reviewed law context states symmetric matrix for $A=A^T$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+              "path": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes linear operator matrix, $L$ denotes lower triangular matrix, and $U$ denotes upper triangular matrix.\nThe reviewed law context states lu factorization for $A=LU$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+              "path": "linear-algebra-development-matmul-02-lu-factorization.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes symmetric operator matrix, $Q$ denotes orthogonal matrix, and $\\Lambda$ denotes diagonal matrix.\nThe reviewed law context states orthogonal eigendecomposition for $A=Q\\Lambda Q^T$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+              "path": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $n$ denotes dimension scalar, $r$ denotes rank scalar, and $k$ denotes nullity scalar.\nThe reviewed law context states rank-nullity theorem for $n=r+k$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+              "path": "linear-algebra-development-matmul-02-rank-nullity-theorem.md"
             }
           ],
           "id": "current"
@@ -2998,24 +3098,31 @@
       "genre": "Statistics derivation notebook",
       "id": "linear-algebra-development-transpose-03",
       "lawIds": [
-        "linear-algebra:matrix-transpose-definition"
+        "linear-algebra:matrix-transpose-definition",
+        "linear-algebra:determinant-definition",
+        "linear-algebra:inner-product-definition",
+        "linear-algebra:eigenpair-equation",
+        "linear-algebra:hermitian-matrix-definition",
+        "linear-algebra:qr-factorization",
+        "linear-algebra:singular-value-decomposition",
+        "linear-algebra:basis-expansion"
       ],
       "provenance": {
         "authorId": "linear-algebra-development",
         "engineBlind": true,
         "independenceGroup": "linear-algebra-development",
-        "rawDigest": "5e1d2cc920d9465a5ca5fd68b79d8c80c94d303267c1aa0dc2aa5628293cb8c3",
+        "rawDigest": "131637dc493188d245fdb1d514b782cf25fdfe206042cf1aa80aa0875f4f49e1",
         "taskCardDigest": "21c92a1eab3f70469f84a78f887607210f804a5f240c6b843ed6f5d854f17036"
       },
       "review": {
         "correctionSummary": [
-          "Replaced prose-like parenthesized symbols with valid TeX while preserving the transpose definition."
+          "Added reviewed typed linear-algebra foundation relations and exact cursor anchors."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "85dced370f7c2056290011760fad894177b026653d55c4fc61fac5c1748543c7",
+        "finalDigest": "76a1bfc52469d2fee194c2bcae03b7a8e710f0860b5cd2a953fa8c327a2fbdd1",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "85dced370f7c2056290011760fad894177b026653d55c4fc61fac5c1748543c7",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "76a1bfc52469d2fee194c2bcae03b7a8e710f0860b5cd2a953fa8c327a2fbdd1",
         "status": "corrected"
       },
       "snapshots": [
@@ -3025,6 +3132,41 @@
               "content": "For this derivation, let the centered data table satisfy\n\\[\nA\\in\\mathbb R^{r\\times s}.\n\\]\nDefine the column-oriented view by\n\\[\nB = A^{\\mathsf T}.\n\\]\nEquivalently, \\(B_{ij}=A_{ji}\\), so \\(B\\in\\mathbb R^{s\\times r}\\). Subsequent covariance calculations use observations as columns, and the meanings of \\(A\\) and \\(B\\) remain local to this derivation.\n",
               "fileId": "linear-algebra-development-transpose-03.md",
               "path": "linear-algebra-development-transpose-03.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $d$ denotes scalar and $A$ denotes linear operator matrix.\nThe reviewed law context states determinant for $d=\\det(A)$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+              "path": "linear-algebra-development-transpose-03-determinant-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $s$ denotes scalar, $x$ denotes vector, and $y$ denotes vector.\nThe reviewed law context states inner product for $s=\\langle x,y\\rangle$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+              "path": "linear-algebra-development-transpose-03-inner-product-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes linear operator matrix, $v$ denotes vector, and $\\lambda$ denotes scalar.\nThe reviewed law context states eigenpair equation for $Av=\\lambda v$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+              "path": "linear-algebra-development-transpose-03-eigenpair-equation.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes hermitian operator matrix.\nThe reviewed law context states hermitian matrix for $A=\\operatorname{adj}(A)$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+              "path": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes linear operator matrix, $Q$ denotes orthogonal matrix, and $R$ denotes upper triangular matrix.\nThe reviewed law context states qr factorization for $A=QR$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+              "path": "linear-algebra-development-transpose-03-qr-factorization.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $A$ denotes linear operator matrix, $U$ denotes orthogonal matrix, $\\Sigma$ denotes singular value matrix, and $V$ denotes orthogonal matrix.\nThe reviewed law context states singular value decomposition for $A=U\\Sigma V^T$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+              "path": "linear-algebra-development-transpose-03-singular-value-decomposition.md"
+            },
+            {
+              "content": "This note records a typed relation used in the surrounding derivation.\nHere $x$ denotes vector, $c$ denotes basis coefficient scalar, and $v$ denotes basis vector.\nThe reviewed law context states basis expansion for $x=\\sum_i c_i v_i$.\nThe statement and its role declarations are local to this calculation.\n",
+              "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+              "path": "linear-algebra-development-transpose-03-basis-expansion.md"
             }
           ],
           "id": "current"
@@ -12234,6 +12376,2267 @@
       "id": "control-systems-development-01-linear-output-after-evidence",
       "kind": "supplemental",
       "scenarioId": "control-systems-development-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+        "needle": "C=A+B",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "established",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": true,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+                "needle": "$C$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "C",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+              "needle": "C=A+B",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+                "needle": "$C$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+                "needle": "C=A+B",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-matrix-addition.md",
+              "needle": "C=A+B"
+            },
+            "relationId": "linear-algebra:matrix-addition",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "C"
+              },
+              {
+                "role": "left",
+                "symbol": "A"
+              },
+              {
+                "role": "right",
+                "symbol": "B"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-matrix-addition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+        "needle": "B=\\operatorname{inv}(A)",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+                "needle": "$B$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "B",
+            "range": {
+              "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+              "needle": "B=\\operatorname{inv}(A)",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+                "needle": "$B$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+                "needle": "B=\\operatorname{inv}(A)",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-matrix-inverse-definition.md",
+              "needle": "B=\\operatorname{inv}(A)"
+            },
+            "relationId": "linear-algebra:matrix-inverse-definition",
+            "roles": [
+              {
+                "role": "inverse",
+                "symbol": "B"
+              },
+              {
+                "role": "operator",
+                "symbol": "A"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-matrix-inverse-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+        "needle": "d=\\det(A)",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+                "needle": "$d$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "d",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+              "needle": "d=\\det(A)",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+                "needle": "$d$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+                "needle": "d=\\det(A)",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-determinant-definition.md",
+              "needle": "d=\\det(A)"
+            },
+            "relationId": "linear-algebra:determinant-definition",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "d"
+              },
+              {
+                "role": "operator",
+                "symbol": "A"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-determinant-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+        "needle": "t=\\operatorname{tr}(A)",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+                "needle": "$t$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "t",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+              "needle": "t=\\operatorname{tr}(A)",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+                "needle": "$t$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+                "needle": "t=\\operatorname{tr}(A)",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-trace-definition.md",
+              "needle": "t=\\operatorname{tr}(A)"
+            },
+            "relationId": "linear-algebra:trace-definition",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "t"
+              },
+              {
+                "role": "operator",
+                "symbol": "A"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-trace-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+        "needle": "B=\\operatorname{adj}(A)",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+                "needle": "$B$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "B",
+            "range": {
+              "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+              "needle": "B=\\operatorname{adj}(A)",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+                "needle": "$B$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+                "needle": "B=\\operatorname{adj}(A)",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-matrix-adjoint-definition.md",
+              "needle": "B=\\operatorname{adj}(A)"
+            },
+            "relationId": "linear-algebra:matrix-adjoint-definition",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "B"
+              },
+              {
+                "role": "operator",
+                "symbol": "A"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-matrix-adjoint-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+        "needle": "s=\\langle x,y\\rangle",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+                "needle": "$s$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "s",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+              "needle": "s=\\langle x,y\\rangle",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+                "needle": "$s$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+                "needle": "s=\\langle x,y\\rangle",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-inner-product-definition.md",
+              "needle": "s=\\langle x,y\\rangle"
+            },
+            "relationId": "linear-algebra:inner-product-definition",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "s"
+              },
+              {
+                "role": "left",
+                "symbol": "x"
+              },
+              {
+                "role": "right",
+                "symbol": "y"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-inner-product-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+        "needle": "r=\\lVert x\\rVert",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+                "needle": "$r$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "r",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+              "needle": "r=\\lVert x\\rVert",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+                "needle": "$r$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+                "needle": "r=\\lVert x\\rVert",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-vector-norm-definition.md",
+              "needle": "r=\\lVert x\\rVert"
+            },
+            "relationId": "linear-algebra:vector-norm-definition",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "r"
+              },
+              {
+                "role": "vector",
+                "symbol": "x"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-vector-norm-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-vector-orthogonality.md",
+        "needle": "\\langle x,y\\rangle=0",
+        "offset": 18,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          },
+          "prepareRename": {
+            "status": "unavailable"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-vector-orthogonality.md",
+              "needle": "\\langle x,y\\rangle=0"
+            },
+            "relationId": "linear-algebra:vector-orthogonality",
+            "roles": [
+              {
+                "role": "left",
+                "symbol": "x"
+              },
+              {
+                "role": "right",
+                "symbol": "y"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-vector-orthogonality",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+        "needle": "Av=\\lambda v",
+        "offset": 2,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+                "needle": "$v$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "v",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+              "needle": "Av=\\lambda v",
+              "selection": {
+                "length": 1,
+                "offset": 1
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+                "needle": "$v$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+                "needle": "Av=\\lambda v",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-eigenpair-equation.md",
+              "needle": "Av=\\lambda v"
+            },
+            "relationId": "linear-algebra:eigenpair-equation",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "vector",
+                "symbol": "v"
+              },
+              {
+                "role": "value",
+                "symbol": "lambda"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-eigenpair-equation",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+        "needle": "AP=PD",
+        "offset": 2,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+                "needle": "$P$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "P",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+              "needle": "AP=PD",
+              "selection": {
+                "length": 1,
+                "offset": 1
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+                "needle": "$P$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+                "needle": "AP=PD",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-matrix-diagonalization.md",
+              "needle": "AP=PD"
+            },
+            "relationId": "linear-algebra:matrix-diagonalization",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "basis",
+                "symbol": "P"
+              },
+              {
+                "role": "diagonal",
+                "symbol": "D"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-matrix-diagonalization",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+        "needle": "A=A^T",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "established",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": true,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+              "needle": "A=A^T",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+                "needle": "A=A^T",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-symmetric-matrix-definition.md",
+              "needle": "A=A^T"
+            },
+            "relationId": "linear-algebra:symmetric-matrix-definition",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-symmetric-matrix-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+        "needle": "A=\\operatorname{adj}(A)",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+              "needle": "A=\\operatorname{adj}(A)",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+                "needle": "A=\\operatorname{adj}(A)",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-hermitian-matrix-definition.md",
+              "needle": "A=\\operatorname{adj}(A)"
+            },
+            "relationId": "linear-algebra:hermitian-matrix-definition",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-hermitian-matrix-definition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+        "needle": "q=\\operatorname{quad}(A,x)",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+                "needle": "$q$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "q",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+              "needle": "q=\\operatorname{quad}(A,x)",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+                "needle": "$q$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+                "needle": "q=\\operatorname{quad}(A,x)",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-positive-definite-quadratic-form.md",
+              "needle": "q=\\operatorname{quad}(A,x)"
+            },
+            "relationId": "linear-algebra:positive-definite-quadratic-form",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "q"
+              },
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "vector",
+                "symbol": "x"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-positive-definite-quadratic-form",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+        "needle": "A=LU",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+              "needle": "A=LU",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+                "needle": "A=LU",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-lu-factorization.md",
+              "needle": "A=LU"
+            },
+            "relationId": "linear-algebra:lu-factorization",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "lower",
+                "symbol": "L"
+              },
+              {
+                "role": "upper",
+                "symbol": "U"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-lu-factorization",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+        "needle": "A=QR",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+              "needle": "A=QR",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+                "needle": "A=QR",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-qr-factorization.md",
+              "needle": "A=QR"
+            },
+            "relationId": "linear-algebra:qr-factorization",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "orthogonal",
+                "symbol": "Q"
+              },
+              {
+                "role": "upper",
+                "symbol": "R"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-qr-factorization",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+        "needle": "A=LL^T",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "established",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": true,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+              "needle": "A=LL^T",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+                "needle": "A=LL^T",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-cholesky-factorization.md",
+              "needle": "A=LL^T"
+            },
+            "relationId": "linear-algebra:cholesky-factorization",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "lower",
+                "symbol": "L"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-cholesky-factorization",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+        "needle": "A=Q\\Lambda Q^T",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+              "needle": "A=Q\\Lambda Q^T",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+                "needle": "A=Q\\Lambda Q^T",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition.md",
+              "needle": "A=Q\\Lambda Q^T"
+            },
+            "relationId": "linear-algebra:orthogonal-eigendecomposition",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "basis",
+                "symbol": "Q"
+              },
+              {
+                "role": "values",
+                "symbol": "Lambda"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-orthogonal-eigendecomposition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+        "needle": "A=U\\Sigma V^T",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "A",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+              "needle": "A=U\\Sigma V^T",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+                "needle": "$A$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+                "needle": "A=U\\Sigma V^T",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-singular-value-decomposition.md",
+              "needle": "A=U\\Sigma V^T"
+            },
+            "relationId": "linear-algebra:singular-value-decomposition",
+            "roles": [
+              {
+                "role": "operator",
+                "symbol": "A"
+              },
+              {
+                "role": "left",
+                "symbol": "U"
+              },
+              {
+                "role": "values",
+                "symbol": "Sigma"
+              },
+              {
+                "role": "right",
+                "symbol": "V"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-singular-value-decomposition",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+        "needle": "x=Ab",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+                "needle": "$x$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "x",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+              "needle": "x=Ab",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+                "needle": "$x$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+                "needle": "x=Ab",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-pseudoinverse-solution.md",
+              "needle": "x=Ab"
+            },
+            "relationId": "linear-algebra:pseudoinverse-solution",
+            "roles": [
+              {
+                "role": "solution",
+                "symbol": "x"
+              },
+              {
+                "role": "inverse",
+                "symbol": "A"
+              },
+              {
+                "role": "observation",
+                "symbol": "b"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-pseudoinverse-solution",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+        "needle": "n=r+k",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+                "needle": "$n$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "n",
+            "range": {
+              "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+              "needle": "n=r+k",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+                "needle": "$n$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+                "needle": "n=r+k",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matmul-02-rank-nullity-theorem.md",
+              "needle": "n=r+k"
+            },
+            "relationId": "linear-algebra:rank-nullity-theorem",
+            "roles": [
+              {
+                "role": "dimension",
+                "symbol": "n"
+              },
+              {
+                "role": "rank",
+                "symbol": "r"
+              },
+              {
+                "role": "nullity",
+                "symbol": "k"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matmul-02-rank-nullity-theorem",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matmul-02"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+        "needle": "x=\\sum_i c_i v_i",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+                "needle": "$x$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "x",
+            "range": {
+              "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+              "needle": "x=\\sum_i c_i v_i",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+                "needle": "$x$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+                "needle": "x=\\sum_i c_i v_i",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-transpose-03-basis-expansion.md",
+              "needle": "x=\\sum_i c_i v_i"
+            },
+            "relationId": "linear-algebra:basis-expansion",
+            "roles": [
+              {
+                "role": "vector",
+                "symbol": "x"
+              },
+              {
+                "role": "coordinate",
+                "symbol": "c"
+              },
+              {
+                "role": "basis",
+                "symbol": "v"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-transpose-03-basis-expansion",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-transpose-03"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+        "needle": "y=Px",
+        "offset": 1,
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+                "needle": "$y$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "y",
+            "range": {
+              "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+              "needle": "y=Px",
+              "selection": {
+                "length": 1,
+                "offset": 0
+              }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+                "needle": "$y$ denotes",
+                "selection": {
+                  "length": 1,
+                  "offset": 1
+                }
+              },
+              {
+                "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+                "needle": "y=Px",
+                "selection": {
+                  "length": 1,
+                  "offset": 0
+                }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": [
+          {
+            "anchor": {
+              "fileId": "linear-algebra-development-matvec-01-orthogonal-projection.md",
+              "needle": "y=Px"
+            },
+            "relationId": "linear-algebra:orthogonal-projection",
+            "roles": [
+              {
+                "role": "result",
+                "symbol": "y"
+              },
+              {
+                "role": "projector",
+                "symbol": "P"
+              },
+              {
+                "role": "vector",
+                "symbol": "x"
+              }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "linear-algebra-development-matvec-01-orthogonal-projection",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "fileId": "linear-algebra-foundation-retraction.md",
+        "needle": "C=A+B",
+        "offset": 1,
+        "snapshotId": "foundation-retracted"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": {
+          "excludedCodes": [],
+          "maximum": 0,
+          "required": []
+        },
+        "excludedRelationIds": [
+          "linear-algebra:matrix-addition"
+        ],
+        "proofGrounded": false,
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          },
+          "prepareRename": {
+            "status": "unavailable"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          },
+          "rename": {
+            "excluded": [],
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
+          }
+        },
+        "relations": []
+      },
+      "family": "edit-lifecycle",
+      "id": "linear-algebra-development-project-retraction",
+      "kind": "supplemental",
+      "scenarioId": "linear-algebra-development-matvec-01"
     }
   ]
 }

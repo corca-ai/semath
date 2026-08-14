@@ -107,6 +107,20 @@
       "sha256": "8ec50817f7ec306e39ce392d83220b2d77cdf31be2f803d8693c03c028ed814a"
     },
     {
+      "bytes": 2395085,
+      "cases": 1760,
+      "id": "linear-algebra-foundation-diversity",
+      "path": "corpus/linear-algebra-foundation-diversity.json",
+      "sha256": "c5a0d58303a205c90039d7faebab666a61bf19573d217612836c9d52c4952e74"
+    },
+    {
+      "bytes": 200448,
+      "cases": 220,
+      "id": "linear-algebra-foundation-probe",
+      "path": "corpus/linear-algebra-foundation-probe.json",
+      "sha256": "fb2b8b37a459cb88bbec239d790f274844f4621c1d67f59912d4ef8bd26f779d"
+    },
+    {
       "bytes": 209590,
       "cases": 160,
       "id": "linear-products-diversity",
@@ -198,6 +212,6 @@
       "sha256": "39d1369854f686e9847ff9cbad922da6d96f38177dfe977ad5e21002c3a1ec80"
     }
   ],
-  "totalBytes": 6838898,
-  "totalCases": 5406
+  "totalBytes": 9434431,
+  "totalCases": 7386
 }
