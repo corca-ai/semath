@@ -385,7 +385,8 @@
       "description": "Time integral of electric current.",
       "aliases": [
         "charge",
-        "signed charge"
+        "signed charge",
+        "test charge"
       ],
       "dimension": [
         {

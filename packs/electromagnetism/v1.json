@@ -35,7 +35,7 @@
       "aliases": [
         "charged body",
         "point charge",
-        "test charge"
+        "test particle"
       ],
       "parents": [],
       "references": [
@@ -230,6 +230,8 @@
           ],
           "evidencePhrases": [
             "electrostatic regime",
+            "electric field evaluated at the body's center",
+            "electric field evaluated at the charged body",
             "magnetic force is negligible",
             "magnetic force is absent"
           ],

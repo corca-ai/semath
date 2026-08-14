@@ -1256,15 +1256,37 @@ fn tokenize(chunks: &[SurfaceChunk], word_identifiers: bool) -> Vec<Token> {
                     cursor += chunk.text[cursor..].chars().next().unwrap().len_utf8();
                 }
                 TokenKind::Identifier(chunk.text[start..cursor].into())
-            } else if character.is_ascii_digit() || character == '.' {
+            } else if character.is_ascii_digit()
+                || character == '.'
+                    && chunk.text[cursor + character.len_utf8()..]
+                        .chars()
+                        .next()
+                        .is_some_and(|next| next.is_ascii_digit())
+            {
                 cursor += character.len_utf8();
                 while cursor < chunk.text.len()
                     && chunk.text[cursor..]
                         .chars()
                         .next()
-                        .is_some_and(|next| next.is_ascii_digit() || next == '.')
+                        .is_some_and(|next| next.is_ascii_digit())
                 {
                     cursor += chunk.text[cursor..].chars().next().unwrap().len_utf8();
+                }
+                if chunk.text[cursor..].starts_with('.')
+                    && chunk.text[cursor + 1..]
+                        .chars()
+                        .next()
+                        .is_some_and(|next| next.is_ascii_digit())
+                {
+                    cursor += 1;
+                    while cursor < chunk.text.len()
+                        && chunk.text[cursor..]
+                            .chars()
+                            .next()
+                            .is_some_and(|next| next.is_ascii_digit())
+                    {
+                        cursor += chunk.text[cursor..].chars().next().unwrap().len_utf8();
+                    }
                 }
                 TokenKind::Number(chunk.text[start..cursor].into())
             } else if character == '&' {
@@ -3176,6 +3198,10 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template("x=0.5")),
             "relation(equals,symbol(x),number(0.5))"
+        );
+        assert_eq!(
+            render_canonical(&lower_template("F_e=q_tE_0.")),
+            render_canonical(&lower_template("F_e=q_tE_0"))
         );
     }
 
