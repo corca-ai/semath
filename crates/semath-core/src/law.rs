@@ -2298,6 +2298,7 @@ fn plan_role_support(
             role_support = role_support.and(role_symbol_support(
                 role,
                 symbol,
+                &expression.range,
                 offset,
                 notation_context_activated,
                 law_explicitly_activated,
@@ -2448,6 +2449,11 @@ fn role_source_evidence_ranges(
 ) -> Vec<SourceRange> {
     let mut ranges = Vec::new();
     for symbol in semantic_symbols(expression) {
+        ranges.extend(consistency.occurrence_role_evidence_ranges(
+            &symbol,
+            &expression.range,
+            &role.concept,
+        ));
         ranges.extend(
             consistency
                 .roles_at(&symbol, offset)
@@ -2853,6 +2859,7 @@ impl RoleSupport {
 fn role_symbol_support(
     role: &PackLawRole,
     symbol: &str,
+    symbol_range: &SourceRange,
     offset: u32,
     notation_context_activated: bool,
     law_explicitly_activated: bool,
@@ -2862,6 +2869,9 @@ fn role_symbol_support(
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
+    if consistency.has_occurrence_role(symbol, symbol_range, &role.concept) {
+        return RoleSupport::Typed;
+    }
     let notation_symbol = symbol;
     if role.concept == "quantities-units:dimensionless"
         && role.shape.as_deref() == Some("scalar")
@@ -5470,7 +5480,13 @@ This conversion is performed once per accepted timing sample so the accumulator 
         let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
-        let roles = observe_roles(&document, &prose.definitions, &shapes);
+        let role_definitions = prose
+            .definitions
+            .iter()
+            .chain(&prose.semantic_role_definitions)
+            .cloned()
+            .collect::<Vec<_>>();
+        let roles = observe_roles(&document, &role_definitions, &shapes);
         let external = ExternalTypeEnvironment::default();
         let domains = crate::domain::observe_domains(
             &document,
@@ -5587,7 +5603,13 @@ This conversion is performed once per accepted timing sample so the accumulator 
         let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
-        let roles = observe_roles(&document, &prose.definitions, &shapes);
+        let role_definitions = prose
+            .definitions
+            .iter()
+            .chain(&prose.semantic_role_definitions)
+            .cloned()
+            .collect::<Vec<_>>();
+        let roles = observe_roles(&document, &role_definitions, &shapes);
         let external = ExternalTypeEnvironment::default();
         let domains = crate::domain::observe_domains(
             &document,
@@ -6325,6 +6347,42 @@ The normal equation is $A^\top A\theta=A^\top b$.",
     }
 
     #[test]
+    fn descriptive_symbol_roles_complete_a_following_formula_relation() {
+        let source = r"For the dc supply, let $I_s$ be the conventional current delivered at terminal
+voltage $V_s$; its output power is
+\[
+P_s=V_sI_s.
+\]";
+        let observations = law_observations(source);
+        let power = observations
+            .all()
+            .iter()
+            .find(|recognition| recognition.law_id == "electric-power-law")
+            .unwrap_or_else(|| {
+                panic!(
+                    "the independently described power roles should identify the law: {observations:#?}"
+                )
+            });
+        assert_eq!(power.status, LawRecognitionStatus::ConditionMissing);
+        assert!(power.bindings.iter().all(|binding| {
+            matches!(
+                binding.proof,
+                LawBindingProof::Typed | LawBindingProof::Derived
+            )
+        }));
+    }
+
+    #[test]
+    fn occurrence_roles_preserve_explicitly_different_contexts() {
+        let source = "Event $A$ belongs to the first probability space, while event $B$ belongs to a different experiment. The formal surface is $A\\cap B$.";
+        assert!(
+            recognized_laws(source)
+                .iter()
+                .all(|law| *law != "event-intersection")
+        );
+    }
+
+    #[test]
     fn infers_one_unresolved_law_role_from_at_least_two_typed_roles() {
         assert_eq!(
             recognized_laws("Let $A$ be area and $v$ velocity. $Q=Av$."),
@@ -6557,7 +6615,13 @@ This vector field is the gradient of $f$; hence, after the characterization abov
         let prose = observe_prose(&document, &parsed, &canonical);
         let shapes = observe_shapes(&document, &parsed, &canonical, &prose.shapes);
         let quantities = observe_quantities(&document, &parsed, &prose.definitions);
-        let roles = observe_roles(&document, &prose.definitions, &shapes);
+        let role_definitions = prose
+            .definitions
+            .iter()
+            .chain(&prose.semantic_role_definitions)
+            .cloned()
+            .collect::<Vec<_>>();
+        let roles = observe_roles(&document, &role_definitions, &shapes);
         let external = ExternalTypeEnvironment::default();
         let domains = crate::domain::observe_domains(
             &document,

@@ -14,6 +14,7 @@ struct ScopedRoleClaim {
     symbol_range: SourceRange,
     available_from: u32,
     scope_id: usize,
+    occurrence_bound: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -46,7 +47,7 @@ impl RoleObservations {
     pub fn exported(&self) -> Vec<RoleInfo> {
         self.roles
             .iter()
-            .filter(|claim| self.scopes.depth(claim.scope_id) == 0)
+            .filter(|claim| self.scopes.depth(claim.scope_id) == 0 && !claim.occurrence_bound)
             .map(|claim| claim.info.clone())
             .collect()
     }
@@ -57,6 +58,7 @@ impl RoleObservations {
             .iter()
             .filter(|claim| {
                 self.symbols_equivalent(&claim.info.symbol, symbol)
+                    && (!claim.occurrence_bound || claim.symbol_range.contains(offset))
                     && (self.scopes.depth(claim.scope_id) == 0
                         || claim.available_from <= offset
                         || claim.symbol_range.contains(offset))
@@ -78,6 +80,38 @@ impl RoleObservations {
                 .collect(),
             truncated,
         )
+    }
+
+    pub(crate) fn has_occurrence_role(
+        &self,
+        symbol: &str,
+        range: &SourceRange,
+        concept: &str,
+    ) -> bool {
+        self.roles.iter().any(|claim| {
+            claim.occurrence_bound
+                && claim.symbol_range == *range
+                && self.symbols_equivalent(&claim.info.symbol, symbol)
+                && concepts_share_lineage(&claim.info.concept_id, concept)
+        })
+    }
+
+    pub(crate) fn occurrence_role_evidence_ranges(
+        &self,
+        symbol: &str,
+        range: &SourceRange,
+        concept: &str,
+    ) -> Vec<SourceRange> {
+        self.roles
+            .iter()
+            .filter(|claim| {
+                claim.occurrence_bound
+                    && claim.symbol_range == *range
+                    && self.symbols_equivalent(&claim.info.symbol, symbol)
+                    && concepts_share_lineage(&claim.info.concept_id, concept)
+            })
+            .flat_map(|claim| claim.info.evidence.source_ranges.iter().cloned())
+            .collect()
     }
 
     pub fn diagnostics_for(&self, symbol: &str, offset: u32) -> (Vec<SemanticDiagnostic>, bool) {
@@ -140,7 +174,11 @@ pub(crate) fn observe_roles(
         .collect::<Vec<_>>();
 
     let mut groups = BTreeMap::<(String, usize), (Vec<usize>, Vec<usize>)>::new();
-    for (index, role) in roles.iter().enumerate() {
+    for (index, role) in roles
+        .iter()
+        .enumerate()
+        .filter(|(_, role)| !role.occurrence_bound)
+    {
         groups
             .entry((role.info.symbol.clone(), role.scope_id))
             .or_default()
@@ -212,6 +250,10 @@ fn role_claims(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Vec<ScopedRo
             scope_id: scopes.id_at(symbol_range.start_offset),
             symbol_range: symbol_range.clone(),
             available_from,
+            occurrence_bound: definition
+                .evidence
+                .rule_id
+                .starts_with("formula-occurrence-role/"),
         })
         .collect()
 }

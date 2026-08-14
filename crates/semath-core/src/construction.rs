@@ -293,6 +293,17 @@ pub(crate) fn match_quantified<'a>(
 /// before a math mention. Semantic vocabulary decides whether any candidate is
 /// a scientific role; this function only composes the normalized prose span.
 pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruction<'_>> {
+    role_first_nominal_candidates_with_whitespace(value, false)
+}
+
+pub(crate) fn multiline_role_first_nominal_candidates(value: &str) -> Vec<NominalConstruction<'_>> {
+    role_first_nominal_candidates_with_whitespace(value, true)
+}
+
+fn role_first_nominal_candidates_with_whitespace(
+    value: &str,
+    allow_multiline: bool,
+) -> Vec<NominalConstruction<'_>> {
     let mut start = value
         .char_indices()
         .rev()
@@ -397,7 +408,12 @@ pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruct
         }
     }
     phrase = phrase.trim_end();
-    if !valid_plain_description(phrase) || phrase.split_whitespace().count() > 8 {
+    let valid = if allow_multiline {
+        valid_nominal_description
+    } else {
+        valid_plain_description
+    };
+    if !valid(phrase) || phrase.split_whitespace().count() > 8 {
         return Vec::new();
     }
 
@@ -416,12 +432,10 @@ pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruct
         .filter_map(|separator| {
             let offset = lower.rfind(separator)? + separator.len();
             let tail = strip_article(phrase[offset..].trim());
-            (valid_plain_description(tail) && tail.split_whitespace().count() <= 6).then_some(
-                NominalConstruction {
-                    description: tail,
-                    relative_start: start + phrase.find(tail).unwrap_or(offset),
-                },
-            )
+            (valid(tail) && tail.split_whitespace().count() <= 6).then_some(NominalConstruction {
+                description: tail,
+                relative_start: start + phrase.find(tail).unwrap_or(offset),
+            })
         })
         .collect::<Vec<_>>();
     candidates.sort_by_key(|candidate| candidate.description.len());
@@ -852,11 +866,23 @@ fn valid_plain_description(value: &str) -> bool {
         })
 }
 
+fn valid_nominal_description(value: &str) -> bool {
+    valid_description(value)
+        && !value.contains('$')
+        && !value.contains("\\(")
+        && value.chars().all(|character| {
+            character.is_ascii_alphanumeric()
+                || character.is_ascii_whitespace()
+                || matches!(character, '-' | '\'')
+        })
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
         CoordinationLead, coordinated_descriptions, defines_by_formula,
-        fronted_labeled_descriptions, match_definition, role_first_nominal_candidates,
+        fronted_labeled_descriptions, match_definition, multiline_role_first_nominal_candidates,
+        role_first_nominal_candidates,
     };
 
     #[test]
@@ -1037,6 +1063,18 @@ mod tests {
                 .map(|candidate| candidate.description)
                 .collect::<Vec<_>>(),
             ["potential"]
+        );
+        assert_eq!(
+            multiline_role_first_nominal_candidates(
+                " be the conventional current delivered at terminal\nvoltage "
+            )
+            .into_iter()
+            .map(|candidate| candidate.description)
+            .collect::<Vec<_>>(),
+            [
+                "terminal\nvoltage",
+                "conventional current delivered at terminal\nvoltage"
+            ]
         );
     }
 
