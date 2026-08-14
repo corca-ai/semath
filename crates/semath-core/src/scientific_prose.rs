@@ -849,6 +849,7 @@ fn emit_lexical_events(
         ("those quantities", AnaphorKind::PluralDemonstrative),
         ("those symbols", AnaphorKind::PluralDemonstrative),
         ("this quantity", AnaphorKind::SingularDemonstrative),
+        ("this vector field", AnaphorKind::SingularDemonstrative),
         ("this symbol", AnaphorKind::SingularDemonstrative),
         ("this variable", AnaphorKind::SingularDemonstrative),
         ("this equation", AnaphorKind::FormulaDemonstrative),
@@ -1369,6 +1370,8 @@ fn classify_discourse_frame(
         || lower.contains(" does not apply")
         || lower.contains(" do not apply")
         || lower.contains(" did not apply")
+        || lower.contains(" does not assume")
+        || lower.contains(" do not assume")
         || lower.contains(" inapplicable")
         || [" not define", " not denote", " not represent", " not mean"]
             .iter()

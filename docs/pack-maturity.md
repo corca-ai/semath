@@ -121,6 +121,11 @@ holds approved support policy; GitHub issues hold planned work.
   Eleven development expectations were reviewed as `partial` where only
   formula or domain context was available; the release baseline remains 50 of
   115 with risk 130 and zero unsafe risk.
+- The 2026-08-14 v0.35 development frontier connects exact formula ownership,
+  source-backed formula facts, typed discourse metadescriptions, and typed
+  operator assignments. Characterized operator roles now prove their matching
+  domain condition without a second authority. It passes 56 of 115 probes with
+  risk 118 and zero false establishment, false conflict, or identity risk.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
@@ -159,6 +164,7 @@ field completeness.
 | Scoped comparisons          | A rendered spelling could accidentally stand in for semantic identity                                                  | Comparison and retraction authority now follows resolved entities, source order, scopes, and connected components                                                         |
 | Document conditions         | Included roles propagated but their typed assumptions stopped at the file boundary                                     | The existing ordered external type environment now carries subject-bound assumptions and retracts them through the same dependency closure                                |
 | Prose composition           | Result actions, role-first clauses, and formula-following `where` or `Here` assumptions used separate narrow branches  | The normalized event stream composes these bounded forms and rejects cited, hedged, hypothetical, negated, or contradictory evidence                                      |
+| Characterized operators     | An existentially characterized result and a later typed operator assignment remained disconnected                    | Bounded nominal shapes and unambiguous demonstratives retain the result role; the typed operator plan proves the matching domain condition from the same evidence          |
 | Law runtime                 | A legacy single-result unifier coexisted with bounded multi-result matching                                            | One bounded unifier remains, preserving structural recognition while deleting the obsolete path                                                                           |
 
 ## Remaining measured gaps

@@ -138,6 +138,12 @@ definitions or relations. Applying only those explicit adjudications produces
 the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
 cases stay visible as coverage work.
 
+The 2026-08-14 v0.35 development frontier passes 56 of 115 probes with risk
+118 and no false establishment, false conflict, or identity risk. Its current
+first-loss atlas is 24 attachment, 17 typed-fact, and 18 pack-unification
+misses. This supersedes the older editable-development measurement above for
+current release work without changing that historical v0.28 record.
+
 The now-exposed historical authored holdout remains 6 of 97 with raw risk 728.
 These deliberately difficult documents are a first-loss map, not a release
 pass-rate target. Its two raw false-establishment counts are exact, reviewed

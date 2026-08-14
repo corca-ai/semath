@@ -100,6 +100,10 @@ attachment, and establishment are separate pure steps: only positive, asserted,
 unconditional author claims establish meaning. Cited, hedged, hypothetical,
 alternative, ambiguous-anaphoric, and negative observations remain
 source-grounded without promotion.
+Existential role-first declarations may contribute their explicit nominal
+shape, and noun-headed demonstratives may select a prior entity only when that
+shape leaves exactly one compatible antecedent. Crowded or multiply compatible
+contexts remain ambiguous rather than choosing by proximity.
 An asserted nominal lead attached to an equation may also produce a
 formula-scoped meaning fact for the exact result occurrence. That fact can
 support the meaning decision without creating a definition entity, reference
@@ -274,6 +278,10 @@ structurally derived role identity can complete an established decision;
 formula-level assertion may keep a useful relation and proposed role mapping
 visible, but cannot prove that mapping by itself. An unresolved binding is
 likewise candidate evidence only.
+Positive subject-bound regularity evidence such as differentiability can prove
+the function role it entails. Once an operator assignment has a complete typed
+role plan, domain conditions reuse that plan and its evidence instead of
+deriving a second, potentially divergent authority.
 An exact formula-owned structural occurrence can consume its own asserted
 formula fact, but that proof is not copied to nested symbols. Conversely, when
 an established law activation and a rejected formula differ by exactly one
