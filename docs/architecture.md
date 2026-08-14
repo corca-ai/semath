@@ -197,7 +197,11 @@ sorted catalog discovers versioned pack JSON without a handwritten Rust
 registry; the same compiler report is exposed through WASM to authoring tools.
 Typed operator signatures may bind both declared concepts and quantity kinds;
 their canonical operand structure can derive role and shared-context evidence
-only when the complete signature matches.
+only when the complete signature matches. In an exact equality, a complete
+signature on one side may also derive the result type for the exact expression
+on the other side. This evidence is symmetric across equality direction, but
+does not apply to inequalities, approximate comparisons, citations, or an
+output with an explicitly conflicting shape or quantity.
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
 

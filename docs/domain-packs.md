@@ -37,7 +37,12 @@ result concept and shape. The generic runtime uses those signatures only when
 the source establishes compatible operand types; notation alone is not proof.
 Signature concepts may name either pack concepts or quantity kinds. A complete
 canonical operator match can then preserve the operand roles and a declared
-shared context without a law-specific runtime matcher.
+shared context without a law-specific runtime matcher. When that match is one
+side of an exact equality, its declared result concept and constraints may
+support the exact expression on the other side; explicit output shape or
+quantity conflicts still refuse the role. Packs should express this reusable
+evidence as an operator signature rather than adding a law-specific runtime
+branch.
 Each side condition has a closed kind, stable ID, validated role subjects, a
 display label, and optional reviewed English `evidencePhrases`. Those phrases
 compile into the shared assumption-event path; they do not create a pack

@@ -293,6 +293,22 @@
       ]
     },
     {
+      "id": "nabla-operator",
+      "topic": "differentiation",
+      "description": "The gradient of a declared scalar function is a vector-valued nabla result.",
+      "notation": [
+        "\\nabla f"
+      ],
+      "operandConcepts": [
+        "calculus-analysis:function"
+      ],
+      "resultConcept": "calculus-analysis:nabla-operator",
+      "resultShape": "vector",
+      "references": [
+        "principles-analysis"
+      ]
+    },
+    {
       "id": "integral",
       "topic": "integration",
       "description": "An integral with explicit integrand, differential, and optional bounds.",

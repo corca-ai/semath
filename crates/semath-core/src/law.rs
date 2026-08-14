@@ -2242,6 +2242,24 @@ fn plan_role_support(
             _ => None,
         };
         let expression = projected_expression.as_ref().unwrap_or(bound_expression);
+        let output_support = relation_operator_output_role_support(
+            role,
+            bound_expression,
+            actual,
+            offset,
+            consistency,
+            external,
+        );
+        if output_support.is_proven() {
+            if expression_constraints_refuted(
+                role, expression, offset, shapes, quantities, external,
+            ) {
+                return None;
+            }
+            supported += 1;
+            supported_roles.insert(role.id.as_str(), RoleBindingProof::DerivedFromTypes);
+            continue;
+        }
         match structural_operator_role_support(role, expression, offset, consistency, external) {
             RoleSupport::Typed | RoleSupport::Derived => {
                 supported += 1;
@@ -2576,6 +2594,63 @@ fn structural_operator_role_support(
     } else {
         RoleSupport::Unresolved
     }
+}
+
+fn relation_operator_output_role_support(
+    role: &PackLawRole,
+    expression: &SemanticExpr,
+    relation: &SemanticExpr,
+    offset: u32,
+    consistency: &RoleObservations,
+    external: &ExternalTypeEnvironment,
+) -> RoleSupport {
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &relation.kind
+    else {
+        return RoleSupport::Unresolved;
+    };
+    if operator != "equals" {
+        return RoleSupport::Unresolved;
+    }
+    let left_matches = equivalent(expression, left);
+    let right_matches = equivalent(expression, right);
+    let operator_expression = match (left_matches, right_matches) {
+        (true, false) => right.as_ref(),
+        (false, true) => left.as_ref(),
+        _ => return RoleSupport::Unresolved,
+    };
+    structural_operator_role_support(role, operator_expression, offset, consistency, external)
+}
+
+fn expression_constraints_refuted(
+    role: &PackLawRole,
+    expression: &SemanticExpr,
+    offset: u32,
+    shapes: &ShapeObservations,
+    quantities: &QuantityObservations,
+    external: &ExternalTypeEnvironment,
+) -> bool {
+    semantic_symbols(expression).into_iter().any(|symbol| {
+        let shape_refuted = role.shape.as_deref().is_some_and(|expected| {
+            shapes
+                .claims_at(&symbol, offset)
+                .0
+                .into_iter()
+                .chain(external.shapes_at(offset, &symbol))
+                .any(|shape| shape.kind != expected)
+                || shapes
+                    .shape_at(&symbol, offset)
+                    .is_some_and(|shape| shape.kind != expected)
+        });
+        let quantity_refuted = role.quantity.as_deref().is_some_and(|expected| {
+            quantity_support(expected, &symbol, &symbol, offset, quantities, external)
+                == RoleSupport::Refuted
+        });
+        shape_refuted || quantity_refuted
+    })
 }
 
 fn expression_concept_support(
@@ -6351,6 +6426,39 @@ The normal equation is $A^\top A\theta=A^\top b$.",
                 .iter()
                 .any(|role| role.role == "variable" && role.symbol == "x")
         );
+    }
+
+    #[test]
+    fn typed_operator_result_derives_only_its_exact_relation_output() {
+        for source in [
+            "Let $f$ be a scalar function. We define $g=\\nabla f$.",
+            "Let $f$ be a scalar function. We define $\\nabla f=g$.",
+        ] {
+            let recognized = recognized_law_observations(source);
+            let gradient = recognized
+                .iter()
+                .find(|law| law.law_id == "gradient-relation")
+                .expect("gradient relation");
+            let relation = gradient.relation.as_ref().expect("public relation");
+            assert!(relation.roles.iter().any(|role| {
+                role.role == "result"
+                    && role.symbol == "g"
+                    && role.concept_id.as_deref() == Some("calculus-analysis:nabla-operator")
+            }));
+        }
+
+        for rejected in [
+            "Let $f$ be a scalar function and $g$ a scalar. We define $g=\\nabla f$.",
+            "Let $f$ be a scalar function. According to the reference, $g=\\nabla f$.",
+            "Let $f$ be a scalar function. We define $g=f$.",
+        ] {
+            assert!(
+                !recognized_laws(rejected)
+                    .iter()
+                    .any(|law| law == "gradient-relation"),
+                "{rejected}"
+            );
+        }
     }
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {
