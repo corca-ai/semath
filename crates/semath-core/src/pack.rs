@@ -759,6 +759,8 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
         "concepts",
         pack.concepts.iter().map(|entry| entry.id.as_str()),
     )?;
+    let mut concept_targets = concepts.clone();
+    concept_targets.extend(pack.quantity_kinds.iter().map(|entry| entry.id.as_str()));
     unique_ids(
         "activationRules",
         pack.activation_rules.iter().map(|entry| entry.id.as_str()),
@@ -840,7 +842,7 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
             for (concept_index, concept) in entry.operand_concepts.iter().enumerate() {
                 validate_pack_concept_reference(
                     pack,
-                    &concepts,
+                    &concept_targets,
                     &format!("{collection}[{index}].operandConcepts[{concept_index}]"),
                     concept,
                 )?;
@@ -848,7 +850,7 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
             if let Some(concept) = &entry.result_concept {
                 validate_pack_concept_reference(
                     pack,
-                    &concepts,
+                    &concept_targets,
                     &format!("{collection}[{index}].resultConcept"),
                     concept,
                 )?;

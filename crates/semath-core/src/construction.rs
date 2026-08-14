@@ -380,7 +380,8 @@ pub(crate) fn role_first_nominal_candidates(value: &str) -> Vec<NominalConstruct
     start += phrase.len() - without_article.len();
     phrase = without_article;
     for determiner in [
-        "both ", "two ", "three ", "four ", "five ", "six ", "seven ", "eight ",
+        "its ", "their ", "this ", "that ", "both ", "two ", "three ", "four ", "five ", "six ",
+        "seven ", "eight ",
     ] {
         if phrase
             .get(..determiner.len())
@@ -1002,6 +1003,12 @@ mod tests {
                 .last()
                 .map(|item| item.description),
             Some("corresponding mass rate")
+        );
+        assert_eq!(
+            role_first_nominal_candidates("Its optical quality factor ")
+                .last()
+                .map(|item| item.description),
+            Some("optical quality factor")
         );
         assert_eq!(
             role_first_nominal_candidates(", and the machined\nbore determines the wetted area ")
