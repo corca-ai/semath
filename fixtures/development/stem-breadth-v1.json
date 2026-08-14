@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "id": "practical-stem-breadth-v1",
+  "baseline": {
+    "commit": "16e1797286fd5143144e78657230cebedd433943",
+    "protocolVersion": 14,
+    "developmentFixtureId": "v027-authored-scientific-development",
+    "note": "Frozen before practical-STEM implementation. Scores describe reviewed public-development evidence, not field completeness or real-world prevalence."
+  },
+  "sourcePolicy": {
+    "developmentFixturePath": "fixtures/challenge/document-reasoning-development-v1.json",
+    "provenance": "project-original-independent-review",
+    "importedText": false
+  },
+  "releaseCommission": {
+    "status": "commissioned-unwritten",
+    "authoringMethod": "isolated-authors",
+    "criticMethod": "independent-critics",
+    "engineExecutionsBeforeSeal": 0,
+    "historicalFixturesAreTuningInputs": false,
+    "receiptPolicy": "new-path-one-shot"
+  },
+  "fields": [
+    {
+      "id": "shared-foundations",
+      "plannedIssue": "https://github.com/corca-ai/semath/issues/347",
+      "capabilities": [
+        {
+          "capability": "vocabulary",
+          "status": "measured",
+          "requirement": "Resolve reviewed declarations and shared mathematical terms without pack-specific prose branches.",
+          "probeIds": ["CA-DEV-01", "DMD-01", "CFQ-DEV-001"]
+        },
+        {
+          "capability": "typing",
+          "status": "measured",
+          "requirement": "Retain role, shape, quantity, and cross-field type evidence independently of spelling.",
+          "probeIds": ["CFQ-DEV-001", "CFQ-DEV-004", "CA-DEV-07"]
+        },
+        {
+          "capability": "relation-recognition",
+          "status": "measured",
+          "requirement": "Recognize source-grounded shared relations with exact roles and ranges.",
+          "probeIds": ["CA-DEV-01", "DMD-06", "CFQ-DEV-004"]
+        },
+        {
+          "capability": "equivalent-forms",
+          "status": "measured",
+          "requirement": "Preserve reviewed derivative, balance, and rearranged forms without unsafe algebra.",
+          "probeIds": ["CA-DEV-02", "FM-DEV-004", "thermo-dev-008"]
+        },
+        {
+          "capability": "conditions",
+          "status": "measured",
+          "requirement": "Attach explicit domains, guards, sign conventions, and scoped assumptions to their subjects.",
+          "probeIds": ["DMD-09", "EM-DEV-004", "FM-DEV-006"]
+        },
+        {
+          "capability": "document-attachment",
+          "status": "measured",
+          "requirement": "Associate declarations and equation references across realistic neighboring prose without citation leakage.",
+          "probeIds": ["DMD-01", "DEV-CFS-03", "DEV-CFS-05"]
+        },
+        {
+          "capability": "project-lifecycle",
+          "status": "measured",
+          "requirement": "Respect section, include, macro, and edit boundaries and retract evidence after source changes.",
+          "probeIds": ["CA-DEV-10", "DMD-10", "DEV-CFS-02"]
+        },
+        {
+          "capability": "decision-quality",
+          "status": "measured",
+          "requirement": "Keep established, partial, ambiguous, conflicting, and unsupported outcomes distinct.",
+          "probeIds": ["CFCD-02", "CFCD-03", "CFCD-05", "CFQ-DEV-001"]
+        },
+        {
+          "capability": "navigation",
+          "status": "measured",
+          "requirement": "Expose only exact source-backed definition, reference, and rename surfaces.",
+          "probeIds": ["DEV-CFS-01", "DEV-CFS-02", "DMD-08"]
+        },
+        {
+          "capability": "refusal",
+          "status": "measured",
+          "requirement": "Remain calm for cited, hypothetical, contradictory, cross-scope, and under-typed input.",
+          "probeIds": ["CA-DEV-05", "CFCD-05", "DMD-07"]
+        }
+      ]
+    },
+    {
+      "id": "linear-algebra",
+      "plannedIssue": "https://github.com/corca-ai/semath/issues/348",
+      "capabilities": [
+        {
+          "capability": "vocabulary",
+          "status": "measured",
+          "requirement": "Resolve matrix, vector, transpose, product, state, covariance, and Hessian terminology.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03"]
+        },
+        {
+          "capability": "typing",
+          "status": "measured",
+          "requirement": "Retain ordered operand roles, compatible extents, and matrix quantity distinctions.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "CFQ-DEV-004"]
+        },
+        {
+          "capability": "relation-recognition",
+          "status": "measured",
+          "requirement": "Recognize matrix-vector, matrix-matrix, transpose, and normal-equation relations.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-matmul-02", "linear-algebra-development-transpose-03", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "equivalent-forms",
+          "status": "measured",
+          "requirement": "Preserve order-sensitive products and transpose structure across reviewed derivations.",
+          "probeIds": ["linear-algebra-development-transpose-03", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "conditions",
+          "status": "measured",
+          "requirement": "Ground dimension compatibility, rank, symmetry, and definiteness guards.",
+          "probeIds": ["control-systems-development-02", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "document-attachment",
+          "status": "measured",
+          "requirement": "Attach prose shape and role evidence to the intended matrix occurrence and equation.",
+          "probeIds": ["linear-algebra-development-matvec-01", "linear-algebra-development-transpose-03", "control-systems-development-01"]
+        },
+        {
+          "capability": "project-lifecycle",
+          "status": "commissioned-gap",
+          "requirement": "Add a reviewed multi-file matrix declaration, shadowing, mutation, and retraction scenario.",
+          "probeIds": [],
+          "plannedIssue": "https://github.com/corca-ai/semath/issues/348"
+        },
+        {
+          "capability": "decision-quality",
+          "status": "measured",
+          "requirement": "Distinguish compatible products from reverse-order, covariance, Hessian, and role collisions.",
+          "probeIds": ["linear-algebra-development-matmul-02", "CFQ-DEV-004", "OPTML-DEV-008"]
+        },
+        {
+          "capability": "navigation",
+          "status": "commissioned-gap",
+          "requirement": "Add exact matrix or vector definition, reference, prepare-rename, and rename surfaces without helper-name or sibling-scope leakage.",
+          "probeIds": [],
+          "plannedIssue": "https://github.com/corca-ai/semath/issues/348"
+        },
+        {
+          "capability": "refusal",
+          "status": "measured",
+          "requirement": "Refuse incompatible shapes, reversed noncommutative products, and unsupported matrix roles.",
+          "probeIds": ["linear-algebra-development-matmul-02", "CFQ-DEV-004", "OPTML-DEV-008"]
+        }
+      ]
+    },
+    {
+      "id": "differential-equations",
+      "plannedIssue": "https://github.com/corca-ai/semath/issues/349",
+      "capabilities": [
+        {
+          "capability": "vocabulary",
+          "status": "measured",
+          "requirement": "Resolve derivative, state, field, flux, wave, diffusion, and boundary terminology.",
+          "probeIds": ["control-systems-development-01", "EM-DEV-007", "CFCD-06"]
+        },
+        {
+          "capability": "typing",
+          "status": "measured",
+          "requirement": "Retain dependent variables, independent variables, operators, coefficients, and field shapes.",
+          "probeIds": ["CA-DEV-04", "control-systems-development-01", "EM-DEV-007"]
+        },
+        {
+          "capability": "relation-recognition",
+          "status": "measured",
+          "requirement": "Recognize derivative evolution, diffusion, wave, and differential field relations.",
+          "probeIds": ["control-systems-development-01", "EM-DEV-006", "EM-DEV-007", "CFCD-06"]
+        },
+        {
+          "capability": "equivalent-forms",
+          "status": "measured",
+          "requirement": "Preserve prime, Leibniz, partial-derivative, and operator forms without conflating variables.",
+          "probeIds": ["CA-DEV-01", "CA-DEV-04"]
+        },
+        {
+          "capability": "conditions",
+          "status": "measured",
+          "requirement": "Ground domains, constant-coefficient assumptions, signs, and validity regimes.",
+          "probeIds": ["CA-DEV-03", "EM-DEV-003", "EM-DEV-007"]
+        },
+        {
+          "capability": "document-attachment",
+          "status": "measured",
+          "requirement": "Attach model declarations, equation references, and limitations to the correct evolution equation.",
+          "probeIds": ["CA-DEV-03", "EM-DEV-007", "DEV-CFS-03"]
+        },
+        {
+          "capability": "project-lifecycle",
+          "status": "measured",
+          "requirement": "Respect later specializations, section boundaries, includes, and retraction of derivative evidence.",
+          "probeIds": ["CA-DEV-10", "EM-DEV-010", "DEV-CFS-02"]
+        },
+        {
+          "capability": "decision-quality",
+          "status": "measured",
+          "requirement": "Keep stated models, alternatives, sign conflicts, and denied applicability distinct.",
+          "probeIds": ["CFCD-02", "CFCD-06", "EM-DEV-006", "EM-DEV-008"]
+        },
+        {
+          "capability": "navigation",
+          "status": "measured",
+          "requirement": "Navigate only exact derivative and field identities after their declarations become visible.",
+          "probeIds": ["CA-DEV-10-established-specialization", "DEV-CFS-01"]
+        },
+        {
+          "capability": "refusal",
+          "status": "measured",
+          "requirement": "Refuse missing conditions, wrong signs, cited models, and equations denied for the local system.",
+          "probeIds": ["CA-DEV-05", "EM-DEV-006", "EM-DEV-008"]
+        }
+      ]
+    },
+    {
+      "id": "probability-statistics",
+      "plannedIssue": "https://github.com/corca-ai/semath/issues/350",
+      "capabilities": [
+        {
+          "capability": "vocabulary",
+          "status": "measured",
+          "requirement": "Resolve events, intersection, union, conditioning, expectation, variance, density, and covariance terminology.",
+          "probeIds": ["probability-development-release-overlap", "probability-development-retry-conditional", "probability-development-metric-name-collision", "CFQ-DEV-002"]
+        },
+        {
+          "capability": "typing",
+          "status": "measured",
+          "requirement": "Distinguish events, probabilities, random variables, moments, densities, matrices, and scalar parameters.",
+          "probeIds": ["probability-development-retry-conditional", "probability-development-metric-name-collision", "CFQ-DEV-005"]
+        },
+        {
+          "capability": "relation-recognition",
+          "status": "measured",
+          "requirement": "Recognize event algebra, conditional probability, expectation, variance, and likelihood-related relations.",
+          "probeIds": ["probability-development-release-overlap-accepted-union", "probability-development-retry-conditional", "probability-development-metric-name-collision-established-expectation-linearity", "OPTML-DEV-004"]
+        },
+        {
+          "capability": "equivalent-forms",
+          "status": "measured",
+          "requirement": "Preserve reviewed event and moment transformations with their exact conditions.",
+          "probeIds": ["probability-development-metric-name-collision-accepted-variance-scaling", "probability-development-metric-name-collision-established-expectation-linearity"]
+        },
+        {
+          "capability": "conditions",
+          "status": "measured",
+          "requirement": "Ground positive denominators, support, normalization, integrability, and distribution assumptions.",
+          "probeIds": ["probability-development-retry-conditional", "OPTML-DEV-004", "CFQ-DEV-005"]
+        },
+        {
+          "capability": "document-attachment",
+          "status": "measured",
+          "requirement": "Attach statistical definitions, metric explanations, and limitations to exact symbols and formulas.",
+          "probeIds": ["probability-development-retry-conditional", "OPTML-DEV-004", "CFQ-DEV-002"]
+        },
+        {
+          "capability": "project-lifecycle",
+          "status": "commissioned-gap",
+          "requirement": "Add a reviewed multi-file distribution or estimator declaration with mutation and deterministic retraction.",
+          "probeIds": [],
+          "plannedIssue": "https://github.com/corca-ai/semath/issues/350"
+        },
+        {
+          "capability": "decision-quality",
+          "status": "measured",
+          "requirement": "Distinguish established event operations from overloaded metric names, unsupported distributions, and source conflicts.",
+          "probeIds": ["probability-development-release-overlap", "probability-development-metric-name-collision", "CFQ-DEV-002"]
+        },
+        {
+          "capability": "navigation",
+          "status": "measured",
+          "requirement": "Navigate and rename only explicitly declared event and random-variable identities.",
+          "probeIds": ["probability-development-metric-name-collision-accepted-variance-scaling", "probability-development-retry-conditional-event-intersection-given"]
+        },
+        {
+          "capability": "refusal",
+          "status": "measured",
+          "requirement": "Refuse zero-denominator conditioning, distribution guesses, metric-name collisions, and cross-scope evidence.",
+          "probeIds": ["probability-development-release-overlap", "probability-development-metric-name-collision", "CFQ-DEV-002"]
+        }
+      ]
+    },
+    {
+      "id": "numerical-analysis",
+      "plannedIssue": "https://github.com/corca-ai/semath/issues/351",
+      "capabilities": [
+        {
+          "capability": "vocabulary",
+          "status": "measured",
+          "requirement": "Resolve iterate, gradient, residual, tolerance, approximation, least-squares, and implementation terminology.",
+          "probeIds": ["CA-DEV-07", "OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "typing",
+          "status": "measured",
+          "requirement": "Retain iterate, operator, matrix, vector, scalar-step, residual, and tolerance roles and shapes.",
+          "probeIds": ["linear-algebra-development-matvec-01", "OPTML-DEV-001", "OPTML-DEV-003"]
+        },
+        {
+          "capability": "relation-recognition",
+          "status": "measured",
+          "requirement": "Recognize updates, stopping relations, normal equations, matrix kernels, and approximate derivative context.",
+          "probeIds": ["linear-algebra-development-matvec-01", "OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "equivalent-forms",
+          "status": "measured",
+          "requirement": "Preserve reviewed rearrangements and transpose products without converting approximation into equality.",
+          "probeIds": ["FM-DEV-004", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "conditions",
+          "status": "measured",
+          "requirement": "Ground positive step, tolerance, rank, differentiability, and interior-solution requirements.",
+          "probeIds": ["OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-005", "OPTML-DEV-006"]
+        },
+        {
+          "capability": "document-attachment",
+          "status": "measured",
+          "requirement": "Attach algorithm descriptions, stopping criteria, and approximation caveats to the intended computation.",
+          "probeIds": ["CA-DEV-07", "OPTML-DEV-001", "OPTML-DEV-003"]
+        },
+        {
+          "capability": "project-lifecycle",
+          "status": "measured",
+          "requirement": "Respect cursor boundaries and later evidence when an implementation or theorem draft is completed.",
+          "probeIds": ["OPTML-DEV-010", "CA-DEV-10"]
+        },
+        {
+          "capability": "decision-quality",
+          "status": "measured",
+          "requirement": "Separate supported updates and stopping rules from wrong roles, missing provenance, and unsupported convergence claims.",
+          "probeIds": ["OPTML-DEV-008", "OPTML-DEV-009", "CFQ-DEV-006"]
+        },
+        {
+          "capability": "navigation",
+          "status": "measured",
+          "requirement": "Navigate exact iterates, variables, and declared operator occurrences without helper-name collisions.",
+          "probeIds": ["OPTML-DEV-010-established-stationarity", "CA-DEV-10-established-specialization"]
+        },
+        {
+          "capability": "refusal",
+          "status": "measured",
+          "requirement": "Refuse wrong gradient roles, missing rank or tolerance evidence, and unsupported stability or convergence conclusions.",
+          "probeIds": ["OPTML-DEV-008", "OPTML-DEV-009", "CFQ-DEV-006"]
+        }
+      ]
+    }
+  ]
+}

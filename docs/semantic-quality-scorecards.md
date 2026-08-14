@@ -130,6 +130,14 @@ rejects any false establishment, false conflict, navigation or identity risk,
 fewer than 50 passing probes, or risk above 130. Tighten this dated baseline
 when coverage improves; do not weaken it to admit a regression.
 
+The [practical STEM breadth benchmark](stem-breadth-benchmark.md) projects that
+same reviewed public-development evidence into five program fields and ten
+capabilities. Its first-loss scoring keeps vocabulary, typing, recognition,
+equivalence, conditions, attachment, lifecycle, decision, navigation, and
+refusal visible separately. Commissioned empty cells remain gaps until their
+linked field issue adds independently reviewed evidence; a strong aggregate or
+an unrelated probe cannot fill them.
+
 The 2026-08-13 v0.28 pre-blind evaluation passes 50 of 115 editable development
 probes (risk 130, no false establishment, false conflict, or navigation risk).
 The immutable semantic-continuity report is 22 of 48 with raw risk 202; fifteen

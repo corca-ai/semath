@@ -46,6 +46,8 @@ artifacts.
   smallest authoritative test layer for each capability.
 - [Semantic quality scorecards](semantic-quality-scorecards.md) — interpret and
   change calibration, refusal, corpus, parity, and performance budgets.
+- [Practical STEM breadth benchmark](stem-breadth-benchmark.md) — interpret the
+  reviewed field-by-capability development matrix and its commissioned gaps.
 - Inspect the dated cursor, identity, navigation, and lifecycle fixture review in
   the [v0.28 development-contract adjudication](v028-development-adjudication.md).
 - [Performance gates](performance.md) — reproduce full-path latency, memory,

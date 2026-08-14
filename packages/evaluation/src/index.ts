@@ -24,3 +24,4 @@ export * from "./runner";
 export * from "./scorecard";
 export * from "./semantic-safety";
 export * from "./synthetic";
+export * from "./stem-breadth";
