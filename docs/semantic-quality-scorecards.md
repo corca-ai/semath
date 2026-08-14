@@ -358,8 +358,8 @@ pull-request latency. A same-machine development run after compaction took
 881.04 seconds and reached 3,981,983,744 bytes of peak resident memory. It
 reproduced the baseline's four existing precision/refusal failures exactly;
 compaction changed neither inputs nor observations. After the v0.27 semantic
-refinements, the final manual run passes all thresholds for all 7,806 cases and
-all 651 metamorphic observations: every one of the 83 evaluated laws has 100%
+refinements, the final manual run passes all thresholds for all 9,066 cases and
+all 777 metamorphic observations: every one of the 97 evaluated laws has 100%
 recall, precision, role accuracy, evidence integrity, and refusal preservation.
 These local measurements are diagnostic evidence, not the stable x86_64 release
 budget measurement.

@@ -160,62 +160,62 @@
         {
           "capability": "vocabulary",
           "status": "measured",
-          "requirement": "Resolve derivative, state, field, flux, wave, diffusion, and boundary terminology.",
-          "probeIds": ["control-systems-development-01", "EM-DEV-007", "CFCD-06"]
+          "requirement": "Resolve ODE state, PDE field, operator, initial-data, boundary-data, wave, diffusion, and flux terminology.",
+          "probeIds": ["control-systems-development-01", "EM-DEV-007", "CFCD-06", "differential-equations-development-linear-system", "differential-equations-development-diffusion", "differential-equations-development-dirichlet"]
         },
         {
           "capability": "typing",
           "status": "measured",
-          "requirement": "Retain dependent variables, independent variables, operators, coefficients, and field shapes.",
-          "probeIds": ["CA-DEV-04", "control-systems-development-01", "EM-DEV-007"]
+          "requirement": "Retain dependent and independent variables, operators, coefficients, state/field shapes, and scoped problem data.",
+          "probeIds": ["CA-DEV-04", "control-systems-development-01", "EM-DEV-007", "differential-equations-development-linear-system", "differential-equations-development-diffusion"]
         },
         {
           "capability": "relation-recognition",
           "status": "measured",
-          "requirement": "Recognize derivative evolution, diffusion, wave, and differential field relations.",
-          "probeIds": ["control-systems-development-01", "EM-DEV-006", "EM-DEV-007", "CFCD-06"]
+          "requirement": "Recognize ODE evolution, initial values, diffusion, boundary conditions, wave, and differential field relations.",
+          "probeIds": ["control-systems-development-01", "EM-DEV-006", "EM-DEV-007", "CFCD-06", "differential-equations-development-linear-system", "differential-equations-development-initial-value", "differential-equations-development-diffusion", "differential-equations-development-dirichlet", "differential-equations-development-neumann", "differential-equations-development-wave-reuse"]
         },
         {
           "capability": "equivalent-forms",
           "status": "measured",
-          "requirement": "Preserve prime, Leibniz, partial-derivative, and operator forms without conflating variables.",
-          "probeIds": ["CA-DEV-01", "CA-DEV-04"]
+          "requirement": "Preserve prime, Leibniz, partial-derivative, Laplacian, and operator forms without conflating variables or model roles.",
+          "probeIds": ["CA-DEV-01", "CA-DEV-04", "differential-equations-development-diffusion"]
         },
         {
           "capability": "conditions",
           "status": "measured",
-          "requirement": "Ground domains, constant-coefficient assumptions, signs, and validity regimes.",
-          "probeIds": ["CA-DEV-03", "EM-DEV-003", "EM-DEV-007"]
+          "requirement": "Ground domains, regularity, operator assumptions, initial/boundary scope, signs, and validity regimes.",
+          "probeIds": ["CA-DEV-03", "EM-DEV-003", "EM-DEV-007", "differential-equations-development-initial-value", "differential-equations-development-dirichlet", "differential-equations-development-neumann"]
         },
         {
           "capability": "document-attachment",
           "status": "measured",
-          "requirement": "Attach model declarations, equation references, and limitations to the correct evolution equation.",
-          "probeIds": ["CA-DEV-03", "EM-DEV-007", "DEV-CFS-03"]
+          "requirement": "Attach model, initial-value, boundary-value, equation-reference, and limitation prose to the correct relation.",
+          "probeIds": ["CA-DEV-03", "EM-DEV-007", "DEV-CFS-03", "differential-equations-development-linear-system", "differential-equations-development-diffusion", "differential-equations-development-dirichlet"]
         },
         {
           "capability": "project-lifecycle",
           "status": "measured",
-          "requirement": "Respect later specializations, section boundaries, includes, and retraction of derivative evidence.",
-          "probeIds": ["CA-DEV-10", "EM-DEV-010", "DEV-CFS-02"]
+          "requirement": "Respect later specializations, section boundaries, includes, and retraction of model-role evidence.",
+          "probeIds": ["CA-DEV-10", "EM-DEV-010", "DEV-CFS-02", "differential-equations-development-declaration-retraction"]
         },
         {
           "capability": "decision-quality",
           "status": "measured",
-          "requirement": "Keep stated models, alternatives, sign conflicts, and denied applicability distinct.",
-          "probeIds": ["CFCD-02", "CFCD-06", "EM-DEV-006", "EM-DEV-008"]
+          "requirement": "Keep established, partial, unsupported, alternative, and sign-conflicting model interpretations distinct.",
+          "probeIds": ["CFCD-02", "CFCD-06", "EM-DEV-006", "EM-DEV-008", "differential-equations-development-diffusion", "differential-equations-development-declaration-retraction"]
         },
         {
           "capability": "navigation",
           "status": "measured",
-          "requirement": "Navigate only exact derivative and field identities after their declarations become visible.",
-          "probeIds": ["CA-DEV-10-established-specialization", "DEV-CFS-01"]
+          "requirement": "Navigate only exact derivative, field, state, and boundary-data identities after their declarations become visible.",
+          "probeIds": ["CA-DEV-10-established-specialization", "DEV-CFS-01", "differential-equations-development-dirichlet"]
         },
         {
           "capability": "refusal",
           "status": "measured",
-          "requirement": "Refuse missing conditions, wrong signs, cited models, and equations denied for the local system.",
-          "probeIds": ["CA-DEV-05", "EM-DEV-006", "EM-DEV-008"]
+          "requirement": "Refuse missing model roles or conditions, wrong operators/signs, cited-only models, and equations denied locally.",
+          "probeIds": ["CA-DEV-05", "EM-DEV-006", "EM-DEV-008", "differential-equations-development-declaration-retraction"]
         }
       ]
     },

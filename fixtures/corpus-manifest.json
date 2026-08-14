@@ -11,6 +11,8 @@
     "discrete-diversity",
     "discrete-math-clusters",
     "discrete-probe",
+    "differential-equations-foundation-diversity",
+    "differential-equations-foundation-probe",
     "electromagnetism",
     "engineering-cross-field",
     "fluid-mechanics",
@@ -243,7 +245,8 @@
         "concept-vocabulary": {
           "maturity": "evaluated",
           "suiteIds": [
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-diversity"
           ]
         },
         "declarations-roles": {
@@ -251,7 +254,9 @@
           "suiteIds": [
             "calculus-probe",
             "calculus-diversity",
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-probe",
+            "differential-equations-foundation-diversity"
           ]
         },
         "shape-quantity-unit": {
@@ -259,7 +264,9 @@
           "suiteIds": [
             "calculus-probe",
             "calculus-diversity",
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-probe",
+            "differential-equations-foundation-diversity"
           ]
         },
         "law-recognition": {
@@ -267,7 +274,9 @@
           "suiteIds": [
             "calculus-probe",
             "calculus-diversity",
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-probe",
+            "differential-equations-foundation-diversity"
           ]
         },
         "diagnostics-refusal": {
@@ -275,21 +284,25 @@
           "suiteIds": [
             "calculus-probe",
             "calculus-diversity",
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-probe",
+            "differential-equations-foundation-diversity"
           ]
         },
         "project-macro": {
           "maturity": "evaluated",
           "suiteIds": [
             "calculus-diversity",
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-diversity"
           ]
         },
         "navigation-explanation": {
           "maturity": "evaluated",
           "suiteIds": [
             "calculus-diversity",
-            "calculus-analysis-clusters"
+            "calculus-analysis-clusters",
+            "differential-equations-foundation-diversity"
           ]
         }
       }
@@ -1666,6 +1679,58 @@
       "kind": "law",
       "packId": "probability",
       "path": "corpus/probability-union-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 6,
+          "syntaxStructure": 8,
+          "proseFamily": 16,
+          "projectTopology": 5,
+          "mutationFamily": 8
+        },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "differential-equations-foundation-probe",
+      "kind": "law",
+      "packId": "calculus-analysis",
+      "path": "corpus/differential-equations-foundation-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": [
+        "notation",
+        "roles",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 3,
+          "syntaxStructure": 2,
+          "proseFamily": 2,
+          "projectTopology": 1,
+          "mutationFamily": 3
+        },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "differential-equations-foundation-diversity",
+      "kind": "law",
+      "packId": "calculus-analysis",
+      "path": "corpus/differential-equations-foundation-diversity.json",
       "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,

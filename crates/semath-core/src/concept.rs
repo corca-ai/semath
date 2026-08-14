@@ -264,6 +264,22 @@ mod tests {
     #[test]
     fn classifies_pack_quantities_through_the_shared_concept_vocabulary() {
         assert_eq!(
+            classify_role("pde field function").as_deref(),
+            Some("calculus-analysis:pde-field")
+        );
+        assert_eq!(
+            classify_role("diffusivity scalar").as_deref(),
+            Some("fluid-mechanics:diffusivity")
+        );
+        assert_eq!(
+            classify_role("conservation flux vector").as_deref(),
+            Some("calculus-analysis:conservation-flux")
+        );
+        assert_eq!(
+            classify_role("eigenvalue scalar").as_deref(),
+            Some("linear-algebra:eigenvalue")
+        );
+        assert_eq!(
             classify_role("moving at speed").as_deref(),
             Some("quantities-units:velocity")
         );

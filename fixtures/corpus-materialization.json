@@ -72,6 +72,20 @@
       "sha256": "e80f9bad30a318d8532e7f58dc45d2a4fe1621250c03ad69976c24a1446dbadf"
     },
     {
+      "bytes": 1585952,
+      "cases": 1120,
+      "id": "differential-equations-foundation-diversity",
+      "path": "corpus/differential-equations-foundation-diversity.json",
+      "sha256": "2a86838b74768abcb568f198291128be065eab2ddf721d9e77d5cac31f376bad"
+    },
+    {
+      "bytes": 135193,
+      "cases": 140,
+      "id": "differential-equations-foundation-probe",
+      "path": "corpus/differential-equations-foundation-probe.json",
+      "sha256": "4bc82b16d1cfca557eaa18edf116b6610da7e5dc06bb0f8a73949e0384346879"
+    },
+    {
       "bytes": 886267,
       "cases": 720,
       "id": "electromagnetism",
@@ -212,6 +226,6 @@
       "sha256": "39d1369854f686e9847ff9cbad922da6d96f38177dfe977ad5e21002c3a1ec80"
     }
   ],
-  "totalBytes": 9434431,
-  "totalCases": 7386
+  "totalBytes": 11155576,
+  "totalCases": 8646
 }

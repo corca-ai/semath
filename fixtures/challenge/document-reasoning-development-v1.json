@@ -113,12 +113,13 @@
       "review": {
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
-          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial.",
+          "Added reviewed ODE, PDE, initial-data, boundary-data, and cross-field wave contexts with a declaration-removal lifecycle."
         ],
         "criticId": "math-development-review",
         "finalDigest": "16cdbe09c632feff3b96233e75eabb6ef713e582a1224067db114e645f096126",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
+        "reviewedAt": "2026-08-15",
         "semanticReviewDigest": "16cdbe09c632feff3b96233e75eabb6ef713e582a1224067db114e645f096126",
         "status": "corrected"
       },
@@ -144,25 +145,41 @@
       "genre": "Research methods",
       "id": "CA-DEV-04",
       "lawIds": [
-        "calculus-analysis:first-derivative-relation"
+        "calculus-analysis:first-derivative-relation",
+        "calculus-analysis:first-order-ode-model",
+        "calculus-analysis:second-order-ode-model",
+        "calculus-analysis:linear-first-order-ode",
+        "calculus-analysis:linear-ode-system",
+        "calculus-analysis:poisson-equation",
+        "calculus-analysis:laplace-equation",
+        "calculus-analysis:conservation-form-equation",
+        "calculus-analysis:initial-value-condition",
+        "calculus-analysis:diffusion-equation",
+        "calculus-analysis:dirichlet-boundary-condition",
+        "calculus-analysis:neumann-boundary-condition",
+        "calculus-analysis:robin-boundary-condition",
+        "calculus-analysis:interface-continuity-condition",
+        "calculus-analysis:differential-operator-eigenproblem",
+        "electromagnetism:scalar-wave-equation"
       ],
       "provenance": {
         "authorId": "calculus-analysis-development",
         "engineBlind": true,
         "independenceGroup": "calculus-analysis-development",
-        "rawDigest": "c9bf5cc3bf814c7c4cc0bbca7977d7d94ebe92d9916344e912196174c12d02ad",
+        "rawDigest": "ccb8819db4e0fdfcf49423b2977dc59a1792186b0d337ec29bc9a58228ab14ea",
         "taskCardDigest": "21197bea3a99cbf15a34121de1428c68f5f23662020ccd72053ebfbe2efa3b78"
       },
       "review": {
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
-          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
+          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial.",
+          "Added reviewed ODE, PDE, initial-data, boundary-data, and cross-field wave contexts with a declaration-removal lifecycle."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "e4acca77d6fc3a35ae8e54cd0f5e92c96252373ec2d8fb3af8936b5d88e796bb",
+        "finalDigest": "95665d2993828fd10c19e81c3f9966c38e62192c52e93527d90764525fb493c7",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "e4acca77d6fc3a35ae8e54cd0f5e92c96252373ec2d8fb3af8936b5d88e796bb",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "95665d2993828fd10c19e81c3f9966c38e62192c52e93527d90764525fb493c7",
         "status": "corrected"
       },
       "snapshots": [
@@ -172,14 +189,39 @@
               "content": "For each fixed calibration parameter $\\alpha\\in A$, we treat $y_\\alpha(x):=Y(x,\\alpha)$ as a differentiable function of $x\\in(0,T)$.  Our prime notation is reserved for that one-variable slice, and $\\frac{d y_\\alpha}{dx}(x)$ denotes evaluation of its Leibniz derivative at $x$:\n\\[\n y_\\alpha'(x):=\\frac{d y_\\alpha}{dx}(x)=\\frac{\\partial Y}{\\partial x}(x,\\alpha).\n\\]\nParameter sensitivity is reported separately as $\\partial Y/\\partial\\alpha$ and is never denoted by $y_\\alpha'$.  All time integrals use $s$ as the dummy variable, for example $\\int_0^x Y(s,\\alpha)\\,ds$.\n",
               "fileId": "methods.tex",
               "path": "methods.tex"
+            },
+            {
+              "content": "The reduced flight model uses $x$ for the ODE state function, $t$ for the evolution variable, $A$ for the linear evolution operator, and $b$ for the forcing term. The reviewed law context states linear ode system for $\\frac{d x}{d t}=Ax+b$. The initial state is recorded separately: $t_0$ denotes the initial time and $x_0$ denotes the initial state value. The reviewed law context states initial value condition for $x(t_0)=x_0$. These two statements define the simulation problem rather than a numerical time-stepping rule.\n",
+              "fileId": "methods/ode-model.tex",
+              "path": "methods/ode-model.tex"
+            },
+            {
+              "content": "For the thermal layer, $u$ denotes the temperature PDE field function, $t$ the evolution variable, and $\\kappa$ the measured diffusivity scalar. The reviewed law context states diffusion equation for $\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u$. On the cooled wall, $x_b$ denotes the boundary location and $g$ the prescribed boundary data. The reviewed law context states dirichlet boundary condition for $u(x_b)=g$. On the insulated wall, $h$ denotes homogeneous boundary data. The reviewed law context states neumann boundary condition for $\\operatorname{normalDerivative}(u,x_b)=h$. The implementation later sets $h=0$; the wall conditions are part of the model and are not inferred from the PDE alone.\n",
+              "fileId": "methods/thermal-model.tex",
+              "path": "methods/thermal-model.tex"
+            },
+            {
+              "content": "The same appendix reuses the propagation law already defined by electromagnetism for one homogeneous medium. Let $\\psi$ denote the scalar wave field, $t$ a duration scalar, and $c$ the wave speed scalar. The reviewed law context states scalar wave equation for $\\frac{\\partial^2\\psi}{\\partial t^2}=c^2\\nabla^2\\psi$. No calculus-local duplicate of that law is introduced.\n",
+              "fileId": "methods/wave-model.tex",
+              "path": "methods/wave-model.tex"
             }
           ],
           "id": "current"
+        },
+        {
+          "documents": [
+            {
+              "content": "The type and domain declarations were removed during revision. The draft still displays $\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u$, but it no longer identifies $u$, $t$, or $\\kappa$ as members of a diffusion model.\n",
+              "fileId": "methods/thermal-model.tex",
+              "path": "methods/thermal-model.tex"
+            }
+          ],
+          "id": "declarations-removed"
         }
       ],
       "variationTags": [
         "`y'(x)=dy/dx` for each fixed parameter value.",
-        "Methods prose; indexed function; total versus partial derivative; explicit variable disambiguation; integral as surrounding structure."
+        "Methods prose; indexed function; total versus partial derivative; explicit variable disambiguation; ODE/PDE roles, boundary data, cross-field reuse, and declaration removal."
       ]
     },
     {
@@ -187,24 +229,39 @@
       "genre": "Limitations note",
       "id": "CA-DEV-05",
       "lawIds": [
-        "calculus-analysis:first-derivative-relation"
+        "calculus-analysis:first-derivative-relation",
+        "calculus-analysis:first-order-ode-model",
+        "calculus-analysis:second-order-ode-model",
+        "calculus-analysis:linear-first-order-ode",
+        "calculus-analysis:linear-ode-system",
+        "calculus-analysis:diffusion-equation",
+        "calculus-analysis:poisson-equation",
+        "calculus-analysis:laplace-equation",
+        "calculus-analysis:conservation-form-equation",
+        "calculus-analysis:initial-value-condition",
+        "calculus-analysis:dirichlet-boundary-condition",
+        "calculus-analysis:neumann-boundary-condition",
+        "calculus-analysis:robin-boundary-condition",
+        "calculus-analysis:interface-continuity-condition",
+        "calculus-analysis:differential-operator-eigenproblem"
       ],
       "provenance": {
         "authorId": "calculus-analysis-development",
         "engineBlind": true,
         "independenceGroup": "calculus-analysis-development",
-        "rawDigest": "c9bf5cc3bf814c7c4cc0bbca7977d7d94ebe92d9916344e912196174c12d02ad",
+        "rawDigest": "3b5ae810aab1182430f3a55caccffb2a7b1fd73c952a006a45b912e0e7fd0070",
         "taskCardDigest": "987aeb6e4ed08fc4107096baca7e2a1f5ac5b43098936ee7222db859956f299d"
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Applied the independent critic's source or cursor correction.",
+          "Added a limitations appendix that keeps underdeclared differential-equation forms explicitly unsupported."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "67232151382c0cad6a0dd0168d616e691e182b283fceba5892870fa2440dac27",
+        "finalDigest": "0b350ee81664fb26dc07c871c3e8210370621ac159d3c031d226c5c202c78779",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "67232151382c0cad6a0dd0168d616e691e182b283fceba5892870fa2440dac27",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "0b350ee81664fb26dc07c871c3e8210370621ac159d3c031d226c5c202c78779",
         "status": "corrected"
       },
       "snapshots": [
@@ -214,6 +271,11 @@
               "content": "Consider $y(x)=|x|$ near the origin.  Although the report template asks for both $y'(0)$ and $dy/dx(0)$, neither expression has a value here because\n\\[\n\\lim_{h\\downarrow0}\\frac{y(h)-y(0)}h=1,\n\\qquad\n\\lim_{h\\uparrow0}\\frac{y(h)-y(0)}h=-1.\n\\]\nConsequently neither derivative notation is defined at zero, and the candidate equality $y'(0)=dy/dx(0)$ is not asserted.  Away from zero the usual notations are available, but that fact does not repair the missing derivative at the reported point.\n",
               "fileId": "limitations.md",
               "path": "limitations.md"
+            },
+            {
+              "content": "A reviewer supplied the bare patterns $dy/dt=f$, $d^2y/dt^2=f$, $dy/dt+ay=b$, $dx/dt=Ax+b$, $\\partial_tu=\\kappa\\nabla^2u$, $\\nabla^2u=f$, $\\nabla^2u=0$, $\\partial_tu+\\operatorname{div}(F)=0$, $y(t_0)=y_0$, $u(x_b)=g$, $\\operatorname{normalDerivative}(u,x_b)=g$, $n+\\alpha u=g$, $u_L=u_R$, and $L(u)=\\lambda u$. The draft does not declare the symbols, model domain, initial or boundary scope, interface, or operator assumptions. These strings are examples awaiting author clarification; none is adopted as a verified model in this limitations note.\n",
+              "fileId": "differential-equation-limitations.md",
+              "path": "differential-equation-limitations.md"
             }
           ],
           "id": "current"
@@ -14637,6 +14699,283 @@
       "id": "linear-algebra-development-project-retraction",
       "kind": "supplemental",
       "scenarioId": "linear-algebra-development-matvec-01"
+    },
+    {
+      "cursor": {
+        "offset": 15,
+        "fileId": "methods/ode-model.tex",
+        "needle": "\\frac{d x}{d t}=Ax+b",
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [
+          {
+            "anchor": { "fileId": "methods/ode-model.tex", "needle": "\\frac{d x}{d t}=Ax+b" },
+            "relationId": "calculus-analysis:linear-ode-system",
+            "roles": [
+              { "role": "state", "symbol": "x" },
+              { "role": "variable", "symbol": "t" },
+              { "role": "operator", "symbol": "A" },
+              { "role": "source", "symbol": "b" }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "differential-equations-development-linear-system",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": {
+        "offset": 6,
+        "fileId": "methods/ode-model.tex",
+        "needle": "x(t_0)=x_0",
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [
+          {
+            "anchor": { "fileId": "methods/ode-model.tex", "needle": "x(t_0)=x_0" },
+            "relationId": "calculus-analysis:initial-value-condition",
+            "roles": [
+              { "role": "state", "symbol": "x" },
+              { "role": "initial-time", "symbol": "t_0" },
+              { "role": "initial-value", "symbol": "x_0" }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "differential-equations-development-initial-value",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": {
+        "offset": 29,
+        "fileId": "methods/thermal-model.tex",
+        "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u",
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [
+          {
+            "anchor": { "fileId": "methods/thermal-model.tex", "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u" },
+            "relationId": "calculus-analysis:diffusion-equation",
+            "roles": [
+              { "role": "field", "symbol": "u" },
+              { "role": "variable", "symbol": "t" },
+              { "role": "diffusivity", "symbol": "kappa" }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "differential-equations-development-diffusion",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": {
+        "offset": 6,
+        "fileId": "methods/thermal-model.tex",
+        "needle": "u(x_b)=g",
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [
+              {
+                "fileId": "methods/thermal-model.tex",
+                "needle": "$u$ denotes",
+                "selection": { "length": 1, "offset": 1 }
+              }
+            ],
+            "status": "available"
+          },
+          "prepareRename": {
+            "placeholder": "u",
+            "range": {
+              "fileId": "methods/thermal-model.tex",
+              "needle": "u(x_b)=g",
+              "selection": { "length": 1, "offset": 0 }
+            },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 2,
+            "required": [
+              {
+                "fileId": "methods/thermal-model.tex",
+                "needle": "$u$ denotes",
+                "selection": { "length": 1, "offset": 1 }
+              },
+              {
+                "fileId": "methods/thermal-model.tex",
+                "needle": "u(x_b)=g",
+                "selection": { "length": 1, "offset": 0 }
+              }
+            ],
+            "status": "available"
+          },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [
+          {
+            "anchor": { "fileId": "methods/thermal-model.tex", "needle": "u(x_b)=g" },
+            "relationId": "calculus-analysis:dirichlet-boundary-condition",
+            "roles": [
+              { "role": "field", "symbol": "u" },
+              { "role": "boundary", "symbol": "x_b" },
+              { "role": "value", "symbol": "g" }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "differential-equations-development-dirichlet",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": {
+        "offset": 38,
+        "fileId": "methods/thermal-model.tex",
+        "needle": "\\operatorname{normalDerivative}(u,x_b)=h",
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [
+          {
+            "anchor": { "fileId": "methods/thermal-model.tex", "needle": "\\operatorname{normalDerivative}(u,x_b)=h" },
+            "relationId": "calculus-analysis:neumann-boundary-condition",
+            "roles": [
+              { "role": "field", "symbol": "u" },
+              { "role": "boundary", "symbol": "x_b" },
+              { "role": "value", "symbol": "h" }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "differential-equations-development-neumann",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": {
+        "offset": 35,
+        "fileId": "methods/wave-model.tex",
+        "needle": "\\frac{\\partial^2\\psi}{\\partial t^2}=c^2\\nabla^2\\psi",
+        "snapshotId": "current"
+      },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [
+          {
+            "anchor": { "fileId": "methods/wave-model.tex", "needle": "\\frac{\\partial^2\\psi}{\\partial t^2}=c^2\\nabla^2\\psi" },
+            "relationId": "electromagnetism:scalar-wave-equation",
+            "roles": [
+              { "role": "field", "symbol": "psi" },
+              { "role": "speed", "symbol": "c" },
+              { "role": "time", "symbol": "t" }
+            ],
+            "sourceGrounded": true
+          }
+        ]
+      },
+      "family": "scope-comparison",
+      "id": "differential-equations-development-wave-reuse",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": {
+        "edge": "after",
+        "fileId": "methods/thermal-model.tex",
+        "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u",
+        "snapshotId": "declarations-removed"
+      },
+      "expected": {
+        "decision": "unsupported",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": ["calculus-analysis:diffusion-equation"],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": []
+      },
+      "family": "edit-lifecycle",
+      "id": "differential-equations-development-declaration-retraction",
+      "kind": "supplemental",
+      "scenarioId": "CA-DEV-04"
     }
   ]
 }

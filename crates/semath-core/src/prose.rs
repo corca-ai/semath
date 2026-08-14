@@ -2795,6 +2795,9 @@ fn collect_ordered_clause_definition(
     }
     let last_end = index.byte_for_utf16(regions.last().unwrap().region.full_range.end_offset);
     let suffix = source[last_end..sentence_end].trim();
+    let ordered_marker = ["respectively", "in that order"]
+        .iter()
+        .any(|marker| suffix.to_ascii_lowercase().contains(marker));
     let suffix = suffix
         .trim_end_matches(|character: char| character.is_whitespace() || character == '.')
         .trim_end_matches("respectively")
@@ -2824,6 +2827,19 @@ fn collect_ordered_clause_definition(
             sentence_start,
             sentence_end,
         );
+        if ordered_marker && classify_role(description).is_some() {
+            push_semantic_role_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                description,
+                "english-clause-ordered-role-definition",
+                sentence_start,
+                sentence_end,
+            );
+        }
     }
 }
 
@@ -3915,6 +3931,42 @@ mod tests {
         assert_eq!(
             analysis.shapes[5].evidence.rule_id,
             "english-relational-definition"
+        );
+    }
+
+    #[test]
+    fn links_ordered_differential_equation_role_declarations() {
+        let analysis = analyze(
+            "Let $u$, $t$, and $\\kappa$ denote pde field function, variable, and diffusivity scalar, respectively.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| {
+                (
+                    definition.symbol.as_str(),
+                    classify_role(&definition.description),
+                )
+            })
+            .collect::<Vec<_>>();
+        assert!(
+            definitions.contains(&("u", Some("calculus-analysis:pde-field".into()))),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.contains(&("t", Some("calculus-analysis:variable".into()))),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.contains(&("kappa", Some("fluid-mechanics:diffusivity".into()))),
+            "{definitions:?}"
+        );
+        assert!(
+            analysis.shapes.iter().any(|claim| {
+                claim.symbol == "kappa" && matches!(claim.shape, ProseShape::Scalar)
+            }),
+            "{:?}",
+            analysis.shapes
         );
     }
 
