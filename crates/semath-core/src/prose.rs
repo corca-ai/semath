@@ -12,7 +12,8 @@ use crate::concept::classify_role;
 use crate::construction::{
     coordinated_descriptions, coordination_lead, defines_by_formula, fronted_labeled_descriptions,
     fronted_shared_description, is_declaration_lead, match_apposition, match_definition,
-    match_parenthetical, match_passive_definition, match_quantified, role_first_nominal_candidates,
+    match_parenthetical, match_passive_definition, match_quantified,
+    multiline_role_first_nominal_candidates, role_first_nominal_candidates,
 };
 use crate::pack::{PackActivationStructure, PackConditionKind, built_in_packs};
 use crate::parser::ParsedMath;
@@ -81,6 +82,7 @@ pub(crate) fn definition_available_from(definition: &DefinitionInfo) -> u32 {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
+    pub semantic_role_definitions: Vec<DefinitionInfo>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
     pub shapes: Vec<ProseShapeClaim>,
     pub assumptions: Vec<AssumptionInfo>,
@@ -621,6 +623,7 @@ pub(crate) fn observe_prose(
         &mut analysis,
     );
     deduplicate(&mut analysis);
+    attach_formula_occurrence_roles(parsed, canonical_expressions, &mut analysis);
     analysis
 }
 
@@ -662,7 +665,12 @@ fn collect_role_first_nominal_definitions(
             else {
                 continue;
             };
-            let candidates = role_first_nominal_candidates(&source[span_start..span_end]);
+            let span = &source[span_start..span_end];
+            let mut candidates = role_first_nominal_candidates(span);
+            let multiline_fallback = candidates.is_empty() && span.contains(['\n', '\r']);
+            if multiline_fallback {
+                candidates = multiline_role_first_nominal_candidates(span);
+            }
             let Some(base) = candidates.last() else {
                 continue;
             };
@@ -689,6 +697,7 @@ fn collect_role_first_nominal_definitions(
             {
                 continue;
             }
+            let mut semantic_only = false;
             let selected = if let Some(role) = classify_role(base.description) {
                 candidates
                     .iter()
@@ -704,23 +713,47 @@ fn collect_role_first_nominal_definitions(
                             .is_some_and(|(candidate, _)| candidate == shape)
                     })
                     .unwrap_or(base)
+            } else if let Some(candidate) = candidates.iter().find(|candidate| {
+                classify_role(candidate.description).is_some()
+                    || shape_claim(candidate.description).is_some()
+            }) {
+                semantic_only = true;
+                candidate
             } else {
                 continue;
             };
+            semantic_only |= clip_before_nested_nominal_role(base.description) != base.description;
+            if multiline_fallback && !semantic_only {
+                continue;
+            }
             let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
                 continue;
             };
-            push_claim(
-                output,
-                document,
-                index,
-                &symbol,
-                &symbol_range,
-                selected.description,
-                "english-role-first-nominal-definition",
-                span_start + selected.relative_start,
-                mention.end,
-            );
+            if semantic_only {
+                push_semantic_role_claim(
+                    output,
+                    document,
+                    index,
+                    &symbol,
+                    &symbol_range,
+                    selected.description,
+                    "english-nested-role-first-nominal-definition",
+                    span_start + selected.relative_start,
+                    mention.end,
+                );
+            } else {
+                push_claim(
+                    output,
+                    document,
+                    index,
+                    &symbol,
+                    &symbol_range,
+                    selected.description,
+                    "english-role-first-nominal-definition",
+                    span_start + selected.relative_start,
+                    mention.end,
+                );
+            }
         }
     }
 }
@@ -1210,12 +1243,14 @@ fn collect_equation_flow_definitions(
         let window = &source[*prose_start..*prose_end];
         let action = events.last_definition_action(*prose_start, *prose_end);
         let description = equation_flow_description(window)
+            .map(|description| (description, false))
             .or_else(|| precedes_formula.then(|| equation_flow_nominal_description(window))?)
             .or_else(|| {
                 precedes_formula.then_some(())?;
                 action_equation_flow_description(source, *prose_start, *prose_end, action?)
+                    .map(|description| (description, false))
             });
-        let Some(description) = description else {
+        let Some((description, semantic_only)) = description else {
             continue;
         };
         let description_start = description.as_ptr() as usize - source.as_ptr() as usize;
@@ -1285,17 +1320,31 @@ fn collect_equation_flow_definitions(
             resolved_mentions.insert(*mention_index);
             continue;
         }
-        push_claim(
-            output,
-            document,
-            index,
-            &symbol,
-            &symbol_range,
-            &description,
-            "english-equation-flow-definition",
-            candidate.evidence_start,
-            candidate.evidence_end,
-        );
+        if semantic_only {
+            push_semantic_role_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                &description,
+                "english-equation-flow-head-role",
+                candidate.evidence_start,
+                candidate.evidence_end,
+            );
+        } else {
+            push_claim(
+                output,
+                document,
+                index,
+                &symbol,
+                &symbol_range,
+                &description,
+                "english-equation-flow-definition",
+                candidate.evidence_start,
+                candidate.evidence_end,
+            );
+        }
         resolved_mentions.insert(*mention_index);
     }
 }
@@ -1483,7 +1532,7 @@ fn strip_trailing_flow_copula(mut value: &str) -> &str {
     value.trim()
 }
 
-fn equation_flow_nominal_description(value: &str) -> Option<&str> {
+fn equation_flow_nominal_description(value: &str) -> Option<(&str, bool)> {
     let trimmed = trim_terminal_punctuation(value);
     let without_copula = strip_trailing_flow_copula(trimmed);
     let lower = trimmed.to_ascii_lowercase();
@@ -1491,11 +1540,22 @@ fn equation_flow_nominal_description(value: &str) -> Option<&str> {
         || [" has ", " have ", " had "]
             .iter()
             .any(|marker| format!(" {lower} ").contains(marker));
-    has_introductory_relation
-        .then(|| role_first_nominal_candidates(without_copula))?
-        .into_iter()
-        .find(|candidate| valid_flow_description(candidate.description))
-        .map(|candidate| candidate.description)
+    has_introductory_relation.then_some(())?;
+    let candidates = role_first_nominal_candidates(without_copula);
+    let description = candidates
+        .iter()
+        .find(|candidate| valid_flow_description(candidate.description))?
+        .description;
+    if classify_role(description).is_none()
+        && let Some(head) = description.split_whitespace().next_back()
+        && let Some(head_start) = description.rfind(head)
+        && classify_role(description[..head_start].trim())
+            .is_none_or(|role| !role.starts_with("quantities-units:"))
+        && classify_role(head).is_some_and(|role| role.starts_with("quantities-units:"))
+    {
+        return Some((head, true));
+    }
+    Some((description, false))
 }
 
 fn equation_flow_description(text: &str) -> Option<&str> {
@@ -2468,19 +2528,66 @@ fn collect_clause_definitions(
             let Some(description) = description else {
                 continue;
             };
+            let clipped = clip_before_nested_nominal_role(description);
             push_claim(
                 output,
                 document,
                 index,
                 &symbol,
                 &symbol_range,
-                description,
+                clipped,
                 "english-clause-definition",
                 sentence_start,
                 next,
             );
+            if clipped != description {
+                push_semantic_role_claim(
+                    output,
+                    document,
+                    index,
+                    &symbol,
+                    &symbol_range,
+                    clipped,
+                    "english-clause-nested-role-definition",
+                    sentence_start,
+                    next,
+                );
+            }
         }
     }
+}
+
+fn clip_before_nested_nominal_role(description: &str) -> &str {
+    multiline_role_first_nominal_candidates(description)
+        .into_iter()
+        .filter(|candidate| candidate.relative_start > 0)
+        .find_map(|candidate| {
+            let prefix = trim_trailing_relation_word(
+                description[..candidate.relative_start]
+                    .trim_end()
+                    .trim_end_matches([',', ':', ';'])
+                    .trim_end(),
+            );
+            let distinct_roles = classify_role(prefix)
+                .zip(classify_role(candidate.description))
+                .is_some_and(|(prefix, nested)| prefix != nested);
+            let distinct_shapes = shape_claim(prefix)
+                .zip(shape_claim(candidate.description))
+                .is_some_and(|((prefix, _), (nested, _))| prefix != nested);
+            (distinct_roles || distinct_shapes).then_some(prefix)
+        })
+        .unwrap_or(description)
+}
+
+fn trim_trailing_relation_word(value: &str) -> &str {
+    let trimmed = value.trim_end();
+    let lower = trimmed.to_ascii_lowercase();
+    for suffix in [" at", " of", " with", " as", " having"] {
+        if lower.ends_with(suffix) {
+            return trimmed[..trimmed.len() - suffix.len()].trim_end();
+        }
+    }
+    trimmed
 }
 
 fn collect_ordered_clause_definition(
@@ -3132,6 +3239,122 @@ fn push_claim(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+fn push_semantic_role_claim(
+    analysis: &mut ProseObservations,
+    document: &ProjectDocument,
+    index: &SourceIndex,
+    symbol: &str,
+    symbol_range: &SourceRange,
+    description: &str,
+    rule_id: &str,
+    evidence_start: usize,
+    evidence_end: usize,
+) {
+    analysis.semantic_role_definitions.push(DefinitionInfo {
+        symbol: symbol.into(),
+        description: description.trim().into(),
+        location: Location {
+            file_id: document.file_id.clone(),
+            path: document.path.clone(),
+            range: symbol_range.clone(),
+        },
+        evidence: Evidence {
+            rule_id: rule_id.into(),
+            kind: "attached-prose".into(),
+            strength: "strong".into(),
+            source_ranges: vec![SourceRange {
+                start_offset: index.utf16_for_byte(evidence_start),
+                end_offset: index.utf16_for_byte(evidence_end),
+            }],
+        },
+        entity_id: None,
+    });
+}
+
+fn attach_formula_occurrence_roles(
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    analysis: &mut ProseObservations,
+) {
+    let candidates = analysis
+        .semantic_role_definitions
+        .iter()
+        .filter(|definition| classify_role(&definition.description).is_some())
+        .cloned()
+        .collect::<Vec<_>>();
+    let mut attached = Vec::new();
+    for definition in candidates {
+        let evidence_end = definition
+            .evidence
+            .source_ranges
+            .iter()
+            .map(|range| range.end_offset)
+            .max()
+            .unwrap_or(definition.location.range.end_offset);
+        let target = parsed
+            .iter()
+            .zip(canonical_expressions)
+            .filter(|(math, expression)| {
+                let start = math.region.content_range.start_offset;
+                definition.location.range.start_offset <= expression.range.end_offset
+                    && start.saturating_sub(evidence_end) <= MAX_ATTACHMENT_DISTANCE_BYTES as u32
+                    && matches!(
+                        expression.kind,
+                        SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                    )
+                    && expression_contains_symbol(expression, &definition.symbol)
+            })
+            .min_by_key(|(math, _)| math.region.content_range.start_offset);
+        let Some((math, expression)) = target else {
+            continue;
+        };
+        let evidence_range = definition.evidence.source_ranges.first().cloned();
+        if evidence_range.as_ref().is_some_and(|range| {
+            !analysis
+                .semantic_evidence
+                .attachment
+                .permits(range, &math.region.content_range)
+                && range.end_offset < math.region.content_range.start_offset
+        }) {
+            continue;
+        }
+        collect_matching_symbol_ranges(expression, &definition.symbol, &mut attached, &definition);
+    }
+    attached.sort_by_key(|definition| definition.location.range.start_offset);
+    attached.dedup_by(|left, right| {
+        left.symbol == right.symbol
+            && left.description == right.description
+            && left.location.range == right.location.range
+    });
+    analysis.semantic_role_definitions = attached;
+}
+
+fn expression_contains_symbol(expression: &SemanticExpr, symbol: &str) -> bool {
+    expression_name(expression).as_deref() == Some(symbol)
+        || expression_children(expression)
+            .iter()
+            .any(|child| expression_contains_symbol(child, symbol))
+}
+
+fn collect_matching_symbol_ranges(
+    expression: &SemanticExpr,
+    symbol: &str,
+    output: &mut Vec<DefinitionInfo>,
+    definition: &DefinitionInfo,
+) {
+    if expression_name(expression).as_deref() == Some(symbol) {
+        let mut occurrence = definition.clone();
+        occurrence.location.range = expression.range.clone();
+        occurrence.evidence.rule_id =
+            format!("formula-occurrence-role/{}", definition.evidence.rule_id);
+        output.push(occurrence);
+    }
+    for child in expression_children(expression) {
+        collect_matching_symbol_ranges(child, symbol, output, definition);
+    }
+}
+
 fn shape_claim(description: &str) -> Option<(ProseShape, Vec<String>)> {
     let description = description
         .split_once(", and let")
@@ -3702,6 +3925,52 @@ mod tests {
             "The review says that this optical quality factor does not apply:\n\\[Q_o=\\omega_0/\\kappa.\\]",
         );
         assert!(rejected.formula_meanings.is_empty());
+    }
+
+    #[test]
+    fn composes_descriptive_operand_roles_with_a_nominal_formula_result() {
+        let source = r"For the dc supply, let $I_s$ be the conventional current delivered at terminal
+voltage $V_s$; its output power is
+\[
+P_s=V_sI_s.
+\]";
+        let analysis = analyze(source);
+        for (symbol, role) in [
+            ("I_s", "quantities-units:electric-current"),
+            ("V_s", "quantities-units:voltage"),
+            ("P_s", "quantities-units:power"),
+        ] {
+            assert!(
+                analysis.semantic_role_definitions.iter().any(|definition| {
+                    definition.symbol == symbol
+                        && classify_role(&definition.description).as_deref() == Some(role)
+                }),
+                "missing {symbol} as {role}: {:#?}",
+                analysis.semantic_role_definitions
+            );
+        }
+    }
+
+    #[test]
+    fn compound_roles_do_not_collapse_to_a_conflicting_formula_head() {
+        let source = r"\subsection{Electrostatic convention}
+Let \(q_*\) denote the signed particle charge and let \(V_*\) be the electric
+potential relative to the grounded enclosure.  The particle's potential energy
+in this convention is
+\[
+  U_*=q_*V_*.
+\]
+\subsection{Digitizer convention}
+For the acquisition appendix only, \(U_*\) is reassigned to the digitizer's
+reported voltage and \(V_*\) denotes its unscaled integer sample.  These local
+names are used in the conversion \(U_*=gV_*\), where \(g\) is the volts-per-count
+gain.";
+        let analysis = analyze(source);
+        assert!(
+            analysis.semantic_role_definitions.is_empty(),
+            "unexpected occurrence roles: {:#?}",
+            analysis.semantic_role_definitions
+        );
     }
 
     #[test]

@@ -115,7 +115,13 @@ impl DocumentSemanticObservations {
         let prose_match_stats = prose.match_stats;
         let shapes = observe_shapes(document, parsed, canonical_expressions, &prose.shapes);
         let quantities = observe_quantities(document, parsed, &prose.definitions);
-        let roles = observe_roles(document, &prose.definitions, &shapes);
+        let role_definitions = prose
+            .definitions
+            .iter()
+            .chain(&prose.semantic_role_definitions)
+            .cloned()
+            .collect::<Vec<_>>();
+        let roles = observe_roles(document, &role_definitions, &shapes);
         // Project analysis always supplies the source-ordered external type
         // environment immediately after base observations are built. Running
         // every compiled law here would duplicate the dominant analysis pass.
