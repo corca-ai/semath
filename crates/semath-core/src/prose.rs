@@ -689,13 +689,24 @@ fn collect_role_first_nominal_definitions(
             {
                 continue;
             }
-            let Some(role) = classify_role(base.description) else {
+            let selected = if let Some(role) = classify_role(base.description) {
+                candidates
+                    .iter()
+                    .find(|candidate| {
+                        classify_role(candidate.description).as_deref() == Some(&role)
+                    })
+                    .unwrap_or(base)
+            } else if let Some((shape, _)) = shape_claim(base.description) {
+                candidates
+                    .iter()
+                    .find(|candidate| {
+                        shape_claim(candidate.description)
+                            .is_some_and(|(candidate, _)| candidate == shape)
+                    })
+                    .unwrap_or(base)
+            } else {
                 continue;
             };
-            let selected = candidates
-                .iter()
-                .find(|candidate| classify_role(candidate.description).as_deref() == Some(&role))
-                .unwrap_or(base);
             let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
                 continue;
             };
@@ -813,6 +824,7 @@ fn collect_anaphoric_definitions(
             continue;
         }
 
+        let text = description_clause.text.trim();
         let mut antecedents = candidate
             .mention_indices
             .iter()
@@ -824,6 +836,18 @@ fn collect_anaphoric_definitions(
             primary_symbol(document, &parsed[mention.math_index])
                 .is_some_and(|(symbol, _)| seen_symbols.insert(symbol))
         });
+        if antecedents.len() > 1 && text.to_ascii_lowercase().starts_with("this vector field") {
+            antecedents.retain(|mention| {
+                primary_symbol(document, &parsed[mention.math_index]).is_some_and(|(symbol, _)| {
+                    output.shapes.iter().any(|claim| {
+                        claim.symbol == symbol
+                            && claim.available_from
+                                <= index.utf16_for_byte(description_clause.start)
+                            && matches!(claim.shape, ProseShape::Vector(_))
+                    })
+                })
+            });
+        }
         if antecedents.is_empty() || antecedents.len() > 8 {
             continue;
         }
@@ -843,7 +867,6 @@ fn collect_anaphoric_definitions(
             continue;
         }
 
-        let text = description_clause.text.trim();
         let has_former = events.has_anaphor_kind(*description_index, AnaphorKind::Former);
         let has_latter = events.has_anaphor_kind(*description_index, AnaphorKind::Latter);
         if has_former || has_latter {
@@ -944,7 +967,12 @@ fn anaphoric_description_body(text: &str, arity: usize) -> Option<&str> {
     let trimmed = text.trim();
     let lower = trimmed.to_ascii_lowercase();
     let leads: &[&str] = if arity == 1 {
-        &["this quantity", "this symbol", "this variable"]
+        &[
+            "this quantity",
+            "this symbol",
+            "this variable",
+            "this vector field",
+        ]
     } else {
         &[
             "they",
@@ -3538,6 +3566,31 @@ mod tests {
             definition.symbol == "r" && definition.description == "residual norm"
         }));
 
+        let characterized =
+            analyze("Let $g$ be a vector field. This vector field is the gradient of $f$.");
+        assert!(characterized.definitions.iter().any(|definition| {
+            definition.symbol == "g"
+                && definition.description == "gradient of $f$"
+                && definition.evidence.rule_id == "english-anaphoric-definition"
+        }));
+
+        let characterized_after_equation = analyze(
+            "For every $x$ there is a unique vector $g(x)$ such that $Df(x)[v]=g(x)\\cdot v$ for all $v$. This vector field is the gradient of $f$.",
+        );
+        assert!(
+            characterized_after_equation
+                .definitions
+                .iter()
+                .any(|definition| {
+                    definition.symbol == "g"
+                        && definition.description == "gradient of $f$"
+                        && definition.evidence.rule_id == "english-anaphoric-definition"
+                }),
+            "definitions={:?}; shapes={:?}",
+            characterized_after_equation.definitions,
+            characterized_after_equation.shapes
+        );
+
         let semicolon = analyze(
             "Let $x$ and $u$ be introduced. The former is the state vector; the latter is the control input.",
         );
@@ -3591,6 +3644,13 @@ mod tests {
             analyze("We compare $u$ and $v$. The former might denote input and the latter output.");
         assert!(!hedged.definitions.iter().any(|definition| {
             definition.evidence.rule_id == "english-former-latter-definition"
+        }));
+
+        let ambiguous_vector =
+            analyze("Let $g$ and $h$ be vector fields. This vector field is the gradient of $f$.");
+        assert!(!ambiguous_vector.definitions.iter().any(|definition| {
+            definition.evidence.rule_id == "english-anaphoric-definition"
+                && definition.description == "gradient of $f$"
         }));
     }
 
@@ -4038,21 +4098,26 @@ mod tests {
 
     #[test]
     fn marks_explicitly_withdrawn_inline_formulas_as_negative_evidence() {
-        let source = "The review no longer publishes the preliminary estimate $Q=Av$.";
-        let analysis = analyze(source);
-        let formula = test_math_regions(source, DocumentLanguage::Latex)
-            .into_iter()
-            .next()
-            .unwrap();
-        assert_eq!(
-            analysis
-                .semantic_evidence
-                .formula_disposition(&formula.content_range),
-            (
-                crate::semantic_index::EvidencePolarity::Negative,
-                crate::semantic_index::EvidenceModality::Asserted,
-            )
-        );
+        for source in [
+            "The review no longer publishes the preliminary estimate $Q=Av$.",
+            "At this stage we do not assume $g=\\nabla f$.",
+        ] {
+            let analysis = analyze(source);
+            let formula = test_math_regions(source, DocumentLanguage::Latex)
+                .into_iter()
+                .next()
+                .unwrap();
+            assert_eq!(
+                analysis
+                    .semantic_evidence
+                    .formula_disposition(&formula.content_range),
+                (
+                    crate::semantic_index::EvidencePolarity::Negative,
+                    crate::semantic_index::EvidenceModality::Asserted,
+                ),
+                "{source}"
+            );
+        }
     }
 
     #[test]

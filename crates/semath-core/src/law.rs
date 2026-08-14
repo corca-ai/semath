@@ -905,6 +905,7 @@ pub(crate) fn observe_laws(
                         context.shapes,
                         context.quantities,
                         context.consistency,
+                        context.assumptions,
                         context.external,
                     )?;
                     let typed = expression_is_well_typed(actual, context.shapes);
@@ -2211,6 +2212,7 @@ fn plan_role_support(
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> Option<RoleSupportPlan> {
     let mut supported = 0;
@@ -2248,6 +2250,7 @@ fn plan_role_support(
             actual,
             offset,
             consistency,
+            assumptions,
             external,
         );
         if output_support.is_proven() {
@@ -2260,7 +2263,14 @@ fn plan_role_support(
             supported_roles.insert(role.id.as_str(), RoleBindingProof::DerivedFromTypes);
             continue;
         }
-        match structural_operator_role_support(role, expression, offset, consistency, external) {
+        match structural_operator_role_support(
+            role,
+            expression,
+            offset,
+            consistency,
+            assumptions,
+            external,
+        ) {
             RoleSupport::Typed | RoleSupport::Derived => {
                 supported += 1;
                 supported_roles.insert(role.id.as_str(), RoleBindingProof::DerivedFromTypes);
@@ -2294,6 +2304,7 @@ fn plan_role_support(
                 shapes,
                 quantities,
                 consistency,
+                assumptions,
                 external,
             ));
         }
@@ -2393,6 +2404,18 @@ impl RoleSupportPlan {
     }
 }
 
+fn has_differentiable_function_evidence(assumptions: &[AssumptionInfo], symbol: &str) -> bool {
+    assumptions
+        .iter()
+        .any(|assumption| is_differentiable_function_evidence(assumption, symbol))
+}
+
+fn is_differentiable_function_evidence(assumption: &AssumptionInfo, symbol: &str) -> bool {
+    assumption.kind == "regularity"
+        && assumption.value == "differentiable"
+        && assumption.subjects.iter().any(|subject| subject == symbol)
+}
+
 fn role_binding_evidence_ranges(
     expression: &SemanticExpr,
     proof: RoleBindingProof,
@@ -2420,6 +2443,7 @@ fn role_source_evidence_ranges(
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> Vec<SourceRange> {
     let mut ranges = Vec::new();
@@ -2432,6 +2456,14 @@ fn role_source_evidence_ranges(
                 .filter(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
                 .flat_map(|claim| claim.evidence.source_ranges),
         );
+        if concepts_share_lineage("semath:function", &role.concept) {
+            ranges.extend(
+                assumptions
+                    .iter()
+                    .filter(|assumption| is_differentiable_function_evidence(assumption, &symbol))
+                    .flat_map(|assumption| assumption.evidence.source_ranges.iter().cloned()),
+            );
+        }
         ranges.extend(
             external
                 .roles_at(offset, &symbol)
@@ -2550,6 +2582,7 @@ fn structural_operator_role_support(
     expression: &SemanticExpr,
     offset: u32,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     if matches!(expression.kind, SemanticExprKind::Derivative { .. })
@@ -2580,6 +2613,7 @@ fn structural_operator_role_support(
                     concept,
                     offset,
                     consistency,
+                    assumptions,
                     external,
                 ))
             },
@@ -2602,6 +2636,7 @@ fn relation_operator_output_role_support(
     relation: &SemanticExpr,
     offset: u32,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     let SemanticExprKind::Relation {
@@ -2622,7 +2657,14 @@ fn relation_operator_output_role_support(
         (false, true) => left.as_ref(),
         _ => return RoleSupport::Unresolved,
     };
-    structural_operator_role_support(role, operator_expression, offset, consistency, external)
+    structural_operator_role_support(
+        role,
+        operator_expression,
+        offset,
+        consistency,
+        assumptions,
+        external,
+    )
 }
 
 fn expression_constraints_refuted(
@@ -2658,6 +2700,7 @@ fn expression_concept_support(
     expected: &str,
     offset: u32,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     let symbols = semantic_leaf_symbols(expression);
@@ -2676,9 +2719,11 @@ fn expression_concept_support(
             found |= concepts_share_lineage(&role.concept_id, expected);
             conflicting |= roles_conflict(expected, &role.concept_id);
         }
+        let asserted_function = concepts_share_lineage("semath:function", expected)
+            && has_differentiable_function_evidence(assumptions, symbol);
         support.and(if conflicting {
             RoleSupport::Refuted
-        } else if found {
+        } else if found || asserted_function {
             RoleSupport::Typed
         } else {
             RoleSupport::Unresolved
@@ -2814,6 +2859,7 @@ fn role_symbol_support(
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
     let notation_symbol = symbol;
@@ -2940,7 +2986,11 @@ fn role_symbol_support(
         } else {
             RoleSupport::Unresolved
         }
-    } else if has_exact_role || external.has_role(offset, symbol, &role.concept) {
+    } else if has_exact_role
+        || external.has_role(offset, symbol, &role.concept)
+        || (concepts_share_lineage("semath:function", &role.concept)
+            && has_differentiable_function_evidence(assumptions, symbol))
+    {
         RoleSupport::Typed
     } else if activated_notation_support {
         notation_support()
@@ -3039,6 +3089,7 @@ fn recognition(
                         context.shapes,
                         context.quantities,
                         context.consistency,
+                        context.assumptions,
                         context.external,
                     )
                 }
@@ -3155,6 +3206,7 @@ fn recognition(
                 context.quantities,
                 context.consistency,
                 context.assumptions,
+                role_support,
                 context.external,
                 context.positive_facts,
             );
@@ -3393,6 +3445,7 @@ fn condition_evidence(
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
     assumptions: &[AssumptionInfo],
+    role_support: &RoleSupportPlan,
     external: &ExternalTypeEnvironment,
     positive_facts: &[PositiveFormulaFact],
 ) -> (Vec<Evidence>, bool) {
@@ -3423,15 +3476,8 @@ fn condition_evidence(
     if let Some(condition_evidence) = &semantic_condition {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
-    let structural_condition = structural_condition_evidence(
-        condition,
-        roles,
-        bindings,
-        actual,
-        offset,
-        consistency,
-        external,
-    );
+    let structural_condition =
+        structural_condition_evidence(condition, roles, bindings, actual, role_support);
     if let Some(condition_evidence) = &structural_condition {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
@@ -3522,19 +3568,14 @@ fn structural_condition_evidence(
     roles: &[PackLawRole],
     bindings: &BTreeMap<String, SemanticExpr>,
     actual: &SemanticExpr,
-    offset: u32,
-    consistency: &RoleObservations,
-    external: &ExternalTypeEnvironment,
+    role_support: &RoleSupportPlan,
 ) -> Option<Evidence> {
     if condition.kind == PackConditionKind::DomainMembership
         && condition.subjects.iter().all(|subject| {
-            let Some(role) = roles.iter().find(|role| role.id == *subject) else {
-                return false;
-            };
-            bindings.get(subject).is_some_and(|expression| {
-                structural_operator_role_support(role, expression, offset, consistency, external)
-                    .is_proven()
-            })
+            matches!(
+                role_support.proof_for(subject),
+                RoleBindingProof::Typed | RoleBindingProof::DerivedFromTypes
+            )
         })
     {
         return Some(Evidence {
@@ -6459,6 +6500,32 @@ The normal equation is $A^\top A\theta=A^\top b$.",
                 "{rejected}"
             );
         }
+    }
+
+    #[test]
+    fn characterized_operator_assignment_proves_its_domain_condition() {
+        let source = r#"\begin{lemma}
+Let $U\subset\mathbb R^n$ be open and $f:U\to\mathbb R$ differentiable. For every $x\in U$ there is a unique vector $g(x)$ such that
+\[
+  Df(x)[v]=g(x)\cdot v\qquad\text{for all }v\in\mathbb R^n.
+\]
+This vector field is the gradient of $f$; hence, after the characterization above, we set $g:=\nabla f$ on $U$.
+\end{lemma}"#;
+        let recognized = recognized_law_observations(source);
+        let gradient = recognized
+            .iter()
+            .find(|law| law.law_id == "gradient-relation")
+            .expect("gradient relation");
+
+        assert_eq!(
+            gradient.status,
+            LawRecognitionStatus::Verified,
+            "{:?}",
+            gradient.bindings
+        );
+        assert!(gradient.conditions.iter().all(|condition| {
+            condition.status == ConstraintStatus::Verified && !condition.evidence.is_empty()
+        }));
     }
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {
