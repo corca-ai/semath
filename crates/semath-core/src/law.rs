@@ -1766,6 +1766,38 @@ fn unify_exact_all(
             placeholders,
             bindings,
         ),
+        (
+            SemanticExprKind::Binder {
+                operator: left_operator,
+                variables: left_variables,
+                lower: left_lower,
+                upper: left_upper,
+                body: left_body,
+            },
+            SemanticExprKind::Binder {
+                operator: right_operator,
+                variables: right_variables,
+                lower: right_lower,
+                upper: right_upper,
+                body: right_body,
+            },
+        ) if left_operator == right_operator
+            && left_variables.len() == right_variables.len()
+            && left_lower.is_some() == right_lower.is_some()
+            && left_upper.is_some() == right_upper.is_some() =>
+        {
+            let left = left_variables
+                .iter()
+                .chain(left_lower.iter().map(Box::as_ref))
+                .chain(left_upper.iter().map(Box::as_ref))
+                .chain(std::iter::once(left_body.as_ref()));
+            let right = right_variables
+                .iter()
+                .chain(right_lower.iter().map(Box::as_ref))
+                .chain(right_upper.iter().map(Box::as_ref))
+                .chain(std::iter::once(right_body.as_ref()));
+            unify_sequence(left, right, placeholders, bindings)
+        }
         (SemanticExprKind::Unknown(left), SemanticExprKind::Unknown(right)) if left == right => {
             vec![bindings.clone()]
         }
@@ -4831,6 +4863,25 @@ mod tests {
     }
 
     #[test]
+    fn bounded_integrals_bind_variables_limits_and_integrands_once() {
+        let template = lower_template("\\int_{lower}^{upper} density(variable) \\, d variable = 1");
+        let actual = lower_template("\\int_a^b f(x) \\, d x = 1");
+        let captured = lower_template("\\int_a^b f(y) \\, d x = 1");
+        let placeholders = ["density", "variable", "lower", "upper"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        let bindings = unify_all(&template, &actual, &placeholders, &BTreeMap::new());
+
+        assert_eq!(bindings.len(), 1, "{bindings:?}");
+        assert_eq!(bindings[0].len(), 4);
+        assert!(
+            unify_all(&template, &captured, &placeholders, &BTreeMap::new()).is_empty(),
+            "a bound variable must agree with its integrand occurrence"
+        );
+    }
+
+    #[test]
     fn generated_notation_projects_its_authored_macro_call() {
         let expression = SemanticExpr {
             kind: SemanticExprKind::Symbol("DeltaT".into()),
@@ -6232,6 +6283,22 @@ This conversion is performed once per accepted timing sample so the accumulator 
             (
                 "Let $L$, $u$, and $\\lambda$ denote evolution operator, pde field function, and eigenvalue scalar, respectively. The reviewed law context states differential operator eigenproblem for $L(u)=\\lambda u$",
                 "differential-operator-eigenproblem",
+            ),
+            (
+                "Let $f$, $x$, $a$, and $b$ denote density function, variable, integration bound, and integration bound, respectively. The reviewed law context states density normalization for $\\int_a^b f(x)\\,dx=1$",
+                "density-normalization",
+            ),
+            (
+                "Let $c$, $X$, and $Y$ denote covariance scalar, random variable, and random variable, respectively. The reviewed law context states covariance definition for $c=\\operatorname{Cov}(X,Y)$",
+                "covariance-value-definition",
+            ),
+            (
+                "Let $y$, $X$, $b$, and $e$ denote regression response, linear operator, regression parameter, and regression error, respectively. The reviewed law context states linear regression model for $y=Xb+e$",
+                "linear-regression-model",
+            ),
+            (
+                "Let $x_1$, $A$, $x_0$, and $w$ denote state, state matrix, state, and process noise, respectively. The reviewed law context states stochastic state transition for $x_1=Ax_0+w$",
+                "stochastic-state-transition",
             ),
         ] {
             assert_eq!(recognized_laws(source), [expected], "{source}");

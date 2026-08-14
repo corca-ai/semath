@@ -3775,7 +3775,24 @@
       "id": "probability-development-metric-name-collision",
       "lawIds": [
         "probability:expectation-linearity",
-        "probability:variance-scaling"
+        "probability:variance-scaling",
+        "probability:expected-value-definition",
+        "probability:variance-value-definition",
+        "probability:covariance-value-definition",
+        "probability:independent-event-factorization",
+        "probability:density-normalization",
+        "probability:mass-normalization",
+        "probability:cdf-from-density",
+        "probability:likelihood-product",
+        "probability:log-likelihood-definition",
+        "probability:sample-mean-definition",
+        "probability:sample-variance-definition",
+        "probability:standard-error-of-mean",
+        "probability:confidence-upper-bound",
+        "probability:covariance-matrix-definition",
+        "probability:linear-regression-model",
+        "probability:stochastic-state-transition",
+        "probability:process-autocovariance-definition"
       ],
       "provenance": {
         "authorId": "probability-development",
@@ -3788,13 +3805,14 @@
         "correctionSummary": [
           "Separated the false reviewed variance claim from the accepted quadratic correction.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
-          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity."
+          "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
+          "Added reviewed distribution, moment, estimator, regression, covariance, and stochastic-process contexts with an include-removal lifecycle."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "78d9fd0bc301c45aa1d15d3bb0041a451763d5647bf1fc76ed3c98c90dc4e972",
+        "finalDigest": "b68ee2155fa339f213f842d63f2e9831511c821985488766121479595e4af133",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "78d9fd0bc301c45aa1d15d3bb0041a451763d5647bf1fc76ed3c98c90dc4e972",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "b68ee2155fa339f213f842d63f2e9831511c821985488766121479595e4af133",
         "status": "corrected"
       },
       "snapshots": [
@@ -3804,14 +3822,49 @@
               "content": "The model defines \\(S=2X-3Y\\), so linearity of expectation gives\n\\[\n\\mathbb E[S]=2\\mathbb E[X]-3\\mathbb E[Y].\n\\]\nIn the implementation helper, \\(Y\\) is instead a local integer parameter and does not inherit the model variable's probabilistic meaning.\n\n### Reviewed claim\n\nThe patch proposed\n\\[\n\\operatorname{Var}(2X)=2\\operatorname{Var}(X).\n\\]\n\n### Accepted correction\n\nReview replaced the claim using quadratic variance scaling:\n\\[\n\\operatorname{Var}(2X)=4\\operatorname{Var}(X).\n\\]\nNo variance for \\(S\\) follows from its mean without covariance information.\n",
               "fileId": "metric-review.md",
               "path": "metric-review.md"
+            },
+            {
+              "content": "Let $X$ denote a random variable, $\\mu$ a distribution mean scalar, $v$ a variance scalar, and $c$ a covariance scalar. The variable has finite expectation and finite second moment. These meanings are exported only to documents that include this file.\n",
+              "fileId": "statistics/model-roles.tex",
+              "path": "statistics/model-roles.tex"
+            },
+            {
+              "content": "\\input{model-roles.tex}\nThe reviewed law context states expected value definition for $\\mu=\\mathbb E(X)$. The reviewed law context states variance definition for $v=\\operatorname{Var}(X)$. Let $Y$ denote a random variable in the same probability space as $X$; both variables have finite joint second moments. The reviewed law context states covariance definition for $c=\\operatorname{Cov}(X,Y)$.\n",
+              "fileId": "statistics/moments.tex",
+              "path": "statistics/moments.tex"
+            },
+            {
+              "content": "Let $f$, $x$, $a$, and $b$ denote density function, sample observation, integration bound, and integration bound, respectively. Let $t$ denote the integration variable and $F$ the cumulative distribution function for the same continuous distribution. The density is nonnegative on its complete support. The reviewed law context states density normalization for $\\int_a^b f(t)\\,dt=1$. The reviewed law context states cdf from density for $F(x)=\\int_a^x f(t)\\,dt$.\n",
+              "fileId": "statistics/distribution.tex",
+              "path": "statistics/distribution.tex"
+            },
+            {
+              "content": "Let $L$ denote likelihood scalar, $p$ a mass function, and $h$ a log likelihood scalar. The observations are conditionally independent and the likelihood is positive. The reviewed law context states independent sample likelihood for $L=\\prod_i p_i$. The reviewed law context states log likelihood definition for $h=\\log(L)$. Let $m$, $n$, and $z$ denote sample mean scalar, sample size scalar, and sample observation, respectively. The sample size is positive. The reviewed law context states sample mean definition for $m=\\frac{1}{n}\\sum_i z_i$.\n",
+              "fileId": "statistics/estimation.tex",
+              "path": "statistics/estimation.tex"
+            },
+            {
+              "content": "Let $y$, $D$, $\\beta$, and $e$ denote regression response, linear operator, regression parameter, and regression error, respectively. The reviewed law context states linear regression model for $y=D\\beta+e$. Let $x_1$, $A$, $x_0$, and $w$ denote state, state matrix, state, and process noise, respectively; all four roles belong to one stochastic state model. The reviewed law context states stochastic state transition for $x_1=Ax_0+w$.\n",
+              "fileId": "statistics/models.tex",
+              "path": "statistics/models.tex"
             }
           ],
           "id": "current"
+        },
+        {
+          "documents": [
+            {
+              "content": "The include carrying the statistical role declarations was removed. The draft still displays $\\mu=\\mathbb E(X)$, but it no longer defines either symbol or names the relation.\n",
+              "fileId": "statistics/moments.tex",
+              "path": "statistics/moments.tex"
+            }
+          ],
+          "id": "declarations-removed"
         }
       ],
       "variationTags": [
         "Linearity of expectation and variance under scalar multiplication, with a symbol-collision and scope trap.",
-        "Negative development case covering E[aX+bY] = aE[X]+bE[Y], Var(aX) = a^2 Var(X), symbol collision, and scope control."
+        "Negative development case covering E[aX+bY] = aE[X]+bE[Y], Var(aX) = a^2 Var(X), symbol collision, scope control, distribution and estimator definitions, and project retraction."
       ]
     },
     {
@@ -14976,6 +15029,263 @@
       "id": "differential-equations-development-declaration-retraction",
       "kind": "supplemental",
       "scenarioId": "CA-DEV-04"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/moments.tex", "needle": "\\mu=\\mathbb E(X)", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "statistics/moments.tex", "needle": "\\mu=\\mathbb E(X)" },
+          "relationId": "probability:expected-value-definition",
+          "roles": [{ "role": "mean", "symbol": "mu" }, { "role": "variable", "symbol": "X" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "probability-statistics-development-expected-value",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/moments.tex", "needle": "v=\\operatorname{Var}(X)", "snapshotId": "current" },
+      "expected": {
+        "decision": "established",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": true,
+        "relations": [{
+          "anchor": { "fileId": "statistics/moments.tex", "needle": "v=\\operatorname{Var}(X)" },
+          "relationId": "probability:variance-value-definition",
+          "roles": [{ "role": "variance", "symbol": "v" }, { "role": "variable", "symbol": "X" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "probability-statistics-development-variance",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/moments.tex", "needle": "c=\\operatorname{Cov}(X,Y)", "snapshotId": "current" },
+      "expected": {
+        "decision": "established",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": true,
+        "relations": [{
+          "anchor": { "fileId": "statistics/moments.tex", "needle": "c=\\operatorname{Cov}(X,Y)" },
+          "relationId": "probability:covariance-value-definition",
+          "roles": [{ "role": "covariance", "symbol": "c" }, { "role": "left-variable", "symbol": "X" }, { "role": "right-variable", "symbol": "Y" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "probability-statistics-development-covariance",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/distribution.tex", "needle": "\\int_a^b f(t)\\,dt=1", "snapshotId": "current" },
+      "expected": {
+        "decision": "established",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": true,
+        "relations": [{
+          "anchor": { "fileId": "statistics/distribution.tex", "needle": "\\int_a^b f(t)\\,dt=1" },
+          "relationId": "probability:density-normalization",
+          "roles": [{ "role": "density", "symbol": "f" }, { "role": "variable", "symbol": "t" }, { "role": "lower", "symbol": "a" }, { "role": "upper", "symbol": "b" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "probability-statistics-development-density-normalization",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/distribution.tex", "needle": "F(x)=\\int_a^x f(t)\\,dt", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": {
+            "placeholder": "t",
+            "range": { "fileId": "statistics/distribution.tex", "needle": "F(x)=\\int_a^x f(t)\\,dt", "selection": { "length": 1, "offset": 21 } },
+            "status": "available"
+          },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "statistics/distribution.tex", "needle": "F(x)=\\int_a^x f(t)\\,dt" },
+          "relationId": "probability:cdf-from-density",
+          "roles": [{ "role": "cdf", "symbol": "F" }, { "role": "density", "symbol": "f" }, { "role": "value", "symbol": "x" }, { "role": "variable", "symbol": "t" }, { "role": "lower", "symbol": "a" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "probability-statistics-development-cdf",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/estimation.tex", "needle": "L=\\prod_i p_i", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "statistics/estimation.tex", "needle": "L=\\prod_i p_i" },
+          "relationId": "probability:likelihood-product",
+          "roles": [{ "role": "likelihood", "symbol": "L" }, { "role": "mass", "symbol": "p" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "guarded-condition",
+      "id": "probability-statistics-development-likelihood",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/estimation.tex", "needle": "m=\\frac{1}{n}\\sum_i z_i", "snapshotId": "current" },
+      "expected": {
+        "decision": "established",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": true,
+        "relations": [{
+          "anchor": { "fileId": "statistics/estimation.tex", "needle": "m=\\frac{1}{n}\\sum_i z_i" },
+          "relationId": "probability:sample-mean-definition",
+          "roles": [{ "role": "sample-mean", "symbol": "m" }, { "role": "sample-size", "symbol": "n" }, { "role": "observation", "symbol": "z" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "guarded-condition",
+      "id": "probability-statistics-development-sample-mean",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/models.tex", "needle": "y=D\\beta+e", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": {
+            "placeholder": "e",
+            "range": { "fileId": "statistics/models.tex", "needle": "y=D\\beta+e", "selection": { "length": 1, "offset": 9 } },
+            "status": "available"
+          },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "statistics/models.tex", "needle": "y=D\\beta+e" },
+          "relationId": "probability:linear-regression-model",
+          "roles": [{ "role": "response", "symbol": "y" }, { "role": "design", "symbol": "D" }, { "role": "parameter", "symbol": "beta" }, { "role": "error", "symbol": "e" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "derivation-chain",
+      "id": "probability-statistics-development-regression",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/models.tex", "needle": "x_1=Ax_0+w", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": {
+            "placeholder": "w",
+            "range": { "fileId": "statistics/models.tex", "needle": "x_1=Ax_0+w", "selection": { "length": 1, "offset": 9 } },
+            "status": "available"
+          },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "statistics/models.tex", "needle": "x_1=Ax_0+w" },
+          "relationId": "probability:stochastic-state-transition",
+          "roles": [{ "role": "next-state", "symbol": "x_1" }, { "role": "transition", "symbol": "A" }, { "role": "state", "symbol": "x_0" }, { "role": "noise", "symbol": "w" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "derivation-chain",
+      "id": "probability-statistics-development-stochastic-transition",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "statistics/moments.tex", "needle": "\\mu=\\mathbb E(X)", "snapshotId": "declarations-removed" },
+      "expected": {
+        "decision": "unsupported",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": ["probability:expected-value-definition"],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": []
+      },
+      "family": "edit-lifecycle",
+      "id": "probability-statistics-development-declaration-retraction",
+      "kind": "supplemental",
+      "scenarioId": "probability-development-metric-name-collision"
     }
   ]
 }

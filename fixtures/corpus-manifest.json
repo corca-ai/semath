@@ -28,6 +28,8 @@
     "optimization-ml-clusters",
     "optimization-probe",
     "probability-diversity",
+    "probability-statistics-foundation-diversity",
+    "probability-statistics-foundation-probe",
     "probability-statistics-depth",
     "probability-union-diversity",
     "probability-union-probe",
@@ -666,6 +668,8 @@
         "concept-vocabulary": {
           "maturity": "evaluated",
           "suiteIds": [
+            "probability-statistics-foundation-probe",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         },
@@ -676,6 +680,8 @@
             "probability-diversity",
             "probability-union-probe",
             "probability-union-diversity",
+            "probability-statistics-foundation-probe",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         },
@@ -684,6 +690,8 @@
           "suiteIds": [
             "probability-diversity",
             "probability-union-diversity",
+            "probability-statistics-foundation-probe",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         },
@@ -694,6 +702,8 @@
             "probability-diversity",
             "probability-union-probe",
             "probability-union-diversity",
+            "probability-statistics-foundation-probe",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         },
@@ -704,6 +714,8 @@
             "probability-diversity",
             "probability-union-probe",
             "probability-union-diversity",
+            "probability-statistics-foundation-probe",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         },
@@ -712,6 +724,7 @@
           "suiteIds": [
             "probability-diversity",
             "probability-union-diversity",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         },
@@ -720,6 +733,7 @@
           "suiteIds": [
             "probability-diversity",
             "probability-union-diversity",
+            "probability-statistics-foundation-diversity",
             "probability-statistics-depth"
           ]
         }
@@ -1679,6 +1693,58 @@
       "kind": "law",
       "packId": "probability",
       "path": "corpus/probability-union-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 6,
+          "syntaxStructure": 8,
+          "proseFamily": 16,
+          "projectTopology": 5,
+          "mutationFamily": 8
+        },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "probability-statistics-foundation-probe",
+      "kind": "law",
+      "packId": "probability",
+      "path": "corpus/probability-statistics-foundation-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": [
+        "notation",
+        "roles",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 3,
+          "syntaxStructure": 2,
+          "proseFamily": 2,
+          "projectTopology": 1,
+          "mutationFamily": 3
+        },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "probability-statistics-foundation-diversity",
+      "kind": "law",
+      "packId": "probability",
+      "path": "corpus/probability-statistics-foundation-diversity.json",
       "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,

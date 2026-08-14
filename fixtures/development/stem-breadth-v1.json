@@ -227,62 +227,61 @@
           "capability": "vocabulary",
           "status": "measured",
           "requirement": "Resolve events, intersection, union, conditioning, expectation, variance, density, and covariance terminology.",
-          "probeIds": ["probability-development-release-overlap", "probability-development-retry-conditional", "probability-development-metric-name-collision", "CFQ-DEV-002"]
+          "probeIds": ["probability-development-release-overlap", "probability-development-retry-conditional", "probability-development-metric-name-collision", "probability-statistics-development-expected-value", "probability-statistics-development-variance", "probability-statistics-development-covariance", "CFQ-DEV-002"]
         },
         {
           "capability": "typing",
           "status": "measured",
           "requirement": "Distinguish events, probabilities, random variables, moments, densities, matrices, and scalar parameters.",
-          "probeIds": ["probability-development-retry-conditional", "probability-development-metric-name-collision", "CFQ-DEV-005"]
+          "probeIds": ["probability-development-retry-conditional", "probability-development-metric-name-collision", "probability-statistics-development-density-normalization", "probability-statistics-development-sample-mean", "probability-statistics-development-regression", "probability-statistics-development-stochastic-transition", "CFQ-DEV-005"]
         },
         {
           "capability": "relation-recognition",
           "status": "measured",
           "requirement": "Recognize event algebra, conditional probability, expectation, variance, and likelihood-related relations.",
-          "probeIds": ["probability-development-release-overlap-accepted-union", "probability-development-retry-conditional", "probability-development-metric-name-collision-established-expectation-linearity", "OPTML-DEV-004"]
+          "probeIds": ["probability-development-release-overlap-accepted-union", "probability-development-retry-conditional", "probability-development-metric-name-collision-established-expectation-linearity", "probability-statistics-development-cdf", "probability-statistics-development-likelihood", "OPTML-DEV-004"]
         },
         {
           "capability": "equivalent-forms",
           "status": "measured",
           "requirement": "Preserve reviewed event and moment transformations with their exact conditions.",
-          "probeIds": ["probability-development-metric-name-collision-accepted-variance-scaling", "probability-development-metric-name-collision-established-expectation-linearity"]
+          "probeIds": ["probability-development-metric-name-collision-accepted-variance-scaling", "probability-development-metric-name-collision-established-expectation-linearity", "probability-statistics-development-cdf"]
         },
         {
           "capability": "conditions",
           "status": "measured",
           "requirement": "Ground positive denominators, support, normalization, integrability, and distribution assumptions.",
-          "probeIds": ["probability-development-retry-conditional", "OPTML-DEV-004", "CFQ-DEV-005"]
+          "probeIds": ["probability-development-retry-conditional", "probability-statistics-development-density-normalization", "probability-statistics-development-likelihood", "probability-statistics-development-sample-mean", "OPTML-DEV-004", "CFQ-DEV-005"]
         },
         {
           "capability": "document-attachment",
           "status": "measured",
           "requirement": "Attach statistical definitions, metric explanations, and limitations to exact symbols and formulas.",
-          "probeIds": ["probability-development-retry-conditional", "OPTML-DEV-004", "CFQ-DEV-002"]
+          "probeIds": ["probability-development-retry-conditional", "probability-statistics-development-expected-value", "probability-statistics-development-cdf", "probability-statistics-development-regression", "OPTML-DEV-004", "CFQ-DEV-002"]
         },
         {
           "capability": "project-lifecycle",
-          "status": "commissioned-gap",
-          "requirement": "Add a reviewed multi-file distribution or estimator declaration with mutation and deterministic retraction.",
-          "probeIds": [],
-          "plannedIssue": "https://github.com/corca-ai/semath/issues/350"
+          "status": "measured",
+          "requirement": "Retract statistical relations after an included role-declaration source is removed from the project.",
+          "probeIds": ["probability-statistics-development-declaration-retraction"]
         },
         {
           "capability": "decision-quality",
           "status": "measured",
           "requirement": "Distinguish established event operations from overloaded metric names, unsupported distributions, and source conflicts.",
-          "probeIds": ["probability-development-release-overlap", "probability-development-metric-name-collision", "CFQ-DEV-002"]
+          "probeIds": ["probability-development-release-overlap", "probability-development-metric-name-collision", "probability-statistics-development-variance", "probability-statistics-development-covariance", "probability-statistics-development-density-normalization", "probability-statistics-development-sample-mean", "CFQ-DEV-002"]
         },
         {
           "capability": "navigation",
           "status": "measured",
           "requirement": "Navigate and rename only explicitly declared event and random-variable identities.",
-          "probeIds": ["probability-development-metric-name-collision-accepted-variance-scaling", "probability-development-retry-conditional-event-intersection-given"]
+          "probeIds": ["probability-development-metric-name-collision-accepted-variance-scaling", "probability-development-retry-conditional-event-intersection-given", "probability-statistics-development-cdf", "probability-statistics-development-regression", "probability-statistics-development-stochastic-transition"]
         },
         {
           "capability": "refusal",
           "status": "measured",
           "requirement": "Refuse zero-denominator conditioning, distribution guesses, metric-name collisions, and cross-scope evidence.",
-          "probeIds": ["probability-development-release-overlap", "probability-development-metric-name-collision", "CFQ-DEV-002"]
+          "probeIds": ["probability-development-release-overlap", "probability-development-metric-name-collision", "probability-statistics-development-declaration-retraction", "CFQ-DEV-002"]
         }
       ]
     },

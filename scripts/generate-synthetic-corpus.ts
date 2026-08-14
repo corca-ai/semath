@@ -10,6 +10,7 @@ import {
 } from "../packages/evaluation/src/index";
 import { linearAlgebraFoundationSuite } from "../packages/evaluation/src/linear-algebra-foundation-seeds";
 import { differentialEquationsFoundationSuite } from "../packages/evaluation/src/differential-equations-foundation-seeds";
+import { probabilityStatisticsFoundationSuite } from "../packages/evaluation/src/probability-statistics-foundation-seeds";
 
 const root = new URL("../", import.meta.url);
 const evidenceStart = "% semath-recognition-evidence:start";
@@ -65,6 +66,7 @@ export async function materializeSyntheticCorpora(): Promise<Map<string, Corpus>
     ...promotionSeeds.suites,
     linearAlgebraFoundationSuite,
     differentialEquationsFoundationSuite,
+    probabilityStatisticsFoundationSuite,
   ];
   const outputs = new Map<string, Corpus>();
   for (const group of groups) {

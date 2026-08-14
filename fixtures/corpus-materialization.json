@@ -37,11 +37,11 @@
       "sha256": "d9327970b25ff1d82f2f870223f899f33e272045ca5af0c77f6713e4d2362b40"
     },
     {
-      "bytes": 425002,
+      "bytes": 424922,
       "cases": 320,
       "id": "control-engineering-depth",
       "path": "corpus/control-engineering-depth.json",
-      "sha256": "0a5e4a7762b502161d43517c48f2befe39cc60d5c425e96c089bdfd3645fc4b3"
+      "sha256": "8595fa2c1fbfe0d76bc3d407199856af63eb92a3868ecba6abac55238037bfa5"
     },
     {
       "bytes": 242033,
@@ -58,11 +58,11 @@
       "sha256": "d0c179e86db704a521a9fba24c0ce4a329fab703d7989a967dccd776742606be"
     },
     {
-      "bytes": 196466,
+      "bytes": 198466,
       "cases": 160,
       "id": "discrete-math-clusters",
       "path": "corpus/discrete-math-clusters.json",
-      "sha256": "3ff526e248d67bfca62fb3c59b3a9b6de9b5ba98a6a4fec2cff6602a0867c401"
+      "sha256": "149adc888f9cff91e394f162271608a81d0239a31a3ebc62d37d6960d906de76"
     },
     {
       "bytes": 15753,
@@ -100,11 +100,11 @@
       "sha256": "12d64693d99b20cf7fbdf529578a0799538a05b313c2f23a7f60cf379d87ab81"
     },
     {
-      "bytes": 903928,
+      "bytes": 903768,
       "cases": 720,
       "id": "fluid-mechanics",
       "path": "corpus/fluid-mechanics.json",
-      "sha256": "28ec494320487c1897aca8541b5c7f619215ed741f22f8e4ba2d696a8ecb9d22"
+      "sha256": "7cfdf27c5db33050a72e3946a3f842bcb2d6c839b3753c0de94314fd8428f837"
     },
     {
       "bytes": 25160,
@@ -170,11 +170,11 @@
       "sha256": "73b947253177417427d320343348f51445fe333bf5c086eb1509a972b1b9cf8c"
     },
     {
-      "bytes": 595963,
+      "bytes": 596043,
       "cases": 480,
       "id": "optimization-ml-clusters",
       "path": "corpus/optimization-ml-clusters.json",
-      "sha256": "47e86293854e55fb89046f9c71e9fe7be6760a1c064cb30310c5c3422d62021c"
+      "sha256": "d0539023972de2efe01c829e0ed5e5373492d0ce04384ed5bfe4124345223da0"
     },
     {
       "bytes": 9166,
@@ -191,11 +191,25 @@
       "sha256": "faf4238854a0bb1adf54f4f38522c468ea982420894130716c31ff135d32fdd1"
     },
     {
-      "bytes": 485543,
-      "cases": 400,
+      "bytes": 1911585,
+      "cases": 1360,
+      "id": "probability-statistics-foundation-diversity",
+      "path": "corpus/probability-statistics-foundation-diversity.json",
+      "sha256": "a6559f83d2c2101dfa9a48d5b93c17646139eb50d36cc1cc81ce5b0f19605603"
+    },
+    {
+      "bytes": 162404,
+      "cases": 170,
+      "id": "probability-statistics-foundation-probe",
+      "path": "corpus/probability-statistics-foundation-probe.json",
+      "sha256": "1fbb97b1ed9a8d589509e316c821ddf8db3b22c7948ce778398c5cd3ad16e484"
+    },
+    {
+      "bytes": 2194273,
+      "cases": 1760,
       "id": "probability-statistics-depth",
       "path": "corpus/probability-statistics-depth.json",
-      "sha256": "25edb087faa5ceae3434c587d20c5000ee849d023b8e20fdcbbdcfbfd174eb8b"
+      "sha256": "050281b06354a6fefcf49b4d5165f302084709dddc93b9feb56dcc601445391c"
     },
     {
       "bytes": 98423,
@@ -226,6 +240,6 @@
       "sha256": "39d1369854f686e9847ff9cbad922da6d96f38177dfe977ad5e21002c3a1ec80"
     }
   ],
-  "totalBytes": 11155576,
-  "totalCases": 8646
+  "totalBytes": 14940135,
+  "totalCases": 11536
 }

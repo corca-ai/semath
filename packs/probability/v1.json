@@ -1,11 +1,11 @@
 {
   "schemaVersion": 11,
   "packId": "probability",
-  "packVersion": "1.4.0",
+  "packVersion": "1.5.0",
   "packKind": "field",
   "namespace": "probability",
   "title": "Probability and statistics",
-  "description": "Probability formulas gated by explicit event and random-variable roles.",
+  "description": "Probability, statistics, and bounded stochastic-process formulas gated by explicit local roles and conditions.",
   "dependencies": [],
   "capabilities": {
     "provides": [
@@ -64,6 +64,363 @@
         "scalar",
         "scalar constant",
         "constant coefficient"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "distribution",
+      "conceptKind": "entity",
+      "title": "Probability distribution",
+      "description": "A probability law over a declared support.",
+      "aliases": [
+        "probability distribution",
+        "normal distribution",
+        "Gaussian distribution",
+        "Bernoulli distribution",
+        "binomial distribution",
+        "Poisson distribution"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "density-function",
+      "conceptKind": "entity",
+      "title": "Probability density function",
+      "description": "A nonnegative density on a declared continuous support.",
+      "aliases": [
+        "probability density",
+        "probability density function",
+        "density function"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "mass-function",
+      "conceptKind": "entity",
+      "title": "Probability mass function",
+      "description": "A nonnegative mass function on a declared discrete support.",
+      "aliases": [
+        "probability mass",
+        "probability mass function",
+        "mass function"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "cumulative-distribution-function",
+      "conceptKind": "entity",
+      "title": "Cumulative distribution function",
+      "description": "The cumulative probability up to a declared value.",
+      "aliases": [
+        "cumulative distribution",
+        "cumulative distribution function",
+        "cdf"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "distribution-mean",
+      "conceptKind": "quantity",
+      "title": "Distribution mean",
+      "description": "The expected value of a declared random variable.",
+      "aliases": [
+        "population mean",
+        "expected value"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "variance",
+      "conceptKind": "quantity",
+      "title": "Variance",
+      "description": "The second central moment of a declared random variable.",
+      "aliases": [
+        "variance",
+        "population variance"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "covariance",
+      "conceptKind": "quantity",
+      "title": "Covariance",
+      "description": "The joint central moment of two declared random variables.",
+      "aliases": [
+        "covariance",
+        "cross covariance"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "covariance-matrix",
+      "conceptKind": "quantity",
+      "title": "Covariance matrix",
+      "description": "A matrix collecting pairwise covariance for a random vector.",
+      "aliases": [
+        "covariance matrix",
+        "noise covariance",
+        "process covariance"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "likelihood",
+      "conceptKind": "entity",
+      "title": "Likelihood",
+      "description": "Observed-data plausibility regarded as a function of a parameter.",
+      "aliases": [
+        "likelihood",
+        "likelihood function"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "log-likelihood",
+      "conceptKind": "quantity",
+      "title": "Log-likelihood",
+      "description": "The logarithm of a positive likelihood value.",
+      "aliases": [
+        "log likelihood",
+        "log-likelihood"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "logarithm",
+      "conceptKind": "operator",
+      "title": "Likelihood logarithm",
+      "description": "The logarithm operator applied to a positive likelihood.",
+      "aliases": [
+        "likelihood logarithm",
+        "natural logarithm"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "statistical-estimator",
+      "conceptKind": "entity",
+      "title": "Statistical estimator",
+      "description": "A statistic used to estimate a declared parameter.",
+      "aliases": [
+        "statistical estimator",
+        "point estimator"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "sample-observation",
+      "conceptKind": "quantity",
+      "title": "Sample observation",
+      "description": "One measured or sampled value in a statistical dataset.",
+      "aliases": [
+        "sample observation",
+        "statistical observation"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "sample-size",
+      "conceptKind": "quantity",
+      "title": "Sample size",
+      "description": "The positive number of observations in a reviewed sample.",
+      "aliases": [
+        "sample size",
+        "number of observations"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "sample-mean",
+      "conceptKind": "quantity",
+      "title": "Sample mean",
+      "description": "The arithmetic mean of a declared sample.",
+      "aliases": [
+        "sample mean",
+        "empirical mean"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "sample-variance",
+      "conceptKind": "quantity",
+      "title": "Sample variance",
+      "description": "A reviewed squared-residual average for a sample.",
+      "aliases": [
+        "sample variance",
+        "empirical variance"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "standard-deviation",
+      "conceptKind": "quantity",
+      "title": "Standard deviation",
+      "description": "A square-root scale associated with a variance.",
+      "aliases": [
+        "standard deviation"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "standard-error",
+      "conceptKind": "quantity",
+      "title": "Standard error",
+      "description": "A sampling-uncertainty scale for an estimator.",
+      "aliases": [
+        "standard error"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "critical-value",
+      "conceptKind": "quantity",
+      "title": "Critical value",
+      "description": "A reviewed scalar multiplier for an uncertainty interval.",
+      "aliases": [
+        "critical value",
+        "quantile multiplier"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "confidence-bound",
+      "conceptKind": "quantity",
+      "title": "Confidence bound",
+      "description": "An interval endpoint under explicitly stated coverage assumptions.",
+      "aliases": [
+        "confidence bound",
+        "uncertainty bound"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "stochastic-process",
+      "conceptKind": "entity",
+      "title": "Stochastic process",
+      "description": "An indexed family of random states in a declared stochastic model.",
+      "aliases": [
+        "stochastic process",
+        "random process",
+        "time series process"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "process-noise",
+      "conceptKind": "quantity",
+      "title": "Process noise",
+      "description": "A random disturbance in a stochastic state relation.",
+      "aliases": [
+        "process noise",
+        "random disturbance"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "regression-response",
+      "conceptKind": "quantity",
+      "title": "Regression response",
+      "description": "The observed response in a declared regression model.",
+      "aliases": [
+        "regression response",
+        "response variable"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "regression-parameter",
+      "conceptKind": "quantity",
+      "title": "Regression parameter",
+      "description": "The parameter vector in a declared regression model.",
+      "aliases": [
+        "regression parameter",
+        "coefficient vector"
+      ],
+      "parents": [],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "regression-error",
+      "conceptKind": "quantity",
+      "title": "Regression error",
+      "description": "The residual random error in a declared regression model.",
+      "aliases": [
+        "regression error",
+        "error term"
       ],
       "parents": [],
       "references": [
@@ -262,6 +619,774 @@
         "probability-theory"
       ],
       "canonicalRelation": "Var(coefficient variable) = coefficient^2 Var(variable)"
+    },
+    {
+      "id": "expected-value-definition",
+      "title": "Expected-value definition",
+      "description": "A declared mean equals the expectation of an integrable random variable.",
+      "roles": [
+        {
+          "id": "mean",
+          "concept": "probability:distribution-mean",
+          "description": "Expected value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "variable",
+          "concept": "probability:random-variable",
+          "description": "Integrable random variable."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "integrable-variable",
+          "kind": "domain-membership",
+          "subjects": [
+            "variable"
+          ],
+          "label": "The random variable is integrable under the stated probability law.",
+          "evidencePhrases": [
+            "is integrable",
+            "has finite expectation"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "expected value definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "mean = E(variable)"
+    },
+    {
+      "id": "variance-value-definition",
+      "title": "Variance-value definition",
+      "description": "A declared variance equals the variance operator applied to a square-integrable random variable.",
+      "roles": [
+        {
+          "id": "variance",
+          "concept": "probability:variance",
+          "description": "Variance value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "variable",
+          "concept": "probability:random-variable",
+          "description": "Square-integrable random variable."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "finite-second-moment",
+          "kind": "domain-membership",
+          "subjects": [
+            "variable"
+          ],
+          "label": "The random variable has a finite second moment.",
+          "evidencePhrases": [
+            "has finite second moment",
+            "is square integrable"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "variance definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "variance = Var(variable)"
+    },
+    {
+      "id": "covariance-value-definition",
+      "title": "Covariance-value definition",
+      "description": "A declared covariance equals the covariance of two jointly square-integrable random variables.",
+      "roles": [
+        {
+          "id": "covariance",
+          "concept": "probability:covariance",
+          "description": "Covariance value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-variable",
+          "concept": "probability:random-variable",
+          "description": "First random variable."
+        },
+        {
+          "id": "right-variable",
+          "concept": "probability:random-variable",
+          "description": "Second random variable."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "joint-second-moment",
+          "kind": "same-context",
+          "subjects": [
+            "left-variable",
+            "right-variable"
+          ],
+          "label": "Both variables share a probability law with finite second moments.",
+          "evidencePhrases": [
+            "have finite joint second moments",
+            "are jointly square integrable"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "covariance definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "covariance = Cov(left-variable, right-variable)"
+    },
+    {
+      "id": "independent-event-factorization",
+      "title": "Independent-event factorization",
+      "description": "The probability of an intersection factors only for explicitly independent events.",
+      "roles": [
+        {
+          "id": "left",
+          "concept": "probability:event",
+          "description": "First event."
+        },
+        {
+          "id": "right",
+          "concept": "probability:event",
+          "description": "Second event."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "independent-events",
+          "kind": "assumption",
+          "subjects": [
+            "left",
+            "right"
+          ],
+          "label": "The two events are independent in the same probability space.",
+          "evidencePhrases": [
+            "are independent events",
+            "are mutually independent"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "independent event factorization"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "P(left \\cap right) = P(left) P(right)"
+    },
+    {
+      "id": "density-normalization",
+      "title": "Probability-density normalization",
+      "description": "A declared continuous density integrates to one over its support.",
+      "roles": [
+        {
+          "id": "density",
+          "concept": "probability:density-function",
+          "description": "Probability density function.",
+          "shape": "function",
+          "sourceProjection": "head"
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Integration variable."
+        },
+        {
+          "id": "lower",
+          "concept": "calculus-analysis:integration-bound",
+          "description": "Lower support bound."
+        },
+        {
+          "id": "upper",
+          "concept": "calculus-analysis:integration-bound",
+          "description": "Upper support bound."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-continuous-support",
+          "kind": "domain-membership",
+          "subjects": [
+            "density",
+            "variable",
+            "lower",
+            "upper"
+          ],
+          "label": "The density is nonnegative and the bounds are its complete support.",
+          "evidencePhrases": [
+            "is nonnegative on its complete support",
+            "has the stated continuous support"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "density normalization"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "\\int_{lower}^{upper} density(variable) \\, d variable = 1"
+    },
+    {
+      "id": "mass-normalization",
+      "title": "Probability-mass normalization",
+      "description": "A declared discrete mass function sums to one over its support.",
+      "roles": [
+        {
+          "id": "mass",
+          "concept": "probability:mass-function",
+          "description": "Indexed probability mass family.",
+          "shape": "function"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "declared-discrete-support",
+          "kind": "domain-membership",
+          "subjects": [
+            "mass"
+          ],
+          "label": "The nonnegative indexed masses cover the complete discrete support.",
+          "evidencePhrases": [
+            "covers the complete discrete support",
+            "is a normalized mass function"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "mass normalization"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "\\sum_i mass_i = 1"
+    },
+    {
+      "id": "cdf-from-density",
+      "title": "CDF from density",
+      "description": "A cumulative distribution function equals the density integral from the lower support bound.",
+      "roles": [
+        {
+          "id": "cdf",
+          "concept": "probability:cumulative-distribution-function",
+          "description": "Cumulative distribution function.",
+          "shape": "function",
+          "sourceProjection": "head"
+        },
+        {
+          "id": "density",
+          "concept": "probability:density-function",
+          "description": "Probability density function.",
+          "shape": "function",
+          "sourceProjection": "head"
+        },
+        {
+          "id": "value",
+          "concept": "probability:sample-observation",
+          "description": "Evaluation value."
+        },
+        {
+          "id": "variable",
+          "concept": "calculus-analysis:variable",
+          "description": "Integration variable."
+        },
+        {
+          "id": "lower",
+          "concept": "calculus-analysis:integration-bound",
+          "description": "Lower support bound."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "shared-distribution",
+          "kind": "same-context",
+          "subjects": [
+            "cdf",
+            "density",
+            "value"
+          ],
+          "label": "The CDF and density describe the same continuous distribution.",
+          "evidencePhrases": [
+            "belong to the same continuous distribution",
+            "describe the same distribution"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "cdf from density"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "cdf(value) = \\int_{lower}^{value} density(variable) \\, d variable"
+    },
+    {
+      "id": "likelihood-product",
+      "title": "Independent-sample likelihood product",
+      "description": "A likelihood factors into indexed observation contributions under an explicit independence assumption.",
+      "roles": [
+        {
+          "id": "likelihood",
+          "concept": "probability:likelihood",
+          "description": "Likelihood value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "mass",
+          "concept": "probability:mass-function",
+          "description": "Indexed likelihood contribution."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "independent-contributions",
+          "kind": "assumption",
+          "subjects": [
+            "likelihood",
+            "mass"
+          ],
+          "label": "The observation contributions are conditionally independent under the same parameter.",
+          "evidencePhrases": [
+            "are conditionally independent observations",
+            "factor under the shared parameter"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "independent sample likelihood"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "likelihood = \\prod_i mass_i"
+    },
+    {
+      "id": "log-likelihood-definition",
+      "title": "Log-likelihood definition",
+      "description": "The log-likelihood is the logarithm of a positive likelihood.",
+      "roles": [
+        {
+          "id": "log-likelihood",
+          "concept": "probability:log-likelihood",
+          "description": "Log-likelihood value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "likelihood",
+          "concept": "probability:likelihood",
+          "description": "Positive likelihood value.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "positive-likelihood",
+          "kind": "positive",
+          "subjects": [
+            "likelihood"
+          ],
+          "label": "The likelihood is positive on the evaluated parameter value.",
+          "evidencePhrases": [
+            "likelihood is positive",
+            "has positive likelihood"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "log likelihood definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "log-likelihood = log(likelihood)"
+    },
+    {
+      "id": "sample-mean-definition",
+      "title": "Sample-mean definition",
+      "description": "The sample mean is the indexed observation sum divided by a positive sample size.",
+      "roles": [
+        {
+          "id": "sample-mean",
+          "concept": "probability:sample-mean",
+          "description": "Sample mean.",
+          "shape": "scalar"
+        },
+        {
+          "id": "sample-size",
+          "concept": "probability:sample-size",
+          "description": "Sample size.",
+          "shape": "scalar"
+        },
+        {
+          "id": "observation",
+          "concept": "probability:sample-observation",
+          "description": "Indexed sample observations."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "positive-sample-size",
+          "kind": "positive",
+          "subjects": [
+            "sample-size"
+          ],
+          "label": "The sample size is positive and counts the indexed observations.",
+          "evidencePhrases": [
+            "sample size is positive",
+            "contains a positive number of observations"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "sample mean definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "sample-mean = \\frac{1}{sample-size} \\sum_i observation_i"
+    },
+    {
+      "id": "sample-variance-definition",
+      "title": "Sample-variance definition",
+      "description": "A reviewed sample variance averages squared centered residuals with explicit degrees of freedom.",
+      "roles": [
+        {
+          "id": "sample-variance",
+          "concept": "probability:sample-variance",
+          "description": "Sample variance.",
+          "shape": "scalar"
+        },
+        {
+          "id": "degrees-of-freedom",
+          "concept": "probability:sample-size",
+          "description": "Positive degrees-of-freedom divisor.",
+          "shape": "scalar"
+        },
+        {
+          "id": "residual",
+          "concept": "probability:sample-observation",
+          "description": "Indexed centered residual."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "positive-degrees-of-freedom",
+          "kind": "positive",
+          "subjects": [
+            "degrees-of-freedom"
+          ],
+          "label": "The stated degrees of freedom are positive for the reviewed estimator.",
+          "evidencePhrases": [
+            "degrees of freedom are positive",
+            "uses positive degrees of freedom"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "sample variance definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "sample-variance = \\frac{1}{degrees-of-freedom} \\sum_i residual_i^2"
+    },
+    {
+      "id": "standard-error-of-mean",
+      "title": "Standard error of a sample mean",
+      "description": "Under the stated sampling model, standard error equals standard deviation divided by the square root of sample size.",
+      "roles": [
+        {
+          "id": "standard-error",
+          "concept": "probability:standard-error",
+          "description": "Standard error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "standard-deviation",
+          "concept": "probability:standard-deviation",
+          "description": "Standard deviation.",
+          "shape": "scalar"
+        },
+        {
+          "id": "sample-size",
+          "concept": "probability:sample-size",
+          "description": "Sample size.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "independent-identical-sampling",
+          "kind": "assumption",
+          "subjects": [
+            "standard-error",
+            "standard-deviation",
+            "sample-size"
+          ],
+          "label": "The stated sampling assumptions justify the standard-error formula.",
+          "evidencePhrases": [
+            "observations are independent and identically distributed",
+            "uses the stated independent sampling model"
+          ]
+        },
+        {
+          "id": "positive-sample-size",
+          "kind": "positive",
+          "subjects": [
+            "sample-size"
+          ],
+          "label": "The sample size is positive."
+        }
+      ],
+      "activationPhrases": [
+        "standard error of the mean"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "standard-error = standard-deviation / sample-size^{1/2}"
+    },
+    {
+      "id": "confidence-upper-bound",
+      "title": "Confidence upper bound",
+      "description": "A reviewed upper uncertainty bound combines an estimate, critical value, and standard error.",
+      "roles": [
+        {
+          "id": "upper-bound",
+          "concept": "probability:confidence-bound",
+          "description": "Upper confidence bound.",
+          "shape": "scalar"
+        },
+        {
+          "id": "estimate",
+          "concept": "probability:statistical-estimator",
+          "description": "Point estimate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "critical-value",
+          "concept": "probability:critical-value",
+          "description": "Critical value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "standard-error",
+          "concept": "probability:standard-error",
+          "description": "Standard error.",
+          "shape": "scalar"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "reviewed-coverage-model",
+          "kind": "assumption",
+          "subjects": [
+            "upper-bound",
+            "estimate",
+            "critical-value",
+            "standard-error"
+          ],
+          "label": "The critical value and standard error belong to the stated coverage model.",
+          "evidencePhrases": [
+            "uses the stated coverage model",
+            "has the stated confidence level"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "confidence upper bound"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "upper-bound = estimate + critical-value standard-error"
+    },
+    {
+      "id": "covariance-matrix-definition",
+      "title": "Covariance-matrix definition",
+      "description": "A covariance matrix is the expected outer product of a centered random vector.",
+      "roles": [
+        {
+          "id": "covariance-matrix",
+          "concept": "probability:covariance-matrix",
+          "description": "Covariance matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "centered-vector",
+          "concept": "linear-algebra:vector",
+          "description": "Centered random vector.",
+          "shape": "vector"
+        }
+      ],
+      "conditions": [
+        {
+          "id": "finite-vector-second-moment",
+          "kind": "domain-membership",
+          "subjects": [
+            "centered-vector"
+          ],
+          "label": "The centered random vector has finite second moments.",
+          "evidencePhrases": [
+            "centered vector has finite second moments",
+            "is a square integrable random vector"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "covariance matrix definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "covariance-matrix = E(centered-vector centered-vector^T)"
+    },
+    {
+      "id": "linear-regression-model",
+      "title": "Linear regression observation model",
+      "description": "A response equals a linear design applied to parameters plus an explicit random error.",
+      "roles": [
+        {
+          "id": "response",
+          "concept": "probability:regression-response",
+          "description": "Regression response."
+        },
+        {
+          "id": "design",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Linear operator design matrix."
+        },
+        {
+          "id": "parameter",
+          "concept": "probability:regression-parameter",
+          "description": "Regression parameter."
+        },
+        {
+          "id": "error",
+          "concept": "probability:regression-error",
+          "description": "Regression error."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "compatible-regression-shapes",
+          "kind": "shape-compatible",
+          "subjects": [
+            "response",
+            "design",
+            "parameter",
+            "error"
+          ],
+          "label": "The design, parameter, response, and error shapes are compatible."
+        }
+      ],
+      "activationPhrases": [
+        "linear regression model"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "response = design parameter + error"
+    },
+    {
+      "id": "stochastic-state-transition",
+      "title": "Stochastic state transition",
+      "description": "A next state equals a linear transition of the current state plus process noise.",
+      "roles": [
+        {
+          "id": "next-state",
+          "concept": "control-systems:state",
+          "description": "System state at the next stochastic step."
+        },
+        {
+          "id": "transition",
+          "concept": "control-systems:state-matrix",
+          "description": "State matrix for the stochastic transition."
+        },
+        {
+          "id": "state",
+          "concept": "control-systems:state",
+          "description": "System state at the current stochastic step."
+        },
+        {
+          "id": "noise",
+          "concept": "probability:process-noise",
+          "description": "Process noise."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "shared-stochastic-model",
+          "kind": "same-context",
+          "subjects": [
+            "next-state",
+            "transition",
+            "state",
+            "noise"
+          ],
+          "label": "All roles belong to the same scoped stochastic state model."
+        }
+      ],
+      "activationPhrases": [
+        "stochastic state transition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "next-state = transition state + noise"
+    },
+    {
+      "id": "process-autocovariance-definition",
+      "title": "Process autocovariance definition",
+      "description": "An autocovariance value relates two scoped states of the same stochastic process.",
+      "roles": [
+        {
+          "id": "autocovariance",
+          "concept": "probability:covariance",
+          "description": "Autocovariance value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-state",
+          "concept": "control-systems:state",
+          "description": "System state at the first stochastic-process time."
+        },
+        {
+          "id": "right-state",
+          "concept": "control-systems:state",
+          "description": "System state at the second stochastic-process time."
+        }
+      ],
+      "conditions": [
+        {
+          "id": "shared-process",
+          "kind": "same-context",
+          "subjects": [
+            "left-state",
+            "right-state"
+          ],
+          "label": "Both indexed states belong to the same stochastic process with finite second moments.",
+          "evidencePhrases": [
+            "belong to the same stochastic process",
+            "share a finite-second-moment process"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "process autocovariance definition"
+      ],
+      "references": [
+        "probability-theory"
+      ],
+      "canonicalRelation": "autocovariance = Cov(left-state, right-state)"
     }
   ],
   "activationRules": [
@@ -340,6 +1465,87 @@
       "notation": [
         "\\mathbb{E}"
       ],
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "variance",
+      "topic": "moments",
+      "description": "Variance of a declared random variable.",
+      "notation": [
+        "Var(X)"
+      ],
+      "operandConcepts": [
+        "probability:random-variable"
+      ],
+      "resultConcept": "probability:variance",
+      "resultShape": "scalar",
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "covariance",
+      "topic": "moments",
+      "description": "Covariance of two declared random variables.",
+      "notation": [
+        "Cov(X,Y)"
+      ],
+      "operandConcepts": [
+        "probability:random-variable",
+        "probability:random-variable"
+      ],
+      "resultConcept": "probability:covariance",
+      "resultShape": "scalar",
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "density-function",
+      "topic": "distributions",
+      "description": "A declared density evaluated at an observation.",
+      "notation": [
+        "f(x)"
+      ],
+      "operandConcepts": [
+        "probability:sample-observation"
+      ],
+      "resultConcept": "probability:scalar-coefficient",
+      "resultShape": "scalar",
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "cumulative-distribution-function",
+      "topic": "distributions",
+      "description": "A declared CDF evaluated at an observation.",
+      "notation": [
+        "F(x)"
+      ],
+      "operandConcepts": [
+        "probability:sample-observation"
+      ],
+      "resultConcept": "probability:probability",
+      "resultShape": "scalar",
+      "references": [
+        "probability-theory"
+      ]
+    },
+    {
+      "id": "logarithm",
+      "topic": "estimation",
+      "description": "Natural logarithm of a positive likelihood.",
+      "notation": [
+        "log(L)"
+      ],
+      "operandConcepts": [
+        "probability:likelihood"
+      ],
+      "resultConcept": "probability:log-likelihood",
+      "resultShape": "scalar",
       "references": [
         "probability-theory"
       ]
