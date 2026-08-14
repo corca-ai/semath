@@ -81,6 +81,7 @@ impl LocalContextProjection {
 /// `ProjectSemanticIndex`.
 pub(crate) struct DocumentSemanticObservations {
     pub definitions: Vec<DefinitionInfo>,
+    pub project_references: Vec<crate::ProjectInclude>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
     pub shapes: ShapeObservations,
     pub quantities: QuantityObservations,
@@ -135,6 +136,7 @@ impl DocumentSemanticObservations {
         let assumption_scopes = ScopeGraph::new(document);
         Self {
             definitions: prose.definitions,
+            project_references: prose.project_references,
             formula_meanings: prose.formula_meanings,
             shapes,
             quantities,

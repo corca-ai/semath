@@ -91,6 +91,31 @@ describe("recognition frontier", () => {
     });
   });
 
+  test("counts source-linked relation evidence as discourse evidence", () => {
+    const view = semanticView();
+    view.context.claims = [];
+    view.context.relations = [
+      {
+        conditions: [],
+        description: "Named relation",
+        evidence: [
+          {
+            kind: "explicit-prose",
+            ruleId: "pack/law/named/activation-phrase",
+            sourceRanges: [{ endOffset: 18, startOffset: 4 }],
+            strength: "strong",
+          },
+        ],
+        range: { endOffset: 30, startOffset: 20 },
+        relationId: "pack:named",
+        roles: [],
+        title: "Named relation",
+      },
+    ];
+
+    expect(frontierSignals(view, true).discourseEvidence).toBeTrue();
+  });
+
   test("does not mistake an empty public projection for a canonical loss", () => {
     const populated = semanticView();
     const view: SemanticViewInfo = {

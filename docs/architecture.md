@@ -77,12 +77,18 @@ answer, while decorated and styled forms remain distinct from their nucleus.
 Included documents contribute the same namespaced role, shape, quantity, unit,
 dimension, and evidence records used locally. A per-document external type
 environment is derived from include order; facts never flow backwards across an
-include site or between disconnected components.
+include site or between disconnected components. An asserted dependency phrase
+may name an exact local `.tex`, `.md`, or `.bib` path and contribute the same
+source-ordered project edge. This is limited to explicit conventions,
+definitions, declarations, macros, notation, symbols, or assumptions; ordinary
+`see` mentions, external paths, citations, conditions, and negations do not
+connect project components.
 
 Pure extractors derive document observations from immutable documents. Project mutation,
-reverse-include invalidation, cancellation, and caching form the effectful
-shell. An edit reanalyzes only the changed document and its reverse include
-closure; clean and incremental rebuilds must produce the same semantic result.
+reverse-dependency invalidation, cancellation, and caching form the effectful
+shell. An edit reanalyzes only the changed document and its reverse include or
+explicit-reference closure; clean and incremental rebuilds must produce the
+same semantic result.
 When an external declaration relinks a wasmtex snapshot, Semath accepts the
 same text revision only if the source identity is unchanged and the structural
 fingerprint differs. This retracts generated meaning without admitting stale or

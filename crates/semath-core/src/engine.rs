@@ -507,7 +507,13 @@ impl ProjectState {
         let observations = &document.observations;
         Some(ProjectOrderDocument {
             file_id: file_id.to_owned(),
-            includes: document.document.includes.clone(),
+            includes: document
+                .document
+                .includes
+                .iter()
+                .chain(&observations.project_references)
+                .cloned()
+                .collect(),
             occurrence_offsets: document
                 .semantic_occurrences
                 .iter()
