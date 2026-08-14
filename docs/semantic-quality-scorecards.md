@@ -140,9 +140,13 @@ cases stay visible as coverage work.
 
 The 2026-08-14 v0.35 development frontier passes 56 of 115 probes with risk
 118 and no false establishment, false conflict, or identity risk. Its current
-first-loss atlas is 24 attachment, 17 typed-fact, and 18 pack-unification
-misses. This supersedes the older editable-development measurement above for
-current release work without changing that historical v0.28 record.
+first-loss atlas is 21 attachment, 19 typed-fact, and 19 pack-unification
+misses. Exact relation-source prose evidence moved three losses out of the
+attachment stage without changing any public decision; explicit project
+references now also preserve source order, component boundaries, retraction,
+and reverse-dependency invalidation. This supersedes the older
+editable-development measurement above for current release work without
+changing that historical v0.28 record.
 
 The now-exposed historical authored holdout remains 6 of 97 with raw risk 728.
 These deliberately difficult documents are a first-loss map, not a release

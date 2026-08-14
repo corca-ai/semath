@@ -2194,6 +2194,107 @@ fn included_type_declarations_drive_project_law_inference() {
 }
 
 #[test]
+fn asserted_project_reference_drives_and_retracts_source_ordered_law_inference() {
+    let referenced = "Using the definitions in \\texttt{definitions.tex}, the relation is $V=RI$.";
+    let detached = "The relation is $V=RI$.";
+    let definitions = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                document("main", "main.tex", referenced, 1),
+                document("definitions", "definitions.tex", definitions, 1),
+            ],
+        })
+        .unwrap();
+
+    let relation_ids = |engine: &SemathEngine, content: &str, version| {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: content.find('=').unwrap() as u32,
+                },
+                version,
+                version,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        view.context
+            .relations
+            .into_iter()
+            .map(|relation| relation.relation_id)
+            .collect::<BTreeSet<_>>()
+    };
+    assert!(relation_ids(&engine, referenced, 1).contains("circuits:ohm-law"));
+
+    let update = engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", detached, 2)),
+            }],
+        })
+        .unwrap();
+    assert_eq!(update.analyzed_file_ids, ["main"]);
+    assert!(!relation_ids(&engine, detached, 2).contains("circuits:ohm-law"));
+}
+
+#[test]
+fn referenced_document_changes_reanalyze_dependents() {
+    let main = "Following the declarations in `shared/definitions.md`, $V=RI$.";
+    let definitions = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                document("main", "main.tex", main, 1),
+                document("definitions", "shared/definitions.md", definitions, 1),
+            ],
+        })
+        .unwrap();
+
+    let update = engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document(
+                    "definitions",
+                    "shared/definitions.md",
+                    "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be current.",
+                    2,
+                )),
+            }],
+        })
+        .unwrap();
+    assert_eq!(
+        update
+            .analyzed_file_ids
+            .into_iter()
+            .collect::<BTreeSet<_>>(),
+        BTreeSet::from(["definitions".into(), "main".into()])
+    );
+}
+
+#[test]
 fn included_assumptions_verify_conditions_without_cross_component_leakage() {
     let main = "\\input{definitions}\n$A \\cap B$";
     let definitions = "Let $A$ and $B$ be events in the same probability space.";

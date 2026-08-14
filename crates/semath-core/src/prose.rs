@@ -25,7 +25,8 @@ use crate::scientific_prose::{
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
 use crate::{
-    AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, SourceIndex, SourceRange,
+    AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, ProjectInclude,
+    ProjectSourceRef, SourceIndex, SourceRange,
 };
 
 static VECTOR_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
@@ -83,6 +84,7 @@ pub(crate) fn definition_available_from(definition: &DefinitionInfo) -> u32 {
 pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub semantic_role_definitions: Vec<DefinitionInfo>,
+    pub project_references: Vec<ProjectInclude>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
     pub shapes: Vec<ProseShapeClaim>,
     pub assumptions: Vec<AssumptionInfo>,
@@ -321,6 +323,7 @@ pub(crate) fn observe_prose(
         .collect::<Vec<_>>();
     let events = normalize_prose_events(source, &clauses, &mentions);
     let discourse_constructions = events.discourse_constructions(source, &mentions, &clauses);
+    analysis.project_references = collect_project_references(document, source, &index, &clauses);
     let construction_targets = construction_formula_targets(
         document,
         &index,
@@ -625,6 +628,113 @@ pub(crate) fn observe_prose(
     deduplicate(&mut analysis);
     attach_formula_occurrence_roles(parsed, canonical_expressions, &mut analysis);
     analysis
+}
+
+fn collect_project_references(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+) -> Vec<ProjectInclude> {
+    let mut references = Vec::new();
+    // wasmtex deliberately excludes TeX control syntax from visible prose.
+    // Inspect only the narrow, validated path surfaces in the original source,
+    // while retaining visible-prose clauses as the authority for discourse.
+    for (path, start, end) in explicit_project_path_surfaces(&document.content) {
+        let Some(clause) = clause_at(clauses, start) else {
+            continue;
+        };
+        if !clause.frame.establishes() || !dependency_reference_lead(&source[clause.start..start]) {
+            continue;
+        }
+        references.push(ProjectInclude {
+            path: path.to_owned(),
+            kind: "prose-reference".into(),
+            source: ProjectSourceRef {
+                file_id: document.file_id.clone(),
+                path: document.path.clone(),
+                range: SourceRange {
+                    start_offset: index.utf16_for_byte(start),
+                    end_offset: index.utf16_for_byte(end),
+                },
+            },
+        });
+    }
+    references.sort_by(|left, right| {
+        left.source
+            .range
+            .start_offset
+            .cmp(&right.source.range.start_offset)
+            .then(left.path.cmp(&right.path))
+    });
+    references
+        .dedup_by(|left, right| left.path == right.path && left.source.range == right.source.range);
+    references
+}
+
+fn explicit_project_path_surfaces(source: &str) -> Vec<(&str, usize, usize)> {
+    let mut surfaces = Vec::new();
+    let mut search_from = 0;
+    while let Some(relative) = source[search_from..].find("\\texttt{") {
+        let command_start = search_from + relative;
+        let path_start = command_start + "\\texttt{".len();
+        let Some(relative_end) = source[path_start..].find('}') else {
+            break;
+        };
+        let path_end = path_start + relative_end;
+        if valid_project_reference_path(&source[path_start..path_end]) {
+            surfaces.push((&source[path_start..path_end], command_start, path_end + 1));
+        }
+        search_from = path_end + 1;
+    }
+    if source.contains('`') {
+        let mut search_from = 0;
+        while let Some(relative) = source[search_from..].find('`') {
+            let delimiter_start = search_from + relative;
+            let path_start = delimiter_start + 1;
+            let Some(relative_end) = source[path_start..].find('`') else {
+                break;
+            };
+            let path_end = path_start + relative_end;
+            if valid_project_reference_path(&source[path_start..path_end]) {
+                surfaces.push((&source[path_start..path_end], delimiter_start, path_end + 1));
+            }
+            search_from = path_end + 1;
+        }
+    }
+    surfaces
+}
+
+fn valid_project_reference_path(path: &str) -> bool {
+    !path.is_empty()
+        && path.len() <= 240
+        && !path.starts_with('/')
+        && !path.contains(['\\', '{', '}', '`'])
+        && path
+            .chars()
+            .all(|character| character.is_ascii_alphanumeric() || "/._-".contains(character))
+        && [".tex", ".md", ".bib"]
+            .iter()
+            .any(|suffix| path.ends_with(suffix))
+}
+
+fn dependency_reference_lead(before: &str) -> bool {
+    let lower = before.to_ascii_lowercase();
+    let dependency_noun = [
+        "assumption",
+        "convention",
+        "declaration",
+        "definition",
+        "macro",
+        "notation",
+        "symbol",
+    ]
+    .iter()
+    .any(|noun| lower.contains(noun));
+    dependency_noun
+        && ["according to", "following", "under", "using"]
+            .iter()
+            .any(|lead| lower.contains(lead))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1454,7 +1564,10 @@ fn action_equation_flow_description<'a>(
     let ProseEventKind::DefinitionAction(kind) = action.kind else {
         return None;
     };
-    if !matches!(kind, DefinitionAction::Compute | DefinitionAction::Write) {
+    if !matches!(
+        kind,
+        DefinitionAction::Compute | DefinitionAction::Produce | DefinitionAction::Write
+    ) {
         return None;
     }
 
@@ -1468,25 +1581,46 @@ fn action_equation_flow_description<'a>(
     ] {
         if after_lower.ends_with(marker) {
             let description = strip_description_article(after[..after.len() - marker.len()].trim());
-            if valid_flow_description(description) && classify_role(description).is_some() {
+            if valid_flow_description(description)
+                && (classify_role(description).is_some() || is_formula_metadescription(description))
+            {
                 return Some(description);
             }
         }
     }
 
-    if kind != DefinitionAction::Write {
-        return None;
-    }
     let before = trim_terminal_punctuation(&source[window_start..action.start]);
-    let phrase = strip_trailing_flow_copula(before);
+    let phrase = strip_trailing_flow_adverbs(strip_trailing_flow_copula(before));
     role_first_nominal_candidates(phrase)
         .into_iter()
         .find(|candidate| {
             valid_flow_description(candidate.description)
-                && classify_role(candidate.description).is_some()
-                && !is_formula_metadescription(candidate.description)
+                && match kind {
+                    DefinitionAction::Write => {
+                        classify_role(candidate.description).is_some()
+                            && !is_formula_metadescription(candidate.description)
+                    }
+                    DefinitionAction::Compute | DefinitionAction::Produce => {
+                        is_formula_metadescription(candidate.description)
+                    }
+                    _ => false,
+                }
         })
         .map(|candidate| candidate.description)
+}
+
+fn strip_trailing_flow_adverbs(mut value: &str) -> &str {
+    loop {
+        let trimmed = value.trim_end();
+        let lower = trimmed.to_ascii_lowercase();
+        let Some(marker) = [" hence", " then", " therefore"]
+            .into_iter()
+            .find(|marker| lower.ends_with(marker))
+        else {
+            return trimmed;
+        };
+        value = &trimmed[..trimmed.len() - marker.len()];
+    }
 }
 
 fn is_formula_metadescription(description: &str) -> bool {
@@ -2216,6 +2350,7 @@ fn phrase_ranges(
     clause: &ScientificClause<'_>,
     phrase: &str,
 ) -> Vec<SourceRange> {
+    let hyphenated = phrase.contains('-');
     let lower = clause.text.to_ascii_lowercase().replace('-', " ");
     let phrase = phrase.to_ascii_lowercase().replace('-', " ");
     let mut ranges = Vec::new();
@@ -2229,12 +2364,55 @@ fn phrase_ranges(
         });
         search_from += found + phrase.len();
     }
+    if hyphenated {
+        let phrase_words = ascii_word_ranges(&phrase)
+            .into_iter()
+            .map(|(start, end)| &phrase[start..end])
+            .collect::<Vec<_>>();
+        let clause_words = ascii_word_ranges(clause.text);
+        if !phrase_words.is_empty() {
+            for window in clause_words.windows(phrase_words.len()) {
+                if window
+                    .iter()
+                    .zip(&phrase_words)
+                    .all(|((start, end), expected)| {
+                        clause.text[*start..*end].eq_ignore_ascii_case(expected)
+                    })
+                {
+                    let start = clause.start + window[0].0;
+                    let end = clause.start + window.last().unwrap().1;
+                    ranges.push(SourceRange {
+                        start_offset: index.utf16_for_byte(start),
+                        end_offset: index.utf16_for_byte(end),
+                    });
+                }
+            }
+        }
+    }
+    ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    ranges.dedup();
     ranges.retain(|range| range.start_offset < range.end_offset);
     debug_assert!(ranges.iter().all(|range| {
         let start = index.byte_for_utf16(range.start_offset);
         let end = index.byte_for_utf16(range.end_offset);
         source.get(start..end).is_some()
     }));
+    ranges
+}
+
+fn ascii_word_ranges(value: &str) -> Vec<(usize, usize)> {
+    let mut ranges = Vec::new();
+    let mut start = None;
+    for (offset, character) in value.char_indices() {
+        if character.is_ascii_alphanumeric() {
+            start.get_or_insert(offset);
+        } else if let Some(word_start) = start.take() {
+            ranges.push((word_start, offset));
+        }
+    }
+    if let Some(word_start) = start {
+        ranges.push((word_start, value.len()));
+    }
     ranges
 }
 
@@ -3588,8 +3766,9 @@ mod tests {
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{
-        DocumentLanguage, ProjectDocument, ProjectMacro, ProjectMacroExpansion,
-        ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSourceRef, SourceRange,
+        CompleteSyntaxState, DocumentLanguage, ProjectDocument, ProjectMacro,
+        ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSourceRef,
+        SourceRange, VisibleProseSpan,
     };
 
     fn analyze(source: &str) -> super::ProseObservations {
@@ -3622,6 +3801,36 @@ mod tests {
             .map(|math| lower_document_region(document, &math.region.content_range))
             .collect::<Vec<_>>();
         observe_prose(document, &parsed, &canonical)
+    }
+
+    #[test]
+    fn observes_asserted_explicit_project_dependency_references() {
+        for source in [
+            r"Using the conventions in \texttt{shared/signs.md}, heat into the system is positive.",
+            "Following the definitions in `shared/roles.tex`, power is positive.",
+        ] {
+            let analysis = analyze(source);
+            assert_eq!(analysis.project_references.len(), 1, "{source}");
+            assert_eq!(analysis.project_references[0].kind, "prose-reference");
+            assert!(
+                analysis.project_references[0].path.starts_with("shared/"),
+                "{source}"
+            );
+        }
+    }
+
+    #[test]
+    fn refuses_non_asserted_or_non_dependency_project_path_mentions() {
+        for source in [
+            r"If enabled, use the conventions in \texttt{shared/signs.md}.",
+            r"We do not use the conventions in \texttt{shared/signs.md}.",
+            r"The cited note claims that we use the conventions in \texttt{shared/signs.md}.",
+            r"See \texttt{shared/signs.md} for additional discussion.",
+            r"Using the material in \texttt{shared/signs.md}, heat is positive.",
+            r"Using the conventions on the website at \texttt{https://example.com/signs.md}, heat is positive.",
+        ] {
+            assert!(analyze(source).project_references.is_empty(), "{source}");
+        }
     }
 
     #[test]
@@ -4024,6 +4233,66 @@ gain.";
             "According to the cited note, the selected constitutive model is\n\\[J=-D\\nabla c.\\]",
             "The selected constitutive model is not\n\\[J=-D\\nabla c.\\]",
             "If the optional backend is enabled, the selected constitutive model is\n\\[J=-D\\nabla c.\\]",
+        ] {
+            assert!(analyze(source).formula_meanings.is_empty(), "{source}");
+        }
+    }
+
+    #[test]
+    fn equation_flow_survives_wasmtex_visible_prose_masking() {
+        let source = "The momentum balance then gives\n\\[F_x=\\dot m\\,\\Delta v.\\]";
+        let mut document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: test_math_regions(source, DocumentLanguage::Latex),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        document.visible_prose.push(VisibleProseSpan {
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: source.find("\\[").unwrap() as u32,
+            },
+            state: CompleteSyntaxState::Complete,
+        });
+
+        let analysis = analyze_document(&document);
+        assert!(
+            !analysis.formula_meanings.is_empty(),
+            "{:?}",
+            analysis.semantic_evidence.law_activations
+        );
+    }
+
+    #[test]
+    fn tex_dash_variants_preserve_named_relation_attachment() {
+        let source = "Let $A$ and $B$ be sets. Applying two-set inclusion--exclusion gives\n\\[|A\\cup B|=|A|+|B|-|A\\cap B|.\\]";
+        let analysis = analyze(source);
+        assert!(analysis.semantic_evidence.law_activations.iter().any(
+            |activation| activation.law_id == "two-set-inclusion-exclusion"
+                && activation.identifies_attached_formula
+                && !activation.attached_formula_ranges.is_empty()
+        ));
+    }
+
+    #[test]
+    fn result_action_attachment_refuses_non_formula_and_non_asserted_heads() {
+        for source in [
+            "The reviewer then gives\n\\[F_x=\\dot m\\,\\Delta v.\\]",
+            "According to the cited note, the momentum balance gives\n\\[F_x=\\dot m\\,\\Delta v.\\]",
+            "If the optional model is enabled, the momentum balance gives\n\\[F_x=\\dot m\\,\\Delta v.\\]",
+            "The momentum balance does not give\n\\[F_x=\\dot m\\,\\Delta v.\\]",
         ] {
             assert!(analyze(source).formula_meanings.is_empty(), "{source}");
         }

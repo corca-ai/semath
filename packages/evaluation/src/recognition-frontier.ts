@@ -120,6 +120,13 @@ export function frontierSignals(
           view.symbol?.roles?.length ||
           view.symbol?.shapes.length,
       ) ||
+      view.context.relations.some((relation) =>
+        relation.evidence.some((evidence) =>
+          ["attached-prose", "explicit-prose", "source-definition"].includes(
+            evidence.kind,
+          ),
+        ),
+      ) ||
       view.domains.some((domain) =>
         domain.evidence.some((evidence) =>
           ["domain-context", "prose-domain-prior"].includes(evidence.kind),
