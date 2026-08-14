@@ -931,6 +931,52 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
 }
 
 #[test]
+fn formula_metadescription_establishes_only_the_attached_relation() {
+    let content = "The selected constitutive model is\n\\[J=-D\\nabla c-q\\nabla\\phi.\\]";
+    let offset = content.rfind("\\phi").unwrap() as u32 + "\\phi".len() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+    assert!(view.symbol.is_some_and(|symbol| symbol.entity_id.is_none()));
+    assert!(view.context.entity_id.is_some());
+
+    let inner = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.rfind("\\phi").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = inner.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        matches!(view.decision, MeaningDecision::Partial { .. }),
+        "{view:#?}"
+    );
+    assert!(view.context.entity_id.is_none());
+}
+
+#[test]
 fn semantic_view_does_not_project_a_nested_law_onto_the_formula_head() {
     let content = "Let $A$ and $B$ be events. The reported value is $p=P(A\\cap B)/P(B)$.";
     let mut engine = SemathEngine::default();

@@ -81,6 +81,9 @@ symbol scan into an empty semantic result.
 Formula-scoped meaning facts follow the same rule: they may establish the exact
 queried formula occurrence while definition, references, and rename remain
 refused because no declaration entity was created.
+When a nested occurrence shares the canonical relation's terminal boundary,
+the relation fact applies only to a query at that exact boundary. Moving the
+cursor inside the nested occurrence does not inherit the relation's proof.
 
 The authoritative declaration is the exact occurrence named by an asserted,
 positive, explicit `Defines` claim in the project semantic index. Presentation

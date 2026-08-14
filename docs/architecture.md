@@ -104,6 +104,11 @@ An asserted nominal lead attached to an equation may also produce a
 formula-scoped meaning fact for the exact result occurrence. That fact can
 support the meaning decision without creating a definition entity, reference
 set, or edit authority.
+Nominal metadescriptions whose semantic head is the formula itself—such as a
+selected model, governing balance, or continuum identity—attach to the exact
+canonical relation rather than being discarded or converted into a symbol
+definition. At a shared terminal edge that fact may select the enclosing
+relation; an interior cursor still selects only its nested occurrence.
 Parenthetical and explicit acronym
 forms, glossary/acronym resources, and named-operator declarations therefore
 share one resolution path. Non-asserting and negative claims remain
