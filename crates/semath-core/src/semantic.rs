@@ -157,6 +157,15 @@ impl DocumentSemanticObservations {
         formula_ranges: &[crate::SourceRange],
         external: &ExternalTypeEnvironment,
     ) {
+        // Equation-derived domain relevance belongs to the previous law pass.
+        // Rebuild source-only hypotheses before matching so a retracted law
+        // cannot keep its own pack active during incremental analysis.
+        self.domains = observe_domains(
+            document,
+            ScopeGraph::new(document),
+            &self.semantic_evidence,
+            &[],
+        );
         self.laws = observe_laws(
             canonical_expressions,
             &self.semantic_evidence,
