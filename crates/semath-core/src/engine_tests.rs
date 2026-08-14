@@ -1,8 +1,9 @@
 use std::collections::{BTreeSet, HashMap};
 
 use super::{
-    SemathEngine, canonical_expression_owner, index_occurrence_range, notation_occurrence_range,
-    occurrence_id_at_range, relation_expression_at_cursor, stable_text_digest,
+    SemathEngine, canonical_expression_owner, expression_carries_formula_fact,
+    index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
+    relation_expression_at_cursor, stable_text_digest,
 };
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
@@ -912,8 +913,8 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
     };
     assert!(matches!(
         &view.decision,
-        MeaningDecision::Partial { meaning, requirements, .. }
-            if meaning.label == "Mechanical power" && !requirements.is_empty()
+        MeaningDecision::Established { meaning, reasons, .. }
+            if meaning.label == "Mechanical power" && !reasons.is_empty()
     ));
     assert_eq!(
         view.context.relations[0].relation_id,
@@ -1513,7 +1514,7 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
             panic!("expected semantic view")
         };
         assert!(
-            matches!(&view.decision, MeaningDecision::Partial { meaning, .. } if meaning.label == "Mechanical power"),
+            matches!(&view.decision, MeaningDecision::Established { meaning, .. } if meaning.label == "Mechanical power"),
             "offset {offset}"
         );
     }
@@ -1611,6 +1612,9 @@ fn composite_formula_ownership_is_exact_and_does_not_guess_internal_symbols() {
         canonical_expression_owner(&relation, &range(2, 5), true, None)
             .map(|expression| &expression.kind),
         Some(SemanticExprKind::Power(_, _))
+    ));
+    assert!(expression_carries_formula_fact(
+        canonical_expression_owner(&relation, &range(2, 5), true, None).unwrap()
     ));
     assert_eq!(
         canonical_expression_owner(&relation, &range(0, 1), false, Some(5))
@@ -1814,7 +1818,7 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
+    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
     let relation = &view.context.relations[0];
     assert!(relation.evidence[0].source_ranges[0].contains(invocation_start));
 }

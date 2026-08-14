@@ -1,7 +1,7 @@
 {
   "schemaVersion": 10,
   "packId": "quantities-units",
-  "packVersion": "1.2.0",
+  "packVersion": "1.3.0",
   "packKind": "capability",
   "namespace": "quantities-units",
   "title": "Scientific quantities and SI units",
@@ -30,6 +30,16 @@
       "conceptKind": "entity",
       "title": "Measurement unit",
       "description": "A named scale used to express a physical quantity.",
+      "parents": [],
+      "references": [
+        "si-brochure"
+      ]
+    },
+    {
+      "id": "force-velocity-dot-product",
+      "conceptKind": "operator",
+      "title": "Force–velocity dot product",
+      "description": "Pairs force and velocity in one coordinate context to produce power.",
       "parents": [],
       "references": [
         "si-brochure"
@@ -1102,7 +1112,25 @@
   "laws": [],
   "activationRules": [],
   "roles": [],
-  "operators": [],
+  "operators": [
+    {
+      "id": "force-velocity-dot-product",
+      "topic": "derived quantities",
+      "description": "A force dotted with velocity produces power when both operands share a coordinate context.",
+      "notation": [
+        "force \\cdot velocity"
+      ],
+      "operandConcepts": [
+        "quantities-units:force",
+        "quantities-units:velocity"
+      ],
+      "resultConcept": "quantities-units:power",
+      "resultShape": "scalar",
+      "references": [
+        "si-brochure"
+      ]
+    }
+  ],
   "references": [
     {
       "id": "si-brochure",

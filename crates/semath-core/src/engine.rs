@@ -22,7 +22,7 @@ use crate::entity_policy::{
     refused_authorization,
 };
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
-use crate::law::ExternalTypeEnvironment;
+use crate::law::{ExternalTypeEnvironment, rejected_formula_sign_conflicts};
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
 use crate::prose::{LawActivationEvidence, ScientificSemanticEvidence, definition_available_from};
@@ -2201,6 +2201,14 @@ fn canonical_expression_entity(expression: &SemanticExpr, anchor: &SourceOccurre
     }
 }
 
+fn expression_carries_formula_fact(expression: &SemanticExpr) -> bool {
+    matches!(
+        expression.kind,
+        SemanticExprKind::Power(_, ref exponent)
+            if matches!(exponent.kind, SemanticExprKind::Number(_))
+    )
+}
+
 fn canonical_expression_owner<'a>(
     relation: &'a SemanticExpr,
     focus: &SourceRange,
@@ -3678,7 +3686,7 @@ impl SemathEngine {
         document: &AnalyzedDocument,
         focus: &CursorFocus,
         relation: &SemanticExpr,
-    ) -> Option<EntityId> {
+    ) -> Option<(EntityId, bool)> {
         let occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
         let matches_occurrence = |seed: &&SemanticOccurrenceSeed| {
             seed.kind == occurrence.kind
@@ -3721,7 +3729,8 @@ impl SemathEngine {
             .semantic
             .contains_entity(&entity_id)
             .then_some(())?;
-        Some(entity_id)
+        let carries_formula_fact = expression_carries_formula_fact(owner);
+        Some((entity_id, carries_formula_fact))
     }
 
     fn canonical_meaning_owner(
@@ -3799,7 +3808,9 @@ impl SemathEngine {
         .then_some(display_focus.as_ref())
         .flatten();
         let formula_meaning_owner = if focus.is_none() {
-            queried_relation.and_then(|relation| self.canonical_meaning_owner(document, relation))
+            queried_relation
+                .and_then(|relation| self.canonical_meaning_owner(document, relation))
+                .map(|entity_id| (entity_id, false))
         } else {
             display_focus.as_ref().and_then(|focus| {
                 if semantic_focus.is_some() && self.resolved_entity(&focus.occurrence_id).is_some()
@@ -3810,9 +3821,14 @@ impl SemathEngine {
                     .and_then(|relation| self.formula_meaning_owner(document, focus, relation))
             })
         };
-        let meaning_entity = formula_meaning_owner.or_else(|| {
-            semantic_focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id))
-        });
+        let exact_formula_meaning = formula_meaning_owner
+            .as_ref()
+            .is_some_and(|(_, exactly_owned)| *exactly_owned);
+        let meaning_entity = formula_meaning_owner
+            .map(|(entity_id, _)| entity_id)
+            .or_else(|| {
+                semantic_focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id))
+            });
         let mut context_formulas = local_formulas.clone();
         if !local_formulas.is_empty() {
             let linked =
@@ -3844,13 +3860,33 @@ impl SemathEngine {
                     .semantic_evidence()
                     .formula_is_asserted(&relation.range)
             });
-        let symbol_proof = if symbol_definition_may_establish {
+        let mut symbol_proof = if symbol_definition_may_establish {
             symbol_info.as_ref().map_or_else(Vec::new, |symbol| {
                 asserted_definition_evidence(&self.index.semantic, symbol)
             })
         } else {
             Vec::new()
         };
+        if symbol_definition_may_establish && let Some(focus) = display_focus.as_ref() {
+            symbol_proof.extend(
+                observations
+                    .formula_meanings
+                    .iter()
+                    .filter(|fact| fact.target_range == focus.range)
+                    .map(|fact| fact.evidence.clone()),
+            );
+        }
+        if exact_formula_meaning
+            && symbol_definition_may_establish
+            && let Some(relation) = queried_relation
+        {
+            symbol_proof.push(Evidence {
+                rule_id: "semath/asserted-formula-meaning".into(),
+                kind: "source-claim".into(),
+                strength: "hard".into(),
+                source_ranges: vec![relation.range.clone()],
+            });
+        }
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -3900,6 +3936,12 @@ impl SemathEngine {
                     .then_some(conflict)
             })
             .collect::<Vec<_>>();
+        if let Some(relation) = queried_relation {
+            typed_conflicts.extend(rejected_formula_sign_conflicts(
+                relation,
+                observations.semantic_evidence(),
+            ));
+        }
         typed_conflicts.sort_by(|left, right| left.conflict_id.cmp(&right.conflict_id));
         typed_conflicts.dedup_by(|left, right| left.conflict_id == right.conflict_id);
         let mut diagnostics = document_diagnostics(

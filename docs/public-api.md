@@ -78,6 +78,9 @@ the surrounding formula is partial or unsupported. Conversely, an established
 formula does not establish the identity of every symbol inside it. References
 are complete for that entity or unavailable—hosts must not merge a fallback
 symbol scan into an empty semantic result.
+Formula-scoped meaning facts follow the same rule: they may establish the exact
+queried formula occurrence while definition, references, and rename remain
+refused because no declaration entity was created.
 
 The authoritative declaration is the exact occurrence named by an asserted,
 positive, explicit `Defines` claim in the project semantic index. Presentation

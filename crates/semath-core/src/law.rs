@@ -18,8 +18,8 @@ use crate::shape::ShapeObservations;
 use crate::source_index::SourceIndex;
 use crate::{
     AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawBindingProof,
-    LawConditionInfo, LawRecognition, LawRecognitionStatus, QuantityInfo, RelationInfo,
-    RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
+    LawConditionInfo, LawRecognition, LawRecognitionStatus, MeaningConflict, QuantityInfo,
+    RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
     SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
@@ -301,26 +301,36 @@ static OPERATOR_TYPES: LazyLock<Vec<CompiledOperatorType>> = LazyLock::new(|| {
                 entry.notation.iter().filter_map(|notation| {
                     let result_concept = entry.result_concept.clone()?;
                     let expression = lower_template(notation);
-                    let SemanticExprKind::Apply {
-                        operator,
-                        arguments,
-                    } = expression.kind
-                    else {
-                        return None;
+                    let (operator, arity) = match expression.kind {
+                        SemanticExprKind::Apply {
+                            operator,
+                            arguments,
+                        } => (operator.value, arguments.len()),
+                        SemanticExprKind::Dot(_, _) => ("dot".into(), 2),
+                        _ => return None,
                     };
-                    (arguments.len() == entry.operand_concepts.len()).then(|| {
-                        CompiledOperatorType {
-                            operator: operator.value,
-                            operand_concepts: entry.operand_concepts.clone(),
-                            result_concept,
-                            result_shape: entry.result_shape.clone(),
-                        }
+                    (arity == entry.operand_concepts.len()).then(|| CompiledOperatorType {
+                        operator,
+                        operand_concepts: entry.operand_concepts.clone(),
+                        result_concept,
+                        result_shape: entry.result_shape.clone(),
                     })
                 })
             })
         })
         .collect()
 });
+
+fn typed_operator_parts(expression: &SemanticExpr) -> Option<(&str, Vec<&SemanticExpr>)> {
+    match &expression.kind {
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } => Some((operator.as_str(), arguments.iter().collect())),
+        SemanticExprKind::Dot(left, right) => Some(("dot", vec![left, right])),
+        _ => None,
+    }
+}
 
 static NESTED_LAW_APPLICATIONS: LazyLock<BTreeSet<String>> = LazyLock::new(|| {
     COMPILED_LAWS
@@ -1767,6 +1777,153 @@ fn plan_matches_exact(plan: &LawMatchPlan, actual: &SemanticExpr) -> bool {
     }) || plan.variadic && is_variadic_balance_candidate(actual)
 }
 
+fn relation_without_side_sign(
+    expression: &SemanticExpr,
+    strip_left: bool,
+) -> Option<(bool, SemanticExpr)> {
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &expression.kind
+    else {
+        return None;
+    };
+    let target = if strip_left {
+        left.as_ref()
+    } else {
+        right.as_ref()
+    };
+    let (negative, unsigned) = match &target.kind {
+        SemanticExprKind::Negate(inner) => (true, inner.as_ref().clone()),
+        SemanticExprKind::Product(items) if matches!(items.first().map(|item| &item.kind), Some(SemanticExprKind::Symbol(sign)) if sign == "+") =>
+        {
+            let remaining = &items[1..];
+            let unsigned = if remaining.len() == 1 {
+                remaining[0].clone()
+            } else {
+                SemanticExpr {
+                    kind: SemanticExprKind::Product(remaining.to_vec()),
+                    range: target.range.clone(),
+                    provenance: target.provenance.clone(),
+                }
+            };
+            (false, unsigned)
+        }
+        _ => (false, target.clone()),
+    };
+    Some((
+        negative,
+        SemanticExpr {
+            kind: SemanticExprKind::Relation {
+                operator: operator.clone(),
+                left: if strip_left {
+                    Box::new(unsigned.clone())
+                } else {
+                    left.clone()
+                },
+                right: if strip_left {
+                    right.clone()
+                } else {
+                    Box::new(unsigned)
+                },
+            },
+            range: expression.range.clone(),
+            provenance: expression.provenance.clone(),
+        },
+    ))
+}
+
+fn differs_by_one_explicit_relation_sign(
+    template: &SemanticExpr,
+    actual: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+) -> bool {
+    [true, false].into_iter().any(|strip_left| {
+        let Some((template_negative, template_unsigned)) =
+            relation_without_side_sign(template, strip_left)
+        else {
+            return false;
+        };
+        let Some((actual_negative, actual_unsigned)) =
+            relation_without_side_sign(actual, strip_left)
+        else {
+            return false;
+        };
+        template_negative != actual_negative
+            && !unify_exact_all(
+                &template_unsigned,
+                &actual_unsigned,
+                placeholders,
+                &BTreeMap::new(),
+            )
+            .is_empty()
+    })
+}
+
+pub(crate) fn rejected_formula_sign_conflicts(
+    actual: &SemanticExpr,
+    semantic_evidence: &ScientificSemanticEvidence,
+) -> Vec<MeaningConflict> {
+    if !semantic_evidence.formula_is_rejected(&actual.range) {
+        return Vec::new();
+    }
+    COMPILED_LAWS
+        .iter()
+        .filter_map(|compiled| {
+            let activation = semantic_evidence
+                .law_activation(compiled.pack_id, &compiled.law.id, &actual.range)
+                .or_else(|| {
+                    semantic_evidence
+                        .law_activations
+                        .iter()
+                        .filter(|activation| {
+                            activation.pack_id == compiled.pack_id
+                                && activation.law_id == compiled.law.id
+                                && activation.frame.establishes()
+                                && activation.clause_range.end_offset <= actual.range.start_offset
+                                && actual
+                                    .range
+                                    .start_offset
+                                    .saturating_sub(activation.clause_range.end_offset)
+                                    <= MAX_ASSUMPTION_DISTANCE
+                        })
+                        .max_by_key(|activation| activation.clause_range.end_offset)
+                })?;
+            compiled
+                .plan
+                .forms
+                .iter()
+                .any(|form| {
+                    differs_by_one_explicit_relation_sign(
+                        &form.expression,
+                        actual,
+                        &compiled.plan.placeholders,
+                    )
+                })
+                .then(|| MeaningConflict {
+                    conflict_id: format!(
+                        "{}:{}/explicit-sign-mismatch",
+                        compiled.pack_id, compiled.law.id
+                    ),
+                    label: format!(
+                        "The rejected formula has the opposite explicit sign from {}.",
+                        compiled.law.title
+                    ),
+                    evidence: vec![
+                        activation.evidence.clone(),
+                        Evidence {
+                            rule_id: "semantic-law/explicit-sign-mismatch".into(),
+                            kind: "canonical-math".into(),
+                            strength: "hard".into(),
+                            source_ranges: vec![actual.range.clone()],
+                        },
+                    ],
+                })
+        })
+        .collect()
+}
+
 fn expand_ambiguous_juxtaposition(expression: &SemanticExpr) -> Option<SemanticExpr> {
     if let Some(factors) = ambiguous_factor(expression) {
         return Some(SemanticExpr {
@@ -2085,11 +2242,6 @@ fn plan_role_support(
             _ => None,
         };
         let expression = projected_expression.as_ref().unwrap_or(bound_expression);
-        if formula_operator_role_support(role, expression, actual).is_proven() {
-            supported += 1;
-            supported_roles.insert(role.id.as_str(), RoleBindingProof::Derived);
-            continue;
-        }
         match structural_operator_role_support(role, expression, offset, consistency, external) {
             RoleSupport::Typed | RoleSupport::Derived => {
                 supported += 1;
@@ -2141,7 +2293,12 @@ fn plan_role_support(
                 supported_roles.insert(role.id.as_str(), RoleBindingProof::Asserted);
             }
             RoleSupport::Unresolved => {
-                unresolved_roles.insert(role.id.as_str());
+                if formula_operator_role_support(role, expression, actual).is_proven() {
+                    supported += 1;
+                    supported_roles.insert(role.id.as_str(), RoleBindingProof::Derived);
+                } else {
+                    unresolved_roles.insert(role.id.as_str());
+                }
             }
             RoleSupport::Refuted => return None,
         }
@@ -2326,15 +2483,11 @@ fn formula_operator_role_support(
         return RoleSupport::Unresolved;
     }
     let supported = expression_any(formula, |candidate| {
-        let SemanticExprKind::Apply {
-            operator,
-            arguments,
-        } = &candidate.kind
-        else {
+        let Some((operator, arguments)) = typed_operator_parts(candidate) else {
             return false;
         };
         OPERATOR_TYPES.iter().any(|signature| {
-            signature.operator == operator.value
+            signature.operator == operator
                 && signature.operand_concepts.len() == arguments.len()
                 && arguments
                     .iter()
@@ -2386,17 +2539,13 @@ fn structural_operator_role_support(
     {
         return RoleSupport::Derived;
     }
-    let SemanticExprKind::Apply {
-        operator,
-        arguments,
-    } = &expression.kind
-    else {
+    let Some((operator, arguments)) = typed_operator_parts(expression) else {
         return RoleSupport::Unresolved;
     };
     let mut matched = false;
     let mut support = RoleSupport::Unresolved;
     for signature in OPERATOR_TYPES.iter().filter(|signature| {
-        signature.operator == operator.value
+        signature.operator == operator
             && concepts_share_lineage(&signature.result_concept, &role.concept)
             && signature.operand_concepts.len() == arguments.len()
             && role
@@ -3411,28 +3560,24 @@ fn typed_operator_groups_roles(
         return false;
     };
     expression_any(actual, |candidate| {
-        let SemanticExprKind::Apply {
-            operator,
-            arguments,
-        } = &candidate.kind
-        else {
+        let Some((operator, arguments)) = typed_operator_parts(candidate) else {
             return false;
         };
         OPERATOR_TYPES.iter().any(|signature| {
-            signature.operator == operator.value
+            signature.operator == operator
                 && signature.operand_concepts.len() == arguments.len()
-                && arguments
-                    .iter()
-                    .zip(&signature.operand_concepts)
-                    .any(|(argument, expected)| {
-                        let available = semantic_leaf_symbols(argument);
-                        subject_roles.iter().all(|(role, binding)| {
+                && subject_roles.iter().all(|(role, binding)| {
+                    arguments
+                        .iter()
+                        .zip(&signature.operand_concepts)
+                        .any(|(argument, expected)| {
+                            let available = semantic_leaf_symbols(argument);
                             concepts_share_lineage(&role.concept, expected)
                                 && semantic_leaf_symbols(binding)
                                     .iter()
                                     .all(|symbol| available.contains(symbol))
                         })
-                    })
+                })
         })
     })
 }
@@ -4202,7 +4347,8 @@ mod tests {
 
     use super::{
         COMPILED_LAWS, ExternalTypeEnvironment, LAW_DISPATCH, LawAnalysisContext, LawDispatch,
-        LawObservations, TypedAssumption, collect_law_expressions, observe_laws,
+        LawObservations, TypedAssumption, collect_law_expressions,
+        differs_by_one_explicit_relation_sign, observe_laws, rejected_formula_sign_conflicts,
         source_label_matches_expression, strip_formula_presentation, structural_alternatives,
         typed_assumption, unify_all,
     };
@@ -4254,6 +4400,77 @@ mod tests {
         assert_eq!(
             typed_assumption(&assumption("sign-convention", "not-clockwise")),
             TypedAssumption::OpposedSignConvention
+        );
+    }
+
+    #[test]
+    fn explicit_relation_sign_mismatch_is_structural_and_symmetric() {
+        let placeholders = ["electric-field", "magnetic-field", "time"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect::<BTreeSet<_>>();
+        let negative = lower_template(
+            "\\nabla \\times electric-field = -\\frac{\\partial magnetic-field}{\\partial time}",
+        );
+        let positive = lower_template("\\nabla \\times E = \\frac{\\partial B}{\\partial t}");
+        assert!(differs_by_one_explicit_relation_sign(
+            &negative,
+            &positive,
+            &placeholders
+        ));
+        assert!(!differs_by_one_explicit_relation_sign(
+            &negative,
+            &negative,
+            &placeholders
+        ));
+    }
+
+    #[test]
+    fn rejected_formula_conflicts_with_an_attached_activated_law_sign() {
+        let source = "Our laboratory convention uses a right-handed coordinate system and assigns\nthe conventional minus sign to the magnetic-field derivative in Faraday's law.\nI have not determined whether the probe channel was inverted or the export routine\ndropped the sign. The following plus-sign rule is therefore quoted only as the\nacquisition notebook's exported output and must not be used as a corrected physical field equation:\n$\\nabla\\times E=+\\frac{\\partial B}{\\partial t}$.";
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
+        let document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: regions.clone(),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        let parsed = parse_regions(source, &regions);
+        let canonical = canonical_expressions(&document, &parsed);
+        let prose = observe_prose(&document, &parsed, &canonical);
+        assert!(
+            prose
+                .semantic_evidence
+                .formula_is_rejected(&canonical[0].range)
+        );
+        assert!(
+            prose
+                .semantic_evidence
+                .law_activations
+                .iter()
+                .any(|activation| {
+                    activation.law_id == "faraday-law" && activation.frame.establishes()
+                }),
+            "{:#?}",
+            prose.semantic_evidence.law_activations
+        );
+        let conflicts = rejected_formula_sign_conflicts(&canonical[0], &prose.semantic_evidence);
+        assert_eq!(conflicts.len(), 1, "canonical={:#?}", canonical[0]);
+        assert_eq!(
+            conflicts[0].conflict_id,
+            "electromagnetism:faraday-law/explicit-sign-mismatch"
         );
     }
 
@@ -5111,7 +5328,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
-    fn recognizes_typed_mechanical_power_without_a_law_specific_matcher() {
+    fn typed_dot_signature_establishes_mechanical_power_roles_and_context() {
         let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$";
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
@@ -5164,10 +5381,14 @@ This conversion is performed once per accepted timing sample so the accumulator 
         );
         let recognition = &laws.all()[0];
         assert_eq!(recognition.law_id, "mechanical-power");
-        assert_eq!(recognition.status, LawRecognitionStatus::ConditionMissing);
+        assert_eq!(recognition.status, LawRecognitionStatus::Verified);
         assert!(recognition.conditions.iter().any(|condition| {
             condition.kind == ScientificConstraintKind::SameContext
-                && condition.status == ConstraintStatus::Required
+                && condition.status == ConstraintStatus::Verified
+                && condition
+                    .evidence
+                    .iter()
+                    .any(|evidence| evidence.rule_id == "typed-operator/shared-context")
         }));
     }
 

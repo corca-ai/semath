@@ -3,7 +3,9 @@ use crate::consistency::{RoleObservations, observe_roles};
 use crate::domain::{DomainObservations, observe_domains};
 use crate::law::{ExternalTypeEnvironment, LawAnalysisContext, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
-use crate::prose::{ProseMatchStats, ScientificSemanticEvidence, observe_prose};
+use crate::prose::{
+    FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence, observe_prose,
+};
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
 use crate::semantic_index::EntityId;
@@ -79,6 +81,7 @@ impl LocalContextProjection {
 /// `ProjectSemanticIndex`.
 pub(crate) struct DocumentSemanticObservations {
     pub definitions: Vec<DefinitionInfo>,
+    pub formula_meanings: Vec<FormulaMeaningFact>,
     pub shapes: ShapeObservations,
     pub quantities: QuantityObservations,
     pub roles: RoleObservations,
@@ -126,6 +129,7 @@ impl DocumentSemanticObservations {
         let assumption_scopes = ScopeGraph::new(document);
         Self {
             definitions: prose.definitions,
+            formula_meanings: prose.formula_meanings,
             shapes,
             quantities,
             roles,

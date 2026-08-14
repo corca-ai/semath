@@ -100,6 +100,10 @@ attachment, and establishment are separate pure steps: only positive, asserted,
 unconditional author claims establish meaning. Cited, hedged, hypothetical,
 alternative, ambiguous-anaphoric, and negative observations remain
 source-grounded without promotion.
+An asserted nominal lead attached to an equation may also produce a
+formula-scoped meaning fact for the exact result occurrence. That fact can
+support the meaning decision without creating a definition entity, reference
+set, or edit authority.
 Parenthetical and explicit acronym
 forms, glossary/acronym resources, and named-operator declarations therefore
 share one resolution path. Non-asserting and negative claims remain
@@ -168,7 +172,7 @@ opaque, and a command name is never treated as its expansion meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 9 describes namespaced concepts and reviewed English aliases, typed law
+Schema 10 describes namespaced concepts and reviewed English aliases, typed law
 roles, one canonical relation with optional surface representations, conditions,
 activation evidence, quantities, units, and references. Activation evidence is
 either a reviewed prose phrase or a closed
@@ -186,6 +190,9 @@ Pack compilation rejects unknown fields, unresolved or wrong-kind concepts,
 invalid dependencies, cycles, and inconsistent dimensions. A build-generated,
 sorted catalog discovers versioned pack JSON without a handwritten Rust
 registry; the same compiler report is exposed through WASM to authoring tools.
+Typed operator signatures may bind both declared concepts and quantity kinds;
+their canonical operand structure can derive role and shared-context evidence
+only when the complete signature matches.
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
 
@@ -258,6 +265,12 @@ structurally derived role identity can complete an established decision;
 formula-level assertion may keep a useful relation and proposed role mapping
 visible, but cannot prove that mapping by itself. An unresolved binding is
 likewise candidate evidence only.
+An exact formula-owned structural occurrence can consume its own asserted
+formula fact, but that proof is not copied to nested symbols. Conversely, when
+an established law activation and a rejected formula differ by exactly one
+explicit relation sign, the bounded structural comparison reports a
+source-grounded conflict rather than recognizing the rejected formula as the
+law.
 Typed role evidence points to the actual declaration, shape, or quantity
 source, while structural derivations retain both their structural range and
 their parent evidence. Domain relevance and conventional notation can expose

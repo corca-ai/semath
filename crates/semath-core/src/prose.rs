@@ -81,10 +81,17 @@ pub(crate) fn definition_available_from(definition: &DefinitionInfo) -> u32 {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ProseObservations {
     pub definitions: Vec<DefinitionInfo>,
+    pub formula_meanings: Vec<FormulaMeaningFact>,
     pub shapes: Vec<ProseShapeClaim>,
     pub assumptions: Vec<AssumptionInfo>,
     pub semantic_evidence: ScientificSemanticEvidence,
     pub match_stats: ProseMatchStats,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct FormulaMeaningFact {
+    pub target_range: SourceRange,
+    pub evidence: Evidence,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -1201,6 +1208,22 @@ fn collect_equation_flow_definitions(
         if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, &description) {
             continue;
         }
+        if classify_role(&description).is_none() {
+            output.formula_meanings.push(FormulaMeaningFact {
+                target_range: symbol_range,
+                evidence: Evidence {
+                    rule_id: "english-equation-flow-meaning".into(),
+                    kind: "attached-prose".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![SourceRange {
+                        start_offset: index.utf16_for_byte(candidate.evidence_start),
+                        end_offset: index.utf16_for_byte(candidate.evidence_end),
+                    }],
+                },
+            });
+            resolved_mentions.insert(*mention_index);
+            continue;
+        }
         push_claim(
             output,
             document,
@@ -1412,7 +1435,6 @@ fn equation_flow_nominal_description(value: &str) -> Option<&str> {
         .into_iter()
         .find(|candidate| {
             valid_flow_description(candidate.description)
-                && classify_role(candidate.description).is_some()
                 && !is_formula_metadescription(candidate.description)
         })
         .map(|candidate| candidate.description)
@@ -3564,6 +3586,32 @@ mod tests {
         assert!(!cited.definitions.iter().any(|definition| {
             definition.evidence.rule_id == "english-equation-flow-definition"
         }));
+    }
+
+    #[test]
+    fn nominal_equation_flow_preserves_unclassified_source_roles() {
+        let asserted = analyze(
+            "For the prospective resonator, $\\kappa$ is its decay linewidth. Its optical quality factor is\n\\[Q_o=\\omega_0/\\kappa.\\]",
+        );
+        assert!(
+            asserted
+                .definitions
+                .iter()
+                .all(|definition| definition.symbol != "Q_o")
+        );
+        assert!(
+            asserted
+                .formula_meanings
+                .iter()
+                .any(|fact| { fact.evidence.rule_id == "english-equation-flow-meaning" }),
+            "{:?}",
+            asserted.formula_meanings
+        );
+
+        let rejected = analyze(
+            "The review says that this optical quality factor does not apply:\n\\[Q_o=\\omega_0/\\kappa.\\]",
+        );
+        assert!(rejected.formula_meanings.is_empty());
     }
 
     #[test]
