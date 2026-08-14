@@ -264,6 +264,30 @@ mod tests {
     #[test]
     fn classifies_pack_quantities_through_the_shared_concept_vocabulary() {
         assert_eq!(
+            classify_role("cross-section mean speed").as_deref(),
+            Some("quantities-units:velocity")
+        );
+        assert_eq!(
+            classify_role("variance scalar").as_deref(),
+            Some("probability:variance")
+        );
+        assert_eq!(
+            classify_role("covariance scalar").as_deref(),
+            Some("probability:covariance")
+        );
+        assert_eq!(
+            classify_role("density function").as_deref(),
+            Some("probability:density-function")
+        );
+        assert_eq!(
+            classify_role("log likelihood scalar").as_deref(),
+            Some("probability:log-likelihood")
+        );
+        assert_eq!(
+            classify_role("sample mean scalar").as_deref(),
+            Some("probability:sample-mean")
+        );
+        assert_eq!(
             classify_role("pde field function").as_deref(),
             Some("calculus-analysis:pde-field")
         );

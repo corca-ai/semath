@@ -544,6 +544,7 @@ function renderFormula(source: string, bindings: ReadonlyMap<string, string>): s
   }
   return result
     .replace(/\bVar(?=\s*\()/gu, "\\operatorname{Var}")
+    .replace(/\bCov(?=\s*\()/gu, "\\operatorname{Cov}")
     .replace(/\bE(?=\s*\()/gu, "\\operatorname{E}")
     .replace(/\bP(?=\s*\()/gu, "\\mathbb{P}")
     .replace(/\blog\b/gu, "\\log");
@@ -557,9 +558,15 @@ function declaration(
   shapeOverrides?: ReadonlyMap<string, string>,
 ): string {
   const lawPhrase = law.activationPhrases[0] ?? law.title;
+  const conceptCounts = new Map<string, number>();
+  for (const role of law.roles) {
+    conceptCounts.set(role.concept, (conceptCounts.get(role.concept) ?? 0) + 1);
+  }
   const entries = [...bindings].map(([roleId, symbol]) => {
     const role = law.roles.find((candidate) => candidate.id === roleId);
-    const words = (conceptTitles.get(role?.concept ?? "") ??
+    const repeatedConcept = role && (conceptCounts.get(role.concept) ?? 0) > 1;
+    const words = ((repeatedConcept ? role.description : undefined) ??
+      conceptTitles.get(role?.concept ?? "") ??
       role?.description ??
       roleId.replaceAll("-", " "))
       .trim()

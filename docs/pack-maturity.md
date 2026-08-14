@@ -6,15 +6,15 @@ holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 9,010 scored law cases cover 97 laws in twelve formula packs, including 48
-  positive and 32 refusal diversity cases for every promoted law. Of all 9,066
-  scored corpus cases, 420 remain readable fixture seeds and 8,646 are
+- 11,900 scored law cases cover 114 laws in twelve formula packs, including 48
+  positive and 32 refusal diversity cases for every promoted law. Of all 11,956
+  scored corpus cases, 420 remain readable fixture seeds and 11,536 are
   deterministic cases reproduced in memory from compact specs, packs, and
   seeds; generated cases are not called independently authored evidence.
-- 777 deterministic metamorphic cases preserve results under irrelevant prose,
+- 1,032 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
-- All 97 evaluated laws score 100% for recall, precision, role binding,
-  source-linked evidence, and refusal preservation across 9,066 cases. The 777
+- All 114 evaluated laws score 100% for recall, precision, role binding,
+  source-linked evidence, and refusal preservation across 11,956 cases. The 1,032
   metamorphic observations also pass. Generated breadth remains regression
   evidence rather than independently authored language.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
@@ -48,6 +48,19 @@ holds approved support policy; GitHub issues hold planned work.
   model or its roles. The 1,260 model-specific positive and refusal cases and
   126 metamorphic observations all pass; removing the declaration from an
   authored project retracts the relation without producing an unsafe edit.
+- Probability and statistics now promote 22 typed relation families. The
+  seventeen additions cover expected values, variances and covariances,
+  density/mass normalization, CDF construction, likelihood and log likelihood,
+  sample estimators and uncertainty, covariance matrices, linear regression,
+  and bounded stochastic state and autocovariance models. They reuse calculus
+  binders, linear-algebra shapes, and control-system state roles rather than
+  duplicating those foundations. Generic `P`, `E`, `X`, `p`, and `N` spellings
+  remain candidates rather than proof: local statistical roles, a named law,
+  and each law's exact conditions determine promotion. The focused 1,530-case
+  probe/diversity suite and its 153 metamorphic observations pass, while the
+  full probability depth suite now covers 1,760 cases. An authored multi-file
+  project establishes ten reviewed statistics surfaces and retracts the
+  expected-value relation when its role-declaration include is removed.
 - The independent frozen challenge v3 preserves 48 semantic boundaries across
   binding, constraints, packs, presentation, resolution, and syntax, then
   composes them into six realistic document shapes. The pre-change baseline
@@ -151,11 +164,11 @@ holds approved support policy; GitHub issues hold planned work.
 - The practical-STEM benchmark was commissioned at
   `16e1797286fd5143144e78657230cebedd433943`, where it passed 57 of 115
   authored development probes with risk 116. The current 2026-08-15 state
-  passes 87 of 145 with the same risk and zero false establishment, false
+  passes 97 of 155 with the same risk and zero false establishment, false
   conflict, identity, or navigation risk. Its field-by-capability matrix now
-  references 83 unique reviewed probes across 49 of 50 cells. Linear algebra
-  measures all ten capabilities; only probability/statistics project lifecycle
-  remains an explicit commissioned gap. Of those 83 probes, 53 pass every
+  references 93 unique reviewed probes across all 50 cells. Linear algebra,
+  differential equations, and probability/statistics now measure all ten
+  capabilities with no commissioned gaps. Of those 93 probes, 63 pass every
   reviewed public surface. Layer-aware cell totals are:
 
   | Program field            | Passed | Cases |
@@ -163,21 +176,21 @@ holds approved support policy; GitHub issues hold planned work.
   | Shared foundations       |     20 |    31 |
   | Linear algebra           |     43 |    50 |
   | Differential equations   |     41 |    53 |
-  | Probability/statistics   |     16 |    27 |
+  | Probability/statistics   |     41 |    52 |
   | Numerical analysis       |     13 |    30 |
 
   | Capability            | Passed | Cases |
   | --------------------- | -----: | ----: |
-  | Vocabulary            |     19 |    23 |
-  | Typing                |     16 |    19 |
-  | Relation recognition  |     18 |    29 |
-  | Equivalent forms      |      7 |    15 |
-  | Conditions            |     14 |    22 |
-  | Document attachment   |     17 |    20 |
-  | Project lifecycle     |      9 |    10 |
-  | Decision quality      |     11 |    21 |
-  | Navigation            |      9 |    14 |
-  | Refusal               |     13 |    18 |
+  | Vocabulary            |     22 |    26 |
+  | Typing                |     20 |    23 |
+  | Relation recognition  |     20 |    31 |
+  | Equivalent forms      |      8 |    16 |
+  | Conditions            |     17 |    25 |
+  | Document attachment   |     20 |    23 |
+  | Project lifecycle     |     10 |    11 |
+  | Decision quality      |     15 |    25 |
+  | Navigation            |     12 |    17 |
+  | Refusal               |     14 |    19 |
 
   These overlapping diagnostic projections cannot be summed into an accuracy
   score. They establish the ordered coverage frontier for #347–#351 while the

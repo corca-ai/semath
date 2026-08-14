@@ -109,6 +109,28 @@ describe("pack authoring policies", () => {
     }
   });
 
+  test("keeps repeated concepts distinct with their reviewed role descriptions", () => {
+    const repeated = {
+      ...pack,
+      laws: [{
+        ...pack.laws[0],
+        canonicalRelation: "output = Cov(left, right)",
+        roles: [
+          { concept: "sample-field:output", id: "output", shape: "scalar" },
+          { concept: "sample-field:input", description: "First input quantity", id: "left" },
+          { concept: "sample-field:input", description: "Second input quantity", id: "right" },
+        ],
+      }],
+    } as const;
+    const prose = scaffoldPackWorkspace(repeated).corpus.cases[0]!.documents
+      .map((document) => document.content)
+      .join("\n");
+
+    expect(prose).toContain("first input quantity");
+    expect(prose).toContain("second input quantity");
+    expect(prose).toContain("\\operatorname{Cov}");
+  });
+
   test("finds pack-specific runtime decisions but ignores tests and data mentions", () => {
     expect(findForbiddenRuntimeBranches([
       { path: "src/infer.rs", source: 'if pack_id == "sample-field" { specialize(); }' },

@@ -16,16 +16,16 @@ describe("practical STEM breadth benchmark", () => {
   test("validates the reviewed public-development matrix", async () => {
     const { manifest, fixture } = await inputs();
     expect(validateStemBreadthBenchmark(manifest, fixture)).toEqual({
-      commissionedGaps: 1,
+      commissionedGaps: 0,
       fields: {
         "shared-foundations": { gaps: 0, measuredCapabilities: 10 },
         "linear-algebra": { gaps: 0, measuredCapabilities: 10 },
         "differential-equations": { gaps: 0, measuredCapabilities: 10 },
-        "probability-statistics": { gaps: 1, measuredCapabilities: 9 },
+        "probability-statistics": { gaps: 0, measuredCapabilities: 10 },
         "numerical-analysis": { gaps: 0, measuredCapabilities: 10 },
       },
-      measuredCells: 49,
-      referencedProbes: 83,
+      measuredCells: 50,
+      referencedProbes: 93,
     });
   });
 
@@ -47,10 +47,10 @@ describe("practical STEM breadth benchmark", () => {
   test("keeps commissioned gaps distinct from measured cells", async () => {
     const { rawManifest } = await inputs();
     const changed = mutableManifest(rawManifest);
-    const gap = changed.fields
-      .flatMap((field) => field.capabilities)
-      .find((cell) => cell.status === "commissioned-gap");
-    if (!gap) throw new Error("test fixture is missing a commissioned gap");
+    const gap = changed.fields[0]?.capabilities[0];
+    if (!gap) throw new Error("test fixture is missing its first cell");
+    gap.status = "commissioned-gap";
+    gap.plannedIssue = "https://github.com/corca-ai/semath/issues/999";
     gap.probeIds = ["linear-algebra-development-matvec-01"];
     expect(() => parseStemBreadthManifest(changed)).not.toThrow();
     const fixture = parseAuthoredScientificFixture(
@@ -116,12 +116,20 @@ async function json(path: string): Promise<unknown> {
 
 function mutableManifest(value: unknown): {
   fields: {
-    capabilities: { probeIds: string[]; status: string }[];
+    capabilities: {
+      plannedIssue?: string;
+      probeIds: string[];
+      status: string;
+    }[];
   }[];
 } {
   return structuredClone(value) as {
     fields: {
-      capabilities: { probeIds: string[]; status: string }[];
+      capabilities: {
+        plannedIssue?: string;
+        probeIds: string[];
+        status: string;
+      }[];
     }[];
   };
 }
