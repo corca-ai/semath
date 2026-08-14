@@ -374,6 +374,7 @@ pub(crate) fn observe_prose(
         document,
         source,
         parsed,
+        canonical_expressions,
         &index,
         &clauses,
         &mentions,
@@ -1069,6 +1070,7 @@ fn collect_equation_flow_definitions(
     document: &ProjectDocument,
     source: &str,
     parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
@@ -1198,13 +1200,44 @@ fn collect_equation_flow_definitions(
         {
             continue;
         }
+        let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
+        if is_formula_metadescription(&description) {
+            let target = canonical_expressions
+                .iter()
+                .filter(|expression| {
+                    formula_range.start_offset <= expression.range.start_offset
+                        && expression.range.end_offset <= formula_range.end_offset
+                        && matches!(
+                            expression.kind,
+                            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                        )
+                })
+                .max_by_key(|expression| {
+                    expression.range.end_offset - expression.range.start_offset
+                });
+            if let Some(target) = target {
+                output.formula_meanings.push(FormulaMeaningFact {
+                    target_range: target.range.clone(),
+                    evidence: Evidence {
+                        rule_id: "english-equation-flow-meaning".into(),
+                        kind: "attached-prose".into(),
+                        strength: "strong".into(),
+                        source_ranges: vec![SourceRange {
+                            start_offset: index.utf16_for_byte(candidate.evidence_start),
+                            end_offset: index.utf16_for_byte(candidate.evidence_end),
+                        }],
+                    },
+                });
+                resolved_mentions.insert(*mention_index);
+            }
+            continue;
+        }
         let Some((symbol, symbol_range)) =
             relation_head_symbol(document, &math.region.content_range)
                 .or_else(|| primary_symbol(document, math))
         else {
             continue;
         };
-        let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
         if conflicts_with_existing_role(output, &scopes, &symbol, &symbol_range, &description) {
             continue;
         }
@@ -1433,10 +1466,7 @@ fn equation_flow_nominal_description(value: &str) -> Option<&str> {
     has_introductory_relation
         .then(|| role_first_nominal_candidates(without_copula))?
         .into_iter()
-        .find(|candidate| {
-            valid_flow_description(candidate.description)
-                && !is_formula_metadescription(candidate.description)
-        })
+        .find(|candidate| valid_flow_description(candidate.description))
         .map(|candidate| candidate.description)
 }
 
@@ -3648,6 +3678,26 @@ mod tests {
             "{:?}",
             analysis.semantic_evidence.law_activations
         );
+
+        let labeled = analyze(
+            "The selected continuum identity is\n\\[\\frac{\\partial^2 \\psi}{\\partial t^2}=c^2\\nabla^2\\psi.\\]",
+        );
+        assert!(
+            labeled.formula_meanings.iter().any(|fact| {
+                fact.evidence.rule_id == "english-equation-flow-meaning"
+                    && fact.target_range.start_offset < fact.target_range.end_offset
+            }),
+            "{:?}",
+            labeled.formula_meanings
+        );
+
+        for source in [
+            "According to the cited note, the selected constitutive model is\n\\[J=-D\\nabla c.\\]",
+            "The selected constitutive model is not\n\\[J=-D\\nabla c.\\]",
+            "If the optional backend is enabled, the selected constitutive model is\n\\[J=-D\\nabla c.\\]",
+        ] {
+            assert!(analyze(source).formula_meanings.is_empty(), "{source}");
+        }
     }
 
     #[test]

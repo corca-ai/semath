@@ -3076,7 +3076,7 @@ impl SemathEngine {
                     observations,
                     parsed,
                     focus.as_ref(),
-                    cursor_offset,
+                    (cursor_offset, offset),
                     hygiene_enabled,
                 )),
             },
@@ -3684,8 +3684,10 @@ impl SemathEngine {
     fn formula_meaning_owner(
         &self,
         document: &AnalyzedDocument,
+        observations: &DocumentSemanticObservations,
         focus: &CursorFocus,
         relation: &SemanticExpr,
+        offset: u32,
     ) -> Option<(EntityId, bool)> {
         let occurrence = self.index.semantic.occurrence(&focus.occurrence_id)?;
         let matches_occurrence = |seed: &&SemanticOccurrenceSeed| {
@@ -3714,12 +3716,22 @@ impl SemathEngine {
             .filter(matches_occurrence)
             .filter_map(|seed| seed.application_end_offset)
             .max();
-        let owner = canonical_expression_owner(
-            relation,
-            &focus.range,
-            structurally_composite,
-            application_end,
-        )?;
+        let attached_relation_fact = offset == relation.range.end_offset
+            && focus.range.end_offset == relation.range.end_offset
+            && observations
+                .formula_meanings
+                .iter()
+                .any(|fact| fact.target_range == relation.range);
+        let owner = if attached_relation_fact {
+            relation
+        } else {
+            canonical_expression_owner(
+                relation,
+                &focus.range,
+                structurally_composite,
+                application_end,
+            )?
+        };
         let occurrence_id = self
             .index
             .occurrence_id_for_range(&document.document.file_id, &owner.range)?;
@@ -3729,7 +3741,7 @@ impl SemathEngine {
             .semantic
             .contains_entity(&entity_id)
             .then_some(())?;
-        let carries_formula_fact = expression_carries_formula_fact(owner);
+        let carries_formula_fact = attached_relation_fact || expression_carries_formula_fact(owner);
         Some((entity_id, carries_formula_fact))
     }
 
@@ -3756,9 +3768,10 @@ impl SemathEngine {
         observations: &DocumentSemanticObservations,
         parsed: Option<&ParsedMath>,
         focus: Option<&CursorFocus>,
-        offset: u32,
+        offsets: (u32, u32),
         hygiene_enabled: bool,
     ) -> SemanticViewInfo {
+        let (offset, source_offset) = offsets;
         let formula_boundary = focus.is_none();
         let queried_relation = parsed.and_then(|math| {
             relation_expression_at_cursor(
@@ -3817,8 +3830,15 @@ impl SemathEngine {
                 {
                     return None;
                 }
-                queried_relation
-                    .and_then(|relation| self.formula_meaning_owner(document, focus, relation))
+                queried_relation.and_then(|relation| {
+                    self.formula_meaning_owner(
+                        document,
+                        observations,
+                        focus,
+                        relation,
+                        source_offset,
+                    )
+                })
             })
         };
         let exact_formula_meaning = formula_meaning_owner
