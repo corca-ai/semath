@@ -146,10 +146,11 @@ definitions or relations. Applying only those explicit adjudications produces
 the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
 cases stay visible as coverage work.
 
-The current 2026-08-15 development frontier passes 80 of 138 probes with risk
+The current 2026-08-15 development frontier passes 108 of 166 probes with risk
 116 and no false establishment, false conflict, identity, or navigation risk.
 Its first-loss atlas is 21 attachment, 19 typed-fact, and 18 pack-unification
-misses. The additional reviewed probes cover 22 typed linear-algebra relation
+misses. The additional reviewed probes cover typed linear-algebra,
+differential-equation, probability/statistics, and numerical-analysis relation
 families plus declaration retraction and exact navigation behavior. This
 supersedes the older editable-development measurement above for current release
 work without changing the historical v0.28 and v0.35 records.
@@ -358,8 +359,8 @@ pull-request latency. A same-machine development run after compaction took
 881.04 seconds and reached 3,981,983,744 bytes of peak resident memory. It
 reproduced the baseline's four existing precision/refusal failures exactly;
 compaction changed neither inputs nor observations. After the v0.27 semantic
-refinements, the final manual run passes all thresholds for all 11,956 cases and
-all 1,032 metamorphic observations: every one of the 114 evaluated laws has 100%
+refinements, the final manual run passes all thresholds for all 13,936 cases and
+all 1,230 metamorphic observations: every one of the 136 evaluated laws has 100%
 recall, precision, role accuracy, evidence integrity, and refusal preservation.
 These local measurements are diagnostic evidence, not the stable x86_64 release
 budget measurement.

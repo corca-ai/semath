@@ -24,6 +24,8 @@
     "linear-products-probe",
     "mechanics-diversity",
     "mechanics-engineering-depth",
+    "numerical-analysis-foundation-diversity",
+    "numerical-analysis-foundation-probe",
     "optimization-diversity",
     "optimization-ml-clusters",
     "optimization-probe",
@@ -920,6 +922,58 @@
       }
     },
     {
+      "packId": "numerical-analysis",
+      "capabilities": {
+        "concept-vocabulary": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-probe",
+            "numerical-analysis-foundation-diversity"
+          ]
+        },
+        "declarations-roles": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-probe",
+            "numerical-analysis-foundation-diversity"
+          ]
+        },
+        "shape-quantity-unit": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-probe",
+            "numerical-analysis-foundation-diversity"
+          ]
+        },
+        "law-recognition": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-probe",
+            "numerical-analysis-foundation-diversity"
+          ]
+        },
+        "diagnostics-refusal": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-probe",
+            "numerical-analysis-foundation-diversity"
+          ]
+        },
+        "project-macro": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-diversity"
+          ]
+        },
+        "navigation-explanation": {
+          "maturity": "evaluated",
+          "suiteIds": [
+            "numerical-analysis-foundation-diversity"
+          ]
+        }
+      }
+    },
+    {
       "packId": "quantities-units",
       "capabilities": {
         "concept-vocabulary": {
@@ -1745,6 +1799,58 @@
       "kind": "law",
       "packId": "probability",
       "path": "corpus/probability-statistics-foundation-diversity.json",
+      "tier": "evaluated",
+      "minimumPositiveCasesPerLaw": 48,
+      "minimumRefusalCasesPerLaw": 32,
+      "requiredDimensions": [
+        "notation",
+        "prose",
+        "roles",
+        "constraints",
+        "project-context",
+        "macro-provenance",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 6,
+          "syntaxStructure": 8,
+          "proseFamily": 16,
+          "projectTopology": 5,
+          "mutationFamily": 8
+        },
+        "maximumProfileShare": 0.05
+      }
+    },
+    {
+      "id": "numerical-analysis-foundation-probe",
+      "kind": "law",
+      "packId": "numerical-analysis",
+      "path": "corpus/numerical-analysis-foundation-probe.json",
+      "tier": "probe",
+      "minimumPositiveCasesPerLaw": 5,
+      "minimumRefusalCasesPerLaw": 5,
+      "requiredDimensions": [
+        "notation",
+        "roles",
+        "semantic-mutation"
+      ],
+      "requiredDiversity": {
+        "minimumDistinct": {
+          "semanticSkeleton": 3,
+          "syntaxStructure": 2,
+          "proseFamily": 2,
+          "projectTopology": 1,
+          "mutationFamily": 3
+        },
+        "maximumProfileShare": 0.35
+      }
+    },
+    {
+      "id": "numerical-analysis-foundation-diversity",
+      "kind": "law",
+      "packId": "numerical-analysis",
+      "path": "corpus/numerical-analysis-foundation-diversity.json",
       "tier": "evaluated",
       "minimumPositiveCasesPerLaw": 48,
       "minimumRefusalCasesPerLaw": 32,

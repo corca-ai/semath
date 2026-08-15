@@ -3244,7 +3244,29 @@
       "genre": "Textbook exposition",
       "id": "OPTML-DEV-001",
       "lawIds": [
-        "optimization-ml:gradient-descent-update"
+        "optimization-ml:gradient-descent-update",
+        "numerical-analysis:approximate-value-relation",
+        "numerical-analysis:absolute-error-definition",
+        "numerical-analysis:relative-error-definition",
+        "numerical-analysis:truncation-error-bound",
+        "numerical-analysis:discretization-error-bound",
+        "numerical-analysis:asymptotic-order-membership",
+        "numerical-analysis:linear-system-residual",
+        "numerical-analysis:residual-stopping-condition",
+        "numerical-analysis:convergence-envelope",
+        "numerical-analysis:linear-convergence-step",
+        "numerical-analysis:newton-root-update",
+        "numerical-analysis:trapezoidal-quadrature",
+        "numerical-analysis:forward-difference-derivative",
+        "numerical-analysis:central-difference-derivative",
+        "numerical-analysis:explicit-euler-step",
+        "numerical-analysis:implicit-euler-step",
+        "numerical-analysis:relaxed-residual-iteration",
+        "numerical-analysis:least-squares-approximation",
+        "numerical-analysis:linear-interpolation",
+        "numerical-analysis:condition-number-definition",
+        "numerical-analysis:perturbation-stability-bound",
+        "numerical-analysis:discrete-model-equation"
       ],
       "provenance": {
         "authorId": "optimization-ml-development",
@@ -3255,13 +3277,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Removed duplicated exposition while preserving the gradient-role definition."
+          "Removed duplicated exposition while preserving the gradient-role definition.",
+          "Added reviewed numerical approximation, error, convergence, solver, quadrature, time-step, least-squares, conditioning, and include-removal contexts."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "d7fad65c779dfdb39123408e4e12837121eeeed15fa1a1a11348600a4ef6213a",
+        "finalDigest": "86657aa3073c90b84d10c6c1ba3a4999cf2f3cf84bad193e490e85b1429d0a02",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "d7fad65c779dfdb39123408e4e12837121eeeed15fa1a1a11348600a4ef6213a",
+        "reviewedAt": "2026-08-15",
+        "semanticReviewDigest": "86657aa3073c90b84d10c6c1ba3a4999cf2f3cf84bad193e490e85b1429d0a02",
         "status": "corrected"
       },
       "snapshots": [
@@ -3271,14 +3294,35 @@
               "content": "Starting from the current iterate, the basic descent method forms\n\\begin{equation}\\label{eq:basic-step}\n  x_{k+1}=x_k-\\alpha_k g_k .\n\\end{equation}\nHere $\\alpha_k>0$ is the step length, and $g_k:=\\nabla f(x_k)$, the gradient of the differentiable objective $f$ at the\ncurrent iterate.  Thus \\eqref{eq:basic-step} is ordinary gradient descent,\nrather than a generic search-direction scheme.\n",
               "fileId": "chapters/descent.tex",
               "path": "chapters/descent.tex"
+            },
+            {
+              "content": "Let $u_h$ denote an approximate value and $u$ its exact value in the same numerical comparison. Let $e$ denote absolute error scalar. Let $r$, $b$, $A$, and $x_h$ denote numerical residual vector, vector, linear operator matrix, and approximate value vector, respectively. Let $\\varepsilon$ denote a positive tolerance scalar. Let $z_k$, $z$, and $d_k$ denote numerical iterate vector, convergence limit vector, and error bound scalar, respectively. Let $q_1$, $q_0$, $f_0$, and $c_0$ denote numerical iterate scalar, numerical iterate scalar, function value scalar, and derivative value scalar, respectively; $c_0$ is nonzero. Let $Q$, $h$, $a$, and $c$ denote integral approximation scalar, positive step size scalar, sample value scalar, and sample value scalar. Let $y_1$, $y_0$, $h_t$, and $g_0$ denote ODE state, ODE state, positive step size scalar, and evolution source. Let $v$, $D$, and $\\beta$ denote vector, linear operator matrix, and vector, respectively. Let $\\kappa$, $M$, and $N$ denote condition number, invertible operator, and inverse operator, respectively.\n",
+              "fileId": "numerics/roles.tex",
+              "path": "numerics/roles.tex"
+            },
+            {
+              "content": "\\input{roles.tex}\nThe approximation is recorded directionally as $u_h\\approx u$; no exact equality is asserted. Its reported absolute error is $e=\\operatorname{norm}(u-u_h)$. For the linear solve, the linear system residual is $r=b-Ax_h$, and the residual stopping criterion is $\\lVert r\\rVert\\le\\varepsilon$. The convergence error bound retains its stated limit and norm: $\\operatorname{norm}(z_k-z)\\le d_k$. The Newton iteration is $q_1=q_0-f_0/c_0$. One trapezoidal rule panel gives $Q=h\\cdot(a+c)/2$. The ODE discretization uses the explicit Euler step $y_1=y_0+h_t g_0$. The least squares approximation remains directional: $v\\approx D\\beta$. Finally, the norm-dependent condition number is $\\kappa=\\lVert M\\rVert\\lVert N\\rVert$.\n",
+              "fileId": "numerics/methods.tex",
+              "path": "numerics/methods.tex"
             }
           ],
           "id": "current"
+        },
+        {
+          "documents": [
+            {
+              "content": "The role include was removed. The draft still contains $u_h\\approx u$, but neither value is defined and no approximation context is asserted.\n",
+              "fileId": "numerics/methods.tex",
+              "path": "numerics/methods.tex"
+            }
+          ],
+          "id": "numerical-roles-removed"
         }
       ],
       "variationTags": [
         "`x_{k+1}=x_k-\\alpha_k g_k`",
-        "Positive example; declaration after use; equation reference; local anaphora; guarded positive step size."
+        "Positive example; declaration after use; equation reference; local anaphora; guarded positive step size.",
+        "Reviewed numerical-analysis vertical with exact-versus-approximate authority, typed cross-pack roles, and retraction after an include is removed."
       ]
     },
     {
@@ -15286,6 +15330,291 @@
       "id": "probability-statistics-development-declaration-retraction",
       "kind": "supplemental",
       "scenarioId": "probability-development-metric-name-collision"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "u_h\\approx u" },
+          "relationId": "numerical-analysis:approximate-value-relation",
+          "roles": [{ "role": "approximate-value", "symbol": "u_h" }, { "role": "exact-value", "symbol": "u" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "numerical-analysis-development-approximation",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "e=\\operatorname{norm}(u-u_h)", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "e=\\operatorname{norm}(u-u_h)" },
+          "relationId": "numerical-analysis:absolute-error-definition",
+          "roles": [{ "role": "absolute-error", "symbol": "e" }, { "role": "exact-value", "symbol": "u" }, { "role": "approximate-value", "symbol": "u_h" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "derivation-chain",
+      "id": "numerical-analysis-development-absolute-error",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "r=b-Ax_h", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "r=b-Ax_h" },
+          "relationId": "numerical-analysis:linear-system-residual",
+          "roles": [{ "role": "residual", "symbol": "r" }, { "role": "right-hand-side", "symbol": "b" }, { "role": "operator", "symbol": "A" }, { "role": "approximate-solution", "symbol": "x_h" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "derivation-chain",
+      "id": "numerical-analysis-development-residual",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "\\lVert r\\rVert\\le\\varepsilon", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "\\lVert r\\rVert\\le\\varepsilon" },
+          "relationId": "numerical-analysis:residual-stopping-condition",
+          "roles": [{ "role": "residual", "symbol": "r" }, { "role": "tolerance", "symbol": "varepsilon" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "guarded-condition",
+      "id": "numerical-analysis-development-stopping",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "\\operatorname{norm}(z_k-z)\\le d_k", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "\\operatorname{norm}(z_k-z)\\le d_k" },
+          "relationId": "numerical-analysis:convergence-envelope",
+          "roles": [{ "role": "iterate", "symbol": "z_k" }, { "role": "limit", "symbol": "z" }, { "role": "error-bound", "symbol": "d_k" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "guarded-condition",
+      "id": "numerical-analysis-development-convergence",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "q_1=q_0-f_0/c_0", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "q_1=q_0-f_0/c_0" },
+          "relationId": "numerical-analysis:newton-root-update",
+          "roles": [{ "role": "next-iterate", "symbol": "q_1" }, { "role": "current-iterate", "symbol": "q_0" }, { "role": "function-value", "symbol": "f_0" }, { "role": "derivative-value", "symbol": "c_0" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "guarded-condition",
+      "id": "numerical-analysis-development-newton",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "Q=h\\cdot(a+c)/2", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "Q=h\\cdot(a+c)/2" },
+          "relationId": "numerical-analysis:trapezoidal-quadrature",
+          "roles": [{ "role": "integral-approximation", "symbol": "Q" }, { "role": "step", "symbol": "h" }, { "role": "left-value", "symbol": "a" }, { "role": "right-value", "symbol": "c" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "scope-comparison",
+      "id": "numerical-analysis-development-quadrature",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "y_1=y_0+h_t g_0", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "y_1=y_0+h_t g_0" },
+          "relationId": "numerical-analysis:explicit-euler-step",
+          "roles": [{ "role": "next-state", "symbol": "y_1" }, { "role": "current-state", "symbol": "y_0" }, { "role": "step", "symbol": "h_t" }, { "role": "source", "symbol": "g_0" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "derivation-chain",
+      "id": "numerical-analysis-development-euler",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "v\\approx D\\beta", "snapshotId": "current" },
+      "expected": {
+        "decision": "partial",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "prepareRename": {
+            "placeholder": "\\beta",
+            "range": { "fileId": "numerics/methods.tex", "needle": "v\\approx D\\beta", "selection": { "length": 5, "offset": 10 } },
+            "status": "available"
+          },
+          "references": { "excluded": [], "minimum": 1, "required": [], "status": "available" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": false,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "v\\approx D\\beta" },
+          "relationId": "numerical-analysis:least-squares-approximation",
+          "roles": [{ "role": "observation", "symbol": "v" }, { "role": "design", "symbol": "D" }, { "role": "parameter", "symbol": "beta" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "collision-unsupported",
+      "id": "numerical-analysis-development-least-squares",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "\\kappa=\\lVert M\\rVert\\lVert N\\rVert", "snapshotId": "current" },
+      "expected": {
+        "decision": "established",
+        "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
+        "excludedRelationIds": [],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": { "status": "unavailable" },
+          "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": true,
+        "relations": [{
+          "anchor": { "fileId": "numerics/methods.tex", "needle": "\\kappa=\\lVert M\\rVert\\lVert N\\rVert" },
+          "relationId": "numerical-analysis:condition-number-definition",
+          "roles": [{ "role": "condition-number", "symbol": "kappa" }, { "role": "operator", "symbol": "M" }, { "role": "inverse", "symbol": "N" }],
+          "sourceGrounded": true
+        }]
+      },
+      "family": "guarded-condition",
+      "id": "numerical-analysis-development-conditioning",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
+    },
+    {
+      "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "snapshotId": "numerical-roles-removed" },
+      "expected": {
+        "decision": "established",
+        "diagnostics": { "excludedCodes": [], "maximum": 2, "required": [] },
+        "excludedRelationIds": ["numerical-analysis:approximate-value-relation"],
+        "navigation": {
+          "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
+          "prepareRename": {
+            "placeholder": "u",
+            "range": { "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "selection": { "length": 1, "offset": 11 } },
+            "status": "available"
+          },
+          "references": {
+            "excluded": [],
+            "minimum": 1,
+            "required": [{ "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "selection": { "length": 1, "offset": 11 } }],
+            "status": "available"
+          },
+          "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
+        },
+        "proofGrounded": true,
+        "relations": [],
+        "symbol": "u",
+        "cursorOccurrence": { "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "selection": { "length": 1, "offset": 11 } }
+      },
+      "family": "edit-lifecycle",
+      "id": "numerical-analysis-development-declaration-retraction",
+      "kind": "supplemental",
+      "scenarioId": "OPTML-DEV-001"
     }
   ]
 }

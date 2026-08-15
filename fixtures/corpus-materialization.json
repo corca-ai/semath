@@ -163,6 +163,20 @@
       "sha256": "056a1d9656d843741332cd7df6acecc966844eccc81374d2d5d5af6d3b0e663b"
     },
     {
+      "bytes": 2557575,
+      "cases": 1760,
+      "id": "numerical-analysis-foundation-diversity",
+      "path": "corpus/numerical-analysis-foundation-diversity.json",
+      "sha256": "2f6fb58011e6eacfe81504c041250204be5e857cb9a887f695fdcdaa53ae35ef"
+    },
+    {
+      "bytes": 219108,
+      "cases": 220,
+      "id": "numerical-analysis-foundation-probe",
+      "path": "corpus/numerical-analysis-foundation-probe.json",
+      "sha256": "f0f10fe748ca60809253b0d726fc93f527ae21f43bc3c029b920575f0807c0f1"
+    },
+    {
       "bytes": 110351,
       "cases": 80,
       "id": "optimization-diversity",
@@ -240,6 +254,6 @@
       "sha256": "39d1369854f686e9847ff9cbad922da6d96f38177dfe977ad5e21002c3a1ec80"
     }
   ],
-  "totalBytes": 14940135,
-  "totalCases": 11536
+  "totalBytes": 17716818,
+  "totalCases": 13516
 }

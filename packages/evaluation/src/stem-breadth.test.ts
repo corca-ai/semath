@@ -25,7 +25,7 @@ describe("practical STEM breadth benchmark", () => {
         "numerical-analysis": { gaps: 0, measuredCapabilities: 10 },
       },
       measuredCells: 50,
-      referencedProbes: 93,
+      referencedProbes: 104,
     });
   });
 

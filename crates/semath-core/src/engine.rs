@@ -2451,6 +2451,7 @@ fn claim_shape(
 fn comparison_operator(operator: &str) -> Option<ClaimComparison> {
     Some(match operator {
         "equals" => ClaimComparison::Equal,
+        "approximately-equals" => ClaimComparison::Approximate,
         "not-equals" => ClaimComparison::NotEqual,
         "less-than" => ClaimComparison::LessThan,
         "less-or-equal" => ClaimComparison::LessOrEqual,

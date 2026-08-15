@@ -6,15 +6,15 @@ holds approved support policy; GitHub issues hold planned work.
 
 ## Evidence
 
-- 11,900 scored law cases cover 114 laws in twelve formula packs, including 48
-  positive and 32 refusal diversity cases for every promoted law. Of all 11,956
-  scored corpus cases, 420 remain readable fixture seeds and 11,536 are
+- 13,880 scored law cases cover 136 laws in thirteen formula packs, including
+  48 positive and 32 refusal diversity cases for every promoted law. Of all
+  13,936 scored corpus cases, 420 remain readable fixture seeds and 13,516 are
   deterministic cases reproduced in memory from compact specs, packs, and
   seeds; generated cases are not called independently authored evidence.
-- 1,032 deterministic metamorphic cases preserve results under irrelevant prose,
+- 1,230 deterministic metamorphic cases preserve results under irrelevant prose,
   comments, and document ordering.
-- All 114 evaluated laws score 100% for recall, precision, role binding,
-  source-linked evidence, and refusal preservation across 11,956 cases. The 1,032
+- All 136 evaluated laws score 100% for recall, precision, role binding,
+  source-linked evidence, and refusal preservation across 13,936 cases. The 1,230
   metamorphic observations also pass. Generated breadth remains regression
   evidence rather than independently authored language.
 - The quantities/units foundation passes 52 of 52 non-law cases for quantity,
@@ -61,6 +61,16 @@ holds approved support policy; GitHub issues hold planned work.
   full probability depth suite now covers 1,760 cases. An authored multi-file
   project establishes ten reviewed statistics surfaces and retracts the
   expected-value relation when its role-declaration include is removed.
+- Numerical analysis now promotes 22 typed relation families across error and
+  convergence, nonlinear solves, quadrature, finite differences, time stepping,
+  iterative residuals, least-squares approximation, interpolation, conditioning,
+  and discrete models. It reuses calculus and linear-algebra concepts instead of
+  duplicating their meaning. Approximation is a distinct directional relation:
+  it never enters exact-equality closure, while asymptotic order is represented
+  as membership in a bound class rather than equality. Its focused 1,980-case
+  probe/diversity suite and 198 metamorphic observations pass. Eleven reviewed
+  document probes keep unmet numerical conditions partial and verify exact
+  declaration retraction and navigation.
 - The independent frozen challenge v3 preserves 48 semantic boundaries across
   binding, constraints, packs, presentation, resolution, and syntax, then
   composes them into six realistic document shapes. The pre-change baseline
@@ -164,11 +174,11 @@ holds approved support policy; GitHub issues hold planned work.
 - The practical-STEM benchmark was commissioned at
   `16e1797286fd5143144e78657230cebedd433943`, where it passed 57 of 115
   authored development probes with risk 116. The current 2026-08-15 state
-  passes 97 of 155 with the same risk and zero false establishment, false
+  passes 108 of 166 with the same risk and zero false establishment, false
   conflict, identity, or navigation risk. Its field-by-capability matrix now
-  references 93 unique reviewed probes across all 50 cells. Linear algebra,
+  references 104 unique reviewed probes across all 50 cells. Linear algebra,
   differential equations, and probability/statistics now measure all ten
-  capabilities with no commissioned gaps. Of those 93 probes, 63 pass every
+  capabilities with no commissioned gaps. Of those 104 probes, 74 pass every
   reviewed public surface. Layer-aware cell totals are:
 
   | Program field            | Passed | Cases |
@@ -177,20 +187,20 @@ holds approved support policy; GitHub issues hold planned work.
   | Linear algebra           |     43 |    50 |
   | Differential equations   |     41 |    53 |
   | Probability/statistics   |     41 |    52 |
-  | Numerical analysis       |     13 |    30 |
+  | Numerical analysis       |     57 |    74 |
 
   | Capability            | Passed | Cases |
   | --------------------- | -----: | ----: |
-  | Vocabulary            |     22 |    26 |
-  | Typing                |     20 |    23 |
-  | Relation recognition  |     20 |    31 |
-  | Equivalent forms      |      8 |    16 |
-  | Conditions            |     17 |    25 |
-  | Document attachment   |     20 |    23 |
-  | Project lifecycle     |     10 |    11 |
-  | Decision quality      |     15 |    25 |
-  | Navigation            |     12 |    17 |
-  | Refusal               |     14 |    19 |
+  | Vocabulary            |     26 |    30 |
+  | Typing                |     24 |    27 |
+  | Relation recognition  |     30 |    41 |
+  | Equivalent forms      |     11 |    19 |
+  | Conditions            |     22 |    30 |
+  | Document attachment   |     24 |    27 |
+  | Project lifecycle     |     11 |    12 |
+  | Decision quality      |     19 |    29 |
+  | Navigation            |     17 |    22 |
+  | Refusal               |     18 |    23 |
 
   These overlapping diagnostic projections cannot be summed into an accuracy
   score. They establish the ordered coverage frontier for #347–#351 while the
@@ -235,15 +245,14 @@ field completeness.
 | Prose composition           | Result actions, role-first clauses, and formula-following `where` or `Here` assumptions used separate narrow branches  | The normalized event stream composes these bounded forms and rejects cited, hedged, hypothetical, negated, or contradictory evidence                                      |
 | Characterized operators     | An existentially characterized result and a later typed operator assignment remained disconnected                    | Bounded nominal shapes and unambiguous demonstratives retain the result role; the typed operator plan proves the matching domain condition from the same evidence          |
 | Law runtime                 | A legacy single-result unifier coexisted with bounded multi-result matching                                            | One bounded unifier remains, preserving structural recognition while deleting the obsolete path                                                                           |
+| Approximation semantics     | Approximation notation could collapse into exact equality and inherit unsupported proof authority                     | A distinct directional comparison preserves source evidence without entering equality closure; asymptotic order remains bound-class membership                            |
 
 ## Remaining measured gaps
 
 | Category            | Current limitation                                                                                                   | Affected evidence                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Coverage            | Evaluated vertical slices do not yet provide broad field recognition                                                 | Electromagnetism, thermodynamics/heat transfer, fluid mechanics, calculus, discrete mathematics, and optimization/ML |
-| Document identity   | Realistic declarations, edits, scoped reuse, and navigation projections still frequently lose the intended entity    | 42 of 149 failed authored probes localize first to identity or scope                                                 |
-| Local recognition   | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | 103 of 149 failed authored probes localize to attachment, typed facts, or pack unification                           |
-| Decision projection | Available evidence still produces the wrong calm/established distinction in some realistic scenes                    | 4 of 149 failed authored probes localize first to the decision boundary                                              |
+| Local recognition   | Existing prose events, typed facts, and pack unification do not yet retain enough evidence from realistic exposition | All 58 current development misses localize to attachment (21), typed facts (19), or pack unification (18)            |
 
 The remaining limitations are inputs to later roadmap issues. They require
 shared primitives and measured evidence; they must not be hidden by
