@@ -346,6 +346,35 @@ export interface LawRecognition {
   title: string;
 }
 
+export type ConventionalRequirementInfo =
+  | {
+      constraint: SemanticConstraint;
+      evidence: readonly Evidence[];
+      kind: "role-declaration";
+      parameter: string;
+      requirementId: string;
+      symbol: string;
+    }
+  | {
+      condition: LawConditionInfo;
+      kind: "condition";
+      requirementId: string;
+    };
+
+export interface ConventionalCandidateInfo {
+  bindings: readonly LawBinding[];
+  candidateId: string;
+  disposition: "conventional-candidate";
+  evidence: readonly Evidence[];
+  lawId: string;
+  packId: string;
+  packVersion: string;
+  relation: RelationInfo;
+  relevance: DomainRelevance;
+  requirements: readonly ConventionalRequirementInfo[];
+  title: string;
+}
+
 export type EntitySurfaceRefusalKind =
   | "unsupported"
   | "ambiguous"
@@ -371,6 +400,7 @@ export type EntitySurfaceAuthorization =
 
 export interface SemanticViewInfo {
   context: SemanticContextInfo;
+  conventionalCandidates?: readonly ConventionalCandidateInfo[];
   decision: MeaningDecision;
   declarations: readonly Location[];
   diagnostics: readonly SemanticDiagnostic[];

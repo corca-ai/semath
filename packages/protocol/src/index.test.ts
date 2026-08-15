@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   SEMATH_PROTOCOL_VERSION,
+  type ConventionalCandidateInfo,
   type LawConditionInfo,
   type ProjectSnapshot,
   type SymbolInfo,
@@ -52,5 +53,30 @@ describe("protocol", () => {
       subjects: ["A"],
     };
     expect(condition.operatorProperty).toBe("linear");
+  });
+
+  test("keeps conventional candidates structurally non-authoritative", () => {
+    const candidate: ConventionalCandidateInfo = {
+      bindings: [],
+      candidateId: "conventional/linear-algebra/matrix-vector-product/1:5",
+      disposition: "conventional-candidate",
+      evidence: [],
+      lawId: "matrix-vector-product",
+      packId: "linear-algebra",
+      packVersion: "1.4.0",
+      relation: {
+        conditions: [],
+        description: "A matrix maps a vector.",
+        evidence: [],
+        range: { endOffset: 5, startOffset: 1 },
+        relationId: "linear-algebra:matrix-vector-product",
+        roles: [],
+        title: "Matrix-vector product",
+      },
+      relevance: { evidence: [], support: "supported" },
+      requirements: [],
+      title: "Matrix-vector product",
+    };
+    expect(candidate.disposition).toBe("conventional-candidate");
   });
 });

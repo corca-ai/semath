@@ -37,14 +37,15 @@ use crate::semantic_index::{
     occurrence_binding_key,
 };
 use crate::{
-    AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, DefinitionInfo,
-    DimensionExponentInfo, DomainActivation, EntitySurfaceRefusal, EntitySurfaceRefusalKind,
-    Evidence, Location, MeaningConflict, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
-    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
-    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, ConventionalCandidateDisposition,
+    ConventionalCandidateInfo, ConventionalRequirementInfo, DefinitionInfo, DimensionExponentInfo,
+    DomainActivation, EntitySurfaceRefusal, EntitySurfaceRefusalKind, Evidence, LawBindingProof,
+    LawRecognition, LawRecognitionStatus, Location, MeaningConflict, PROTOCOL_VERSION,
+    PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
+    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue, RoleInfo,
+    SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo,
+    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
+    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -53,6 +54,8 @@ const MAX_SYMBOL_QUANTITIES: usize = 8;
 const MAX_VIEW_DIAGNOSTICS: usize = 8;
 const MAX_VIEW_DECLARATIONS: usize = 16;
 const MAX_VIEW_CANDIDATES: usize = 16;
+const MAX_CONVENTIONAL_CANDIDATES: usize = 8;
+const MAX_CONVENTIONAL_REQUIREMENTS: usize = 16;
 const MAX_VIEW_CLAIMS: usize = 32;
 
 #[derive(Debug, Error)]
@@ -3953,12 +3956,12 @@ impl SemathEngine {
         let queried_formula_range = parsed.map(|math| &math.region.content_range);
         let queried_formula_is_rejected = queried_formula_range
             .is_some_and(|range| observations.semantic_evidence().formula_is_rejected(range));
-        let mut local_formulas = observations.laws.at(offset);
-        if local_formulas.is_empty()
+        let mut projected_formulas = observations.laws.at(offset);
+        if projected_formulas.is_empty()
             && formula_boundary
             && let Some(math) = parsed
         {
-            local_formulas = observations.laws.overlapping(&math.region.content_range);
+            projected_formulas = observations.laws.overlapping(&math.region.content_range);
         }
         let focus_is_relation_head = focus.is_some_and(|focus| {
             queried_relation
@@ -3966,13 +3969,19 @@ impl SemathEngine {
                 .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range))
         });
         if focus_is_relation_head {
-            local_formulas.retain(|formula| {
+            projected_formulas.retain(|formula| {
                 formula.relation.as_ref().is_some_and(|relation| {
                     focus.is_some_and(|focus| ranges_overlap(&relation.range, &focus.range))
                 })
             });
         }
-        local_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
+        projected_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
+        let (conventional_candidates, conventional_candidates_truncated) =
+            conventional_candidates(&projected_formulas);
+        let local_formulas = projected_formulas
+            .into_iter()
+            .filter(|formula| !formula.non_authoritative)
+            .collect::<Vec<_>>();
         let display_focus = focus.cloned().or_else(|| {
             let (name, range) = queried_relation.and_then(relation_head)?;
             let occurrence_id = self
@@ -4160,6 +4169,7 @@ impl SemathEngine {
         let truncated = declarations_truncated
             || diagnostics_truncated
             || domains_truncated
+            || conventional_candidates_truncated
             || context.truncated
             || symbol_info.as_ref().is_some_and(|info| info.truncated);
         let engine_limited = document
@@ -4212,6 +4222,7 @@ impl SemathEngine {
             decision,
             symbol: symbol_info,
             context,
+            conventional_candidates,
             declarations,
             diagnostics,
             domains,
@@ -4680,6 +4691,100 @@ impl SemathEngine {
         }
         self.index.order = project_order;
     }
+}
+
+fn conventional_candidates(formulas: &[LawRecognition]) -> (Vec<ConventionalCandidateInfo>, bool) {
+    let mut candidates = formulas
+        .iter()
+        .filter(|formula| formula.conventional_candidate)
+        .filter(|formula| formula.status != LawRecognitionStatus::Conflicting)
+        .filter_map(|formula| {
+            let relevance = formula.relevance.clone()?;
+            let relation = formula.relation.clone()?;
+            let unresolved_bindings = formula
+                .bindings
+                .iter()
+                .filter(|binding| {
+                    matches!(
+                        binding.proof,
+                        LawBindingProof::Asserted | LawBindingProof::Candidate
+                    )
+                })
+                .collect::<Vec<_>>();
+            if unresolved_bindings.is_empty() {
+                return None;
+            }
+            let mut requirements = unresolved_bindings
+                .into_iter()
+                .map(|binding| ConventionalRequirementInfo::RoleDeclaration {
+                    requirement_id: format!("{}/binding/{}", formula.law_id, binding.parameter),
+                    parameter: binding.parameter.clone(),
+                    symbol: binding.symbol.clone(),
+                    constraint: binding.constraint.clone(),
+                    evidence: vec![binding.evidence.clone()],
+                })
+                .chain(
+                    formula
+                        .conditions
+                        .iter()
+                        .filter(|condition| condition.status != crate::ConstraintStatus::Verified)
+                        .cloned()
+                        .map(|condition| ConventionalRequirementInfo::Condition {
+                            requirement_id: format!(
+                                "{}/condition/{}",
+                                formula.law_id, condition.condition_id
+                            ),
+                            condition,
+                        }),
+                )
+                .collect::<Vec<_>>();
+            requirements.truncate(MAX_CONVENTIONAL_REQUIREMENTS);
+            let mut evidence = formula
+                .evidence
+                .iter()
+                .chain(&relevance.evidence)
+                .cloned()
+                .collect::<Vec<_>>();
+            evidence.sort_by_key(|item| {
+                (
+                    item.rule_id.clone(),
+                    item.source_ranges
+                        .first()
+                        .map_or(0, |range| range.start_offset),
+                )
+            });
+            evidence.dedup();
+            Some(ConventionalCandidateInfo {
+                candidate_id: format!(
+                    "conventional/{}/{}/{}:{}",
+                    formula.pack_id,
+                    formula.law_id,
+                    formula.range.start_offset,
+                    formula.range.end_offset
+                ),
+                disposition: ConventionalCandidateDisposition::ConventionalCandidate,
+                pack_id: formula.pack_id.clone(),
+                pack_version: formula.pack_version.clone(),
+                law_id: formula.law_id.clone(),
+                title: formula.title.clone(),
+                relation,
+                bindings: formula.bindings.clone(),
+                requirements,
+                relevance,
+                evidence,
+            })
+        })
+        .collect::<Vec<_>>();
+    candidates.sort_by(|left, right| {
+        crate::domain::support_rank(left.relevance.support)
+            .cmp(&crate::domain::support_rank(right.relevance.support))
+            .then(left.pack_id.cmp(&right.pack_id))
+            .then(left.law_id.cmp(&right.law_id))
+    });
+    candidates.dedup_by(|left, right| left.candidate_id == right.candidate_id);
+    let truncated = candidates.len() > MAX_CONVENTIONAL_CANDIDATES;
+    candidates.truncate(MAX_CONVENTIONAL_CANDIDATES);
+    (candidates, truncated)
 }
 
 fn asserted_definition_evidence(

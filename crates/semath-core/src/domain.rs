@@ -8,8 +8,9 @@ use crate::pack::built_in_packs;
 use crate::prose::ScientificSemanticEvidence;
 use crate::scope::ScopeGraph;
 use crate::{
-    DomainActivation, DomainRelevance, DomainSupportTier, Evidence, LawRecognition, MathRootState,
-    ProjectDocument, SourceRange,
+    ConstraintStatus, DomainActivation, DomainRelevance, DomainSupportTier, Evidence,
+    LawBindingProof, LawRecognition, LawRecognitionStatus, MathRootState, ProjectDocument,
+    SourceRange,
 };
 
 const MAX_PRIOR_MATCHES: usize = 64;
@@ -37,6 +38,8 @@ struct EquationActivation {
     pack_version: String,
     title: String,
     range: SourceRange,
+    scope_id: usize,
+    source_established: bool,
     evidence: Evidence,
 }
 
@@ -45,6 +48,7 @@ pub(crate) struct DomainObservations {
     hypotheses: Vec<ScopedHypothesis>,
     equations: Vec<EquationActivation>,
     scopes: ScopeGraph,
+    include_current_equation: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -134,16 +138,28 @@ impl DomainObservations {
             );
         }
         for equation in &self.equations {
-            if equation.range.contains(offset) {
+            let in_equation = self.include_current_equation && equation.range.contains(offset);
+            let precedes_in_scope = equation.range.end_offset <= offset
+                && equation.source_established
+                && self.scopes.visible(equation.scope_id, offset);
+            if in_equation || precedes_in_scope {
                 merge_activation(
                     &mut active,
                     ActivationInput {
                         pack_id: &equation.pack_id,
                         pack_version: &equation.pack_version,
                         title: &equation.title,
-                        scope_kind: "equation",
-                        scope_range: equation.range.clone(),
-                        support: DomainSupportTier::Explicit,
+                        scope_kind: if in_equation { "equation" } else { "section" },
+                        scope_range: if in_equation {
+                            equation.range.clone()
+                        } else {
+                            self.scopes.range_at(offset)
+                        },
+                        support: if in_equation {
+                            DomainSupportTier::Explicit
+                        } else {
+                            DomainSupportTier::Supported
+                        },
                         specificity: usize::MAX,
                         evidence: equation.evidence.clone(),
                     },
@@ -171,6 +187,17 @@ impl DomainObservations {
                 .then(left_id.cmp(right_id))
         });
         active
+    }
+
+    pub(crate) fn has_established_equation_evidence(&self) -> bool {
+        self.equations
+            .iter()
+            .any(|equation| equation.source_established)
+    }
+
+    pub(crate) fn for_forward_law_routing(mut self) -> Self {
+        self.include_current_equation = false;
+        self
     }
 }
 
@@ -235,6 +262,7 @@ pub(crate) fn observe_domains(
         .collect::<BTreeMap<_, _>>();
     let equations = formulas
         .iter()
+        .filter(|formula| !formula.non_authoritative)
         .filter_map(|formula| {
             let evidence = formula.evidence.first()?.clone();
             Some(EquationActivation {
@@ -246,6 +274,8 @@ pub(crate) fn observe_domains(
                     .unwrap_or(formula.pack_id.as_str())
                     .into(),
                 range: formula.range.clone(),
+                scope_id: scopes.id_at(formula.range.start_offset),
+                source_established: formula_is_source_established(formula),
                 evidence,
             })
         })
@@ -254,7 +284,23 @@ pub(crate) fn observe_domains(
         hypotheses,
         equations,
         scopes,
+        include_current_equation: true,
     }
+}
+
+fn formula_is_source_established(formula: &LawRecognition) -> bool {
+    matches!(
+        formula.status,
+        LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified
+    ) && formula.bindings.iter().all(|binding| {
+        matches!(
+            binding.proof,
+            LawBindingProof::Typed | LawBindingProof::Derived
+        ) && !binding.evidence.source_ranges.is_empty()
+    }) && formula
+        .conditions
+        .iter()
+        .all(|condition| condition.status == ConstraintStatus::Verified)
 }
 
 fn collect_priors(

@@ -931,6 +931,266 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
 }
 
 #[test]
+fn semantic_view_exposes_conventional_notation_as_a_bounded_non_authoritative_candidate() {
+    let content = "For a periodic signal, the asserted relation is $f=1/T$.";
+    let offset = content.rfind("f=").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
+    assert!(view.diagnostics.is_empty());
+    let candidate = view
+        .conventional_candidates
+        .first()
+        .expect("period-frequency convention candidate");
+    assert_eq!(candidate.law_id, "period-frequency-reciprocity");
+    assert_eq!(
+        candidate.disposition,
+        crate::ConventionalCandidateDisposition::ConventionalCandidate
+    );
+    assert!(candidate.requirements.iter().any(|requirement| matches!(
+        requirement,
+        crate::ConventionalRequirementInfo::RoleDeclaration { parameter, constraint, .. }
+            if parameter == "frequency"
+                && constraint.concepts == ["signals-systems:cyclic-frequency"]
+    )));
+    assert!(candidate.requirements.iter().any(|requirement| matches!(
+        requirement,
+        crate::ConventionalRequirementInfo::Condition { condition, .. }
+            if condition.condition_id == "positive-period"
+    )));
+    assert!(candidate.evidence.iter().any(|evidence| {
+        evidence.kind == "prose-domain-prior" && !evidence.source_ranges.is_empty()
+    }));
+
+    let definition = engine
+        .query(query(
+            Query::Definition {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Locations {
+        authorization,
+        locations,
+    } = definition.value
+    else {
+        panic!("expected definition result")
+    };
+    assert!(matches!(
+        authorization,
+        crate::EntitySurfaceAuthorization::Refused { .. }
+    ));
+    assert!(locations.is_empty());
+}
+
+#[test]
+fn removing_domain_context_retracts_the_conventional_candidate() {
+    let content = "The asserted relation is $f=1/T$.";
+    let offset = content.rfind("f=").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(view.conventional_candidates.is_empty(), "{view:#?}");
+}
+
+#[test]
+fn conventional_candidates_cover_representative_stem_notation_families() {
+    for (source, needle, law_id) in [
+        (
+            "The asserted linear algebra relation is $A x=b$.",
+            "A x=b",
+            "matrix-vector-product",
+        ),
+        (
+            "The asserted probability relation is $\\mu=E(X)$.",
+            "\\mu=E(X)",
+            "expected-value-definition",
+        ),
+        (
+            "The asserted classical mechanics relation is $F=ma$.",
+            "F=ma",
+            "newton-second-law",
+        ),
+        (
+            "The asserted electromagnetism relation is $F=qE$.",
+            "F=qE",
+            "electric-force-law",
+        ),
+        (
+            "The asserted thermodynamics relation is $PV=nRT$.",
+            "PV=nRT",
+            "ideal-gas",
+        ),
+    ] {
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(source)).unwrap();
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: source.find(needle).unwrap() as u32,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert!(
+            view.conventional_candidates
+                .iter()
+                .any(|candidate| candidate.law_id == law_id),
+            "missing {law_id} for {source}: {view:#?}"
+        );
+        assert!(view.diagnostics.is_empty(), "{source}: {view:#?}");
+        assert!(!matches!(
+            view.decision,
+            MeaningDecision::Established { .. }
+        ));
+    }
+}
+
+#[test]
+fn field_context_alone_does_not_authorize_a_complete_looking_law() {
+    let source = "The altered expression does not establish the reviewed probability relation. $c=\\operatorname{Cov}(X,Z)$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(source)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: source.find("c=").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(!matches!(
+        view.decision,
+        MeaningDecision::Established { .. }
+    ));
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .all(|relation| { relation.relation_id != "probability:covariance-value-definition" })
+    );
+}
+
+#[test]
+fn an_established_equation_routes_only_later_formulas_in_the_same_scope() {
+    let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$ Then inspect $z$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(source)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: source.rfind('z').unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let mechanics = view
+        .domains
+        .first()
+        .expect("the established equation routes its field forward");
+    assert_eq!(mechanics.pack_id, "classical-mechanics");
+    assert_eq!(mechanics.support, crate::DomainSupportTier::Supported);
+    assert!(mechanics.evidence.iter().any(|evidence| {
+        evidence.kind == "canonical-math"
+            && evidence
+                .source_ranges
+                .iter()
+                .all(|range| range.end_offset <= source.rfind('z').unwrap() as u32)
+    }));
+
+    let without_equation =
+        "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. Then inspect $z$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(without_equation)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: without_equation.rfind('z').unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.domains
+            .iter()
+            .all(|domain| domain.support != crate::DomainSupportTier::Supported)
+    );
+}
+
+#[test]
+fn established_equation_does_not_activate_its_own_conventional_notation() {
+    let source = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz})$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(source)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: source.find("\\omega_c").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
+    assert!(view.conventional_candidates.is_empty());
+}
+
+#[test]
 fn formula_metadescription_establishes_only_the_attached_relation() {
     let content = "The selected constitutive model is\n\\[J=-D\\nabla c-q\\nabla\\phi.\\]";
     let offset = content.rfind("\\phi").unwrap() as u32 + "\\phi".len() as u32;
@@ -2329,6 +2589,55 @@ fn included_type_declarations_drive_project_law_inference() {
     let symbol = view.symbol.expect("expected V symbol information");
     assert_eq!(symbol.roles[0].concept_id, "quantities-units:voltage");
     assert_eq!(symbol.roles[0].evidence.source_ranges[0].start_offset, 0);
+}
+
+#[test]
+fn conventional_notation_does_not_downgrade_included_type_proof() {
+    let main = "\\input{definitions}\nThe linear system is $Ax=b$.";
+    let definitions = "Let $A$ denote a matrix, $x$ a vector, and $b$ a vector.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "definitions".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 19,
+            },
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("definitions", "definitions.tex", definitions, 1),
+            ],
+        })
+        .unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.find("Ax=b").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
+    assert!(view.conventional_candidates.is_empty());
 }
 
 #[test]
