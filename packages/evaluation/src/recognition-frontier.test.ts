@@ -119,6 +119,7 @@ describe("recognition frontier", () => {
   test("does not mistake an empty public projection for a canonical loss", () => {
     const populated = semanticView();
     const view: SemanticViewInfo = {
+      authoringContext: populated.authoringContext,
       context: {
         candidates: [],
         claims: [],
@@ -209,6 +210,24 @@ function semanticView(): SemanticViewInfo {
     strength: "strong" as const,
   };
   return {
+    authoringContext: {
+      claimEvidence: [],
+      conditions: [],
+      disposition: "partial",
+      equationLinks: [],
+      lifecycle: {
+        capped: false,
+        documentVersion: 1,
+        editable: true,
+        engineLimited: false,
+        freshness: "current",
+        generation: "authored",
+        retracted: false,
+      },
+      notationOccurrences: [],
+      requirements: [],
+      truncated: false,
+    },
     context: {
       candidates: [
         {

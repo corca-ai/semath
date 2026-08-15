@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 14 as const;
+export const SEMATH_PROTOCOL_VERSION = 15 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 8 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -375,6 +375,110 @@ export interface ConventionalCandidateInfo {
   title: string;
 }
 
+export type MathAuthoringDisposition =
+  | "established"
+  | "partial"
+  | "conventional"
+  | "ambiguous"
+  | "conflicting"
+  | "unsupported"
+  | "engine-limited";
+
+export interface MathSourceLifecycleInfo {
+  capped: boolean;
+  documentVersion: number;
+  editable: boolean;
+  engineLimited: boolean;
+  freshness: "current";
+  generation: "authored" | "generated";
+  retracted: boolean;
+}
+
+export interface MathFormulaAnchorInfo {
+  documentVersion: number;
+  location: Location;
+  provenance?: readonly SourceRange[];
+  scopePath: readonly number[];
+  sourceNotation: string;
+}
+
+export type MathAuthoringRequirementInfo =
+  | {
+      evidence: readonly Evidence[];
+      kind: "declaration";
+      occurrenceId: SourceOccurrenceId;
+      requirementId: string;
+      symbol: string;
+    }
+  | {
+      constraint: SemanticConstraint;
+      evidence: readonly Evidence[];
+      kind: "role-declaration";
+      parameter: string;
+      requirementId: string;
+      symbol: string;
+    }
+  | {
+      condition: LawConditionInfo;
+      kind: "condition";
+      requirementId: string;
+    }
+  | {
+      alternatives: readonly MeaningAlternative[];
+      evidence: readonly Evidence[];
+      kind: "disambiguation";
+      requirementId: string;
+    };
+
+export interface MathEquationLinkInfo {
+  evidence: readonly Evidence[];
+  kind: "derived-law" | "shared-entity";
+  linkId: string;
+  sharedEntities: readonly EntityId[];
+  source: MathFormulaAnchorInfo;
+  target: MathFormulaAnchorInfo;
+}
+
+export interface MathApproximationInfo {
+  evidence: readonly Evidence[];
+  exactness: "approximate";
+  relatedFactIds?: readonly string[];
+  relationRange: SourceRange;
+}
+
+export interface MathClaimEvidenceLinkInfo {
+  claim: Location;
+  claimId: string;
+  evidence: readonly Evidence[];
+  modality: "asserted" | "cited" | "hedged" | "hypothetical" | "quoted";
+  polarity: "negative" | "positive";
+  strengthCeiling: "asserted" | "qualified" | "unusable";
+  supportingClaimIds: readonly string[];
+  supportingFormulas: readonly MathFormulaAnchorInfo[];
+}
+
+export interface MathNotationOccurrenceInfo {
+  entityId: EntityId;
+  location: Location;
+  occurrenceId: SourceOccurrenceId;
+  scopePath: readonly number[];
+  sourceNotation: string;
+}
+
+export interface MathAuthoringContext {
+  approximation?: MathApproximationInfo;
+  claimEvidence: readonly MathClaimEvidenceLinkInfo[];
+  conditions: readonly LawConditionInfo[];
+  conventionalCandidates?: readonly ConventionalCandidateInfo[];
+  disposition: MathAuthoringDisposition;
+  equationLinks: readonly MathEquationLinkInfo[];
+  formula?: MathFormulaAnchorInfo;
+  lifecycle: MathSourceLifecycleInfo;
+  notationOccurrences: readonly MathNotationOccurrenceInfo[];
+  requirements: readonly MathAuthoringRequirementInfo[];
+  truncated: boolean;
+}
+
 export type EntitySurfaceRefusalKind =
   | "unsupported"
   | "ambiguous"
@@ -399,8 +503,8 @@ export type EntitySurfaceAuthorization =
   | { reason: EntitySurfaceRefusal; status: "refused" };
 
 export interface SemanticViewInfo {
+  authoringContext: MathAuthoringContext;
   context: SemanticContextInfo;
-  conventionalCandidates?: readonly ConventionalCandidateInfo[];
   decision: MeaningDecision;
   declarations: readonly Location[];
   diagnostics: readonly SemanticDiagnostic[];

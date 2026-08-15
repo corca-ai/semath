@@ -76,7 +76,8 @@ answer, while decorated and styled forms remain distinct from their nucleus.
 
 Conventional notation is a second, non-authoritative candidate projection.
 After structural dispatch, a uniquely routed field may pair reviewed role
-notation with a compatible law. `semanticView.conventionalCandidates` exposes
+notation with a compatible law.
+`semanticView.authoringContext.conventionalCandidates` exposes
 the proposed relation, role bindings, scoped routing evidence, and the exact
 role declarations and law conditions still required. This projection cannot
 create claims, establish an entity or law, emit a Problem, authorize navigation
@@ -183,7 +184,7 @@ visible there, so same-spelling dimensions in sibling scopes never become proof.
 Constraint conflicts require incompatible established values or a demonstrably
 invalid typed operation. Missing operands, unresolved symbolic extents, and
 work limits remain partial evidence rather than Problems. Work and truncation
-counters are part of protocol 14 so hosts can enforce performance budgets.
+counters are part of protocol 15 so hosts can enforce performance budgets.
 
 Transparent macro structure supplied by wasmtex may contribute meaning in both
 formulas and prose declarations. Generated nodes inherit only the real call
@@ -374,13 +375,23 @@ units and coordinate frames.
 
 ## Public boundary
 
-Protocol 14 exposes selection, `semanticView`, definition, references, rename,
+Protocol 15 exposes selection, `semanticView`, definition, references, rename,
 and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
 established, partial, ambiguous, conflicting, or unsupported. Known decisions
 carry a structured meaning; all decisions carry bounded typed reasons. There is
 no summary-string or missing-evidence presentation policy in the protocol. Native, WASM,
 Worker, LSP, and CorTeX consume the same result model, and raw parser trees are
 not public.
+
+`semanticView.authoringContext` is a neutral bounded projection over that same
+authority for writing-assistance hosts. It exposes one exact formula anchor,
+structured role and condition requirements, conventional candidates, typed
+conditions, source-backed equation links, explicit approximation disposition,
+prose-claim evidence links, same-entity notation occurrences, and current
+source lifecycle. It does not introduce a second decision, infer rhetorical
+intent, or encode phrases, English wording, UI categories, or recommendation
+scores. Shared-entity equation links remain distinct from derived-law links so
+a host cannot turn mere reuse into “follows from” language.
 
 Cursor ownership is one pure UTF-16 range policy over real occurrence,
 structural selection, and complete-application boundaries. Exact containment
