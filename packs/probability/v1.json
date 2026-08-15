@@ -1,12 +1,28 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "probability",
   "packVersion": "1.5.0",
   "packKind": "field",
   "namespace": "probability",
   "title": "Probability and statistics",
   "description": "Probability, statistics, and bounded stochastic-process formulas gated by explicit local roles and conditions.",
-  "dependencies": [],
+  "dependencies": [
+    {
+      "packId": "calculus-analysis",
+      "versionMajor": 1,
+      "requiredCapabilities": []
+    },
+    {
+      "packId": "control-systems",
+      "versionMajor": 1,
+      "requiredCapabilities": []
+    },
+    {
+      "packId": "linear-algebra",
+      "versionMajor": 1,
+      "requiredCapabilities": []
+    }
+  ],
   "capabilities": {
     "provides": [
       "semath:formula-recognition",
@@ -27,7 +43,7 @@
     },
     {
       "id": "random-variable",
-      "conceptKind": "quantity",
+      "conceptKind": "operator",
       "title": "Random variable",
       "description": "A measurable numerical quantity defined on a probability space.",
       "parents": [],
@@ -177,7 +193,7 @@
     },
     {
       "id": "covariance-matrix",
-      "conceptKind": "quantity",
+      "conceptKind": "operator",
       "title": "Covariance matrix",
       "description": "A matrix collecting pairwise covariance for a random vector.",
       "aliases": [
@@ -426,6 +442,13 @@
       "references": [
         "probability-theory"
       ]
+    }
+  ],
+  "conceptBridges": [
+    {
+      "id": "covariance-matrix-is-symmetric-operator",
+      "source": "probability:covariance-matrix",
+      "target": "linear-algebra:symmetric-operator"
     }
   ],
   "quantityKinds": [],

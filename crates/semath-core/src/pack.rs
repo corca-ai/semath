@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 11;
+pub const PACK_SCHEMA_VERSION: u32 = 12;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -43,6 +43,8 @@ pub struct DomainPack {
     pub capabilities: PackCapabilities,
     #[serde(default)]
     pub concepts: Vec<PackConcept>,
+    #[serde(default)]
+    pub concept_bridges: Vec<PackConceptBridge>,
     #[serde(default)]
     pub quantity_kinds: Vec<PackQuantityKind>,
     #[serde(default)]
@@ -96,6 +98,14 @@ pub struct PackConcept {
     #[serde(default)]
     pub parents: Vec<String>,
     pub references: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PackConceptBridge {
+    pub id: String,
+    pub source: String,
+    pub target: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -547,6 +557,41 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                 )
         })
         .collect::<BTreeSet<_>>();
+    let concept_kinds = packs
+        .iter()
+        .flat_map(|pack| {
+            pack.concepts
+                .iter()
+                .map(move |concept| {
+                    (
+                        format!("{}:{}", pack.namespace, concept.id),
+                        concept.concept_kind.as_str(),
+                    )
+                })
+                .chain(pack.quantity_kinds.iter().map(move |quantity| {
+                    (format!("{}:{}", pack.namespace, quantity.id), "quantity")
+                }))
+        })
+        .collect::<BTreeMap<_, _>>();
+    let concept_owners = packs
+        .iter()
+        .flat_map(|pack| {
+            pack.concepts
+                .iter()
+                .map(move |concept| {
+                    (
+                        format!("{}:{}", pack.namespace, concept.id),
+                        pack.pack_id.as_str(),
+                    )
+                })
+                .chain(pack.quantity_kinds.iter().map(move |quantity| {
+                    (
+                        format!("{}:{}", pack.namespace, quantity.id),
+                        pack.pack_id.as_str(),
+                    )
+                }))
+        })
+        .collect::<BTreeMap<_, _>>();
     let by_id = packs
         .iter()
         .map(|pack| (pack.pack_id.as_str(), pack))
@@ -608,6 +653,51 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                         format!("unknown parent concept {parent}"),
                     ));
                 }
+                if !parent.starts_with(&format!("{}:", pack.namespace)) {
+                    return Err(error(
+                        format!("packs[{pack_index}].concepts[{concept_index}].parents"),
+                        "cross-pack ancestry must be declared in conceptBridges",
+                    ));
+                }
+            }
+        }
+        let dependencies = pack
+            .dependencies
+            .iter()
+            .map(|dependency| dependency.pack_id.as_str())
+            .collect::<BTreeSet<_>>();
+        for (bridge_index, bridge) in pack.concept_bridges.iter().enumerate() {
+            let path = format!("packs[{pack_index}].conceptBridges[{bridge_index}]");
+            let Some(source_kind) = concept_kinds.get(&bridge.source) else {
+                return Err(error(
+                    format!("{path}.source"),
+                    format!("unknown concept {}", bridge.source),
+                ));
+            };
+            let Some(target_kind) = concept_kinds.get(&bridge.target) else {
+                return Err(error(
+                    format!("{path}.target"),
+                    format!("unknown concept {}", bridge.target),
+                ));
+            };
+            if concept_owners.get(&bridge.source).copied() != Some(pack.pack_id.as_str()) {
+                return Err(error(
+                    format!("{path}.source"),
+                    "bridge source must be owned by its declaring pack",
+                ));
+            }
+            let target_owner = concept_owners[&bridge.target];
+            if !dependencies.contains(target_owner) {
+                return Err(error(
+                    format!("{path}.target"),
+                    format!("target owner {target_owner} must be a declared dependency"),
+                ));
+            }
+            if source_kind != target_kind {
+                return Err(error(
+                    path,
+                    format!("incompatible concept kinds {source_kind} and {target_kind}"),
+                ));
             }
         }
         for (law_index, law) in pack.laws.iter().enumerate() {
@@ -620,6 +710,15 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                         format!("unknown concept {}", role.concept),
                     ));
                 }
+                let owner = concept_owners[&role.concept];
+                if owner != pack.pack_id && !dependencies.contains(owner) {
+                    return Err(error(
+                        format!(
+                            "packs[{pack_index}].laws[{law_index}].roles[{role_index}].concept"
+                        ),
+                        format!("concept owner {owner} must be a declared dependency"),
+                    ));
+                }
                 if let Some(quantity) = &role.quantity
                     && !concepts.contains(quantity)
                 {
@@ -629,6 +728,17 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
                         ),
                         format!("unknown quantity {quantity}"),
                     ));
+                }
+                if let Some(quantity) = &role.quantity {
+                    let owner = concept_owners[quantity];
+                    if owner != pack.pack_id && !dependencies.contains(owner) {
+                        return Err(error(
+                            format!(
+                                "packs[{pack_index}].laws[{law_index}].roles[{role_index}].quantity"
+                            ),
+                            format!("quantity owner {owner} must be a declared dependency"),
+                        ));
+                    }
                 }
             }
         }
@@ -648,7 +758,8 @@ pub fn validate_catalog(packs: &[DomainPack]) -> Result<(), PackValidationError>
             }
         }
     }
-    dependency_cycles(packs, &ids)
+    dependency_cycles(packs, &ids)?;
+    concept_cycles(packs)
 }
 
 fn same_dimension(left: &[PackDimensionExponent], right: &[PackDimensionExponent]) -> bool {
@@ -794,6 +905,20 @@ fn validate_entries(pack: &DomainPack) -> Result<(), PackValidationError> {
         "activationRules",
         pack.activation_rules.iter().map(|entry| entry.id.as_str()),
     )?;
+    unique_ids(
+        "conceptBridges",
+        pack.concept_bridges.iter().map(|bridge| bridge.id.as_str()),
+    )?;
+    for (index, bridge) in pack.concept_bridges.iter().enumerate() {
+        validate_qualified_id(&format!("conceptBridges[{index}].source"), &bridge.source)?;
+        validate_qualified_id(&format!("conceptBridges[{index}].target"), &bridge.target)?;
+        if bridge.source == bridge.target {
+            return Err(error(
+                format!("conceptBridges[{index}]"),
+                "bridge source and target must differ",
+            ));
+        }
+    }
     unique_ids("roles", pack.roles.iter().map(|entry| entry.id.as_str()))?;
     unique_ids(
         "operators",
@@ -1028,6 +1153,62 @@ fn dependency_cycles(packs: &[DomainPack], ids: &HashSet<&str>) -> Result<(), Pa
     Ok(())
 }
 
+fn concept_cycles(packs: &[DomainPack]) -> Result<(), PackValidationError> {
+    let parents = packs
+        .iter()
+        .flat_map(|pack| {
+            pack.concepts
+                .iter()
+                .map(move |concept| {
+                    (
+                        format!("{}:{}", pack.namespace, concept.id),
+                        concept.parents.clone(),
+                    )
+                })
+                .chain(
+                    pack.concept_bridges
+                        .iter()
+                        .map(|bridge| (bridge.source.clone(), vec![bridge.target.clone()])),
+                )
+        })
+        .fold(
+            BTreeMap::<String, Vec<String>>::new(),
+            |mut graph, (source, targets)| {
+                graph.entry(source).or_default().extend(targets);
+                graph
+            },
+        );
+    fn visit(
+        concept: &str,
+        parents: &BTreeMap<String, Vec<String>>,
+        visiting: &mut HashSet<String>,
+        visited: &mut HashSet<String>,
+    ) -> bool {
+        if visited.contains(concept) {
+            return false;
+        }
+        if !visiting.insert(concept.to_owned()) {
+            return true;
+        }
+        let cycle = parents.get(concept).is_some_and(|targets| {
+            targets
+                .iter()
+                .any(|target| visit(target, parents, visiting, visited))
+        });
+        visiting.remove(concept);
+        visited.insert(concept.to_owned());
+        cycle
+    }
+    let mut visiting = HashSet::new();
+    let mut visited = HashSet::new();
+    for concept in parents.keys() {
+        if visit(concept, &parents, &mut visiting, &mut visited) {
+            return Err(error("conceptBridges", "concept bridge cycle"));
+        }
+    }
+    Ok(())
+}
+
 fn unique_ids<'a>(
     path: &str,
     values: impl IntoIterator<Item = &'a str>,
@@ -1076,14 +1257,89 @@ fn error(path: impl Into<String>, message: impl Into<String>) -> PackValidationE
 #[cfg(test)]
 mod tests {
     use super::{
-        PACK_SCHEMA_VERSION, built_in_packs, compile_pack, validate_catalog, validate_pack,
+        PACK_SCHEMA_VERSION, PackConceptBridge, built_in_packs, compile_pack, validate_catalog,
+        validate_pack,
     };
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 11);
+        assert_eq!(PACK_SCHEMA_VERSION, 12);
         assert_eq!(built_in_packs().len(), 14);
         validate_catalog(built_in_packs()).unwrap();
+    }
+
+    #[test]
+    fn validates_owned_typed_concept_bridges_and_external_role_dependencies() {
+        let mut packs = built_in_packs().to_vec();
+        let control = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "control-systems")
+            .unwrap();
+        control.dependencies.clear();
+        control.capabilities.requires.clear();
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.path.contains("conceptBridges[0].target"));
+        assert!(error.message.contains("declared dependency"));
+
+        let mut packs = built_in_packs().to_vec();
+        let control = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "control-systems")
+            .unwrap();
+        control.concept_bridges[0].target = "linear-algebra:linear-operator".into();
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.path.contains("conceptBridges[0]"));
+        assert!(error.message.contains("incompatible concept kinds"));
+
+        let mut packs = built_in_packs().to_vec();
+        let probability = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "probability")
+            .unwrap();
+        probability
+            .dependencies
+            .retain(|dependency| dependency.pack_id != "control-systems");
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.path.contains("roles"));
+        assert!(error.message.contains("concept owner control-systems"));
+    }
+
+    #[test]
+    fn rejects_cross_pack_parents_and_concept_cycles() {
+        let mut packs = built_in_packs().to_vec();
+        let optimization = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "optimization-ml")
+            .unwrap();
+        optimization.concepts[0]
+            .parents
+            .push("calculus-analysis:function".into());
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.message.contains("conceptBridges"));
+
+        let mut packs = built_in_packs().to_vec();
+        let linear = packs
+            .iter_mut()
+            .find(|pack| pack.pack_id == "linear-algebra")
+            .unwrap();
+        linear
+            .concepts
+            .iter_mut()
+            .find(|concept| concept.id == "linear-operator")
+            .unwrap()
+            .parents
+            .push("linear-algebra:transpose".into());
+        let error = validate_catalog(&packs).unwrap_err();
+        assert!(error.message.contains("concept bridge cycle"));
+
+        let mut pack = built_in_packs()[0].clone();
+        pack.concept_bridges.push(PackConceptBridge {
+            id: "self-bridge".into(),
+            source: format!("{}:{}", pack.namespace, pack.concepts[0].id),
+            target: format!("{}:{}", pack.namespace, pack.concepts[0].id),
+        });
+        let error = validate_pack(&pack).unwrap_err();
+        assert!(error.message.contains("must differ"));
     }
 
     #[test]

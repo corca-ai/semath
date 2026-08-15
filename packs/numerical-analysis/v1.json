@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "numerical-analysis",
   "packVersion": "1.0.0",
   "packKind": "field",
@@ -268,6 +268,13 @@
       "aliases": ["discretized operator", "difference operator"],
       "parents": [],
       "references": ["leveque"]
+    }
+  ],
+  "conceptBridges": [
+    {
+      "id": "discrete-operator-is-linear-operator",
+      "source": "numerical-analysis:discrete-operator",
+      "target": "linear-algebra:linear-operator"
     }
   ],
   "quantityKinds": [],

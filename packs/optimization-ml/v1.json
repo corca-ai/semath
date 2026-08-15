@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "optimization-ml",
   "packVersion": "1.3.0",
   "packKind": "field",
@@ -14,6 +14,16 @@
         "semath:dimensional-analysis",
         "semath:quantities"
       ]
+    },
+    {
+      "packId": "calculus-analysis",
+      "versionMajor": 1,
+      "requiredCapabilities": []
+    },
+    {
+      "packId": "linear-algebra",
+      "versionMajor": 1,
+      "requiredCapabilities": []
     }
   ],
   "capabilities": {
@@ -204,12 +214,27 @@
         "class probability",
         "confidence"
       ],
-      "parents": [
-        "quantities-units:dimensionless"
-      ],
+      "parents": [],
       "references": [
         "convex-optimization"
       ]
+    }
+  ],
+  "conceptBridges": [
+    {
+      "id": "objective-is-function",
+      "source": "optimization-ml:objective-function",
+      "target": "calculus-analysis:function"
+    },
+    {
+      "id": "iterate-is-vector",
+      "source": "optimization-ml:iterate",
+      "target": "linear-algebra:vector"
+    },
+    {
+      "id": "predicted-probability-is-dimensionless",
+      "source": "optimization-ml:predicted-probability",
+      "target": "quantities-units:dimensionless"
     }
   ],
   "quantityKinds": [],

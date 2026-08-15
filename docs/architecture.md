@@ -187,9 +187,10 @@ opaque, and a command name is never treated as its expansion meaning.
 ## Domain packs
 
 A domain pack is declarative expert knowledge compiled to one Rust runtime IR.
-Schema 11 describes namespaced concepts and reviewed English aliases, typed law
-roles, one canonical relation with optional surface representations, conditions,
-activation evidence, quantities, units, and references. Activation evidence is
+Schema 12 describes namespaced concepts, reviewed English aliases, typed
+cross-pack concept bridges, typed law roles, one canonical relation with
+optional surface representations, conditions, activation evidence, quantities,
+units, and references. Activation evidence is
 either a reviewed prose phrase or a closed
 structural kind derived from the canonical math model; arbitrary pattern
 strings are not a runtime policy language. The generic unifier applies every
@@ -202,9 +203,15 @@ resolves conditions to bound symbols and source evidence; packs cannot add a
 second matcher or constraint model.
 
 Pack compilation rejects unknown fields, unresolved or wrong-kind concepts,
-invalid dependencies, cycles, and inconsistent dimensions. A build-generated,
-sorted catalog discovers versioned pack JSON without a handwritten Rust
+foreign bridge sources, bridge targets outside direct dependencies, undeclared
+external role owners, dependency or concept-lineage cycles, and inconsistent
+dimensions. Pack-local parents and typed bridges compile into the same bounded
+concept-lineage closure used by role compatibility; there is no bridge runtime
+or second graph. A build-generated, sorted catalog discovers versioned pack
+JSON without a handwritten Rust
 registry; the same compiler report is exposed through WASM to authoring tools.
+The report retains bridge ownership alongside domain signatures and the
+cross-pack collision atlas.
 Typed operator signatures may bind both declared concepts and quantity kinds;
 their canonical operand structure can derive role and shared-context evidence
 only when the complete signature matches. In an exact equality, a complete
@@ -212,6 +219,19 @@ signature on one side may also derive the result type for the exact expression
 on the other side. This evidence is symmetric across equality direction, but
 does not apply to inequalities, approximate comparisons, citations, or an
 output with an explicitly conflicting shape or quantity.
+
+An established law may expose simple typed bindings as source-ordered evidence
+for later formulas in the same document. The engine performs at most two
+forward hops and admits at most 64 such roles per target formula. Every pass
+uses the same compiled-law unifier; domain relevance is rebuilt from source
+evidence before matching and is never derived from this chain. Accepted role
+bindings that a later law actually consumes become `DerivedLaw` claims in
+`ProjectSemanticIndex` with explicit relation parents; unrelated single-law
+bindings are not retained. Clean and incremental rebuilds therefore share the
+normal atomic retraction path without growing a parallel fact inventory. A
+missing intermediate, scope leak, conflict, composite label, or exhausted bound
+produces uncertainty rather than an invented diagnostic.
+
 Built-in JSON is compiled once into bounded indexes. There is no second
 TypeScript validator or legacy pattern runtime.
 

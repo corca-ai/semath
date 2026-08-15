@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "control-systems",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -57,7 +57,7 @@
     },
     {
       "id": "state-matrix",
-      "conceptKind": "entity",
+      "conceptKind": "operator",
       "title": "State matrix",
       "description": "The linear operator multiplying the state.",
       "parents": [],
@@ -67,7 +67,7 @@
     },
     {
       "id": "input-matrix",
-      "conceptKind": "entity",
+      "conceptKind": "operator",
       "title": "Input matrix",
       "description": "The linear operator multiplying the control input.",
       "parents": [],
@@ -124,6 +124,23 @@
       "references": [
         "linear-system-theory"
       ]
+    }
+  ],
+  "conceptBridges": [
+    {
+      "id": "state-is-vector",
+      "source": "control-systems:state",
+      "target": "linear-algebra:vector"
+    },
+    {
+      "id": "state-matrix-is-linear-operator",
+      "source": "control-systems:state-matrix",
+      "target": "linear-algebra:linear-operator"
+    },
+    {
+      "id": "input-matrix-is-linear-operator",
+      "source": "control-systems:input-matrix",
+      "target": "linear-algebra:linear-operator"
     }
   ],
   "quantityKinds": [],

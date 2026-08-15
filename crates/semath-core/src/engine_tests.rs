@@ -12,12 +12,12 @@ use crate::canonical::{
 use crate::parser::test_math_regions;
 use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
-    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree, LexicalClass,
-    MathRoot, MathRootState, MeaningDecision, NotationArgument, NotationNode, NotationNodeKind,
-    NotationNodeRanges, PROTOCOL_VERSION, ProjectChange, ProjectDocument, ProjectInclude,
-    ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind,
-    ProjectSnapshot, ProjectSourceRef, Query, QueryEnvelope, QueryValue, SourceRange, SyntaxScope,
-    SyntaxState,
+    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree,
+    LawBindingProof, LexicalClass, MathRoot, MathRootState, MeaningDecision, NotationArgument,
+    NotationNode, NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION, ProjectChange,
+    ProjectDocument, ProjectInclude, ProjectMacro, ProjectMacroExpansion,
+    ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query,
+    QueryEnvelope, QueryValue, SourceRange, SyntaxScope, SyntaxState,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -1075,6 +1075,114 @@ fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() 
         })
         .unwrap();
     assert_eq!(retracted.stats.semantic_derived_claims, 0);
+}
+
+#[test]
+fn law_roles_are_retained_as_retractable_derived_index_claims() {
+    let content = "Let $A$ be an n by n matrix and $x$ an n-dimensional vector. Define $y=Ax$. Let $B$ be an n by n matrix and $z$ an n-dimensional vector. Then $z=By$. Inspect $y$.";
+    let offset = content.rfind("$y$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let before_formula = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.find("$y=Ax$").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = before_formula.value else {
+        panic!("expected semantic view")
+    };
+    assert!(!view.context.claims.iter().any(|claim| {
+        claim
+            .evidence
+            .iter()
+            .any(|evidence| evidence.rule_id.starts_with("law-chain/2/"))
+    }));
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context.claims.iter().any(|claim| {
+            claim.predicate == "concept"
+                && claim.value == "linear-algebra:vector"
+                && claim.evidence.iter().any(|evidence| {
+                    evidence.kind == "derived-claim"
+                        && evidence.rule_id.starts_with("law-chain/2/linear-algebra:")
+                })
+        }),
+        "{:?}",
+        view.context.claims
+    );
+
+    let without_relation = "Let $A$ be an n by n matrix and $x$ an n-dimensional vector. Let $y$ denote the output. Let $B$ be an n by n matrix and $z$ an n-dimensional vector. Then $z=By$. Inspect $y$.";
+    engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", without_relation, 2)),
+            }],
+        })
+        .unwrap();
+    let offset = without_relation.rfind("$y$").unwrap() as u32 + 1;
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            2,
+            2,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(!view.context.claims.iter().any(|claim| {
+        claim
+            .evidence
+            .iter()
+            .any(|evidence| evidence.rule_id.starts_with("law-chain/2/"))
+    }));
+}
+
+#[test]
+fn a_typed_law_role_can_support_one_later_law_without_backward_flow() {
+    let content = "Let $A$ be an n by n matrix and $x$ an n-dimensional vector. Define $y=Ax$. Let $B$ be an n by n matrix and $z$ an n-dimensional vector. Then $z=By$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let laws = engine.index.observations("main").laws.all();
+    let products = laws
+        .iter()
+        .filter(|law| law.title == "Matrix-vector product")
+        .collect::<Vec<_>>();
+    assert_eq!(products.len(), 2, "{laws:#?}");
+    let later = products
+        .iter()
+        .find(|law| law.range.start_offset > content.find("Let $B$").unwrap() as u32)
+        .expect("later product");
+    assert!(later.bindings.iter().any(|binding| {
+        binding.parameter == "vector"
+            && binding.symbol == "y"
+            && binding.proof == LawBindingProof::Derived
+    }));
 }
 
 #[test]

@@ -30,6 +30,12 @@ export interface PackAuthoringReport {
     matchingLaws: readonly string[];
     parameterSlots: readonly string[];
   }[];
+  bridges: readonly {
+    bridgeId: string;
+    ownerPackId: string;
+    sourceConceptId: string;
+    targetConceptId: string;
+  }[];
   collisions: readonly {
     distinguishingEvidence: readonly string[];
     leftRelationId: string;
