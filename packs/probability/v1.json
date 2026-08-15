@@ -1,7 +1,7 @@
 {
   "schemaVersion": 12,
   "packId": "probability",
-  "packVersion": "1.5.0",
+  "packVersion": "1.6.0",
   "packKind": "field",
   "namespace": "probability",
   "title": "Probability and statistics",
@@ -652,12 +652,19 @@
           "id": "mean",
           "concept": "probability:distribution-mean",
           "description": "Expected value.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "mu",
+            "\\mu"
+          ]
         },
         {
           "id": "variable",
           "concept": "probability:random-variable",
-          "description": "Integrable random variable."
+          "description": "Integrable random variable.",
+          "notation": [
+            "X"
+          ]
         }
       ],
       "conditions": [

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 12,
   "packId": "thermodynamics-heat-transfer",
-  "packVersion": "1.1.0",
+  "packVersion": "1.2.0",
   "packKind": "field",
   "namespace": "thermodynamics-heat-transfer",
   "title": "Thermodynamics and heat transfer",
@@ -604,31 +604,47 @@
           "id": "pressure",
           "concept": "quantities-units:pressure",
           "description": "Pressure.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "P",
+            "p"
+          ]
         },
         {
           "id": "volume",
           "concept": "quantities-units:volume",
           "description": "Volume.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "V"
+          ]
         },
         {
           "id": "amount",
           "concept": "thermodynamics-heat-transfer:amount-of-substance",
           "description": "Amount of substance.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "n"
+          ]
         },
         {
           "id": "constant",
           "concept": "thermodynamics-heat-transfer:gas-constant",
           "description": "Gas constant.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "R"
+          ]
         },
         {
           "id": "temperature",
           "concept": "quantities-units:temperature",
           "description": "Absolute temperature.",
-          "shape": "scalar"
+          "shape": "scalar",
+          "notation": [
+            "T"
+          ]
         }
       ],
       "conditions": [

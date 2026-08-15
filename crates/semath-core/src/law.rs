@@ -719,6 +719,7 @@ impl LawObservations {
         let established = self
             .recognitions
             .iter()
+            .filter(|recognition| !recognition.non_authoritative)
             .filter(|recognition| {
                 matches!(
                     recognition.status,
@@ -759,6 +760,7 @@ impl ExternalTypeEnvironment {
             let mut derived = observations
                 .all()
                 .iter()
+                .filter(|recognition| !recognition.non_authoritative)
                 .filter(|recognition| {
                     recognition.range.end_offset <= formula.start_offset
                         && matches!(
@@ -997,6 +999,10 @@ pub(crate) fn observe_laws(
             });
             let attached_role_support =
                 attached_declared_role_support || attached_formula_role_support;
+            let context_only_admission = !compiled.law.activation_phrases.is_empty()
+                && activation.is_none()
+                && !attached_role_support
+                && role_context_activated;
             if !compiled.law.activation_phrases.is_empty()
                 && pack_requires_explicit_law_activation(compiled.pack_id)
                 && activation.is_none()
@@ -1006,7 +1012,7 @@ pub(crate) fn observe_laws(
             }
             if !compiled.law.activation_phrases.is_empty()
                 && activation.is_none()
-                && (!attached_role_support
+                && ((!attached_role_support && !role_context_activated)
                     || recognitions[recognition_start..].iter().any(|recognized| {
                         laws_share_collision(
                             &recognized.pack_id,
@@ -1086,6 +1092,21 @@ pub(crate) fn observe_laws(
                 &recognition_context,
                 activation,
             );
+            recognized.conventional_candidate = context_only_admission
+                || (activation.is_none()
+                    && role_context_activated
+                    && !attached_role_support
+                    && recognized.bindings.iter().any(|binding| {
+                        binding.proof == LawBindingProof::Asserted
+                            && compiled.law.roles.iter().any(|role| {
+                                let PackLawRole { id, notation, .. } = role;
+                                id == &binding.parameter
+                                    && notation.iter().any(|candidate| {
+                                        notation_matches_symbol(candidate, &binding.symbol)
+                                    })
+                            })
+                    }));
+            recognized.non_authoritative = context_only_admission;
             recognized.rank = relevance.as_ref().map_or(
                 if is_capability_pack(compiled.pack_id) {
                     25
@@ -2535,6 +2556,18 @@ fn plan_role_support(
     let unresolved_role = (unresolved == 1)
         .then(|| unresolved_roles.first().copied())
         .flatten();
+    let asserted_roles = supported_roles
+        .iter()
+        .filter_map(|(role, proof)| (*proof == RoleBindingProof::Asserted).then_some(*role))
+        .collect::<Vec<_>>();
+    let asserted_role = (asserted_roles.len() == 1).then(|| asserted_roles[0].to_owned());
+    let inferable_role = if unresolved == 1 && asserted_roles.is_empty() {
+        unresolved_role
+    } else if unresolved == 0 && asserted_roles.len() == 1 {
+        asserted_role.as_deref()
+    } else {
+        None
+    };
     let proved = supported_roles
         .values()
         .filter(|proof| {
@@ -2546,16 +2579,16 @@ fn plan_role_support(
             )
         })
         .count();
-    let inferred = unresolved == 1
+    let inferred = inferable_role.is_some()
         && proved >= 2
-        && ((unresolved_role == inferred_role && roles.len() <= 3)
+        && ((inferable_role == inferred_role && roles.len() <= 3)
             || (roles.len() <= 3
-                && unresolved_role.is_some_and(|unresolved| {
+                && inferable_role.is_some_and(|unresolved| {
                     roles
                         .iter()
                         .any(|role| role.id == unresolved && role.quantity.is_some())
                 }))
-            || (unresolved_role != inferred_role && proved >= 3));
+            || (inferable_role != inferred_role && proved >= 3));
     let admitted_by_assertion = (law_explicitly_activated
         && (inferred_role.map_or(supported >= 2, |role| supported_roles.contains_key(role))
             || (roles.len() == 2 && supported == 1 && unresolved == 1)))
@@ -2567,6 +2600,9 @@ fn plan_role_support(
         .into_iter()
         .map(|(role, proof)| (role.to_owned(), proof))
         .collect::<BTreeMap<_, _>>();
+    if inferred && let Some(role) = asserted_role {
+        proofs.insert(role, RoleBindingProof::Derived);
+    }
     for role in unresolved_roles {
         let proof = if inferred && Some(role) == unresolved_role {
             RoleBindingProof::Derived
@@ -3183,8 +3219,16 @@ fn role_symbol_support(
                 })
                 .unwrap_or(RoleSupport::Unresolved);
         }
-        if role.concept.split(':').next_back() == Some(expected_shape) {
-            return required_quantity.and(shape_support);
+        let shape_proves_concept = role.concept.split(':').next_back() == Some(expected_shape)
+            || (role.concept == "linear-algebra:linear-operator" && expected_shape == "matrix");
+        if shape_proves_concept {
+            return required_quantity.and(
+                if shape_support == RoleSupport::Unresolved && activated_notation_support {
+                    notation_support()
+                } else {
+                    shape_support
+                },
+            );
         }
         if activated_notation_support && shape_support.is_proven() {
             return required_quantity.and(notation_support());
@@ -3212,6 +3256,8 @@ fn role_symbol_support(
             RoleSupport::Typed
         } else if shape_support.is_proven() {
             shape_support
+        } else if activated_notation_support {
+            notation_support()
         } else {
             RoleSupport::Unresolved
         }
@@ -3544,6 +3590,8 @@ fn recognition(
         evidence,
         relevance: None,
         rank: 100,
+        conventional_candidate: false,
+        non_authoritative: false,
     }
 }
 

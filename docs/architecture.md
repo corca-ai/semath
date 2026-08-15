@@ -74,6 +74,14 @@ entity-keyed index. Thus `\operatorname{acc}(B_m)` can carry application and
 juxtaposition possibilities without wasmtex or a command switch declaring the
 answer, while decorated and styled forms remain distinct from their nucleus.
 
+Conventional notation is a second, non-authoritative candidate projection.
+After structural dispatch, a uniquely routed field may pair reviewed role
+notation with a compatible law. `semanticView.conventionalCandidates` exposes
+the proposed relation, role bindings, scoped routing evidence, and the exact
+role declarations and law conditions still required. This projection cannot
+create claims, establish an entity or law, emit a Problem, authorize navigation
+or rename, or feed its own candidate meaning back into routing.
+
 Included documents contribute the same namespaced role, shape, quantity, unit,
 dimension, and evidence records used locally. A per-document external type
 environment is derived from include order; facts never flow backwards across an
@@ -275,6 +283,17 @@ diagnostic, or establishes meaning. Genuine collisions therefore remain
 bounded alternatives, in relevance order, until independent typed evidence
 resolves or contradicts them. Law-derived equation relevance is computed only
 after law matching and cannot feed back to activate the same law.
+
+Any recognized equation reports its own field as `explicit` on that equation.
+It contributes forward routing evidence only when every role has independent
+typed or structural proof and every condition is verified; that field is then
+`supported` after the equation in the same visible scope. Analysis may run one
+additional bounded law pass for later formulae. Candidate, asserted-role,
+conflicting, or condition-missing equations never enter that pass, so
+conventional notation cannot circularly activate itself. Project convention
+files use the ordinary source-ordered include edge:
+their authored roles, shapes, quantities, and law activations retain their
+source ranges and never become hidden project metadata.
 
 Authoring keeps a functional core and an effectful shell. Rust owns schema,
 catalog, dependency, canonical-form, unit, and dimension validation. Pure

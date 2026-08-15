@@ -1321,6 +1321,8 @@ mod tests {
                 range,
             }),
             rank: 100,
+            conventional_candidate: false,
+            non_authoritative: false,
         }
     }
 }

@@ -858,6 +858,52 @@ pub struct LawRecognition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relation: Option<RelationInfo>,
     pub rank: u32,
+    #[serde(skip)]
+    pub(crate) conventional_candidate: bool,
+    #[serde(skip)]
+    pub(crate) non_authoritative: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(
+    tag = "kind",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase"
+)]
+pub enum ConventionalRequirementInfo {
+    RoleDeclaration {
+        requirement_id: String,
+        parameter: String,
+        symbol: String,
+        constraint: SemanticConstraint,
+        evidence: Vec<Evidence>,
+    },
+    Condition {
+        requirement_id: String,
+        condition: LawConditionInfo,
+    },
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum ConventionalCandidateDisposition {
+    ConventionalCandidate,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ConventionalCandidateInfo {
+    pub candidate_id: String,
+    pub disposition: ConventionalCandidateDisposition,
+    pub pack_id: String,
+    pub pack_version: String,
+    pub law_id: String,
+    pub title: String,
+    pub relation: RelationInfo,
+    pub bindings: Vec<LawBinding>,
+    pub requirements: Vec<ConventionalRequirementInfo>,
+    pub relevance: DomainRelevance,
+    pub evidence: Vec<Evidence>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -918,6 +964,8 @@ pub struct SemanticViewInfo {
     pub decision: MeaningDecision,
     pub symbol: Option<SymbolInfo>,
     pub context: SemanticContextInfo,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub conventional_candidates: Vec<ConventionalCandidateInfo>,
     pub declarations: Vec<Location>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub domains: Vec<DomainActivation>,

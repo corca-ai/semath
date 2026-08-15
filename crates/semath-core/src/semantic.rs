@@ -166,7 +166,7 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             &[],
         );
-        let analyze = |environment: &ExternalTypeEnvironment| {
+        let analyze = |environment: &ExternalTypeEnvironment, domains: &DomainObservations| {
             observe_laws(
                 canonical_expressions,
                 &self.semantic_evidence,
@@ -178,22 +178,36 @@ impl DocumentSemanticObservations {
                     consistency: &self.roles,
                     assumptions: &self.assumptions,
                     external: environment,
-                    domains: &self.domains,
+                    domains,
                 },
             )
         };
-        let direct = analyze(external);
-        self.laws = if let Some(first_hop) =
-            external.with_preceding_law_roles(formula_ranges, &direct)
-        {
-            let one_hop = analyze(&first_hop);
-            if let Some(second_hop) = external.with_preceding_law_roles(formula_ranges, &one_hop) {
-                analyze(&second_hop)
+        let analyze_with_law_chains = |domains: &DomainObservations| {
+            let direct = analyze(external, domains);
+            if let Some(first_hop) = external.with_preceding_law_roles(formula_ranges, &direct) {
+                let one_hop = analyze(&first_hop, domains);
+                if let Some(second_hop) =
+                    external.with_preceding_law_roles(formula_ranges, &one_hop)
+                {
+                    analyze(&second_hop, domains)
+                } else {
+                    one_hop
+                }
             } else {
-                one_hop
+                direct
             }
+        };
+        let source_laws = analyze_with_law_chains(&self.domains);
+        let routed_domains = observe_domains(
+            document,
+            ScopeGraph::new(document),
+            &self.semantic_evidence,
+            source_laws.all(),
+        );
+        self.laws = if routed_domains.has_established_equation_evidence() {
+            analyze_with_law_chains(&routed_domains.for_forward_law_routing())
         } else {
-            direct
+            source_laws
         };
         self.domains = observe_domains(
             document,

@@ -127,5 +127,17 @@ alternatives but never changes a decision from unsupported to established.
 hosts and release gates can detect routing regressions without reimplementing
 policy.
 
+`semanticView.conventionalCandidates`, when present, is a bounded advisory
+projection separate from the meaning decision. Each item has the literal
+`conventional-candidate` disposition, a proposed pack law and relation, its
+current bindings, exact domain evidence, and a discriminated requirement list.
+A `role-declaration` requirement carries the expected concept/shape constraint
+for one source symbol; a `condition` requirement carries the typed law
+condition. Hosts may explain or use these values to prepare a reviewed source
+edit, but must not treat them as claims, diagnostics, identity, navigation, or
+edit authorization. Once the author supplies source-backed declarations or an
+accepted edit, normal analysis may establish the result and the conventional
+candidate retracts.
+
 Core semantic behavior belongs to Rust. Packages own transport and lifecycle;
 applications own presentation, permissions, review, apply, and undo.

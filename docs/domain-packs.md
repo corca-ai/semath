@@ -108,6 +108,14 @@ retract the intermediate through the normal dependency closure. Missing
 support, composite bindings, conflicts, and work beyond the bound remain
 uncertain rather than creating a problem.
 
+Reviewed `notation` entries on law roles may also seed a conventional candidate
+when structural matching and one uniquely routed field agree. They are pack
+data, not proof. The public candidate repeats the proposed bindings and carries
+role-declaration requirements with the expected closed concept and shape, plus
+each unverified typed condition. Authors promote the proposal only by adding
+ordinary visible declarations or a reviewed source edit; packs cannot silently
+declare a document's symbols by convention.
+
 For relation skeletons repeated across independent laws and fields, a law may
 replace `canonicalRelation` with one reviewed `archetype` and an exact
 role-to-slot binding. Slots must bind every law role once. The Rust authoring
