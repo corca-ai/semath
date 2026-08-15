@@ -267,6 +267,10 @@ impl ScientificSemanticEvidence {
             .min_by_key(|clause| clause.range.end_offset - clause.range.start_offset)
     }
 
+    pub(crate) fn source_clause_range_for(&self, range: &SourceRange) -> Option<SourceRange> {
+        self.clause_for(range).map(|clause| clause.range.clone())
+    }
+
     fn formula_frame(&self, range: &SourceRange) -> Option<&ScientificClauseEvidence> {
         let direct = self.clause_for(range);
         if direct.is_some_and(|clause| !clause.frame.evidence.is_empty()) {

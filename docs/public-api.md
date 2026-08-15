@@ -1,6 +1,6 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 14 is a deliberate
+Semath is a library and language-service runtime. Protocol 15 is a deliberate
 hard cutover to a small meaning-first API.
 
 | Export | Responsibility |
@@ -42,7 +42,7 @@ unsupported law conditions and truncated evidence cannot produce `established`.
 subjects; omission means none were established. Parser ASTs, free-form refusal
 policy, and legacy rewrite queries are not public.
 
-Protocol 14 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
+Protocol 15 identifies every `RoleInfo` by its open, pack-qualified `conceptId`.
 There is no closed role enum or unnamespaced compatibility field. Included-file
 role, shape, and quantity facts use the same records and retain their original
 evidence.
@@ -127,17 +127,40 @@ alternatives but never changes a decision from unsupported to established.
 hosts and release gates can detect routing regressions without reimplementing
 policy.
 
-`semanticView.conventionalCandidates`, when present, is a bounded advisory
-projection separate from the meaning decision. Each item has the literal
-`conventional-candidate` disposition, a proposed pack law and relation, its
-current bindings, exact domain evidence, and a discriminated requirement list.
-A `role-declaration` requirement carries the expected concept/shape constraint
+`semanticView.authoringContext` is always present on a current successful
+semantic query. Its optional `formula` supplies the exact file, path, revision,
+scope, UTF-16 range, authored source notation, and generated provenance for the
+complete math region. `lifecycle` reports only Semath-owned source facts:
+authored versus generated, current freshness, retraction, editability of the
+source surface, capping, and engine limits. A stale query returns the existing
+typed query error rather than a stale authoring context.
+
+The authoring context also exposes structured missing role declarations and
+conditions, bounded exact same-entity notation occurrences, prose claim anchors
+with polarity, modality, evidence parents, and a safe strength ceiling, and a
+distinct approximation disposition for canonical approximate relations.
+Equation links distinguish `shared-entity` continuity from `derived-law`
+evidence; only the latter can ground consequence wording. All collections are
+source ordered, capped, retractable, and reproduced by native, WASM, Worker,
+and LSP boundaries.
+
+`semanticView.authoringContext.conventionalCandidates`, when present, is a
+bounded advisory projection separate from the meaning decision. Each item has
+the literal `conventional-candidate` disposition, a proposed pack law and
+relation, its current bindings, exact domain evidence, and a discriminated
+requirement list. A `role-declaration` requirement carries the expected
+concept/shape constraint
 for one source symbol; a `condition` requirement carries the typed law
 condition. Hosts may explain or use these values to prepare a reviewed source
 edit, but must not treat them as claims, diagnostics, identity, navigation, or
 edit authorization. Once the author supplies source-backed declarations or an
 accepted edit, normal analysis may establish the result and the conventional
 candidate retracts.
+
+`MathAuthoringContext` contains no phrase ID, rhetorical move, English
+template, UI category, recommendation score, or conclusion that prose should
+be inserted. Hosts remain responsible for writing policy, permissions,
+preview, mutation, collaboration, and undo.
 
 Core semantic behavior belongs to Rust. Packages own transport and lifecycle;
 applications own presentation, permissions, review, apply, and undo.

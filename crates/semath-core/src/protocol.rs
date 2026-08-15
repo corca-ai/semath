@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 14;
+pub const PROTOCOL_VERSION: u32 = 15;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -908,6 +908,186 @@ pub struct ConventionalCandidateInfo {
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
+pub enum MathAuthoringDisposition {
+    Established,
+    Partial,
+    Conventional,
+    Ambiguous,
+    Conflicting,
+    Unsupported,
+    EngineLimited,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathSourceGeneration {
+    Authored,
+    Generated,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathSourceFreshness {
+    Current,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathSourceLifecycleInfo {
+    pub document_version: u64,
+    pub generation: MathSourceGeneration,
+    pub freshness: MathSourceFreshness,
+    pub editable: bool,
+    pub retracted: bool,
+    pub capped: bool,
+    pub engine_limited: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathFormulaAnchorInfo {
+    pub location: Location,
+    pub document_version: u64,
+    pub scope_path: Vec<u32>,
+    pub source_notation: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub provenance: Vec<SourceRange>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(
+    tag = "kind",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase"
+)]
+pub enum MathAuthoringRequirementInfo {
+    Declaration {
+        requirement_id: String,
+        symbol: String,
+        occurrence_id: SourceOccurrenceId,
+        evidence: Vec<Evidence>,
+    },
+    RoleDeclaration {
+        requirement_id: String,
+        parameter: String,
+        symbol: String,
+        constraint: SemanticConstraint,
+        evidence: Vec<Evidence>,
+    },
+    Condition {
+        requirement_id: String,
+        condition: LawConditionInfo,
+    },
+    Disambiguation {
+        requirement_id: String,
+        alternatives: Vec<MeaningAlternative>,
+        evidence: Vec<Evidence>,
+    },
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathEquationLinkKind {
+    SharedEntity,
+    DerivedLaw,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathEquationLinkInfo {
+    pub link_id: String,
+    pub kind: MathEquationLinkKind,
+    pub source: MathFormulaAnchorInfo,
+    pub target: MathFormulaAnchorInfo,
+    pub shared_entities: Vec<EntityId>,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathExactness {
+    Approximate,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathApproximationInfo {
+    pub exactness: MathExactness,
+    pub relation_range: SourceRange,
+    pub evidence: Vec<Evidence>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub related_fact_ids: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathClaimStrengthCeiling {
+    Asserted,
+    Qualified,
+    Unusable,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathClaimPolarity {
+    Positive,
+    Negative,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathClaimModality {
+    Asserted,
+    Hypothetical,
+    Hedged,
+    Quoted,
+    Cited,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathClaimEvidenceLinkInfo {
+    pub claim_id: String,
+    pub claim: Location,
+    pub polarity: MathClaimPolarity,
+    pub modality: MathClaimModality,
+    pub strength_ceiling: MathClaimStrengthCeiling,
+    pub supporting_claim_ids: Vec<String>,
+    pub supporting_formulas: Vec<MathFormulaAnchorInfo>,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathNotationOccurrenceInfo {
+    pub occurrence_id: SourceOccurrenceId,
+    pub entity_id: EntityId,
+    pub location: Location,
+    pub scope_path: Vec<u32>,
+    pub source_notation: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathAuthoringContext {
+    pub disposition: MathAuthoringDisposition,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula: Option<MathFormulaAnchorInfo>,
+    pub requirements: Vec<MathAuthoringRequirementInfo>,
+    pub conditions: Vec<LawConditionInfo>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub conventional_candidates: Vec<ConventionalCandidateInfo>,
+    pub equation_links: Vec<MathEquationLinkInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approximation: Option<MathApproximationInfo>,
+    pub claim_evidence: Vec<MathClaimEvidenceLinkInfo>,
+    pub notation_occurrences: Vec<MathNotationOccurrenceInfo>,
+    pub lifecycle: MathSourceLifecycleInfo,
+    pub truncated: bool,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
 pub enum LawRecognitionStatus {
     ConditionMissing,
     Conflicting,
@@ -964,8 +1144,7 @@ pub struct SemanticViewInfo {
     pub decision: MeaningDecision,
     pub symbol: Option<SymbolInfo>,
     pub context: SemanticContextInfo,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub conventional_candidates: Vec<ConventionalCandidateInfo>,
+    pub authoring_context: MathAuthoringContext,
     pub declarations: Vec<Location>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub domains: Vec<DomainActivation>,

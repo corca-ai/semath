@@ -1,7 +1,7 @@
 use std::collections::{BTreeSet, HashMap};
 
 use super::{
-    SemathEngine, canonical_expression_owner, expression_carries_formula_fact,
+    EngineError, SemathEngine, canonical_expression_owner, expression_carries_formula_fact,
     index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
     relation_expression_at_cursor, stable_text_digest,
 };
@@ -928,6 +928,25 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
             .collect::<Vec<_>>(),
         ["power", "force", "velocity"],
     );
+    let authoring = &view.authoring_context;
+    assert_eq!(
+        authoring.disposition,
+        crate::MathAuthoringDisposition::Established
+    );
+    let anchor = authoring.formula.as_ref().expect("exact formula anchor");
+    assert_eq!(anchor.document_version, 1);
+    assert_eq!(anchor.source_notation, "P=\\mathbf{F}\\cdot\\mathbf{v}");
+    assert_eq!(anchor.location.path, "main.tex");
+    assert_eq!(
+        authoring.lifecycle.generation,
+        crate::MathSourceGeneration::Authored
+    );
+    assert_eq!(
+        authoring.lifecycle.freshness,
+        crate::MathSourceFreshness::Current
+    );
+    assert!(authoring.lifecycle.editable);
+    assert!(!authoring.truncated);
 }
 
 #[test]
@@ -953,6 +972,7 @@ fn semantic_view_exposes_conventional_notation_as_a_bounded_non_authoritative_ca
     assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
     assert!(view.diagnostics.is_empty());
     let candidate = view
+        .authoring_context
         .conventional_candidates
         .first()
         .expect("period-frequency convention candidate");
@@ -974,6 +994,26 @@ fn semantic_view_exposes_conventional_notation_as_a_bounded_non_authoritative_ca
     )));
     assert!(candidate.evidence.iter().any(|evidence| {
         evidence.kind == "prose-domain-prior" && !evidence.source_ranges.is_empty()
+    }));
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conventional
+    );
+    assert!(
+        view.authoring_context
+            .requirements
+            .iter()
+            .any(|requirement| {
+                matches!(
+                    requirement,
+                    crate::MathAuthoringRequirementInfo::RoleDeclaration { parameter, .. }
+                        if parameter == "frequency"
+                )
+            })
+    );
+    assert!(view.authoring_context.conditions.iter().any(|condition| {
+        condition.condition_id == "positive-period"
+            && condition.status == crate::ConstraintStatus::Required
     }));
 
     let definition = engine
@@ -1019,7 +1059,43 @@ fn removing_domain_context_retracts_the_conventional_candidate() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(view.conventional_candidates.is_empty(), "{view:#?}");
+    assert!(
+        view.authoring_context.conventional_candidates.is_empty(),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn math_authoring_context_preserves_approximation_without_equality_authority() {
+    let content = "The numerical approximation is $u_h\\approx u$.";
+    let offset = content.find("u_h").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let approximation = view
+        .authoring_context
+        .approximation
+        .expect("approximation disposition");
+    assert_eq!(approximation.exactness, crate::MathExactness::Approximate);
+    assert!(approximation.evidence.iter().any(|evidence| {
+        evidence.rule_id == "semath/canonical-approximation" || !evidence.source_ranges.is_empty()
+    }));
+    assert!(!matches!(
+        view.decision,
+        MeaningDecision::Established { .. }
+    ));
 }
 
 #[test]
@@ -1067,7 +1143,8 @@ fn conventional_candidates_cover_representative_stem_notation_families() {
             panic!("expected semantic view")
         };
         assert!(
-            view.conventional_candidates
+            view.authoring_context
+                .conventional_candidates
                 .iter()
                 .any(|candidate| candidate.law_id == law_id),
             "missing {law_id} for {source}: {view:#?}"
@@ -1187,7 +1264,7 @@ fn established_equation_does_not_activate_its_own_conventional_notation() {
     };
 
     assert!(matches!(view.decision, MeaningDecision::Established { .. }));
-    assert!(view.conventional_candidates.is_empty());
+    assert!(view.authoring_context.conventional_candidates.is_empty());
 }
 
 #[test]
@@ -1483,6 +1560,74 @@ fn semantic_view_projects_claim_status_only_from_typed_index_evidence() {
             .iter()
             .any(|item| item.concept_id == concept.value)
     );
+    let claim_link = view
+        .authoring_context
+        .claim_evidence
+        .iter()
+        .find(|link| link.claim_id == concept.claim_id)
+        .expect("source-grounded prose claim link");
+    assert_eq!(claim_link.modality, crate::MathClaimModality::Asserted);
+    assert_eq!(claim_link.polarity, crate::MathClaimPolarity::Positive);
+    assert_eq!(
+        claim_link.strength_ceiling,
+        crate::MathClaimStrengthCeiling::Asserted
+    );
+    assert_eq!(claim_link.claim.range.start_offset, 0);
+    assert!(claim_link.claim.range.end_offset <= offset);
+    assert!(claim_link.supporting_formulas.is_empty());
+    assert!(view.authoring_context.notation_occurrences.len() >= 2);
+}
+
+#[test]
+fn authoring_claim_anchor_uses_the_claims_own_included_document() {
+    let main = "\\input{definitions}\nInspect $A$.";
+    let definitions = "Let $A$ denote an event.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "definitions".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(0, "\\input{definitions}".len() as u32),
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("definitions", "definitions.tex", definitions, 1),
+            ],
+        })
+        .unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.rfind('A').unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    let claim = view
+        .authoring_context
+        .claim_evidence
+        .iter()
+        .find(|claim| claim.claim.file_id == "definitions")
+        .expect("included source claim");
+    assert_eq!(claim.claim.path, "definitions.tex");
+    assert_eq!(claim.claim.range, range(0, definitions.len() as u32));
 }
 
 #[test]
@@ -1752,6 +1897,10 @@ fn incompatible_redeclarations_share_one_typed_public_conflict() {
         panic!("expected semantic view")
     };
     assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting
+    );
     assert_eq!(
         view.diagnostics
             .iter()
@@ -2132,6 +2281,8 @@ fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
         panic!("expected semantic view")
     };
     assert!(view.context.relations.is_empty());
+    assert!(view.authoring_context.lifecycle.retracted);
+    assert!(!view.authoring_context.lifecycle.editable);
 }
 
 #[test]
@@ -2213,6 +2364,16 @@ fn formula_meaning_includes_a_source_ordered_relation_linked_by_entity_identity(
             "fluid-mechanics:volumetric-flow-rate",
         ])
     );
+    let link = view
+        .authoring_context
+        .equation_links
+        .first()
+        .expect("source-backed prior equation link");
+    assert_eq!(link.kind, crate::MathEquationLinkKind::SharedEntity);
+    assert!(link.source.source_notation.contains("Q=A v"));
+    assert!(link.target.source_notation.contains("\\dot m=\\rho Q"));
+    assert!(!link.shared_entities.is_empty());
+    assert!(!link.evidence.is_empty());
 }
 
 #[test]
@@ -2265,6 +2426,20 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
     assert!(matches!(view.decision, MeaningDecision::Established { .. }));
     let relation = &view.context.relations[0];
     assert!(relation.evidence[0].source_ranges[0].contains(invocation_start));
+    assert_eq!(
+        view.authoring_context.lifecycle.generation,
+        crate::MathSourceGeneration::Generated
+    );
+    assert!(!view.authoring_context.lifecycle.editable);
+    assert!(
+        !view
+            .authoring_context
+            .formula
+            .as_ref()
+            .expect("macro formula anchor")
+            .provenance
+            .is_empty()
+    );
 }
 
 #[test]
@@ -2345,7 +2520,23 @@ fn incremental_upsert_matches_the_new_document_version() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
+    assert_eq!(view.authoring_context.lifecycle.document_version, 2);
+    assert!(
+        view.authoring_context
+            .notation_occurrences
+            .iter()
+            .all(|occurrence| occurrence.occurrence_id.document_version == 2)
+    );
     assert_eq!(view.symbol.unwrap().definitions[0].description, "the state");
+    let stale = engine.query(query(
+        Query::SemanticView {
+            file_id: "main".into(),
+            offset,
+        },
+        2,
+        1,
+    ));
+    assert!(matches!(stale, Err(EngineError::DocumentVersionMismatch)));
 }
 
 #[test]
@@ -2441,6 +2632,12 @@ fn same_revision_opaque_relink_reanalyzes_without_accepting_stale_text() {
         "{:#?}",
         view.decision
     );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::EngineLimited
+    );
+    assert!(view.authoring_context.lifecycle.engine_limited);
+    assert!(!view.authoring_context.lifecycle.editable);
 }
 
 #[test]
@@ -2637,7 +2834,7 @@ fn conventional_notation_does_not_downgrade_included_type_proof() {
         panic!("expected semantic view")
     };
     assert!(matches!(view.decision, MeaningDecision::Established { .. }));
-    assert!(view.conventional_candidates.is_empty());
+    assert!(view.authoring_context.conventional_candidates.is_empty());
 }
 
 #[test]

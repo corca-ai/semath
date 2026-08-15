@@ -18,16 +18,16 @@ jobs:
         with:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
+      - run: sha256sum -c SHA256SUMS
+        working-directory: lib/wasm
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - run: scripts/build-wasm.sh
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
       - run: bun run typecheck
       - run: bun test
       - run: bun run architecture
-      - run: sha256sum -c SHA256SUMS
-        working-directory: lib/wasm
-      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
-      - run: scripts/build-wasm.sh
       - run: bun run pack:conformance
       - run: bun run parity
       - run: bun run budget

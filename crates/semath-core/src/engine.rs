@@ -40,12 +40,16 @@ use crate::{
     AnalysisStats, AssumptionInfo, ChangeEnvelope, ConceptInfo, ConventionalCandidateDisposition,
     ConventionalCandidateInfo, ConventionalRequirementInfo, DefinitionInfo, DimensionExponentInfo,
     DomainActivation, EntitySurfaceRefusal, EntitySurfaceRefusalKind, Evidence, LawBindingProof,
-    LawRecognition, LawRecognitionStatus, Location, MeaningConflict, PROTOCOL_VERSION,
-    PhysicalDimensionInfo, ProjectChange, ProjectDocument, ProjectSnapshot,
-    ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult, QueryValue, RoleInfo,
-    SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo,
-    SemanticDiagnostic, SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo,
-    ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
+    LawRecognition, LawRecognitionStatus, Location, MathApproximationInfo, MathAuthoringContext,
+    MathAuthoringDisposition, MathAuthoringRequirementInfo, MathClaimEvidenceLinkInfo,
+    MathClaimModality, MathClaimPolarity, MathClaimStrengthCeiling, MathEquationLinkInfo,
+    MathEquationLinkKind, MathExactness, MathFormulaAnchorInfo, MathNotationOccurrenceInfo,
+    MathSourceFreshness, MathSourceGeneration, MathSourceLifecycleInfo, MeaningConflict,
+    MeaningDecision, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange, ProjectDocument,
+    ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult,
+    QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus,
+    SemanticContextInfo, SemanticDiagnostic, SemanticEditFile, SemanticEditProposal,
+    SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -56,6 +60,7 @@ const MAX_VIEW_DECLARATIONS: usize = 16;
 const MAX_VIEW_CANDIDATES: usize = 16;
 const MAX_CONVENTIONAL_CANDIDATES: usize = 8;
 const MAX_CONVENTIONAL_REQUIREMENTS: usize = 16;
+const MAX_AUTHORING_ITEMS: usize = 16;
 const MAX_VIEW_CLAIMS: usize = 32;
 
 #[derive(Debug, Error)]
@@ -92,6 +97,12 @@ struct AnalyzedDocument {
     cross_modal_bindings: Vec<CrossModalBinding>,
     engine_limited_ranges: Vec<SourceRange>,
     observations: DocumentSemanticObservations,
+}
+
+#[derive(Clone, Debug)]
+struct SourceLinkedFormula {
+    recognition: LawRecognition,
+    shared_entities: Vec<EntityId>,
 }
 
 #[derive(Clone, Debug)]
@@ -2487,6 +2498,13 @@ fn canonical_expression_at_range<'a>(
         .max_by_key(|expression| expression.range.end_offset - expression.range.start_offset)
 }
 
+fn expression_contains_relation(expression: &SemanticExpr) -> bool {
+    matches!(expression.kind, SemanticExprKind::Relation { .. })
+        || expression_children(expression)
+            .into_iter()
+            .any(expression_contains_relation)
+}
+
 fn collect_canonical_expressions<'a>(
     expression: &'a SemanticExpr,
     output: &mut Vec<&'a SemanticExpr>,
@@ -3975,6 +3993,9 @@ impl SemathEngine {
                 })
             });
         }
+        let formula_retracted = projected_formulas
+            .iter()
+            .any(|formula| self.formula_is_retracted(document, formula));
         projected_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
         let (conventional_candidates, conventional_candidates_truncated) =
             conventional_candidates(&projected_formulas);
@@ -4026,17 +4047,20 @@ impl SemathEngine {
             .or_else(|| {
                 semantic_focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id))
             });
+        let linked_formulas = if local_formulas.is_empty() {
+            Vec::new()
+        } else {
+            self.source_linked_preceding_formulas(document, observations, &local_formulas)
+        };
         let mut context_formulas = local_formulas.clone();
         if !local_formulas.is_empty() {
-            let linked =
-                self.source_linked_preceding_formulas(document, observations, &local_formulas);
-            for formula in linked {
+            for formula in &linked_formulas {
                 if !context_formulas.iter().any(|existing| {
-                    existing.pack_id == formula.pack_id
-                        && existing.law_id == formula.law_id
-                        && existing.range == formula.range
+                    existing.pack_id == formula.recognition.pack_id
+                        && existing.law_id == formula.recognition.law_id
+                        && existing.range == formula.recognition.range
                 }) {
-                    context_formulas.push(formula);
+                    context_formulas.push(formula.recognition.clone());
                 }
             }
         }
@@ -4218,16 +4242,580 @@ impl SemathEngine {
             unsupported_relation_context,
             truncated,
         });
+        let authoring_context = self.math_authoring_context(
+            document,
+            parsed,
+            display_focus.as_ref(),
+            queried_relation,
+            &local_formulas,
+            &linked_formulas,
+            &context,
+            &decision,
+            conventional_candidates,
+            formula_retracted,
+            engine_limited,
+            truncated,
+        );
         SemanticViewInfo {
             decision,
             symbol: symbol_info,
             context,
-            conventional_candidates,
+            authoring_context,
             declarations,
             diagnostics,
             domains,
             truncated,
         }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn math_authoring_context(
+        &self,
+        document: &AnalyzedDocument,
+        parsed: Option<&ParsedMath>,
+        focus: Option<&CursorFocus>,
+        queried_relation: Option<&SemanticExpr>,
+        local_formulas: &[LawRecognition],
+        linked_formulas: &[SourceLinkedFormula],
+        context: &SemanticContextInfo,
+        decision: &MeaningDecision,
+        conventional_candidates: Vec<ConventionalCandidateInfo>,
+        retracted: bool,
+        engine_limited: bool,
+        view_truncated: bool,
+    ) -> MathAuthoringContext {
+        let provenance =
+            queried_relation.map_or_else(Vec::new, |relation| relation.provenance.clone());
+        let formula = parsed.map(|math| {
+            self.math_formula_anchor(document, &math.region.content_range, provenance.clone())
+        });
+        let mut truncated = view_truncated;
+        let mut requirements = self.math_authoring_requirements(
+            focus,
+            local_formulas,
+            decision,
+            &conventional_candidates,
+        );
+        truncated |= requirements.len() > MAX_AUTHORING_ITEMS;
+        requirements.truncate(MAX_AUTHORING_ITEMS);
+
+        let mut conditions = local_formulas
+            .iter()
+            .flat_map(|formula| formula.conditions.iter().cloned())
+            .collect::<Vec<_>>();
+        conditions.sort_by(|left, right| {
+            evidence_order_key(&left.evidence)
+                .cmp(&evidence_order_key(&right.evidence))
+                .then(left.condition_id.cmp(&right.condition_id))
+                .then(left.subjects.cmp(&right.subjects))
+        });
+        conditions.dedup_by(|left, right| {
+            left.condition_id == right.condition_id && left.subjects == right.subjects
+        });
+        truncated |= conditions.len() > MAX_AUTHORING_ITEMS;
+        conditions.truncate(MAX_AUTHORING_ITEMS);
+
+        let mut equation_links = formula.as_ref().map_or_else(Vec::new, |target| {
+            self.math_equation_links(document, target, local_formulas, linked_formulas)
+        });
+        truncated |= equation_links.len() > MAX_AUTHORING_ITEMS;
+        equation_links.truncate(MAX_AUTHORING_ITEMS);
+
+        let approximation = queried_relation
+            .and_then(|relation| self.math_approximation(relation, local_formulas, context));
+        let mut claim_evidence = self.math_claim_evidence(context);
+        truncated |= claim_evidence.len() > MAX_AUTHORING_ITEMS;
+        claim_evidence.truncate(MAX_AUTHORING_ITEMS);
+
+        let (mut notation_occurrences, notation_truncated) = self.math_notation_occurrences(focus);
+        truncated |= notation_truncated || notation_occurrences.len() > MAX_AUTHORING_ITEMS;
+        notation_occurrences.truncate(MAX_AUTHORING_ITEMS);
+
+        let generated = formula
+            .as_ref()
+            .is_some_and(|anchor| !anchor.provenance.is_empty());
+        let focus_editable = focus
+            .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id))
+            .is_some_and(|occurrence| {
+                occurrence.kind == OccurrenceKind::Notation
+                    && occurrence.selection_range.start_offset
+                        < occurrence.selection_range.end_offset
+            });
+        let complete = parsed.is_none_or(|math| math.region.closed);
+        let editable = !generated
+            && !retracted
+            && !engine_limited
+            && complete
+            && (formula.is_some() || focus_editable);
+        let disposition = math_authoring_disposition(
+            decision,
+            !conventional_candidates.is_empty(),
+            engine_limited,
+        );
+        MathAuthoringContext {
+            disposition,
+            formula,
+            requirements,
+            conditions,
+            conventional_candidates,
+            equation_links,
+            approximation,
+            claim_evidence,
+            notation_occurrences,
+            lifecycle: MathSourceLifecycleInfo {
+                document_version: document.document.document_version,
+                generation: if generated {
+                    MathSourceGeneration::Generated
+                } else {
+                    MathSourceGeneration::Authored
+                },
+                freshness: MathSourceFreshness::Current,
+                editable,
+                retracted,
+                capped: truncated,
+                engine_limited,
+            },
+            truncated,
+        }
+    }
+
+    fn math_formula_anchor(
+        &self,
+        document: &AnalyzedDocument,
+        range: &SourceRange,
+        mut provenance: Vec<SourceRange>,
+    ) -> MathFormulaAnchorInfo {
+        provenance.sort_by_key(|range| (range.start_offset, range.end_offset));
+        provenance.dedup();
+        MathFormulaAnchorInfo {
+            location: Location {
+                file_id: document.document.file_id.clone(),
+                path: document.document.path.clone(),
+                range: range.clone(),
+            },
+            document_version: document.document.document_version,
+            scope_path: document.scopes.path_at(range.start_offset),
+            source_notation: source_text(&document.document, range),
+            provenance,
+        }
+    }
+
+    fn math_formula_anchor_for_range(
+        &self,
+        document: &AnalyzedDocument,
+        range: &SourceRange,
+    ) -> MathFormulaAnchorInfo {
+        let formula_range = document
+            .formula_ranges
+            .iter()
+            .find(|candidate| {
+                candidate.start_offset <= range.start_offset
+                    && range.end_offset <= candidate.end_offset
+            })
+            .unwrap_or(range);
+        let provenance = document
+            .canonical_expressions
+            .iter()
+            .find(|expression| {
+                expression.range.start_offset <= range.start_offset
+                    && range.end_offset <= expression.range.end_offset
+            })
+            .map_or_else(Vec::new, |expression| expression.provenance.clone());
+        self.math_formula_anchor(document, formula_range, provenance)
+    }
+
+    fn math_authoring_requirements(
+        &self,
+        focus: Option<&CursorFocus>,
+        formulas: &[LawRecognition],
+        decision: &MeaningDecision,
+        conventional_candidates: &[ConventionalCandidateInfo],
+    ) -> Vec<MathAuthoringRequirementInfo> {
+        let mut requirements = Vec::new();
+        for formula in formulas {
+            requirements.extend(
+                formula
+                    .bindings
+                    .iter()
+                    .filter(|binding| {
+                        matches!(
+                            binding.proof,
+                            LawBindingProof::Asserted | LawBindingProof::Candidate
+                        )
+                    })
+                    .map(|binding| MathAuthoringRequirementInfo::RoleDeclaration {
+                        requirement_id: format!("{}/binding/{}", formula.law_id, binding.parameter),
+                        parameter: binding.parameter.clone(),
+                        symbol: binding.symbol.clone(),
+                        constraint: binding.constraint.clone(),
+                        evidence: vec![binding.evidence.clone()],
+                    }),
+            );
+            requirements.extend(
+                formula
+                    .conditions
+                    .iter()
+                    .filter(|condition| condition.status != crate::ConstraintStatus::Verified)
+                    .map(|condition| MathAuthoringRequirementInfo::Condition {
+                        requirement_id: format!(
+                            "{}/condition/{}",
+                            formula.law_id, condition.condition_id
+                        ),
+                        condition: condition.clone(),
+                    }),
+            );
+        }
+        for candidate in conventional_candidates {
+            requirements.extend(candidate.requirements.iter().map(
+                |requirement| match requirement {
+                    ConventionalRequirementInfo::RoleDeclaration {
+                        requirement_id,
+                        parameter,
+                        symbol,
+                        constraint,
+                        evidence,
+                    } => MathAuthoringRequirementInfo::RoleDeclaration {
+                        requirement_id: requirement_id.clone(),
+                        parameter: parameter.clone(),
+                        symbol: symbol.clone(),
+                        constraint: constraint.clone(),
+                        evidence: evidence.clone(),
+                    },
+                    ConventionalRequirementInfo::Condition {
+                        requirement_id,
+                        condition,
+                    } => MathAuthoringRequirementInfo::Condition {
+                        requirement_id: requirement_id.clone(),
+                        condition: condition.clone(),
+                    },
+                },
+            ));
+        }
+        if let Some(focus) = focus
+            && self.resolved_entity(&focus.occurrence_id).is_none()
+        {
+            requirements.push(MathAuthoringRequirementInfo::Declaration {
+                requirement_id: format!(
+                    "declaration/{}/{}/{}",
+                    focus.occurrence_id.file_id,
+                    focus.occurrence_id.document_version,
+                    focus.occurrence_id.local_id
+                ),
+                symbol: focus.name.clone(),
+                occurrence_id: focus.occurrence_id.clone(),
+                evidence: vec![Evidence {
+                    rule_id: "semath/authoring/unresolved-occurrence".into(),
+                    kind: "source-occurrence".into(),
+                    strength: "weak".into(),
+                    source_ranges: vec![focus.range.clone()],
+                }],
+            });
+        }
+        if let MeaningDecision::Ambiguous { alternatives, .. } = decision {
+            requirements.push(MathAuthoringRequirementInfo::Disambiguation {
+                requirement_id: "meaning/disambiguation".into(),
+                alternatives: alternatives.clone(),
+                evidence: alternatives
+                    .iter()
+                    .flat_map(|alternative| alternative.evidence.iter().cloned())
+                    .collect(),
+            });
+        }
+        let mut seen = HashSet::new();
+        requirements.retain(|requirement| seen.insert(authoring_requirement_id(requirement)));
+        requirements
+    }
+
+    fn math_equation_links(
+        &self,
+        document: &AnalyzedDocument,
+        target: &MathFormulaAnchorInfo,
+        current: &[LawRecognition],
+        preceding: &[SourceLinkedFormula],
+    ) -> Vec<MathEquationLinkInfo> {
+        let mut links = preceding
+            .iter()
+            .map(|formula| {
+                let source =
+                    self.math_formula_anchor_for_range(document, &formula.recognition.range);
+                let mut evidence = current
+                    .iter()
+                    .flat_map(|formula| {
+                        formula
+                            .evidence
+                            .iter()
+                            .chain(formula.bindings.iter().map(|binding| &binding.evidence))
+                    })
+                    .filter(|evidence| {
+                        evidence
+                            .source_ranges
+                            .iter()
+                            .any(|range| ranges_overlap(range, &source.location.range))
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>();
+                let kind = if evidence
+                    .iter()
+                    .any(|item| item.rule_id.starts_with("law-chain/"))
+                {
+                    MathEquationLinkKind::DerivedLaw
+                } else {
+                    MathEquationLinkKind::SharedEntity
+                };
+                if evidence.is_empty() {
+                    evidence.push(Evidence {
+                        rule_id: "semath/authoring/shared-entity".into(),
+                        kind: "semantic-identity".into(),
+                        strength: "strong".into(),
+                        source_ranges: vec![
+                            source.location.range.clone(),
+                            target.location.range.clone(),
+                        ],
+                    });
+                }
+                MathEquationLinkInfo {
+                    link_id: format!(
+                        "equation-link/{}:{}-{}:{}",
+                        source.location.range.start_offset,
+                        source.location.range.end_offset,
+                        target.location.range.start_offset,
+                        target.location.range.end_offset
+                    ),
+                    kind,
+                    source,
+                    target: target.clone(),
+                    shared_entities: formula.shared_entities.clone(),
+                    evidence,
+                }
+            })
+            .collect::<Vec<_>>();
+        links.sort_by_key(|link| {
+            (
+                link.source.location.range.start_offset,
+                link.source.location.range.end_offset,
+            )
+        });
+        links.dedup_by(|left, right| left.link_id == right.link_id);
+        links
+    }
+
+    fn math_approximation(
+        &self,
+        relation: &SemanticExpr,
+        formulas: &[LawRecognition],
+        context: &SemanticContextInfo,
+    ) -> Option<MathApproximationInfo> {
+        let SemanticExprKind::Relation { operator, .. } = &relation.kind else {
+            return None;
+        };
+        (operator.as_str() == "approximately-equals").then(|| {
+            let mut evidence = formulas
+                .iter()
+                .flat_map(|formula| {
+                    formula.evidence.iter().chain(
+                        formula
+                            .relation
+                            .iter()
+                            .flat_map(|relation| relation.evidence.iter()),
+                    )
+                })
+                .cloned()
+                .collect::<Vec<_>>();
+            if evidence.is_empty() {
+                evidence.push(Evidence {
+                    rule_id: "semath/canonical-approximation".into(),
+                    kind: "source-relation".into(),
+                    strength: "hard".into(),
+                    source_ranges: vec![relation.range.clone()],
+                });
+            }
+            evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
+            evidence.dedup();
+            let related_fact_ids = context
+                .claims
+                .iter()
+                .filter(|claim| {
+                    claim.evidence.iter().any(|evidence| {
+                        evidence
+                            .source_ranges
+                            .iter()
+                            .any(|range| ranges_overlap(range, &relation.range))
+                    })
+                })
+                .map(|claim| claim.claim_id.clone())
+                .take(MAX_AUTHORING_ITEMS)
+                .collect();
+            MathApproximationInfo {
+                exactness: MathExactness::Approximate,
+                relation_range: relation.range.clone(),
+                evidence,
+                related_fact_ids,
+            }
+        })
+    }
+
+    fn math_claim_evidence(&self, context: &SemanticContextInfo) -> Vec<MathClaimEvidenceLinkInfo> {
+        let mut links = context
+            .claims
+            .iter()
+            .filter_map(|claim| {
+                let indexed_claim = self
+                    .index
+                    .semantic
+                    .claim(&ClaimId(claim.claim_id.clone()))?;
+                let record = self.index.semantic.evidence(&indexed_claim.evidence_id)?;
+                let claim_occurrence = self.index.semantic.occurrence(&record.source)?;
+                let claim_document = self.index.documents.get(&claim_occurrence.id.file_id)?;
+                let claim_range = claim_document
+                    .observations
+                    .semantic_evidence()
+                    .source_clause_range_for(&claim_occurrence.range)
+                    .or_else(|| {
+                        claim
+                            .evidence
+                            .iter()
+                            .flat_map(|evidence| evidence.source_ranges.iter())
+                            .min_by_key(|range| (range.start_offset, range.end_offset))
+                            .cloned()
+                    })
+                    .unwrap_or_else(|| claim_occurrence.range.clone());
+                let supporting_formulas = record
+                    .provenance
+                    .iter()
+                    .filter_map(|id| self.index.semantic.occurrence(id))
+                    .filter_map(|occurrence| {
+                        let document = self.index.documents.get(&occurrence.id.file_id)?;
+                        let formula_range = document.formula_ranges.iter().find(|range| {
+                            range.start_offset <= occurrence.range.start_offset
+                                && occurrence.range.end_offset <= range.end_offset
+                        })?;
+                        let expression = canonical_expression_at_range(
+                            &document.canonical_expressions,
+                            formula_range,
+                        )?;
+                        expression_contains_relation(expression).then(|| {
+                            self.math_formula_anchor_for_range(document, &occurrence.range)
+                        })
+                    })
+                    .take(MAX_AUTHORING_ITEMS)
+                    .collect::<Vec<_>>();
+                let polarity = match record.polarity {
+                    EvidencePolarity::Positive => MathClaimPolarity::Positive,
+                    EvidencePolarity::Negative => MathClaimPolarity::Negative,
+                };
+                let modality = match record.modality {
+                    EvidenceModality::Asserted => MathClaimModality::Asserted,
+                    EvidenceModality::Hypothetical => MathClaimModality::Hypothetical,
+                    EvidenceModality::Hedged => MathClaimModality::Hedged,
+                    EvidenceModality::Quoted => MathClaimModality::Quoted,
+                    EvidenceModality::Cited => MathClaimModality::Cited,
+                };
+                let strength_ceiling = match (record.polarity, record.modality) {
+                    (EvidencePolarity::Positive, EvidenceModality::Asserted) => {
+                        MathClaimStrengthCeiling::Asserted
+                    }
+                    (EvidencePolarity::Positive, _) => MathClaimStrengthCeiling::Qualified,
+                    (EvidencePolarity::Negative, _) => MathClaimStrengthCeiling::Unusable,
+                };
+                Some(MathClaimEvidenceLinkInfo {
+                    claim_id: claim.claim_id.clone(),
+                    claim: Location {
+                        file_id: claim_occurrence.id.file_id.clone(),
+                        path: claim_document.document.path.clone(),
+                        range: claim_range,
+                    },
+                    polarity,
+                    modality,
+                    strength_ceiling,
+                    supporting_claim_ids: record
+                        .parent_claims
+                        .iter()
+                        .map(|id| id.0.clone())
+                        .collect(),
+                    supporting_formulas,
+                    evidence: claim.evidence.clone(),
+                })
+            })
+            .collect::<Vec<_>>();
+        links.sort_by(|left, right| {
+            self.index
+                .order
+                .position(&left.claim.file_id, left.claim.range.start_offset)
+                .unwrap_or(u64::MAX)
+                .cmp(
+                    &self
+                        .index
+                        .order
+                        .position(&right.claim.file_id, right.claim.range.start_offset)
+                        .unwrap_or(u64::MAX),
+                )
+                .then(left.claim.file_id.cmp(&right.claim.file_id))
+                .then(
+                    left.claim
+                        .range
+                        .start_offset
+                        .cmp(&right.claim.range.start_offset),
+                )
+                .then(left.claim_id.cmp(&right.claim_id))
+        });
+        links.dedup_by(|left, right| left.claim_id == right.claim_id);
+        links
+    }
+
+    fn math_notation_occurrences(
+        &self,
+        focus: Option<&CursorFocus>,
+    ) -> (Vec<MathNotationOccurrenceInfo>, bool) {
+        let Some(entity_id) = focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id))
+        else {
+            return (Vec::new(), false);
+        };
+        let Ok(occurrences) = self
+            .index
+            .semantic
+            .bounded_established_occurrences_for_entity(&entity_id)
+        else {
+            return (Vec::new(), true);
+        };
+        let mut projected = occurrences
+            .into_iter()
+            .filter(|occurrence| occurrence.kind == OccurrenceKind::Notation)
+            .filter_map(|occurrence| {
+                let document = self.index.documents.get(&occurrence.id.file_id)?;
+                Some(MathNotationOccurrenceInfo {
+                    occurrence_id: occurrence.id,
+                    entity_id: entity_id.clone(),
+                    location: Location {
+                        file_id: document.document.file_id.clone(),
+                        path: document.document.path.clone(),
+                        range: occurrence.range,
+                    },
+                    scope_path: occurrence.scope_path,
+                    source_notation: occurrence.source_text,
+                })
+            })
+            .collect::<Vec<_>>();
+        projected.sort_by(|left, right| {
+            self.index
+                .order
+                .position(&left.location.file_id, left.location.range.start_offset)
+                .unwrap_or(u64::MAX)
+                .cmp(
+                    &self
+                        .index
+                        .order
+                        .position(&right.location.file_id, right.location.range.start_offset)
+                        .unwrap_or(u64::MAX),
+                )
+                .then(left.location.path.cmp(&right.location.path))
+                .then(
+                    left.location
+                        .range
+                        .start_offset
+                        .cmp(&right.location.range.start_offset),
+                )
+        });
+        (projected, false)
     }
 
     fn formula_is_retracted(
@@ -4260,7 +4848,7 @@ impl SemathEngine {
         document: &AnalyzedDocument,
         observations: &DocumentSemanticObservations,
         current: &[crate::LawRecognition],
-    ) -> Vec<crate::LawRecognition> {
+    ) -> Vec<SourceLinkedFormula> {
         let current_start = current
             .iter()
             .map(|formula| formula.range.start_offset)
@@ -4278,12 +4866,17 @@ impl SemathEngine {
             .all()
             .iter()
             .filter(|formula| formula.range.end_offset <= current_start)
-            .filter(|formula| {
-                self.entities_in_formula(document, &formula.range)
-                    .iter()
-                    .any(|entity| current_entities.contains(entity))
+            .filter_map(|formula| {
+                let shared_entities = self
+                    .entities_in_formula(document, &formula.range)
+                    .intersection(&current_entities)
+                    .cloned()
+                    .collect::<Vec<_>>();
+                (!shared_entities.is_empty()).then(|| SourceLinkedFormula {
+                    recognition: formula.clone(),
+                    shared_entities,
+                })
             })
-            .cloned()
             .collect()
     }
 
@@ -4691,6 +5284,49 @@ impl SemathEngine {
         }
         self.index.order = project_order;
     }
+}
+
+fn math_authoring_disposition(
+    decision: &MeaningDecision,
+    has_conventional_candidate: bool,
+    engine_limited: bool,
+) -> MathAuthoringDisposition {
+    match decision {
+        MeaningDecision::Established { .. } => MathAuthoringDisposition::Established,
+        MeaningDecision::Partial { .. } if has_conventional_candidate => {
+            MathAuthoringDisposition::Conventional
+        }
+        MeaningDecision::Partial { .. } => MathAuthoringDisposition::Partial,
+        MeaningDecision::Ambiguous { .. } => MathAuthoringDisposition::Ambiguous,
+        MeaningDecision::Conflicting { .. } => MathAuthoringDisposition::Conflicting,
+        MeaningDecision::Unsupported { .. } if engine_limited => {
+            MathAuthoringDisposition::EngineLimited
+        }
+        MeaningDecision::Unsupported { .. } if has_conventional_candidate => {
+            MathAuthoringDisposition::Conventional
+        }
+        MeaningDecision::Unsupported { .. } => MathAuthoringDisposition::Unsupported,
+    }
+}
+
+fn authoring_requirement_id(requirement: &MathAuthoringRequirementInfo) -> String {
+    match requirement {
+        MathAuthoringRequirementInfo::Declaration { requirement_id, .. }
+        | MathAuthoringRequirementInfo::RoleDeclaration { requirement_id, .. }
+        | MathAuthoringRequirementInfo::Condition { requirement_id, .. }
+        | MathAuthoringRequirementInfo::Disambiguation { requirement_id, .. } => {
+            requirement_id.clone()
+        }
+    }
+}
+
+fn evidence_order_key(evidence: &[Evidence]) -> (u32, u32) {
+    evidence
+        .iter()
+        .flat_map(|item| item.source_ranges.iter())
+        .map(|range| (range.start_offset, range.end_offset))
+        .min()
+        .unwrap_or((u32::MAX, u32::MAX))
 }
 
 fn conventional_candidates(formulas: &[LawRecognition]) -> (Vec<ConventionalCandidateInfo>, bool) {
