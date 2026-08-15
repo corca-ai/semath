@@ -1082,7 +1082,7 @@ mod tests {
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
         assert_eq!(PACK_SCHEMA_VERSION, 11);
-        assert_eq!(built_in_packs().len(), 13);
+        assert_eq!(built_in_packs().len(), 14);
         validate_catalog(built_in_packs()).unwrap();
     }
 

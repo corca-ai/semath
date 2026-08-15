@@ -293,61 +293,61 @@
           "capability": "vocabulary",
           "status": "measured",
           "requirement": "Resolve iterate, gradient, residual, tolerance, approximation, least-squares, and implementation terminology.",
-          "probeIds": ["CA-DEV-07", "OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-006"]
+          "probeIds": ["CA-DEV-07", "OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-006", "numerical-analysis-development-approximation", "numerical-analysis-development-residual", "numerical-analysis-development-stopping", "numerical-analysis-development-conditioning"]
         },
         {
           "capability": "typing",
           "status": "measured",
           "requirement": "Retain iterate, operator, matrix, vector, scalar-step, residual, and tolerance roles and shapes.",
-          "probeIds": ["linear-algebra-development-matvec-01", "OPTML-DEV-001", "OPTML-DEV-003"]
+          "probeIds": ["linear-algebra-development-matvec-01", "OPTML-DEV-001", "OPTML-DEV-003", "numerical-analysis-development-residual", "numerical-analysis-development-convergence", "numerical-analysis-development-euler", "numerical-analysis-development-least-squares"]
         },
         {
           "capability": "relation-recognition",
           "status": "measured",
           "requirement": "Recognize updates, stopping relations, normal equations, matrix kernels, and approximate derivative context.",
-          "probeIds": ["linear-algebra-development-matvec-01", "OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-006"]
+          "probeIds": ["linear-algebra-development-matvec-01", "OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-006", "numerical-analysis-development-approximation", "numerical-analysis-development-absolute-error", "numerical-analysis-development-residual", "numerical-analysis-development-stopping", "numerical-analysis-development-convergence", "numerical-analysis-development-newton", "numerical-analysis-development-quadrature", "numerical-analysis-development-euler", "numerical-analysis-development-least-squares", "numerical-analysis-development-conditioning"]
         },
         {
           "capability": "equivalent-forms",
           "status": "measured",
           "requirement": "Preserve reviewed rearrangements and transpose products without converting approximation into equality.",
-          "probeIds": ["FM-DEV-004", "OPTML-DEV-006"]
+          "probeIds": ["FM-DEV-004", "OPTML-DEV-006", "numerical-analysis-development-approximation", "numerical-analysis-development-absolute-error", "numerical-analysis-development-least-squares"]
         },
         {
           "capability": "conditions",
           "status": "measured",
           "requirement": "Ground positive step, tolerance, rank, differentiability, and interior-solution requirements.",
-          "probeIds": ["OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-005", "OPTML-DEV-006"]
+          "probeIds": ["OPTML-DEV-001", "OPTML-DEV-003", "OPTML-DEV-005", "OPTML-DEV-006", "numerical-analysis-development-stopping", "numerical-analysis-development-convergence", "numerical-analysis-development-newton", "numerical-analysis-development-quadrature", "numerical-analysis-development-euler"]
         },
         {
           "capability": "document-attachment",
           "status": "measured",
           "requirement": "Attach algorithm descriptions, stopping criteria, and approximation caveats to the intended computation.",
-          "probeIds": ["CA-DEV-07", "OPTML-DEV-001", "OPTML-DEV-003"]
+          "probeIds": ["CA-DEV-07", "OPTML-DEV-001", "OPTML-DEV-003", "numerical-analysis-development-approximation", "numerical-analysis-development-stopping", "numerical-analysis-development-newton", "numerical-analysis-development-quadrature"]
         },
         {
           "capability": "project-lifecycle",
           "status": "measured",
           "requirement": "Respect cursor boundaries and later evidence when an implementation or theorem draft is completed.",
-          "probeIds": ["OPTML-DEV-010", "CA-DEV-10"]
+          "probeIds": ["OPTML-DEV-010", "CA-DEV-10", "numerical-analysis-development-declaration-retraction"]
         },
         {
           "capability": "decision-quality",
           "status": "measured",
           "requirement": "Separate supported updates and stopping rules from wrong roles, missing provenance, and unsupported convergence claims.",
-          "probeIds": ["OPTML-DEV-008", "OPTML-DEV-009", "CFQ-DEV-006"]
+          "probeIds": ["OPTML-DEV-008", "OPTML-DEV-009", "CFQ-DEV-006", "numerical-analysis-development-approximation", "numerical-analysis-development-convergence", "numerical-analysis-development-conditioning", "numerical-analysis-development-declaration-retraction"]
         },
         {
           "capability": "navigation",
           "status": "measured",
           "requirement": "Navigate exact iterates, variables, and declared operator occurrences without helper-name collisions.",
-          "probeIds": ["OPTML-DEV-010-established-stationarity", "CA-DEV-10-established-specialization"]
+          "probeIds": ["OPTML-DEV-010-established-stationarity", "CA-DEV-10-established-specialization", "numerical-analysis-development-residual", "numerical-analysis-development-newton", "numerical-analysis-development-euler", "numerical-analysis-development-least-squares", "numerical-analysis-development-declaration-retraction"]
         },
         {
           "capability": "refusal",
           "status": "measured",
           "requirement": "Refuse wrong gradient roles, missing rank or tolerance evidence, and unsupported stability or convergence conclusions.",
-          "probeIds": ["OPTML-DEV-008", "OPTML-DEV-009", "CFQ-DEV-006"]
+          "probeIds": ["OPTML-DEV-008", "OPTML-DEV-009", "CFQ-DEV-006", "numerical-analysis-development-approximation", "numerical-analysis-development-stopping", "numerical-analysis-development-convergence", "numerical-analysis-development-declaration-retraction"]
         }
       ]
     }

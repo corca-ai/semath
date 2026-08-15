@@ -2186,6 +2186,8 @@ impl Parser {
             Some(self.previous_reference("greater-or-equal"))
         } else if self.consume_command("ne") || self.consume_command("neq") {
             Some(self.previous_reference("not-equals"))
+        } else if self.consume_command("approx") {
+            Some(self.previous_reference("approximately-equals"))
         } else if self.consume_command("in") {
             Some(self.previous_reference("member-of"))
         } else if self.consume_command("notin") {
@@ -2574,6 +2576,7 @@ fn is_relation_command(name: &str) -> bool {
             | "leq"
             | "ne"
             | "neq"
+            | "approx"
             | "notin"
             | "subset"
             | "subseteq"
@@ -2823,6 +2826,18 @@ mod tests {
         assert_eq!(
             render_canonical(&lower_template(r"a<b\leq c")),
             "system(relation(less-than,symbol(a),symbol(b)),relation(less-or-equal,symbol(b),symbol(c)))"
+        );
+    }
+
+    #[test]
+    fn preserves_approximation_as_a_distinct_directional_relation() {
+        assert_eq!(
+            render_canonical(&lower_template(r"u_h\approx u")),
+            "relation(approximately-equals,index(symbol(u),symbol(h)),symbol(u))"
+        );
+        assert_ne!(
+            render_canonical(&lower_template(r"u_h\approx u")),
+            render_canonical(&lower_template(r"u_h=u"))
         );
     }
 

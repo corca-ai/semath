@@ -589,6 +589,7 @@ fn role_value(value: &ClaimValue) -> Option<&str> {
 fn reverse_comparison(operator: &ClaimComparison) -> ClaimComparison {
     match operator {
         ClaimComparison::Equal => ClaimComparison::Equal,
+        ClaimComparison::Approximate => ClaimComparison::Approximate,
         ClaimComparison::NotEqual => ClaimComparison::NotEqual,
         ClaimComparison::LessThan => ClaimComparison::GreaterThan,
         ClaimComparison::LessOrEqual => ClaimComparison::GreaterOrEqual,
@@ -1619,6 +1620,19 @@ mod tests {
             comparison("less", ClaimComparison::LessThan, x, y),
         ]);
         assert!(compatible.conflicts.is_empty());
+    }
+
+    #[test]
+    fn approximation_has_neither_equality_nor_distinctness_authority() {
+        assert!(!comparisons_conflict(
+            &ClaimComparison::Approximate,
+            &ClaimComparison::Equal,
+        ));
+        assert!(!comparisons_conflict(
+            &ClaimComparison::Approximate,
+            &ClaimComparison::NotEqual,
+        ));
+        assert!(!comparison_proves_distinct(&ClaimComparison::Approximate));
     }
 
     #[test]

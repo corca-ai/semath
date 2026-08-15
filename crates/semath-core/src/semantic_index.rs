@@ -268,6 +268,7 @@ pub enum ClaimCondition {
 #[serde(rename_all = "kebab-case")]
 pub enum ClaimComparison {
     Equal,
+    Approximate,
     NotEqual,
     LessThan,
     LessOrEqual,

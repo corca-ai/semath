@@ -94,6 +94,9 @@
       "conceptKind": "operator",
       "title": "Inverse operator",
       "description": "The inverse of an invertible linear operator.",
+      "aliases": [
+        "inverse operator matrix"
+      ],
       "parents": [
         "linear-algebra:linear-operator"
       ],
@@ -106,6 +109,10 @@
       "conceptKind": "operator",
       "title": "Invertible matrix",
       "description": "A square linear operator with a two-sided inverse.",
+      "aliases": [
+        "invertible operator",
+        "invertible operator matrix"
+      ],
       "parents": [
         "linear-algebra:linear-operator"
       ],
