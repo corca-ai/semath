@@ -1,6 +1,6 @@
 # Built-in domain packs
 
-Semath compiles schema-11 JSON packs into one bounded Rust semantic
+Semath compiles schema-12 JSON packs into one bounded Rust semantic
 runtime. Packs contain concepts, roles, laws, canonical relations, optional
 representations, conditions,
 quantities, units, activation evidence, and references. They contain no
@@ -24,8 +24,9 @@ extend classification declaratively; runtime grammar never branches on pack ID.
 
 ## Authoring contract
 
-Each pack declares `schemaVersion: 11`, stable identity and SemVer, dependencies,
-concepts, and typed laws. Concepts may declare reviewed English aliases. A law
+Each pack declares `schemaVersion: 12`, stable identity and SemVer, dependencies,
+concepts, explicit concept bridges, and typed laws. Concepts may declare
+reviewed English aliases. A law
 supplies exactly one `canonicalRelation`, optional presentation
 `representations`, and roles with a required semantic concept
 and optional orthogonal quantity, shape, notation, and variadic constraints.
@@ -52,7 +53,7 @@ conditions. Activation rules carry reviewed prose `phrases` and closed
 structural kinds; the removed `patterns` field is not accepted as a
 compatibility alias.
 
-Schema 11 adds three compositional condition primitives without adding a second
+Schema 11 added three compositional condition primitives without adding a second
 fact system:
 
 - `maps-between` binds an operator, domain value, and codomain value;
@@ -86,6 +87,27 @@ Field packs remain responsible for reviewed vocabulary and laws. The generic
 runtime stores these requirements, evidence, retraction edges, and work limits
 without branching on a pack or law ID.
 
+Schema 12 makes cross-pack concept lineage explicit. A `conceptBridge` is owned
+by the pack that owns its source concept, targets a concept in a declared direct
+dependency, and connects only equal closed concept kinds. Ordinary `parents`
+remain pack-local. The compiler rejects unknown or foreign sources, undeclared
+target owners, incompatible kinds, dependency cycles, concept-lineage cycles,
+and external law roles whose owner is not a declared dependency. Bridges feed
+the existing lineage closure; they do not create another graph or dispatch
+path. The authoring report lists every bridge with its owner so reviewers can
+interpret cross-pack collision evidence.
+
+Within one document, an established law may provide its simple typed role
+bindings to later formulas. Matching is source ordered, limited to 64 roles per
+formula and two forward hops, and is rerun through the same compiled-law
+unifier. Law-derived roles never flow backward or activate a domain hypothesis.
+Roles that a later law actually consumes lower to ordinary `DerivedLaw` claims
+with explicit relation parents in `ProjectSemanticIndex`; unrelated single-law
+bindings are not retained. Replacement and incremental reanalysis therefore
+retract the intermediate through the normal dependency closure. Missing
+support, composite bindings, conflicts, and work beyond the bound remain
+uncertain rather than creating a problem.
+
 For relation skeletons repeated across independent laws and fields, a law may
 replace `canonicalRelation` with one reviewed `archetype` and an exact
 role-to-slot binding. Slots must bind every law role once. The Rust authoring
@@ -101,10 +123,10 @@ JSON path. All laws enter the same generic unifier. A pack or law ID branch in
 analysis code indicates a missing core abstraction.
 
 The authoring report schema is version 3. Alongside diagnostics and canonical
-forms it exposes catalog-derived domain signatures and a deterministic
-cross-pack collision atlas. Authors review ambiguity and refusal ownership from
-this report; generated reports remain build artifacts rather than checked-in
-documentation.
+forms it exposes catalog-derived domain signatures, explicit bridge ownership,
+and a deterministic cross-pack collision atlas. Authors review ambiguity and
+refusal ownership from this report; generated reports remain build artifacts
+rather than checked-in documentation.
 
 Every new law must have an owning corpus suite with positive, refusal, role,
 notation, constraint, and project-context evidence appropriate to its maturity.
@@ -134,7 +156,7 @@ reviewed results with `semath-pack compare <baseline> <candidate>`.
 
 The generated corpus is a balanced set of positive and refusal observations
 materialized from compact editable seeds, not independently authored evidence
-or evidence of maturity by itself. The checked-in schema-11 pack files and the
+or evidence of maturity by itself. The checked-in schema-12 pack files and the
 [quality manifest](../fixtures/corpus-manifest.json) remain authoritative.
 Repository gates run the same compiler workflow with `bun run pack:authoring`,
 then conformance followed by the manual foundation and corpus evaluation.

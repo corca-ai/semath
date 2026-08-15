@@ -642,12 +642,6 @@ impl ExternalTypeEnvironment {
             .any(|info| info.quantity_kind_id.as_deref() == Some(quantity))
     }
 
-    fn has_shape(&self, offset: u32, symbol: &str, shape: &str) -> bool {
-        self.shapes_at(offset, symbol)
-            .iter()
-            .any(|info| info.kind == shape)
-    }
-
     pub fn roles_at(&self, offset: u32, symbol: &str) -> Vec<RoleInfo> {
         facts_at(&self.roles, self.formula_offset(offset), symbol)
     }
@@ -720,6 +714,147 @@ impl LawObservations {
     pub fn pack_latent_fallbacks(&self) -> u32 {
         self.pack_latent_fallbacks
     }
+
+    pub(crate) fn retained_roles(&self) -> Vec<(RoleInfo, SourceRange)> {
+        let established = self
+            .recognitions
+            .iter()
+            .filter(|recognition| {
+                matches!(
+                    recognition.status,
+                    LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified
+                )
+            })
+            .collect::<Vec<_>>();
+        established
+            .iter()
+            .flat_map(|recognition| {
+                recognition
+                    .bindings
+                    .iter()
+                    .filter(|binding| {
+                        binding.proof == LawBindingProof::Derived
+                            && binding.evidence.kind == "law-chain-binding"
+                    })
+                    .filter_map(|binding| {
+                        law_derived_role(recognition, binding)
+                            .map(|role| (role, recognition.range.clone()))
+                    })
+            })
+            .collect()
+    }
+}
+
+const MAX_LAW_DERIVATION_DEPTH: u8 = 2;
+const MAX_DERIVED_LAW_ROLES_PER_FORMULA: usize = 64;
+
+impl ExternalTypeEnvironment {
+    pub(crate) fn with_preceding_law_roles(
+        &self,
+        formula_ranges: &[SourceRange],
+        observations: &LawObservations,
+    ) -> Option<Self> {
+        let mut output = None;
+        for formula in formula_ranges {
+            let mut derived = observations
+                .all()
+                .iter()
+                .filter(|recognition| {
+                    recognition.range.end_offset <= formula.start_offset
+                        && matches!(
+                            recognition.status,
+                            LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified
+                        )
+                })
+                .flat_map(|recognition| {
+                    recognition.bindings.iter().filter_map(move |binding| {
+                        let role = law_derived_role(recognition, binding)?;
+                        let shape = law_derived_shape(binding, &role.evidence);
+                        Some((role, shape))
+                    })
+                })
+                .take(MAX_DERIVED_LAW_ROLES_PER_FORMULA)
+                .collect::<Vec<_>>();
+            derived.sort_by(|left, right| {
+                (&left.0.symbol, &left.0.concept_id).cmp(&(&right.0.symbol, &right.0.concept_id))
+            });
+            derived.dedup_by(|left, right| {
+                left.0.symbol == right.0.symbol && left.0.concept_id == right.0.concept_id
+            });
+            for (role, shape) in derived {
+                let environment = output.get_or_insert_with(|| self.clone());
+                if let Some(shape) = shape {
+                    environment.add_shape(formula.start_offset, shape);
+                }
+                environment.add_role(formula.start_offset, role);
+            }
+        }
+        output
+    }
+}
+
+fn law_derived_shape(binding: &LawBinding, evidence: &Evidence) -> Option<ShapeInfo> {
+    let kind = match binding.constraint.kind {
+        SemanticConstraintKind::Scalar => "scalar",
+        SemanticConstraintKind::Vector => "vector",
+        SemanticConstraintKind::Matrix => "matrix",
+        SemanticConstraintKind::Tensor => "tensor",
+        SemanticConstraintKind::Function => "function",
+        _ => return None,
+    };
+    let dimensions = binding.constraint.dimensions.clone();
+    let display = if dimensions.is_empty() {
+        kind.to_owned()
+    } else {
+        format!("{kind}[{}]", dimensions.join(" × "))
+    };
+    Some(ShapeInfo {
+        symbol: binding.symbol.clone(),
+        kind: kind.into(),
+        dimensions,
+        refinements: binding.constraint.refinements.clone(),
+        display,
+        evidence: evidence.clone(),
+    })
+}
+
+fn law_derived_role(recognition: &LawRecognition, binding: &LawBinding) -> Option<RoleInfo> {
+    let concept_id = binding.constraint.concepts.first()?.clone();
+    simple_binding_symbol(&binding.symbol)?;
+    let mut source_ranges = recognition
+        .evidence
+        .iter()
+        .flat_map(|evidence| evidence.source_ranges.iter().cloned())
+        .chain(binding.evidence.source_ranges.iter().cloned())
+        .collect::<Vec<_>>();
+    source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
+    source_ranges.dedup();
+    Some(RoleInfo {
+        symbol: binding.symbol.clone(),
+        concept_id,
+        description: format!(
+            "Role established by {}:{}.",
+            recognition.pack_id, recognition.law_id
+        ),
+        evidence: Evidence {
+            rule_id: format!(
+                "law-chain/{}/{}:{}",
+                MAX_LAW_DERIVATION_DEPTH, recognition.pack_id, recognition.law_id
+            ),
+            kind: "law-derived-role".into(),
+            strength: "strong".into(),
+            source_ranges,
+        },
+    })
+}
+
+fn simple_binding_symbol(symbol: &str) -> Option<&str> {
+    (!symbol.is_empty()
+        && symbol.chars().all(|character| {
+            character.is_ascii_alphanumeric()
+                || matches!(character, '\\' | '_' | '{' | '}' | '\'' | '′')
+        }))
+    .then_some(symbol)
 }
 
 pub(crate) fn observe_laws(
@@ -2369,7 +2504,17 @@ fn plan_role_support(
             }
             RoleSupport::Derived => {
                 supported += 1;
-                supported_roles.insert(role.id.as_str(), RoleBindingProof::Derived);
+                let proof = if symbols.iter().any(|symbol| {
+                    external.roles_at(offset, symbol).iter().any(|claim| {
+                        claim.evidence.kind == "law-derived-role"
+                            && concepts_share_lineage(&claim.concept_id, &role.concept)
+                    })
+                }) {
+                    RoleBindingProof::DerivedFromLaw
+                } else {
+                    RoleBindingProof::Derived
+                };
+                supported_roles.insert(role.id.as_str(), proof);
             }
             RoleSupport::Asserted => {
                 supported += 1;
@@ -2440,6 +2585,7 @@ enum RoleBindingProof {
     Typed,
     Derived,
     DerivedFromTypes,
+    DerivedFromLaw,
     Asserted,
     Candidate,
 }
@@ -2994,7 +3140,7 @@ fn role_symbol_support(
     {
         return RoleSupport::Refuted;
     }
-    let mut matching_shape = false;
+    let mut shape_support = RoleSupport::Unresolved;
     if let Some(expected_shape) = role.shape.as_deref() {
         let mut explicit = shapes.claims_at(symbol, offset).0;
         if notation_symbol != symbol {
@@ -3016,18 +3162,31 @@ fn role_symbol_support(
             .or_else(|| shapes.shape_at(notation_symbol, offset))
         {
             Some(shape) if shape.kind != expected_shape => return RoleSupport::Refuted,
-            Some(_) => matching_shape = true,
+            Some(_) => shape_support = RoleSupport::Typed,
             None => {}
         }
-        matching_shape |= external.has_shape(offset, symbol, expected_shape);
-        if role.concept.split(':').next_back() == Some(expected_shape) {
-            return required_quantity.and(if matching_shape {
-                RoleSupport::Typed
-            } else {
-                RoleSupport::Unresolved
-            });
+        if shape_support == RoleSupport::Unresolved {
+            shape_support = imported
+                .iter()
+                .filter(|shape| shape.kind == expected_shape)
+                .map(|shape| {
+                    if shape.evidence.kind == "law-derived-role" {
+                        RoleSupport::Derived
+                    } else {
+                        RoleSupport::Typed
+                    }
+                })
+                .min_by_key(|support| match support {
+                    RoleSupport::Typed => 0,
+                    RoleSupport::Derived => 1,
+                    _ => 2,
+                })
+                .unwrap_or(RoleSupport::Unresolved);
         }
-        if activated_notation_support && matching_shape {
+        if role.concept.split(':').next_back() == Some(expected_shape) {
+            return required_quantity.and(shape_support);
+        }
+        if activated_notation_support && shape_support.is_proven() {
             return required_quantity.and(notation_support());
         }
     }
@@ -3046,22 +3205,31 @@ fn role_symbol_support(
             support
         }
     } else if role.concept == "linear-algebra:linear-operator" {
-        if matching_shape
-            || shapes
-                .shape_at(symbol, offset)
-                .is_some_and(|shape| shape.kind == "matrix")
-            || external.has_shape(offset, symbol, "matrix")
-        {
+        let local_matrix = shapes
+            .shape_at(symbol, offset)
+            .is_some_and(|shape| shape.kind == "matrix");
+        if local_matrix {
             RoleSupport::Typed
+        } else if shape_support.is_proven() {
+            shape_support
         } else {
             RoleSupport::Unresolved
         }
     } else if has_exact_role
-        || external.has_role(offset, symbol, &role.concept)
         || (concepts_share_lineage("semath:function", &role.concept)
             && has_differentiable_function_evidence(assumptions, symbol))
     {
         RoleSupport::Typed
+    } else if let Some(imported) = external
+        .roles_at(offset, symbol)
+        .into_iter()
+        .find(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
+    {
+        if imported.evidence.kind == "law-derived-role" {
+            RoleSupport::Derived
+        } else {
+            RoleSupport::Typed
+        }
     } else if activated_notation_support {
         notation_support()
     } else {
@@ -3151,18 +3319,18 @@ fn recognition(
             let expression = bindings.get(&role.id)?;
             let planned_proof = role_support.proof_for(&role.id);
             let mut proof_ranges = match planned_proof {
-                RoleBindingProof::Typed | RoleBindingProof::DerivedFromTypes => {
-                    role_source_evidence_ranges(
-                        role,
-                        expression,
-                        actual.range.start_offset,
-                        context.shapes,
-                        context.quantities,
-                        context.consistency,
-                        context.assumptions,
-                        context.external,
-                    )
-                }
+                RoleBindingProof::Typed
+                | RoleBindingProof::DerivedFromTypes
+                | RoleBindingProof::DerivedFromLaw => role_source_evidence_ranges(
+                    role,
+                    expression,
+                    actual.range.start_offset,
+                    context.shapes,
+                    context.quantities,
+                    context.consistency,
+                    context.assumptions,
+                    context.external,
+                ),
                 RoleBindingProof::Candidate => vec![actual.range.clone()],
                 RoleBindingProof::Derived | RoleBindingProof::Asserted => {
                     vec![expression.range.clone()]
@@ -3189,9 +3357,9 @@ fn recognition(
                 ),
                 proof: match proof {
                     RoleBindingProof::Typed => LawBindingProof::Typed,
-                    RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
-                        LawBindingProof::Derived
-                    }
+                    RoleBindingProof::Derived
+                    | RoleBindingProof::DerivedFromTypes
+                    | RoleBindingProof::DerivedFromLaw => LawBindingProof::Derived,
                     RoleBindingProof::Asserted => LawBindingProof::Asserted,
                     RoleBindingProof::Candidate => LawBindingProof::Candidate,
                 },
@@ -3200,6 +3368,9 @@ fn recognition(
                         RoleBindingProof::Typed => format!("typed-law-role/{}", role.id),
                         RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
                             format!("derived-law-role/{}", role.id)
+                        }
+                        RoleBindingProof::DerivedFromLaw => {
+                            format!("law-chain-role/{}", role.id)
                         }
                         RoleBindingProof::Asserted => format!("asserted-law-role/{}", role.id),
                         RoleBindingProof::Candidate => {
@@ -3211,6 +3382,7 @@ fn recognition(
                         RoleBindingProof::Derived | RoleBindingProof::DerivedFromTypes => {
                             "derived-binding"
                         }
+                        RoleBindingProof::DerivedFromLaw => "law-chain-binding",
                         RoleBindingProof::Asserted => "asserted-binding",
                         RoleBindingProof::Candidate => "candidate-binding",
                     }
@@ -3219,6 +3391,7 @@ fn recognition(
                         RoleBindingProof::Typed => "hard",
                         RoleBindingProof::Derived
                         | RoleBindingProof::DerivedFromTypes
+                        | RoleBindingProof::DerivedFromLaw
                         | RoleBindingProof::Asserted => "strong",
                         RoleBindingProof::Candidate => "weak",
                     }
@@ -6931,6 +7104,37 @@ This vector field is the gradient of $f$; hence, after the characterization abov
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {
         law_observations(source).all().to_vec()
+    }
+
+    #[test]
+    fn law_roles_flow_forward_once_and_never_back_into_earlier_formulas() {
+        let observations = law_observations(
+            "Let $H$ be an m by n matrix, $q$ an n-dimensional vector, and $z$ an m-dimensional vector. Then $z=Hq$.",
+        );
+        let recognition = observations
+            .all()
+            .iter()
+            .find(|law| law.law_id == "matrix-vector-product")
+            .expect("matrix-vector product");
+        let before = SourceRange {
+            start_offset: recognition.range.start_offset.saturating_sub(1),
+            end_offset: recognition.range.start_offset,
+        };
+        let after = SourceRange {
+            start_offset: recognition.range.end_offset + 1,
+            end_offset: recognition.range.end_offset + 2,
+        };
+        let environment = ExternalTypeEnvironment::default()
+            .with_preceding_law_roles(&[before.clone(), after.clone()], &observations)
+            .expect("the later formula receives derived roles");
+        assert!(environment.roles_at(before.start_offset, "H").is_empty());
+        assert!(
+            environment
+                .roles_at(after.start_offset, "H")
+                .iter()
+                .any(|role| role.concept_id == "linear-algebra:linear-operator"
+                    && role.evidence.kind == "law-derived-role")
+        );
     }
 
     fn law_observations(source: &str) -> LawObservations {

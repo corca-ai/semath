@@ -166,20 +166,35 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             &[],
         );
-        self.laws = observe_laws(
-            canonical_expressions,
-            &self.semantic_evidence,
-            &LawAnalysisContext {
-                source: &document.content,
-                formula_ranges,
-                shapes: &self.shapes,
-                quantities: &self.quantities,
-                consistency: &self.roles,
-                assumptions: &self.assumptions,
-                external,
-                domains: &self.domains,
-            },
-        );
+        let analyze = |environment: &ExternalTypeEnvironment| {
+            observe_laws(
+                canonical_expressions,
+                &self.semantic_evidence,
+                &LawAnalysisContext {
+                    source: &document.content,
+                    formula_ranges,
+                    shapes: &self.shapes,
+                    quantities: &self.quantities,
+                    consistency: &self.roles,
+                    assumptions: &self.assumptions,
+                    external: environment,
+                    domains: &self.domains,
+                },
+            )
+        };
+        let direct = analyze(external);
+        self.laws = if let Some(first_hop) =
+            external.with_preceding_law_roles(formula_ranges, &direct)
+        {
+            let one_hop = analyze(&first_hop);
+            if let Some(second_hop) = external.with_preceding_law_roles(formula_ranges, &one_hop) {
+                analyze(&second_hop)
+            } else {
+                one_hop
+            }
+        } else {
+            direct
+        };
         self.domains = observe_domains(
             document,
             ScopeGraph::new(document),

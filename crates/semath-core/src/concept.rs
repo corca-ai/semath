@@ -91,14 +91,27 @@ static PACK_CONCEPT_ANCESTORS: LazyLock<BTreeSet<(String, String)>> = LazyLock::
     let parents = built_in_packs()
         .iter()
         .flat_map(|pack| {
-            pack.concepts.iter().map(|concept| {
-                (
-                    format!("{}:{}", pack.namespace, concept.id),
-                    concept.parents.clone(),
+            pack.concepts
+                .iter()
+                .map(|concept| {
+                    (
+                        format!("{}:{}", pack.namespace, concept.id),
+                        concept.parents.clone(),
+                    )
+                })
+                .chain(
+                    pack.concept_bridges
+                        .iter()
+                        .map(|bridge| (bridge.source.clone(), vec![bridge.target.clone()])),
                 )
-            })
         })
-        .collect::<BTreeMap<_, _>>();
+        .fold(
+            BTreeMap::<String, Vec<String>>::new(),
+            |mut parents, (concept, values)| {
+                parents.entry(concept).or_default().extend(values);
+                parents
+            },
+        );
     let mut ancestors = BTreeSet::new();
     for concept in parents.keys() {
         let mut frontier = parents.get(concept).cloned().unwrap_or_default();
@@ -349,6 +362,14 @@ mod tests {
         ));
         assert!(concepts_share_lineage(
             "linear-algebra:transpose",
+            "linear-algebra:linear-operator"
+        ));
+        assert!(concepts_share_lineage(
+            "control-systems:state",
+            "linear-algebra:vector"
+        ));
+        assert!(concepts_share_lineage(
+            "probability:covariance-matrix",
             "linear-algebra:linear-operator"
         ));
         assert!(!concepts_share_lineage(

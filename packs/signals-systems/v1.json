@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "signals-systems",
   "packVersion": "1.1.0",
   "packKind": "field",
@@ -14,6 +14,11 @@
         "semath:dimensional-analysis",
         "semath:quantities"
       ]
+    },
+    {
+      "packId": "calculus-analysis",
+      "versionMajor": 1,
+      "requiredCapabilities": []
     }
   ],
   "capabilities": {
@@ -118,6 +123,13 @@
       "references": [
         "signals-systems"
       ]
+    }
+  ],
+  "conceptBridges": [
+    {
+      "id": "transfer-function-is-function",
+      "source": "signals-systems:transfer-function",
+      "target": "calculus-analysis:function"
     }
   ],
   "quantityKinds": [],

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "thermodynamics-heat-transfer",
   "packVersion": "1.1.0",
   "packKind": "field",

@@ -101,6 +101,15 @@ pub struct PackArchetypeReport {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct PackConceptBridgeReport {
+    pub bridge_id: String,
+    pub owner_pack_id: String,
+    pub source_concept_id: String,
+    pub target_concept_id: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct PackAuthoringReport {
     pub schema_version: u32,
     pub diagnostics: Vec<PackAuthoringDiagnostic>,
@@ -109,6 +118,7 @@ pub struct PackAuthoringReport {
     pub signatures: Vec<PackDomainSignature>,
     pub collisions: Vec<PackLawCollision>,
     pub archetypes: Vec<PackArchetypeReport>,
+    pub bridges: Vec<PackConceptBridgeReport>,
 }
 
 pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringReport {
@@ -217,6 +227,19 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
         })
         .collect();
     let archetypes = compile_archetype_report(&compiled, &request.sources);
+    let bridges = catalog
+        .iter()
+        .flat_map(|pack| {
+            pack.concept_bridges
+                .iter()
+                .map(move |bridge| PackConceptBridgeReport {
+                    bridge_id: bridge.id.clone(),
+                    owner_pack_id: pack.pack_id.clone(),
+                    source_concept_id: bridge.source.clone(),
+                    target_concept_id: bridge.target.clone(),
+                })
+        })
+        .collect();
     let packs = compiled
         .into_iter()
         .map(|(_, pack)| PackAuthoringSummary {
@@ -236,6 +259,7 @@ pub fn inspect_pack_catalog(request: PackAuthoringRequest) -> PackAuthoringRepor
         signatures,
         collisions,
         archetypes,
+        bridges,
     }
 }
 
@@ -372,6 +396,7 @@ pub fn pack_template(pack_id: &str) -> Result<String, PackValidationError> {
             template_concept("coefficient", "Coefficient", &reference_id),
             template_concept("input", "Input", &reference_id),
         ],
+        concept_bridges: Vec::new(),
         quantity_kinds: Vec::new(),
         units: Vec::new(),
         laws: vec![PackLaw {
@@ -578,6 +603,28 @@ fn diagnostic_code(error: &PackValidationError) -> &'static str {
         "schema.duplicate-id"
     } else if error.message.contains("dependency cycle") {
         "dependency.cycle"
+    } else if error.message.contains("concept bridge cycle") {
+        "bridge.cycle"
+    } else if error
+        .message
+        .contains("bridge source must be owned by its declaring pack")
+    {
+        "bridge.source-owner"
+    } else if error.message.contains("incompatible concept kinds") {
+        "bridge.incompatible-kind"
+    } else if error
+        .message
+        .contains("cross-pack ancestry must be declared")
+    {
+        "bridge.required"
+    } else if error.message.contains("target owner")
+        && error.message.contains("declared dependency")
+    {
+        "bridge.dependency"
+    } else if error.message.contains("concept owner")
+        && error.message.contains("declared dependency")
+    {
+        "dependency.external-concept"
     } else if error.message.contains("missing capability")
         || error.message.contains("capabilities required")
     {
@@ -726,6 +773,11 @@ mod tests {
                     .distinguishing_evidence
                     .iter()
                     .any(|value| value == "domain")
+        }));
+        assert!(report.bridges.iter().any(|bridge| {
+            bridge.owner_pack_id == "control-systems"
+                && bridge.source_concept_id == "control-systems:state"
+                && bridge.target_concept_id == "linear-algebra:vector"
         }));
     }
 

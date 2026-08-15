@@ -1,12 +1,23 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "packId": "calculus-analysis",
   "packVersion": "1.1.0",
   "packKind": "field",
   "namespace": "calculus-analysis",
   "title": "Calculus and analysis",
   "description": "Recognition-first catalog for calculus and differential-equation models without inferred regularity or problem conditions.",
-  "dependencies": [],
+  "dependencies": [
+    {
+      "packId": "fluid-mechanics",
+      "versionMajor": 1,
+      "requiredCapabilities": []
+    },
+    {
+      "packId": "linear-algebra",
+      "versionMajor": 1,
+      "requiredCapabilities": []
+    }
+  ],
   "capabilities": {
     "provides": [
       "semath:formula-recognition",
@@ -271,6 +282,7 @@
       ]
     }
   ],
+  "conceptBridges": [],
   "quantityKinds": [],
   "units": [],
   "laws": [

@@ -258,11 +258,18 @@ impl AnalyzedDocument {
                     .chain(event.expansion.input_range.iter().cloned())
             })
             .collect();
-        let formula_ranges = document
-            .math_roots
-            .iter()
-            .map(|root| root.content_range.clone())
-            .collect();
+        let formula_ranges = if document.math_roots.is_empty() {
+            parsed
+                .iter()
+                .map(|math| math.region.content_range.clone())
+                .collect()
+        } else {
+            document
+                .math_roots
+                .iter()
+                .map(|root| root.content_range.clone())
+                .collect()
+        };
         compact_analyzed_document(&mut document);
         Ok(Self {
             component_id: document.file_id.clone(),
@@ -1042,12 +1049,16 @@ fn lower_semantic_document(
         &definitions,
         &relations.entities,
     );
+    let law_roles =
+        lower_law_derived_role_facts(source, observations, &occurrences, &definitions, &relations);
     relations.prune_unreferenced_entities(&typed.claims);
     evidence.extend(typed.evidence);
     claims.extend(typed.claims);
     entities.extend(relations.entities);
     evidence.extend(relations.evidence);
     claims.extend(relations.claims);
+    evidence.extend(law_roles.evidence);
+    claims.extend(law_roles.claims);
     entities.extend(cross_modal.entities);
     evidence.extend(cross_modal.evidence);
     claims.extend(cross_modal.claims);
@@ -1307,6 +1318,116 @@ struct LoweredTypedFacts {
     claims: Vec<Claim>,
 }
 
+fn lower_law_derived_role_facts(
+    source: &ProjectDocument,
+    observations: &DocumentSemanticObservations,
+    occurrences: &[SourceOccurrence],
+    definitions: &BTreeMap<EntityId, DefinitionInfo>,
+    relations: &LoweredRelationFacts,
+) -> LoweredTypedFacts {
+    let mut output = LoweredTypedFacts::default();
+    for (role, formula_range) in observations.laws.retained_roles() {
+        let entity = closest_definition(definitions, &role.symbol, &role.evidence)
+            .map(|(entity, _)| entity.clone())
+            .or_else(|| {
+                closest_relation_entity(
+                    &relations.entities,
+                    occurrences,
+                    &role.symbol,
+                    &role.evidence,
+                )
+            });
+        let Some(entity) = entity else { continue };
+        let mut parent_claims = relations
+            .claims
+            .iter()
+            .filter(|claim| {
+                relations.ranges.get(&claim.id).is_some_and(|range| {
+                    ranges_overlap(range, &formula_range)
+                        || role
+                            .evidence
+                            .source_ranges
+                            .iter()
+                            .any(|evidence| ranges_overlap(range, evidence))
+                })
+            })
+            .map(|claim| claim.id.clone())
+            .take(16)
+            .collect::<Vec<_>>();
+        parent_claims.sort();
+        parent_claims.dedup();
+        if parent_claims.is_empty() {
+            continue;
+        }
+        let parent_evidence = parent_claims
+            .iter()
+            .filter_map(|parent_id| {
+                let claim = relations
+                    .claims
+                    .iter()
+                    .find(|claim| claim.id == *parent_id)?;
+                relations
+                    .evidence
+                    .iter()
+                    .find(|evidence| evidence.id == claim.evidence_id)
+            })
+            .collect::<Vec<_>>();
+        let Some(source_occurrence) = parent_evidence
+            .iter()
+            .filter_map(|evidence| {
+                occurrences
+                    .iter()
+                    .find(|occurrence| occurrence.id == evidence.source)
+            })
+            .max_by_key(|occurrence| occurrence.availability_order)
+        else {
+            continue;
+        };
+        let available_after = parent_evidence
+            .iter()
+            .map(|evidence| evidence.available_after)
+            .max()
+            .unwrap_or(source_occurrence.availability_order);
+        let mut provenance = parent_evidence
+            .iter()
+            .map(|evidence| evidence.source.clone())
+            .collect::<Vec<_>>();
+        provenance.sort();
+        provenance.dedup();
+        let ordinal = output.claims.len();
+        let evidence_id = EvidenceId(format!(
+            "{}:{}:law-role-evidence:{ordinal}",
+            source.file_id, source.document_version
+        ));
+        output.evidence.push(EvidenceRecord {
+            id: evidence_id.clone(),
+            source: source_occurrence.id.clone(),
+            scope_path: source_occurrence.scope_path.clone(),
+            available_after,
+            polarity: EvidencePolarity::Positive,
+            modality: EvidenceModality::Asserted,
+            origin: EvidenceOrigin::Derived,
+            provenance,
+            parent_claims,
+            rule_id: role.evidence.rule_id,
+            rule_version: 1,
+        });
+        output.claims.push(Claim {
+            id: ClaimId(format!(
+                "{}:{}:law-role-claim:{ordinal}",
+                source.file_id, source.document_version
+            )),
+            subject: entity,
+            predicate: ClaimPredicate::HasRole,
+            object: ClaimObject::Value(ClaimValue::Concept(role.concept_id)),
+            evidence_id,
+            tier: InferenceTier::DerivedLaw,
+            derivation_depth: 1,
+        });
+    }
+    output
+}
+
 fn lower_typed_observation_facts(
     source: &ProjectDocument,
     observations: &DocumentSemanticObservations,
@@ -1492,6 +1613,7 @@ struct LoweredRelationFacts {
     entities: Vec<EntityId>,
     evidence: Vec<EvidenceRecord>,
     claims: Vec<Claim>,
+    ranges: BTreeMap<ClaimId, SourceRange>,
 }
 
 impl LoweredRelationFacts {
@@ -1726,7 +1848,7 @@ impl RelationLowerer<'_> {
             }
             _ => return Some(result),
         };
-        self.emit_relation(result.clone(), relation);
+        self.emit_relation(result.clone(), relation, &expression.range);
         Some(result)
     }
 
@@ -2061,7 +2183,7 @@ impl RelationLowerer<'_> {
             .map(|(entity, _)| entity.clone())
     }
 
-    fn emit_relation(&mut self, subject: EntityId, relation: ClaimRelation) {
+    fn emit_relation(&mut self, subject: EntityId, relation: ClaimRelation, range: &SourceRange) {
         let ordinal = self.output.claims.len();
         let evidence_id = EvidenceId(format!(
             "{}:{}:canonical-relation-evidence:{ordinal}",
@@ -2071,14 +2193,22 @@ impl RelationLowerer<'_> {
             "{}:{}:canonical-relation-claim:{ordinal}",
             self.source.file_id, self.source.document_version
         ));
-        let mut provenance = relation
-            .entities()
-            .into_iter()
-            .map(|entity| entity.anchor.clone())
-            .chain(std::iter::once(subject.anchor.clone()))
-            .collect::<Vec<_>>();
-        provenance.sort();
-        provenance.dedup();
+        let source_occurrence = self
+            .occurrences
+            .iter()
+            .find(|occurrence| occurrence.range == *range)
+            .or_else(|| {
+                self.occurrences.iter().find(|occurrence| {
+                    occurrence.range.start_offset <= range.start_offset
+                        && range.end_offset <= occurrence.range.end_offset
+                })
+            })
+            .or_else(|| {
+                self.occurrences
+                    .iter()
+                    .find(|occurrence| occurrence.id == subject.anchor)
+            })
+            .expect("relation subjects have a source occurrence");
         let available_after = relation
             .entities()
             .into_iter()
@@ -2089,22 +2219,32 @@ impl RelationLowerer<'_> {
                     .find(|occurrence| occurrence.id == entity.anchor)
                     .map(|occurrence| occurrence.availability_order)
             })
+            .chain(
+                self.occurrences
+                    .iter()
+                    .filter(|occurrence| {
+                        range.start_offset <= occurrence.range.start_offset
+                            && occurrence.range.end_offset <= range.end_offset
+                    })
+                    .map(|occurrence| occurrence.availability_order),
+            )
             .max()
             .unwrap_or(0);
-        let (polarity, modality) = self.disposition_for(&subject.anchor);
+        let (polarity, modality) = self.disposition_for(&source_occurrence.id);
         self.output.evidence.push(EvidenceRecord {
             id: evidence_id.clone(),
-            source: subject.anchor.clone(),
-            scope_path: subject.scope_path.clone(),
+            source: source_occurrence.id.clone(),
+            scope_path: source_occurrence.scope_path.clone(),
             available_after,
             polarity,
             modality,
             origin: EvidenceOrigin::Explicit,
-            provenance,
+            provenance: vec![source_occurrence.id.clone()],
             parent_claims: Vec::new(),
             rule_id: "semath/canonical-relation".into(),
             rule_version: 1,
         });
+        self.output.ranges.insert(claim_id.clone(), range.clone());
         self.output.claims.push(Claim {
             id: claim_id,
             subject,
