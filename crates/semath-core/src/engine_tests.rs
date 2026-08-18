@@ -1264,8 +1264,11 @@ fn a_final_established_equation_still_routes_its_domain_to_later_prose() {
     };
 
     assert!(view.domains.iter().any(|domain| {
-        domain.pack_id == "classical-mechanics"
-            && domain.support == crate::DomainSupportTier::Supported
+        domain.support == crate::DomainSupportTier::Supported
+            && domain
+                .evidence
+                .iter()
+                .any(|evidence| evidence.kind == "canonical-math")
     }));
 }
 
