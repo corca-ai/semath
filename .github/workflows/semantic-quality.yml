@@ -2,9 +2,30 @@ name: semantic-quality
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: Run the guarded one-shot semantic release
+        required: true
+        type: boolean
+        default: false
+      expected_sha:
+        description: Exact candidate commit for a release run
+        required: false
+        type: string
+      release_id:
+        description: Frozen semantic release id
+        required: false
+        type: string
+      confirmation:
+        description: Type RUN FRESH ONCE for a release run
+        required: false
+        type: string
 
 jobs:
   evaluate:
+    if: ${{ !inputs.release }}
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,3 +50,74 @@ jobs:
           # Shared-runner CPU allocation is not a stable timing reference.
           # Other semantic and structural performance budgets remain strict.
           SEMATH_BUDGET_TIMING_GATE: "0"
+
+  release:
+    if: ${{ inputs.release }}
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: semantic-release-${{ inputs.release_id }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the exact reviewed release request
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          test "$GITHUB_SHA" = "$EXPECTED_SHA"
+          test "$RELEASE_ID" = "v0.36"
+          test "$CONFIRMATION" = "RUN FRESH ONCE"
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - name: Install pinned awiki
+        env:
+          AWIKI_ARCHIVE_SHA256: c0b7ee22c089130c5ace0cd7201cf8c39a48afbfbc220463b03f5ba41fe8200e
+        run: |
+          archive="$RUNNER_TEMP/awiki-x86_64-unknown-linux-gnu.tar.xz"
+          curl --fail --location --silent --show-error \
+            https://github.com/corca-ai/awiki/releases/download/v0.5.0/awiki-x86_64-unknown-linux-gnu.tar.xz \
+            --output "$archive"
+          echo "$AWIKI_ARCHIVE_SHA256  $archive" | sha256sum --check
+          tar --extract --xz --file "$archive" --directory "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/awiki-x86_64-unknown-linux-gnu" >> "$GITHUB_PATH"
+      - name: Complete every pre-blind release gate
+        env:
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ github.workspace }}/fixtures/challenge/document-reasoning-fresh-v036.json
+          SEMATH_FRESH_BLIND_RECEIPT: ${{ runner.temp }}/semath-v036-receipt.json
+          SEMATH_SEMANTIC_RELEASE_PREFLIGHT_ONLY: "1"
+        run: bun run release:semantic
+      - name: Reserve the one-shot v0.36 boundary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          marker='<!-- semath-fresh-blind:v0.36:spent -->'
+          if gh api "repos/$GITHUB_REPOSITORY/issues/354/comments" --paginate --jq '.[].body' | grep --fixed-strings --quiet "$marker"; then
+            echo "v0.36 fresh-blind execution was already reserved" >&2
+            exit 1
+          fi
+          gh issue comment 354 --body "$marker
+          Reserved immediately before the fresh engine boundary for candidate $GITHUB_SHA in Actions run $GITHUB_RUN_ID. This release id must not be executed again."
+      - name: Execute the fresh release exactly once
+        env:
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ github.workspace }}/fixtures/challenge/document-reasoning-fresh-v036.json
+          SEMATH_FRESH_BLIND_RECEIPT: ${{ runner.temp }}/semath-v036-receipt.json
+        run: bun scripts/run-fresh-blind-release.ts
+      - name: Preserve the terminal receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: warn
+          name: semath-v036-receipt-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/semath-v036-receipt.json
+          retention-days: 90

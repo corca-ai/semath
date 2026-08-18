@@ -31,6 +31,13 @@ export function semanticReleaseSteps(
   ];
 }
 
+export function semanticReleasePreflightSteps(
+  fixture: string,
+  receipt: string,
+): readonly SemanticReleaseStep[] {
+  return semanticReleaseSteps(fixture, receipt).slice(0, -1);
+}
+
 export function assertCommittedWasmArtifactsMatchHead(
   changedPaths: string,
   untrackedPaths = "",
@@ -61,6 +68,8 @@ function main(): void {
   }
   const fixture = required("SEMATH_FRESH_BLIND_FIXTURE");
   const receipt = required("SEMATH_FRESH_BLIND_RECEIPT");
+  const preflightOnly =
+    process.env.SEMATH_SEMANTIC_RELEASE_PREFLIGHT_ONLY === "1";
   if (existsSync(receipt)) {
     throw new Error(`fresh blind receipt already exists: ${receipt}`);
   }
@@ -68,7 +77,10 @@ function main(): void {
     throw new Error("semantic release requires a clean worktree");
   }
 
-  for (const step of semanticReleaseSteps(fixture, receipt)) {
+  const steps = preflightOnly
+    ? semanticReleasePreflightSteps(fixture, receipt)
+    : semanticReleaseSteps(fixture, receipt);
+  for (const step of steps) {
     if (step.kind === "assert-committed-wasm-artifacts-match-head") {
       assertCommittedWasmArtifactsMatchHead(
         output("git", ["diff", "--name-only", "HEAD", "--", "lib/wasm"]),

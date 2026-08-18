@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   assertCleanReleaseWorktree,
   assertCommittedWasmArtifactsMatchHead,
+  semanticReleasePreflightSteps,
   semanticReleaseSteps,
 } from "./run-semantic-release";
 
@@ -60,5 +61,17 @@ describe("semantic release orchestration", () => {
     expect(() =>
       assertCleanReleaseWorktree(" M packages/protocol/src/index.ts\n?? stray.txt"),
     ).toThrow("semantic release worktree changed before the fresh blind boundary");
+  });
+
+  test("stops a hosted release preflight at the clean one-shot boundary", () => {
+    const steps = semanticReleasePreflightSteps("fixture.json", "receipt.json");
+    const labels = steps.map((step) =>
+      step.kind === "command"
+        ? [step.command, ...step.args].join(" ")
+        : step.kind,
+    );
+
+    expect(labels.at(-1)).toBe("assert-clean-release-worktree");
+    expect(labels).not.toContain("bun scripts/run-fresh-blind-release.ts");
   });
 });
