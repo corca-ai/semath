@@ -1245,6 +1245,31 @@ fn an_established_equation_routes_only_later_formulas_in_the_same_scope() {
 }
 
 #[test]
+fn a_final_established_equation_still_routes_its_domain_to_later_prose() {
+    let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$ The discussion continues.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(source)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: source.find("discussion").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(view.domains.iter().any(|domain| {
+        domain.pack_id == "classical-mechanics"
+            && domain.support == crate::DomainSupportTier::Supported
+    }));
+}
+
+#[test]
 fn established_equation_does_not_activate_its_own_conventional_notation() {
     let source = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz})$.";
     let mut engine = SemathEngine::default();

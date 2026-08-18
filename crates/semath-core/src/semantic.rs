@@ -204,7 +204,7 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             source_laws.all(),
         );
-        self.laws = if routed_domains.has_established_equation_evidence() {
+        self.laws = if routed_domains.requires_forward_law_routing(formula_ranges) {
             analyze_with_law_chains(&routed_domains.for_forward_law_routing())
         } else {
             source_laws

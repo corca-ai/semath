@@ -189,10 +189,14 @@ impl DomainObservations {
         active
     }
 
-    pub(crate) fn has_established_equation_evidence(&self) -> bool {
-        self.equations
-            .iter()
-            .any(|equation| equation.source_established)
+    pub(crate) fn requires_forward_law_routing(&self, formula_ranges: &[SourceRange]) -> bool {
+        self.equations.iter().any(|equation| {
+            equation.source_established
+                && formula_ranges.iter().any(|formula| {
+                    equation.range.end_offset <= formula.start_offset
+                        && self.scopes.visible(equation.scope_id, formula.start_offset)
+                })
+        })
     }
 
     pub(crate) fn for_forward_law_routing(mut self) -> Self {
@@ -431,14 +435,14 @@ fn source_text<'a>(document: &'a ProjectDocument, range: &SourceRange) -> &'a st
 
 #[cfg(test)]
 mod tests {
-    use super::observe_domains;
+    use super::{DomainObservations, EquationActivation, observe_domains};
     use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::scope::ScopeGraph;
     use crate::{
-        DocumentLanguage, DomainSupportTier, MathRootState, ProjectDocument, ProseAnnotation,
-        SourceRange,
+        DocumentLanguage, DomainSupportTier, Evidence, MathRootState, ProjectDocument,
+        ProseAnnotation, SourceRange,
     };
 
     fn analyze(source: &str, language: DocumentLanguage) -> super::DomainObservations {
@@ -473,6 +477,55 @@ mod tests {
             &prose.semantic_evidence,
             &[],
         )
+    }
+
+    fn range(source: &str, text: &str) -> SourceRange {
+        let start_offset = source.find(text).unwrap() as u32;
+        SourceRange {
+            start_offset,
+            end_offset: start_offset + text.len() as u32,
+        }
+    }
+
+    fn routing_observations(source: &str, equation_range: SourceRange) -> DomainObservations {
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        domains.equations.push(EquationActivation {
+            pack_id: "test".into(),
+            pack_version: "1.0.0".into(),
+            title: "Test".into(),
+            scope_id: domains.scopes.id_at(equation_range.start_offset),
+            range: equation_range,
+            source_established: true,
+            evidence: Evidence {
+                rule_id: "test".into(),
+                kind: "canonical-math".into(),
+                strength: "exact".into(),
+                source_ranges: Vec::new(),
+            },
+        });
+        domains
+    }
+
+    #[test]
+    fn forward_law_routing_requires_a_later_formula() {
+        let source = "$a=b$ then $c=d$";
+        let equation = range(source, "$a=b$");
+        let later = range(source, "$c=d$");
+        let domains = routing_observations(source, equation.clone());
+
+        assert!(!domains.requires_forward_law_routing(std::slice::from_ref(&equation)));
+        assert!(domains.requires_forward_law_routing(&[equation, later]));
+    }
+
+    #[test]
+    fn forward_law_routing_ignores_only_earlier_or_sibling_scope_formulas() {
+        let source = "$a=b$\n# First\n$c=d$\n# Second\n$e=f$";
+        let earlier = range(source, "$a=b$");
+        let equation = range(source, "$c=d$");
+        let sibling = range(source, "$e=f$");
+        let domains = routing_observations(source, equation.clone());
+
+        assert!(!domains.requires_forward_law_routing(&[earlier, equation, sibling]));
     }
 
     #[test]
