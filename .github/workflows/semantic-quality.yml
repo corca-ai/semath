@@ -45,6 +45,8 @@ jobs:
           if-no-files-found: error
           name: semath-wasm-${{ github.sha }}
           path: lib/wasm/
+      - name: Verify stable performance budgets before long-form quality
+        run: bun run budget:stable
       - run: bun run quality
         env:
           # Shared-runner CPU allocation is not a stable timing reference.
