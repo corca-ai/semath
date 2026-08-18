@@ -171,6 +171,16 @@ holds approved support policy; GitHub issues hold planned work.
   operator assignments. Characterized operator roles now prove their matching
   domain condition without a second authority. It passes 56 of 115 probes with
   risk 118 and zero false establishment, false conflict, or identity risk.
+- The independently sealed v0.36 fresh blind was executed once on 2026-08-18
+  UTC after all pre-blind gates passed. It scored 0 of 48 with risk 986,
+  including 47 false establishments, three false conflicts, 192 unexpected
+  authoring-context facts, 10 unsafe lifecycle transitions, 79 navigation or
+  edit locations outside reviewed allowlists, and three diagnostic-limit
+  violations. All eight clean/incremental lifecycle stages agreed. Its terminal
+  receipt is `safety-failed`; PR #365 was closed without merge, CorTeX must not
+  pin it, and the exposed fixture is historical evidence rather than a tuning
+  set. Receipt SHA-256:
+  `d81e92197d914f76f5cab84c0467c39d494c26169907c469078c78c20efcf684`.
 - The practical-STEM benchmark was commissioned at
   `16e1797286fd5143144e78657230cebedd433943`, where it passed 57 of 115
   authored development probes with risk 116. The current 2026-08-15 state
@@ -203,8 +213,10 @@ holds approved support policy; GitHub issues hold planned work.
   | Refusal               |     18 |    23 |
 
   These overlapping diagnostic projections cannot be summed into an accuracy
-  score. They establish the ordered coverage frontier for #347–#351 while the
-  separately commissioned sealed evaluation remains unwritten and unspent.
+  score. They establish the ordered public-development coverage frontier for
+  #347–#351. The separately commissioned v0.36 evaluation has since been spent
+  and failed safety; it does not convert this development evidence into a
+  release claim.
 
 These numbers describe the synthetic benchmark, not real-world prevalence or
 field completeness.
