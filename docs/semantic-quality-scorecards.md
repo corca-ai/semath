@@ -271,6 +271,24 @@ exposed fixture is now historical evidence and must not be rerun or used for
 case-specific tuning; coverage must continue through public development and
 new independently sealed evidence.
 
+The independently sealed v0.36 fresh blind was executed once on 2026-08-18
+UTC after candidate `ed48fc4c0dda70b001754f782d3d06e547fcb2ad` passed every
+pre-blind gate on x86_64 Linux. It scored 0 of 48 with risk 986: 47 false
+establishments, three false conflicts, 48 coverage misses, and 29 identity or
+navigation misses. The expanded authoring-context safety oracle found 192
+unexpected facts across all 48 cases, 10 unsafe lifecycle transitions across
+four cases, 79 navigation or edit locations outside the reviewed allowlists
+across 23 cases, and three diagnostic-limit violations. All eight
+clean/incremental lifecycle stages agreed, so this is a semantic safety failure
+rather than a lifecycle-parity or release-infrastructure error. The terminal
+receipt is `safety-failed`; its fixture seal is
+`a69a5eb8a1a0147aef6494e0f40f757bcaf8a5bb46d32f7210aef91c4926419a`
+and its receipt digest is
+`d81e92197d914f76f5cab84c0467c39d494c26169907c469078c78c20efcf684`.
+PR #365 was closed without merge. No 0.18.0 package, tag, or CorTeX pin was
+published. The exposed v0.36 fixture is historical evidence and must not be
+rerun, relabeled, or used for case-specific tuning.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or
