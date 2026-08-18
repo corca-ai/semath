@@ -57,7 +57,7 @@ jobs:
       contents: read
       issues: write
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     concurrency:
       group: semantic-release-${{ inputs.release_id }}
       cancel-in-progress: false
