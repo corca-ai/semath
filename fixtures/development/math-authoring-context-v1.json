@@ -1,0 +1,1583 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-18",
+  "reviewedBy": "codex-development-context-evidence",
+  "reviewSummary": "Reviewed every public source and full neutral authoring projection, including exact requirements, conditions, candidates, links, claims, notation topology, formula metadata, and lifecycle fences.",
+  "cases": [
+    {
+      "id": "exact-authored-formula",
+      "kind": "static",
+      "features": [
+        "exact-source-lifecycle"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "P=\\mathbf{F}\\cdot\\mathbf{v}",
+        "selection": {
+          "offset": 0,
+          "length": 1
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $P$ be power.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "P",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $P$ be power.",
+                "occurrence": 0
+              },
+              "claimGroup": 1,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "P",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $P$ be power.",
+                "occurrence": 0
+              },
+              "claimGroup": 2,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "P",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $P$ be power.",
+                "occurrence": 0
+              },
+              "claimGroup": 3,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "P",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            }
+          ],
+          "conditions": [
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "P=\\mathbf{F}\\cdot\\mathbf{v}",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "\\mathbf{F}",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "\\mathbf{v}",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "same-context",
+              "operatorProperty": null,
+              "status": "verified",
+              "subjects": [
+                "F",
+                "v"
+              ]
+            }
+          ],
+          "conventionalCandidates": [],
+          "disposition": "established",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "P=\\mathbf{F}\\cdot\\mathbf{v}",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "P=\\mathbf{F}\\cdot\\mathbf{v}"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "P",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "P"
+            },
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "P",
+                "occurrence": 1
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "P"
+            }
+          ],
+          "requirements": [],
+          "truncated": false
+        },
+        "definitionAuthorized": true
+      }
+    },
+    {
+      "id": "conventional-period-frequency",
+      "kind": "static",
+      "features": [
+        "conventional-non-authoritative"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "For a periodic signal, the asserted relation is $f=1/T$."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "f=1/T",
+        "selection": {
+          "offset": 0,
+          "length": 1
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "For a periodic signal, the asserted relation is $f=1/T$.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "f",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": [
+                {
+                  "anchor": {
+                    "fileId": "main",
+                    "needle": "f=1/T",
+                    "occurrence": 0
+                  },
+                  "documentVersion": 1,
+                  "provenance": [],
+                  "scopePath": [],
+                  "sourceNotation": "f=1/T"
+                }
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "f",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "T",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "same-context",
+              "operatorProperty": null,
+              "status": "required",
+              "subjects": [
+                "f",
+                "T"
+              ]
+            },
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "T",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "positive",
+              "operatorProperty": null,
+              "status": "required",
+              "subjects": [
+                "T"
+              ]
+            }
+          ],
+          "conventionalCandidates": [
+            {
+              "bindings": [
+                {
+                  "constraint": {
+                    "concepts": [
+                      "signals-systems:cyclic-frequency"
+                    ],
+                    "kind": "scalar"
+                  },
+                  "evidence": [
+                    {
+                      "fileId": "main",
+                      "needle": "f",
+                      "occurrence": 0
+                    }
+                  ],
+                  "parameter": "frequency",
+                  "proof": "asserted",
+                  "symbol": "f"
+                },
+                {
+                  "constraint": {
+                    "concepts": [
+                      "quantities-units:duration"
+                    ],
+                    "kind": "scalar"
+                  },
+                  "evidence": [
+                    {
+                      "fileId": "main",
+                      "needle": "T",
+                      "occurrence": 0
+                    }
+                  ],
+                  "parameter": "period",
+                  "proof": "asserted",
+                  "symbol": "T"
+                }
+              ],
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "f=1/T",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "periodic signal",
+                  "occurrence": 0
+                }
+              ],
+              "lawId": "period-frequency-reciprocity",
+              "packId": "signals-systems",
+              "packVersion": "1.1.0",
+              "relation": {
+                "anchor": {
+                  "fileId": "main",
+                  "needle": "f=1/T",
+                  "occurrence": 0
+                },
+                "conditions": [
+                  "The period is positive.",
+                  "Frequency and period refer to the same periodic signal."
+                ],
+                "evidence": [
+                  {
+                    "fileId": "main",
+                    "needle": "f=1/T",
+                    "occurrence": 0
+                  }
+                ],
+                "relationId": "signals-systems:period-frequency-reciprocity",
+                "roles": [
+                  {
+                    "conceptId": "signals-systems:cyclic-frequency",
+                    "role": "frequency",
+                    "symbol": "f"
+                  },
+                  {
+                    "conceptId": "quantities-units:duration",
+                    "role": "period",
+                    "symbol": "T"
+                  }
+                ]
+              },
+              "relevance": {
+                "evidence": [
+                  {
+                    "fileId": "main",
+                    "needle": "periodic signal",
+                    "occurrence": 0
+                  }
+                ],
+                "support": "tentative"
+              },
+              "requirements": [
+                {
+                  "constraint": {
+                    "concepts": [
+                      "signals-systems:cyclic-frequency"
+                    ],
+                    "kind": "scalar"
+                  },
+                  "evidence": [
+                    {
+                      "fileId": "main",
+                      "needle": "f",
+                      "occurrence": 0
+                    }
+                  ],
+                  "kind": "role-declaration",
+                  "parameter": "frequency",
+                  "symbol": "f"
+                },
+                {
+                  "constraint": {
+                    "concepts": [
+                      "quantities-units:duration"
+                    ],
+                    "kind": "scalar"
+                  },
+                  "evidence": [
+                    {
+                      "fileId": "main",
+                      "needle": "T",
+                      "occurrence": 0
+                    }
+                  ],
+                  "kind": "role-declaration",
+                  "parameter": "period",
+                  "symbol": "T"
+                },
+                {
+                  "condition": {
+                    "evidence": [
+                      {
+                        "fileId": "main",
+                        "needle": "T",
+                        "occurrence": 0
+                      }
+                    ],
+                    "kind": "positive",
+                    "operatorProperty": null,
+                    "status": "required",
+                    "subjects": [
+                      "T"
+                    ]
+                  },
+                  "kind": "condition"
+                },
+                {
+                  "condition": {
+                    "evidence": [
+                      {
+                        "fileId": "main",
+                        "needle": "f",
+                        "occurrence": 0
+                      },
+                      {
+                        "fileId": "main",
+                        "needle": "T",
+                        "occurrence": 0
+                      }
+                    ],
+                    "kind": "same-context",
+                    "operatorProperty": null,
+                    "status": "required",
+                    "subjects": [
+                      "f",
+                      "T"
+                    ]
+                  },
+                  "kind": "condition"
+                }
+              ]
+            }
+          ],
+          "disposition": "conventional",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "f=1/T",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "f=1/T"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "f",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "f"
+            }
+          ],
+          "requirements": [
+            {
+              "constraint": {
+                "concepts": [
+                  "signals-systems:cyclic-frequency"
+                ],
+                "kind": "scalar"
+              },
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "f",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "role-declaration",
+              "parameter": "frequency",
+              "symbol": "f"
+            },
+            {
+              "constraint": {
+                "concepts": [
+                  "quantities-units:duration"
+                ],
+                "kind": "scalar"
+              },
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "T",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "role-declaration",
+              "parameter": "period",
+              "symbol": "T"
+            },
+            {
+              "condition": {
+                "evidence": [
+                  {
+                    "fileId": "main",
+                    "needle": "T",
+                    "occurrence": 0
+                  }
+                ],
+                "kind": "positive",
+                "operatorProperty": null,
+                "status": "required",
+                "subjects": [
+                  "T"
+                ]
+              },
+              "kind": "condition"
+            },
+            {
+              "condition": {
+                "evidence": [
+                  {
+                    "fileId": "main",
+                    "needle": "f",
+                    "occurrence": 0
+                  },
+                  {
+                    "fileId": "main",
+                    "needle": "T",
+                    "occurrence": 0
+                  }
+                ],
+                "kind": "same-context",
+                "operatorProperty": null,
+                "status": "required",
+                "subjects": [
+                  "f",
+                  "T"
+                ]
+              },
+              "kind": "condition"
+            }
+          ],
+          "truncated": false
+        },
+        "definitionAuthorized": false
+      }
+    },
+    {
+      "id": "approximation-without-equality",
+      "kind": "static",
+      "features": [
+        "approximate-not-exact"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "The numerical approximation is $u_h\\approx u$."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "u_h\\approx u",
+        "selection": {
+          "offset": 0,
+          "length": 3
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": {
+            "evidence": [
+              {
+                "fileId": "main",
+                "needle": "numerical approximation",
+                "occurrence": 0
+              },
+              {
+                "fileId": "main",
+                "needle": "u_h\\approx u",
+                "occurrence": 0
+              }
+            ],
+            "range": {
+              "fileId": "main",
+              "needle": "u_h\\approx u",
+              "occurrence": 0
+            }
+          },
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "The numerical approximation is $u_h\\approx u$.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "u_h",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": [
+                {
+                  "anchor": {
+                    "fileId": "main",
+                    "needle": "u_h\\approx u",
+                    "occurrence": 0
+                  },
+                  "documentVersion": 1,
+                  "provenance": [],
+                  "scopePath": [],
+                  "sourceNotation": "u_h\\approx u"
+                }
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "u_h",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "u",
+                  "occurrence": 2
+                }
+              ],
+              "kind": "same-context",
+              "operatorProperty": null,
+              "status": "required",
+              "subjects": [
+                "u_h",
+                "u"
+              ]
+            }
+          ],
+          "conventionalCandidates": [],
+          "disposition": "partial",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "u_h\\approx u",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "u_h\\approx u"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "u_h",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "u_h"
+            }
+          ],
+          "requirements": [
+            {
+              "constraint": {
+                "concepts": [
+                  "numerical-analysis:approximate-value"
+                ],
+                "kind": "expression"
+              },
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "numerical approximation",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "u_h",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "role-declaration",
+              "parameter": "approximate-value",
+              "symbol": "u_h"
+            },
+            {
+              "constraint": {
+                "concepts": [
+                  "numerical-analysis:exact-value"
+                ],
+                "kind": "expression"
+              },
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "numerical approximation",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "u",
+                  "occurrence": 2
+                }
+              ],
+              "kind": "role-declaration",
+              "parameter": "exact-value",
+              "symbol": "u"
+            },
+            {
+              "condition": {
+                "evidence": [
+                  {
+                    "fileId": "main",
+                    "needle": "u_h",
+                    "occurrence": 0
+                  },
+                  {
+                    "fileId": "main",
+                    "needle": "u",
+                    "occurrence": 2
+                  }
+                ],
+                "kind": "same-context",
+                "operatorProperty": null,
+                "status": "required",
+                "subjects": [
+                  "u_h",
+                  "u"
+                ]
+              },
+              "kind": "condition"
+            }
+          ],
+          "truncated": false
+        },
+        "definitionAuthorized": false
+      }
+    },
+    {
+      "id": "generated-union-macro",
+      "kind": "static",
+      "features": [
+        "generated-noneditable"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\newcommand{\\join}[2]{#1\\mathbin{\\cup}#2}\nSuppose \\(A\\) and \\(B\\) are subsets of a fixed universe \\(U\\). We claim that\nthe least subset of \\(U\\) containing each of them is their union. Indeed,\nfor every \\(x\\in U\\),\n\\[\n  x\\in\\join{A}{B}\\quad\\Longleftrightarrow\\quad (x\\in A)\\lor(x\\in B).\n\\]\nConsequently any set \\(C\\subseteq U\\) that contains both \\(A\\) and \\(B\\)\nalso contains \\(\\join{A}{B}\\). This proves the claim.\n"
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "x\\in\\join{A}{B}",
+        "selection": {
+          "offset": 5,
+          "length": 12
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [],
+          "conditions": [
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "\\join{A}{B}",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "\\join{A}{B}",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "Suppose \\(A\\) and \\(B\\) are subsets of a fixed universe ",
+                  "occurrence": 0
+                },
+                {
+                  "fileId": "main",
+                  "needle": "\\join{A}{B}",
+                  "occurrence": 0
+                }
+              ],
+              "kind": "domain-membership",
+              "operatorProperty": null,
+              "status": "verified",
+              "subjects": [
+                "A",
+                "B"
+              ]
+            }
+          ],
+          "conventionalCandidates": [],
+          "disposition": "established",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "\n  x\\in\\join{A}{B}\\quad\\Longleftrightarrow\\quad (x\\in A)\\lor(x\\in B).\n",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [
+              {
+                "fileId": "main",
+                "needle": "join",
+                "occurrence": 0
+              },
+              {
+                "fileId": "main",
+                "needle": "join",
+                "occurrence": 1
+              }
+            ],
+            "scopePath": [
+              2147483648
+            ],
+            "sourceNotation": "\n  x\\in\\join{A}{B}\\quad\\Longleftrightarrow\\quad (x\\in A)\\lor(x\\in B).\n"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": false,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "generated",
+            "retracted": false
+          },
+          "notationOccurrences": [],
+          "requirements": [
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "\\join",
+                  "occurrence": 1
+                }
+              ],
+              "kind": "declaration",
+              "symbol": "\\join"
+            }
+          ],
+          "truncated": false
+        },
+        "definitionAuthorized": false
+      }
+    },
+    {
+      "id": "included-formula-retraction",
+      "kind": "static",
+      "features": [
+        "retraction"
+      ],
+      "mainFileId": "base",
+      "documents": [
+        {
+          "fileId": "base",
+          "path": "base.tex",
+          "content": "The preliminary station model treats the suction pipe as a uniform section. Here \\(A\\) is internal area and \\(v\\) is section-averaged speed.\n\\[\nQ=Av.\n\\]\nThis is the initial definition of reported volume flow.\n\\input{revision}\n"
+        },
+        {
+          "fileId": "revision",
+          "path": "revision.tex",
+          "content": "The commissioning amendment no longer treats \\(Q=Av\\) as a certified volume-flow relation. The replacement instrument exposes mass flow, and the report now retains only\n\\[\n\\dot m=\\rho A v_{\\mathrm{bulk}}.\n\\]\n"
+        }
+      ],
+      "cursor": {
+        "fileId": "base",
+        "needle": "Q=Av",
+        "selection": {
+          "offset": 1,
+          "length": 1
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "base",
+                "needle": "Q",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "base",
+                  "needle": "Q",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            }
+          ],
+          "conditions": [],
+          "conventionalCandidates": [],
+          "disposition": "partial",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "base",
+              "needle": "\nQ=Av.\n",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "\nQ=Av.\n"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": false,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": true
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "base",
+                "needle": "Q",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "Q"
+            }
+          ],
+          "requirements": [],
+          "truncated": false
+        },
+        "definitionAuthorized": false
+      }
+    },
+    {
+      "id": "opaque-expansion-engine-limit",
+      "kind": "static",
+      "features": [
+        "capped-engine-limit"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\newcommand{\\joint}[2]{\\csname A\\endcsname}\nLet \\(A\\) and \\(B\\) be events. \\(\\joint{A}{B}\\)."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "\\joint{A}{B}",
+        "selection": {
+          "offset": 1,
+          "length": 5
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [],
+          "conditions": [],
+          "conventionalCandidates": [],
+          "disposition": "engine-limited",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "\\joint{A}{B}",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "\\joint{A}{B}"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": false,
+            "engineLimited": true,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [],
+          "requirements": [
+            {
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "\\joint",
+                  "occurrence": 1
+                }
+              ],
+              "kind": "declaration",
+              "symbol": "\\joint"
+            }
+          ],
+          "truncated": false
+        },
+        "definitionAuthorized": false
+      }
+    },
+    {
+      "id": "bounded-declaration-fanout",
+      "kind": "static",
+      "features": [
+        "capped-engine-limit"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $x_0$ denote a scalar. Let $x_1$ denote a scalar. Let $x_2$ denote a scalar. Let $x_3$ denote a scalar. Let $x_4$ denote a scalar. Let $x_5$ denote a scalar. Let $x_6$ denote a scalar. Let $x_7$ denote a scalar. Let $x_8$ denote a scalar. Let $x_9$ denote a scalar. Let $x_{10}$ denote a scalar. Let $x_{11}$ denote a scalar. Let $x_{12}$ denote a scalar. Let $x_{13}$ denote a scalar. Let $x_{14}$ denote a scalar. Let $x_{15}$ denote a scalar. Let $x_{16}$ denote a scalar. Let $x_{17}$ denote a scalar. Let $x_{18}$ denote a scalar. Let $x_{19}$ denote a scalar. Let $x_{20}$ denote a scalar. Let $x_{21}$ denote a scalar. Let $x_{22}$ denote a scalar. Let $x_{23}$ denote a scalar. Let $x_{24}$ denote a scalar. Let $x_{25}$ denote a scalar. Let $x_{26}$ denote a scalar. Let $x_{27}$ denote a scalar. Let $x_{28}$ denote a scalar. Let $x_{29}$ denote a scalar. Let $x_{30}$ denote a scalar. Let $x_{31}$ denote a scalar. Let $x_{32}$ denote a scalar. Let $x_{33}$ denote a scalar. Let $x_{34}$ denote a scalar. Let $x_{35}$ denote a scalar. Inspect $x_0$."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "Inspect $x_0$",
+        "selection": {
+          "offset": 9,
+          "length": 3
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $x_0$ denote a scalar.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "x_0",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $x_0$ denote a scalar.",
+                "occurrence": 0
+              },
+              "claimGroup": 1,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "x_0",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            }
+          ],
+          "conditions": [],
+          "conventionalCandidates": [],
+          "disposition": "partial",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "x_0",
+              "occurrence": 1
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "x_0"
+          },
+          "lifecycle": {
+            "capped": true,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "x_0",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "x_0"
+            },
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "x_0",
+                "occurrence": 1
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "x_0"
+            }
+          ],
+          "requirements": [],
+          "truncated": true
+        },
+        "definitionAuthorized": true
+      }
+    },
+    {
+      "id": "included-claim-anchor",
+      "kind": "static",
+      "features": [
+        "cross-document-claim-evidence"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "\\input{definitions}\nInspect $A$."
+        },
+        {
+          "fileId": "definitions",
+          "path": "definitions.tex",
+          "content": "Let $A$ denote an event."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "Inspect $A$",
+        "selection": {
+          "offset": 9,
+          "length": 1
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "definitions",
+                "needle": "Let $A$ denote an event.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "definitions",
+                  "needle": "A",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "definitions",
+                "needle": "Let $A$ denote an event.",
+                "occurrence": 0
+              },
+              "claimGroup": 1,
+              "evidence": [
+                {
+                  "fileId": "definitions",
+                  "needle": "A",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            }
+          ],
+          "conditions": [],
+          "conventionalCandidates": [],
+          "disposition": "established",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "A",
+              "occurrence": 0
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "A"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "definitions",
+                "needle": "A",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "A"
+            },
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "A",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "A"
+            }
+          ],
+          "requirements": [],
+          "truncated": false
+        },
+        "definitionAuthorized": true
+      }
+    },
+    {
+      "id": "sibling-scope-identity",
+      "kind": "static",
+      "features": [
+        "same-entity-notation"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.md",
+          "content": "# First\nLet $x$ denote an event. Inspect $x$.\n# Second\nLet $x$ denote a function. Inspect $x$."
+        }
+      ],
+      "cursor": {
+        "fileId": "main",
+        "needle": "Inspect $x$",
+        "selection": {
+          "offset": 9,
+          "length": 1
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $x$ denote an event.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "x",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $x$ denote an event.",
+                "occurrence": 0
+              },
+              "claimGroup": 1,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "x",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            }
+          ],
+          "conditions": [],
+          "conventionalCandidates": [],
+          "disposition": "established",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "x",
+              "occurrence": 1
+            },
+            "documentVersion": 1,
+            "provenance": [],
+            "scopePath": [
+              1
+            ],
+            "sourceNotation": "x"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "x",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [
+                1
+              ],
+              "sourceNotation": "x"
+            },
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "x",
+                "occurrence": 1
+              },
+              "entityGroup": 0,
+              "scopePath": [
+                1
+              ],
+              "sourceNotation": "x"
+            }
+          ],
+          "requirements": [],
+          "truncated": false
+        },
+        "definitionAuthorized": true
+      }
+    },
+    {
+      "id": "revision-fence",
+      "kind": "revision",
+      "features": [
+        "revision-fence",
+        "exact-source-lifecycle"
+      ],
+      "mainFileId": "main",
+      "documents": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $x$ denote the input. $y=x$"
+        }
+      ],
+      "revisedDocuments": [
+        {
+          "fileId": "main",
+          "path": "main.tex",
+          "content": "Let $x$ denote the state. $y=x$"
+        }
+      ],
+      "staleDocumentVersion": 1,
+      "cursor": {
+        "fileId": "main",
+        "needle": "y=x",
+        "selection": {
+          "offset": 2,
+          "length": 1
+        },
+        "occurrence": 0
+      },
+      "expected": {
+        "authoringContext": {
+          "approximation": null,
+          "claimEvidence": [
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $x$ denote the state.",
+                "occurrence": 0
+              },
+              "claimGroup": 0,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "x",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            },
+            {
+              "claim": {
+                "fileId": "main",
+                "needle": "Let $x$ denote the state.",
+                "occurrence": 0
+              },
+              "claimGroup": 1,
+              "evidence": [
+                {
+                  "fileId": "main",
+                  "needle": "x",
+                  "occurrence": 0
+                }
+              ],
+              "modality": "asserted",
+              "polarity": "positive",
+              "strengthCeiling": "asserted",
+              "supportingClaimGroups": [],
+              "supportingFormulas": []
+            }
+          ],
+          "conditions": [],
+          "conventionalCandidates": [],
+          "disposition": "established",
+          "equationLinks": [],
+          "formula": {
+            "anchor": {
+              "fileId": "main",
+              "needle": "y=x",
+              "occurrence": 0
+            },
+            "documentVersion": 2,
+            "provenance": [],
+            "scopePath": [],
+            "sourceNotation": "y=x"
+          },
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 2,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "notationOccurrences": [
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "x",
+                "occurrence": 0
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "x"
+            },
+            {
+              "anchor": {
+                "fileId": "main",
+                "needle": "x",
+                "occurrence": 1
+              },
+              "entityGroup": 0,
+              "scopePath": [],
+              "sourceNotation": "x"
+            }
+          ],
+          "requirements": [],
+          "truncated": false
+        },
+        "definitionAuthorized": true
+      }
+    }
+  ]
+}

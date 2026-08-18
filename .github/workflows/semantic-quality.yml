@@ -19,6 +19,11 @@ jobs:
         working-directory: lib/wasm
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: scripts/build-wasm.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: semath-wasm-${{ github.sha }}
+          path: lib/wasm/
       - run: bun run quality
         env:
           # Shared-runner CPU allocation is not a stable timing reference.

@@ -184,6 +184,147 @@ describe("fresh blind release evidence", () => {
     ).toThrow("reference allowlist must enumerate every exact atomic source occurrence");
   });
 
+  test("requires complete primary authoring-context declarations and tranche breadth in v0.36", () => {
+    const value = fixtureValue();
+    value.release.id = "v0.36";
+    applyV036FieldAllocation(value);
+    value.fixture.probes.forEach((probe, index) => {
+      (probe.expected as Record<string, unknown>).authoringContext =
+        freshMathAuthoringExpectation(index, true);
+    });
+    const release = finalize(value);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios).toBe(48);
+
+    const shallow = fixtureValue();
+    shallow.release.id = "v0.36";
+    applyV036FieldAllocation(shallow);
+    shallow.fixture.probes.forEach((probe, index) => {
+      const context = freshMathAuthoringExpectation(index, true);
+      context.disposition = "partial";
+      (probe.expected as Record<string, unknown>).authoringContext = context;
+    });
+    const shallowRelease = finalize(shallow);
+    expect(() =>
+      validateFreshBlindRelease(shallowRelease, validation(shallowRelease)),
+    ).toThrow("lacks disposition");
+
+    const missing = fixtureValue();
+    missing.release.id = "v0.36";
+    applyV036FieldAllocation(missing);
+    missing.fixture.probes.slice(1).forEach((probe, index) => {
+      (probe.expected as Record<string, unknown>).authoringContext =
+        freshMathAuthoringExpectation(index + 1, true);
+    });
+    const missingRelease = finalize(missing);
+    expect(() =>
+      validateFreshBlindRelease(missingRelease, validation(missingRelease)),
+    ).toThrow("primary probe requires an authored math authoring context");
+
+    const narrow = fixtureValue();
+    narrow.release.id = "v0.36";
+    applyV036FieldAllocation(narrow);
+    narrow.fixture.probes.forEach((probe, index) => {
+      (probe.expected as Record<string, unknown>).authoringContext =
+        freshMathAuthoringExpectation(index, false);
+    });
+    const narrowRelease = finalize(narrow);
+    expect(() =>
+      validateFreshBlindRelease(narrowRelease, validation(narrowRelease)),
+    ).toThrow("lacks authoring-context coverage");
+  });
+
+  test("commissions v0.36 source evidence, versions, topology, and exact fields", () => {
+    const invalidCases = [
+      {
+        message: "lifecycle documentVersion must be 1",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.lifecycle.documentVersion = 2;
+        },
+      },
+      {
+        message: "formula anchor documentVersion must be 1",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.equationLinks[0]!.target.documentVersion = 2;
+        },
+      },
+      {
+        message: "approximation requires exact source evidence",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.approximation!.evidence = [];
+        },
+      },
+      {
+        message: "equation link requires exact source evidence",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.equationLinks[0]!.evidence = [];
+        },
+      },
+      {
+        message: "claim evidence requires exact source evidence",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.claimEvidence[0]!.evidence = [];
+        },
+      },
+      {
+        message: "entity groups must be dense and zero-based",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.equationLinks[0]!.sharedEntityGroups = [2];
+        },
+      },
+      {
+        message: "claim groups must be dense and zero-based",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.claimEvidence[0]!.claimGroup = 2;
+        },
+      },
+      {
+        message: "claim group maps to multiple claim anchors",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          (context.claimEvidence as unknown as Record<string, unknown>[]).push({
+            ...context.claimEvidence[0]!,
+            claim: {
+              ...context.claimEvidence[0]!.claim,
+              selection: { length: 3, offset: 1 },
+            },
+          });
+        },
+      },
+      {
+        message: "equation link references an unknown entity group",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          context.equationLinks[0]!.sharedEntityGroups = [0, 1];
+        },
+      },
+      {
+        message: "claim evidence references an unknown claim group",
+        mutate: (context: ReturnType<typeof freshMathAuthoringExpectation>) => {
+          (context.claimEvidence[0] as unknown as Record<string, unknown>)[
+            "supportingClaimGroups"
+          ] = [1];
+        },
+      },
+    ];
+    for (const { message, mutate } of invalidCases) {
+      const value = commissionedV036Value();
+      mutate(
+        (value.fixture.probes[0]!.expected as Record<string, unknown>)[
+          "authoringContext"
+        ] as ReturnType<typeof freshMathAuthoringExpectation>,
+      );
+      const release = finalize(value);
+      expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
+        message,
+      );
+    }
+
+    const wrongFields = commissionedV036Value();
+    wrongFields.fixture.scenarios[0]!.field = "cross-field";
+    const wrongFieldRelease = finalize(wrongFields);
+    expect(() =>
+      validateFreshBlindRelease(wrongFieldRelease, validation(wrongFieldRelease)),
+    ).toThrow("calculus-analysis: v0.36 fresh blind requires exactly 6 cases, got 5");
+  });
+
   test("rejects exact evidence reuse and suspicious prose lineage", () => {
     const release = fixture();
     const input = validation(release);
@@ -252,8 +393,16 @@ describe("fresh blind release evidence", () => {
       diagnosticsOverLimitIds: [],
       falseConflict: 0,
       falseConflictIds: [],
+      falseAuthoringConflict: 0,
+      falseAuthoringConflictIds: [],
       falseEstablishment: 1,
       falseEstablishmentIds: [probe.id],
+      moreAuthoritativeDispositionIds: [],
+      moreAuthoritativeDispositions: 0,
+      unsafeAuthoringContextCaseIds: [],
+      unsafeAuthoringContextFacts: 0,
+      unsafeLifecycleCaseIds: [],
+      unsafeLifecycleTransitions: 0,
       unsafeNavigationOrEditCaseIds: [probe.id],
       unsafeNavigationOrEditLocations: 3,
     });
@@ -272,8 +421,16 @@ describe("fresh blind release evidence", () => {
       diagnosticsOverLimitIds: [],
       falseConflict: 1,
       falseConflictIds: [probe.id],
+      falseAuthoringConflict: 0,
+      falseAuthoringConflictIds: [],
       falseEstablishment: 0,
       falseEstablishmentIds: [],
+      moreAuthoritativeDispositionIds: [],
+      moreAuthoritativeDispositions: 0,
+      unsafeAuthoringContextCaseIds: [],
+      unsafeAuthoringContextFacts: 0,
+      unsafeLifecycleCaseIds: [],
+      unsafeLifecycleTransitions: 0,
       unsafeNavigationOrEditCaseIds: [],
       unsafeNavigationOrEditLocations: 0,
     });
@@ -404,6 +561,116 @@ describe("fresh blind release evidence", () => {
     expect(summary.unsafeNavigationOrEditCaseIds).toEqual([probe.id]);
   });
 
+  test("gates unreviewed authoring facts and authority but not missing context", () => {
+    const value = fixtureValue();
+    const firstExpected = value.fixture.probes[0]!.expected as Record<string, unknown>;
+    const conservative = freshMathAuthoringExpectation(0, false);
+    conservative.lifecycle = {
+      ...conservative.lifecycle,
+      capped: true,
+      editable: false,
+      engineLimited: true,
+      generation: "generated",
+      retracted: true,
+    };
+    firstExpected.authoringContext = conservative;
+    const release = finalize(value);
+    const probe = release.fixture.probes[0]!;
+    const base: AuthoredScientificObservation = {
+      caseId: probe.id,
+      decision: probe.expected.decision,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: probe.expected.proofGrounded,
+      references: [],
+      relations: [],
+      renameEdits: [],
+      symbol: null,
+    };
+    const missing = freshBlindSafetySummary(release.fixture, [base]);
+    expect(missing.unsafeAuthoringContextFacts).toBe(0);
+    expect(missing.moreAuthoritativeDispositions).toBe(0);
+    expect(missing.unsafeLifecycleTransitions).toBe(0);
+    expect(freshBlindSafetyGateFailed(missing)).toBe(false);
+
+    const document = release.fixture.scenarios[0]!.snapshots[0]!.documents[0]!;
+    const needle = "$x_0=1$";
+    const startOffset = document.content.indexOf(needle);
+    const location = {
+      fileId: document.fileId,
+      path: document.path,
+      range: { startOffset, endOffset: startOffset + needle.length },
+    };
+    const unsafe = freshBlindSafetySummary(release.fixture, [
+      {
+        ...base,
+        authoringContext: {
+          approximationEvidence: [],
+          claimEvidence: [],
+          conditions: [],
+          conventionalCandidates: [],
+          disposition: "established",
+          equationLinks: [],
+          formula: {
+            documentVersion: 2,
+            location,
+            provenance: [],
+            scopePath: [0],
+            sourceNotation: "x_0=1",
+          },
+          lifecycle: {
+            capped: false,
+            documentVersion: 2,
+            editable: true,
+            engineLimited: false,
+            freshness: "current",
+            generation: "authored",
+            retracted: false,
+          },
+          notationOccurrences: [
+            {
+              entityGroup: 0,
+              location,
+              scopePath: [0],
+              sourceNotation: "x_0",
+            },
+          ],
+          requirements: [],
+          truncated: false,
+        },
+      },
+    ]);
+    expect(unsafe.moreAuthoritativeDispositionIds).toEqual([probe.id]);
+    expect(unsafe.unsafeAuthoringContextFacts).toBe(2);
+    expect(unsafe.unsafeAuthoringContextCaseIds).toEqual([probe.id]);
+    expect(unsafe.unsafeLifecycleTransitions).toBe(6);
+    expect(unsafe.unsafeLifecycleCaseIds).toEqual([probe.id]);
+    expect(freshBlindSafetyGateFailed(unsafe)).toBe(true);
+
+    const conflict = freshBlindSafetySummary(release.fixture, [
+      {
+        ...base,
+        authoringContext: {
+          approximationEvidence: [],
+          claimEvidence: [],
+          conditions: [],
+          conventionalCandidates: [],
+          disposition: "conflicting",
+          equationLinks: [],
+          lifecycle: probe.expected.authoringContext!.lifecycle,
+          notationOccurrences: [],
+          requirements: [],
+          truncated: false,
+        },
+      },
+    ]);
+    expect(conflict.falseAuthoringConflict).toBe(1);
+    expect(conflict.falseAuthoringConflictIds).toEqual([probe.id]);
+    expect(conflict.falseConflict).toBe(1);
+    expect(freshBlindSafetyGateFailed(conflict)).toBe(true);
+  });
+
   test("rejects every available navigation or edit outside its exact allowlist", () => {
     const release = fixture();
     const probe = release.fixture.probes[0]!;
@@ -489,8 +756,16 @@ describe("fresh blind release evidence", () => {
       diagnosticsOverLimitIds: [],
       falseConflict: 0,
       falseConflictIds: [],
+      falseAuthoringConflict: 0,
+      falseAuthoringConflictIds: [],
       falseEstablishment: 0,
       falseEstablishmentIds: [],
+      moreAuthoritativeDispositionIds: [],
+      moreAuthoritativeDispositions: 0,
+      unsafeAuthoringContextCaseIds: [],
+      unsafeAuthoringContextFacts: 0,
+      unsafeLifecycleCaseIds: [],
+      unsafeLifecycleTransitions: 0,
       unsafeNavigationOrEditCaseIds: [],
       unsafeNavigationOrEditLocations: 0,
     };
@@ -509,6 +784,11 @@ describe("fresh blind release evidence", () => {
       },
       {
         ...clean,
+        falseAuthoringConflict: 1,
+        falseAuthoringConflictIds: ["authoring-conflict-case"],
+      },
+      {
+        ...clean,
         falseEstablishment: 1,
         falseEstablishmentIds: ["establishment-case"],
       },
@@ -516,6 +796,21 @@ describe("fresh blind release evidence", () => {
         ...clean,
         unsafeNavigationOrEditCaseIds: ["navigation-case"],
         unsafeNavigationOrEditLocations: 2,
+      },
+      {
+        ...clean,
+        moreAuthoritativeDispositionIds: ["authority-case"],
+        moreAuthoritativeDispositions: 1,
+      },
+      {
+        ...clean,
+        unsafeAuthoringContextCaseIds: ["context-case"],
+        unsafeAuthoringContextFacts: 1,
+      },
+      {
+        ...clean,
+        unsafeLifecycleCaseIds: ["lifecycle-case"],
+        unsafeLifecycleTransitions: 1,
       },
     ]) {
       expect(freshBlindSafetyGateFailed(unsafe)).toBe(true);
@@ -542,6 +837,17 @@ describe("fresh blind release evidence", () => {
 
 function fixture() {
   return finalize(fixtureValue());
+}
+
+function commissionedV036Value(): FixtureValue {
+  const value = fixtureValue();
+  value.release.id = "v0.36";
+  applyV036FieldAllocation(value);
+  value.fixture.probes.forEach((probe, index) => {
+    (probe.expected as Record<string, unknown>).authoringContext =
+      freshMathAuthoringExpectation(index, true);
+  });
+  return value;
 }
 
 function finalize(value: FixtureValue) {
@@ -707,6 +1013,170 @@ function fixtureValue(): FixtureValue {
   };
 }
 
+function freshMathAuthoringExpectation(index: number, covered: boolean) {
+  const anchor = { fileId: "main", needle: `$x_${index}=1$` };
+  const formula = {
+    anchor,
+    documentVersion: 1,
+    provenance: [],
+    scopePath: [0],
+    sourceNotation: `x_${index}=1`,
+  };
+  const conditionStatuses = [
+    "conflicting",
+    "required",
+    "unsupported",
+    "verified",
+  ] as const;
+  const condition = {
+    evidence: [anchor],
+    kind: "positive",
+    operatorProperty: null,
+    status: conditionStatuses[index % conditionStatuses.length]!,
+    subjects: [`x_${index}`],
+  };
+  const constraint = { concepts: ["test:value"], kind: "scalar" } as const;
+  const requirement = [
+    { evidence: [anchor], kind: "declaration", symbol: `x_${index}` },
+    {
+      constraint,
+      evidence: [anchor],
+      kind: "role-declaration",
+      parameter: "value",
+      symbol: `x_${index}`,
+    },
+    { condition, kind: "condition" },
+    {
+      alternatives: [
+        { evidence: [anchor], range: anchor, relevance: null },
+      ],
+      evidence: [anchor],
+      kind: "disambiguation",
+    },
+  ][index % 4]!;
+  const dispositions = [
+    "ambiguous",
+    "conflicting",
+    "conventional",
+    "engine-limited",
+    "established",
+    "partial",
+    "unsupported",
+  ] as const;
+  const modalities = [
+    "asserted",
+    "cited",
+    "hedged",
+    "hypothetical",
+    "quoted",
+  ] as const;
+  const strengths = ["asserted", "qualified", "unusable"] as const;
+  return {
+    approximation: covered ? { evidence: [anchor], range: anchor } : null,
+    claimEvidence: covered
+      ? [
+          {
+            claim: anchor,
+            claimGroup: 0,
+            evidence: [anchor],
+            modality: modalities[index % modalities.length]!,
+            polarity: index % 2 === 0 ? "positive" : "negative",
+            strengthCeiling: strengths[index % strengths.length]!,
+            supportingClaimGroups: [],
+            supportingFormulas: [formula],
+          },
+        ]
+      : [],
+    conditions: covered
+      ? [
+          condition,
+        ]
+      : [],
+    conventionalCandidates: covered
+      ? [
+          {
+            bindings: [],
+            evidence: [anchor],
+            lawId: "test:law",
+            packId: "test",
+            packVersion: "1.0.0",
+            relation: {
+              anchor,
+              conditions: [],
+              evidence: [anchor],
+              relationId: "test:law",
+              roles: [],
+            },
+            relevance: { evidence: [anchor], support: "tentative" },
+            requirements: [],
+          },
+        ]
+      : [],
+    disposition: covered ? dispositions[index % dispositions.length]! : "partial",
+    equationLinks: covered
+      ? [
+          {
+            evidence: [anchor],
+            kind: index % 2 === 0 ? "shared-entity" : "derived-law",
+            sharedEntityGroups: [0],
+            source: formula,
+            target: formula,
+          },
+        ]
+      : [],
+    formula: covered ? formula : null,
+    lifecycle: {
+      capped: covered && index === 4,
+      documentVersion: 1,
+      editable: !(covered && index === 3),
+      engineLimited: covered && index === 5,
+      generation: covered && index === 1 ? "generated" : "authored",
+      freshness: "current",
+      retracted: covered && index === 2,
+    },
+    notationOccurrences: covered
+      ? [
+          {
+            anchor: {
+              fileId: "main",
+              needle: `$x_${index}=1$`,
+              selection: { length: `x_${index}`.length, offset: 1 },
+            },
+            entityGroup: 0,
+            scopePath: [0],
+            sourceNotation: `x_${index}`,
+          },
+        ]
+      : [],
+    requirements: covered ? [requirement] : [],
+    truncated: false,
+  };
+}
+
+function applyV036FieldAllocation(value: FixtureValue): void {
+  const allocation = [
+    ["calculus-analysis", 6],
+    ["circuits", 2],
+    ["classical-mechanics", 2],
+    ["control-systems", 2],
+    ["cross-field", 6],
+    ["discrete-math", 2],
+    ["electromagnetism", 3],
+    ["fluid-mechanics", 3],
+    ["linear-algebra", 6],
+    ["optimization-ml", 5],
+    ["probability", 6],
+    ["signals-systems", 2],
+    ["thermodynamics-heat-transfer", 3],
+  ] as const;
+  const fields = allocation.flatMap(([field, count]) =>
+    Array.from({ length: count }, () => field),
+  );
+  value.fixture.scenarios.forEach((scenario, index) => {
+    scenario.field = fields[index]!;
+  });
+}
+
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -733,6 +1203,7 @@ function fixtureValueShape() {
       batch: Record<string, unknown> & { seal: string };
       probes: Record<string, unknown>[];
       scenarios: Array<{
+        field: string;
         id: string;
         provenance: {
           authorId: string;

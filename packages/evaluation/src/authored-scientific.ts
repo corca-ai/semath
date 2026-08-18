@@ -1,6 +1,9 @@
 import type {
+  MathAuthoringContext,
+  MathAuthoringDisposition,
   QueryResult,
   RelationInfo,
+  SemanticConstraint,
   SemanticViewInfo,
   SourceRange,
 } from "../../protocol/src/index";
@@ -43,6 +46,22 @@ export const AUTHORED_AREA_ALLOCATION = {
   "signals-systems": { development: 3, holdout: 1 },
   "thermodynamics-heat-transfer": { development: 10, holdout: 6 },
 } as const;
+
+export const V036_AUTHORED_HOLDOUT_AREA_ALLOCATION = {
+  "calculus-analysis": 6,
+  circuits: 2,
+  "classical-mechanics": 2,
+  "control-systems": 2,
+  "cross-field": 6,
+  "discrete-math": 2,
+  electromagnetism: 3,
+  "fluid-mechanics": 3,
+  "linear-algebra": 6,
+  "optimization-ml": 5,
+  probability: 6,
+  "signals-systems": 2,
+  "thermodynamics-heat-transfer": 3,
+} as const satisfies Readonly<Record<keyof typeof AUTHORED_AREA_ALLOCATION, number>>;
 
 /** A commissioning target, not a quota that may override semantic review. */
 export const AUTHORED_DECISION_TARGET = {
@@ -144,6 +163,272 @@ export interface AuthoredDiagnosticExpectation {
   readonly code: string;
 }
 
+export interface AuthoredMathCondition {
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly kind: MathAuthoringContext["conditions"][number]["kind"];
+  readonly operatorProperty: NonNullable<
+    MathAuthoringContext["conditions"][number]["operatorProperty"]
+  > | null;
+  readonly status: MathAuthoringContext["conditions"][number]["status"];
+  readonly subjects: readonly string[];
+}
+
+export interface ObservedMathCondition {
+  readonly evidence: readonly ObservedLocation[];
+  readonly kind: AuthoredMathCondition["kind"];
+  readonly operatorProperty: AuthoredMathCondition["operatorProperty"];
+  readonly status: AuthoredMathCondition["status"];
+  readonly subjects: readonly string[];
+}
+
+export type AuthoredMathRequirement =
+  | {
+      readonly evidence: readonly AuthoredSourceAnchor[];
+      readonly kind: "declaration";
+      readonly symbol: string;
+    }
+  | {
+      readonly evidence: readonly AuthoredSourceAnchor[];
+      readonly kind: "role-declaration";
+      readonly parameter: string;
+      readonly constraint: SemanticConstraint;
+      readonly symbol: string;
+    }
+  | { readonly condition: AuthoredMathCondition; readonly kind: "condition" }
+  | {
+      readonly evidence: readonly AuthoredSourceAnchor[];
+      readonly kind: "disambiguation";
+      readonly alternatives: readonly AuthoredMathAlternativeExpectation[];
+    };
+
+export type ObservedMathRequirement =
+  | {
+      readonly evidence: readonly ObservedLocation[];
+      readonly kind: "declaration";
+      readonly symbol: string;
+    }
+  | {
+      readonly evidence: readonly ObservedLocation[];
+      readonly kind: "role-declaration";
+      readonly parameter: string;
+      readonly constraint: SemanticConstraint;
+      readonly symbol: string;
+    }
+  | { readonly condition: ObservedMathCondition; readonly kind: "condition" }
+  | {
+      readonly evidence: readonly ObservedLocation[];
+      readonly kind: "disambiguation";
+      readonly alternatives: readonly ObservedMathAlternative[];
+    };
+
+export interface AuthoredMathRelevanceExpectation {
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly support: "explicit" | "supported" | "tentative";
+}
+
+export interface ObservedMathRelevance {
+  readonly evidence: readonly ObservedLocation[];
+  readonly support: AuthoredMathRelevanceExpectation["support"];
+}
+
+export interface AuthoredMathAlternativeExpectation {
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly range: AuthoredSourceAnchor;
+  readonly relevance: AuthoredMathRelevanceExpectation | null;
+}
+
+export interface ObservedMathAlternative {
+  readonly evidence: readonly ObservedLocation[];
+  readonly range: ObservedLocation;
+  readonly relevance?: ObservedMathRelevance;
+}
+
+export interface AuthoredMathFormulaAnchorExpectation {
+  readonly anchor: AuthoredSourceAnchor;
+  readonly documentVersion: number;
+  readonly provenance: readonly AuthoredSourceAnchor[];
+  readonly scopePath: readonly number[];
+  readonly sourceNotation: string;
+}
+
+export interface ObservedMathFormulaAnchor {
+  readonly documentVersion: number;
+  readonly location: ObservedLocation;
+  readonly provenance: readonly ObservedLocation[];
+  readonly scopePath: readonly number[];
+  readonly sourceNotation: string;
+}
+
+export interface AuthoredMathBindingExpectation {
+  readonly constraint: SemanticConstraint;
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly parameter: string;
+  readonly proof: "asserted" | "candidate" | "derived" | "typed";
+  readonly symbol: string;
+}
+
+export interface ObservedMathBinding {
+  readonly constraint: SemanticConstraint;
+  readonly evidence: readonly ObservedLocation[];
+  readonly parameter: string;
+  readonly proof: AuthoredMathBindingExpectation["proof"];
+  readonly symbol: string;
+}
+
+export type AuthoredConventionalRequirementExpectation =
+  | {
+      readonly constraint: SemanticConstraint;
+      readonly evidence: readonly AuthoredSourceAnchor[];
+      readonly kind: "role-declaration";
+      readonly parameter: string;
+      readonly symbol: string;
+    }
+  | { readonly condition: AuthoredMathCondition; readonly kind: "condition" };
+
+export type ObservedConventionalRequirement =
+  | {
+      readonly constraint: SemanticConstraint;
+      readonly evidence: readonly ObservedLocation[];
+      readonly kind: "role-declaration";
+      readonly parameter: string;
+      readonly symbol: string;
+    }
+  | { readonly condition: ObservedMathCondition; readonly kind: "condition" };
+
+export interface AuthoredConventionalCandidateExpectation {
+  readonly bindings: readonly AuthoredMathBindingExpectation[];
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly lawId: string;
+  readonly packId: string;
+  readonly packVersion: string;
+  readonly relation: {
+    readonly anchor: AuthoredSourceAnchor;
+    readonly conditions: readonly string[];
+    readonly evidence: readonly AuthoredSourceAnchor[];
+    readonly relationId: string;
+    readonly roles: readonly {
+      readonly conceptId: string | null;
+      readonly role: string;
+      readonly symbol: string;
+    }[];
+  };
+  readonly relevance: AuthoredMathRelevanceExpectation;
+  readonly requirements: readonly AuthoredConventionalRequirementExpectation[];
+}
+
+export interface ObservedConventionalCandidate {
+  readonly bindings: readonly ObservedMathBinding[];
+  readonly evidence: readonly ObservedLocation[];
+  readonly lawId: string;
+  readonly packId: string;
+  readonly packVersion: string;
+  readonly relation: {
+    readonly conditions: readonly string[];
+    readonly evidence: readonly ObservedLocation[];
+    readonly location: ObservedLocation;
+    readonly relationId: string;
+    readonly roles: readonly {
+      readonly conceptId: string | null;
+      readonly role: string;
+      readonly symbol: string;
+    }[];
+  };
+  readonly relevance: ObservedMathRelevance;
+  readonly requirements: readonly ObservedConventionalRequirement[];
+}
+
+export interface AuthoredMathEquationLinkExpectation {
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly kind: MathAuthoringContext["equationLinks"][number]["kind"];
+  readonly sharedEntityGroups: readonly number[];
+  readonly source: AuthoredMathFormulaAnchorExpectation;
+  readonly target: AuthoredMathFormulaAnchorExpectation;
+}
+
+export interface AuthoredMathClaimEvidenceExpectation {
+  readonly claim: AuthoredSourceAnchor;
+  readonly claimGroup: number;
+  readonly evidence: readonly AuthoredSourceAnchor[];
+  readonly modality: MathAuthoringContext["claimEvidence"][number]["modality"];
+  readonly polarity: MathAuthoringContext["claimEvidence"][number]["polarity"];
+  readonly strengthCeiling: MathAuthoringContext["claimEvidence"][number]["strengthCeiling"];
+  readonly supportingClaimGroups: readonly number[];
+  readonly supportingFormulas: readonly AuthoredMathFormulaAnchorExpectation[];
+}
+
+export interface AuthoredMathAuthoringExpectation {
+  readonly approximation: {
+    readonly evidence: readonly AuthoredSourceAnchor[];
+    readonly range: AuthoredSourceAnchor;
+  } | null;
+  readonly claimEvidence: readonly AuthoredMathClaimEvidenceExpectation[];
+  readonly conditions: readonly AuthoredMathCondition[];
+  readonly conventionalCandidates: readonly AuthoredConventionalCandidateExpectation[];
+  readonly disposition: MathAuthoringDisposition;
+  readonly equationLinks: readonly AuthoredMathEquationLinkExpectation[];
+  readonly formula: AuthoredMathFormulaAnchorExpectation | null;
+  readonly lifecycle: {
+    readonly capped: boolean;
+    readonly documentVersion: number;
+    readonly editable: boolean;
+    readonly engineLimited: boolean;
+    readonly generation: "authored" | "generated";
+    readonly freshness: "current";
+    readonly retracted: boolean;
+  };
+  readonly notationOccurrences: readonly {
+    readonly anchor: AuthoredSourceAnchor;
+    readonly entityGroup: number;
+    readonly scopePath: readonly number[];
+    readonly sourceNotation: string;
+  }[];
+  readonly requirements: readonly AuthoredMathRequirement[];
+  readonly truncated: boolean;
+}
+
+export interface ObservedMathAuthoringContext {
+  readonly approximation?: ObservedLocation;
+  readonly approximationEvidence: readonly ObservedLocation[];
+  readonly claimEvidence: readonly {
+    readonly claim: ObservedLocation;
+    readonly claimGroup: number;
+    readonly evidence: readonly ObservedLocation[];
+    readonly modality: AuthoredMathClaimEvidenceExpectation["modality"];
+    readonly polarity: AuthoredMathClaimEvidenceExpectation["polarity"];
+    readonly strengthCeiling: AuthoredMathClaimEvidenceExpectation["strengthCeiling"];
+    readonly supportingClaimGroups: readonly number[];
+    readonly supportingFormulas: readonly ObservedMathFormulaAnchor[];
+  }[];
+  readonly conditions: readonly ObservedMathCondition[];
+  readonly conventionalCandidates: readonly ObservedConventionalCandidate[];
+  readonly disposition: MathAuthoringDisposition;
+  readonly equationLinks: readonly {
+    readonly evidence: readonly ObservedLocation[];
+    readonly kind: AuthoredMathEquationLinkExpectation["kind"];
+    readonly sharedEntityGroups: readonly number[];
+    readonly source: ObservedMathFormulaAnchor;
+    readonly target: ObservedMathFormulaAnchor;
+  }[];
+  readonly formula?: ObservedMathFormulaAnchor;
+  readonly lifecycle: AuthoredMathAuthoringExpectation["lifecycle"];
+  readonly notationOccurrences: readonly {
+    readonly entityGroup: number;
+    readonly location: ObservedLocation;
+    readonly scopePath: readonly number[];
+    readonly sourceNotation: string;
+  }[];
+  readonly requirements: readonly ObservedMathRequirement[];
+  readonly truncated: boolean;
+}
+
+export interface AuthoredMathAuthoringComparison {
+  readonly missing: readonly string[];
+  readonly falseConflictDisposition: boolean;
+  readonly moreAuthoritativeDisposition: boolean;
+  readonly unsafeLifecycle: readonly string[];
+  readonly unexpected: readonly string[];
+}
+
 export interface AuthoredScientificProbe {
   readonly cursor: {
     readonly edge?: "after" | "before";
@@ -154,6 +439,7 @@ export interface AuthoredScientificProbe {
     readonly snapshotId: string;
   };
   readonly expected: {
+    readonly authoringContext?: AuthoredMathAuthoringExpectation;
     readonly cursorOccurrence?: AuthoredSourceAnchor | null;
     readonly decision: ScientificDecision;
     readonly diagnostics: {
@@ -207,6 +493,7 @@ export interface ObservedLocation {
 }
 
 export interface AuthoredScientificObservation {
+  readonly authoringContext?: ObservedMathAuthoringContext;
   readonly caseId: string;
   readonly decision: ScientificDecision;
   readonly definitions: readonly ObservedLocation[];
@@ -334,6 +621,9 @@ export function validateAuthoredScientificTranche(
   holdout: AuthoredScientificFixture,
   lawCatalog: readonly AuthoredLawCatalogEntry[],
   priorityFields: readonly string[],
+  areaAllocation: Partial<
+    Record<AuthoredSplit, Readonly<Record<AuthoredArea, number>>>
+  > = {},
 ): AuthoredTrancheSummary {
   requireSplit(development, "development");
   requireSplit(holdout, "holdout");
@@ -353,8 +643,8 @@ export function validateAuthoredScientificTranche(
     "tranche probe ids",
   );
   rejectLineageLeakage(development, holdout);
-  validateAreaAllocation(development);
-  validateAreaAllocation(holdout);
+  validateAreaAllocation(development, areaAllocation.development);
+  validateAreaAllocation(holdout, areaAllocation.holdout);
 
   const decisions = countBy(
     allPrimary.map((probe) => probe.expected.decision),
@@ -541,6 +831,34 @@ export function scoreAuthoredScientificFixture(
     );
     caseFailures.push(...identityFailures.map((failure) => failure.basis));
     caseNavigation = identityFailures.length > 0;
+    if (probe.expected.authoringContext) {
+      const context = compareAuthoredMathAuthoringContext(
+        snapshot,
+        probe.expected.authoringContext,
+        observed.authoringContext,
+      );
+      caseFailures.push(
+        ...context.missing.map((failure) => `missing authoring ${failure}`),
+        ...context.unexpected.map(
+          (failure) => `unexpected authoring ${failure}`,
+        ),
+        ...context.unsafeLifecycle.map(
+          (failure) => `unsafe authoring lifecycle ${failure}`,
+        ),
+      );
+      if (context.moreAuthoritativeDisposition) {
+        caseFailures.push("authoring disposition is more authoritative than reviewed");
+      }
+      if (context.falseConflictDisposition) {
+        caseFailures.push("authoring disposition introduces an unreviewed conflict");
+      }
+      caseMissedCoverage ||= context.missing.length > 0;
+      caseFalseConflict ||= context.falseConflictDisposition;
+      caseFalseEstablishment ||=
+        context.unexpected.length > 0 ||
+        context.moreAuthoritativeDisposition ||
+        context.unsafeLifecycle.length > 0;
+    }
     const problems = observed.diagnostics.filter(
       (item) => item.severity === "error" || item.severity === "warning",
     );
@@ -600,6 +918,7 @@ export function scoreAuthoredScientificFixture(
 export function observeAuthoredScientificProbe(
   probe: AuthoredScientificProbe,
   results: AuthoredScientificSurfaceResults,
+  snapshot: AuthoredScientificSnapshot,
 ): AuthoredScientificObservation {
   if (results.semanticView.value.kind !== "semanticView") {
     throw new Error(`${probe.id}: semanticView result is missing`);
@@ -636,6 +955,11 @@ export function observeAuthoredScientificProbe(
     .filter((reason) => reason.kind === "proof" || reason.kind === "source-conflict")
     .flatMap((reason) => reason.evidence);
   return {
+    authoringContext: observeAuthoredMathAuthoringContext(
+      probe.cursor.fileId,
+      view.authoringContext,
+      snapshot,
+    ),
     caseId: probe.id,
     decision: view.decision.status,
     definitions: results.definition.value.locations,
@@ -673,6 +997,1093 @@ export function observeAuthoredScientificProbe(
     symbol: view.symbol?.symbol ?? null,
     ...(view.symbol ? { symbolLocation: view.symbol.location } : {}),
   };
+}
+
+/** Projects only host-neutral, source-grounded authoring facts. Generated ids,
+ * evidence ids, display copy, ranking, and host presentation are deliberately
+ * absent from the evaluation oracle. */
+export function observeAuthoredMathAuthoringContext(
+  fileId: string,
+  context: MathAuthoringContext,
+  snapshot: AuthoredScientificSnapshot,
+): ObservedMathAuthoringContext {
+  const location = (range: SourceRange): ObservedLocation =>
+    observedLocationForRange(snapshot, fileId, range);
+  const formulaAnchor = (
+    formula: NonNullable<MathAuthoringContext["formula"]>,
+  ): ObservedMathFormulaAnchor => ({
+    documentVersion: formula.documentVersion,
+    location: copyObservedLocation(formula.location),
+    provenance: (formula.provenance ?? []).map((range) =>
+      observedLocationForRange(snapshot, formula.location.fileId, range),
+    ),
+    scopePath: [...formula.scopePath],
+    sourceNotation: formula.sourceNotation,
+  });
+  const entityGroups = new Map<string, number>();
+  const entityGroup = (entityId: unknown): number => {
+    const key = stableJson(entityId);
+    const existing = entityGroups.get(key);
+    if (existing !== undefined) return existing;
+    const ordinal = entityGroups.size;
+    entityGroups.set(key, ordinal);
+    return ordinal;
+  };
+  for (const occurrence of context.notationOccurrences) {
+    entityGroup(occurrence.entityId);
+  }
+  for (const link of context.equationLinks) {
+    for (const entityId of link.sharedEntities) entityGroup(entityId);
+  }
+  const claimGroups = new Map<string, number>();
+  const claimGroup = (claimId: string): number => {
+    const existing = claimGroups.get(claimId);
+    if (existing !== undefined) return existing;
+    const ordinal = claimGroups.size;
+    claimGroups.set(claimId, ordinal);
+    return ordinal;
+  };
+  for (const link of context.claimEvidence) claimGroup(link.claimId);
+  for (const link of context.claimEvidence) {
+    for (const claimId of link.supportingClaimIds) claimGroup(claimId);
+  }
+  return {
+    approximationEvidence: context.approximation
+      ? observeEvidenceSources(
+          context.approximation.evidence,
+          snapshot,
+          fileId,
+        )
+      : [],
+    ...(context.approximation
+      ? {
+          approximation: location(context.approximation.relationRange),
+        }
+      : {}),
+    claimEvidence: context.claimEvidence.map((link) => ({
+      claim: copyObservedLocation(link.claim),
+      claimGroup: claimGroup(link.claimId),
+      evidence: observeEvidenceSources(
+        link.evidence,
+        snapshot,
+        link.claim.fileId,
+      ),
+      modality: link.modality,
+      polarity: link.polarity,
+      strengthCeiling: link.strengthCeiling,
+      supportingClaimGroups: link.supportingClaimIds.map(claimGroup),
+      supportingFormulas: link.supportingFormulas.map(formulaAnchor),
+    })),
+    conditions: context.conditions.map((condition) =>
+      observeAuthoredMathCondition(condition, snapshot, fileId),
+    ),
+    conventionalCandidates: (context.conventionalCandidates ?? []).map(
+      (candidate) => ({
+        bindings: candidate.bindings.map((binding) => ({
+          constraint: normalizeSemanticConstraint(binding.constraint),
+          evidence: observeEvidenceSources([binding.evidence], snapshot, fileId),
+          parameter: binding.parameter,
+          proof: binding.proof,
+          symbol: binding.symbol,
+        })),
+        evidence: observeEvidenceSources(candidate.evidence, snapshot, fileId),
+        lawId: candidate.lawId,
+        packId: candidate.packId,
+        packVersion: candidate.packVersion,
+        relation: {
+          conditions: [...candidate.relation.conditions],
+          evidence: observeEvidenceSources(
+            candidate.relation.evidence,
+            snapshot,
+            fileId,
+          ),
+          location: location(candidate.relation.range),
+          relationId: candidate.relation.relationId,
+          roles: candidate.relation.roles.map((role) => ({
+            conceptId: role.conceptId ?? null,
+            role: role.role,
+            symbol: role.symbol,
+          })),
+        },
+        relevance: observeMathRelevance(candidate.relevance, snapshot, fileId),
+        requirements: candidate.requirements.map((requirement) =>
+          requirement.kind === "condition"
+            ? {
+                condition: observeAuthoredMathCondition(
+                  requirement.condition,
+                  snapshot,
+                  fileId,
+                ),
+                kind: requirement.kind,
+              }
+            : {
+                constraint: normalizeSemanticConstraint(requirement.constraint),
+                evidence: observeEvidenceSources(
+                  requirement.evidence,
+                  snapshot,
+                  fileId,
+                ),
+                kind: requirement.kind,
+                parameter: requirement.parameter,
+                symbol: requirement.symbol,
+              },
+        ),
+      }),
+    ),
+    disposition: context.disposition,
+    equationLinks: context.equationLinks.map((link) => ({
+      evidence: observeEvidenceSources(link.evidence, snapshot, fileId),
+      kind: link.kind,
+      sharedEntityGroups: link.sharedEntities.map(entityGroup),
+      source: formulaAnchor(link.source),
+      target: formulaAnchor(link.target),
+    })),
+    ...(context.formula ? { formula: formulaAnchor(context.formula) } : {}),
+    lifecycle: {
+      capped: context.lifecycle.capped,
+      documentVersion: context.lifecycle.documentVersion,
+      editable: context.lifecycle.editable,
+      engineLimited: context.lifecycle.engineLimited,
+      freshness: context.lifecycle.freshness,
+      generation: context.lifecycle.generation,
+      retracted: context.lifecycle.retracted,
+    },
+    notationOccurrences: context.notationOccurrences.map((occurrence) => ({
+      entityGroup: entityGroup(occurrence.entityId),
+      location: copyObservedLocation(occurrence.location),
+      scopePath: [...occurrence.scopePath],
+      sourceNotation: occurrence.sourceNotation,
+    })),
+    requirements: context.requirements.map((requirement) => {
+      switch (requirement.kind) {
+        case "condition":
+          return {
+            condition: observeAuthoredMathCondition(
+              requirement.condition,
+              snapshot,
+              fileId,
+            ),
+            kind: requirement.kind,
+          };
+        case "declaration":
+          return {
+            evidence: observeEvidenceSources(
+              requirement.evidence,
+              snapshot,
+              requirement.occurrenceId.fileId,
+            ),
+            kind: requirement.kind,
+            symbol: requirement.symbol,
+          };
+        case "disambiguation":
+          return {
+            alternatives: requirement.alternatives.map((alternative) => ({
+              evidence: observeEvidenceSources(
+                alternative.evidence,
+                snapshot,
+                fileId,
+              ),
+              range: location(alternative.range),
+              ...(alternative.relevance
+                ? {
+                    relevance: observeMathRelevance(
+                      alternative.relevance,
+                      snapshot,
+                      fileId,
+                    ),
+                  }
+                : {}),
+            })),
+            evidence: observeEvidenceSources(
+              requirement.evidence,
+              snapshot,
+              fileId,
+            ),
+            kind: requirement.kind,
+          };
+        case "role-declaration":
+          return {
+            constraint: normalizeSemanticConstraint(requirement.constraint),
+            evidence: observeEvidenceSources(
+              requirement.evidence,
+              snapshot,
+              fileId,
+            ),
+            kind: requirement.kind,
+            parameter: requirement.parameter,
+            symbol: requirement.symbol,
+          };
+      }
+    }),
+    truncated: context.truncated,
+  };
+}
+
+export function compareAuthoredMathAuthoringContext(
+  snapshot: AuthoredScientificSnapshot,
+  expected: AuthoredMathAuthoringExpectation,
+  observed: ObservedMathAuthoringContext | undefined,
+): AuthoredMathAuthoringComparison {
+  if (!observed) {
+    return {
+      falseConflictDisposition: false,
+      missing: ["authoring context"],
+      moreAuthoritativeDisposition: false,
+      unsafeLifecycle: [],
+      unexpected: [],
+    };
+  }
+  const missing: string[] = [];
+  const unexpected: string[] = [];
+  const unsafeLifecycle = unsafeMathLifecycleTransitions(
+    expected.lifecycle,
+    observed.lifecycle,
+  );
+  if (observed.truncated !== expected.truncated) {
+    missing.push(
+      `truncated ${expected.truncated}; observed ${observed.truncated}`,
+    );
+    if (expected.truncated && !observed.truncated) {
+      unexpected.push("truncation fence removed");
+    }
+  }
+  const expectedEntityGroups = canonicalExpectedEntityGroups(snapshot, expected);
+  const observedEntityGroups = canonicalObservedEntityGroups(observed);
+  if (observed.disposition !== expected.disposition) {
+    missing.push(
+      `disposition ${expected.disposition}; observed ${observed.disposition}`,
+    );
+  }
+  for (const field of [
+    "capped",
+    "documentVersion",
+    "editable",
+    "engineLimited",
+    "freshness",
+    "generation",
+    "retracted",
+  ] as const) {
+    if (observed.lifecycle[field] !== expected.lifecycle[field]) {
+      missing.push(
+        `lifecycle ${field} ${String(expected.lifecycle[field])}; observed ${String(observed.lifecycle[field])}`,
+      );
+    }
+  }
+  compareOptionalGroundedValue(
+    "formula",
+    expected.formula ? expectedFormulaAnchorKey(snapshot, expected.formula) : undefined,
+    observed.formula ? observedFormulaAnchorKey(observed.formula) : undefined,
+    missing,
+    unexpected,
+  );
+  compareMultiset(
+    "requirement",
+    expected.requirements.map((requirement) =>
+      expectedMathRequirementKey(snapshot, requirement),
+    ),
+    observed.requirements.map(observedMathRequirementKey),
+    missing,
+    unexpected,
+  );
+  compareMultiset(
+    "condition",
+    expected.conditions.map((condition) =>
+      expectedMathConditionKey(snapshot, condition),
+    ),
+    observed.conditions.map(observedMathConditionKey),
+    missing,
+    unexpected,
+  );
+  compareMultiset(
+    "conventional candidate",
+    expected.conventionalCandidates.map((candidate) =>
+      expectedConventionalCandidateKey(snapshot, candidate),
+    ),
+    observed.conventionalCandidates.map(observedConventionalCandidateKey),
+    missing,
+    unexpected,
+  );
+  compareMultiset(
+    "equation link",
+    expected.equationLinks.map(
+      (link) =>
+        `${link.kind}:${expectedEvidenceKey(snapshot, link.evidence)}:entities-${link.sharedEntityGroups.map((group) => expectedEntityGroups.get(group)!).sort((left, right) => left - right).join(",")}:${expectedFormulaAnchorKey(snapshot, link.source)}->${expectedFormulaAnchorKey(snapshot, link.target)}`,
+    ),
+    observed.equationLinks.map(
+      (link) =>
+        `${link.kind}:${observedEvidenceKey(link.evidence)}:entities-${link.sharedEntityGroups.map((group) => observedEntityGroups.get(group)!).sort((left, right) => left - right).join(",")}:${observedFormulaAnchorKey(link.source)}->${observedFormulaAnchorKey(link.target)}`,
+    ),
+    missing,
+    unexpected,
+  );
+  compareOptionalGroundedValue(
+    "approximation",
+    expected.approximation
+      ? `${locationKey(resolveAuthoredAnchor(snapshot, expected.approximation.range))}:${expectedEvidenceKey(snapshot, expected.approximation.evidence)}`
+      : undefined,
+    observed.approximation
+      ? `${locationKey(observed.approximation)}:${observedEvidenceKey(observed.approximationEvidence)}`
+      : observed.approximationEvidence.length > 0
+        ? `without-range:${observedEvidenceKey(observed.approximationEvidence)}`
+      : undefined,
+    missing,
+    unexpected,
+  );
+  compareClaimEvidenceTopology(snapshot, expected.claimEvidence, observed.claimEvidence, missing, unexpected);
+  compareMultiset(
+    "notation occurrence",
+    expected.notationOccurrences.map(
+      (occurrence) =>
+        `${locationKey(resolveAuthoredAnchor(snapshot, occurrence.anchor))}:${occurrence.sourceNotation}:${occurrence.scopePath.join(".")}:entity-${expectedEntityGroups.get(occurrence.entityGroup)!}`,
+    ),
+    observed.notationOccurrences.map(
+      (occurrence) =>
+        `${locationKey(occurrence.location)}:${occurrence.sourceNotation}:${occurrence.scopePath.join(".")}:entity-${observedEntityGroups.get(occurrence.entityGroup)!}`,
+    ),
+    missing,
+    unexpected,
+  );
+  return {
+    falseConflictDisposition:
+      observed.disposition === "conflicting" &&
+      expected.disposition !== "conflicting",
+    missing,
+    moreAuthoritativeDisposition: unsafeMathDispositionTransition(
+      snapshot,
+      expected,
+      observed,
+    ),
+    unsafeLifecycle,
+    unexpected,
+  };
+}
+
+function observeAuthoredMathCondition(
+  condition: MathAuthoringContext["conditions"][number],
+  snapshot: AuthoredScientificSnapshot,
+  fileId: string,
+): ObservedMathCondition {
+  return {
+    evidence: observeEvidenceSources(condition.evidence, snapshot, fileId),
+    kind: condition.kind,
+    operatorProperty: condition.operatorProperty ?? null,
+    status: condition.status,
+    subjects: [...condition.subjects],
+  };
+}
+
+function observeMathRelevance(
+  relevance: { readonly evidence: readonly { readonly sourceRanges: readonly SourceRange[] }[]; readonly support: AuthoredMathRelevanceExpectation["support"] },
+  snapshot: AuthoredScientificSnapshot,
+  fileId: string,
+): ObservedMathRelevance {
+  return {
+    evidence: observeEvidenceSources(relevance.evidence, snapshot, fileId),
+    support: relevance.support,
+  };
+}
+
+function normalizeSemanticConstraint(
+  constraint: SemanticConstraint,
+): SemanticConstraint {
+  return {
+    ...(constraint.concepts
+      ? { concepts: [...constraint.concepts].sort() }
+      : {}),
+    ...(constraint.dimensions
+      ? { dimensions: [...constraint.dimensions].sort() }
+      : {}),
+    kind: constraint.kind,
+    ...(constraint.refinements
+      ? { refinements: [...constraint.refinements].sort() }
+      : {}),
+  };
+}
+
+function observeEvidenceSources(
+  evidence: readonly { readonly sourceRanges: readonly SourceRange[] }[],
+  snapshot: AuthoredScientificSnapshot,
+  fileId: string,
+): ObservedLocation[] {
+  return evidence.flatMap((item) =>
+    item.sourceRanges.map((range) =>
+      observedLocationForRange(snapshot, fileId, range),
+    ),
+  );
+}
+
+function copyObservedLocation(location: ObservedLocation): ObservedLocation {
+  return {
+    fileId: location.fileId,
+    path: location.path,
+    range: { ...location.range },
+  };
+}
+
+function observedLocationForRange(
+  snapshot: AuthoredScientificSnapshot,
+  fileId: string,
+  range: SourceRange,
+): ObservedLocation {
+  const document = snapshot.documents.find((candidate) => candidate.fileId === fileId);
+  if (!document) throw new Error(`${snapshot.id}: unknown authoring-context file ${fileId}`);
+  return { fileId, path: document.path, range: { ...range } };
+}
+
+function locationKey(location: ObservedLocation): string {
+  return `${location.fileId}:${location.path}:${location.range.startOffset}:${location.range.endOffset}`;
+}
+
+function expectedFormulaAnchorKey(
+  snapshot: AuthoredScientificSnapshot,
+  formula: AuthoredMathFormulaAnchorExpectation,
+): string {
+  return mathFormulaAnchorKey(
+    locationKey(resolveAuthoredAnchor(snapshot, formula.anchor)),
+    formula.documentVersion,
+    formula.provenance.map((anchor) =>
+      locationKey(resolveAuthoredAnchor(snapshot, anchor)),
+    ),
+    formula.scopePath,
+    formula.sourceNotation,
+  );
+}
+
+function observedFormulaAnchorKey(formula: ObservedMathFormulaAnchor): string {
+  return mathFormulaAnchorKey(
+    locationKey(formula.location),
+    formula.documentVersion,
+    formula.provenance.map(locationKey),
+    formula.scopePath,
+    formula.sourceNotation,
+  );
+}
+
+function mathFormulaAnchorKey(
+  location: string,
+  documentVersion: number,
+  provenance: readonly string[],
+  scopePath: readonly number[],
+  sourceNotation: string,
+): string {
+  return `${location}:v${documentVersion}:scope-${scopePath.join(".")}:notation-${sourceNotation}:provenance-${[...provenance].sort().join(",")}`;
+}
+
+function expectedMathConditionKey(
+  snapshot: AuthoredScientificSnapshot,
+  condition: AuthoredMathCondition,
+): string {
+  return mathConditionKey(
+    condition.kind,
+    condition.operatorProperty,
+    condition.status,
+    condition.subjects,
+    condition.evidence.map((anchor) =>
+      locationKey(resolveAuthoredAnchor(snapshot, anchor)),
+    ),
+  );
+}
+
+function observedMathConditionKey(condition: ObservedMathCondition): string {
+  return mathConditionKey(
+    condition.kind,
+    condition.operatorProperty,
+    condition.status,
+    condition.subjects,
+    condition.evidence.map(locationKey),
+  );
+}
+
+function mathConditionKey(
+  kind: AuthoredMathCondition["kind"],
+  operatorProperty: AuthoredMathCondition["operatorProperty"],
+  status: AuthoredMathCondition["status"],
+  subjects: readonly string[],
+  evidence: readonly string[],
+): string {
+  return `${kind}:${operatorProperty ?? "no-operator-property"}:${status}:${[...subjects].sort().join(",")}:evidence-${[...evidence].sort().join(",")}`;
+}
+
+function expectedMathRequirementKey(
+  snapshot: AuthoredScientificSnapshot,
+  requirement: AuthoredMathRequirement,
+): string {
+  switch (requirement.kind) {
+    case "condition":
+      return `${requirement.kind}:${expectedMathConditionKey(snapshot, requirement.condition)}`;
+    case "declaration":
+      return `${requirement.kind}:${requirement.symbol}:${expectedEvidenceKey(snapshot, requirement.evidence)}`;
+    case "disambiguation":
+      return `${requirement.kind}:${expectedEvidenceKey(snapshot, requirement.evidence)}:alternatives-${requirement.alternatives
+        .map((alternative) => expectedMathAlternativeKey(snapshot, alternative))
+        .sort()
+        .join(",")}`;
+    case "role-declaration":
+      return `${requirement.kind}:${requirement.parameter}:${requirement.symbol}:${constraintKey(requirement.constraint)}:${expectedEvidenceKey(snapshot, requirement.evidence)}`;
+  }
+}
+
+function observedMathRequirementKey(requirement: ObservedMathRequirement): string {
+  switch (requirement.kind) {
+    case "condition":
+      return `${requirement.kind}:${observedMathConditionKey(requirement.condition)}`;
+    case "declaration":
+      return `${requirement.kind}:${requirement.symbol}:${observedEvidenceKey(requirement.evidence)}`;
+    case "disambiguation":
+      return `${requirement.kind}:${observedEvidenceKey(requirement.evidence)}:alternatives-${requirement.alternatives
+        .map(observedMathAlternativeKey)
+        .sort()
+        .join(",")}`;
+    case "role-declaration":
+      return `${requirement.kind}:${requirement.parameter}:${requirement.symbol}:${constraintKey(requirement.constraint)}:${observedEvidenceKey(requirement.evidence)}`;
+  }
+}
+
+function expectedMathAlternativeKey(
+  snapshot: AuthoredScientificSnapshot,
+  alternative: AuthoredMathAlternativeExpectation,
+): string {
+  return `${locationKey(resolveAuthoredAnchor(snapshot, alternative.range))}:${expectedEvidenceKey(snapshot, alternative.evidence)}:${alternative.relevance ? expectedMathRelevanceKey(snapshot, alternative.relevance) : "no-relevance"}`;
+}
+
+function observedMathAlternativeKey(alternative: ObservedMathAlternative): string {
+  return `${locationKey(alternative.range)}:${observedEvidenceKey(alternative.evidence)}:${alternative.relevance ? observedMathRelevanceKey(alternative.relevance) : "no-relevance"}`;
+}
+
+function expectedMathRelevanceKey(
+  snapshot: AuthoredScientificSnapshot,
+  relevance: AuthoredMathRelevanceExpectation,
+): string {
+  return `${relevance.support}:${expectedEvidenceKey(snapshot, relevance.evidence)}`;
+}
+
+function observedMathRelevanceKey(relevance: ObservedMathRelevance): string {
+  return `${relevance.support}:${observedEvidenceKey(relevance.evidence)}`;
+}
+
+function constraintKey(constraint: SemanticConstraint): string {
+  return stableJson(normalizeSemanticConstraint(constraint));
+}
+
+function expectedBindingKey(
+  snapshot: AuthoredScientificSnapshot,
+  binding: AuthoredMathBindingExpectation,
+): string {
+  return `${binding.parameter}:${binding.symbol}:${binding.proof}:${constraintKey(binding.constraint)}:${expectedEvidenceKey(snapshot, binding.evidence)}`;
+}
+
+function observedBindingKey(binding: ObservedMathBinding): string {
+  return `${binding.parameter}:${binding.symbol}:${binding.proof}:${constraintKey(binding.constraint)}:${observedEvidenceKey(binding.evidence)}`;
+}
+
+function expectedConventionalRequirementKey(
+  snapshot: AuthoredScientificSnapshot,
+  requirement: AuthoredConventionalRequirementExpectation,
+): string {
+  return requirement.kind === "condition"
+    ? `condition:${expectedMathConditionKey(snapshot, requirement.condition)}`
+    : `role-declaration:${requirement.parameter}:${requirement.symbol}:${constraintKey(requirement.constraint)}:${expectedEvidenceKey(snapshot, requirement.evidence)}`;
+}
+
+function observedConventionalRequirementKey(
+  requirement: ObservedConventionalRequirement,
+): string {
+  return requirement.kind === "condition"
+    ? `condition:${observedMathConditionKey(requirement.condition)}`
+    : `role-declaration:${requirement.parameter}:${requirement.symbol}:${constraintKey(requirement.constraint)}:${observedEvidenceKey(requirement.evidence)}`;
+}
+
+function expectedConventionalCandidateKey(
+  snapshot: AuthoredScientificSnapshot,
+  candidate: AuthoredConventionalCandidateExpectation,
+): string {
+  const relation = candidate.relation;
+  return stableJson({
+    bindings: candidate.bindings.map((binding) =>
+      expectedBindingKey(snapshot, binding),
+    ).sort(),
+    evidence: expectedEvidenceKey(snapshot, candidate.evidence),
+    lawId: candidate.lawId,
+    packId: candidate.packId,
+    packVersion: candidate.packVersion,
+    relation: {
+      conditions: [...relation.conditions].sort(),
+      evidence: expectedEvidenceKey(snapshot, relation.evidence),
+      location: locationKey(resolveAuthoredAnchor(snapshot, relation.anchor)),
+      relationId: relation.relationId,
+      roles: relation.roles.map((role) => stableJson(role)).sort(),
+    },
+    relevance: expectedMathRelevanceKey(snapshot, candidate.relevance),
+    requirements: candidate.requirements.map((requirement) =>
+      expectedConventionalRequirementKey(snapshot, requirement),
+    ).sort(),
+  });
+}
+
+function observedConventionalCandidateKey(
+  candidate: ObservedConventionalCandidate,
+): string {
+  const relation = candidate.relation;
+  return stableJson({
+    bindings: candidate.bindings.map(observedBindingKey).sort(),
+    evidence: observedEvidenceKey(candidate.evidence),
+    lawId: candidate.lawId,
+    packId: candidate.packId,
+    packVersion: candidate.packVersion,
+    relation: {
+      conditions: [...relation.conditions].sort(),
+      evidence: observedEvidenceKey(relation.evidence),
+      location: locationKey(relation.location),
+      relationId: relation.relationId,
+      roles: relation.roles.map((role) => stableJson(role)).sort(),
+    },
+    relevance: observedMathRelevanceKey(candidate.relevance),
+    requirements: candidate.requirements.map(
+      observedConventionalRequirementKey,
+    ).sort(),
+  });
+}
+
+function expectedEvidenceKey(
+  snapshot: AuthoredScientificSnapshot,
+  evidence: readonly AuthoredSourceAnchor[],
+): string {
+  return `evidence-${evidence
+    .map((anchor) => locationKey(resolveAuthoredAnchor(snapshot, anchor)))
+    .sort()
+    .join(",")}`;
+}
+
+function observedEvidenceKey(evidence: readonly ObservedLocation[]): string {
+  return `evidence-${evidence.map(locationKey).sort().join(",")}`;
+}
+
+function compareOptionalGroundedValue(
+  label: string,
+  expected: string | undefined,
+  observed: string | undefined,
+  missing: string[],
+  unexpected: string[],
+): void {
+  if (expected === observed) return;
+  if (expected !== undefined) missing.push(`${label} ${expected}`);
+  if (observed !== undefined) unexpected.push(`${label} ${observed}`);
+}
+
+function compareMultiset(
+  label: string,
+  expected: readonly string[],
+  observed: readonly string[],
+  missing: string[],
+  unexpected: string[],
+): void {
+  const expectedCounts = multisetCounts(expected);
+  const observedCounts = multisetCounts(observed);
+  for (const [value, count] of expectedCounts) {
+    for (let index = observedCounts.get(value) ?? 0; index < count; index += 1) {
+      missing.push(`${label} ${value}`);
+    }
+  }
+  for (const [value, count] of observedCounts) {
+    for (let index = expectedCounts.get(value) ?? 0; index < count; index += 1) {
+      unexpected.push(`${label} ${value}`);
+    }
+  }
+}
+
+function multisetCounts(values: readonly string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+  return counts;
+}
+
+function canonicalExpectedEntityGroups(
+  snapshot: AuthoredScientificSnapshot,
+  context: AuthoredMathAuthoringExpectation,
+): Map<number, number> {
+  const descriptors = new Map<number, string[]>();
+  for (const occurrence of context.notationOccurrences) {
+    addTopologyDescriptor(
+      descriptors,
+      occurrence.entityGroup,
+      `notation:${locationKey(resolveAuthoredAnchor(snapshot, occurrence.anchor))}:${occurrence.scopePath.join(".")}:${occurrence.sourceNotation}`,
+    );
+  }
+  for (const link of context.equationLinks) {
+    const descriptor = `link:${link.kind}:${expectedFormulaAnchorKey(snapshot, link.source)}->${expectedFormulaAnchorKey(snapshot, link.target)}`;
+    for (const group of link.sharedEntityGroups) {
+      addTopologyDescriptor(descriptors, group, descriptor);
+    }
+  }
+  return canonicalTopologyOrdinals(descriptors);
+}
+
+function canonicalObservedEntityGroups(
+  context: ObservedMathAuthoringContext,
+): Map<number, number> {
+  const descriptors = new Map<number, string[]>();
+  for (const occurrence of context.notationOccurrences) {
+    addTopologyDescriptor(
+      descriptors,
+      occurrence.entityGroup,
+      `notation:${locationKey(occurrence.location)}:${occurrence.scopePath.join(".")}:${occurrence.sourceNotation}`,
+    );
+  }
+  for (const link of context.equationLinks) {
+    const descriptor = `link:${link.kind}:${observedFormulaAnchorKey(link.source)}->${observedFormulaAnchorKey(link.target)}`;
+    for (const group of link.sharedEntityGroups) {
+      addTopologyDescriptor(descriptors, group, descriptor);
+    }
+  }
+  return canonicalTopologyOrdinals(descriptors);
+}
+
+function compareClaimEvidenceTopology(
+  snapshot: AuthoredScientificSnapshot,
+  expected: readonly AuthoredMathClaimEvidenceExpectation[],
+  observed: ObservedMathAuthoringContext["claimEvidence"],
+  missing: string[],
+  unexpected: string[],
+): void {
+  const expectedPublic = expected.map((claim) =>
+    expectedClaimEvidencePublicKey(snapshot, claim),
+  );
+  const observedPublic = observed.map(observedClaimEvidencePublicKey);
+  compareMultiset(
+    "claim evidence",
+    expectedPublic,
+    observedPublic,
+    missing,
+    unexpected,
+  );
+  if (
+    stableJson([...expectedPublic].sort()) ===
+      stableJson([...observedPublic].sort()) &&
+    !claimTopologyHasExactBijection(snapshot, expected, observed)
+  ) {
+    missing.push("claim evidence parent topology");
+    unexpected.push("claim evidence parent topology");
+  }
+}
+
+function expectedClaimEvidencePublicKey(
+  snapshot: AuthoredScientificSnapshot,
+  claim: AuthoredMathClaimEvidenceExpectation,
+): string {
+  return `${locationKey(resolveAuthoredAnchor(snapshot, claim.claim))}:${expectedEvidenceKey(snapshot, claim.evidence)}:${claim.polarity}:${claim.modality}:${claim.strengthCeiling}:parent-count-${claim.supportingClaimGroups.length}:${claim.supportingFormulas
+    .map((formula) => expectedFormulaAnchorKey(snapshot, formula))
+    .sort()
+    .join(",")}`;
+}
+
+function observedClaimEvidencePublicKey(
+  claim: ObservedMathAuthoringContext["claimEvidence"][number],
+): string {
+  return `${locationKey(claim.claim)}:${observedEvidenceKey(claim.evidence)}:${claim.polarity}:${claim.modality}:${claim.strengthCeiling}:parent-count-${claim.supportingClaimGroups.length}:${claim.supportingFormulas
+    .map(observedFormulaAnchorKey)
+    .sort()
+    .join(",")}`;
+}
+
+function claimTopologyHasExactBijection(
+  snapshot: AuthoredScientificSnapshot,
+  expected: readonly AuthoredMathClaimEvidenceExpectation[],
+  observed: ObservedMathAuthoringContext["claimEvidence"],
+): boolean {
+  const expectedGroups = claimTopologyGroups(expected);
+  const observedGroups = claimTopologyGroups(observed);
+  if (expectedGroups.length !== observedGroups.length) return false;
+  const expectedFingerprints = new Map(
+    expectedGroups.map((group) => [
+      group,
+      claimGroupFingerprint(
+        group,
+        expected,
+        (claim) => expectedClaimEvidencePublicKey(snapshot, claim),
+      ),
+    ]),
+  );
+  const observedFingerprints = new Map(
+    observedGroups.map((group) => [
+      group,
+      claimGroupFingerprint(group, observed, observedClaimEvidencePublicKey),
+    ]),
+  );
+  const candidates = new Map(
+    expectedGroups.map((group) => [
+      group,
+      observedGroups.filter(
+        (candidate) =>
+          observedFingerprints.get(candidate) === expectedFingerprints.get(group),
+      ),
+    ]),
+  );
+  if ([...candidates.values()].some((items) => items.length === 0)) return false;
+  const ordered = [...expectedGroups].sort(
+    (left, right) =>
+      candidates.get(left)!.length - candidates.get(right)!.length,
+  );
+  const mapping = new Map<number, number>();
+  const used = new Set<number>();
+  const matches = (index: number): boolean => {
+    if (index === ordered.length) {
+      const expectedTopology = expected
+        .map(
+          (claim) =>
+            `${expectedClaimEvidencePublicKey(snapshot, claim)}:claim-${mapping.get(claim.claimGroup)!}:parents-${claim.supportingClaimGroups
+              .map((group) => mapping.get(group)!)
+              .sort((left, right) => left - right)
+              .join(",")}`,
+        )
+        .sort();
+      const observedTopology = observed
+        .map(
+          (claim) =>
+            `${observedClaimEvidencePublicKey(claim)}:claim-${claim.claimGroup}:parents-${[...claim.supportingClaimGroups].sort((left, right) => left - right).join(",")}`,
+        )
+        .sort();
+      return stableJson(expectedTopology) === stableJson(observedTopology);
+    }
+    const group = ordered[index]!;
+    for (const candidate of candidates.get(group)!) {
+      if (used.has(candidate)) continue;
+      mapping.set(group, candidate);
+      used.add(candidate);
+      if (
+        partialClaimTopologyIsConsistent(
+          mapping,
+          used,
+          expected,
+          observed,
+          (claim) => expectedClaimEvidencePublicKey(snapshot, claim),
+          observedClaimEvidencePublicKey,
+        ) &&
+        matches(index + 1)
+      ) {
+        return true;
+      }
+      used.delete(candidate);
+      mapping.delete(group);
+    }
+    return false;
+  };
+  return matches(0);
+}
+
+function partialClaimTopologyIsConsistent<
+  ExpectedClaim extends {
+    readonly claimGroup: number;
+    readonly supportingClaimGroups: readonly number[];
+  },
+  ObservedClaim extends {
+    readonly claimGroup: number;
+    readonly supportingClaimGroups: readonly number[];
+  },
+>(
+  mapping: ReadonlyMap<number, number>,
+  usedObservedGroups: ReadonlySet<number>,
+  expected: readonly ExpectedClaim[],
+  observed: readonly ObservedClaim[],
+  expectedPublicKey: (claim: ExpectedClaim) => string,
+  observedPublicKey: (claim: ObservedClaim) => string,
+): boolean {
+  for (const [expectedSource, observedSource] of mapping) {
+    const expectedClaims = expected.filter(
+      (claim) => claim.claimGroup === expectedSource,
+    );
+    const observedClaims = observed.filter(
+      (claim) => claim.claimGroup === observedSource,
+    );
+    if (
+      !hasPerfectClaimRecordMatching(
+        expectedClaims,
+        observedClaims,
+        (expectedClaim, observedClaim) => {
+          if (
+            expectedPublicKey(expectedClaim) !== observedPublicKey(observedClaim)
+          ) {
+            return false;
+          }
+          const expectedMappedParents = multisetCounts(
+            expectedClaim.supportingClaimGroups.flatMap((group) => {
+              const mapped = mapping.get(group);
+              return mapped === undefined ? [] : [String(mapped)];
+            }),
+          );
+          const observedUsedParents = multisetCounts(
+            observedClaim.supportingClaimGroups
+              .filter((group) => usedObservedGroups.has(group))
+              .map(String),
+          );
+          if (!sameStringCounts(expectedMappedParents, observedUsedParents)) {
+            return false;
+          }
+          const expectedUnmapped = expectedClaim.supportingClaimGroups.filter(
+            (group) => !mapping.has(group),
+          ).length;
+          const observedUnused = observedClaim.supportingClaimGroups.filter(
+            (group) => !usedObservedGroups.has(group),
+          ).length;
+          return expectedUnmapped === observedUnused;
+        },
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function hasPerfectClaimRecordMatching<Expected, Observed>(
+  expected: readonly Expected[],
+  observed: readonly Observed[],
+  compatible: (expected: Expected, observed: Observed) => boolean,
+): boolean {
+  if (expected.length !== observed.length) return false;
+  const used = new Set<number>();
+  const match = (index: number): boolean => {
+    if (index === expected.length) return true;
+    for (let candidate = 0; candidate < observed.length; candidate += 1) {
+      if (
+        used.has(candidate) ||
+        !compatible(expected[index]!, observed[candidate]!)
+      ) {
+        continue;
+      }
+      used.add(candidate);
+      if (match(index + 1)) return true;
+      used.delete(candidate);
+    }
+    return false;
+  };
+  return match(0);
+}
+
+function sameStringCounts(
+  left: ReadonlyMap<string, number>,
+  right: ReadonlyMap<string, number>,
+): boolean {
+  return (
+    left.size === right.size &&
+    [...left].every(([key, count]) => right.get(key) === count)
+  );
+}
+
+function claimTopologyGroups(
+  claims: readonly {
+    readonly claimGroup: number;
+    readonly supportingClaimGroups: readonly number[];
+  }[],
+): number[] {
+  return [
+    ...new Set(
+      claims.flatMap((claim) => [
+        claim.claimGroup,
+        ...claim.supportingClaimGroups,
+      ]),
+    ),
+  ].sort((left, right) => left - right);
+}
+
+function claimGroupFingerprint<Claim extends {
+  readonly claimGroup: number;
+  readonly supportingClaimGroups: readonly number[];
+}>(
+  group: number,
+  claims: readonly Claim[],
+  publicKey: (claim: Claim) => string,
+): string {
+  return stableJson({
+    claims: claims
+      .filter((claim) => claim.claimGroup === group)
+      .map(publicKey)
+      .sort(),
+    supports: claims
+      .flatMap((claim) =>
+        claim.supportingClaimGroups
+          .filter((parent) => parent === group)
+          .map(() => publicKey(claim)),
+      )
+      .sort(),
+  });
+}
+
+function addTopologyDescriptor(
+  descriptors: Map<number, string[]>,
+  group: number,
+  descriptor: string,
+): void {
+  const values = descriptors.get(group) ?? [];
+  values.push(descriptor);
+  descriptors.set(group, values);
+}
+
+function canonicalTopologyOrdinals(
+  descriptors: ReadonlyMap<number, readonly string[]>,
+): Map<number, number> {
+  const ordered = [...descriptors.entries()].sort((left, right) => {
+    const leftKey = [...left[1]].sort().join("|");
+    const rightKey = [...right[1]].sort().join("|");
+    return leftKey.localeCompare(rightKey) || left[0] - right[0];
+  });
+  return new Map(ordered.map(([group], ordinal) => [group, ordinal]));
+}
+
+function unsafeMathDispositionTransition(
+  snapshot: AuthoredScientificSnapshot,
+  expected: AuthoredMathAuthoringExpectation,
+  observed: ObservedMathAuthoringContext,
+): boolean {
+  if (expected.disposition === observed.disposition) return false;
+  if (observed.disposition === "conventional") {
+    if (expected.disposition !== "partial") return true;
+    const reviewed = expected.conventionalCandidates
+      .map((candidate) => expectedConventionalCandidateKey(snapshot, candidate))
+      .sort();
+    const actual = observed.conventionalCandidates
+      .map(observedConventionalCandidateKey)
+      .sort();
+    return reviewed.length === 0 || stableJson(reviewed) !== stableJson(actual);
+  }
+  const unsafeTransitions: Readonly<
+    Record<MathAuthoringDisposition, readonly MathAuthoringDisposition[]>
+  > = {
+    ambiguous: ["established", "partial"],
+    conflicting: ["established", "partial"],
+    conventional: ["established", "partial"],
+    "engine-limited": ["established", "partial"],
+    established: [],
+    partial: ["established"],
+    unsupported: ["established", "partial"],
+  };
+  return unsafeTransitions[expected.disposition].includes(observed.disposition);
+}
+
+function unsafeMathLifecycleTransitions(
+  expected: AuthoredMathAuthoringExpectation["lifecycle"],
+  observed: ObservedMathAuthoringContext["lifecycle"],
+): string[] {
+  const unsafe: string[] = [];
+  if (!expected.editable && observed.editable) unsafe.push("editable enabled");
+  if (expected.retracted && !observed.retracted) unsafe.push("retraction removed");
+  if (expected.capped && !observed.capped) unsafe.push("work cap removed");
+  if (expected.engineLimited && !observed.engineLimited) {
+    unsafe.push("engine limit removed");
+  }
+  if (expected.generation === "generated" && observed.generation === "authored") {
+    unsafe.push("generated source presented as authored");
+  }
+  const observedCouldAuthorize =
+    observed.editable && !observed.retracted && !observed.engineLimited;
+  if (
+    expected.documentVersion !== observed.documentVersion &&
+    observedCouldAuthorize
+  ) {
+    unsafe.push(
+      `revision fence ${expected.documentVersion} replaced by ${observed.documentVersion}`,
+    );
+  }
+  return unsafe;
 }
 
 export function observeAuthoredRelations(
@@ -905,10 +2316,10 @@ function parseExpected(
     item,
     [
       "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
-      "navigation", "diagnostics",
+      "navigation", "diagnostics", "authoringContext",
     ],
     path,
-    ["symbol", "cursorOccurrence"],
+    ["symbol", "cursorOccurrence", "authoringContext"],
   );
   const navigation = record(item.navigation, `${path}.navigation`);
   exact(
@@ -965,6 +2376,14 @@ function parseExpected(
     throw new Error(`${path}.diagnostics.maximum: smaller than required diagnostics`);
   }
   return {
+    ...(item.authoringContext === undefined
+      ? {}
+      : {
+          authoringContext: parseAuthoredMathAuthoringExpectation(
+            item.authoringContext,
+            `${path}.authoringContext`,
+          ),
+        }),
     ...(item.cursorOccurrence === undefined
       ? {}
       : {
@@ -1040,6 +2459,621 @@ function parseExpected(
     },
     relations: parseRelationExpectations(item.relations, `${path}.relations`),
     ...(item.symbol === undefined ? {} : { symbol: text(item.symbol, `${path}.symbol`) }),
+  };
+}
+
+export function validateHostNeutralAuthoringContextVocabulary(
+  value: unknown,
+  path = "authoringContext",
+): void {
+  if (Array.isArray(value)) {
+    value.forEach((child, index) =>
+      validateHostNeutralAuthoringContextVocabulary(child, `${path}[${index}]`),
+    );
+    return;
+  }
+  if (typeof value !== "object" || value === null) return;
+  for (const [key, child] of Object.entries(value)) {
+    const tokens = key
+      .replaceAll(/([a-z])([A-Z])/gu, "$1-$2")
+      .toLocaleLowerCase("en-US")
+      .split(/[^a-z0-9]+/u);
+    const forbidden = tokens.find((token) =>
+      ["rhetoric", "score", "template"].includes(token),
+    );
+    if (forbidden) {
+      throw new Error(`${path}.${key}: host vocabulary ${forbidden} is forbidden`);
+    }
+    validateHostNeutralAuthoringContextVocabulary(child, `${path}.${key}`);
+  }
+}
+
+export function parseAuthoredMathAuthoringExpectation(
+  value: unknown,
+  path: string,
+): AuthoredMathAuthoringExpectation {
+  validateHostNeutralAuthoringContextVocabulary(value, path);
+  const item = record(value, path);
+  exact(
+    item,
+    [
+      "approximation",
+      "claimEvidence",
+      "conditions",
+      "conventionalCandidates",
+      "disposition",
+      "equationLinks",
+      "formula",
+      "lifecycle",
+      "notationOccurrences",
+      "requirements",
+      "truncated",
+    ],
+    path,
+  );
+  const lifecycle = record(item.lifecycle, `${path}.lifecycle`);
+  exact(
+    lifecycle,
+    [
+      "capped",
+      "documentVersion",
+      "editable",
+      "engineLimited",
+      "freshness",
+      "generation",
+      "retracted",
+    ],
+    `${path}.lifecycle`,
+  );
+  return {
+    approximation:
+      item.approximation === null
+        ? null
+        : {
+            evidence: parseEvidenceAnchors(
+              record(item.approximation, `${path}.approximation`).evidence,
+              `${path}.approximation.evidence`,
+            ),
+            range: parseApproximationRange(
+              item.approximation,
+              `${path}.approximation`,
+            ),
+          },
+    claimEvidence: array(item.claimEvidence, `${path}.claimEvidence`).map(
+      (candidate, index) =>
+        parseAuthoredMathClaimEvidence(
+          candidate,
+          `${path}.claimEvidence[${index}]`,
+        ),
+    ),
+    conditions: array(item.conditions, `${path}.conditions`).map(
+      (candidate, index) =>
+        parseAuthoredMathCondition(candidate, `${path}.conditions[${index}]`),
+    ),
+    conventionalCandidates: array(
+      item.conventionalCandidates,
+      `${path}.conventionalCandidates`,
+    ).map((candidate, index) =>
+      parseAuthoredConventionalCandidate(
+        candidate,
+        `${path}.conventionalCandidates[${index}]`,
+      ),
+    ),
+    disposition: oneOf(
+      item.disposition,
+      [
+        "ambiguous",
+        "conflicting",
+        "conventional",
+        "engine-limited",
+        "established",
+        "partial",
+        "unsupported",
+      ] as const,
+      `${path}.disposition`,
+    ),
+    equationLinks: array(item.equationLinks, `${path}.equationLinks`).map(
+      (candidate, index) => {
+        const linkPath = `${path}.equationLinks[${index}]`;
+        const link = record(candidate, linkPath);
+        exact(
+          link,
+          ["evidence", "kind", "sharedEntityGroups", "source", "target"],
+          linkPath,
+        );
+        return {
+          evidence: parseEvidenceAnchors(link.evidence, `${linkPath}.evidence`),
+          kind: oneOf(
+            link.kind,
+            ["derived-law", "shared-entity"] as const,
+            `${linkPath}.kind`,
+          ),
+          sharedEntityGroups: integers(
+            link.sharedEntityGroups,
+            `${linkPath}.sharedEntityGroups`,
+          ),
+          source: parseAuthoredMathFormulaAnchor(
+            link.source,
+            `${linkPath}.source`,
+          ),
+          target: parseAuthoredMathFormulaAnchor(
+            link.target,
+            `${linkPath}.target`,
+          ),
+        };
+      },
+    ),
+    formula:
+      item.formula === null
+        ? null
+        : parseAuthoredMathFormulaAnchor(item.formula, `${path}.formula`),
+    lifecycle: {
+      capped: boolean(lifecycle.capped, `${path}.lifecycle.capped`),
+      documentVersion: integer(
+        lifecycle.documentVersion,
+        `${path}.lifecycle.documentVersion`,
+      ),
+      editable: boolean(lifecycle.editable, `${path}.lifecycle.editable`),
+      engineLimited: boolean(
+        lifecycle.engineLimited,
+        `${path}.lifecycle.engineLimited`,
+      ),
+      generation: oneOf(
+        lifecycle.generation,
+        ["authored", "generated"] as const,
+        `${path}.lifecycle.generation`,
+      ),
+      freshness: oneOf(
+        lifecycle.freshness,
+        ["current"] as const,
+        `${path}.lifecycle.freshness`,
+      ),
+      retracted: boolean(lifecycle.retracted, `${path}.lifecycle.retracted`),
+    },
+    notationOccurrences: array(
+      item.notationOccurrences,
+      `${path}.notationOccurrences`,
+    ).map((candidate, index) => {
+      const occurrencePath = `${path}.notationOccurrences[${index}]`;
+      const occurrence = record(candidate, occurrencePath);
+      exact(
+        occurrence,
+        ["anchor", "entityGroup", "scopePath", "sourceNotation"],
+        occurrencePath,
+      );
+      return {
+        anchor: parseAnchor(occurrence.anchor, `${occurrencePath}.anchor`),
+        entityGroup: integer(
+          occurrence.entityGroup,
+          `${occurrencePath}.entityGroup`,
+        ),
+        scopePath: integers(
+          occurrence.scopePath,
+          `${occurrencePath}.scopePath`,
+        ),
+        sourceNotation: text(
+          occurrence.sourceNotation,
+          `${occurrencePath}.sourceNotation`,
+        ),
+      };
+    }),
+    requirements: array(item.requirements, `${path}.requirements`).map(
+      (candidate, index) =>
+        parseAuthoredMathRequirement(
+          candidate,
+          `${path}.requirements[${index}]`,
+        ),
+    ),
+    truncated: boolean(item.truncated, `${path}.truncated`),
+  };
+}
+
+function parseApproximationRange(
+  value: unknown,
+  path: string,
+): AuthoredSourceAnchor {
+  const item = record(value, path);
+  exact(item, ["evidence", "range"], path);
+  return parseAnchor(item.range, `${path}.range`);
+}
+
+function parseAuthoredMathFormulaAnchor(
+  value: unknown,
+  path: string,
+): AuthoredMathFormulaAnchorExpectation {
+  const item = record(value, path);
+  exact(
+    item,
+    ["anchor", "documentVersion", "provenance", "scopePath", "sourceNotation"],
+    path,
+  );
+  return {
+    anchor: parseAnchor(item.anchor, `${path}.anchor`),
+    documentVersion: integer(item.documentVersion, `${path}.documentVersion`),
+    provenance: array(item.provenance, `${path}.provenance`).map(
+      (candidate, index) =>
+        parseAnchor(candidate, `${path}.provenance[${index}]`),
+    ),
+    scopePath: integers(item.scopePath, `${path}.scopePath`),
+    sourceNotation: text(item.sourceNotation, `${path}.sourceNotation`),
+  };
+}
+
+function parseAuthoredMathCondition(
+  value: unknown,
+  path: string,
+): AuthoredMathCondition {
+  const item = record(value, path);
+  exact(
+    item,
+    ["evidence", "kind", "operatorProperty", "status", "subjects"],
+    path,
+  );
+  return {
+    evidence: array(item.evidence, `${path}.evidence`).map((candidate, index) =>
+      parseAnchor(candidate, `${path}.evidence[${index}]`),
+    ),
+    kind: oneOf(
+      item.kind,
+      [
+        "assumption",
+        "differentiable",
+        "domain-membership",
+        "maps-between",
+        "nonzero",
+        "operator-property",
+        "positive",
+        "rank-compatible",
+        "same-context",
+        "shape-compatible",
+        "sign-convention",
+        "uniform",
+      ] as const,
+      `${path}.kind`,
+    ),
+    operatorProperty:
+      item.operatorProperty === null
+        ? null
+        : oneOf(
+            item.operatorProperty,
+            [
+              "adjoint",
+              "bilinear",
+              "gradient",
+              "hessian",
+              "inner-product",
+              "jacobian",
+              "linear",
+              "norm",
+            ] as const,
+            `${path}.operatorProperty`,
+          ),
+    status: oneOf(
+      item.status,
+      ["conflicting", "required", "unsupported", "verified"] as const,
+      `${path}.status`,
+    ),
+    subjects: strings(item.subjects, `${path}.subjects`),
+  };
+}
+
+function parseAuthoredMathRequirement(
+  value: unknown,
+  path: string,
+): AuthoredMathRequirement {
+  const item = record(value, path);
+  const kind = oneOf(
+    item.kind,
+    ["condition", "declaration", "disambiguation", "role-declaration"] as const,
+    `${path}.kind`,
+  );
+  switch (kind) {
+    case "condition":
+      exact(item, ["kind", "condition"], path);
+      return {
+        condition: parseAuthoredMathCondition(item.condition, `${path}.condition`),
+        kind,
+      };
+    case "declaration":
+      exact(item, ["evidence", "kind", "symbol"], path);
+      return {
+        evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+        kind,
+        symbol: text(item.symbol, `${path}.symbol`),
+      };
+    case "disambiguation":
+      exact(item, ["alternatives", "evidence", "kind"], path);
+      return {
+        alternatives: array(item.alternatives, `${path}.alternatives`).map(
+          (candidate, index) =>
+            parseAuthoredMathAlternative(
+              candidate,
+              `${path}.alternatives[${index}]`,
+            ),
+        ),
+        evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+        kind,
+      };
+    case "role-declaration":
+      exact(
+        item,
+        ["constraint", "evidence", "kind", "parameter", "symbol"],
+        path,
+      );
+      return {
+        constraint: parseSemanticConstraint(
+          item.constraint,
+          `${path}.constraint`,
+        ),
+        evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+        kind,
+        parameter: text(item.parameter, `${path}.parameter`),
+        symbol: text(item.symbol, `${path}.symbol`),
+      };
+  }
+}
+
+function parseEvidenceAnchors(
+  value: unknown,
+  path: string,
+): AuthoredSourceAnchor[] {
+  return array(value, path).map((candidate, index) =>
+    parseAnchor(candidate, `${path}[${index}]`),
+  );
+}
+
+function parseAuthoredMathClaimEvidence(
+  value: unknown,
+  path: string,
+): AuthoredMathClaimEvidenceExpectation {
+  const item = record(value, path);
+  exact(
+    item,
+    [
+      "claim",
+      "claimGroup",
+      "evidence",
+      "modality",
+      "polarity",
+      "strengthCeiling",
+      "supportingClaimGroups",
+      "supportingFormulas",
+    ],
+    path,
+  );
+  return {
+    claim: parseAnchor(item.claim, `${path}.claim`),
+    claimGroup: integer(item.claimGroup, `${path}.claimGroup`),
+    evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+    modality: oneOf(
+      item.modality,
+      ["asserted", "cited", "hedged", "hypothetical", "quoted"] as const,
+      `${path}.modality`,
+    ),
+    polarity: oneOf(
+      item.polarity,
+      ["negative", "positive"] as const,
+      `${path}.polarity`,
+    ),
+    strengthCeiling: oneOf(
+      item.strengthCeiling,
+      ["asserted", "qualified", "unusable"] as const,
+      `${path}.strengthCeiling`,
+    ),
+    supportingClaimGroups: integers(
+      item.supportingClaimGroups,
+      `${path}.supportingClaimGroups`,
+    ),
+    supportingFormulas: array(
+      item.supportingFormulas,
+      `${path}.supportingFormulas`,
+    ).map((candidate, index) =>
+      parseAuthoredMathFormulaAnchor(
+        candidate,
+        `${path}.supportingFormulas[${index}]`,
+      ),
+    ),
+  };
+}
+
+function parseAuthoredMathAlternative(
+  value: unknown,
+  path: string,
+): AuthoredMathAlternativeExpectation {
+  const item = record(value, path);
+  exact(item, ["evidence", "range", "relevance"], path);
+  return {
+    evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+    range: parseAnchor(item.range, `${path}.range`),
+    relevance:
+      item.relevance === null
+        ? null
+        : parseAuthoredMathRelevance(item.relevance, `${path}.relevance`),
+  };
+}
+
+function parseAuthoredMathRelevance(
+  value: unknown,
+  path: string,
+): AuthoredMathRelevanceExpectation {
+  const item = record(value, path);
+  exact(item, ["evidence", "support"], path);
+  return {
+    evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+    support: oneOf(
+      item.support,
+      ["explicit", "supported", "tentative"] as const,
+      `${path}.support`,
+    ),
+  };
+}
+
+function parseSemanticConstraint(
+  value: unknown,
+  path: string,
+): SemanticConstraint {
+  const item = record(value, path);
+  exact(
+    item,
+    ["concepts", "dimensions", "kind", "refinements"],
+    path,
+    ["concepts", "dimensions", "refinements"],
+  );
+  return normalizeSemanticConstraint({
+    ...(item.concepts === undefined
+      ? {}
+      : { concepts: strings(item.concepts, `${path}.concepts`) }),
+    ...(item.dimensions === undefined
+      ? {}
+      : { dimensions: strings(item.dimensions, `${path}.dimensions`) }),
+    kind: oneOf(
+      item.kind,
+      [
+        "distribution",
+        "event",
+        "expression",
+        "function",
+        "graph",
+        "index",
+        "matrix",
+        "proposition",
+        "random-variable",
+        "scalar",
+        "set",
+        "tensor",
+        "vector",
+      ] as const,
+      `${path}.kind`,
+    ),
+    ...(item.refinements === undefined
+      ? {}
+      : { refinements: strings(item.refinements, `${path}.refinements`) }),
+  });
+}
+
+function parseAuthoredBinding(
+  value: unknown,
+  path: string,
+): AuthoredMathBindingExpectation {
+  const item = record(value, path);
+  exact(
+    item,
+    ["constraint", "evidence", "parameter", "proof", "symbol"],
+    path,
+  );
+  return {
+    constraint: parseSemanticConstraint(item.constraint, `${path}.constraint`),
+    evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+    parameter: text(item.parameter, `${path}.parameter`),
+    proof: oneOf(
+      item.proof,
+      ["asserted", "candidate", "derived", "typed"] as const,
+      `${path}.proof`,
+    ),
+    symbol: text(item.symbol, `${path}.symbol`),
+  };
+}
+
+function parseAuthoredConventionalRequirement(
+  value: unknown,
+  path: string,
+): AuthoredConventionalRequirementExpectation {
+  const item = record(value, path);
+  const kind = oneOf(
+    item.kind,
+    ["condition", "role-declaration"] as const,
+    `${path}.kind`,
+  );
+  if (kind === "condition") {
+    exact(item, ["condition", "kind"], path);
+    return {
+      condition: parseAuthoredMathCondition(item.condition, `${path}.condition`),
+      kind,
+    };
+  }
+  exact(
+    item,
+    ["constraint", "evidence", "kind", "parameter", "symbol"],
+    path,
+  );
+  return {
+    constraint: parseSemanticConstraint(item.constraint, `${path}.constraint`),
+    evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+    kind,
+    parameter: text(item.parameter, `${path}.parameter`),
+    symbol: text(item.symbol, `${path}.symbol`),
+  };
+}
+
+function parseAuthoredConventionalCandidate(
+  value: unknown,
+  path: string,
+): AuthoredConventionalCandidateExpectation {
+  const item = record(value, path);
+  exact(
+    item,
+    [
+      "bindings",
+      "evidence",
+      "lawId",
+      "packId",
+      "packVersion",
+      "relation",
+      "relevance",
+      "requirements",
+    ],
+    path,
+  );
+  const relationPath = `${path}.relation`;
+  const relation = record(item.relation, relationPath);
+  exact(
+    relation,
+    ["anchor", "conditions", "evidence", "relationId", "roles"],
+    relationPath,
+  );
+  return {
+    bindings: array(item.bindings, `${path}.bindings`).map((candidate, index) =>
+      parseAuthoredBinding(candidate, `${path}.bindings[${index}]`),
+    ),
+    evidence: parseEvidenceAnchors(item.evidence, `${path}.evidence`),
+    lawId: text(item.lawId, `${path}.lawId`),
+    packId: text(item.packId, `${path}.packId`),
+    packVersion: text(item.packVersion, `${path}.packVersion`),
+    relation: {
+      anchor: parseAnchor(relation.anchor, `${relationPath}.anchor`),
+      conditions: strings(relation.conditions, `${relationPath}.conditions`),
+      evidence: parseEvidenceAnchors(
+        relation.evidence,
+        `${relationPath}.evidence`,
+      ),
+      relationId: text(relation.relationId, `${relationPath}.relationId`),
+      roles: array(relation.roles, `${relationPath}.roles`).map(
+        (candidate, index) => {
+          const rolePath = `${relationPath}.roles[${index}]`;
+          const role = record(candidate, rolePath);
+          exact(role, ["conceptId", "role", "symbol"], rolePath);
+          return {
+            conceptId:
+              role.conceptId === null
+                ? null
+                : text(role.conceptId, `${rolePath}.conceptId`),
+            role: text(role.role, `${rolePath}.role`),
+            symbol: text(role.symbol, `${rolePath}.symbol`),
+          };
+        },
+      ),
+    },
+    relevance: parseAuthoredMathRelevance(
+      item.relevance,
+      `${path}.relevance`,
+    ),
+    requirements: array(item.requirements, `${path}.requirements`).map(
+      (candidate, index) =>
+        parseAuthoredConventionalRequirement(
+          candidate,
+          `${path}.requirements[${index}]`,
+        ),
+    ),
   };
 }
 
@@ -1180,6 +3214,70 @@ function validateProbe(
       );
     }
   }
+  if (probe.expected.authoringContext) {
+    for (const anchor of authoredMathAuthoringExpectationAnchors(
+      probe.expected.authoringContext,
+    )) {
+      resolveAuthoredAnchor(snapshot, anchor);
+    }
+  }
+}
+
+function authoredMathAuthoringExpectationAnchors(
+  expected: AuthoredMathAuthoringExpectation,
+): readonly AuthoredSourceAnchor[] {
+  const formulaAnchors = (formula: AuthoredMathFormulaAnchorExpectation) => [
+    formula.anchor,
+    ...formula.provenance,
+  ];
+  const relevanceAnchors = (relevance: AuthoredMathRelevanceExpectation) =>
+    relevance.evidence;
+  const alternativeAnchors = (alternative: AuthoredMathAlternativeExpectation) => [
+    alternative.range,
+    ...alternative.evidence,
+    ...(alternative.relevance ? relevanceAnchors(alternative.relevance) : []),
+  ];
+  const requirementEvidence = (requirement: AuthoredMathRequirement) => [
+    ...(requirement.kind === "condition"
+      ? requirement.condition.evidence
+      : requirement.evidence),
+    ...(requirement.kind === "disambiguation"
+      ? requirement.alternatives.flatMap(alternativeAnchors)
+      : []),
+  ];
+  const conventionalRequirementAnchors = (
+    requirement: AuthoredConventionalRequirementExpectation,
+  ) =>
+    requirement.kind === "condition"
+      ? requirement.condition.evidence
+      : requirement.evidence;
+  return [
+    ...(expected.formula ? formulaAnchors(expected.formula) : []),
+    ...(expected.approximation
+      ? [expected.approximation.range, ...expected.approximation.evidence]
+      : []),
+    ...expected.equationLinks.flatMap((link) => [
+      ...link.evidence,
+      ...formulaAnchors(link.source),
+      ...formulaAnchors(link.target),
+    ]),
+    ...expected.claimEvidence.flatMap((link) => [
+      link.claim,
+      ...link.evidence,
+      ...link.supportingFormulas.flatMap(formulaAnchors),
+    ]),
+    ...expected.conditions.flatMap((condition) => condition.evidence),
+    ...expected.requirements.flatMap(requirementEvidence),
+    ...expected.conventionalCandidates.flatMap((candidate) => [
+      ...candidate.evidence,
+      ...candidate.bindings.flatMap((binding) => binding.evidence),
+      candidate.relation.anchor,
+      ...candidate.relation.evidence,
+      ...candidate.relevance.evidence,
+      ...candidate.requirements.flatMap(conventionalRequirementAnchors),
+    ]),
+    ...expected.notationOccurrences.map((occurrence) => occurrence.anchor),
+  ];
 }
 
 function requireSplit(fixture: AuthoredScientificFixture, split: AuthoredSplit): void {
@@ -1190,9 +3288,13 @@ function primaryProbes(fixture: AuthoredScientificFixture): AuthoredScientificPr
   return fixture.probes.filter((probe) => probe.kind === "primary");
 }
 
-function validateAreaAllocation(fixture: AuthoredScientificFixture): void {
+function validateAreaAllocation(
+  fixture: AuthoredScientificFixture,
+  override?: Readonly<Record<AuthoredArea, number>>,
+): void {
   for (const field of Object.keys(AUTHORED_AREA_ALLOCATION) as AuthoredArea[]) {
-    const expected = AUTHORED_AREA_ALLOCATION[field][fixture.batch.split];
+    const expected =
+      override?.[field] ?? AUTHORED_AREA_ALLOCATION[field][fixture.batch.split];
     const actual = fixture.scenarios.filter((scenario) => scenario.field === field).length;
     if (actual !== expected) {
       throw new Error(`${field}: ${fixture.batch.split} requires ${expected} cases, got ${actual}`);
@@ -1547,6 +3649,12 @@ function strings(value: unknown, path: string, minimum = 0): string[] {
   if (result.length < minimum) throw new Error(`${path}: requires at least ${minimum} values`);
   unique(result, path);
   return result;
+}
+
+function integers(value: unknown, path: string): number[] {
+  return array(value, path).map((item, index) =>
+    integer(item, `${path}[${index}]`),
+  );
 }
 
 function integer(value: unknown, path: string): number {

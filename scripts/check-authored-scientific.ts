@@ -340,6 +340,7 @@ function runProbe(
         result: results[6 + index]!,
       })),
     } as AuthoredScientificSurfaceResults,
+    snapshot,
   );
   const cursorView = semanticView(results[0], probe.id + ": cursor");
   const cursorDocumentSyntax = documents.find(

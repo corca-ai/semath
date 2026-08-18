@@ -10,6 +10,15 @@ import {
   type AuthoredScientificScorecard,
 } from "../packages/evaluation/src/index";
 
+const mathAuthoring = spawnSync(
+  "bun",
+  ["scripts/check-math-authoring-development.ts"],
+  { stdio: "inherit" },
+);
+if (mathAuthoring.status !== 0) {
+  throw new Error("math-authoring development evidence failed");
+}
+
 const temporary = await mkdtemp(join(tmpdir(), "semath-authored-development-"));
 const reportPath = join(temporary, "report.json");
 try {
@@ -49,9 +58,9 @@ try {
     throw new Error("development evaluation must produce exactly one score");
   }
   const regressions = authoredReleaseRegressions(score, {
-    cases: 115,
-    maximumRisk: 130,
-    minimumPassed: 50,
+    cases: 166,
+    maximumRisk: 116,
+    minimumPassed: 108,
   });
   if (regressions.length) {
     throw new Error(`development release regression:\n${regressions.join("\n")}`);

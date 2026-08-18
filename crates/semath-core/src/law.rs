@@ -7125,6 +7125,44 @@ g(x):=\nabla f(x)=\begin{pmatrix}\partial f/\partial x_1\\\partial f/\partial x_
     }
 
     #[test]
+    fn a_proposed_formula_does_not_establish_a_law() {
+        let source = r"### Historical inputs
+
+Let \(A\) be an event and \(B\) be an event in the same probability space.
+Historical rollouts give
+\[
+P(A)=0.18,\qquad P(B)=0.11,\qquad P(A\cap B)=0.04.
+\]
+
+### Calculation proposed
+
+The draft go/no-go calculation added the two marginal probabilities:
+\[
+P(A\cup B)=P(A)+P(B)=0.29.
+\]
+
+### Accepted go/no-go value
+
+Review rejected that value because the simultaneous event was counted twice. The accepted calculation is
+\[
+P_{\mathrm{any}}=P(A\cup B)=P(A)+P(B)-P(A\cap B)=0.25.
+\]";
+
+        let recognized = recognized_law_observations(source);
+        let proposed_start = source.find("P(A\\cup B)=P(A)+P(B)=0.29").unwrap() as u32;
+        assert!(
+            recognized.iter().all(|law| {
+                law.relation.as_ref().is_none_or(|relation| {
+                    relation.range.start_offset < proposed_start
+                        || relation.range.start_offset
+                            >= proposed_start + "P(A\\cup B)=P(A)+P(B)=0.29".len() as u32
+                })
+            }),
+            "a proposal must not establish any relation: {recognized:#?}"
+        );
+    }
+
+    #[test]
     fn characterized_operator_assignment_proves_its_domain_condition() {
         let source = r#"\begin{lemma}
 Let $U\subset\mathbb R^n$ be open and $f:U\to\mathbb R$ differentiable. For every $x\in U$ there is a unique vector $g(x)$ such that

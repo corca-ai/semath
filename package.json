@@ -1,6 +1,6 @@
 {
   "name": "semath",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": false,
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -71,6 +71,7 @@
     "foundation:generate:check": "bun scripts/generate-foundation-corpus.ts --check",
     "legacy:audit": "bun scripts/audit-legacy-semantic-paths.ts",
     "legacy:audit:check": "bun scripts/audit-legacy-semantic-paths.ts --check",
+    "math-authoring:development": "bun scripts/check-math-authoring-development.ts",
     "notation:conformance": "bun test packages/evaluation/src/notation-conformance.test.ts",
     "package:smoke": "bun scripts/check-package-smoke.mjs",
     "pack:authoring": "bun packages/authoring/cli.mjs validate packs/*/v1.json && bun packages/authoring/cli.mjs audit-runtime packs/*/v1.json",

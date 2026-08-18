@@ -13,6 +13,7 @@ export * from "./foundation";
 export * from "./fresh-blind-release";
 export * from "./legacy-path-audit";
 export * from "./metamorphic";
+export * from "./math-authoring-development";
 export * from "./model";
 export * from "./notation-conformance";
 export * from "./observation";

@@ -1,12 +1,15 @@
 import type { SourceRange } from "../../protocol/src/index";
 import {
   DOCUMENT_REASONING_FAMILIES,
+  V036_AUTHORED_HOLDOUT_AREA_ALLOCATION,
   authoredScenarioFor,
   authoredSnapshotFor,
+  compareAuthoredMathAuthoringContext,
   parseAuthoredScientificFixture,
   resolveAuthoredAnchor,
   scoreAuthoredScientificFixture,
   type AuthoredLawCatalogEntry,
+  type AuthoredArea,
   type AuthoredLocationExpectation,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
@@ -66,8 +69,21 @@ export interface FreshBlindSafetySummary {
   readonly diagnosticsOverLimitIds: readonly string[];
   readonly falseConflict: number;
   readonly falseConflictIds: readonly string[];
+  /** Authoring contexts that introduced a conflict absent from review. */
+  readonly falseAuthoringConflict: number;
+  readonly falseAuthoringConflictIds: readonly string[];
   readonly falseEstablishment: number;
   readonly falseEstablishmentIds: readonly string[];
+  /** Probe ids whose authoring disposition exceeded the reviewed authority. */
+  readonly moreAuthoritativeDispositionIds: readonly string[];
+  readonly moreAuthoritativeDispositions: number;
+  /** Source-grounded authoring facts outside the reviewed exact allowlist. */
+  readonly unsafeAuthoringContextFacts: number;
+  /** Probe ids with at least one unreviewed authoring fact. */
+  readonly unsafeAuthoringContextCaseIds: readonly string[];
+  /** Authority-increasing or revision-fence-removing lifecycle transitions. */
+  readonly unsafeLifecycleTransitions: number;
+  readonly unsafeLifecycleCaseIds: readonly string[];
   /** Concrete source locations exposed or edited outside the review contract. */
   readonly unsafeNavigationOrEditLocations: number;
   /** Probe ids with at least one unsafe navigation or edit location. */
@@ -286,6 +302,10 @@ export function validateFreshBlindRelease(
       validateEntitySurfaceCommissioning(probe.id, probe.expected, snapshot);
     }
   }
+  if (semanticReleaseNumber(release.release.id) >= 36) {
+    validateMathAuthoringContextCommissioning(primary);
+    validateV036FieldAllocation(fixture);
+  }
   const families = count(primary.map((probe) => probe.family));
   for (const family of DOCUMENT_REASONING_FAMILIES) {
     if (families[family] !== REQUIRED_FAMILY_SCENARIOS) {
@@ -341,6 +361,218 @@ export function validateFreshBlindRelease(
     probes: fixture.probes.length,
     scenarios: fixture.scenarios.length,
   };
+}
+
+function validateMathAuthoringContextCommissioning(
+  primary: readonly AuthoredScientificFixture["probes"][number][],
+): void {
+  const missing = primary.find((probe) => !probe.expected.authoringContext);
+  if (missing) {
+    throw new Error(
+      `${missing.id}: v0.36 primary probe requires an authored math authoring context`,
+    );
+  }
+  const contexts = primary.map((probe) => probe.expected.authoringContext!);
+  for (let index = 0; index < contexts.length; index += 1) {
+    validateV036ContextContract(primary[index]!.id, contexts[index]!);
+  }
+  const covered = {
+    approximation: contexts.some((context) => context.approximation !== null),
+    claimEvidence: contexts.some((context) => context.claimEvidence.length > 0),
+    conditions: contexts.some((context) => context.conditions.length > 0),
+    conventionalCandidates: contexts.some(
+      (context) => context.conventionalCandidates.length > 0,
+    ),
+    equationLinks: contexts.some((context) => context.equationLinks.length > 0),
+    formula: contexts.some((context) => context.formula !== null),
+    notationOccurrences: contexts.some(
+      (context) => context.notationOccurrences.length > 0,
+    ),
+    requirements: contexts.some((context) => context.requirements.length > 0),
+  };
+  const uncovered = Object.entries(covered)
+    .filter(([, present]) => !present)
+    .map(([surface]) => surface);
+  if (uncovered.length) {
+    throw new Error(
+      `v0.36 fresh blind tranche lacks authoring-context coverage: ${uncovered.join(", ")}`,
+    );
+  }
+  requireFreshContextValues(
+    "disposition",
+    contexts.map((context) => context.disposition),
+    [
+      "ambiguous",
+      "conflicting",
+      "conventional",
+      "engine-limited",
+      "established",
+      "partial",
+      "unsupported",
+    ],
+  );
+  const lifecycle = contexts.map((context) => context.lifecycle);
+  for (const [label, present] of [
+    ["generated lifecycle", lifecycle.some((item) => item.generation === "generated")],
+    ["retracted lifecycle", lifecycle.some((item) => item.retracted)],
+    ["noneditable lifecycle", lifecycle.some((item) => !item.editable)],
+    ["capped lifecycle", lifecycle.some((item) => item.capped)],
+    ["engine-limited lifecycle", lifecycle.some((item) => item.engineLimited)],
+  ] as const) {
+    if (!present) throw new Error(`v0.36 fresh blind tranche lacks ${label}`);
+  }
+  requireFreshContextValues(
+    "requirement kind",
+    contexts.flatMap((context) =>
+      context.requirements.map((requirement) => requirement.kind),
+    ),
+    ["condition", "declaration", "disambiguation", "role-declaration"],
+  );
+  requireFreshContextValues(
+    "equation link kind",
+    contexts.flatMap((context) => context.equationLinks.map((link) => link.kind)),
+    ["derived-law", "shared-entity"],
+  );
+  requireFreshContextValues(
+    "condition status",
+    contexts.flatMap((context) => [
+      ...context.conditions.map((condition) => condition.status),
+      ...context.requirements.flatMap((requirement) =>
+        requirement.kind === "condition" ? [requirement.condition.status] : [],
+      ),
+    ]),
+    ["conflicting", "required", "unsupported", "verified"],
+  );
+  requireFreshContextValues(
+    "claim polarity",
+    contexts.flatMap((context) => context.claimEvidence.map((link) => link.polarity)),
+    ["negative", "positive"],
+  );
+  requireFreshContextValues(
+    "claim modality",
+    contexts.flatMap((context) => context.claimEvidence.map((link) => link.modality)),
+    ["asserted", "cited", "hedged", "hypothetical", "quoted"],
+  );
+  requireFreshContextValues(
+    "claim strength ceiling",
+    contexts.flatMap((context) =>
+      context.claimEvidence.map((link) => link.strengthCeiling),
+    ),
+    ["asserted", "qualified", "unusable"],
+  );
+}
+
+function validateV036FieldAllocation(fixture: AuthoredScientificFixture): void {
+  for (const [field, expected] of Object.entries(
+    V036_AUTHORED_HOLDOUT_AREA_ALLOCATION,
+  ) as [AuthoredArea, number][]) {
+    const actual = fixture.scenarios.filter(
+      (scenario) => scenario.field === field,
+    ).length;
+    if (actual !== expected) {
+      throw new Error(
+        `${field}: v0.36 fresh blind requires exactly ${expected} cases, got ${actual}`,
+      );
+    }
+  }
+}
+
+function validateV036ContextContract(
+  probeId: string,
+  context: NonNullable<AuthoredScientificFixture["probes"][number]["expected"]["authoringContext"]>,
+): void {
+  if (context.lifecycle.documentVersion !== 1) {
+    throw new Error(`${probeId}: v0.36 lifecycle documentVersion must be 1`);
+  }
+  const formulaAnchors = [
+    ...(context.formula ? [context.formula] : []),
+    ...context.equationLinks.flatMap((link) => [link.source, link.target]),
+    ...context.claimEvidence.flatMap((claim) => claim.supportingFormulas),
+  ];
+  if (formulaAnchors.some((formula) => formula.documentVersion !== 1)) {
+    throw new Error(`${probeId}: v0.36 formula anchor documentVersion must be 1`);
+  }
+  if (context.approximation && context.approximation.evidence.length === 0) {
+    throw new Error(`${probeId}: v0.36 approximation requires exact source evidence`);
+  }
+  if (context.equationLinks.some((link) => link.evidence.length === 0)) {
+    throw new Error(`${probeId}: v0.36 equation link requires exact source evidence`);
+  }
+  if (context.claimEvidence.some((claim) => claim.evidence.length === 0)) {
+    throw new Error(`${probeId}: v0.36 claim evidence requires exact source evidence`);
+  }
+  validateDenseGroups(
+    probeId,
+    "entity",
+    [
+      ...context.notationOccurrences.map((item) => item.entityGroup),
+      ...context.equationLinks.flatMap((link) => link.sharedEntityGroups),
+    ],
+  );
+  validateDenseGroups(
+    probeId,
+    "claim",
+    context.claimEvidence.flatMap((claim) => [
+      claim.claimGroup,
+      ...claim.supportingClaimGroups,
+    ]),
+  );
+  for (const link of context.equationLinks) {
+    if (new Set(link.sharedEntityGroups).size !== link.sharedEntityGroups.length) {
+      throw new Error(`${probeId}: equation link repeats an entity group`);
+    }
+  }
+  const occurrenceGroups = new Set(
+    context.notationOccurrences.map((occurrence) => occurrence.entityGroup),
+  );
+  if (
+    context.equationLinks.some((link) =>
+      link.sharedEntityGroups.some((group) => !occurrenceGroups.has(group)),
+    )
+  ) {
+    throw new Error(`${probeId}: equation link references an unknown entity group`);
+  }
+  const definedClaims = new Map<number, string>();
+  for (const claim of context.claimEvidence) {
+    const identity = JSON.stringify(claim.claim);
+    const existing = definedClaims.get(claim.claimGroup);
+    if (existing !== undefined && existing !== identity) {
+      throw new Error(`${probeId}: claim group maps to multiple claim anchors`);
+    }
+    definedClaims.set(claim.claimGroup, identity);
+  }
+  if (
+    context.claimEvidence.some((claim) =>
+      claim.supportingClaimGroups.some((group) => !definedClaims.has(group)),
+    )
+  ) {
+    throw new Error(`${probeId}: claim evidence references an unknown claim group`);
+  }
+}
+
+function validateDenseGroups(
+  probeId: string,
+  surface: "claim" | "entity",
+  groups: readonly number[],
+): void {
+  const distinct = [...new Set(groups)].sort((left, right) => left - right);
+  if (distinct.some((group, ordinal) => group !== ordinal)) {
+    throw new Error(`${probeId}: ${surface} groups must be dense and zero-based`);
+  }
+}
+
+function requireFreshContextValues(
+  label: string,
+  actual: readonly string[],
+  required: readonly string[],
+): void {
+  const values = new Set(actual);
+  const missing = required.filter((value) => !values.has(value));
+  if (missing.length) {
+    throw new Error(
+      `v0.36 fresh blind tranche lacks ${label}: ${missing.join(", ")}`,
+    );
+  }
 }
 
 function validateEntitySurfaceCommissioning(
@@ -541,12 +773,19 @@ export function freshBlindSafetySummary(
   let unsafeNavigationOrEditLocations = 0;
   const diagnosticsOverLimitIds: string[] = [];
   const falseConflictIds: string[] = [];
+  const falseAuthoringConflictIds: string[] = [];
   const falseEstablishmentIds: string[] = [];
+  const moreAuthoritativeDispositionIds: string[] = [];
+  let unsafeAuthoringContextFacts = 0;
+  const unsafeAuthoringContextCaseIds = new Set<string>();
+  let unsafeLifecycleTransitions = 0;
+  const unsafeLifecycleCaseIds = new Set<string>();
   const unsafeNavigationOrEditCaseIds = new Set<string>();
   for (const probe of fixture.probes) {
     const observed = byId.get(probe.id);
     if (!observed) continue;
     const scenario = authoredScenarioFor(fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
     const risk = scoreAuthoredScientificFixture(
       { ...fixture, probes: [probe], scenarios: [scenario] },
       [observed],
@@ -557,6 +796,25 @@ export function freshBlindSafetySummary(
     if (risk.falseConflict) {
       falseConflictIds.push(probe.id);
     }
+    if (probe.expected.authoringContext) {
+      const context = compareAuthoredMathAuthoringContext(
+        snapshot,
+        probe.expected.authoringContext,
+        observed.authoringContext,
+      );
+      if (context.moreAuthoritativeDisposition) {
+        moreAuthoritativeDispositionIds.push(probe.id);
+      }
+      if (context.falseConflictDisposition) {
+        falseAuthoringConflictIds.push(probe.id);
+      }
+      unsafeAuthoringContextFacts += context.unexpected.length;
+      if (context.unexpected.length) {
+        unsafeAuthoringContextCaseIds.add(probe.id);
+      }
+      unsafeLifecycleTransitions += context.unsafeLifecycle.length;
+      if (context.unsafeLifecycle.length) unsafeLifecycleCaseIds.add(probe.id);
+    }
     const problems = observed.diagnostics.filter(
       (diagnostic) =>
         diagnostic.severity === "error" || diagnostic.severity === "warning",
@@ -564,7 +822,6 @@ export function freshBlindSafetySummary(
     if (problems.length > probe.expected.diagnostics.maximum) {
       diagnosticsOverLimitIds.push(probe.id);
     }
-    const snapshot = authoredSnapshotFor(scenario, probe);
     const unsafeDefinitions = unsafeLocations(
       observed.definitions,
       probe.expected.navigation.definition,
@@ -609,8 +866,16 @@ export function freshBlindSafetySummary(
     diagnosticsOverLimitIds: diagnosticsOverLimitIds.sort(),
     falseConflict: falseConflictIds.length,
     falseConflictIds: falseConflictIds.sort(),
+    falseAuthoringConflict: falseAuthoringConflictIds.length,
+    falseAuthoringConflictIds: falseAuthoringConflictIds.sort(),
     falseEstablishment: falseEstablishmentIds.length,
     falseEstablishmentIds: falseEstablishmentIds.sort(),
+    moreAuthoritativeDispositionIds: moreAuthoritativeDispositionIds.sort(),
+    moreAuthoritativeDispositions: moreAuthoritativeDispositionIds.length,
+    unsafeAuthoringContextCaseIds: [...unsafeAuthoringContextCaseIds].sort(),
+    unsafeAuthoringContextFacts,
+    unsafeLifecycleCaseIds: [...unsafeLifecycleCaseIds].sort(),
+    unsafeLifecycleTransitions,
     unsafeNavigationOrEditCaseIds: [...unsafeNavigationOrEditCaseIds].sort(),
     unsafeNavigationOrEditLocations,
   };
@@ -622,7 +887,11 @@ export function freshBlindSafetyGateFailed(
   return (
     summary.diagnosticsOverLimit > 0 ||
     summary.falseConflict > 0 ||
+    summary.falseAuthoringConflict > 0 ||
     summary.falseEstablishment > 0 ||
+    summary.moreAuthoritativeDispositions > 0 ||
+    summary.unsafeAuthoringContextFacts > 0 ||
+    summary.unsafeLifecycleTransitions > 0 ||
     summary.unsafeNavigationOrEditLocations > 0
   );
 }
