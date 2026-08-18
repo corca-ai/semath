@@ -1,7 +1,9 @@
 use crate::semantic_index::{
-    EntityId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, Resolution,
-    ResolutionStatus, SourceOccurrence, SourceOccurrenceId,
+    EntityId, EvidenceModality, EvidenceOrigin, EvidencePolarity, EvidenceRecord, SourceOccurrence,
+    SourceOccurrenceId,
 };
+#[cfg(test)]
+use crate::semantic_index::{Resolution, ResolutionStatus};
 use crate::{
     EntitySurfaceAuthorization, EntitySurfaceRefusal, EntitySurfaceRefusalKind, SourceRange,
 };
@@ -18,25 +20,51 @@ pub(crate) enum EntityEvidenceDecision {
     EngineLimited,
 }
 
-pub(crate) fn decide_entity(resolution: &Resolution) -> EntityEvidenceDecision {
-    if resolution.truncated {
+pub(crate) struct EntityDecisionSummary<'a> {
+    pub(crate) candidate_count: usize,
+    pub(crate) has_conflict: bool,
+    pub(crate) positive_count: usize,
+    pub(crate) sole_positive_entity: Option<&'a EntityId>,
+    pub(crate) truncated: bool,
+}
+
+pub(crate) fn decide_entity_summary(summary: EntityDecisionSummary<'_>) -> EntityEvidenceDecision {
+    if summary.truncated {
         return EntityEvidenceDecision::EngineLimited;
     }
-    match resolution.status {
-        ResolutionStatus::Established if resolution.candidates.len() == 1 => {
-            let candidate = &resolution.candidates[0];
-            if candidate.supporting_claims.is_empty() || !candidate.rejecting_claims.is_empty() {
-                EntityEvidenceDecision::Unsupported
-            } else {
-                EntityEvidenceDecision::Established(candidate.entity_id.clone())
-            }
-        }
-        ResolutionStatus::Ambiguous => EntityEvidenceDecision::Ambiguous,
-        ResolutionStatus::Conflicting => EntityEvidenceDecision::Conflicting,
-        ResolutionStatus::Established | ResolutionStatus::Unsupported => {
-            EntityEvidenceDecision::Unsupported
-        }
+    if summary.has_conflict {
+        return EntityEvidenceDecision::Conflicting;
     }
+    if summary.positive_count > 1 {
+        return EntityEvidenceDecision::Ambiguous;
+    }
+    match (
+        summary.sole_positive_entity,
+        summary.candidate_count,
+        summary.positive_count,
+    ) {
+        (Some(entity), 1, 1) => EntityEvidenceDecision::Established(entity.clone()),
+        _ => EntityEvidenceDecision::Unsupported,
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn decide_entity(resolution: &Resolution) -> EntityEvidenceDecision {
+    let positive = resolution
+        .candidates
+        .iter()
+        .filter(|candidate| !candidate.supporting_claims.is_empty())
+        .collect::<Vec<_>>();
+    decide_entity_summary(EntityDecisionSummary {
+        candidate_count: resolution.candidates.len(),
+        has_conflict: resolution.candidates.iter().any(|candidate| {
+            !candidate.supporting_claims.is_empty() && !candidate.rejecting_claims.is_empty()
+        }),
+        positive_count: positive.len(),
+        sole_positive_entity: (positive.len() == 1)
+            .then(|| &positive.first().expect("one positive candidate").entity_id),
+        truncated: resolution.truncated,
+    })
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

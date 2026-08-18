@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::SourceRange;
 use crate::constraint::{ConstraintInputClaim, PlannedConflict, plan_constraint_derivations};
-use crate::entity_policy::{EntityEvidenceDecision, MAX_ENTITY_SURFACE_OCCURRENCES, decide_entity};
+use crate::entity_policy::{
+    EntityDecisionSummary, EntityEvidenceDecision, MAX_ENTITY_SURFACE_OCCURRENCES,
+    decide_entity_summary,
+};
 use crate::scope::scope_visible;
 
 const MAX_DOCUMENT_OCCURRENCES: usize = 100_000;
@@ -599,47 +602,14 @@ impl ProjectSemanticIndex {
         }
         let normalized = occurrence_binding_key(occurrence);
         let mut by_entity = BTreeMap::<EntityId, ResolutionCandidate>::new();
-        let mut visible = self
-            .binding_claims
-            .get(&normalized)
-            .into_iter()
-            .flatten()
-            .filter_map(|claim_id| {
-                let claim = &self.claims[claim_id];
-                let evidence = &self.evidence[&claim.evidence_id];
-                if !scope_visible(&evidence.scope_path, &occurrence.scope_path)
-                    || (evidence.available_after > occurrence.availability_order
-                        && claim.subject.anchor != occurrence.id)
-                    || evidence.modality != EvidenceModality::Asserted
-                    || claim.subject.component_id != occurrence.component_id
-                {
-                    return None;
-                }
-                Some((claim, evidence))
-            })
+        let visible = self
+            .visible_binding_claims(occurrence, &normalized)
             .collect::<Vec<_>>();
-        let local_scope = visible
-            .iter()
-            .filter(|(_, evidence)| evidence.source.file_id == occurrence.id.file_id)
-            .map(|(_, evidence)| evidence.scope_path.len())
-            .max();
-        if let Some(scope_depth) = local_scope {
-            let latest = visible
-                .iter()
-                .filter(|(_, evidence)| {
-                    evidence.source.file_id == occurrence.id.file_id
-                        && evidence.scope_path.len() == scope_depth
-                })
-                .map(|(_, evidence)| evidence.available_after)
-                .max()
-                .expect("local binding has an availability order");
-            visible.retain(|(_, evidence)| {
-                evidence.source.file_id == occurrence.id.file_id
-                    && evidence.scope_path.len() == scope_depth
-                    && evidence.available_after == latest
-            });
-        }
-        for (claim, evidence) in visible {
+        let local_boundary = local_binding_boundary(occurrence, visible.iter().copied());
+        for (claim, evidence) in visible
+            .into_iter()
+            .filter(|(_, evidence)| binding_claim_is_current(occurrence, evidence, local_boundary))
+        {
             let candidate =
                 by_entity
                     .entry(claim.subject.clone())
@@ -775,7 +745,79 @@ impl ProjectSemanticIndex {
         &self,
         occurrence_id: &SourceOccurrenceId,
     ) -> EntityEvidenceDecision {
-        decide_entity(&self.resolve(occurrence_id))
+        let Some(occurrence) = self.occurrences.get(occurrence_id) else {
+            return EntityEvidenceDecision::Unsupported;
+        };
+        let normalized = occurrence_binding_key(occurrence);
+        self.entity_decision_for_binding(occurrence, &normalized)
+    }
+
+    fn entity_decision_for_binding(
+        &self,
+        occurrence: &SourceOccurrence,
+        normalized: &str,
+    ) -> EntityEvidenceDecision {
+        if !self.mentions.contains_key(&occurrence.id) {
+            return EntityEvidenceDecision::Unsupported;
+        }
+        let local_boundary = local_binding_boundary(
+            occurrence,
+            self.visible_binding_claims(occurrence, normalized),
+        );
+        let mut polarity_by_entity = BTreeMap::<&EntityId, u8>::new();
+        for (claim, evidence) in self
+            .visible_binding_claims(occurrence, normalized)
+            .filter(|(_, evidence)| binding_claim_is_current(occurrence, evidence, local_boundary))
+        {
+            let polarity = match evidence.polarity {
+                EvidencePolarity::Positive => 1,
+                EvidencePolarity::Negative => 2,
+            };
+            *polarity_by_entity.entry(&claim.subject).or_default() |= polarity;
+            if polarity_by_entity.len() > MAX_RESOLUTION_CANDIDATES {
+                return decide_entity_summary(EntityDecisionSummary {
+                    candidate_count: polarity_by_entity.len(),
+                    has_conflict: false,
+                    positive_count: 0,
+                    sole_positive_entity: None,
+                    truncated: true,
+                });
+            }
+        }
+        let mut positive = polarity_by_entity
+            .iter()
+            .filter(|(_, polarity)| **polarity & 1 == 1)
+            .map(|(entity, _)| *entity);
+        let sole_positive_entity = positive.next();
+        let positive_count = usize::from(sole_positive_entity.is_some()) + positive.count();
+        decide_entity_summary(EntityDecisionSummary {
+            candidate_count: polarity_by_entity.len(),
+            has_conflict: polarity_by_entity.values().any(|polarity| *polarity == 3),
+            positive_count,
+            sole_positive_entity,
+            truncated: false,
+        })
+    }
+
+    fn visible_binding_claims<'a>(
+        &'a self,
+        occurrence: &'a SourceOccurrence,
+        normalized: &'a str,
+    ) -> impl Iterator<Item = (&'a Claim, &'a EvidenceRecord)> + 'a {
+        self.binding_claims
+            .get(normalized)
+            .into_iter()
+            .flatten()
+            .filter_map(|claim_id| {
+                let claim = &self.claims[claim_id];
+                let evidence = &self.evidence[&claim.evidence_id];
+                (scope_visible(&evidence.scope_path, &occurrence.scope_path)
+                    && (evidence.available_after <= occurrence.availability_order
+                        || claim.subject.anchor == occurrence.id)
+                    && evidence.modality == EvidenceModality::Asserted
+                    && claim.subject.component_id == occurrence.component_id)
+                    .then_some((claim, evidence))
+            })
     }
 
     #[cfg(test)]
@@ -1616,18 +1658,24 @@ impl ProjectSemanticIndex {
                 });
                 !occurrences.is_empty()
             });
-        let resolved = affected_occurrences
-            .iter()
-            .filter_map(|occurrence_id| match self.entity_decision(occurrence_id) {
-                EntityEvidenceDecision::Established(entity) => {
-                    Some((entity, occurrence_id.clone()))
+        let mut resolved = Vec::new();
+        for binding in affected_bindings {
+            for occurrence_id in self
+                .occurrences_by_binding
+                .get(binding)
+                .into_iter()
+                .flatten()
+            {
+                let Some(occurrence) = self.occurrences.get(occurrence_id) else {
+                    continue;
+                };
+                if let EntityEvidenceDecision::Established(entity) =
+                    self.entity_decision_for_binding(occurrence, binding)
+                {
+                    resolved.push((entity, occurrence_id.clone()));
                 }
-                EntityEvidenceDecision::Ambiguous
-                | EntityEvidenceDecision::Conflicting
-                | EntityEvidenceDecision::Unsupported
-                | EntityEvidenceDecision::EngineLimited => None,
-            })
-            .collect::<Vec<_>>();
+            }
+        }
         for (entity, occurrence_id) in resolved {
             self.established_occurrences_by_entity
                 .entry(entity)
@@ -2117,6 +2165,28 @@ fn collect_claim_shape_files(shape: &ClaimShape, files: &mut BTreeSet<String>) {
     }
 }
 
+fn local_binding_boundary<'a>(
+    occurrence: &SourceOccurrence,
+    visible: impl Iterator<Item = (&'a Claim, &'a EvidenceRecord)>,
+) -> Option<(usize, u64)> {
+    visible
+        .filter(|(_, evidence)| evidence.source.file_id == occurrence.id.file_id)
+        .map(|(_, evidence)| (evidence.scope_path.len(), evidence.available_after))
+        .max()
+}
+
+fn binding_claim_is_current(
+    occurrence: &SourceOccurrence,
+    evidence: &EvidenceRecord,
+    local_boundary: Option<(usize, u64)>,
+) -> bool {
+    local_boundary.is_none_or(|(scope_depth, latest)| {
+        evidence.source.file_id == occurrence.id.file_id
+            && evidence.scope_path.len() == scope_depth
+            && evidence.available_after == latest
+    })
+}
+
 pub(crate) fn occurrence_binding_key(occurrence: &SourceOccurrence) -> String {
     if occurrence.notation.is_empty() {
         return occurrence.surface.trim().to_owned();
@@ -2267,6 +2337,98 @@ mod tests {
             evidence,
             claims,
             candidates: Vec::new(),
+        }
+    }
+
+    fn assert_materialized_decisions_match(index: &ProjectSemanticIndex) {
+        for occurrence_id in index.occurrences.keys() {
+            assert_eq!(
+                index.entity_decision(occurrence_id),
+                crate::entity_policy::decide_entity(&index.resolve(occurrence_id)),
+                "decision mismatch for {occurrence_id:?}"
+            );
+        }
+    }
+
+    fn two_entity_binding_index(
+        left_polarities: &[EvidencePolarity],
+        right_polarities: &[EvidencePolarity],
+    ) -> (ProjectSemanticIndex, SourceOccurrenceId) {
+        let left = occurrence("main.tex", 1, 1, 0, 1, &[], "x", Vec::new());
+        let right = occurrence("main.tex", 1, 2, 5, 1, &[], "x", Vec::new());
+        let usage = occurrence("main.tex", 1, 3, 10, 2, &[], "x", Vec::new());
+        let left_entity = entity(&left, "left");
+        let right_entity = entity(&right, "right");
+        let mut evidence_records = Vec::new();
+        let mut claims = Vec::new();
+        for (side, source, subject, polarities) in [
+            ("left", &left, &left_entity, left_polarities),
+            ("right", &right, &right_entity, right_polarities),
+        ] {
+            for (index, polarity) in polarities.iter().enumerate() {
+                let evidence_id = format!("{side}-evidence-{index}");
+                evidence_records.push(evidence(
+                    &evidence_id,
+                    source,
+                    *polarity,
+                    EvidenceModality::Asserted,
+                ));
+                claims.push(claim(
+                    &format!("{side}-claim-{index}"),
+                    subject,
+                    ClaimPredicate::Names,
+                    ClaimObject::Occurrence(source.id.clone()),
+                    &evidence_id,
+                ));
+            }
+        }
+        let usage_id = usage.id.clone();
+        let mut index = ProjectSemanticIndex::default();
+        index
+            .replace_document(facts(
+                "main.tex",
+                1,
+                vec![left, right, usage],
+                vec![left_entity, right_entity],
+                vec![usage_id.clone()],
+                evidence_records,
+                claims,
+            ))
+            .unwrap();
+        (index, usage_id)
+    }
+
+    #[test]
+    fn compact_entity_decisions_match_materialized_resolution_states() {
+        for (left, right, expected) in [
+            (vec![EvidencePolarity::Positive], Vec::new(), 0),
+            (
+                vec![EvidencePolarity::Positive],
+                vec![EvidencePolarity::Positive],
+                1,
+            ),
+            (
+                vec![EvidencePolarity::Positive, EvidencePolarity::Negative],
+                Vec::new(),
+                2,
+            ),
+            (
+                vec![EvidencePolarity::Positive],
+                vec![EvidencePolarity::Negative],
+                3,
+            ),
+        ] {
+            let (index, usage_id) = two_entity_binding_index(&left, &right);
+            let actual = index.entity_decision(&usage_id);
+            let actual = match actual {
+                EntityEvidenceDecision::Established(_) => 0,
+                EntityEvidenceDecision::Ambiguous => 1,
+                EntityEvidenceDecision::Conflicting => 2,
+                EntityEvidenceDecision::Unsupported => 3,
+                EntityEvidenceDecision::EngineLimited => 4,
+            };
+            assert_eq!(actual, expected);
+            assert_materialized_decisions_match(&index);
         }
     }
 
@@ -2801,6 +2963,7 @@ mod tests {
             index.resolve(&before.id).status,
             ResolutionStatus::Unsupported
         );
+        assert_materialized_decisions_match(&index);
     }
 
     #[test]
@@ -3278,6 +3441,11 @@ mod tests {
                 .windows(2)
                 .all(|pair| pair[0].entity_id < pair[1].entity_id)
         );
+        assert_eq!(
+            index.entity_decision(&usage.id),
+            EntityEvidenceDecision::EngineLimited
+        );
+        assert_materialized_decisions_match(&index);
     }
 
     #[test]
