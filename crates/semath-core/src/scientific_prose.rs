@@ -1336,20 +1336,15 @@ fn classify_discourse_frame(
         .find(|word| {
             matches!(
                 **word,
-                "might" | "may" | "perhaps" | "possibly" | "apparently" | "proposed"
+                "might" | "may" | "perhaps" | "possibly" | "apparently"
             )
         })
         .and_then(|word| lower.find(word).map(|start| (start, start + word.len())))
+        .or_else(|| first_marker(&lower, &["seems to", "appears to", "is likely to"]))
         .or_else(|| {
-            first_marker(
-                &lower,
-                &[
-                    "seems to",
-                    "appears to",
-                    "is likely to",
-                    "calculation added",
-                ],
-            )
+            (words.contains(&"draft") && words.contains(&"calculation") && words.contains(&"added"))
+                .then(|| first_marker(&lower, &["draft"]))
+                .flatten()
         });
     let modality = if hedged_marker.is_some() {
         EvidenceModality::Hedged
