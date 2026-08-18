@@ -10,6 +10,7 @@ const baseline = {
   approvedConservativeDecisionIds: [],
   approvedCursorBoundaryIdentityIds: [],
   approvedFalseEstablishmentIds: ["reviewed-transition"],
+  approvedNavigationExpansions: [],
   cases: 2,
   maximumMissedCoverage: 1,
   maximumNavigationOrIdentity: 1,
@@ -22,7 +23,7 @@ describe("authored historical release policy", () => {
     expect(
       authoredHistoricalReleaseRegressions(
         fixture(),
-        [observation("reviewed-transition", "established", true)],
+        [observationFor("reviewed-transition", "established", true)],
         score({ falseEstablishment: 1, total: 26 }),
         baseline,
       ),
@@ -33,7 +34,7 @@ describe("authored historical release policy", () => {
     expect(
       authoredHistoricalReleaseRegressions(
         fixture(),
-        [observation("ordinary-miss", "established", false)],
+        [observationFor("ordinary-miss", "established", false)],
         score({ falseEstablishment: 1, total: 26 }),
         baseline,
       ),
@@ -93,7 +94,12 @@ describe("authored historical release policy", () => {
     expect(
       authoredHistoricalReleaseRegressions(
         reviewedFixture,
-        [{ ...observation("reviewed-boundary", "unsupported", false), symbol: null }],
+        [
+          {
+            ...observationFor("reviewed-boundary", "unsupported", false),
+            symbol: null,
+          },
+        ],
         score({ navigationOrIdentity: 1, total: 10 }),
         {
           ...baseline,
@@ -130,7 +136,7 @@ describe("authored historical release policy", () => {
       ],
     };
     const reviewedObservation = {
-      ...observation("reviewed-conservative", "partial", false),
+      ...observationFor("reviewed-conservative", "partial", false),
       relations: [
         {
           fileId: "main",
@@ -171,6 +177,116 @@ describe("authored historical release policy", () => {
       ),
     ).toContain(
       "invalid conservative-decision adjudication reviewed-conservative",
+    );
+  });
+
+  test("adjudicates only an exact source-grounded navigation expansion", () => {
+    const reviewed = probe("reviewed-navigation");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          scenarioId: "reviewed-navigation-scenario",
+          cursor: {
+            fileId: "main",
+            needle: "x",
+            occurrence: 2,
+            snapshotId: "snapshot",
+          },
+          expected: {
+            ...reviewed.expected,
+            decision: "established",
+            proofGrounded: true,
+          },
+        },
+      ],
+      scenarios: [
+        {
+          field: "optimization-ml",
+          genre: "test",
+          id: "reviewed-navigation-scenario",
+          lawIds: [],
+          provenance: {
+            authorId: "test",
+            engineBlind: true,
+            independenceGroup: "test",
+            rawDigest: "digest",
+            taskCardDigest: "digest",
+          },
+          review: {
+            correctionSummary: [],
+            criticId: "test",
+            finalDigest: "digest",
+            frozenAt: "2026-08-13T00:00:00Z",
+            mainReviewer: "test",
+            reviewedAt: "2026-08-13",
+            semanticReviewDigest: "digest",
+            status: "corrected",
+          },
+          snapshots: [
+            {
+              documents: [{ content: "x x x", fileId: "main", path: "main" }],
+              id: "snapshot",
+            },
+          ],
+          variationTags: [],
+        },
+      ],
+    };
+    const location = (startOffset: number) => ({
+      fileId: "main",
+      path: "main",
+      range: { startOffset, endOffset: startOffset + 1 },
+    });
+    const observation: AuthoredScientificObservation = {
+      ...observationFor("reviewed-navigation", "established", true),
+      definitions: [location(0)],
+      prepareRename: { placeholder: "x", range: location(4).range },
+      references: [location(0), location(2), location(4)],
+      symbol: "x",
+      symbolLocation: location(4),
+    };
+    const reviewedBaseline = {
+      ...baseline,
+      approvedFalseEstablishmentIds: [],
+      approvedNavigationExpansions: [
+        {
+          caseId: "reviewed-navigation",
+          definitions: [{ fileId: "main", needle: "x", occurrence: 0 }],
+          prepareRename: {
+            placeholder: "x",
+            range: { fileId: "main", needle: "x", occurrence: 2 },
+          },
+          references: [
+            { fileId: "main", needle: "x", occurrence: 0 },
+            { fileId: "main", needle: "x", occurrence: 1 },
+            { fileId: "main", needle: "x", occurrence: 2 },
+          ],
+        },
+      ],
+      cases: 2,
+      maximumMissedCoverage: 1,
+      maximumNavigationOrIdentity: 0,
+      maximumRisk: 0,
+    };
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [observation],
+        score({ navigationOrIdentity: 1, total: 10 }),
+        reviewedBaseline,
+      ),
+    ).toEqual([]);
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [{ ...observation, references: observation.references.slice(1) }],
+        score({ navigationOrIdentity: 1, total: 10 }),
+        reviewedBaseline,
+      ),
+    ).toContain(
+      "invalid source-grounded navigation adjudication reviewed-navigation",
     );
   });
 });
@@ -220,7 +336,7 @@ function probe(id: string): AuthoredScientificFixture["probes"][number] {
   };
 }
 
-function observation(
+function observationFor(
   caseId: string,
   decision: AuthoredScientificObservation["decision"],
   proofGrounded: boolean,

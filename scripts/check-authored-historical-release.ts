@@ -49,6 +49,43 @@ try {
         "DMH-06-probe-revision-before-equation",
         "FMH-027-06-probe-stage-6-retracted-volume-flow",
       ],
+      approvedNavigationExpansions: [
+        {
+          caseId: "OPTML-HO-03-probe",
+          definitions: [
+            {
+              fileId: "specs/nonlinear_solver.md",
+              needle: "\\varepsilon",
+              occurrence: 0,
+            },
+          ],
+          prepareRename: {
+            placeholder: "\\varepsilon",
+            range: {
+              fileId: "specs/nonlinear_solver.md",
+              needle: "\\varepsilon",
+              occurrence: 2,
+            },
+          },
+          references: [
+            {
+              fileId: "specs/nonlinear_solver.md",
+              needle: "\\varepsilon",
+              occurrence: 0,
+            },
+            {
+              fileId: "specs/nonlinear_solver.md",
+              needle: "\\varepsilon",
+              occurrence: 1,
+            },
+            {
+              fileId: "specs/nonlinear_solver.md",
+              needle: "\\varepsilon",
+              occurrence: 2,
+            },
+          ],
+        },
+      ],
       cases: 97,
       maximumMissedCoverage: 78,
       maximumNavigationOrIdentity: 54,
@@ -62,7 +99,7 @@ try {
     );
   }
   console.log(
-    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed formula-boundary identity adjudications 1; conservative proof adjudications 1`,
+    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed formula-boundary identity adjudications 1; source-grounded navigation adjudications 1; conservative proof adjudications 1`,
   );
 } finally {
   await rm(temporary, { force: true, recursive: true });

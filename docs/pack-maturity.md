@@ -115,17 +115,24 @@ holds approved support policy; GitHub issues hold planned work.
   another component; preserving the component boundary is safer. The other
   expects a partial decision where the source directly states that an overlap
   is \(A\cap B\). The release policy names these cases and rejects any new or
-  ungrounded substitution. The current first losses localize as follows:
+  ungrounded substitution. The current v0.36 pre-blind comparison remains 6 of
+  97 with raw risk 742. After the existing conservative-decision and exact
+  formula-boundary adjudications, one additional exact adjudication preserves
+  source-grounded navigation for the explicitly declared solver tolerance:
+  one definition, all three references, and its prepare-rename range must match
+  the reviewed source locations, while rename remains unavailable. Adjusted
+  risk remains 720 and adjusted identity/navigation remains 54. The current
+  first losses localize as follows:
 
   | First loss                       |   Development |       Holdout |
   | -------------------------------- | ------------: | ------------: |
   | Neutral syntax                   |             0 |             0 |
-  | Prose attachment                 |            21 |            23 |
-  | Identity or scope                |             0 |            42 |
+  | Prose attachment                 |            22 |            26 |
+  | Identity or scope                |             0 |            40 |
   | Canonical IR                     |             0 |             0 |
-  | Typed fact or condition          |            19 |            10 |
+  | Typed fact or condition          |            19 |             8 |
   | Local-to-observation propagation |             0 |             0 |
-  | Pack unification                 |            18 |            12 |
+  | Pack unification                 |            17 |            13 |
   | Decision                         |             0 |             4 |
   | Host projection                  | Not exercised | Not exercised |
 

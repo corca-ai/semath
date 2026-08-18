@@ -155,7 +155,7 @@ families plus declaration retraction and exact navigation behavior. This
 supersedes the older editable-development measurement above for current release
 work without changing the historical v0.28 and v0.35 records.
 
-The now-exposed historical authored holdout remains 6 of 97 with raw risk 728.
+The now-exposed historical authored holdout remains 6 of 97 with raw risk 742.
 These deliberately difficult documents are a first-loss map, not a release
 pass-rate target. Its two raw false-establishment counts are exact, reviewed
 frozen-contract disagreements. One lifecycle expects prose in a disconnected
@@ -166,10 +166,14 @@ asserts an overlap as \(A\cap B\); the current source-grounded entity decision i
 and rejects substitution by any new false establishment. It also adjudicates
 one frozen cursor contract that asks an `edge: after` formula-boundary query to
 select an arbitrary internal symbol; exact boundary ownership correctly returns
-no symbol. The adjusted risk is 718 and adjusted identity/navigation count is
-54, both within the prior gate. Current historical first losses are 28
-attachment, 37 identity or scope, eight typed-fact, 14 pack-unification, and
-four decision cases. See
+no symbol. One further exact adjudication preserves the now-source-grounded
+navigation for the explicitly declared solver tolerance `\varepsilon`: its one
+definition, all three references, and the current prepare-rename range must
+match the reviewed source locations exactly, while rename remains unavailable.
+The adjusted risk is 720 and adjusted identity/navigation count is 54, both
+within the prior gate. Current historical first losses are 26 attachment, 40
+identity or scope, eight typed-fact, 13 pack-unification, and four decision
+cases. See
 [Pack maturity](pack-maturity.md) for interpretation by capability.
 
 The sealed v0.28 fresh blind was executed once on 2026-08-13 after every

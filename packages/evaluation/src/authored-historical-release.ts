@@ -2,13 +2,31 @@ import type {
   AuthoredScientificFixture,
   AuthoredScientificObservation,
   AuthoredScientificScorecard,
+  AuthoredSourceAnchor,
+  ObservedLocation,
 } from "./authored-scientific";
-import { authoredProbeIdentityFailures } from "./authored-scientific";
+import {
+  authoredProbeIdentityFailures,
+  authoredScenarioFor,
+  authoredSnapshotFor,
+  resolveAuthoredAnchor,
+} from "./authored-scientific";
+
+export interface AuthoredHistoricalNavigationExpansion {
+  readonly caseId: string;
+  readonly definitions: readonly AuthoredSourceAnchor[];
+  readonly prepareRename: {
+    readonly placeholder: string;
+    readonly range: AuthoredSourceAnchor;
+  };
+  readonly references: readonly AuthoredSourceAnchor[];
+}
 
 export interface AuthoredHistoricalReleaseBaseline {
   readonly approvedConservativeDecisionIds: readonly string[];
   readonly approvedCursorBoundaryIdentityIds: readonly string[];
   readonly approvedFalseEstablishmentIds: readonly string[];
+  readonly approvedNavigationExpansions: readonly AuthoredHistoricalNavigationExpansion[];
   readonly cases: number;
   readonly maximumMissedCoverage: number;
   readonly maximumNavigationOrIdentity: number;
@@ -80,8 +98,16 @@ export function authoredHistoricalReleaseRegressions(
       regressions.push(`invalid cursor-boundary identity adjudication ${caseId}`);
     }
   }
+  const adjudicatedNavigationExpansions = reviewedNavigationExpansionIds(
+    fixture,
+    observations,
+    baseline.approvedNavigationExpansions,
+    regressions,
+  );
   const adjudicatedNavigationOrIdentity =
-    score.risk.navigationOrIdentity - adjudicatedBoundaryIdentityIds.length;
+    score.risk.navigationOrIdentity -
+    adjudicatedBoundaryIdentityIds.length -
+    adjudicatedNavigationExpansions.length;
   const approvedConservativeDecision = new Set(
     baseline.approvedConservativeDecisionIds,
   );
@@ -113,6 +139,7 @@ export function authoredHistoricalReleaseRegressions(
   const adjudicatedRisk =
     score.risk.total -
     adjudicatedBoundaryIdentityIds.length * 10 -
+    adjudicatedNavigationExpansions.length * 10 -
     adjudicatedConservativeDecisionIds.length * 2;
   if (score.passed < baseline.minimumPassed) {
     regressions.push(
@@ -138,4 +165,97 @@ export function authoredHistoricalReleaseRegressions(
     );
   }
   return regressions;
+}
+
+function reviewedNavigationExpansionIds(
+  fixture: AuthoredScientificFixture,
+  observations: readonly AuthoredScientificObservation[],
+  approved: readonly AuthoredHistoricalNavigationExpansion[],
+  regressions: string[],
+): readonly string[] {
+  const adjudicated: string[] = [];
+  for (const expansion of approved) {
+    const probe = fixture.probes.find((item) => item.id === expansion.caseId);
+    const observation = observations.find(
+      (item) => item.caseId === expansion.caseId,
+    );
+    if (!probe || !observation) {
+      regressions.push(
+        `invalid source-grounded navigation adjudication ${expansion.caseId}`,
+      );
+      continue;
+    }
+    const snapshot = authoredSnapshotFor(
+      authoredScenarioFor(fixture, probe),
+      probe,
+    );
+    const identityFailures = authoredProbeIdentityFailures(
+      fixture,
+      probe,
+      observation,
+    );
+    const expectedFailures = [
+      "definition:definition availability differs",
+      "prepare-rename:prepareRename availability differs",
+      "references:references availability differs",
+    ];
+    const actualFailures = identityFailures
+      .map((failure) => `${failure.area}:${failure.basis}`)
+      .sort();
+    const prepareRange = resolveAuthoredAnchor(
+      snapshot,
+      expansion.prepareRename.range,
+    );
+    const valid =
+      probe.expected.decision === "established" &&
+      probe.expected.proofGrounded &&
+      observation.decision === "established" &&
+      observation.proofGrounded &&
+      JSON.stringify(actualFailures) === JSON.stringify(expectedFailures) &&
+      exactLocations(snapshot, expansion.definitions, observation.definitions) &&
+      exactLocations(snapshot, expansion.references, observation.references) &&
+      observation.prepareRename.placeholder ===
+        expansion.prepareRename.placeholder &&
+      sameObservedLocation(observation.symbolLocation, prepareRange) &&
+      observation.symbol === expansion.prepareRename.placeholder &&
+      observation.prepareRename.range?.startOffset ===
+        prepareRange.range.startOffset &&
+      observation.prepareRename.range.endOffset === prepareRange.range.endOffset &&
+      observation.renameEdits.length === 0;
+    if (valid) adjudicated.push(expansion.caseId);
+    else {
+      regressions.push(
+        `invalid source-grounded navigation adjudication ${expansion.caseId}`,
+      );
+    }
+  }
+  return adjudicated;
+}
+
+function exactLocations(
+  snapshot: Parameters<typeof resolveAuthoredAnchor>[0],
+  expected: readonly AuthoredSourceAnchor[],
+  actual: readonly ObservedLocation[],
+): boolean {
+  const resolved = expected.map((anchor) =>
+    resolveAuthoredAnchor(snapshot, anchor),
+  );
+  return (
+    resolved.length === actual.length &&
+    resolved.every((location) =>
+      actual.some((item) => sameObservedLocation(item, location)),
+    )
+  );
+}
+
+function sameObservedLocation(
+  actual: ObservedLocation | undefined,
+  expected: ObservedLocation,
+): boolean {
+  return (
+    actual?.fileId === expected.fileId &&
+    actual.path === expected.path &&
+    actual.range.startOffset === expected.range.startOffset &&
+    actual.range.endOffset === expected.range.endOffset
+  );
 }
