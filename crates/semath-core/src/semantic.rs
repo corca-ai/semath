@@ -204,17 +204,18 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             source_laws.all(),
         );
-        self.laws = if routed_domains.requires_forward_law_routing(formula_ranges) {
-            analyze_with_law_chains(&routed_domains.for_forward_law_routing())
+        if routed_domains.requires_forward_law_routing(formula_ranges) {
+            self.laws = analyze_with_law_chains(&routed_domains.for_forward_law_routing());
+            self.domains = observe_domains(
+                document,
+                ScopeGraph::new(document),
+                &self.semantic_evidence,
+                self.laws.all(),
+            );
         } else {
-            source_laws
-        };
-        self.domains = observe_domains(
-            document,
-            ScopeGraph::new(document),
-            &self.semantic_evidence,
-            self.laws.all(),
-        );
+            self.laws = source_laws;
+            self.domains = routed_domains;
+        }
     }
 
     pub fn context(

@@ -424,14 +424,6 @@ impl ProjectState {
             .observations
     }
 
-    fn observations_mut(&mut self, file_id: &str) -> &mut DocumentSemanticObservations {
-        &mut self
-            .documents
-            .get_mut(file_id)
-            .expect("semantic observations require an analyzed document")
-            .observations
-    }
-
     fn occurrence_id_for_range(
         &self,
         file_id: &str,
@@ -5253,16 +5245,15 @@ impl SemathEngine {
             })
             .collect::<Vec<_>>();
         for (file_id, environment) in environments {
-            let document = self.index.documents.get(&file_id).unwrap();
-            let source = document.document.clone();
-            let canonical_expressions = document.canonical_expressions.clone();
-            let formula_ranges = document.formula_ranges.clone();
-            self.index.observations_mut(&file_id).refresh_laws(
-                &source,
-                &canonical_expressions,
-                &formula_ranges,
-                &environment,
-            );
+            let document = self.index.documents.get_mut(&file_id).unwrap();
+            let AnalyzedDocument {
+                document: source,
+                canonical_expressions,
+                formula_ranges,
+                observations,
+                ..
+            } = document;
+            observations.refresh_laws(source, canonical_expressions, formula_ranges, &environment);
             self.index.external_types.insert(file_id, environment);
         }
     }
