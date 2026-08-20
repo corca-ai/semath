@@ -3,6 +3,7 @@ import { sha256 } from "./fresh-blind-evidence";
 import {
   assertFreshBlindWorkflowBytes,
   buildFreshBlindPreflightManifest,
+  commandBytes,
   FRESH_BLIND_CONTRACTS,
   parseFreshBlindPreflightManifest,
   retainedPackagePackArguments,
@@ -134,5 +135,17 @@ describe("fresh blind pre-blind manifest", () => {
       "--ignore-scripts",
       "--quiet",
     ]);
+  });
+
+  test("retains binary command output larger than the spawnSync default", () => {
+    const size = 2 * 1024 * 1024;
+    const bytes = commandBytes(process.execPath, [
+      "-e",
+      `process.stdout.write(Buffer.alloc(${size}, 0x5a))`,
+    ]);
+
+    expect(bytes.byteLength).toBe(size);
+    expect(bytes[0]).toBe(0x5a);
+    expect(bytes.at(-1)).toBe(0x5a);
   });
 });
