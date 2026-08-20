@@ -1,14 +1,30 @@
 import type {
+  AuthoredSourceAnchor,
   AuthoredScientificFixture,
   AuthoredScientificObservation,
   AuthoredScientificScorecard,
+  ObservedLocation,
 } from "./authored-scientific";
-import { authoredProbeIdentityFailures } from "./authored-scientific";
+import {
+  authoredProbeIdentityFailures,
+  authoredScenarioFor,
+  authoredSnapshotFor,
+  resolveAuthoredAnchor,
+} from "./authored-scientific";
+
+export interface ApprovedSourceGroundedNavigationRecovery {
+  readonly caseId: string;
+  readonly definition: AuthoredSourceAnchor;
+  readonly references: readonly AuthoredSourceAnchor[];
+  readonly symbol: string;
+  readonly symbolOccurrence: AuthoredSourceAnchor;
+}
 
 export interface AuthoredHistoricalReleaseBaseline {
   readonly approvedConservativeDecisionIds: readonly string[];
   readonly approvedCursorBoundaryIdentityIds: readonly string[];
   readonly approvedFalseEstablishmentIds: readonly string[];
+  readonly approvedSourceGroundedNavigationRecoveries: readonly ApprovedSourceGroundedNavigationRecovery[];
   readonly cases: number;
   readonly maximumMissedCoverage: number;
   readonly maximumNavigationOrIdentity: number;
@@ -80,8 +96,86 @@ export function authoredHistoricalReleaseRegressions(
       regressions.push(`invalid cursor-boundary identity adjudication ${caseId}`);
     }
   }
+  const adjudicatedSourceGroundedNavigationIds =
+    baseline.approvedSourceGroundedNavigationRecoveries
+      .filter(
+        (recovery, index, recoveries) =>
+          recoveries.findIndex((item) => item.caseId === recovery.caseId) ===
+          index,
+      )
+      .filter((approvedRecovery) => {
+        const probe = fixture.probes.find(
+          (item) => item.id === approvedRecovery.caseId,
+        );
+        const observation = observations.find(
+          (item) => item.caseId === approvedRecovery.caseId,
+        );
+        if (!probe || !observation) return false;
+        const snapshot = authoredSnapshotFor(
+          authoredScenarioFor(fixture, probe),
+          probe,
+        );
+        const definition = resolveAuthoredAnchor(
+          snapshot,
+          approvedRecovery.definition,
+        );
+        const references = approvedRecovery.references.map((anchor) =>
+          resolveAuthoredAnchor(snapshot, anchor),
+        );
+        const symbolOccurrence = resolveAuthoredAnchor(
+          snapshot,
+          approvedRecovery.symbolOccurrence,
+        );
+        const failures = authoredProbeIdentityFailures(
+          fixture,
+          probe,
+          observation,
+        );
+        return (
+          probe.expected.decision === "established" &&
+          probe.expected.proofGrounded &&
+          probe.expected.navigation.definition.status === "unavailable" &&
+          probe.expected.navigation.references.status === "unavailable" &&
+          probe.expected.navigation.prepareRename.status === "unavailable" &&
+          probe.expected.navigation.rename.status === "unavailable" &&
+          observation.decision === "established" &&
+          observation.proofGrounded &&
+          observation.symbol === approvedRecovery.symbol &&
+          sameLocations(observation.definitions, [definition]) &&
+          sameLocations(observation.references, references) &&
+          sameLocation(observation.symbolLocation, symbolOccurrence) &&
+          observation.prepareRename.placeholder === approvedRecovery.symbol &&
+          observation.prepareRename.range !== undefined &&
+          sameRange(observation.prepareRename.range, symbolOccurrence.range) &&
+          observation.renameEdits.length === 0 &&
+          failures.length === 3 &&
+          ["definition", "prepare-rename", "references"].every((area) =>
+            failures.some((failure) => failure.area === area),
+          )
+        );
+      })
+      .map((recovery) => recovery.caseId);
+  for (const recovery of baseline.approvedSourceGroundedNavigationRecoveries) {
+    if (
+      baseline.approvedSourceGroundedNavigationRecoveries.filter(
+        (item) => item.caseId === recovery.caseId,
+      ).length !== 1
+    ) {
+      regressions.push(
+        `duplicate source-grounded navigation adjudication ${recovery.caseId}`,
+      );
+      continue;
+    }
+    if (!adjudicatedSourceGroundedNavigationIds.includes(recovery.caseId)) {
+      regressions.push(
+        `invalid source-grounded navigation adjudication ${recovery.caseId}`,
+      );
+    }
+  }
   const adjudicatedNavigationOrIdentity =
-    score.risk.navigationOrIdentity - adjudicatedBoundaryIdentityIds.length;
+    score.risk.navigationOrIdentity -
+    adjudicatedBoundaryIdentityIds.length -
+    adjudicatedSourceGroundedNavigationIds.length;
   const approvedConservativeDecision = new Set(
     baseline.approvedConservativeDecisionIds,
   );
@@ -113,6 +207,7 @@ export function authoredHistoricalReleaseRegressions(
   const adjudicatedRisk =
     score.risk.total -
     adjudicatedBoundaryIdentityIds.length * 10 -
+    adjudicatedSourceGroundedNavigationIds.length * 10 -
     adjudicatedConservativeDecisionIds.length * 2;
   if (score.passed < baseline.minimumPassed) {
     regressions.push(
@@ -138,4 +233,37 @@ export function authoredHistoricalReleaseRegressions(
     );
   }
   return regressions;
+}
+
+function sameLocations(
+  actual: readonly ObservedLocation[],
+  expected: readonly ObservedLocation[],
+): boolean {
+  return (
+    actual.length === expected.length &&
+    actual.every((location, index) => sameLocation(location, expected[index]))
+  );
+}
+
+function sameLocation(
+  actual: ObservedLocation | undefined,
+  expected: ObservedLocation | undefined,
+): boolean {
+  return (
+    actual !== undefined &&
+    expected !== undefined &&
+    actual.fileId === expected.fileId &&
+    actual.path === expected.path &&
+    sameRange(actual.range, expected.range)
+  );
+}
+
+function sameRange(
+  actual: ObservedLocation["range"],
+  expected: ObservedLocation["range"],
+): boolean {
+  return (
+    actual.startOffset === expected.startOffset &&
+    actual.endOffset === expected.endOffset
+  );
 }
