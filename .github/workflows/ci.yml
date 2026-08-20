@@ -34,3 +34,10 @@ jobs:
       - run: bun run budget:scale
       - run: bun run package:smoke
       - run: git diff --exit-code -- lib/wasm
+      - name: Retain rebuilt WASM on mismatch
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebuilt-wasm-${{ github.sha }}
+          path: lib/wasm
+          retention-days: 1
