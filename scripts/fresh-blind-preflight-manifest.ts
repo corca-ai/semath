@@ -105,6 +105,17 @@ export function assertFreshBlindWorkflowBytes(
   }
 }
 
+export function retainedPackagePackArguments(path: string): readonly string[] {
+  return [
+    "pm",
+    "pack",
+    "--filename",
+    path,
+    "--ignore-scripts",
+    "--quiet",
+  ];
+}
+
 export function parseFreshBlindPreflightManifest(
   value: unknown,
 ): FreshBlindPreflightManifest {
@@ -540,16 +551,7 @@ async function retainPackage(
   manifest: ParsedPackageManifest,
 ): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  command("bun", [
-    "pm",
-    "pack",
-    "--destination",
-    dirname(path),
-    "--filename",
-    path.split("/").at(-1) ?? "",
-    "--ignore-scripts",
-    "--quiet",
-  ]);
+  command("bun", retainedPackagePackArguments(path));
   await readFile(path);
   const packaged = parsePackageManifest(
     JSON.parse(
