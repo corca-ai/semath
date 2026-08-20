@@ -48,4 +48,21 @@ describe("fresh blind workflow integrity", () => {
     expect(uses.length).toBeGreaterThan(0);
     expect(uses.every((use) => /@[0-9a-f]{40}$/u.test(use))).toBe(true);
   });
+
+  test("installs the pinned documentation linter before preflight", () => {
+    const install = workflow.indexOf("- name: Install awiki 0.5.0");
+    const preflight = workflow.indexOf(
+      "- name: Run all pre-blind gates without release credentials",
+    );
+
+    expect(install).toBeGreaterThan(-1);
+    expect(install).toBeLessThan(preflight);
+    expect(workflow).toContain(
+      "awiki/releases/download/v0.5.0/awiki-x86_64-unknown-linux-gnu.tar.xz",
+    );
+    expect(workflow).toContain(
+      "c0b7ee22c089130c5ace0cd7201cf8c39a48afbfbc220463b03f5ba41fe8200e",
+    );
+    expect(workflow).toContain('echo "$HOME/.local/bin" >> "$GITHUB_PATH"');
+  });
 });
