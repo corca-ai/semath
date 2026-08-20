@@ -148,4 +148,15 @@ describe("fresh blind pre-blind manifest", () => {
     expect(bytes[0]).toBe(0x5a);
     expect(bytes.at(-1)).toBe(0x5a);
   });
+
+  test("reports a bounded binary command overflow without hiding ENOBUFS", () => {
+    const size = 9 * 1024 * 1024;
+
+    expect(() =>
+      commandBytes(process.execPath, [
+        "-e",
+        `process.stdout.write(Buffer.alloc(${size}, 0x5a))`,
+      ]),
+    ).toThrow("ENOBUFS");
+  });
 });
