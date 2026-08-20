@@ -10,6 +10,7 @@ const baseline = {
   approvedConservativeDecisionIds: [],
   approvedCursorBoundaryIdentityIds: [],
   approvedFalseEstablishmentIds: ["reviewed-transition"],
+  approvedSourceGroundedNavigationRecoveries: [],
   cases: 2,
   maximumMissedCoverage: 1,
   maximumNavigationOrIdentity: 1,
@@ -173,7 +174,148 @@ describe("authored historical release policy", () => {
       "invalid conservative-decision adjudication reviewed-conservative",
     );
   });
+
+  test("adjudicates only an exact source-grounded navigation recovery", () => {
+    const reviewed = probe("reviewed-navigation");
+    const content = "Define $x$ here; use $x$ there.";
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          cursor: {
+            ...reviewed.cursor,
+            needle: "$x$ there",
+          },
+          expected: {
+            ...reviewed.expected,
+            decision: "established",
+            proofGrounded: true,
+          },
+        },
+      ],
+      scenarios: [
+        {
+          ...scenario(),
+          snapshots: [
+            {
+              documents: [{ content, fileId: "main", path: "main" }],
+              id: "snapshot",
+            },
+          ],
+        },
+      ],
+    };
+    const definition = location(8, 9);
+    const use = location(22, 23);
+    const recovery = {
+      caseId: "reviewed-navigation",
+      definition: {
+        fileId: "main",
+        needle: "x",
+        occurrence: 0,
+      },
+      references: [
+        { fileId: "main", needle: "x", occurrence: 0 },
+        { fileId: "main", needle: "x", occurrence: 1 },
+      ],
+      symbol: "x",
+      symbolOccurrence: {
+        fileId: "main",
+        needle: "x",
+        occurrence: 1,
+      },
+    } as const;
+    const reviewedObservation: AuthoredScientificObservation = {
+      ...observation("reviewed-navigation", "established", true),
+      definitions: [definition],
+      prepareRename: { placeholder: "x", range: use.range },
+      references: [definition, use],
+      symbolLocation: use,
+    };
+    const reviewedBaseline = {
+      ...baseline,
+      approvedSourceGroundedNavigationRecoveries: [recovery],
+      cases: 2,
+      maximumNavigationOrIdentity: 0,
+      maximumRisk: 0,
+    };
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [reviewedObservation],
+        score({ navigationOrIdentity: 1, total: 10 }),
+        reviewedBaseline,
+      ),
+    ).toEqual([]);
+
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [{ ...reviewedObservation, references: [use, definition] }],
+        score({ navigationOrIdentity: 1, total: 10 }),
+        reviewedBaseline,
+      ),
+    ).toContain(
+      "invalid source-grounded navigation adjudication reviewed-navigation",
+    );
+
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [reviewedObservation],
+        score({ navigationOrIdentity: 1, total: 10 }),
+        {
+          ...reviewedBaseline,
+          approvedSourceGroundedNavigationRecoveries: [recovery, recovery],
+        },
+      ),
+    ).toContain(
+      "duplicate source-grounded navigation adjudication reviewed-navigation",
+    );
+  });
 });
+
+function scenario(): AuthoredScientificFixture["scenarios"][number] {
+  return {
+    field: "calculus-analysis",
+    genre: "test",
+    id: "scenario",
+    lawIds: [],
+    provenance: {
+      authorId: "test",
+      engineBlind: true,
+      independenceGroup: "test",
+      rawDigest: "digest",
+      taskCardDigest: "digest",
+    },
+    review: {
+      correctionSummary: [],
+      criticId: "test",
+      finalDigest: "digest",
+      frozenAt: "2026-08-13T00:00:00Z",
+      mainReviewer: "test",
+      reviewedAt: "2026-08-13",
+      semanticReviewDigest: "digest",
+      status: "corrected",
+    },
+    snapshots: [
+      {
+        documents: [{ content: "x", fileId: "main", path: "main" }],
+        id: "snapshot",
+      },
+    ],
+    variationTags: [],
+  };
+}
+
+function location(startOffset: number, endOffset: number) {
+  return {
+    fileId: "main",
+    path: "main",
+    range: { startOffset, endOffset },
+  };
+}
 
 function fixture(): AuthoredScientificFixture {
   return {
