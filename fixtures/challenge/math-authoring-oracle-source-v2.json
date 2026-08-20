@@ -1,0 +1,2824 @@
+{
+  "schemaVersion": 2,
+  "fixtureId": "semath-math-authoring-public-source-v2",
+  "pairs": [
+    {
+      "id": "derivative-convention",
+      "latexCaseId": "derivative-convention-tex",
+      "markdownCaseId": "derivative-convention-md"
+    },
+    {
+      "id": "gradient-definition",
+      "latexCaseId": "gradient-definition-tex",
+      "markdownCaseId": "gradient-definition-md"
+    },
+    {
+      "id": "event-inclusion-exclusion",
+      "latexCaseId": "event-inclusion-exclusion-tex",
+      "markdownCaseId": "event-inclusion-exclusion-md"
+    },
+    {
+      "id": "least-squares-cross-document",
+      "latexCaseId": "least-squares-cross-document-tex",
+      "markdownCaseId": "least-squares-cross-document-md"
+    },
+    {
+      "id": "uncertainty-approximation",
+      "latexCaseId": "uncertainty-approximation-tex",
+      "markdownCaseId": "uncertainty-approximation-md"
+    },
+    {
+      "id": "capacitor-differential-law",
+      "latexCaseId": "capacitor-differential-law-tex",
+      "markdownCaseId": "capacitor-differential-law-md"
+    },
+    {
+      "id": "generated-opaque-call",
+      "latexCaseId": "generated-opaque-call-tex",
+      "markdownCaseId": "generated-opaque-call-md"
+    },
+    {
+      "id": "faraday-sign-conflict",
+      "latexCaseId": "faraday-sign-conflict-tex",
+      "markdownCaseId": "faraday-sign-conflict-md"
+    },
+    {
+      "id": "open-world-cap-plus-one",
+      "latexCaseId": "open-world-cap-plus-one-tex",
+      "markdownCaseId": "open-world-cap-plus-one-md"
+    },
+    {
+      "id": "declaration-and-source-retraction",
+      "latexCaseId": "declaration-and-source-retraction-tex",
+      "markdownCaseId": "declaration-and-source-retraction-md"
+    }
+  ],
+  "cases": [
+    {
+      "id": "derivative-convention-tex",
+      "pairId": "derivative-convention",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "derivative-convention.tex",
+              "path": "derivative-convention.tex",
+              "content": "\\section{Derivative convention}\nLet $I\\subset\\mathbb R$ be an open interval, let $f:I\\to\\mathbb R$ be differentiable, and set $y=f(x)$. We follow the usual calculus convention that $f'(x)$ and $\\frac{dy}{dx}(x)$ denote the same first derivative. Define the reported derivative by\n\\[\ng(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I.\n\\]\nThis statement is local to differentiable points of $f$; it makes no claim at a nondifferentiable point.\n"
+            }
+          ],
+          "mainFileId": "derivative-convention.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "domain",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.tex",
+          "needle": "Let $I\\subset\\mathbb R$ be an open interval, let $f:I\\to\\mathbb R$ be differentiable, and set $y=f(x)$."
+        },
+        {
+          "id": "convention",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.tex",
+          "needle": "We follow the usual calculus convention that $f'(x)$ and $\\frac{dy}{dx}(x)$ denote the same first derivative."
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.tex",
+          "needle": "g(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.tex",
+          "needle": "This statement is local to differentiable points of $f$; it makes no claim at a nondifferentiable point."
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "formula.root",
+          "needle": "\ng(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "claim-01",
+          "needle": "x",
+          "occurrence": 9,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-01",
+          "needle": "f'(x",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-02",
+          "needle": "\\frac{dy}{dx}(x",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-03",
+          "needle": "g(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-04",
+          "needle": "Derivative",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-05",
+          "needle": "derivative",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-06",
+          "needle": "derivative",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-07",
+          "needle": "\\section",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-08",
+          "needle": "\\subset",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-09",
+          "needle": "\\in",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-10",
+          "needle": "\\mathbb R",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.tex",
+          "id": "advisory-11",
+          "needle": "\\mathbb R",
+          "occurrence": 2,
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "derivative-convention-md",
+      "pairId": "derivative-convention",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "derivative-convention.md",
+              "path": "derivative-convention.md",
+              "content": "# Derivative convention\n\nLet $I\\subset\\mathbb R$ be an open interval, let $f:I\\to\\mathbb R$ be differentiable, and set $y=f(x)$. We follow the usual calculus convention that $f'(x)$ and $\\frac{dy}{dx}(x)$ denote the same first derivative. Define the reported derivative by\n\n$$\ng(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I.\n$$\n\nThis statement is local to differentiable points of $f$; it makes no claim at a nondifferentiable point.\n"
+            }
+          ],
+          "mainFileId": "derivative-convention.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "domain",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.md",
+          "needle": "Let $I\\subset\\mathbb R$ be an open interval, let $f:I\\to\\mathbb R$ be differentiable, and set $y=f(x)$."
+        },
+        {
+          "id": "convention",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.md",
+          "needle": "We follow the usual calculus convention that $f'(x)$ and $\\frac{dy}{dx}(x)$ denote the same first derivative."
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.md",
+          "needle": "g(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "derivative-convention.md",
+          "needle": "This statement is local to differentiable points of $f$; it makes no claim at a nondifferentiable point."
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "formula.root",
+          "needle": "\ng(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "claim-01",
+          "needle": "x",
+          "occurrence": 9,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-01",
+          "needle": "f'(x",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-02",
+          "needle": "\\frac{dy}{dx}(x",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-03",
+          "needle": "g(x)=f'(x)=\\frac{dy}{dx}(x),\\qquad x\\in I",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-04",
+          "needle": "Derivative",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-05",
+          "needle": "derivative",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-06",
+          "needle": "derivative",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-07",
+          "needle": "# Derivative convention",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-08",
+          "needle": "\\subset",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-09",
+          "needle": "\\in",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-10",
+          "needle": "\\mathbb R",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "derivative-convention.md",
+          "id": "advisory-11",
+          "needle": "\\mathbb R",
+          "occurrence": 2,
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "gradient-definition-tex",
+      "pairId": "gradient-definition",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "gradient-definition.tex",
+              "path": "gradient-definition.tex",
+              "content": "\\section{Gradient definition}\nLet $\\Omega\\subset\\mathbb R^3$ be open and let $f\\in C^1(\\Omega;\\mathbb R)$. The vector-valued function $g:\\Omega\\to\\mathbb R^3$ is defined componentwise by\n\\[\ng(x):=\\nabla f(x)=\\begin{pmatrix}\\partial f/\\partial x_1\\\\\\partial f/\\partial x_2\\\\\\partial f/\\partial x_3\\end{pmatrix}(x),\\qquad x\\in\\Omega.\n\\]\nThus $g$ is the gradient of $f$, not an unrelated multiplication of symbols.\n"
+            }
+          ],
+          "mainFileId": "gradient-definition.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "function-role",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.tex",
+          "needle": "Let $\\Omega\\subset\\mathbb R^3$ be open and let $f\\in C^1(\\Omega;\\mathbb R)$."
+        },
+        {
+          "id": "result-role",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.tex",
+          "needle": "The vector-valued function $g:\\Omega\\to\\mathbb R^3$ is defined componentwise by"
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.tex",
+          "needle": "g(x):=\\nabla f(x)=\\begin{pmatrix}\\partial f/\\partial x_1\\\\\\partial f/\\partial x_2\\\\\\partial f/\\partial x_3\\end{pmatrix}(x),\\qquad x\\in\\Omega."
+        },
+        {
+          "id": "meaning",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.tex",
+          "needle": "Thus $g$ is the gradient of $f$, not an unrelated multiplication of symbols."
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "formula.root",
+          "needle": "\ng(x):=\\nabla f(x)=\\begin{pmatrix}\\partial f/\\partial x_1\\\\\\partial f/\\partial x_2\\\\\\partial f/\\partial x_3\\end{pmatrix}(x),\\qquad x\\in\\Omega.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "claim-01",
+          "needle": "x",
+          "occurrence": 9,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-01",
+          "needle": "\\nabla",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-02",
+          "needle": "Gradient",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-03",
+          "needle": "gradient",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-04",
+          "needle": "\\section",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-06",
+          "needle": "\\mathbb R",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-07",
+          "needle": "\\mathbb R",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-08",
+          "needle": "\\mathbb R",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-09",
+          "needle": "vector",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-10",
+          "needle": "\\subset",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-11",
+          "needle": "\\in",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.tex",
+          "id": "advisory-12",
+          "needle": "\\in",
+          "occurrence": 2,
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "gradient-definition-md",
+      "pairId": "gradient-definition",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "gradient-definition.md",
+              "path": "gradient-definition.md",
+              "content": "# Gradient definition\n\nLet $\\Omega\\subset\\mathbb R^3$ be open and let $f\\in C^1(\\Omega;\\mathbb R)$. The vector-valued function $g:\\Omega\\to\\mathbb R^3$ is defined componentwise by\n\n$$\ng(x):=\\nabla f(x)=\\begin{pmatrix}\\partial f/\\partial x_1\\\\\\partial f/\\partial x_2\\\\\\partial f/\\partial x_3\\end{pmatrix}(x),\\qquad x\\in\\Omega.\n$$\n\nThus $g$ is the gradient of $f$, not an unrelated multiplication of symbols.\n"
+            }
+          ],
+          "mainFileId": "gradient-definition.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "function-role",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.md",
+          "needle": "Let $\\Omega\\subset\\mathbb R^3$ be open and let $f\\in C^1(\\Omega;\\mathbb R)$."
+        },
+        {
+          "id": "result-role",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.md",
+          "needle": "The vector-valued function $g:\\Omega\\to\\mathbb R^3$ is defined componentwise by"
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.md",
+          "needle": "g(x):=\\nabla f(x)=\\begin{pmatrix}\\partial f/\\partial x_1\\\\\\partial f/\\partial x_2\\\\\\partial f/\\partial x_3\\end{pmatrix}(x),\\qquad x\\in\\Omega."
+        },
+        {
+          "id": "meaning",
+          "snapshotId": "current",
+          "fileId": "gradient-definition.md",
+          "needle": "Thus $g$ is the gradient of $f$, not an unrelated multiplication of symbols."
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "formula.root",
+          "needle": "\ng(x):=\\nabla f(x)=\\begin{pmatrix}\\partial f/\\partial x_1\\\\\\partial f/\\partial x_2\\\\\\partial f/\\partial x_3\\end{pmatrix}(x),\\qquad x\\in\\Omega.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "claim-01",
+          "needle": "x",
+          "occurrence": 9,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-01",
+          "needle": "\\nabla",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-02",
+          "needle": "Gradient",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-03",
+          "needle": "gradient",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-04",
+          "needle": "# Gradient definition",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-06",
+          "needle": "\\mathbb R",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-07",
+          "needle": "\\mathbb R",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-08",
+          "needle": "\\mathbb R",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-09",
+          "needle": "vector",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-10",
+          "needle": "\\subset",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-11",
+          "needle": "\\in",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "gradient-definition.md",
+          "id": "advisory-12",
+          "needle": "\\in",
+          "occurrence": 2,
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "event-inclusion-exclusion-tex",
+      "pairId": "event-inclusion-exclusion",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "event-inclusion-exclusion.tex",
+              "path": "event-inclusion-exclusion.tex",
+              "content": "\\section{Event union}\nLet $A$ and $B$ be events in the same probability space, and let $P$ denote its probability measure. The probability of observing at least one event is defined as $P_{\\mathrm{any}}=P(A\\cup B)$. Inclusion--exclusion gives\n\\[\nP_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B).\n\\]\nThe common probability space is required for both the union and the intersection in this equation.\n"
+            }
+          ],
+          "mainFileId": "event-inclusion-exclusion.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "event-roles",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.tex",
+          "needle": "Let $A$ and $B$ be events in the same probability space, and let $P$ denote its probability measure."
+        },
+        {
+          "id": "union-definition",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.tex",
+          "needle": "The probability of observing at least one event is defined as $P_{\\mathrm{any}}=P(A\\cup B)$."
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.tex",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B)."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.tex",
+          "needle": "The common probability space is required for both the union and the intersection in this equation."
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "formula.root",
+          "needle": "\nP_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B).\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "link-source-01",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-union-e2-a1",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-union-e4-a1",
+          "needle": "$A$",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-union-e4-a2",
+          "needle": "$B$",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-union-e4-a3",
+          "needle": "same probability space",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-union-e5-a1",
+          "needle": "A",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-union-e6-a1",
+          "needle": "B",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-intersection-e5-a1",
+          "needle": "A",
+          "occurrence": 5,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "required-typed-law-event-intersection-e6-a1",
+          "needle": "B",
+          "occurrence": 5,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-01",
+          "needle": "\\section",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-02",
+          "needle": "probability",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-03",
+          "needle": "probability",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-04",
+          "needle": "probability",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-05",
+          "needle": "probability",
+          "occurrence": 4,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-09",
+          "needle": "\\cup",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-10",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-11",
+          "needle": "\\cup",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.tex",
+          "id": "advisory-12",
+          "needle": "\\cap",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "event-inclusion-exclusion-md",
+      "pairId": "event-inclusion-exclusion",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "event-inclusion-exclusion.md",
+              "path": "event-inclusion-exclusion.md",
+              "content": "# Event union\n\nLet $A$ and $B$ be events in the same probability space, and let $P$ denote its probability measure. The probability of observing at least one event is defined as $P_{\\mathrm{any}}=P(A\\cup B)$. Inclusion--exclusion gives\n\n$$\nP_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B).\n$$\n\nThe common probability space is required for both the union and the intersection in this equation.\n"
+            }
+          ],
+          "mainFileId": "event-inclusion-exclusion.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "event-roles",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.md",
+          "needle": "Let $A$ and $B$ be events in the same probability space, and let $P$ denote its probability measure."
+        },
+        {
+          "id": "union-definition",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.md",
+          "needle": "The probability of observing at least one event is defined as $P_{\\mathrm{any}}=P(A\\cup B)$."
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.md",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B)."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "event-inclusion-exclusion.md",
+          "needle": "The common probability space is required for both the union and the intersection in this equation."
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "formula.root",
+          "needle": "\nP_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B).\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "link-source-01",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-union-e2-a1",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-union-e4-a1",
+          "needle": "$A$",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-union-e4-a2",
+          "needle": "$B$",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-union-e4-a3",
+          "needle": "same probability space",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-union-e5-a1",
+          "needle": "A",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-union-e6-a1",
+          "needle": "B",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-intersection-e5-a1",
+          "needle": "A",
+          "occurrence": 5,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "required-typed-law-event-intersection-e6-a1",
+          "needle": "B",
+          "occurrence": 5,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-01",
+          "needle": "# Event union",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-02",
+          "needle": "probability",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-03",
+          "needle": "probability",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-04",
+          "needle": "probability",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-05",
+          "needle": "probability",
+          "occurrence": 4,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-09",
+          "needle": "\\cup",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-10",
+          "needle": "P_{\\mathrm{any}}=P(A\\cup B)=P(A)+P(B)-P(A\\cap B",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-11",
+          "needle": "\\cup",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "event-inclusion-exclusion.md",
+          "id": "advisory-12",
+          "needle": "\\cap",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "least-squares-cross-document-tex",
+      "pairId": "least-squares-cross-document",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "least-squares-roles.tex",
+              "path": "least-squares-roles.tex",
+              "content": "The design matrix satisfies $A\\in\\mathbb R^{m\\times n}$, the observation vector satisfies $b\\in\\mathbb R^m$, and the parameter vector satisfies $x\\in\\mathbb R^n$, with $m\\ge n$.\n"
+            },
+            {
+              "fileId": "least-squares-method.tex",
+              "path": "least-squares-method.tex",
+              "content": "\\section{Least-squares estimate}\nThe role declarations are provided by the exact project path \\texttt{least-squares-roles.tex}.\n\\input{least-squares-roles.tex}\nThe draft calls $\\widehat x$ the unique estimate and defines it by\n\\[\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n\\]\nNo full-column-rank assumption for $A$ is stated, so uniqueness still requires justification.\n"
+            }
+          ],
+          "mainFileId": "least-squares-method.tex",
+          "dependencies": [
+            {
+              "fromFileId": "least-squares-method.tex",
+              "toFileId": "least-squares-roles.tex",
+              "sourceAnchor": "dependency-path"
+            }
+          ]
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "roles",
+          "snapshotId": "current",
+          "fileId": "least-squares-roles.tex",
+          "needle": "The design matrix satisfies $A\\in\\mathbb R^{m\\times n}$, the observation vector satisfies $b\\in\\mathbb R^m$, and the parameter vector satisfies $x\\in\\mathbb R^n$, with $m\\ge n$."
+        },
+        {
+          "id": "dependency-path",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.tex",
+          "needle": "\\input{least-squares-roles.tex}"
+        },
+        {
+          "id": "uniqueness-claim",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.tex",
+          "needle": "The draft calls $\\widehat x$ the unique estimate and defines it by"
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.tex",
+          "needle": "\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2."
+        },
+        {
+          "id": "missing-condition",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.tex",
+          "needle": "No full-column-rank assumption for $A$ is stated, so uniqueness still requires justification."
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "formula.root",
+          "needle": "\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "notation-01",
+          "needle": "\\widehat x",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "notation-02",
+          "needle": "\\widehat x",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "advisory-01",
+          "needle": "\\in",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "advisory-02",
+          "needle": "\\in",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "advisory-03",
+          "needle": "\\operatorname*{argmin}",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.tex",
+          "id": "advisory-04",
+          "needle": "\\mathbb R",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "least-squares-cross-document-md",
+      "pairId": "least-squares-cross-document",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "least-squares-roles.md",
+              "path": "least-squares-roles.md",
+              "content": "The design matrix satisfies $A\\in\\mathbb R^{m\\times n}$, the observation vector satisfies $b\\in\\mathbb R^m$, and the parameter vector satisfies $x\\in\\mathbb R^n$, with $m\\ge n$.\n"
+            },
+            {
+              "fileId": "least-squares-method.md",
+              "path": "least-squares-method.md",
+              "content": "# Least-squares estimate\n\nThe role declarations are provided by the exact project path [least-squares-roles.md](least-squares-roles.md). The draft calls $\\widehat x$ the unique estimate and defines it by\n\n$$\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n$$\n\nNo full-column-rank assumption for $A$ is stated, so uniqueness still requires justification.\n"
+            }
+          ],
+          "mainFileId": "least-squares-method.md",
+          "dependencies": [
+            {
+              "fromFileId": "least-squares-method.md",
+              "toFileId": "least-squares-roles.md",
+              "sourceAnchor": "dependency-path"
+            }
+          ]
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "roles",
+          "snapshotId": "current",
+          "fileId": "least-squares-roles.md",
+          "needle": "The design matrix satisfies $A\\in\\mathbb R^{m\\times n}$, the observation vector satisfies $b\\in\\mathbb R^m$, and the parameter vector satisfies $x\\in\\mathbb R^n$, with $m\\ge n$."
+        },
+        {
+          "id": "dependency-path",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.md",
+          "needle": "The role declarations are provided by the exact project path [least-squares-roles.md](least-squares-roles.md)."
+        },
+        {
+          "id": "uniqueness-claim",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.md",
+          "needle": "The draft calls $\\widehat x$ the unique estimate and defines it by"
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.md",
+          "needle": "\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2."
+        },
+        {
+          "id": "missing-condition",
+          "snapshotId": "current",
+          "fileId": "least-squares-method.md",
+          "needle": "No full-column-rank assumption for $A$ is stated, so uniqueness still requires justification."
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "formula.root",
+          "needle": "\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "notation-01",
+          "needle": "\\widehat x",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "notation-02",
+          "needle": "\\widehat x",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "advisory-01",
+          "needle": "\\in",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "advisory-02",
+          "needle": "\\in",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "advisory-03",
+          "needle": "\\operatorname*{argmin}",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "least-squares-method.md",
+          "id": "advisory-04",
+          "needle": "\\mathbb R",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "uncertainty-approximation-tex",
+      "pairId": "uncertainty-approximation",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "uncertainty-approximation.tex",
+              "path": "uncertainty-approximation.tex",
+              "content": "\\section{First-order uncertainty propagation}\nNear the calibration point, temperature depends on voltage through resistance, so the local derivative chain is\n\\[\n\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}.\n\\]\nFor small perturbations with independent voltage and resistance-calibration errors, first-order propagation gives\n\\[\n\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2.\n\\]\nThe approximation sign is an operator in the relation, not a symbol requiring a declaration. No distributional model is stated, so this calculation does not establish a Gaussian confidence interval.\n"
+            }
+          ],
+          "mainFileId": "uncertainty-approximation.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "approximation-formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "chain-formula",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.tex",
+          "needle": "\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}."
+        },
+        {
+          "id": "conditions",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.tex",
+          "needle": "For small perturbations with independent voltage and resistance-calibration errors, first-order propagation gives"
+        },
+        {
+          "id": "approximation-formula",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.tex",
+          "needle": "\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2."
+        },
+        {
+          "id": "operator-meaning",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.tex",
+          "needle": "The approximation sign is an operator in the relation, not a symbol requiring a declaration."
+        },
+        {
+          "id": "claim-limit",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.tex",
+          "needle": "No distributional model is stated, so this calculation does not establish a Gaussian confidence interval."
+        },
+        {
+          "fileId": "uncertainty-approximation.tex",
+          "id": "approximation-formula.root",
+          "needle": "\n\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "uncertainty-approximation.tex",
+          "id": "approximation-relation",
+          "needle": "\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "uncertainty-approximation.tex",
+          "id": "advisory-01",
+          "needle": "\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "uncertainty-approximation.tex",
+          "id": "advisory-03",
+          "needle": "derivative",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "uncertainty-approximation-md",
+      "pairId": "uncertainty-approximation",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "uncertainty-approximation.md",
+              "path": "uncertainty-approximation.md",
+              "content": "# First-order uncertainty propagation\n\nNear the calibration point, temperature depends on voltage through resistance, so the local derivative chain is\n\n$$\n\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}.\n$$\n\nFor small perturbations with independent voltage and resistance-calibration errors, first-order propagation gives\n\n$$\n\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2.\n$$\n\nThe approximation sign is an operator in the relation, not a symbol requiring a declaration. No distributional model is stated, so this calculation does not establish a Gaussian confidence interval.\n"
+            }
+          ],
+          "mainFileId": "uncertainty-approximation.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "approximation-formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "chain-formula",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.md",
+          "needle": "\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}."
+        },
+        {
+          "id": "conditions",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.md",
+          "needle": "For small perturbations with independent voltage and resistance-calibration errors, first-order propagation gives"
+        },
+        {
+          "id": "approximation-formula",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.md",
+          "needle": "\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2."
+        },
+        {
+          "id": "operator-meaning",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.md",
+          "needle": "The approximation sign is an operator in the relation, not a symbol requiring a declaration."
+        },
+        {
+          "id": "claim-limit",
+          "snapshotId": "current",
+          "fileId": "uncertainty-approximation.md",
+          "needle": "No distributional model is stated, so this calculation does not establish a Gaussian confidence interval."
+        },
+        {
+          "fileId": "uncertainty-approximation.md",
+          "id": "approximation-formula.root",
+          "needle": "\n\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "uncertainty-approximation.md",
+          "id": "approximation-relation",
+          "needle": "\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "uncertainty-approximation.md",
+          "id": "advisory-01",
+          "needle": "\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "uncertainty-approximation.md",
+          "id": "advisory-03",
+          "needle": "derivative",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "capacitor-differential-law-tex",
+      "pairId": "capacitor-differential-law",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "capacitor-differential-law.tex",
+              "path": "capacitor-differential-law.tex",
+              "content": "\\section{Capacitor current}\nLet $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal. Under this passive sign convention, the capacitor law is\n\\[\ni_C(t)=C\\frac{dv_C}{dt}(t).\n\\]\nThe relation applies where $v_C$ is differentiable; reversing the current reference would reverse the sign.\n"
+            }
+          ],
+          "mainFileId": "capacitor-differential-law.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "roles",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.tex",
+          "needle": "Let $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal."
+        },
+        {
+          "id": "convention",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.tex",
+          "needle": "Under this passive sign convention, the capacitor law is"
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.tex",
+          "needle": "i_C(t)=C\\frac{dv_C}{dt}(t)."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.tex",
+          "needle": "The relation applies where $v_C$ is differentiable; reversing the current reference would reverse the sign."
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "formula.root",
+          "needle": "\ni_C(t)=C\\frac{dv_C}{dt}(t).\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "required-typed-law-capacitor-current-law-e2-a1",
+          "needle": "i_C(t",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "required-typed-law-capacitor-current-law-e3-a1",
+          "needle": "Let $C>0$ be a constant capacitance, let",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "required-typed-law-capacitor-current-law-e4-a1",
+          "needle": "Capacitor current}\nLet $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let ",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "required-typed-law-capacitor-current-law-e5-a1",
+          "needle": "\\frac{dv_C}{dt}(t",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "required-typed-law-capacitor-current-law-e6-a1",
+          "needle": "passive sign convention",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "required-typed-law-capacitor-current-law-e8-a1",
+          "needle": "v_C",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "advisory-01",
+          "needle": "Capacitor",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "advisory-02",
+          "needle": "capacitance",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "advisory-03",
+          "needle": "passive sign",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "advisory-04",
+          "needle": "capacitor",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "advisory-05",
+          "needle": "\\section",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.tex",
+          "id": "advisory-07",
+          "needle": "i_C(t)=C\\frac{dv_C}{dt}(t",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "capacitor-differential-law-md",
+      "pairId": "capacitor-differential-law",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "capacitor-differential-law.md",
+              "path": "capacitor-differential-law.md",
+              "content": "# Capacitor current\n\nLet $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal. Under this passive sign convention, the capacitor law is\n\n$$\ni_C(t)=C\\frac{dv_C}{dt}(t).\n$$\n\nThe relation applies where $v_C$ is differentiable; reversing the current reference would reverse the sign.\n"
+            }
+          ],
+          "mainFileId": "capacitor-differential-law.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "roles",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.md",
+          "needle": "Let $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal."
+        },
+        {
+          "id": "convention",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.md",
+          "needle": "Under this passive sign convention, the capacitor law is"
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.md",
+          "needle": "i_C(t)=C\\frac{dv_C}{dt}(t)."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "capacitor-differential-law.md",
+          "needle": "The relation applies where $v_C$ is differentiable; reversing the current reference would reverse the sign."
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "formula.root",
+          "needle": "\ni_C(t)=C\\frac{dv_C}{dt}(t).\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "required-typed-law-capacitor-current-law-e2-a1",
+          "needle": "i_C(t",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "required-typed-law-capacitor-current-law-e3-a1",
+          "needle": "Let $C>0$ be a constant capacitance, let",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "required-typed-law-capacitor-current-law-e4-a1",
+          "needle": "Let $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let ",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "required-typed-law-capacitor-current-law-e5-a1",
+          "needle": "\\frac{dv_C}{dt}(t",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "required-typed-law-capacitor-current-law-e6-a1",
+          "needle": "passive sign convention",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "required-typed-law-capacitor-current-law-e8-a1",
+          "needle": "v_C",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "advisory-01",
+          "needle": "Capacitor",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "advisory-02",
+          "needle": "capacitance",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "advisory-03",
+          "needle": "passive sign",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "advisory-04",
+          "needle": "capacitor",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "advisory-05",
+          "needle": "# Capacitor current",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "capacitor-differential-law.md",
+          "id": "advisory-07",
+          "needle": "i_C(t)=C\\frac{dv_C}{dt}(t",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "generated-opaque-call-tex",
+      "pairId": "generated-opaque-call",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "generated-opaque-call.tex",
+              "path": "generated-opaque-call.tex",
+              "content": "\\newcommand{\\sealedrange}[1]{\\mathsf{VendorRange}(#1)}\n\\section{Sealed calibration output}\nThe vendor interface states that $z$ is a raw measurement and that $r$ is the calibrated range returned by the sealed transformation. The top-level source call $r=\\sealedrange{z}$ is authored and editable; only its macro-expanded subnode is generated and non-editable. The review marker `🔬` precedes the audited call site.\n\\[\nr=\\sealedrange{z}.\n\\]\nThe vendor correction performed inside $\\mathsf{VendorRange}$ is undisclosed. Generated expansion syntax supplies no evidence for an internal mathematical law. This source supports only the stated input--output claim.\n"
+            }
+          ],
+          "mainFileId": "generated-opaque-call.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "macro-call-formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "macro-definition",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "\\newcommand{\\sealedrange}[1]{\\mathsf{VendorRange}(#1)}"
+        },
+        {
+          "id": "roles",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "The vendor interface states that $z$ is a raw measurement and that $r$ is the calibrated range returned by the sealed transformation."
+        },
+        {
+          "id": "source-generation-boundary",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "The top-level source call $r=\\sealedrange{z}$ is authored and editable; only its macro-expanded subnode is generated and non-editable."
+        },
+        {
+          "id": "utf16-prefix",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "The review marker `🔬` precedes the audited call site."
+        },
+        {
+          "id": "macro-call-formula",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "r=\\sealedrange{z}."
+        },
+        {
+          "id": "macro-call-subnode",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "parentAnchor": "macro-call-formula",
+          "needle": "\\sealedrange{z}"
+        },
+        {
+          "id": "opaque-limit",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "The vendor correction performed inside $\\mathsf{VendorRange}$ is undisclosed."
+        },
+        {
+          "id": "generated-authority-boundary",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "Generated expansion syntax supplies no evidence for an internal mathematical law."
+        },
+        {
+          "id": "authority-boundary",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.tex",
+          "needle": "This source supports only the stated input--output claim."
+        },
+        {
+          "fileId": "generated-opaque-call.tex",
+          "id": "macro-call-formula.root",
+          "needle": "\nr=\\sealedrange{z}.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.tex",
+          "id": "claim-01",
+          "needle": "The top-level source call $r=\\sealedrange{z}$ is authored and editable;",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.tex",
+          "id": "notation-01",
+          "needle": "r",
+          "occurrence": 16,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.tex",
+          "id": "notation-02",
+          "needle": "r",
+          "occurrence": 25,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.tex",
+          "id": "advisory-01",
+          "needle": "\\section",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "generated-opaque-call-md",
+      "pairId": "generated-opaque-call",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "generated-opaque-call.md",
+              "path": "generated-opaque-call.md",
+              "content": "# Sealed calibration output\n\nThe document defines the following macro for its math blocks:\n\n$$\n\\newcommand{\\sealedrange}[1]{\\mathsf{VendorRange}(#1)}\n$$\n\nThe vendor interface states that $z$ is a raw measurement and that $r$ is the calibrated range returned by the sealed transformation. The top-level source call $r=\\sealedrange{z}$ is authored and editable; only its macro-expanded subnode is generated and non-editable. The review marker `🔬` precedes the audited call site.\n\n$$\nr=\\sealedrange{z}.\n$$\n\nThe vendor correction performed inside $\\mathsf{VendorRange}$ is undisclosed. Generated expansion syntax supplies no evidence for an internal mathematical law. This source supports only the stated input--output claim.\n"
+            }
+          ],
+          "mainFileId": "generated-opaque-call.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "macro-call-formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "macro-definition",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "\\newcommand{\\sealedrange}[1]{\\mathsf{VendorRange}(#1)}"
+        },
+        {
+          "id": "roles",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "The vendor interface states that $z$ is a raw measurement and that $r$ is the calibrated range returned by the sealed transformation."
+        },
+        {
+          "id": "source-generation-boundary",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "The top-level source call $r=\\sealedrange{z}$ is authored and editable; only its macro-expanded subnode is generated and non-editable."
+        },
+        {
+          "id": "utf16-prefix",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "The review marker `🔬` precedes the audited call site."
+        },
+        {
+          "id": "macro-call-formula",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "r=\\sealedrange{z}."
+        },
+        {
+          "id": "macro-call-subnode",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "parentAnchor": "macro-call-formula",
+          "needle": "\\sealedrange{z}"
+        },
+        {
+          "id": "opaque-limit",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "The vendor correction performed inside $\\mathsf{VendorRange}$ is undisclosed."
+        },
+        {
+          "id": "generated-authority-boundary",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "Generated expansion syntax supplies no evidence for an internal mathematical law."
+        },
+        {
+          "id": "authority-boundary",
+          "snapshotId": "current",
+          "fileId": "generated-opaque-call.md",
+          "needle": "This source supports only the stated input--output claim."
+        },
+        {
+          "fileId": "generated-opaque-call.md",
+          "id": "macro-call-formula.root",
+          "needle": "\nr=\\sealedrange{z}.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.md",
+          "id": "claim-01",
+          "needle": "The top-level source call $r=\\sealedrange{z}$ is authored and editable;",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.md",
+          "id": "notation-01",
+          "needle": "r",
+          "occurrence": 18,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.md",
+          "id": "notation-02",
+          "needle": "r",
+          "occurrence": 27,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.md",
+          "id": "advisory-01",
+          "needle": "# Sealed calibration output",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "faraday-sign-conflict-tex",
+      "pairId": "faraday-sign-conflict",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "faraday-sign-conflict.tex",
+              "path": "faraday-sign-conflict.tex",
+              "content": "\\section{Faraday sign review}\nThe electric field $\\mathbf E(x,t)$ and magnetic field $\\mathbf B(x,t)$ belong to the same time-dependent model, with $t$ as the independent time variable. The orientation of the loop and surface is fixed by the right-hand rule. A draft proposed the plus-sign relation\n\\[\n\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}.\n\\]\nReview rejects that proposal under the stated orientation. The adopted relation is instead\n\\[\n\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}.\n\\]\nThe sign conclusion depends on the recorded orientation and is not a free stylistic choice.\n"
+            }
+          ],
+          "mainFileId": "faraday-sign-conflict.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "rejected",
+          "snapshotId": "current",
+          "anchor": "rejected-formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "field-roles",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.tex",
+          "needle": "The electric field $\\mathbf E(x,t)$ and magnetic field $\\mathbf B(x,t)$ belong to the same time-dependent model, with $t$ as the independent time variable."
+        },
+        {
+          "id": "orientation",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.tex",
+          "needle": "The orientation of the loop and surface is fixed by the right-hand rule."
+        },
+        {
+          "id": "rejected-formula",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.tex",
+          "needle": "\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}."
+        },
+        {
+          "id": "rejection",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.tex",
+          "needle": "Review rejects that proposal under the stated orientation."
+        },
+        {
+          "id": "adopted-formula",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.tex",
+          "needle": "\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.tex",
+          "needle": "The sign conclusion depends on the recorded orientation and is not a free stylistic choice."
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "rejected-formula.root",
+          "needle": "\n\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-01",
+          "needle": "\\nabla",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-02",
+          "needle": "\\partial",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-03",
+          "needle": "\\partial",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-04",
+          "needle": "\\nabla",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-05",
+          "needle": "\\partial",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-06",
+          "needle": "\\partial",
+          "occurrence": 4,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "advisory-07",
+          "needle": "electric field",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.tex",
+          "id": "adopted-formula.root",
+          "needle": "\n\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}.\n",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "faraday-sign-conflict-md",
+      "pairId": "faraday-sign-conflict",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "faraday-sign-conflict.md",
+              "path": "faraday-sign-conflict.md",
+              "content": "# Faraday sign review\n\nThe electric field $\\mathbf E(x,t)$ and magnetic field $\\mathbf B(x,t)$ belong to the same time-dependent model, with $t$ as the independent time variable. The orientation of the loop and surface is fixed by the right-hand rule. A draft proposed the plus-sign relation\n\n$$\n\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}.\n$$\n\nReview rejects that proposal under the stated orientation. The adopted relation is instead\n\n$$\n\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}.\n$$\n\nThe sign conclusion depends on the recorded orientation and is not a free stylistic choice.\n"
+            }
+          ],
+          "mainFileId": "faraday-sign-conflict.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "rejected",
+          "snapshotId": "current",
+          "anchor": "rejected-formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "field-roles",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.md",
+          "needle": "The electric field $\\mathbf E(x,t)$ and magnetic field $\\mathbf B(x,t)$ belong to the same time-dependent model, with $t$ as the independent time variable."
+        },
+        {
+          "id": "orientation",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.md",
+          "needle": "The orientation of the loop and surface is fixed by the right-hand rule."
+        },
+        {
+          "id": "rejected-formula",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.md",
+          "needle": "\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}."
+        },
+        {
+          "id": "rejection",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.md",
+          "needle": "Review rejects that proposal under the stated orientation."
+        },
+        {
+          "id": "adopted-formula",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.md",
+          "needle": "\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}."
+        },
+        {
+          "id": "condition",
+          "snapshotId": "current",
+          "fileId": "faraday-sign-conflict.md",
+          "needle": "The sign conclusion depends on the recorded orientation and is not a free stylistic choice."
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "rejected-formula.root",
+          "needle": "\n\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-01",
+          "needle": "\\nabla",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-02",
+          "needle": "\\partial",
+          "occurrence": 1,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-03",
+          "needle": "\\partial",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-04",
+          "needle": "\\nabla",
+          "occurrence": 2,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-05",
+          "needle": "\\partial",
+          "occurrence": 3,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-06",
+          "needle": "\\partial",
+          "occurrence": 4,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "advisory-07",
+          "needle": "electric field",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "faraday-sign-conflict.md",
+          "id": "adopted-formula.root",
+          "needle": "\n\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}.\n",
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "open-world-cap-plus-one-tex",
+      "pairId": "open-world-cap-plus-one",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "cap-candidate-readings.tex",
+              "path": "cap-candidate-readings.tex",
+              "content": "\\section{Candidate-only readings}\nThe unresolved source pattern was the untyped product $r=uv$. The companion record preserves sixteen prior readings as candidates only; every item below is explicitly non-adopted.\n\\begin{itemize}\n\\item Candidate 01 is explicitly non-adopted: mechanical momentum as mass times velocity.\n\\item Candidate 02 is explicitly non-adopted: force as mass times acceleration.\n\\item Candidate 03 is explicitly non-adopted: electrical power as voltage times current.\n\\item Candidate 04 is explicitly non-adopted: electrical energy as power times time.\n\\item Candidate 05 is explicitly non-adopted: travel distance as speed times time.\n\\item Candidate 06 is explicitly non-adopted: wave speed as frequency times wavelength.\n\\item Candidate 07 is explicitly non-adopted: prismatic volume as base area times height.\n\\item Candidate 08 is explicitly non-adopted: pressure force as pressure times area.\n\\item Candidate 09 is explicitly non-adopted: angular momentum as inertia times angular velocity.\n\\item Candidate 10 is explicitly non-adopted: mass-flow rate as density times volumetric flow.\n\\item Candidate 11 is explicitly non-adopted: amount of substance as concentration times volume.\n\\item Candidate 12 is explicitly non-adopted: radioactive activity as decay constant times population.\n\\item Candidate 13 is explicitly non-adopted: spring force as stiffness times displacement.\n\\item Candidate 14 is explicitly non-adopted: Ohm voltage as current times resistance.\n\\item Candidate 15 is explicitly non-adopted: torque as force times lever arm.\n\\item Candidate 16 is explicitly non-adopted: electric charge as current times time.\n\\end{itemize}\n"
+            },
+            {
+              "fileId": "open-world-cap-plus-one.tex",
+              "path": "open-world-cap-plus-one.tex",
+              "content": "\\section{Adopted local meaning}\n\\input{cap-candidate-readings}\nThe local paragraph adopts a seventeenth, source-correct meaning: $r$ is rectangular area, $u$ is side length, and $v$ is side width, all in compatible length units. The selected relation is\n\\[\nr=uv.\n\\]\nThe sixteen companion readings remain candidate-only provenance, but none is adopted and none may outrank or override the locally adopted area meaning.\n"
+            }
+          ],
+          "mainFileId": "open-world-cap-plus-one.tex",
+          "dependencies": [
+            {
+              "fromFileId": "open-world-cap-plus-one.tex",
+              "toFileId": "cap-candidate-readings.tex",
+              "sourceAnchor": "dependency-path"
+            }
+          ]
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "ambiguous-formula",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "The unresolved source pattern was the untyped product $r=uv$."
+        },
+        {
+          "id": "candidate-policy",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "The companion record preserves sixteen prior readings as candidates only; every item below is explicitly non-adopted."
+        },
+        {
+          "id": "alternative-01",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 01 is explicitly non-adopted: mechanical momentum as mass times velocity."
+        },
+        {
+          "id": "alternative-02",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 02 is explicitly non-adopted: force as mass times acceleration."
+        },
+        {
+          "id": "alternative-03",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 03 is explicitly non-adopted: electrical power as voltage times current."
+        },
+        {
+          "id": "alternative-04",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 04 is explicitly non-adopted: electrical energy as power times time."
+        },
+        {
+          "id": "alternative-05",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 05 is explicitly non-adopted: travel distance as speed times time."
+        },
+        {
+          "id": "alternative-06",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 06 is explicitly non-adopted: wave speed as frequency times wavelength."
+        },
+        {
+          "id": "alternative-07",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 07 is explicitly non-adopted: prismatic volume as base area times height."
+        },
+        {
+          "id": "alternative-08",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 08 is explicitly non-adopted: pressure force as pressure times area."
+        },
+        {
+          "id": "alternative-09",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 09 is explicitly non-adopted: angular momentum as inertia times angular velocity."
+        },
+        {
+          "id": "alternative-10",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 10 is explicitly non-adopted: mass-flow rate as density times volumetric flow."
+        },
+        {
+          "id": "alternative-11",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 11 is explicitly non-adopted: amount of substance as concentration times volume."
+        },
+        {
+          "id": "alternative-12",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 12 is explicitly non-adopted: radioactive activity as decay constant times population."
+        },
+        {
+          "id": "alternative-13",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 13 is explicitly non-adopted: spring force as stiffness times displacement."
+        },
+        {
+          "id": "alternative-14",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 14 is explicitly non-adopted: Ohm voltage as current times resistance."
+        },
+        {
+          "id": "alternative-15",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 15 is explicitly non-adopted: torque as force times lever arm."
+        },
+        {
+          "id": "alternative-16",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.tex",
+          "needle": "Candidate 16 is explicitly non-adopted: electric charge as current times time."
+        },
+        {
+          "id": "adopted-roles",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.tex",
+          "needle": "The local paragraph adopts a seventeenth, source-correct meaning: $r$ is rectangular area, $u$ is side length, and $v$ is side width, all in compatible length units."
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.tex",
+          "needle": "r=uv."
+        },
+        {
+          "id": "ordering-boundary",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.tex",
+          "needle": "The sixteen companion readings remain candidate-only provenance, but none is adopted and none may outrank or override the locally adopted area meaning."
+        },
+        {
+          "id": "dependency-path",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.tex",
+          "needle": "\\input{cap-candidate-readings}"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.tex",
+          "id": "formula.root",
+          "needle": "\nr=uv.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.tex",
+          "id": "notation-01",
+          "needle": "r",
+          "occurrence": 7,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.tex",
+          "id": "notation-02",
+          "needle": "r",
+          "occurrence": 12,
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "open-world-cap-plus-one-md",
+      "pairId": "open-world-cap-plus-one",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "current",
+          "documents": [
+            {
+              "fileId": "cap-candidate-readings.md",
+              "path": "cap-candidate-readings.md",
+              "content": "# Candidate-only readings\n\nThe unresolved source pattern was the untyped product $r=uv$. The companion record preserves sixteen prior readings as candidates only; every item below is explicitly non-adopted.\n\n- Candidate 01 is explicitly non-adopted: mechanical momentum as mass times velocity.\n- Candidate 02 is explicitly non-adopted: force as mass times acceleration.\n- Candidate 03 is explicitly non-adopted: electrical power as voltage times current.\n- Candidate 04 is explicitly non-adopted: electrical energy as power times time.\n- Candidate 05 is explicitly non-adopted: travel distance as speed times time.\n- Candidate 06 is explicitly non-adopted: wave speed as frequency times wavelength.\n- Candidate 07 is explicitly non-adopted: prismatic volume as base area times height.\n- Candidate 08 is explicitly non-adopted: pressure force as pressure times area.\n- Candidate 09 is explicitly non-adopted: angular momentum as inertia times angular velocity.\n- Candidate 10 is explicitly non-adopted: mass-flow rate as density times volumetric flow.\n- Candidate 11 is explicitly non-adopted: amount of substance as concentration times volume.\n- Candidate 12 is explicitly non-adopted: radioactive activity as decay constant times population.\n- Candidate 13 is explicitly non-adopted: spring force as stiffness times displacement.\n- Candidate 14 is explicitly non-adopted: Ohm voltage as current times resistance.\n- Candidate 15 is explicitly non-adopted: torque as force times lever arm.\n- Candidate 16 is explicitly non-adopted: electric charge as current times time.\n"
+            },
+            {
+              "fileId": "open-world-cap-plus-one.md",
+              "path": "open-world-cap-plus-one.md",
+              "content": "# Adopted local meaning\n\nThe companion candidate-only record is the exact project path [cap-candidate-readings.md](cap-candidate-readings.md). The local paragraph adopts a seventeenth, source-correct meaning: $r$ is rectangular area, $u$ is side length, and $v$ is side width, all in compatible length units. The selected relation is\n\n$$\nr=uv.\n$$\n\nThe sixteen companion readings remain candidate-only provenance, but none is adopted and none may outrank or override the locally adopted area meaning.\n"
+            }
+          ],
+          "mainFileId": "open-world-cap-plus-one.md",
+          "dependencies": [
+            {
+              "fromFileId": "open-world-cap-plus-one.md",
+              "toFileId": "cap-candidate-readings.md",
+              "sourceAnchor": "dependency-path"
+            }
+          ]
+        }
+      ],
+      "selections": [
+        {
+          "id": "primary",
+          "snapshotId": "current",
+          "anchor": "formula"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "ambiguous-formula",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "The unresolved source pattern was the untyped product $r=uv$."
+        },
+        {
+          "id": "candidate-policy",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "The companion record preserves sixteen prior readings as candidates only; every item below is explicitly non-adopted."
+        },
+        {
+          "id": "alternative-01",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 01 is explicitly non-adopted: mechanical momentum as mass times velocity."
+        },
+        {
+          "id": "alternative-02",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 02 is explicitly non-adopted: force as mass times acceleration."
+        },
+        {
+          "id": "alternative-03",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 03 is explicitly non-adopted: electrical power as voltage times current."
+        },
+        {
+          "id": "alternative-04",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 04 is explicitly non-adopted: electrical energy as power times time."
+        },
+        {
+          "id": "alternative-05",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 05 is explicitly non-adopted: travel distance as speed times time."
+        },
+        {
+          "id": "alternative-06",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 06 is explicitly non-adopted: wave speed as frequency times wavelength."
+        },
+        {
+          "id": "alternative-07",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 07 is explicitly non-adopted: prismatic volume as base area times height."
+        },
+        {
+          "id": "alternative-08",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 08 is explicitly non-adopted: pressure force as pressure times area."
+        },
+        {
+          "id": "alternative-09",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 09 is explicitly non-adopted: angular momentum as inertia times angular velocity."
+        },
+        {
+          "id": "alternative-10",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 10 is explicitly non-adopted: mass-flow rate as density times volumetric flow."
+        },
+        {
+          "id": "alternative-11",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 11 is explicitly non-adopted: amount of substance as concentration times volume."
+        },
+        {
+          "id": "alternative-12",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 12 is explicitly non-adopted: radioactive activity as decay constant times population."
+        },
+        {
+          "id": "alternative-13",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 13 is explicitly non-adopted: spring force as stiffness times displacement."
+        },
+        {
+          "id": "alternative-14",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 14 is explicitly non-adopted: Ohm voltage as current times resistance."
+        },
+        {
+          "id": "alternative-15",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 15 is explicitly non-adopted: torque as force times lever arm."
+        },
+        {
+          "id": "alternative-16",
+          "snapshotId": "current",
+          "fileId": "cap-candidate-readings.md",
+          "needle": "Candidate 16 is explicitly non-adopted: electric charge as current times time."
+        },
+        {
+          "id": "adopted-roles",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.md",
+          "needle": "The local paragraph adopts a seventeenth, source-correct meaning: $r$ is rectangular area, $u$ is side length, and $v$ is side width, all in compatible length units."
+        },
+        {
+          "id": "formula",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.md",
+          "needle": "r=uv."
+        },
+        {
+          "id": "ordering-boundary",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.md",
+          "needle": "The sixteen companion readings remain candidate-only provenance, but none is adopted and none may outrank or override the locally adopted area meaning."
+        },
+        {
+          "id": "dependency-path",
+          "snapshotId": "current",
+          "fileId": "open-world-cap-plus-one.md",
+          "needle": "The companion candidate-only record is the exact project path [cap-candidate-readings.md](cap-candidate-readings.md)."
+        },
+        {
+          "fileId": "open-world-cap-plus-one.md",
+          "id": "formula.root",
+          "needle": "\nr=uv.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.md",
+          "id": "notation-01",
+          "needle": "r",
+          "occurrence": 11,
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.md",
+          "id": "notation-02",
+          "needle": "r",
+          "occurrence": 16,
+          "snapshotId": "current"
+        }
+      ]
+    },
+    {
+      "id": "declaration-and-source-retraction-tex",
+      "pairId": "declaration-and-source-retraction",
+      "language": "latex",
+      "snapshots": [
+        {
+          "id": "declared",
+          "documents": [
+            {
+              "fileId": "diffusion-roles.tex",
+              "path": "diffusion-roles.tex",
+              "content": "The field $u(x,t)$ is a scalar concentration and is differentiable with respect to $t$; time satisfies $t\\ge0$, and the constant diffusivity satisfies $\\kappa>0$.\n"
+            },
+            {
+              "fileId": "diffusion-note.tex",
+              "path": "diffusion-note.tex",
+              "content": "\\section{Diffusion model}\n\\input{diffusion-roles}\nUnder the stated homogeneous isotropic model, the governing equation is\n\\[\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n\\]\n"
+            }
+          ],
+          "mainFileId": "diffusion-note.tex",
+          "dependencies": [
+            {
+              "fromFileId": "diffusion-note.tex",
+              "toFileId": "diffusion-roles.tex",
+              "sourceAnchor": "dependency-path.before"
+            }
+          ]
+        },
+        {
+          "id": "declarations-removed",
+          "documents": [
+            {
+              "fileId": "diffusion-note.tex",
+              "path": "diffusion-note.tex",
+              "content": "\\section{Equation retained after role removal}\nThe role include and the diffusion-model assertion were removed during revision. The remaining untyped expression is\n\\[\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n\\]\nNo current source adopts a diffusion meaning for $u$, $t$, or $\\kappa$.\n"
+            }
+          ],
+          "mainFileId": "diffusion-note.tex",
+          "dependencies": []
+        },
+        {
+          "id": "formula-removed",
+          "documents": [
+            {
+              "fileId": "diffusion-note.tex",
+              "path": "diffusion-note.tex",
+              "content": "\\section{Equation removed}\nThe untyped equation was removed from the current revision; this file now contains no governing formula.\n"
+            }
+          ],
+          "mainFileId": "diffusion-note.tex",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "before",
+          "snapshotId": "declared",
+          "anchor": "formula.before"
+        },
+        {
+          "id": "after-role-removal",
+          "snapshotId": "declarations-removed",
+          "anchor": "formula.after"
+        },
+        {
+          "id": "removed",
+          "snapshotId": "formula-removed",
+          "anchor": "removal.final"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "roles.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-roles.tex",
+          "needle": "The field $u(x,t)$ is a scalar concentration and is differentiable with respect to $t$; time satisfies $t\\ge0$, and the constant diffusivity satisfies $\\kappa>0$."
+        },
+        {
+          "id": "model.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-note.tex",
+          "needle": "Under the stated homogeneous isotropic model, the governing equation is"
+        },
+        {
+          "id": "formula.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-note.tex",
+          "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u."
+        },
+        {
+          "id": "retraction.after",
+          "snapshotId": "declarations-removed",
+          "fileId": "diffusion-note.tex",
+          "needle": "The role include and the diffusion-model assertion were removed during revision."
+        },
+        {
+          "id": "formula.after",
+          "snapshotId": "declarations-removed",
+          "fileId": "diffusion-note.tex",
+          "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u."
+        },
+        {
+          "id": "authority-boundary.after",
+          "snapshotId": "declarations-removed",
+          "fileId": "diffusion-note.tex",
+          "needle": "No current source adopts a diffusion meaning for $u$, $t$, or $\\kappa$."
+        },
+        {
+          "id": "removal.final",
+          "snapshotId": "formula-removed",
+          "fileId": "diffusion-note.tex",
+          "needle": "The untyped equation was removed from the current revision; this file now contains no governing formula."
+        },
+        {
+          "id": "dependency-path.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-note.tex",
+          "needle": "\\input{diffusion-roles}"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "formula.before.root",
+          "needle": "\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n",
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "advisory-01",
+          "needle": "\\partial",
+          "occurrence": 1,
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "advisory-02",
+          "needle": "\\partial",
+          "occurrence": 2,
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "advisory-03",
+          "needle": "\\nabla",
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "formula.after.root",
+          "needle": "\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n",
+          "snapshotId": "declarations-removed"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "advisory-01-2",
+          "needle": "\\partial",
+          "occurrence": 1,
+          "snapshotId": "declarations-removed"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "advisory-02-2",
+          "needle": "\\partial",
+          "occurrence": 2,
+          "snapshotId": "declarations-removed"
+        },
+        {
+          "fileId": "diffusion-note.tex",
+          "id": "advisory-03-2",
+          "needle": "\\nabla",
+          "snapshotId": "declarations-removed"
+        }
+      ]
+    },
+    {
+      "id": "declaration-and-source-retraction-md",
+      "pairId": "declaration-and-source-retraction",
+      "language": "markdown",
+      "snapshots": [
+        {
+          "id": "declared",
+          "documents": [
+            {
+              "fileId": "diffusion-roles.md",
+              "path": "diffusion-roles.md",
+              "content": "The field $u(x,t)$ is a scalar concentration and is differentiable with respect to $t$; time satisfies $t\\ge0$, and the constant diffusivity satisfies $\\kappa>0$.\n"
+            },
+            {
+              "fileId": "diffusion-note.md",
+              "path": "diffusion-note.md",
+              "content": "# Diffusion model\n\nThe role declarations are recorded in [the companion role note](diffusion-roles.md). Under the stated homogeneous isotropic model, the governing equation is\n\n$$\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n$$\n"
+            }
+          ],
+          "mainFileId": "diffusion-note.md",
+          "dependencies": [
+            {
+              "fromFileId": "diffusion-note.md",
+              "toFileId": "diffusion-roles.md",
+              "sourceAnchor": "dependency-path.before"
+            }
+          ]
+        },
+        {
+          "id": "declarations-removed",
+          "documents": [
+            {
+              "fileId": "diffusion-note.md",
+              "path": "diffusion-note.md",
+              "content": "# Equation retained after role removal\n\nThe role include and the diffusion-model assertion were removed during revision. The remaining untyped expression is\n\n$$\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n$$\n\nNo current source adopts a diffusion meaning for $u$, $t$, or $\\kappa$.\n"
+            }
+          ],
+          "mainFileId": "diffusion-note.md",
+          "dependencies": []
+        },
+        {
+          "id": "formula-removed",
+          "documents": [
+            {
+              "fileId": "diffusion-note.md",
+              "path": "diffusion-note.md",
+              "content": "# Equation removed\n\nThe untyped equation was removed from the current revision; this file now contains no governing formula.\n"
+            }
+          ],
+          "mainFileId": "diffusion-note.md",
+          "dependencies": []
+        }
+      ],
+      "selections": [
+        {
+          "id": "before",
+          "snapshotId": "declared",
+          "anchor": "formula.before"
+        },
+        {
+          "id": "after-role-removal",
+          "snapshotId": "declarations-removed",
+          "anchor": "formula.after"
+        },
+        {
+          "id": "removed",
+          "snapshotId": "formula-removed",
+          "anchor": "removal.final"
+        }
+      ],
+      "namedNeedles": [
+        {
+          "id": "roles.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-roles.md",
+          "needle": "The field $u(x,t)$ is a scalar concentration and is differentiable with respect to $t$; time satisfies $t\\ge0$, and the constant diffusivity satisfies $\\kappa>0$."
+        },
+        {
+          "id": "model.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-note.md",
+          "needle": "Under the stated homogeneous isotropic model, the governing equation is"
+        },
+        {
+          "id": "formula.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-note.md",
+          "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u."
+        },
+        {
+          "id": "retraction.after",
+          "snapshotId": "declarations-removed",
+          "fileId": "diffusion-note.md",
+          "needle": "The role include and the diffusion-model assertion were removed during revision."
+        },
+        {
+          "id": "formula.after",
+          "snapshotId": "declarations-removed",
+          "fileId": "diffusion-note.md",
+          "needle": "\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u."
+        },
+        {
+          "id": "authority-boundary.after",
+          "snapshotId": "declarations-removed",
+          "fileId": "diffusion-note.md",
+          "needle": "No current source adopts a diffusion meaning for $u$, $t$, or $\\kappa$."
+        },
+        {
+          "id": "removal.final",
+          "snapshotId": "formula-removed",
+          "fileId": "diffusion-note.md",
+          "needle": "The untyped equation was removed from the current revision; this file now contains no governing formula."
+        },
+        {
+          "id": "dependency-path.before",
+          "snapshotId": "declared",
+          "fileId": "diffusion-note.md",
+          "needle": "The role declarations are recorded in [the companion role note](diffusion-roles.md)."
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "formula.before.root",
+          "needle": "\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n",
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "advisory-01",
+          "needle": "\\partial",
+          "occurrence": 1,
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "advisory-02",
+          "needle": "\\partial",
+          "occurrence": 2,
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "advisory-03",
+          "needle": "\\nabla",
+          "snapshotId": "declared"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "formula.after.root",
+          "needle": "\n\\frac{\\partial u}{\\partial t}=\\kappa\\nabla^2u.\n",
+          "snapshotId": "declarations-removed"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "advisory-01-2",
+          "needle": "\\partial",
+          "occurrence": 1,
+          "snapshotId": "declarations-removed"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "advisory-02-2",
+          "needle": "\\partial",
+          "occurrence": 2,
+          "snapshotId": "declarations-removed"
+        },
+        {
+          "fileId": "diffusion-note.md",
+          "id": "advisory-03-2",
+          "needle": "\\nabla",
+          "snapshotId": "declarations-removed"
+        }
+      ]
+    }
+  ]
+}

@@ -245,6 +245,7 @@ fn role_claims(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Vec<ScopedRo
                     kind: "explicit-prose".into(),
                     strength: "strong".into(),
                     source_ranges: definition.evidence.source_ranges.clone(),
+                    source_anchors: definition.evidence.source_anchors.clone(),
                 },
             },
             scope_id: scopes.id_at(symbol_range.start_offset),

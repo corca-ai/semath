@@ -19,8 +19,10 @@ jobs:
         working-directory: lib/wasm
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: scripts/build-wasm.sh
+      - run: git diff --exit-code -- lib/wasm
+      - run: bun run authored:development:release
       - run: bun run quality
         env:
-          # Shared-runner CPU allocation is not a stable timing reference.
-          # Other semantic and structural performance budgets remain strict.
+          # Individual shared-runner samples are noisy. The stable-budget
+          # wrapper still enforces the frozen five-sample timing medians.
           SEMATH_BUDGET_TIMING_GATE: "0"

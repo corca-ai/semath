@@ -194,6 +194,7 @@ fn used_before_definition(
                 kind: "structural-order".into(),
                 strength: "calibrated-hint".into(),
                 source_ranges: occurrences,
+                source_anchors: Vec::new(),
             },
             definition.evidence.clone(),
         ],

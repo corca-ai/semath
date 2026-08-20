@@ -335,7 +335,7 @@ export function findForbiddenRuntimeBranches(
   const ids = [...new Set(forbiddenIds)].sort((left, right) => right.length - left.length);
   const violations: RuntimeBranchViolation[] = [];
   for (const file of sources) {
-    if (/\.(?:test|spec)\.[cm]?[jt]sx?$/u.test(file.path)) continue;
+    if (isTestSourcePath(file.path)) continue;
     let testOnly = false;
     for (const [index, sourceLine] of file.source.split(/\r?\n/u).entries()) {
       const line = sourceLine.trim();
@@ -357,6 +357,12 @@ export function findForbiddenRuntimeBranches(
     }
   }
   return violations;
+}
+
+function isTestSourcePath(path: string): boolean {
+  const normalized = path.replaceAll("\\", "/");
+  return /\.(?:test|spec)\.[cm]?[jt]sx?$/u.test(normalized) ||
+    /(?:^|\/)(?:tests?\.rs|[^/]+_tests?\.rs|tests?\/.*\.rs)$/u.test(normalized);
 }
 
 export function findCorpusTagProblems(

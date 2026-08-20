@@ -10,7 +10,7 @@ reserved for real editor, Worker, and deployment wiring.
 | Definitions, references, rename | pure shared-authorization, scope/capture, fanout-cap, and include-order properties | LSP mapping without fallback and both cursor edges | one navigation journey |
 | Canonical meaning and typed laws | Rust canonical/unifier tests plus manifest-owned corpus | protocol and native/WASM equality | one meaning-first view |
 | Shapes, quantities, roles, diagnostics | pure extractors and contradiction tests | Worker/LSP result mapping | reveal one source-linked conflict |
-| Domain packs | Rust schema-9 compiler tests, conformance, pack-derived property planning, and evaluated or probe corpus | clean package and compiled catalog | none |
+| Domain packs | Rust schema-12 compiler tests, conformance, pack-derived property planning, and evaluated or probe corpus | clean package and compiled catalog | none |
 | Document-level scientific reasoning | pure authored-fixture schema, source-anchor, review-seal, wasmtex CST fingerprint, prose-shingle, and risk-scorer tests | manual six-surface native evaluation; one-shot sealed fresh-blind evaluation with clean/incremental lifecycle parity and an immutable receipt | unchanged meaning, navigation, and real-conflict journeys |
 | Incremental analysis | pure six-family lifecycle planning, first-divergence comparison, shrinking, reverse-include closure, and clean-rebuild equivalence | fixed-sample and manual full-lifecycle parity plus 61/501-document budgets | one rapid-edit wiring case |
 | Worker lifecycle | pure queue and generation policy tests | real engine recreation | one project-switch or crash case |

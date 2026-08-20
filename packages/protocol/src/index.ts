@@ -4,8 +4,9 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 16 as const;
+export const SEMATH_PROTOCOL_VERSION = 17 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 8 as const;
+export const MATH_INTERPRETATION_HYPOTHESIS_LIMIT = 16 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
 
@@ -491,7 +492,72 @@ export interface MathInterpretationEvidenceInfo {
   evidence: Evidence;
   provenance: MathInterpretationEvidenceProvenance;
   role: "supporting" | "contradicting";
+  sourceAnchors: readonly MathInterpretationEvidenceSourceAnchorInfo[];
 }
+
+export interface MathInterpretationEvidenceReferenceInfo {
+  evidence: Evidence;
+  sourceAnchors: readonly MathInterpretationEvidenceSourceAnchorInfo[];
+}
+
+export interface MathInterpretationEvidenceSourceAnchorInfo {
+  documentVersion: number;
+  generation: "authored" | "generated";
+  lifecycle: "current" | "retracted";
+  location: Location;
+  scopePath: readonly number[];
+}
+
+export interface MathInterpretationConditionInfo {
+  conditionId: string;
+  evidence: readonly MathInterpretationEvidenceReferenceInfo[];
+  kind: LawConditionInfo["kind"];
+  label: string;
+  operatorProperty?: LawConditionInfo["operatorProperty"];
+  status: LawConditionInfo["status"];
+  subjects: readonly string[];
+}
+
+export interface MathInterpretationDomainRelevanceInfo {
+  evidence: readonly MathInterpretationEvidenceReferenceInfo[];
+  support: DomainSupportTier;
+}
+
+export interface MathInterpretationAlternativeInfo {
+  alternativeId: string;
+  evidence: readonly MathInterpretationEvidenceReferenceInfo[];
+  label: string;
+  range: SourceRange;
+  relevance?: MathInterpretationDomainRelevanceInfo;
+}
+
+export type MathInterpretationRequirementInfo =
+  | {
+      evidence: readonly MathInterpretationEvidenceReferenceInfo[];
+      kind: "declaration";
+      occurrenceId: SourceOccurrenceId;
+      requirementId: string;
+      symbol: string;
+    }
+  | {
+      constraint: SemanticConstraint;
+      evidence: readonly MathInterpretationEvidenceReferenceInfo[];
+      kind: "role-declaration";
+      parameter: string;
+      requirementId: string;
+      symbol: string;
+    }
+  | {
+      condition: MathInterpretationConditionInfo;
+      kind: "condition";
+      requirementId: string;
+    }
+  | {
+      alternatives: readonly MathInterpretationAlternativeInfo[];
+      evidence: readonly MathInterpretationEvidenceReferenceInfo[];
+      kind: "disambiguation";
+      requirementId: string;
+    };
 
 export type MathInterpretationOrderingReasonKind =
   | "explicit-evidence"
@@ -502,7 +568,7 @@ export type MathInterpretationOrderingReasonKind =
   | "stable-source-order";
 
 export interface MathInterpretationOrderingReason {
-  evidence: readonly Evidence[];
+  evidence: readonly MathInterpretationEvidenceReferenceInfo[];
   kind: MathInterpretationOrderingReasonKind;
 }
 
@@ -528,20 +594,199 @@ export interface MathInterpretationHypothesisInfo {
 export type MathInterpretationAnalysisLimitKind =
   | "candidate-set-capped"
   | "evidence-truncated"
+  | "discriminator-set-capped"
   | "engine-limit"
   | "generated-source"
   | "retracted-source";
 
 export interface MathInterpretationAnalysisLimitInfo {
-  evidence: readonly Evidence[];
+  evidence: readonly MathInterpretationEvidenceReferenceInfo[];
   kind: MathInterpretationAnalysisLimitKind;
+}
+
+export interface MathInterpretationCandidateCapInfo {
+  candidateCountBeforeCap: number;
+  preCapSemanticKeyDigest: string;
+}
+
+export function parseMathInterpretationCandidateCapInfo(
+  value: unknown,
+): MathInterpretationCandidateCapInfo {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError("candidateCap must be an object");
+  }
+  const record = value as Record<string, unknown>;
+  const keys = Object.keys(record).sort();
+  if (
+    keys.length !== 2 ||
+    keys[0] !== "candidateCountBeforeCap" ||
+    keys[1] !== "preCapSemanticKeyDigest"
+  ) {
+    throw new TypeError("candidateCap must contain exactly the protocol-17 fields");
+  }
+  const count = record.candidateCountBeforeCap;
+  const digest = record.preCapSemanticKeyDigest;
+  if (
+    typeof count !== "number" ||
+    !Number.isSafeInteger(count) ||
+    count > 0xffff_ffff ||
+    count <= MATH_INTERPRETATION_HYPOTHESIS_LIMIT
+  ) {
+    throw new TypeError(
+      "candidateCountBeforeCap must be a u32 integer above the hypothesis limit",
+    );
+  }
+  if (typeof digest !== "string" || !/^[0-9a-f]{64}$/u.test(digest)) {
+    throw new TypeError(
+      "preCapSemanticKeyDigest must be 64 lowercase hexadecimal characters",
+    );
+  }
+  return {
+    candidateCountBeforeCap: count,
+    preCapSemanticKeyDigest: digest,
+  };
+}
+
+export interface MathInterpretationPreCapSourceIdentity {
+  documentVersion: number;
+  generation: "authored" | "generated";
+  lifecycle: "current" | "retracted";
+  location: Location;
+}
+
+export interface MathInterpretationPreCapBindingKey {
+  parameter: string;
+  symbol: string;
+}
+
+export interface MathInterpretationPreCapConditionKey {
+  conditionId: string;
+  status: LawConditionInfo["status"];
+}
+
+export interface MathInterpretationPreCapEvidenceKey {
+  provenance: MathInterpretationEvidenceProvenance;
+  role: MathInterpretationEvidenceInfo["role"];
+  sourceAnchors: readonly MathInterpretationPreCapSourceIdentity[];
+}
+
+export interface MathInterpretationPreCapSemanticKey {
+  bindings: readonly MathInterpretationPreCapBindingKey[];
+  conditions: readonly MathInterpretationPreCapConditionKey[];
+  evidence: readonly MathInterpretationPreCapEvidenceKey[];
+  formulaSource: MathInterpretationPreCapSourceIdentity;
+  kind: MathInterpretationKind;
+  label: string;
+  relationId: string | null;
+  support: MathInterpretationSupportTier;
+}
+
+/**
+ * Canonical protocol-17 input to `SHA-256`: recursively sorted object keys,
+ * canonicalized binding/condition/evidence arrays, then a lexically sorted
+ * JSON array of distinct semantic-key JSON strings. Duplicate derivation paths
+ * and opaque IDs therefore cannot create a cap. Encode the returned string as
+ * UTF-8 before hashing and publish the lowercase 64-character hexadecimal
+ * digest.
+ */
+export function canonicalMathInterpretationPreCapPayload(
+  values: readonly MathInterpretationPreCapSemanticKey[],
+): string {
+  const keys = [
+    ...new Set(values.map(canonicalMathInterpretationSemanticKey)),
+  ].sort(compareUtf8);
+  return JSON.stringify(keys);
+}
+
+export async function mathInterpretationPreCapSemanticKeyDigest(
+  values: readonly MathInterpretationPreCapSemanticKey[],
+): Promise<string> {
+  const payload = canonicalMathInterpretationPreCapPayload(values);
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(payload),
+  );
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
+
+function canonicalMathInterpretationSemanticKey(
+  value: MathInterpretationPreCapSemanticKey,
+): string {
+  const bindings = value.bindings
+    .map(({ parameter, symbol }) => ({ parameter, symbol }))
+    .sort(stableJsonOrder);
+  const conditions = value.conditions
+    .map(({ conditionId, status }) => ({ conditionId, status }))
+    .sort(stableJsonOrder);
+  const evidence = value.evidence
+    .map(({ provenance, role, sourceAnchors }) => ({
+      provenance,
+      role,
+      sourceAnchors: sourceAnchors
+        .map(({ documentVersion, generation, lifecycle, location }) => ({
+          documentVersion,
+          generation,
+          lifecycle,
+          location,
+        }))
+        .sort(stableJsonOrder),
+    }))
+    .sort(stableJsonOrder);
+  const { documentVersion, generation, lifecycle, location } = value.formulaSource;
+  return stableJson({
+    bindings,
+    conditions,
+    evidence,
+    formulaSource: { documentVersion, generation, lifecycle, location },
+    kind: value.kind,
+    label: value.label,
+    relationId: value.relationId,
+    support: value.support,
+  });
+}
+
+function stableJsonOrder(left: unknown, right: unknown): number {
+  return compareUtf8(stableJson(left), stableJson(right));
+}
+
+function stableJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableJson).join(",")}]`;
+  }
+  if (value !== null && typeof value === "object") {
+    return `{${Object.entries(value)
+      .filter(([, child]) => child !== undefined)
+      .sort(([left], [right]) => compareUtf8(left, right))
+      .map(([key, child]) => `${JSON.stringify(key)}:${stableJson(child)}`)
+      .join(",")}}`;
+  }
+  const serialized = JSON.stringify(value);
+  if (serialized === undefined) {
+    throw new TypeError("pre-cap semantic keys must contain JSON values");
+  }
+  return serialized;
+}
+
+function compareUtf8(left: string, right: string): number {
+  const encoder = new TextEncoder();
+  const leftBytes = encoder.encode(left);
+  const rightBytes = encoder.encode(right);
+  const length = Math.min(leftBytes.length, rightBytes.length);
+  for (let index = 0; index < length; index += 1) {
+    const difference = (leftBytes[index] ?? 0) - (rightBytes[index] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return leftBytes.length - rightBytes.length;
 }
 
 export interface MathInterpretationSetInfo {
   analysisLimits: readonly MathInterpretationAnalysisLimitInfo[];
+  candidateCap?: MathInterpretationCandidateCapInfo;
   exhaustiveness: "bounded-open-world";
   hypotheses: readonly MathInterpretationHypothesisInfo[];
-  missingDiscriminators: readonly MathAuthoringRequirementInfo[];
+  missingDiscriminators: readonly MathInterpretationRequirementInfo[];
   truncated: boolean;
 }
 
@@ -556,7 +801,7 @@ export interface MathAuthoringContext {
   lifecycle: MathSourceLifecycleInfo;
   interpretations: MathInterpretationSetInfo;
   notationOccurrences: readonly MathNotationOccurrenceInfo[];
-  requirements: readonly MathAuthoringRequirementInfo[];
+  requirements: readonly MathInterpretationRequirementInfo[];
   truncated: boolean;
 }
 
@@ -590,7 +835,8 @@ export interface SemanticViewInfo {
   declarations: readonly Location[];
   diagnostics: readonly SemanticDiagnostic[];
   domains: readonly DomainActivation[];
-  symbol?: SymbolInfo;
+  /** Rust `Option` serializes an absent symbol as `null` on the JSON wire. */
+  symbol?: SymbolInfo | null;
   truncated: boolean;
 }
 

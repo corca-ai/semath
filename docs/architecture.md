@@ -92,6 +92,9 @@ bounded and open-world. It neither feeds the semantic index nor changes the
 decision, diagnostics, identity, navigation, or edit surfaces. Natural-language
 extraction and domain relevance remain named evidence channels rather than
 being collapsed into truth or an opaque confidence score.
+Cross-document evidence carries revision-qualified source anchors through the
+type and law pipeline; the projection never reconstructs a document from a
+rule ID or an unqualified numeric range.
 
 Included documents contribute the same namespaced role, shape, quantity, unit,
 dimension, and evidence records used locally. A per-document external type

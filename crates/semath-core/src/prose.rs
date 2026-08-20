@@ -1403,6 +1403,7 @@ fn collect_equation_flow_definitions(
                             start_offset: index.utf16_for_byte(candidate.evidence_start),
                             end_offset: index.utf16_for_byte(candidate.evidence_end),
                         }],
+                        source_anchors: Vec::new(),
                     },
                 });
                 resolved_mentions.insert(*mention_index);
@@ -1429,6 +1430,7 @@ fn collect_equation_flow_definitions(
                         start_offset: index.utf16_for_byte(candidate.evidence_start),
                         end_offset: index.utf16_for_byte(candidate.evidence_end),
                     }],
+                    source_anchors: Vec::new(),
                 },
             });
             resolved_mentions.insert(*mention_index);
@@ -1787,6 +1789,7 @@ fn collect_semantic_evidence(
                     kind: "typed-operation-constraint".into(),
                     strength: "strong".into(),
                     source_ranges: vec![range],
+                    source_anchors: Vec::new(),
                 },
             });
         }
@@ -1806,6 +1809,7 @@ fn collect_semantic_evidence(
                                 kind: "prose-domain-prior".into(),
                                 strength: "weak".into(),
                                 source_ranges: vec![range],
+                                source_anchors: Vec::new(),
                             },
                         });
                     }
@@ -1825,6 +1829,7 @@ fn collect_semantic_evidence(
                             kind: "structural-domain-prior".into(),
                             strength: "weak".into(),
                             source_ranges: vec![range],
+                            source_anchors: Vec::new(),
                         },
                     });
                 }
@@ -1896,6 +1901,7 @@ fn collect_semantic_evidence(
                                 kind: "explicit-prose".into(),
                                 strength: "strong".into(),
                                 source_ranges: vec![range],
+                                source_anchors: Vec::new(),
                             },
                         });
                     }
@@ -2914,6 +2920,7 @@ fn collect_assumptions(
                     .into(),
                     strength: "strong".into(),
                     source_ranges,
+                    source_anchors: Vec::new(),
                 },
             });
         }
@@ -2965,6 +2972,7 @@ fn collect_typed_regularity_assumptions(
                         start_offset: index.utf16_for_byte(mention.start),
                         end_offset: index.utf16_for_byte(mention.end),
                     }],
+                    source_anchors: Vec::new(),
                 },
             });
         }
@@ -3409,6 +3417,7 @@ fn push_claim(
         .into(),
         strength: "strong".into(),
         source_ranges: vec![evidence_range.clone()],
+        source_anchors: Vec::new(),
     };
     analysis.definitions.push(DefinitionInfo {
         symbol: symbol.into(),
@@ -3468,6 +3477,7 @@ fn push_semantic_role_claim(
                 start_offset: index.utf16_for_byte(evidence_start),
                 end_offset: index.utf16_for_byte(evidence_end),
             }],
+            source_anchors: Vec::new(),
         },
         entity_id: None,
     });
@@ -3789,18 +3799,22 @@ mod tests {
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{
-        CompleteSyntaxState, DocumentLanguage, ProjectDocument, ProjectMacro,
-        ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSourceRef,
-        SourceRange, VisibleProseSpan,
+        CompleteSyntaxState, DocumentLanguage, MathRoot, MathRootState, ProjectDocument,
+        ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind,
+        ProjectSourceRef, SourceRange, VisibleProseSpan,
     };
 
     fn analyze(source: &str) -> super::ProseObservations {
-        let regions = test_math_regions(source, DocumentLanguage::Latex);
+        analyze_language(source, DocumentLanguage::Latex)
+    }
+
+    fn analyze_language(source: &str, language: DocumentLanguage) -> super::ProseObservations {
+        let regions = test_math_regions(source, language);
         let document = ProjectDocument {
             prose_annotations: vec![],
             file_id: "main".into(),
             path: "main.tex".into(),
-            language: DocumentLanguage::Latex,
+            language,
             content: source.into(),
             document_version: 1,
             schema_version: 8,
@@ -3815,6 +3829,107 @@ mod tests {
             includes: Vec::new(),
         };
         analyze_document(&document)
+    }
+
+    fn analyze_surface_language(
+        source: &str,
+        language: DocumentLanguage,
+    ) -> super::ProseObservations {
+        let regions = test_math_regions(source, language);
+        let math_roots = regions
+            .iter()
+            .enumerate()
+            .map(|(node, region)| MathRoot {
+                node: node as u32,
+                delimiter: region.delimiter.clone(),
+                full_range: region.full_range.clone(),
+                content_range: region.content_range.clone(),
+                state: MathRootState::Complete,
+            })
+            .collect::<Vec<_>>();
+        let mut visible_prose = Vec::new();
+        let mut start = 0;
+        for region in &regions {
+            if start < region.full_range.start_offset {
+                visible_prose.push(VisibleProseSpan {
+                    range: SourceRange {
+                        start_offset: start,
+                        end_offset: region.full_range.start_offset,
+                    },
+                    state: CompleteSyntaxState::Complete,
+                });
+            }
+            start = region.full_range.end_offset;
+        }
+        if start < source.encode_utf16().count() as u32 {
+            visible_prose.push(VisibleProseSpan {
+                range: SourceRange {
+                    start_offset: start,
+                    end_offset: source.encode_utf16().count() as u32,
+                },
+                state: CompleteSyntaxState::Complete,
+            });
+        }
+        let document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: match language {
+                DocumentLanguage::Latex => "main.tex".into(),
+                DocumentLanguage::Markdown => "main.md".into(),
+                DocumentLanguage::Bibtex => "main.bib".into(),
+            },
+            language,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots,
+            visible_prose,
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: regions,
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        analyze_document(&document)
+    }
+
+    #[test]
+    fn attaches_relational_definitions_across_format_specific_display_boundaries() {
+        let sources = [
+            (
+                DocumentLanguage::Latex,
+                "\\section{Least-squares estimate}\nThe role declarations are provided by the exact project path \\texttt{least-squares-roles.tex}.\n\\input{least-squares-roles.tex}\nThe draft calls $\\widehat x$ the unique estimate and defines it by\n\\[\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n\\]\nNo full-column-rank assumption for $A$ is stated, so uniqueness still requires justification.\n".to_owned(),
+            ),
+            (
+                DocumentLanguage::Markdown,
+                "# Least-squares estimate\n\nThe role declarations are provided by the exact project path [least-squares-roles.md](least-squares-roles.md). The draft calls $\\widehat x$ the unique estimate and defines it by\n\n$$\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n$$\n\nNo full-column-rank assumption for $A$ is stated, so uniqueness still requires justification.\n".to_owned(),
+            ),
+        ];
+
+        for (language, source) in sources {
+            let analysis = analyze_surface_language(&source, language);
+            let relational_definitions = analysis
+                .definitions
+                .iter()
+                .filter(|definition| {
+                    definition.description == "the unique estimate"
+                        && definition.evidence.rule_id == "english-relational-definition"
+                        && definition.evidence.source_ranges.iter().any(|range| {
+                            let evidence =
+                                &source[range.start_offset as usize..range.end_offset as usize];
+                            evidence.contains("calls") && evidence.contains("unique estimate")
+                        })
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(
+                relational_definitions.len(),
+                1,
+                "{language:?}: {:#?}",
+                analysis.definitions
+            );
+        }
     }
 
     fn analyze_document(document: &ProjectDocument) -> super::ProseObservations {

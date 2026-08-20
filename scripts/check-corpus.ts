@@ -7,8 +7,14 @@ import {
   observeQualityRun,
   planQualityRun,
   scoreQuality,
+  type CaseObservation,
 } from "../packages/evaluation/src/index";
 import type { QueryResult } from "../packages/protocol/src/index";
+import {
+  flattenCorpusRunValues,
+  planCorpusRunBatches,
+  qualityRunPlanForBatch,
+} from "./corpus-run-batches";
 import { loadQualityFixtures } from "./evaluation-fixtures";
 
 const loaded = await loadQualityFixtures();
@@ -38,27 +44,41 @@ if (corpusIntegrityFailures.length) {
   throw new Error(`corpus integrity gate failed:\n${corpusIntegrityFailures.join("\n")}`);
 }
 const plan = planQualityRun(manifest, corpora);
-const native = spawnSync(
-  "cargo",
-  ["run", "--quiet", "--locked", "-p", "semath-native"],
-  {
-    encoding: "utf8",
-    input: JSON.stringify({ queries: plan.queries, snapshot: plan.snapshot }),
-    // Protocol 16 returns bounded advisory hypotheses in each semantic view.
-    // This is an aggregate batch transport ceiling, not a per-query product
-    // budget; the dedicated query-result budget remains separately gated.
-    maxBuffer: 256 * 1024 * 1024,
-  },
-);
-if (native.status !== 0) {
-  throw new Error(
-    native.stderr ||
-      native.error?.message ||
-      `native corpus run failed${native.signal ? ` with ${native.signal}` : ""}`,
+const batches = planCorpusRunBatches(plan);
+const batchObservations: CaseObservation[][] = [];
+const reportBatchResults: QueryResult[][] | undefined = process.env.SEMATH_CORPUS_REPORT
+  ? []
+  : undefined;
+for (const batch of batches) {
+  const native = spawnSync(
+    "cargo",
+    ["run", "--quiet", "--locked", "-p", "semath-native"],
+    {
+      encoding: "utf8",
+      input: JSON.stringify({ queries: batch.queries, snapshot: batch.snapshot }),
+      // Protocol 17 returns bounded advisory hypotheses in each semantic view.
+      // This is a per-suite transport circuit breaker, not a per-query product
+      // budget; the dedicated query-result budget remains separately gated.
+      maxBuffer: 256 * 1024 * 1024,
+    },
   );
+  if (native.status !== 0) {
+    throw new Error(
+      native.stderr ||
+        native.error?.message ||
+        `native corpus run failed${native.signal ? ` with ${native.signal}` : ""}`,
+    );
+  }
+  const results = JSON.parse(native.stdout) as QueryResult[];
+  const batchPlan = qualityRunPlanForBatch(plan, batch);
+  batchObservations.push(observeQualityRun(batchPlan, results));
+  reportBatchResults?.push(results);
 }
-const results = JSON.parse(native.stdout) as QueryResult[];
-const observations = observeQualityRun(plan, results);
+const observations = flattenCorpusRunValues(
+  plan.planned.length,
+  batches,
+  batchObservations,
+);
 const scorecard = scoreQuality(manifest, corpora, observations);
 
 for (const law of scorecard.laws) {
@@ -97,7 +117,12 @@ console.log(
   `metamorphic invariance=${format(scorecard.metamorphic.percent)} cases=${scorecard.metamorphicCases}`,
 );
 
-if (process.env.SEMATH_CORPUS_REPORT) {
+if (reportBatchResults) {
+  const results = flattenCorpusRunValues(
+    plan.planned.length,
+    batches,
+    reportBatchResults,
+  );
   for (const [index, item] of plan.planned.entries()) {
     const explanation = explainQualityCase(item, results[index]);
     const observation = observations[index];

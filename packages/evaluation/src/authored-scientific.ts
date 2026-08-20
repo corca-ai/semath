@@ -1,10 +1,15 @@
 import type {
+  MathAuthoringContext,
   MathInterpretationSetInfo,
   QueryResult,
   RelationInfo,
   SemanticViewInfo,
   SourceRange,
 } from "../../protocol/src/index";
+import {
+  parseMathAuthoringContextExpectation,
+  type StableMathAuthoringContext,
+} from "./math-authoring-development";
 import type { CorpusDocument } from "./model";
 import { roleInstancesMatch, type ObservedRole } from "./observation";
 
@@ -155,6 +160,7 @@ export interface AuthoredScientificProbe {
     readonly snapshotId: string;
   };
   readonly expected: {
+    readonly authoringContext?: StableMathAuthoringContext;
     readonly cursorOccurrence?: AuthoredSourceAnchor | null;
     readonly decision: ScientificDecision;
     readonly diagnostics: {
@@ -208,6 +214,7 @@ export interface ObservedLocation {
 }
 
 export interface AuthoredScientificObservation {
+  readonly authoringContext?: MathAuthoringContext;
   readonly caseId: string;
   readonly decision: ScientificDecision;
   readonly definitions: readonly ObservedLocation[];
@@ -639,6 +646,7 @@ export function observeAuthoredScientificProbe(
     .filter((reason) => reason.kind === "proof" || reason.kind === "source-conflict")
     .flatMap((reason) => reason.evidence);
   return {
+    authoringContext: view.authoringContext,
     caseId: probe.id,
     decision: view.decision.status,
     definitions: results.definition.value.locations,
@@ -908,11 +916,11 @@ function parseExpected(
   exact(
     item,
     [
-      "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
+      "authoringContext", "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
       "navigation", "diagnostics",
     ],
     path,
-    ["symbol", "cursorOccurrence"],
+    ["authoringContext", "symbol", "cursorOccurrence"],
   );
   const navigation = record(item.navigation, `${path}.navigation`);
   exact(
@@ -969,6 +977,14 @@ function parseExpected(
     throw new Error(`${path}.diagnostics.maximum: smaller than required diagnostics`);
   }
   return {
+    ...(item.authoringContext === undefined
+      ? {}
+      : {
+          authoringContext: parseMathAuthoringContextExpectation(
+            item.authoringContext,
+            `${path}.authoringContext`,
+          ),
+        }),
     ...(item.cursorOccurrence === undefined
       ? {}
       : {

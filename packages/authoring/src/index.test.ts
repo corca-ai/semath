@@ -136,6 +136,9 @@ describe("pack authoring policies", () => {
       { path: "src/infer.rs", source: 'if pack_id == "sample-field" { specialize(); }' },
       { path: "src/catalog.rs", source: 'const ID: &str = "sample-field";' },
       { path: "src/infer.test.ts", source: 'if (packId === "sample-field") fail();' },
+      { path: "src/engine_tests.rs", source: 'if pack_id == "sample-field" { fail(); }' },
+      { path: "tests/integration.rs", source: 'if pack_id == "sample-field" { fail(); }' },
+      { path: "src\\resolver_test.rs", source: 'if pack_id == "sample-field" { fail(); }' },
     ], ["sample-field"])).toEqual([
       {
         id: "sample-field",

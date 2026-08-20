@@ -1248,9 +1248,8 @@ fn first_fact(
     entity: &EntityId,
     predicate: &ClaimPredicate,
 ) -> Option<(ClaimValue, Proof)> {
-    known
-        .iter()
-        .find(|(key, _)| &key.subject == entity && &key.predicate == predicate)
+    facts_for(known, entity, predicate)
+        .next()
         .map(|(key, proof)| (key.value.clone(), proof.clone()))
 }
 
@@ -1260,12 +1259,9 @@ fn first_fact_at(
     predicate: &ClaimPredicate,
     boundary: &EvidenceRecord,
 ) -> Option<(ClaimValue, Proof)> {
-    known
-        .iter()
-        .filter(|(key, proof)| {
-            &key.subject == entity
-                && &key.predicate == predicate
-                && proof.available_after <= boundary.available_after
+    facts_for(known, entity, predicate)
+        .filter(|(_, proof)| {
+            proof.available_after <= boundary.available_after
                 && proof.scope_path.len() <= boundary.scope_path.len()
                 && proof
                     .scope_path
@@ -1275,6 +1271,26 @@ fn first_fact_at(
         })
         .min_by_key(|(_, proof)| std::cmp::Reverse(proof.available_after))
         .map(|(key, proof)| (key.value.clone(), proof.clone()))
+}
+
+fn facts_for<'a>(
+    known: &'a BTreeMap<FactKey, Proof>,
+    entity: &EntityId,
+    predicate: &ClaimPredicate,
+) -> impl Iterator<Item = (&'a FactKey, &'a Proof)> {
+    let subject = entity.clone();
+    let predicate = predicate.clone();
+    // `FactKey` is ordered by `(subject, predicate, value)`, and `Concept("")`
+    // is the minimum `ClaimValue`. Keep the closed-variant regression below in
+    // sync if `ClaimValue` ordering changes.
+    let lower = FactKey {
+        subject: subject.clone(),
+        predicate: predicate.clone(),
+        value: ClaimValue::Concept(String::new()),
+    };
+    known
+        .range(lower..)
+        .take_while(move |(key, _)| key.subject == subject && key.predicate == predicate)
 }
 
 fn insert_derived(
@@ -1592,6 +1608,118 @@ mod tests {
                 canonical_digest: id.into(),
             })),
         )
+    }
+
+    fn proof(id: &str, available_after: u64, scope_path: &[u32]) -> Proof {
+        Proof {
+            parents: BTreeSet::from([ClaimId(id.into())]),
+            provenance: BTreeSet::new(),
+            available_after,
+            scope_path: scope_path.to_vec(),
+            rule_id: "test-proof".into(),
+            derived: false,
+        }
+    }
+
+    #[test]
+    fn fact_prefix_range_preserves_closed_value_order_and_boundary_selection() {
+        let target = entity_in(10, &[1]);
+        let other = entity_in(11, &[1]);
+        let relation = ClaimRelation::Comparison {
+            operator: ClaimComparison::Equal,
+            left: target.clone(),
+            right: other.clone(),
+            canonical_digest: "value-order".into(),
+        };
+        let mut values = vec![
+            ClaimValue::Concept(String::new()),
+            ClaimValue::Role("role".into()),
+            ClaimValue::Type("type".into()),
+            ClaimValue::Shape(ClaimShape::Scalar),
+            ClaimValue::Dimension(Vec::new()),
+            ClaimValue::Unit("unit".into()),
+            ClaimValue::QuantityKind("quantity".into()),
+            ClaimValue::Condition(ClaimCondition::Named("condition".into())),
+            ClaimValue::Relation(Box::new(relation)),
+            ClaimValue::Scalar("1".into()),
+            ClaimValue::Text("text".into()),
+        ];
+        values.sort();
+        let mut known = BTreeMap::new();
+        for (index, value) in values.iter().cloned().enumerate() {
+            known.insert(
+                FactKey {
+                    subject: target.clone(),
+                    predicate: ClaimPredicate::HasType,
+                    value,
+                },
+                proof(&format!("value-{index}"), index as u64, &[1]),
+            );
+        }
+        known.insert(
+            FactKey {
+                subject: other,
+                predicate: ClaimPredicate::HasType,
+                value: ClaimValue::Concept("before-or-after-target".into()),
+            },
+            proof("other", 99, &[1]),
+        );
+        known.insert(
+            FactKey {
+                subject: target.clone(),
+                predicate: ClaimPredicate::HasShape,
+                value: ClaimValue::Shape(ClaimShape::Vector(Vec::new())),
+            },
+            proof("other-predicate", 99, &[1]),
+        );
+
+        assert_eq!(
+            facts_for(&known, &target, &ClaimPredicate::HasType)
+                .map(|(key, _)| key.value.clone())
+                .collect::<Vec<_>>(),
+            values
+        );
+        assert_eq!(
+            first_fact(&known, &target, &ClaimPredicate::HasType).map(|(value, _)| value),
+            values.first().cloned()
+        );
+
+        let scoped = entity_in(20, &[1, 2]);
+        let mut boundary_known = BTreeMap::new();
+        for (value, available_after, scope_path) in [
+            (ClaimValue::Concept("outer".into()), 1, vec![1]),
+            (ClaimValue::Role("latest-visible".into()), 4, vec![1]),
+            (ClaimValue::Type("future".into()), 5, vec![1]),
+            (ClaimValue::Shape(ClaimShape::Scalar), 3, vec![1, 3]),
+        ] {
+            boundary_known.insert(
+                FactKey {
+                    subject: scoped.clone(),
+                    predicate: ClaimPredicate::HasRole,
+                    value,
+                },
+                proof("boundary", available_after, &scope_path),
+            );
+        }
+        let mut boundary = input_claim(
+            "boundary",
+            scoped.clone(),
+            ClaimPredicate::HasRole,
+            ClaimValue::Role("boundary".into()),
+        )
+        .evidence;
+        boundary.available_after = 4;
+        boundary.scope_path = vec![1, 2];
+        assert_eq!(
+            first_fact_at(
+                &boundary_known,
+                &scoped,
+                &ClaimPredicate::HasRole,
+                &boundary,
+            )
+            .map(|(value, _)| value),
+            Some(ClaimValue::Role("latest-visible".into()))
+        );
     }
 
     #[test]

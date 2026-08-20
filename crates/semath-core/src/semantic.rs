@@ -11,8 +11,9 @@ use crate::scope::ScopeGraph;
 use crate::semantic_index::EntityId;
 use crate::shape::{ShapeObservations, observe_shapes};
 use crate::{
-    AssumptionInfo, DefinitionInfo, LawRecognition, ProjectDocument, QuantityInfo, RelationInfo,
-    SemanticContextInfo,
+    AssumptionInfo, DefinitionInfo, LawRecognition, Location,
+    MathInterpretationEvidenceSourceAnchorInfo, MathInterpretationSourceLifecycle,
+    MathSourceGeneration, ProjectDocument, QuantityInfo, RelationInfo, SemanticContextInfo,
 };
 
 const MAX_RELATIONS: usize = 16;
@@ -183,11 +184,34 @@ impl DocumentSemanticObservations {
             )
         };
         let analyze_with_law_chains = |domains: &DomainObservations| {
+            let source_anchor = |range: &crate::SourceRange| {
+                Some(MathInterpretationEvidenceSourceAnchorInfo {
+                    location: Location {
+                        file_id: document.file_id.clone(),
+                        path: document.path.clone(),
+                        range: range.clone(),
+                    },
+                    document_version: document.document_version,
+                    scope_path: self.assumption_scopes.path_at(range.start_offset),
+                    lifecycle: MathInterpretationSourceLifecycle::Current,
+                    generation: if canonical_expressions.iter().any(|expression| {
+                        expression.range.start_offset <= range.start_offset
+                            && range.end_offset <= expression.range.end_offset
+                            && !expression.provenance.is_empty()
+                    }) {
+                        MathSourceGeneration::Generated
+                    } else {
+                        MathSourceGeneration::Authored
+                    },
+                })
+            };
             let direct = analyze(external, domains);
-            if let Some(first_hop) = external.with_preceding_law_roles(formula_ranges, &direct) {
+            if let Some(first_hop) =
+                external.with_preceding_law_roles(formula_ranges, &direct, &source_anchor)
+            {
                 let one_hop = analyze(&first_hop, domains);
                 if let Some(second_hop) =
-                    external.with_preceding_law_roles(formula_ranges, &one_hop)
+                    external.with_preceding_law_roles(formula_ranges, &one_hop, &source_anchor)
                 {
                     analyze(&second_hop, domains)
                 } else {
@@ -204,7 +228,7 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             source_laws.all(),
         );
-        self.laws = if routed_domains.has_established_equation_evidence() {
+        self.laws = if routed_domains.has_forward_law_routing_target(formula_ranges) {
             analyze_with_law_chains(&routed_domains.for_forward_law_routing())
         } else {
             source_laws

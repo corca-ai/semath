@@ -22,7 +22,10 @@ use crate::entity_policy::{
     refused_authorization,
 };
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
-use crate::interpretation::{MathInterpretationInput, project_math_interpretations};
+use crate::interpretation::{
+    InterpretationEvidenceAuthority, MAX_INTERPRETATION_DISCRIMINATORS, MathInterpretationInput,
+    ResolvedInterpretationEvidence, normalize_source_anchors, project_math_interpretations,
+};
 use crate::law::{ExternalTypeEnvironment, rejected_formula_sign_conflicts};
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
@@ -44,14 +47,15 @@ use crate::{
     LawRecognition, LawRecognitionStatus, Location, MathApproximationInfo, MathAuthoringContext,
     MathAuthoringDisposition, MathAuthoringRequirementInfo, MathClaimEvidenceLinkInfo,
     MathClaimModality, MathClaimPolarity, MathClaimStrengthCeiling, MathEquationLinkInfo,
-    MathEquationLinkKind, MathExactness, MathFormulaAnchorInfo, MathNotationOccurrenceInfo,
-    MathSourceFreshness, MathSourceGeneration, MathSourceLifecycleInfo, MeaningAlternative,
-    MeaningConflict, MeaningDecision, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
-    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
-    QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
-    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
-    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
-    UpdateResult,
+    MathEquationLinkKind, MathExactness, MathFormulaAnchorInfo,
+    MathInterpretationEvidenceSourceAnchorInfo, MathInterpretationSourceLifecycle,
+    MathNotationOccurrenceInfo, MathSourceFreshness, MathSourceGeneration, MathSourceLifecycleInfo,
+    MeaningAlternative, MeaningConflict, MeaningDecision, PROTOCOL_VERSION, PhysicalDimensionInfo,
+    ProjectChange, ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query,
+    QueryEnvelope, QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo,
+    SemanticCandidateStatus, SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic,
+    SemanticEditFile, SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo,
+    SourceRange, SymbolInfo, UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -1263,6 +1267,7 @@ fn lower_binder_facts(
                     kind: "structural-declaration".into(),
                     strength: "strong".into(),
                     source_ranges: vec![binder.declaration.clone()],
+                    source_anchors: Vec::new(),
                 },
                 entity_id: Some(entity.clone()),
             },
@@ -2760,6 +2765,7 @@ fn lower_cross_modal_facts(
                     }
                     .to_owned(),
                     source_ranges: vec![binding.evidence_range.clone()],
+                    source_anchors: Vec::new(),
                 },
                 entity_id: Some(entity.clone()),
             },
@@ -2980,6 +2986,58 @@ fn source_text(document: &ProjectDocument, range: &SourceRange) -> String {
     let start = index.byte_for_utf16(range.start_offset);
     let end = index.byte_for_utf16(range.end_offset);
     document.content.get(start..end).unwrap_or("").to_owned()
+}
+
+fn prose_claim_range(
+    document: &ProjectDocument,
+    formula_ranges: &[SourceRange],
+    mut range: SourceRange,
+) -> SourceRange {
+    let index = crate::SourceIndex::new(&document.content);
+    for formula in formula_ranges {
+        let content_start = index.byte_for_utf16(formula.start_offset);
+        let line_start = document.content[..content_start]
+            .rfind('\n')
+            .map_or(0, |offset| offset + 1);
+        let opener = document.content[line_start..content_start].trim();
+        if range.start_offset < index.utf16_for_byte(line_start)
+            && index.utf16_for_byte(line_start) < range.end_offset
+            && (matches!(opener, "\\[" | "$$") || opener.starts_with("\\begin{"))
+        {
+            range.end_offset = index.utf16_for_byte(line_start);
+            break;
+        }
+    }
+    let mut start = index.byte_for_utf16(range.start_offset);
+    let mut end = index.byte_for_utf16(range.end_offset);
+    while start < end
+        && document.content[start..end]
+            .chars()
+            .next()
+            .is_some_and(char::is_whitespace)
+    {
+        start += document.content[start..end]
+            .chars()
+            .next()
+            .unwrap()
+            .len_utf8();
+    }
+    while start < end
+        && document.content[start..end]
+            .chars()
+            .next_back()
+            .is_some_and(char::is_whitespace)
+    {
+        end -= document.content[start..end]
+            .chars()
+            .next_back()
+            .unwrap()
+            .len_utf8();
+    }
+    SourceRange {
+        start_offset: index.utf16_for_byte(start),
+        end_offset: index.utf16_for_byte(end),
+    }
 }
 
 fn is_formula_trailing_boundary(
@@ -3771,6 +3829,7 @@ impl SemathEngine {
                         .iter()
                         .flat_map(|file| file.edits.iter().map(|edit| edit.range.clone()))
                         .collect(),
+                    source_anchors: Vec::new(),
                 }],
                 files,
             }),
@@ -3803,7 +3862,7 @@ impl SemathEngine {
         meaning_entity: Option<&EntityId>,
         offset: u32,
         formulas: &[crate::LawRecognition],
-    ) -> SemanticContextInfo {
+    ) -> (SemanticContextInfo, Vec<SemanticCandidateInfo>) {
         let (entity_id, symbol_name) = focus
             .map(|focus| {
                 (
@@ -3823,6 +3882,7 @@ impl SemathEngine {
             let context_symbol = context.symbol.clone();
             context.quantities.extend(derived_quantity_infos(
                 &self.index.semantic,
+                &self.index.documents,
                 entity,
                 context_symbol.as_deref(),
                 semantic_occurrence,
@@ -3830,13 +3890,14 @@ impl SemathEngine {
             normalize_quantities(&mut context.quantities);
             append_index_claims(
                 &self.index.semantic,
+                &self.index.documents,
                 entity,
                 semantic_occurrence,
                 &mut context,
             );
         }
-        if let Some(focus) = focus {
-            let mut candidates = self
+        let interpretation_candidates = if let Some(focus) = focus {
+            let candidates = self
                 .index
                 .semantic
                 .candidates_for(&focus.occurrence_id)
@@ -3863,10 +3924,16 @@ impl SemathEngine {
                 })
                 .collect::<Vec<_>>();
             context.truncated |= candidates.len() > MAX_VIEW_CANDIDATES;
-            candidates.truncate(MAX_VIEW_CANDIDATES);
-            context.candidates = candidates;
-        }
-        context
+            context.candidates = candidates
+                .iter()
+                .take(MAX_VIEW_CANDIDATES)
+                .cloned()
+                .collect();
+            candidates
+        } else {
+            context.candidates.clone()
+        };
+        (context, interpretation_candidates)
     }
 
     fn formula_meaning_owner(
@@ -4070,7 +4137,7 @@ impl SemathEngine {
         let symbol_info = display_focus.as_ref().and_then(|focus| {
             self.symbol_info(document, observations, focus, offset, hygiene_enabled)
         });
-        let context = self.semantic_context(
+        let (context, interpretation_structural_candidates) = self.semantic_context(
             observations,
             semantic_focus,
             meaning_entity.as_ref(),
@@ -4085,7 +4152,7 @@ impl SemathEngine {
             });
         let mut symbol_proof = if symbol_definition_may_establish {
             symbol_info.as_ref().map_or_else(Vec::new, |symbol| {
-                asserted_definition_evidence(&self.index.semantic, symbol)
+                asserted_definition_evidence(&self.index.semantic, &self.index.documents, symbol)
             })
         } else {
             Vec::new()
@@ -4108,6 +4175,7 @@ impl SemathEngine {
                 kind: "source-claim".into(),
                 strength: "hard".into(),
                 source_ranges: vec![relation.range.clone()],
+                source_anchors: Vec::new(),
             });
         }
         let mut declarations = symbol_info
@@ -4192,6 +4260,7 @@ impl SemathEngine {
         let diagnostics_truncated = diagnostics.len() > MAX_VIEW_DIAGNOSTICS;
         diagnostics.truncate(MAX_VIEW_DIAGNOSTICS);
         let (domains, domains_truncated) = observations.domains.at(offset);
+        let interpretation_domains = observations.domains.all_at(offset);
         let truncated = declarations_truncated
             || diagnostics_truncated
             || domains_truncated
@@ -4252,7 +4321,8 @@ impl SemathEngine {
             &local_formulas,
             &linked_formulas,
             &context,
-            &domains,
+            &interpretation_domains,
+            &interpretation_structural_candidates,
             &decision,
             conventional_candidates,
             formula_retracted,
@@ -4281,7 +4351,8 @@ impl SemathEngine {
         local_formulas: &[LawRecognition],
         linked_formulas: &[SourceLinkedFormula],
         context: &SemanticContextInfo,
-        domains: &[DomainActivation],
+        interpretation_domains: &[DomainActivation],
+        interpretation_structural_candidates: &[SemanticCandidateInfo],
         decision: &MeaningDecision,
         conventional_candidates: Vec<ConventionalCandidateInfo>,
         retracted: bool,
@@ -4301,8 +4372,9 @@ impl SemathEngine {
             &conventional_candidates,
             context,
         );
-        truncated |= requirements.len() > MAX_AUTHORING_ITEMS;
-        requirements.truncate(MAX_AUTHORING_ITEMS);
+        let discriminator_set_capped = requirements.len() > MAX_INTERPRETATION_DISCRIMINATORS;
+        truncated |= discriminator_set_capped;
+        requirements.truncate(MAX_INTERPRETATION_DISCRIMINATORS);
 
         let mut conditions = local_formulas
             .iter()
@@ -4354,10 +4426,11 @@ impl SemathEngine {
             && (formula.is_some() || focus_editable);
         let disposition = math_authoring_disposition(
             decision,
+            formula.is_some(),
             !conventional_candidates.is_empty(),
             engine_limited,
         );
-        let lifecycle = MathSourceLifecycleInfo {
+        let mut lifecycle = MathSourceLifecycleInfo {
             document_version: document.document.document_version,
             generation: if generated {
                 MathSourceGeneration::Generated
@@ -4379,11 +4452,24 @@ impl SemathEngine {
                     .map(|occurrence| occurrence.scope_path.clone())
             })
             .unwrap_or_default();
+        let interpretation_source_range = formula
+            .as_ref()
+            .map(|formula| &formula.location.range)
+            .or_else(|| focus.map(|focus| &focus.range));
+        let resolve_evidence = |evidence: &Evidence| {
+            self.resolve_interpretation_evidence(
+                document,
+                &lifecycle,
+                interpretation_source_range,
+                evidence,
+            )
+        };
         let interpretations = project_math_interpretations(MathInterpretationInput {
             decision,
             formulas: local_formulas,
             conventional_candidates: &conventional_candidates,
-            domains,
+            domains: interpretation_domains,
+            structural_candidates: interpretation_structural_candidates,
             context,
             requirements: &requirements,
             formula: formula.as_ref(),
@@ -4392,14 +4478,24 @@ impl SemathEngine {
             path: &document.document.path,
             scope_path: &interpretation_scope_path,
             lifecycle: &lifecycle,
-            view_truncated: truncated,
+            discriminator_set_capped,
+            resolve_evidence: &resolve_evidence,
         });
+        if interpretations.candidate_cap.is_some() {
+            lifecycle.capped = true;
+            truncated = true;
+        }
+        let projected_requirements = interpretations.missing_discriminators.clone();
+        let public_conventional_candidates = conventional_candidates
+            .into_iter()
+            .take(MAX_CONVENTIONAL_CANDIDATES)
+            .collect();
         MathAuthoringContext {
             disposition,
             formula,
-            requirements,
+            requirements: projected_requirements,
             conditions,
-            conventional_candidates,
+            conventional_candidates: public_conventional_candidates,
             equation_links,
             approximation,
             claim_evidence,
@@ -4453,6 +4549,68 @@ impl SemathEngine {
             })
             .map_or_else(Vec::new, |expression| expression.provenance.clone());
         self.math_formula_anchor(document, formula_range, provenance)
+    }
+
+    fn resolve_interpretation_evidence(
+        &self,
+        queried_document: &AnalyzedDocument,
+        queried_lifecycle: &MathSourceLifecycleInfo,
+        queried_source_range: Option<&SourceRange>,
+        evidence: &Evidence,
+    ) -> ResolvedInterpretationEvidence {
+        let mut anchors = evidence.source_anchors.clone();
+        for anchor in &mut anchors {
+            if anchor.location.file_id == queried_document.document.file_id
+                && queried_lifecycle.retracted
+                && queried_source_range.is_some_and(|source| {
+                    ranges_overlap(source, &anchor.location.range)
+                        || source == &anchor.location.range
+                })
+            {
+                anchor.lifecycle = MathInterpretationSourceLifecycle::Retracted;
+            }
+        }
+        if anchors.is_empty() {
+            for range in &evidence.source_ranges {
+                let source_document = queried_document;
+                anchors.push(MathInterpretationEvidenceSourceAnchorInfo {
+                    location: Location {
+                        file_id: source_document.document.file_id.clone(),
+                        path: source_document.document.path.clone(),
+                        range: range.clone(),
+                    },
+                    document_version: source_document.document.document_version,
+                    scope_path: source_document.scopes.path_at(range.start_offset),
+                    lifecycle: if source_document.document.file_id
+                        == queried_document.document.file_id
+                        && queried_lifecycle.retracted
+                        && queried_source_range
+                            .is_some_and(|source| ranges_overlap(source, range) || source == range)
+                    {
+                        MathInterpretationSourceLifecycle::Retracted
+                    } else {
+                        MathInterpretationSourceLifecycle::Current
+                    },
+                    generation: evidence_source_generation(source_document, range),
+                });
+            }
+        }
+        normalize_source_anchors(&mut anchors);
+        let authority = if evidence.kind.contains("derived") {
+            InterpretationEvidenceAuthority::Derived
+        } else if matches!(
+            evidence.kind.as_str(),
+            "definition"
+                | "explicit-math"
+                | "source-claim"
+                | "source-definition"
+                | "source-relation"
+        ) {
+            InterpretationEvidenceAuthority::Explicit
+        } else {
+            InterpretationEvidenceAuthority::Observational
+        };
+        ResolvedInterpretationEvidence { anchors, authority }
     }
 
     fn math_authoring_requirements(
@@ -4540,6 +4698,7 @@ impl SemathEngine {
                     kind: "source-occurrence".into(),
                     strength: "weak".into(),
                     source_ranges: vec![focus.range.clone()],
+                    source_anchors: Vec::new(),
                 }],
             });
         }
@@ -4575,6 +4734,7 @@ impl SemathEngine {
                             kind: "source-structure".into(),
                             strength: "contextual".into(),
                             source_ranges: vec![candidate.range.clone()],
+                            source_anchors: Vec::new(),
                         }],
                         relevance: None,
                     })
@@ -4639,6 +4799,7 @@ impl SemathEngine {
                             source.location.range.clone(),
                             target.location.range.clone(),
                         ],
+                        source_anchors: Vec::new(),
                     });
                 }
                 MathEquationLinkInfo {
@@ -4695,6 +4856,7 @@ impl SemathEngine {
                     kind: "source-relation".into(),
                     strength: "hard".into(),
                     source_ranges: vec![relation.range.clone()],
+                    source_anchors: Vec::new(),
                 });
             }
             evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
@@ -4723,6 +4885,7 @@ impl SemathEngine {
     }
 
     fn math_claim_evidence(&self, context: &SemanticContextInfo) -> Vec<MathClaimEvidenceLinkInfo> {
+        let mut projected_evidence_ids = BTreeSet::new();
         let mut links = context
             .claims
             .iter()
@@ -4731,6 +4894,12 @@ impl SemathEngine {
                     .index
                     .semantic
                     .claim(&ClaimId(claim.claim_id.clone()))?;
+                // One authored claim may lower to multiple internal facts (for example,
+                // Defines and HasType). The authoring projection describes the shared
+                // source evidence, so emit that evidence record only once.
+                if !projected_evidence_ids.insert(indexed_claim.evidence_id.clone()) {
+                    return None;
+                }
                 let record = self.index.semantic.evidence(&indexed_claim.evidence_id)?;
                 let claim_occurrence = self.index.semantic.occurrence(&record.source)?;
                 let claim_document = self.index.documents.get(&claim_occurrence.id.file_id)?;
@@ -4738,6 +4907,13 @@ impl SemathEngine {
                     .observations
                     .semantic_evidence()
                     .source_clause_range_for(&claim_occurrence.range)
+                    .map(|range| {
+                        prose_claim_range(
+                            &claim_document.document,
+                            &claim_document.formula_ranges,
+                            range,
+                        )
+                    })
                     .or_else(|| {
                         claim
                             .evidence
@@ -5066,12 +5242,14 @@ impl SemathEngine {
         if let Some(entity) = &entity_id {
             shapes.extend(derived_shape_infos(
                 &self.index.semantic,
+                &self.index.documents,
                 entity,
                 &semantic_occurrence.surface,
                 semantic_occurrence,
             ));
             quantities.extend(derived_quantity_infos(
                 &self.index.semantic,
+                &self.index.documents,
                 entity,
                 Some(&semantic_occurrence.surface),
                 semantic_occurrence,
@@ -5132,12 +5310,14 @@ impl SemathEngine {
             .filter(|(_, document)| target_components.contains(&document.component_id))
         {
             for activation in document.observations.law_activations() {
+                let mut activation = activation.clone();
+                ground_evidence_in_document(document, &mut activation.evidence);
                 activations
                     .entry(document.component_id.clone())
                     .or_default()
                     .push(IndexedLawActivation {
                         source_offset: evidence_anchor(&activation.evidence),
-                        activation: activation.clone(),
+                        activation,
                         file_id: file_id.clone(),
                     });
             }
@@ -5149,6 +5329,7 @@ impl SemathEngine {
             .filter(|(_, document)| target_components.contains(&document.component_id))
             .flat_map(|(file_id, document)| {
                 let component_id = document.component_id.clone();
+                let source_document = document;
                 let roles = document
                     .observations
                     .roles
@@ -5158,11 +5339,14 @@ impl SemathEngine {
                     .map({
                         let component_id = component_id.clone();
                         let file_id = file_id.clone();
-                        move |role| IndexedTypeFact {
-                            component_id: component_id.clone(),
-                            source_offset: evidence_anchor(&role.evidence),
-                            file_id: file_id.clone(),
-                            fact: ExportedTypeFact::Role(role),
+                        move |mut role| {
+                            ground_evidence_in_document(source_document, &mut role.evidence);
+                            IndexedTypeFact {
+                                component_id: component_id.clone(),
+                                source_offset: evidence_anchor(&role.evidence),
+                                file_id: file_id.clone(),
+                                fact: ExportedTypeFact::Role(role),
+                            }
                         }
                     });
                 let quantities = document
@@ -5174,11 +5358,14 @@ impl SemathEngine {
                     .map({
                         let component_id = component_id.clone();
                         let file_id = file_id.clone();
-                        move |quantity| IndexedTypeFact {
-                            component_id: component_id.clone(),
-                            source_offset: evidence_anchor(&quantity.evidence),
-                            file_id: file_id.clone(),
-                            fact: ExportedTypeFact::Quantity(quantity),
+                        move |mut quantity| {
+                            ground_evidence_in_document(source_document, &mut quantity.evidence);
+                            IndexedTypeFact {
+                                component_id: component_id.clone(),
+                                source_offset: evidence_anchor(&quantity.evidence),
+                                file_id: file_id.clone(),
+                                fact: ExportedTypeFact::Quantity(quantity),
+                            }
                         }
                     });
                 let shapes = document
@@ -5190,11 +5377,14 @@ impl SemathEngine {
                     .map({
                         let component_id = component_id.clone();
                         let file_id = file_id.clone();
-                        move |shape| IndexedTypeFact {
-                            component_id: component_id.clone(),
-                            source_offset: evidence_anchor(&shape.evidence),
-                            file_id: file_id.clone(),
-                            fact: ExportedTypeFact::Shape(shape),
+                        move |mut shape| {
+                            ground_evidence_in_document(source_document, &mut shape.evidence);
+                            IndexedTypeFact {
+                                component_id: component_id.clone(),
+                                source_offset: evidence_anchor(&shape.evidence),
+                                file_id: file_id.clone(),
+                                fact: ExportedTypeFact::Shape(shape),
+                            }
                         }
                     });
                 roles.chain(quantities).chain(shapes)
@@ -5215,11 +5405,14 @@ impl SemathEngine {
                     .map({
                         let component_id = document.component_id.clone();
                         let file_id = file_id.clone();
-                        move |assumption| IndexedAssumption {
-                            component_id: component_id.clone(),
-                            source_offset: evidence_anchor(&assumption.evidence),
-                            file_id: file_id.clone(),
-                            assumption,
+                        move |mut assumption| {
+                            ground_evidence_in_document(document, &mut assumption.evidence);
+                            IndexedAssumption {
+                                component_id: component_id.clone(),
+                                source_offset: evidence_anchor(&assumption.evidence),
+                                file_id: file_id.clone(),
+                                assumption,
+                            }
                         }
                     })
             })
@@ -5356,10 +5549,16 @@ impl SemathEngine {
 
 fn math_authoring_disposition(
     decision: &MeaningDecision,
+    formula_context: bool,
     has_conventional_candidate: bool,
     engine_limited: bool,
 ) -> MathAuthoringDisposition {
     match decision {
+        MeaningDecision::Established { meaning, .. }
+            if formula_context && meaning.relation_id.is_none() =>
+        {
+            MathAuthoringDisposition::Partial
+        }
         MeaningDecision::Established { .. } => MathAuthoringDisposition::Established,
         MeaningDecision::Partial { .. } if has_conventional_candidate => {
             MathAuthoringDisposition::Conventional
@@ -5487,12 +5686,12 @@ fn conventional_candidates(formulas: &[LawRecognition]) -> (Vec<ConventionalCand
     });
     candidates.dedup_by(|left, right| left.candidate_id == right.candidate_id);
     let truncated = candidates.len() > MAX_CONVENTIONAL_CANDIDATES;
-    candidates.truncate(MAX_CONVENTIONAL_CANDIDATES);
     (candidates, truncated)
 }
 
 fn asserted_definition_evidence(
     index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
     symbol: &SymbolInfo,
 ) -> Vec<Evidence> {
     let (Some(entity), Some(occurrence)) = (
@@ -5523,7 +5722,7 @@ fn asserted_definition_evidence(
                         .is_some_and(|other_record| other_record.polarity != record.polarity)
             });
             (decide_fact(record, opposed) == EntityFactDisposition::Certain)
-                .then(|| semantic_evidence(index, record, "source-definition", "hard"))
+                .then(|| semantic_evidence(index, documents, record, "source-definition", "hard"))
         })
         .collect::<Vec<_>>();
     evidence.sort_by(|left, right| left.rule_id.cmp(&right.rule_id));
@@ -5694,6 +5893,7 @@ fn candidate_status(supporting: &[ClaimId], rejecting: &[ClaimId]) -> SemanticCa
 
 fn derived_quantity_infos(
     index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
     entity: &EntityId,
     symbol: Option<&str>,
     occurrence: &SourceOccurrence,
@@ -5740,7 +5940,13 @@ fn derived_quantity_infos(
                 unit: None,
                 display: dimension.display.clone(),
                 dimension,
-                evidence: semantic_evidence(index, evidence, "derived-constraint", "strong"),
+                evidence: semantic_evidence(
+                    index,
+                    documents,
+                    evidence,
+                    "derived-constraint",
+                    "strong",
+                ),
                 derived_from,
             })
         })
@@ -5749,6 +5955,7 @@ fn derived_quantity_infos(
 
 fn derived_shape_infos(
     index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
     entity: &EntityId,
     symbol: &str,
     occurrence: &SourceOccurrence,
@@ -5808,7 +6015,13 @@ fn derived_shape_infos(
                 dimensions,
                 refinements: Vec::new(),
                 display,
-                evidence: semantic_evidence(index, evidence, "derived-constraint", "strong"),
+                evidence: semantic_evidence(
+                    index,
+                    documents,
+                    evidence,
+                    "derived-constraint",
+                    "strong",
+                ),
             })
         })
         .collect()
@@ -5859,28 +6072,94 @@ fn normalize_quantities(quantities: &mut Vec<QuantityInfo>) {
 
 fn semantic_evidence(
     index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
     evidence: &EvidenceRecord,
     kind: &str,
     strength: &str,
 ) -> Evidence {
-    let mut source_ranges = evidence
+    let mut source_anchors = evidence
         .provenance
         .iter()
         .filter_map(|source| index.occurrence(source))
-        .map(|occurrence| occurrence.range.clone())
+        .filter_map(|occurrence| {
+            let document = documents.get(&occurrence.id.file_id)?;
+            Some(evidence_source_anchor(document, &occurrence.range))
+        })
         .collect::<Vec<_>>();
-    source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
-    source_ranges.dedup();
+    normalize_source_anchors(&mut source_anchors);
+    let source_ranges = source_anchors
+        .iter()
+        .map(|anchor| anchor.location.range.clone())
+        .collect();
     Evidence {
         rule_id: evidence.rule_id.clone(),
         kind: kind.to_owned(),
         strength: strength.to_owned(),
         source_ranges,
+        source_anchors,
+    }
+}
+
+fn evidence_source_generation(
+    document: &AnalyzedDocument,
+    range: &SourceRange,
+) -> MathSourceGeneration {
+    if document.canonical_expressions.iter().any(|expression| {
+        expression.range.start_offset <= range.start_offset
+            && range.end_offset <= expression.range.end_offset
+            && !expression.provenance.is_empty()
+    }) {
+        MathSourceGeneration::Generated
+    } else {
+        MathSourceGeneration::Authored
+    }
+}
+
+fn ground_evidence_in_document(document: &AnalyzedDocument, evidence: &mut Evidence) {
+    let mut matched_anchors = vec![false; evidence.source_anchors.len()];
+    for range in &evidence.source_ranges {
+        if let Some(index) = evidence
+            .source_anchors
+            .iter()
+            .enumerate()
+            .position(|(index, anchor)| !matched_anchors[index] && anchor.location.range == *range)
+        {
+            matched_anchors[index] = true;
+        } else {
+            evidence
+                .source_anchors
+                .push(evidence_source_anchor(document, range));
+            matched_anchors.push(true);
+        }
+    }
+    normalize_source_anchors(&mut evidence.source_anchors);
+    evidence.source_ranges = evidence
+        .source_anchors
+        .iter()
+        .map(|anchor| anchor.location.range.clone())
+        .collect();
+}
+
+fn evidence_source_anchor(
+    document: &AnalyzedDocument,
+    range: &SourceRange,
+) -> MathInterpretationEvidenceSourceAnchorInfo {
+    MathInterpretationEvidenceSourceAnchorInfo {
+        location: Location {
+            file_id: document.document.file_id.clone(),
+            path: document.document.path.clone(),
+            range: range.clone(),
+        },
+        document_version: document.document.document_version,
+        scope_path: document.scopes.path_at(range.start_offset),
+        lifecycle: MathInterpretationSourceLifecycle::Current,
+        generation: evidence_source_generation(document, range),
     }
 }
 
 fn append_index_claims(
     index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
     entity: &EntityId,
     occurrence: &SourceOccurrence,
     context: &mut SemanticContextInfo,
@@ -5926,7 +6205,9 @@ fn append_index_claims(
                 predicate: claim_predicate_name(&claim.predicate).into(),
                 value: value.clone(),
                 status,
-                evidence: vec![semantic_evidence(index, evidence, kind, strength)],
+                evidence: vec![semantic_evidence(
+                    index, documents, evidence, kind, strength,
+                )],
                 conflicts,
             }
         })
@@ -6196,6 +6477,7 @@ fn constraint_conflict_evidence(
                 .into(),
                 strength: "hard".into(),
                 source_ranges,
+                source_anchors: Vec::new(),
             }
         })
         .collect::<Vec<_>>();

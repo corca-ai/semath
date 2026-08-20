@@ -75,24 +75,25 @@ struct ActivationInput<'a> {
 
 impl DomainObservations {
     pub fn at(&self, offset: u32) -> (Vec<DomainActivation>, bool) {
-        let mut active = self.accumulate(offset);
+        let mut active = self.all_at(offset);
         let truncated = active.len() > MAX_ACTIVATIONS;
         active.truncate(MAX_ACTIVATIONS);
-        (
-            active
-                .into_iter()
-                .map(|(pack_id, activation)| DomainActivation {
-                    pack_id,
-                    pack_version: activation.pack_version,
-                    title: activation.title,
-                    support: activation.support,
-                    scope_kind: activation.scope_kind.into(),
-                    scope_range: activation.scope_range,
-                    evidence: activation.evidence,
-                })
-                .collect(),
-            truncated,
-        )
+        (active, truncated)
+    }
+
+    pub(crate) fn all_at(&self, offset: u32) -> Vec<DomainActivation> {
+        self.accumulate(offset)
+            .into_iter()
+            .map(|(pack_id, activation)| DomainActivation {
+                pack_id,
+                pack_version: activation.pack_version,
+                title: activation.title,
+                support: activation.support,
+                scope_kind: activation.scope_kind.into(),
+                scope_range: activation.scope_range,
+                evidence: activation.evidence,
+            })
+            .collect()
     }
 
     pub(crate) fn relevance(&self, pack_id: &str, offset: u32) -> Option<DomainRelevance> {
@@ -189,10 +190,28 @@ impl DomainObservations {
         active
     }
 
-    pub(crate) fn has_established_equation_evidence(&self) -> bool {
+    pub(crate) fn has_forward_law_routing_target(&self, formula_ranges: &[SourceRange]) -> bool {
         self.equations
             .iter()
-            .any(|equation| equation.source_established)
+            .filter(|equation| equation.source_established)
+            .any(|equation| {
+                formula_ranges.iter().any(|formula| {
+                    let target_offset = if equation.range.end_offset <= formula.start_offset {
+                        formula.start_offset
+                    } else if formula.start_offset <= equation.range.start_offset
+                        && equation.range.end_offset < formula.end_offset
+                    {
+                        // One math root can contain multiple source-ordered
+                        // relations. Its envelope begins before the established
+                        // relation, so preserve the routed pass whenever content
+                        // remains that may contain a later relation.
+                        equation.range.end_offset
+                    } else {
+                        return false;
+                    };
+                    self.scopes.visible(equation.scope_id, target_offset)
+                })
+            })
     }
 
     pub(crate) fn for_forward_law_routing(mut self) -> Self {
@@ -289,18 +308,34 @@ pub(crate) fn observe_domains(
 }
 
 fn formula_is_source_established(formula: &LawRecognition) -> bool {
+    let independently_typed = formula_has_independent_typed_evidence(formula);
     matches!(
         formula.status,
         LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified
-    ) && formula.bindings.iter().all(|binding| {
-        matches!(
-            binding.proof,
-            LawBindingProof::Typed | LawBindingProof::Derived
-        ) && !binding.evidence.source_ranges.is_empty()
-    }) && formula
-        .conditions
-        .iter()
-        .all(|condition| condition.status == ConstraintStatus::Verified)
+    ) && independently_typed
+        && formula.bindings.iter().all(|binding| {
+            matches!(
+                binding.proof,
+                LawBindingProof::Typed | LawBindingProof::Derived
+            ) && !binding.evidence.source_ranges.is_empty()
+        })
+        && formula
+            .conditions
+            .iter()
+            .all(|condition| condition.status == ConstraintStatus::Verified)
+}
+
+pub(crate) fn formula_has_independent_typed_evidence(formula: &LawRecognition) -> bool {
+    formula.bindings.iter().any(|binding| {
+        binding.proof == LawBindingProof::Typed && !binding.evidence.source_ranges.is_empty()
+    }) || formula.conditions.iter().any(|condition| {
+        condition.status == ConstraintStatus::Verified
+            && condition.evidence.iter().any(|evidence| {
+                evidence.kind == "canonical-binding"
+                    && evidence.rule_id.starts_with("typed-law-role/")
+                    && !evidence.source_ranges.is_empty()
+            })
+    })
 }
 
 fn collect_priors(
@@ -416,6 +451,7 @@ fn hypotheses_for_text(
                     kind: "domain-context".into(),
                     strength: "contextual".into(),
                     source_ranges: vec![range.clone()],
+                    source_anchors: Vec::new(),
                 },
             })
         })
@@ -431,14 +467,14 @@ fn source_text<'a>(document: &'a ProjectDocument, range: &SourceRange) -> &'a st
 
 #[cfg(test)]
 mod tests {
-    use super::observe_domains;
+    use super::{EquationActivation, observe_domains};
     use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::prose::observe_prose;
     use crate::scope::ScopeGraph;
     use crate::{
-        DocumentLanguage, DomainSupportTier, MathRootState, ProjectDocument, ProseAnnotation,
-        SourceRange,
+        DocumentLanguage, DomainSupportTier, Evidence, MathRootState, ProjectDocument,
+        ProseAnnotation, SourceIndex, SourceRange,
     };
 
     fn analyze(source: &str, language: DocumentLanguage) -> super::DomainObservations {
@@ -473,6 +509,154 @@ mod tests {
             &prose.semantic_evidence,
             &[],
         )
+    }
+
+    fn add_equation(
+        domains: &mut super::DomainObservations,
+        source: &str,
+        needle: &str,
+        source_established: bool,
+    ) -> SourceRange {
+        let index = SourceIndex::new(source);
+        let start_byte = source.find(needle).unwrap();
+        let end_byte = start_byte + needle.len();
+        let range = SourceRange {
+            start_offset: index.utf16_for_byte(start_byte),
+            end_offset: index.utf16_for_byte(end_byte),
+        };
+        domains.equations.push(EquationActivation {
+            pack_id: "test-domain".into(),
+            pack_version: "1".into(),
+            title: "Test domain".into(),
+            range: range.clone(),
+            scope_id: domains.scopes.id_at(range.start_offset),
+            source_established,
+            evidence: Evidence {
+                rule_id: "test-equation".into(),
+                kind: "canonical-math".into(),
+                strength: "exact".into(),
+                source_ranges: vec![range.clone()],
+                source_anchors: Vec::new(),
+            },
+        });
+        range
+    }
+
+    fn formula_range(source: &str, needle: &str) -> SourceRange {
+        let index = SourceIndex::new(source);
+        let start_byte = source.find(needle).unwrap();
+        SourceRange {
+            start_offset: index.utf16_for_byte(start_byte),
+            end_offset: index.utf16_for_byte(start_byte + needle.len()),
+        }
+    }
+
+    #[test]
+    fn forward_law_routing_requires_a_later_formula() {
+        let source = "$first$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        let equation = add_equation(&mut domains, source, "first", true);
+
+        assert!(!domains.has_forward_law_routing_target(&[]));
+        assert!(!domains.has_forward_law_routing_target(&[equation]));
+    }
+
+    #[test]
+    fn forward_law_routing_accepts_a_later_formula_in_visible_scope() {
+        let source = "# Model\n$first$ and then $later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        add_equation(&mut domains, source, "first", true);
+
+        assert!(domains.has_forward_law_routing_target(&[formula_range(source, "later")]));
+    }
+
+    #[test]
+    fn forward_law_routing_uses_utf16_offsets_after_unicode_text() {
+        let source = "🧪 model $first$ and then $later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        let equation = add_equation(&mut domains, source, "first", true);
+        let later = formula_range(source, "later");
+
+        assert_eq!(
+            equation.start_offset,
+            source[..source.find("first").unwrap()]
+                .encode_utf16()
+                .count() as u32
+        );
+        assert!(domains.has_forward_law_routing_target(&[later]));
+    }
+
+    #[test]
+    fn forward_law_routing_accepts_a_child_formula_visible_from_its_parent_scope() {
+        let source = "# Parent\n$first$\n## Child\n$later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        add_equation(&mut domains, source, "first", true);
+
+        assert!(domains.has_forward_law_routing_target(&[formula_range(source, "later")]));
+    }
+
+    #[test]
+    fn forward_law_routing_accepts_an_exactly_adjacent_range_boundary() {
+        let source = "$first$$later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        let equation = add_equation(&mut domains, source, "first", true);
+        let adjacent = SourceRange {
+            start_offset: equation.end_offset,
+            end_offset: equation.end_offset + 1,
+        };
+
+        assert!(domains.has_forward_law_routing_target(&[adjacent]));
+    }
+
+    #[test]
+    fn forward_law_routing_preserves_later_relations_inside_one_formula_envelope() {
+        let source = "$first, later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        let equation = add_equation(&mut domains, source, "first", true);
+        let formula = SourceRange {
+            start_offset: equation.start_offset,
+            end_offset: formula_range(source, "later").end_offset,
+        };
+
+        assert!(domains.has_forward_law_routing_target(&[formula]));
+    }
+
+    #[test]
+    fn forward_law_routing_rejects_a_later_formula_in_a_sibling_scope() {
+        let source = "# First\n$first$\n# Second\n$later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        add_equation(&mut domains, source, "first", true);
+
+        assert!(!domains.has_forward_law_routing_target(&[formula_range(source, "later")]));
+    }
+
+    #[test]
+    fn forward_law_routing_does_not_escape_a_nested_scope() {
+        let source = "# Parent\n## Child\n$first$\n# Sibling\n$later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        add_equation(&mut domains, source, "first", true);
+
+        assert!(!domains.has_forward_law_routing_target(&[formula_range(source, "later")]));
+    }
+
+    #[test]
+    fn forward_law_routing_requires_source_establishment() {
+        let source = "$first$ and then $later$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        add_equation(&mut domains, source, "first", false);
+
+        assert!(!domains.has_forward_law_routing_target(&[formula_range(source, "later")]));
+    }
+
+    #[test]
+    fn a_current_recognized_equation_reports_explicit_domain_relevance() {
+        let source = "$first$";
+        let mut domains = analyze(source, DocumentLanguage::Markdown);
+        let equation = add_equation(&mut domains, source, "first", false);
+
+        let active = domains.at(equation.start_offset).0;
+        assert_eq!(active.len(), 1);
+        assert_eq!(active[0].support, DomainSupportTier::Explicit);
     }
 
     #[test]

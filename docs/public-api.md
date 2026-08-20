@@ -164,7 +164,7 @@ preview, mutation, collaboration, and undo.
 
 ### Evidence-graded interpretations
 
-Protocol 16 adds `authoringContext.interpretations` as a bounded, open-world
+Protocol 17 exposes `authoringContext.interpretations` as a bounded, open-world
 projection over the existing meaning decision, typed laws, scoped domain
 hypotheses, structural alternatives, and conventional candidates. It does not replace or weaken the
 meaning decision. A host may present the hypotheses for manual review, but the
@@ -177,6 +177,13 @@ the requirement IDs that would discriminate it. `evidence` classifies every
 source-linked item independently as supporting or contradicting and records
 whether it came from an explicit declaration, typed structure, natural-language
 extraction, scoped domain context, a reviewed convention, or derived evidence.
+Each item retains its underlying `Evidence` and adds `sourceAnchors`; every
+anchor identifies the evidence's own file, path, range, document revision,
+scope path, current or retracted lifecycle, and authored or generated origin.
+Cross-document evidence is therefore never labeled as if it came from the
+cursor document.
+These anchors travel with evidence inside the semantic core before projection;
+Semath does not guess a document by matching a rule ID and numeric range.
 These dimensions are deliberately inspectable; Semath exposes no confidence
 percentage or opaque weighted score.
 
@@ -184,12 +191,18 @@ percentage or opaque weighted score.
 kinds and exact evidence. Multiple plausible interpretations remain in the
 ordered set. `missingDiscriminators` contains the complete typed requirement
 objects referenced by hypotheses rather than presentation strings that a host
-would have to parse.
+would have to parse. Every evidence-bearing requirement condition, alternative,
+alternative relevance, ordering reason, and analysis limit uses the same exact
+evidence-reference envelope. The top-level `requirements` collection contains
+that projected type too; raw numeric ranges are never the public identity of
+interpretation evidence.
 
 The set always reports `bounded-open-world` exhaustiveness: absence from the
 bounded candidates does not mean that an author's intended interpretation is
 impossible. `analysisLimits` separately reports candidate/evidence capping,
-engine limits, generated source, and retraction. A missing hypothesis or
+discriminator capping, engine limits, generated source, and retraction. Caps in
+unrelated authoring-context views do not mark the interpretation set truncated.
+A missing hypothesis or
 advisory facet therefore suppresses only the dependent host assistance and
 never becomes a Problem.
 

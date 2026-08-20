@@ -10,6 +10,7 @@ import {
   authoredSnapshotFor,
   classifyAuthoredFirstLoss,
   frontierSignals,
+  evaluateMathAuthoringDevelopment,
   observeAuthoredScientificProbe,
   parseAuthoredScientificFixture,
   parseFreshBlindReleaseFixture,
@@ -99,6 +100,28 @@ for (const fixture of selected) {
   }
   const observations = runs.map((run) => run.observation);
   const score = scoreAuthoredScientificFixture(fixture, observations);
+  const authoringProbes = fixture.probes.flatMap((probe) => {
+    const authoringContext = probe.expected.authoringContext;
+    return authoringContext === undefined
+      ? []
+      : [{ expected: { authoringContext }, id: probe.id }];
+  });
+  const authoringProbeIds = new Set(authoringProbes.map((probe) => probe.id));
+  const authoringEvaluation = evaluateMathAuthoringDevelopment(
+    authoringProbes,
+    observations
+      .filter((observation) => authoringProbeIds.has(observation.caseId))
+      .map((observation) => ({
+        ...(observation.authoringContext === undefined
+          ? {}
+          : { authoringContext: observation.authoringContext }),
+        caseId: observation.caseId,
+      })),
+  );
+  const mathAuthoring = {
+    ...authoringEvaluation,
+    required: authoringProbes.length > 0,
+  };
   const evidenceFacets = summarizeEvidenceGradedHypotheses(observations);
   const evidenceGraded = {
     ...evidenceFacets,
@@ -147,7 +170,8 @@ for (const fixture of selected) {
     ]),
   );
   const firstLossAtlas = summarizeAuthoredFirstLoss(firstLoss);
-  failures += score.failures.length + evidenceGraded.failures.length;
+  failures += score.failures.length + evidenceGraded.failures.length +
+    mathAuthoring.failures.length;
   report.push({
     batch: fixture.batch,
     firstLoss,
@@ -155,6 +179,7 @@ for (const fixture of selected) {
     firstLossCounts,
     observations,
     evidenceGraded,
+    mathAuthoring,
     score,
   });
   console.log(
@@ -178,6 +203,15 @@ for (const fixture of selected) {
         .filter(([, count]) => count > 0)
         .map(([stage, count]) => stage + " " + count)
         .join(", "),
+  );
+  console.log(
+    fixture.batch.split +
+      " math authoring: " +
+      mathAuthoring.exactCases +
+      "/" +
+      mathAuthoring.cases +
+      " exact; required " +
+      mathAuthoring.required,
   );
   console.log(
     fixture.batch.split +
@@ -223,6 +257,7 @@ if (
   const messages = report.flatMap((item) => [
     ...item.score.failures,
     ...item.evidenceGraded.failures,
+    ...item.mathAuthoring.failures,
   ]);
   throw new Error(
     "authored scientific evaluation failed:\n" + messages.join("\n"),

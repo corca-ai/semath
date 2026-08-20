@@ -13,6 +13,8 @@ export * from "./cursor-invariants";
 export * from "./foundation";
 export * from "./fresh-blind-release";
 export * from "./legacy-path-audit";
+export * from "./math-authoring-development";
+export * from "./math-authoring-oracle";
 export * from "./metamorphic";
 export * from "./model";
 export * from "./notation-conformance";

@@ -11,6 +11,7 @@ use crate::domain_signature::{
     is_capability_pack, laws_share_collision, pack_requires_explicit_law_activation,
 };
 use crate::equivalence::{EquivalenceGuard, GuardedForm, compile_guarded_forms, instantiate_guard};
+use crate::interpretation::normalize_source_anchors;
 use crate::pack::{
     PackConditionKind, PackLaw, PackLawCondition, PackLawRole, PackOperatorProperty,
     RoleSourceProjection, built_in_packs,
@@ -21,9 +22,10 @@ use crate::shape::ShapeObservations;
 use crate::source_index::SourceIndex;
 use crate::{
     AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawBindingProof,
-    LawConditionInfo, LawRecognition, LawRecognitionStatus, MeaningConflict, OperatorProperty,
-    QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind,
-    SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
+    LawConditionInfo, LawRecognition, LawRecognitionStatus,
+    MathInterpretationEvidenceSourceAnchorInfo, MeaningConflict, OperatorProperty, QuantityInfo,
+    RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
+    SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
 const MAX_LAW_MATCHES_PER_EXPRESSION: usize = 16;
@@ -754,6 +756,7 @@ impl ExternalTypeEnvironment {
         &self,
         formula_ranges: &[SourceRange],
         observations: &LawObservations,
+        source_anchor: &dyn Fn(&SourceRange) -> Option<MathInterpretationEvidenceSourceAnchorInfo>,
     ) -> Option<Self> {
         let mut output = None;
         for formula in formula_ranges {
@@ -770,7 +773,11 @@ impl ExternalTypeEnvironment {
                 })
                 .flat_map(|recognition| {
                     recognition.bindings.iter().filter_map(move |binding| {
-                        let role = law_derived_role(recognition, binding)?;
+                        let mut role = law_derived_role(recognition, binding)?;
+                        if let Some(anchor) = source_anchor(&recognition.range) {
+                            role.evidence.source_anchors.push(anchor);
+                            normalize_source_anchors(&mut role.evidence.source_anchors);
+                        }
                         let shape = law_derived_shape(binding, &role.evidence);
                         Some((role, shape))
                     })
@@ -831,6 +838,13 @@ fn law_derived_role(recognition: &LawRecognition, binding: &LawBinding) -> Optio
         .collect::<Vec<_>>();
     source_ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
     source_ranges.dedup();
+    let mut source_anchors = recognition
+        .evidence
+        .iter()
+        .flat_map(|evidence| evidence.source_anchors.iter().cloned())
+        .chain(binding.evidence.source_anchors.iter().cloned())
+        .collect::<Vec<_>>();
+    normalize_source_anchors(&mut source_anchors);
     Some(RoleInfo {
         symbol: binding.symbol.clone(),
         concept_id,
@@ -846,6 +860,7 @@ fn law_derived_role(recognition: &LawRecognition, binding: &LawBinding) -> Optio
             kind: "law-derived-role".into(),
             strength: "strong".into(),
             source_ranges,
+            source_anchors,
         },
     })
 }
@@ -2127,6 +2142,7 @@ pub(crate) fn rejected_formula_sign_conflicts(
                             kind: "canonical-math".into(),
                             strength: "hard".into(),
                             source_ranges: vec![actual.range.clone()],
+                            source_anchors: Vec::new(),
                         },
                     ],
                 })
@@ -2671,6 +2687,50 @@ fn role_binding_evidence_ranges(
     ranges
 }
 
+fn role_binding_source_anchors(
+    proof: RoleBindingProof,
+    activation: Option<&LawActivationEvidence>,
+    mut anchors: Vec<MathInterpretationEvidenceSourceAnchorInfo>,
+) -> Vec<MathInterpretationEvidenceSourceAnchorInfo> {
+    if proof == RoleBindingProof::Asserted
+        && let Some(activation) = activation
+    {
+        anchors.extend(activation.evidence.source_anchors.iter().cloned());
+    }
+    normalize_source_anchors(&mut anchors);
+    anchors
+}
+
+fn align_source_ranges_with_anchors(
+    ranges: Vec<SourceRange>,
+    anchors: &[MathInterpretationEvidenceSourceAnchorInfo],
+) -> Vec<SourceRange> {
+    if anchors.is_empty() {
+        return ranges;
+    }
+    let mut unmatched_anchor_ranges = anchors
+        .iter()
+        .map(|anchor| anchor.location.range.clone())
+        .collect::<Vec<_>>();
+    let mut unanchored_ranges = Vec::new();
+    for range in ranges {
+        if let Some(index) = unmatched_anchor_ranges
+            .iter()
+            .position(|anchor_range| anchor_range == &range)
+        {
+            unmatched_anchor_ranges.remove(index);
+        } else {
+            unanchored_ranges.push(range);
+        }
+    }
+    let mut aligned = anchors
+        .iter()
+        .map(|anchor| anchor.location.range.clone())
+        .collect::<Vec<_>>();
+    aligned.extend(unanchored_ranges);
+    aligned
+}
+
 #[allow(clippy::too_many_arguments)]
 fn role_source_evidence_ranges(
     role: &PackLawRole,
@@ -2754,6 +2814,84 @@ fn role_source_evidence_ranges(
     ranges.sort_by_key(|range| (range.start_offset, range.end_offset));
     ranges.dedup();
     ranges
+}
+
+#[allow(clippy::too_many_arguments)]
+fn role_source_evidence_anchors(
+    role: &PackLawRole,
+    expression: &SemanticExpr,
+    offset: u32,
+    shapes: &ShapeObservations,
+    quantities: &QuantityObservations,
+    consistency: &RoleObservations,
+    assumptions: &[AssumptionInfo],
+    external: &ExternalTypeEnvironment,
+) -> Vec<MathInterpretationEvidenceSourceAnchorInfo> {
+    let mut anchors = Vec::new();
+    for symbol in semantic_symbols(expression) {
+        anchors.extend(
+            consistency
+                .roles_at(&symbol, offset)
+                .0
+                .into_iter()
+                .filter(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
+                .flat_map(|claim| claim.evidence.source_anchors),
+        );
+        if concepts_share_lineage("semath:function", &role.concept) {
+            anchors.extend(
+                assumptions
+                    .iter()
+                    .filter(|assumption| is_differentiable_function_evidence(assumption, &symbol))
+                    .flat_map(|assumption| assumption.evidence.source_anchors.iter().cloned()),
+            );
+        }
+        anchors.extend(
+            external
+                .roles_at(offset, &symbol)
+                .into_iter()
+                .filter(|claim| concepts_share_lineage(&claim.concept_id, &role.concept))
+                .flat_map(|claim| claim.evidence.source_anchors),
+        );
+        if let Some(quantity) = role.quantity.as_deref().or_else(|| {
+            role.concept
+                .starts_with("quantities-units:")
+                .then_some(role.concept.as_str())
+        }) {
+            anchors.extend(
+                quantities
+                    .at(&symbol, offset)
+                    .0
+                    .into_iter()
+                    .filter(|claim| claim.quantity_kind_id.as_deref() == Some(quantity))
+                    .flat_map(|claim| claim.evidence.source_anchors),
+            );
+            anchors.extend(
+                external
+                    .quantities_at(offset, &symbol)
+                    .into_iter()
+                    .filter(|claim| claim.quantity_kind_id.as_deref() == Some(quantity))
+                    .flat_map(|claim| claim.evidence.source_anchors),
+            );
+        }
+        if let Some(shape) = role.shape.as_deref() {
+            anchors.extend(
+                shapes
+                    .claims_at(&symbol, offset)
+                    .0
+                    .into_iter()
+                    .filter(|claim| claim.kind == shape)
+                    .flat_map(|claim| claim.evidence.source_anchors),
+            );
+            anchors.extend(
+                external
+                    .shapes_at(offset, &symbol)
+                    .into_iter()
+                    .filter(|claim| claim.kind == shape)
+                    .flat_map(|claim| claim.evidence.source_anchors),
+            );
+        }
+    }
+    anchors
 }
 
 fn is_numeric_scalar(expression: &SemanticExpr) -> bool {
@@ -3356,6 +3494,7 @@ fn recognition(
         kind: "canonical-math".into(),
         strength: "hard".into(),
         source_ranges: vec![formula_evidence_range],
+        source_anchors: Vec::new(),
     };
     let formula_bindings = compiled
         .law
@@ -3382,6 +3521,23 @@ fn recognition(
                     vec![expression.range.clone()]
                 }
             };
+            let proof_anchors = match planned_proof {
+                RoleBindingProof::Typed
+                | RoleBindingProof::DerivedFromTypes
+                | RoleBindingProof::DerivedFromLaw => role_source_evidence_anchors(
+                    role,
+                    expression,
+                    actual.range.start_offset,
+                    context.shapes,
+                    context.quantities,
+                    context.consistency,
+                    context.assumptions,
+                    context.external,
+                ),
+                RoleBindingProof::Candidate
+                | RoleBindingProof::Derived
+                | RoleBindingProof::Asserted => Vec::new(),
+            };
             let proof = if planned_proof == RoleBindingProof::Typed && proof_ranges.is_empty() {
                 RoleBindingProof::Asserted
             } else {
@@ -3392,6 +3548,16 @@ fn recognition(
             } else {
                 role_source_label(expression, role.source_projection, context)?
             };
+            let source_anchors = role_binding_source_anchors(proof, activation, proof_anchors);
+            let source_ranges = align_source_ranges_with_anchors(
+                role_binding_evidence_ranges(
+                    expression,
+                    proof,
+                    activation,
+                    std::mem::take(&mut proof_ranges),
+                ),
+                &source_anchors,
+            );
             Some(LawBinding {
                 parameter: role.id.clone(),
                 symbol,
@@ -3442,12 +3608,8 @@ fn recognition(
                         RoleBindingProof::Candidate => "weak",
                     }
                     .into(),
-                    source_ranges: role_binding_evidence_ranges(
-                        expression,
-                        proof,
-                        activation,
-                        std::mem::take(&mut proof_ranges),
-                    ),
+                    source_ranges,
+                    source_anchors,
                 },
             })
         })
@@ -3553,6 +3715,7 @@ fn recognition(
             kind: "equivalence-proof".into(),
             strength: "hard".into(),
             source_ranges: vec![formula_range.clone()],
+            source_anchors: Vec::new(),
         }));
     }
     LawRecognition {
@@ -3685,6 +3848,7 @@ fn equivalence_conditions(
                     kind: "equivalence-guard".into(),
                     strength: "hard".into(),
                     source_ranges: vec![formula_range.clone()],
+                    source_anchors: Vec::new(),
                 });
                 LawConditionInfo {
                     condition_id: format!("equivalence-nonzero-{index}"),
@@ -3858,6 +4022,7 @@ fn condition_evidence(
                 kind: "canonical-binding".into(),
                 strength: "hard".into(),
                 source_ranges: vec![expression.range.clone()],
+                source_anchors: Vec::new(),
             },
         );
         let symbols = semantic_symbols(expression);
@@ -3941,6 +4106,7 @@ fn structural_condition_evidence(
             kind: "canonical-binding".into(),
             strength: "hard".into(),
             source_ranges: vec![actual.range.clone()],
+            source_anchors: Vec::new(),
         });
     }
     if condition.kind == PackConditionKind::Differentiable && condition.subjects.len() == 2 {
@@ -3952,6 +4118,7 @@ fn structural_condition_evidence(
                 kind: "canonical-binding".into(),
                 strength: "hard".into(),
                 source_ranges: vec![actual.range.clone()],
+                source_anchors: Vec::new(),
             });
         }
     }
@@ -3963,6 +4130,7 @@ fn structural_condition_evidence(
             kind: "canonical-binding".into(),
             strength: "hard".into(),
             source_ranges: vec![actual.range.clone()],
+            source_anchors: Vec::new(),
         });
     }
     if condition.kind == PackConditionKind::SameContext
@@ -3973,6 +4141,7 @@ fn structural_condition_evidence(
             kind: "canonical-binding".into(),
             strength: "hard".into(),
             source_ranges: vec![actual.range.clone()],
+            source_anchors: Vec::new(),
         });
     }
     if condition.kind != PackConditionKind::SameContext || condition.subjects.len() != 2 {
@@ -4009,6 +4178,7 @@ fn structural_condition_evidence(
         kind: "canonical-binding".into(),
         strength: "hard".into(),
         source_ranges: vec![actual.range.clone()],
+        source_anchors: Vec::new(),
     })
 }
 
@@ -4177,6 +4347,7 @@ fn positive_condition_evidence(
         kind: "canonical-binding".into(),
         strength: "hard".into(),
         source_ranges: vec![fact.evidence_range.clone()],
+        source_anchors: Vec::new(),
     })
 }
 
@@ -4421,6 +4592,7 @@ fn same_context_evidence(
                 .filter_map(|subject| bindings.get(subject))
                 .map(|expression| expression.range.clone())
                 .collect(),
+            source_anchors: Vec::new(),
         });
     }
     let symbols = bound_condition_symbols(subjects, bindings);
@@ -4479,6 +4651,7 @@ fn shared_role_context_evidence(
         kind: "attached-prose".into(),
         strength: "strong".into(),
         source_ranges,
+        source_anchors: Vec::new(),
     })
 }
 
@@ -4909,6 +5082,7 @@ mod tests {
                 kind: "display-only".into(),
                 strength: "display-only".into(),
                 source_ranges: Vec::new(),
+                source_anchors: Vec::new(),
             },
         };
         assert_eq!(
@@ -5041,6 +5215,7 @@ mod tests {
                     start_offset: 35,
                     end_offset: 45,
                 }],
+                source_anchors: Vec::new(),
             },
         };
         let formula_range = SourceRange {
@@ -6207,6 +6382,18 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
+    fn draft_proposals_do_not_establish_nested_laws() {
+        let source = "Let $A$ and $B$ be events. The draft calculation proposed \
+            $P(A\\cup B)=P(A)+P(B)=0.29$.";
+
+        assert!(
+            recognized_laws(source)
+                .iter()
+                .all(|law| law != "event-union"),
+        );
+    }
+
+    #[test]
     fn pack_compiled_expression_laws_remain_visible_inside_larger_formulas() {
         let source = "Let $A$, $B$, and $C$ be sets. The overlap is defined by $A\\cap B=C$.";
         let recognized = recognized_law_observations(source);
@@ -7173,7 +7360,7 @@ This vector field is the gradient of $f$; hence, after the characterization abov
             end_offset: recognition.range.end_offset + 2,
         };
         let environment = ExternalTypeEnvironment::default()
-            .with_preceding_law_roles(&[before.clone(), after.clone()], &observations)
+            .with_preceding_law_roles(&[before.clone(), after.clone()], &observations, &|_| None)
             .expect("the later formula receives derived roles");
         assert!(environment.roles_at(before.start_offset, "H").is_empty());
         assert!(
