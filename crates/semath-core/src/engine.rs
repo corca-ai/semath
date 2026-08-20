@@ -22,6 +22,7 @@ use crate::entity_policy::{
     refused_authorization,
 };
 use crate::hygiene::{HygieneAnalysis, analyze_hygiene};
+use crate::interpretation::{MathInterpretationInput, project_math_interpretations};
 use crate::law::{ExternalTypeEnvironment, rejected_formula_sign_conflicts};
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
@@ -44,12 +45,13 @@ use crate::{
     MathAuthoringDisposition, MathAuthoringRequirementInfo, MathClaimEvidenceLinkInfo,
     MathClaimModality, MathClaimPolarity, MathClaimStrengthCeiling, MathEquationLinkInfo,
     MathEquationLinkKind, MathExactness, MathFormulaAnchorInfo, MathNotationOccurrenceInfo,
-    MathSourceFreshness, MathSourceGeneration, MathSourceLifecycleInfo, MeaningConflict,
-    MeaningDecision, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange, ProjectDocument,
-    ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope, QueryResult,
-    QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus, SemanticClaimStatus,
-    SemanticContextInfo, SemanticDiagnostic, SemanticEditFile, SemanticEditProposal,
-    SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo, UpdateResult,
+    MathSourceFreshness, MathSourceGeneration, MathSourceLifecycleInfo, MeaningAlternative,
+    MeaningConflict, MeaningDecision, PROTOCOL_VERSION, PhysicalDimensionInfo, ProjectChange,
+    ProjectDocument, ProjectSnapshot, ProjectSnapshotMetadata, QuantityInfo, Query, QueryEnvelope,
+    QueryResult, QueryValue, RoleInfo, SemanticCandidateInfo, SemanticCandidateStatus,
+    SemanticClaimStatus, SemanticContextInfo, SemanticDiagnostic, SemanticEditFile,
+    SemanticEditProposal, SemanticTextEdit, SemanticViewInfo, ShapeInfo, SourceRange, SymbolInfo,
+    UpdateResult,
 };
 
 const MAX_SYMBOL_DEFINITIONS: usize = 8;
@@ -4250,6 +4252,7 @@ impl SemathEngine {
             &local_formulas,
             &linked_formulas,
             &context,
+            &domains,
             &decision,
             conventional_candidates,
             formula_retracted,
@@ -4278,6 +4281,7 @@ impl SemathEngine {
         local_formulas: &[LawRecognition],
         linked_formulas: &[SourceLinkedFormula],
         context: &SemanticContextInfo,
+        domains: &[DomainActivation],
         decision: &MeaningDecision,
         conventional_candidates: Vec<ConventionalCandidateInfo>,
         retracted: bool,
@@ -4295,6 +4299,7 @@ impl SemathEngine {
             local_formulas,
             decision,
             &conventional_candidates,
+            context,
         );
         truncated |= requirements.len() > MAX_AUTHORING_ITEMS;
         requirements.truncate(MAX_AUTHORING_ITEMS);
@@ -4352,6 +4357,43 @@ impl SemathEngine {
             !conventional_candidates.is_empty(),
             engine_limited,
         );
+        let lifecycle = MathSourceLifecycleInfo {
+            document_version: document.document.document_version,
+            generation: if generated {
+                MathSourceGeneration::Generated
+            } else {
+                MathSourceGeneration::Authored
+            },
+            freshness: MathSourceFreshness::Current,
+            editable,
+            retracted,
+            capped: truncated,
+            engine_limited,
+        };
+        let interpretation_scope_path = formula
+            .as_ref()
+            .map(|formula| formula.scope_path.clone())
+            .or_else(|| {
+                focus
+                    .and_then(|focus| self.index.semantic.occurrence(&focus.occurrence_id))
+                    .map(|occurrence| occurrence.scope_path.clone())
+            })
+            .unwrap_or_default();
+        let interpretations = project_math_interpretations(MathInterpretationInput {
+            decision,
+            formulas: local_formulas,
+            conventional_candidates: &conventional_candidates,
+            domains,
+            context,
+            requirements: &requirements,
+            formula: formula.as_ref(),
+            focus_range: focus.map(|focus| &focus.range),
+            file_id: &document.document.file_id,
+            path: &document.document.path,
+            scope_path: &interpretation_scope_path,
+            lifecycle: &lifecycle,
+            view_truncated: truncated,
+        });
         MathAuthoringContext {
             disposition,
             formula,
@@ -4362,19 +4404,8 @@ impl SemathEngine {
             approximation,
             claim_evidence,
             notation_occurrences,
-            lifecycle: MathSourceLifecycleInfo {
-                document_version: document.document.document_version,
-                generation: if generated {
-                    MathSourceGeneration::Generated
-                } else {
-                    MathSourceGeneration::Authored
-                },
-                freshness: MathSourceFreshness::Current,
-                editable,
-                retracted,
-                capped: truncated,
-                engine_limited,
-            },
+            interpretations,
+            lifecycle,
             truncated,
         }
     }
@@ -4430,6 +4461,7 @@ impl SemathEngine {
         formulas: &[LawRecognition],
         decision: &MeaningDecision,
         conventional_candidates: &[ConventionalCandidateInfo],
+        context: &SemanticContextInfo,
     ) -> Vec<MathAuthoringRequirementInfo> {
         let mut requirements = Vec::new();
         for formula in formulas {
@@ -4520,6 +4552,42 @@ impl SemathEngine {
                     .flat_map(|alternative| alternative.evidence.iter().cloned())
                     .collect(),
             });
+        } else {
+            let mut groups = BTreeMap::<(u32, u32), Vec<&SemanticCandidateInfo>>::new();
+            for candidate in &context.candidates {
+                groups
+                    .entry((candidate.range.start_offset, candidate.range.end_offset))
+                    .or_default()
+                    .push(candidate);
+            }
+            for ((start, end), candidates) in groups {
+                if candidates.len() < 2 {
+                    continue;
+                }
+                let alternatives = candidates
+                    .into_iter()
+                    .map(|candidate| MeaningAlternative {
+                        alternative_id: candidate.candidate_id.clone(),
+                        label: candidate.interpretation.clone(),
+                        range: candidate.range.clone(),
+                        evidence: vec![Evidence {
+                            rule_id: "semath/authoring/structural-alternative".into(),
+                            kind: "source-structure".into(),
+                            strength: "contextual".into(),
+                            source_ranges: vec![candidate.range.clone()],
+                        }],
+                        relevance: None,
+                    })
+                    .collect::<Vec<_>>();
+                requirements.push(MathAuthoringRequirementInfo::Disambiguation {
+                    requirement_id: format!("meaning/structural-disambiguation/{start}-{end}"),
+                    evidence: alternatives
+                        .iter()
+                        .flat_map(|alternative| alternative.evidence.iter().cloned())
+                        .collect(),
+                    alternatives,
+                });
+            }
         }
         let mut seen = HashSet::new();
         requirements.retain(|requirement| seen.insert(authoring_requirement_id(requirement)));

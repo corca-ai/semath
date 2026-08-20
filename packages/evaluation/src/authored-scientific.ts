@@ -1,4 +1,5 @@
 import type {
+  MathInterpretationSetInfo,
   QueryResult,
   RelationInfo,
   SemanticViewInfo,
@@ -216,6 +217,8 @@ export interface AuthoredScientificObservation {
     readonly range: SourceRange;
     readonly severity: "error" | "hint" | "warning";
   }[];
+  /** Present in protocol 16+ reports; omitted from preserved historical observations. */
+  readonly interpretations?: MathInterpretationSetInfo;
   readonly prepareRename: {
     readonly placeholder?: string;
     readonly range?: SourceRange;
@@ -645,6 +648,7 @@ export function observeAuthoredScientificProbe(
       range: diagnostic.range,
       severity: diagnostic.severity,
     })),
+    interpretations: view.authoringContext.interpretations,
     prepareRename: {
       ...(results.prepareRename.value.placeholder
         ? { placeholder: results.prepareRename.value.placeholder }

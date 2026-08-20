@@ -21,11 +21,21 @@ use crate::{
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
+    document_with_language(file_id, path, content, version, DocumentLanguage::Latex)
+}
+
+fn document_with_language(
+    file_id: &str,
+    path: &str,
+    content: &str,
+    version: u64,
+    language: DocumentLanguage,
+) -> ProjectDocument {
     ProjectDocument {
         prose_annotations: vec![],
         file_id: file_id.into(),
         path: path.into(),
-        language: DocumentLanguage::Latex,
+        language,
         content: content.into(),
         document_version: version,
         schema_version: 8,
@@ -35,9 +45,334 @@ fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDo
         scopes: Vec::new(),
         blocks: Vec::new(),
         declarations: Vec::new(),
-        math_regions: test_math_regions(content, DocumentLanguage::Latex),
+        math_regions: test_math_regions(content, language),
         macros: Vec::new(),
         includes: Vec::new(),
+    }
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EvidenceGradedDevelopmentFixture {
+    schema_version: u32,
+    id: String,
+    provenance: EvidenceGradedDevelopmentProvenance,
+    cases: Vec<EvidenceGradedDevelopmentCase>,
+    independently_authored_scenario_coverage: Vec<EvidenceGradedAuthoredScenarioCoverage>,
+    supplemental_lifecycle_tests: Vec<String>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EvidenceGradedDevelopmentProvenance {
+    authoring_method: String,
+    engine_blind_at_authoring: bool,
+    historical_or_fresh_fixture_imported: bool,
+    purpose: String,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EvidenceGradedDevelopmentCase {
+    id: String,
+    pair_id: String,
+    language: DocumentLanguage,
+    path: String,
+    source: String,
+    cursor_needle: String,
+    expected_decision: String,
+    expected_support: Option<String>,
+    required_evidence_role: String,
+    required_provenance: Vec<String>,
+    required_missing_discriminator_prefix: Option<String>,
+    minimum_hypotheses: usize,
+    maximum_diagnostics: usize,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EvidenceGradedAuthoredScenarioCoverage {
+    scenario_id: String,
+    probe_id: String,
+    expected_decision: String,
+    facets: Vec<String>,
+}
+
+#[test]
+fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
+    let fixture: EvidenceGradedDevelopmentFixture = serde_json::from_str(include_str!(
+        "../../../fixtures/development/evidence-graded-hypotheses-v1.json"
+    ))
+    .expect("strict evidence-graded development fixture");
+    assert_eq!(fixture.schema_version, 1);
+    assert_eq!(fixture.id, "evidence-graded-hypotheses-v1");
+    assert_eq!(
+        fixture.provenance.authoring_method,
+        "project-original-reviewed-development"
+    );
+    assert!(!fixture.provenance.engine_blind_at_authoring);
+    assert!(!fixture.provenance.historical_or_fresh_fixture_imported);
+    assert!(fixture.provenance.purpose.contains("spent release fixture"));
+    assert_eq!(fixture.cases.len(), 8);
+    assert_eq!(fixture.supplemental_lifecycle_tests.len(), 7);
+    assert_independently_authored_evidence_coverage(
+        &fixture.independently_authored_scenario_coverage,
+    );
+
+    let mut paired = HashMap::new();
+    for case in fixture.cases {
+        let offset = case
+            .source
+            .rfind(&case.cursor_needle)
+            .unwrap_or_else(|| panic!("{} has a unique cursor needle", case.id))
+            as u32;
+        let mut engine = SemathEngine::default();
+        engine
+            .reset(ProjectSnapshot {
+                protocol_version: PROTOCOL_VERSION,
+                epoch: format!("{}:1", case.id),
+                inventory_version: 1,
+                project_id: case.id.clone(),
+                main_file_id: Some("main".into()),
+                documents: vec![document_with_language(
+                    "main",
+                    &case.path,
+                    &case.source,
+                    1,
+                    case.language,
+                )],
+            })
+            .unwrap();
+        let QueryValue::SemanticView { view } = engine
+            .query(QueryEnvelope {
+                protocol_version: PROTOCOL_VERSION,
+                epoch: format!("{}:1", case.id),
+                inventory_version: 1,
+                document_version: 1,
+                analysis_generation: 1,
+                query: Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+            })
+            .unwrap()
+            .value
+        else {
+            panic!("{} expected semantic view", case.id)
+        };
+        assert_eq!(
+            meaning_decision_name(&view.decision),
+            case.expected_decision,
+            "{} decision",
+            case.id
+        );
+        assert_eq!(
+            view.authoring_context.interpretations.exhaustiveness,
+            crate::MathInterpretationExhaustiveness::BoundedOpenWorld,
+            "{} exhaustiveness",
+            case.id
+        );
+        assert!(
+            view.authoring_context.interpretations.hypotheses.len() >= case.minimum_hypotheses,
+            "{} hypotheses: {:#?}",
+            case.id,
+            view.authoring_context.interpretations
+        );
+        assert!(
+            view.diagnostics.len() <= case.maximum_diagnostics,
+            "{} diagnostics: {:#?}",
+            case.id,
+            view.diagnostics
+        );
+        if let Some(expected) = case.expected_support.as_deref() {
+            assert!(
+                view.authoring_context
+                    .interpretations
+                    .hypotheses
+                    .iter()
+                    .any(|hypothesis| interpretation_support_name(hypothesis.support) == expected),
+                "{} support: {:#?}",
+                case.id,
+                view.authoring_context.interpretations.hypotheses
+            );
+        }
+        assert!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .flat_map(|hypothesis| &hypothesis.evidence)
+                .any(|item| interpretation_evidence_role_name(item.role)
+                    == case.required_evidence_role),
+            "{} evidence role {}: {:#?}",
+            case.id,
+            case.required_evidence_role,
+            view.authoring_context.interpretations.hypotheses
+        );
+        for expected in &case.required_provenance {
+            assert!(
+                view.authoring_context
+                    .interpretations
+                    .hypotheses
+                    .iter()
+                    .flat_map(|hypothesis| &hypothesis.evidence)
+                    .any(|item| interpretation_provenance_name(item.provenance) == expected),
+                "{} provenance {}: {:#?}",
+                case.id,
+                expected,
+                view.authoring_context.interpretations.hypotheses
+            );
+        }
+        if let Some(prefix) = &case.required_missing_discriminator_prefix {
+            assert!(
+                view.authoring_context
+                    .interpretations
+                    .missing_discriminators
+                    .iter()
+                    .map(authoring_requirement_name)
+                    .any(|id| id.starts_with(prefix)),
+                "{} discriminators: {:#?}",
+                case.id,
+                view.authoring_context
+                    .interpretations
+                    .missing_discriminators
+            );
+        }
+        for hypothesis in &view.authoring_context.interpretations.hypotheses {
+            assert_eq!(hypothesis.location.file_id, "main", "{} file", case.id);
+            assert_eq!(hypothesis.location.path, case.path, "{} path", case.id);
+            assert_eq!(hypothesis.document_version, 1, "{} version", case.id);
+            assert!(
+                hypothesis
+                    .ordering_reasons
+                    .iter()
+                    .filter(|reason| {
+                        reason.kind
+                            != crate::MathInterpretationOrderingReasonKind::StableSourceOrder
+                    })
+                    .all(|reason| !reason.evidence.is_empty()),
+                "{} ordering evidence: {:#?}",
+                case.id,
+                hypothesis.ordering_reasons
+            );
+        }
+        let summary = (
+            meaning_decision_name(&view.decision),
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .map(|hypothesis| {
+                    (
+                        hypothesis.kind,
+                        hypothesis.support,
+                        hypothesis.label.clone(),
+                        hypothesis.missing_discriminator_ids.clone(),
+                    )
+                })
+                .collect::<Vec<_>>(),
+        );
+        if let Some(previous) = paired.insert(case.pair_id.clone(), summary.clone()) {
+            assert_eq!(previous, summary, "{} TeX/Markdown parity", case.pair_id);
+        }
+    }
+    assert_eq!(paired.len(), 4);
+}
+
+fn assert_independently_authored_evidence_coverage(
+    coverage: &[EvidenceGradedAuthoredScenarioCoverage],
+) {
+    let authored: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../fixtures/challenge/document-reasoning-development-v1.json"
+    ))
+    .expect("authored development fixture");
+    let scenarios = authored["scenarios"]
+        .as_array()
+        .expect("authored scenarios");
+    let probes = authored["probes"].as_array().expect("authored probes");
+    let mut facets = std::collections::BTreeSet::new();
+    for reference in coverage {
+        let scenario = scenarios
+            .iter()
+            .find(|scenario| scenario["id"] == reference.scenario_id)
+            .unwrap_or_else(|| panic!("missing authored scenario {}", reference.scenario_id));
+        assert_eq!(scenario["provenance"]["engineBlind"], true);
+        assert!(
+            scenario["review"]["status"] == "accepted"
+                || scenario["review"]["status"] == "corrected"
+        );
+        let probe = probes
+            .iter()
+            .find(|probe| probe["id"] == reference.probe_id)
+            .unwrap_or_else(|| panic!("missing authored probe {}", reference.probe_id));
+        assert_eq!(probe["scenarioId"], reference.scenario_id);
+        assert_eq!(probe["expected"]["decision"], reference.expected_decision);
+        facets.extend(reference.facets.iter().map(String::as_str));
+    }
+    for required in [
+        "cross-field-interpretations",
+        "leading-candidate-contradiction",
+        "missing-discriminator",
+        "natural-language-provenance",
+        "open-world-refusal",
+        "section-scope",
+        "include-lifecycle",
+        "retraction-lifecycle",
+    ] {
+        assert!(facets.contains(required), "missing public facet {required}");
+    }
+}
+
+fn meaning_decision_name(decision: &MeaningDecision) -> &'static str {
+    match decision {
+        MeaningDecision::Established { .. } => "established",
+        MeaningDecision::Partial { .. } => "partial",
+        MeaningDecision::Ambiguous { .. } => "ambiguous",
+        MeaningDecision::Conflicting { .. } => "conflicting",
+        MeaningDecision::Unsupported { .. } => "unsupported",
+    }
+}
+
+fn interpretation_support_name(support: crate::MathInterpretationSupportTier) -> &'static str {
+    match support {
+        crate::MathInterpretationSupportTier::Explicit => "explicit",
+        crate::MathInterpretationSupportTier::Derived => "derived",
+        crate::MathInterpretationSupportTier::Supported => "supported",
+        crate::MathInterpretationSupportTier::Tentative => "tentative",
+        crate::MathInterpretationSupportTier::Contradicted => "contradicted",
+    }
+}
+
+fn interpretation_provenance_name(
+    provenance: crate::MathInterpretationEvidenceProvenance,
+) -> &'static str {
+    match provenance {
+        crate::MathInterpretationEvidenceProvenance::ExplicitDeclaration => "explicit-declaration",
+        crate::MathInterpretationEvidenceProvenance::TypedStructure => "typed-structure",
+        crate::MathInterpretationEvidenceProvenance::NaturalLanguageExtraction => {
+            "natural-language-extraction"
+        }
+        crate::MathInterpretationEvidenceProvenance::DomainContext => "domain-context",
+        crate::MathInterpretationEvidenceProvenance::ReviewedConvention => "reviewed-convention",
+        crate::MathInterpretationEvidenceProvenance::DerivedEvidence => "derived-evidence",
+    }
+}
+
+fn interpretation_evidence_role_name(role: crate::MathInterpretationEvidenceRole) -> &'static str {
+    match role {
+        crate::MathInterpretationEvidenceRole::Supporting => "supporting",
+        crate::MathInterpretationEvidenceRole::Contradicting => "contradicting",
+    }
+}
+
+fn authoring_requirement_name(requirement: &crate::MathAuthoringRequirementInfo) -> &str {
+    match requirement {
+        crate::MathAuthoringRequirementInfo::Declaration { requirement_id, .. }
+        | crate::MathAuthoringRequirementInfo::RoleDeclaration { requirement_id, .. }
+        | crate::MathAuthoringRequirementInfo::Condition { requirement_id, .. }
+        | crate::MathAuthoringRequirementInfo::Disambiguation { requirement_id, .. } => {
+            requirement_id
+        }
     }
 }
 
@@ -947,6 +1282,28 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
     );
     assert!(authoring.lifecycle.editable);
     assert!(!authoring.truncated);
+    assert_eq!(
+        authoring.interpretations.exhaustiveness,
+        crate::MathInterpretationExhaustiveness::BoundedOpenWorld
+    );
+    let hypothesis = authoring
+        .interpretations
+        .hypotheses
+        .first()
+        .expect("source-grounded law hypothesis");
+    assert_eq!(
+        hypothesis.hypothesis_id,
+        "classical-mechanics:mechanical-power"
+    );
+    assert_eq!(
+        hypothesis.support,
+        crate::MathInterpretationSupportTier::Derived
+    );
+    assert_eq!(hypothesis.formula.as_ref(), authoring.formula.as_ref());
+    assert!(hypothesis.evidence.iter().all(|item| {
+        !item.evidence.source_ranges.is_empty()
+            && item.role == crate::MathInterpretationEvidenceRole::Supporting
+    }));
 }
 
 #[test]
@@ -1014,6 +1371,26 @@ fn semantic_view_exposes_conventional_notation_as_a_bounded_non_authoritative_ca
     assert!(view.authoring_context.conditions.iter().any(|condition| {
         condition.condition_id == "positive-period"
             && condition.status == crate::ConstraintStatus::Required
+    }));
+    let hypothesis = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .find(|hypothesis| hypothesis.kind == crate::MathInterpretationKind::ReviewedConvention)
+        .expect("reviewed convention remains a distinct hypothesis");
+    assert_eq!(
+        hypothesis.support,
+        crate::MathInterpretationSupportTier::Tentative
+    );
+    assert!(
+        hypothesis
+            .missing_discriminator_ids
+            .iter()
+            .any(|id| id == "period-frequency-reciprocity/binding/frequency")
+    );
+    assert!(hypothesis.evidence.iter().any(|item| {
+        item.provenance == crate::MathInterpretationEvidenceProvenance::DomainContext
     }));
 
     let definition = engine
@@ -2283,6 +2660,13 @@ fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
     assert!(view.context.relations.is_empty());
     assert!(view.authoring_context.lifecycle.retracted);
     assert!(!view.authoring_context.lifecycle.editable);
+    assert!(
+        view.authoring_context
+            .interpretations
+            .analysis_limits
+            .iter()
+            .any(|limit| limit.kind == crate::MathInterpretationAnalysisLimitKind::RetractedSource)
+    );
 }
 
 #[test]
@@ -2431,6 +2815,13 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
         crate::MathSourceGeneration::Generated
     );
     assert!(!view.authoring_context.lifecycle.editable);
+    assert!(
+        view.authoring_context
+            .interpretations
+            .analysis_limits
+            .iter()
+            .any(|limit| limit.kind == crate::MathInterpretationAnalysisLimitKind::GeneratedSource)
+    );
     assert!(
         !view
             .authoring_context
@@ -2638,6 +3029,13 @@ fn same_revision_opaque_relink_reanalyzes_without_accepting_stale_text() {
     );
     assert!(view.authoring_context.lifecycle.engine_limited);
     assert!(!view.authoring_context.lifecycle.editable);
+    assert!(
+        view.authoring_context
+            .interpretations
+            .analysis_limits
+            .iter()
+            .any(|limit| { limit.kind == crate::MathInterpretationAnalysisLimitKind::EngineLimit })
+    );
 }
 
 #[test]

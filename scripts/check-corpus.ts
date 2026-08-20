@@ -44,10 +44,19 @@ const native = spawnSync(
   {
     encoding: "utf8",
     input: JSON.stringify({ queries: plan.queries, snapshot: plan.snapshot }),
-    maxBuffer: 128 * 1024 * 1024,
+    // Protocol 16 returns bounded advisory hypotheses in each semantic view.
+    // This is an aggregate batch transport ceiling, not a per-query product
+    // budget; the dedicated query-result budget remains separately gated.
+    maxBuffer: 256 * 1024 * 1024,
   },
 );
-if (native.status !== 0) throw new Error(native.stderr || "native corpus run failed");
+if (native.status !== 0) {
+  throw new Error(
+    native.stderr ||
+      native.error?.message ||
+      `native corpus run failed${native.signal ? ` with ${native.signal}` : ""}`,
+  );
+}
 const results = JSON.parse(native.stdout) as QueryResult[];
 const observations = observeQualityRun(plan, results);
 const scorecard = scoreQuality(manifest, corpora, observations);
