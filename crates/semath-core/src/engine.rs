@@ -1869,7 +1869,9 @@ impl RelationLowerer<'_> {
             }
             _ => return Some(result),
         };
-        self.emit_relation(result.clone(), relation, &expression.range);
+        if !relation.exceeds_entity_bound() {
+            self.emit_relation(result.clone(), relation, &expression.range);
+        }
         Some(result)
     }
 

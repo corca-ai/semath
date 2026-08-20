@@ -396,6 +396,58 @@ fn chained_equality_stores_operands_and_source_linked_relations_without_a_system
 }
 
 #[test]
+fn wide_variadic_relation_is_bounded_without_rejecting_the_snapshot() {
+    let operands = |count, separator| {
+        (0..count)
+            .map(|index| format!("x_{{{index}}}"))
+            .collect::<Vec<_>>()
+            .join(separator)
+    };
+    let variadic_relations = [
+        ("31-term sum", operands(31, "+")),
+        ("32-term sum", operands(32, "+")),
+        ("31-factor product", operands(31, "\\cdot ")),
+        ("32-factor product", operands(32, "\\cdot ")),
+        (
+            "30-argument application",
+            format!("f({})", operands(30, ",")),
+        ),
+        (
+            "31-argument application",
+            format!("f({})", operands(31, ",")),
+        ),
+    ];
+    for (label, right) in variadic_relations {
+        let formula = format!("r={right}");
+        let content = format!("The candidate equality ${formula}$ is not asserted.");
+
+        let mut engine = SemathEngine::default();
+        engine
+            .reset(snapshot(&content))
+            .unwrap_or_else(|error| panic!("{label} rejected: {error:?}"));
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: (content.find(&formula).expect("formula exists") + formula.len())
+                        as u32,
+                },
+                1,
+                1,
+            ))
+            .expect("the bounded formula remains queryable");
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert!(
+            matches!(view.decision, MeaningDecision::Unsupported { .. }),
+            "{label} must remain unsupported: {:#?}",
+            view.decision
+        );
+    }
+}
+
+#[test]
 fn chained_metric_formula_does_not_store_relation_placeholder_entities() {
     let named = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{ECE}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
     let expanded = "Let p denote the probability assigned to event A.\nExpected calibration error (ECE) uses confidence bins $B_m$.\n$p=\\operatorname{E C E}=\\sum_{m=1}^{M}\\frac{|B_m|}{n}\\left|\\operatorname{acc}(B_m)-\\operatorname{conf}(B_m)\\right|$";
