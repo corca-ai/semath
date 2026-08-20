@@ -215,6 +215,13 @@ function semanticView(): SemanticViewInfo {
       conditions: [],
       disposition: "partial",
       equationLinks: [],
+      interpretations: {
+        analysisLimits: [],
+        exhaustiveness: "bounded-open-world",
+        hypotheses: [],
+        missingDiscriminators: [],
+        truncated: false,
+      },
       lifecycle: {
         capped: false,
         documentVersion: 1,

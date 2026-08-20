@@ -289,6 +289,27 @@ PR #365 was closed without merge. No 0.18.0 package, tag, or CorTeX pin was
 published. The exposed v0.36 fixture is historical evidence and must not be
 rerun, relabeled, or used for case-specific tuning.
 
+## Protocol 16 evidence-graded development facets
+
+On 2026-08-20, protocol 16 projected evidence-graded hypotheses over all 166
+independently authored development probes. The facet report found hypotheses
+in 160 cases and multiple bounded hypotheses in 128. Supporting evidence was
+present in 156 cases, contradictory evidence in one reviewed Faraday-law
+conflict, missing discriminators in 120, natural-language provenance in 81,
+scoped-domain provenance in 147, and reviewed conventions in 11. All 166 cases
+reported bounded-open-world exhaustiveness, exact file/path/range/revision/scope
+anchors, and deterministic evidence-bearing ordering. The dedicated safety
+checks found zero advisory authority, anchor, ordering, contradiction, or
+discriminator-link failures.
+
+These are separate facet counts, not a confidence score or completeness claim.
+The existing authored decision baseline on the same run remained 106 of 166
+with risk 152; the new projection reports uncertainty and provenance without
+silently improving those decisions. The public development manifest also pins
+four TeX/Markdown pairs plus independently authored cross-field, contradiction,
+section, include, retraction, generated-source, edit, and engine-limit evidence.
+No v0.36 fresh-blind input was read, rerun, or used for tuning.
+
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
 least 95% recall. This baseline is release evidence, not a completeness claim or

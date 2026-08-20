@@ -2,10 +2,17 @@
 
 | Semath | Protocol | Pack schema | wasmtex syntax |
 | --- | ---: | ---: | ---: |
-| current `main` code | 15 | 12 | 8 |
+| current `main` code | 16 | 12 | 8 |
 
 `package.json` pins the reviewed wasmtex commit. That commit, the generated
 WASM declarations, protocol version, and pack schema are one tested set.
+
+Protocol 16 adds the required bounded open-world interpretation projection to
+`MathAuthoringContext`. Hosts receive qualitative support tiers, source-linked
+support and contradiction, evidence provenance, missing discriminators,
+ordering reasons, and analysis limits without changing decision or edit
+authority. Protocol 15 hosts must hard-cut over with the corresponding WASM
+artifact; there is no mixed-version compatibility layer.
 
 The latest accepted semantic safety release remains v0.35. The independently
 sealed v0.36 candidate at

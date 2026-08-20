@@ -3,6 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   FIRST_LOSS_STAGES,
+  evidenceGradedBreadthFailures,
   authoredProbeIdentityFailures,
   authoredRelationRangeMatches,
   authoredScenarioFor,
@@ -15,6 +16,7 @@ import {
   resolveAuthoredAnchor,
   roleInstancesMatch,
   scoreAuthoredScientificFixture,
+  summarizeEvidenceGradedHypotheses,
   summarizeAuthoredFirstLoss,
   type AuthoredRelationSourceEvidence,
   type AuthoredScientificFixture,
@@ -97,6 +99,14 @@ for (const fixture of selected) {
   }
   const observations = runs.map((run) => run.observation);
   const score = scoreAuthoredScientificFixture(fixture, observations);
+  const evidenceFacets = summarizeEvidenceGradedHypotheses(observations);
+  const evidenceGraded = {
+    ...evidenceFacets,
+    failures: [
+      ...evidenceFacets.failures,
+      ...evidenceGradedBreadthFailures(evidenceFacets),
+    ],
+  };
   const failedIds = new Set(
     score.failures.map((failure) => failure.slice(0, failure.indexOf(":"))),
   );
@@ -137,13 +147,14 @@ for (const fixture of selected) {
     ]),
   );
   const firstLossAtlas = summarizeAuthoredFirstLoss(firstLoss);
-  failures += score.failures.length;
+  failures += score.failures.length + evidenceGraded.failures.length;
   report.push({
     batch: fixture.batch,
     firstLoss,
     firstLossAtlas,
     firstLossCounts,
     observations,
+    evidenceGraded,
     score,
   });
   console.log(
@@ -168,6 +179,35 @@ for (const fixture of selected) {
         .map(([stage, count]) => stage + " " + count)
         .join(", "),
   );
+  console.log(
+    fixture.batch.split +
+      " evidence facets: hypotheses " +
+      evidenceGraded.withHypotheses +
+      "/" +
+      evidenceGraded.cases +
+      ", multiple " +
+      evidenceGraded.multipleHypothesisCases +
+      ", support " +
+      evidenceGraded.supportingEvidenceCases +
+      ", contradiction " +
+      evidenceGraded.contradictionCases +
+      ", discriminators " +
+      evidenceGraded.missingDiscriminatorCases +
+      ", natural-language " +
+      evidenceGraded.naturalLanguageCases +
+      ", domain " +
+      evidenceGraded.domainContextCases +
+      ", convention " +
+      evidenceGraded.reviewedConventionCases +
+      ", open-world " +
+      evidenceGraded.openWorldCases +
+      ", exact-anchor " +
+      evidenceGraded.exactAnchorCases +
+      ", ordering " +
+      evidenceGraded.orderingCases +
+      "; safety failures " +
+      evidenceGraded.failures.length,
+  );
 }
 
 if (process.env.SEMATH_AUTHORED_REPORT) {
@@ -180,7 +220,10 @@ if (
   failures > 0 &&
   process.env.SEMATH_AUTHORED_ALLOW_FAILURES !== "1"
 ) {
-  const messages = report.flatMap((item) => item.score.failures);
+  const messages = report.flatMap((item) => [
+    ...item.score.failures,
+    ...item.evidenceGraded.failures,
+  ]);
   throw new Error(
     "authored scientific evaluation failed:\n" + messages.join("\n"),
   );

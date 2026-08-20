@@ -83,6 +83,16 @@ role declarations and law conditions still required. This projection cannot
 create claims, establish an entity or law, emit a Problem, authorize navigation
 or rename, or feed its own candidate meaning back into routing.
 
+`semanticView.authoringContext.interpretations` is the host-neutral advisory
+view over decisions, typed law candidates, scoped domain hypotheses,
+structural alternatives, and reviewed conventions. It preserves qualitative support, evidence provenance,
+support versus contradiction, missing discriminators, ordering reasons,
+source/revision/scope anchors, and explicit analysis limits. The set is always
+bounded and open-world. It neither feeds the semantic index nor changes the
+decision, diagnostics, identity, navigation, or edit surfaces. Natural-language
+extraction and domain relevance remain named evidence channels rather than
+being collapsed into truth or an opaque confidence score.
+
 Included documents contribute the same namespaced role, shape, quantity, unit,
 dimension, and evidence records used locally. A per-document external type
 environment is derived from include order; facts never flow backwards across an
@@ -184,7 +194,8 @@ visible there, so same-spelling dimensions in sibling scopes never become proof.
 Constraint conflicts require incompatible established values or a demonstrably
 invalid typed operation. Missing operands, unresolved symbolic extents, and
 work limits remain partial evidence rather than Problems. Work and truncation
-counters are part of protocol 15 so hosts can enforce performance budgets.
+counters have been part of the public protocol since version 15 so hosts can
+enforce performance budgets.
 
 Transparent macro structure supplied by wasmtex may contribute meaning in both
 formulas and prose declarations. Generated nodes inherit only the real call

@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "id": "evidence-graded-hypotheses-v1",
+  "provenance": {
+    "authoringMethod": "project-original-reviewed-development",
+    "engineBlindAtAuthoring": false,
+    "historicalOrFreshFixtureImported": false,
+    "purpose": "Review host-neutral interpretation evidence without tuning against any spent release fixture."
+  },
+  "cases": [
+    {
+      "id": "typed-mechanical-power-tex",
+      "pairId": "typed-mechanical-power",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "Let $P_{dev}$ be power. Let $F_{dev}$ be force. Let $v_{dev}$ be velocity. The measured balance is $P_{dev}=\\mathbf{F}_{dev}\\cdot\\mathbf{v}_{dev}$.",
+      "cursorNeedle": "P_{dev}=",
+      "expectedDecision": "established",
+      "expectedSupport": "derived",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": [
+        "typed-structure",
+        "derived-evidence"
+      ],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0
+    },
+    {
+      "id": "typed-mechanical-power-md",
+      "pairId": "typed-mechanical-power",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "Let $P_{dev}$ be power. Let $F_{dev}$ be force. Let $v_{dev}$ be velocity. The measured balance is $P_{dev}=\\mathbf{F}_{dev}\\cdot\\mathbf{v}_{dev}$.",
+      "cursorNeedle": "P_{dev}=",
+      "expectedDecision": "established",
+      "expectedSupport": "derived",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": [
+        "typed-structure",
+        "derived-evidence"
+      ],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0
+    },
+    {
+      "id": "period-convention-tex",
+      "pairId": "period-convention",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "For a periodic signal in this section, the asserted relation is $f_{dev}=1/T_{dev}$.",
+      "cursorNeedle": "f_{dev}=",
+      "expectedDecision": "partial",
+      "expectedSupport": "tentative",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": ["domain-context", "reviewed-convention"],
+      "requiredMissingDiscriminatorPrefix": "period-frequency-reciprocity/",
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0
+    },
+    {
+      "id": "period-convention-md",
+      "pairId": "period-convention",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "For a periodic signal in this section, the asserted relation is $f_{dev}=1/T_{dev}$.",
+      "cursorNeedle": "f_{dev}=",
+      "expectedDecision": "partial",
+      "expectedSupport": "tentative",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": ["domain-context", "reviewed-convention"],
+      "requiredMissingDiscriminatorPrefix": "period-frequency-reciprocity/",
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0
+    },
+    {
+      "id": "open-world-unknown-tex",
+      "pairId": "open-world-unknown",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "The detached warehouse notation is $orchid_{dev}=quartz_{dev}$, and no scientific role is declared for either symbol.",
+      "cursorNeedle": "orchid_{dev}",
+      "expectedDecision": "established",
+      "expectedSupport": "explicit",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": ["natural-language-extraction"],
+      "requiredMissingDiscriminatorPrefix": "declaration/",
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0
+    },
+    {
+      "id": "open-world-unknown-md",
+      "pairId": "open-world-unknown",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "The detached warehouse notation is $orchid_{dev}=quartz_{dev}$, and no scientific role is declared for either symbol.",
+      "cursorNeedle": "orchid_{dev}",
+      "expectedDecision": "established",
+      "expectedSupport": "explicit",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": ["natural-language-extraction"],
+      "requiredMissingDiscriminatorPrefix": "declaration/",
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0
+    },
+    {
+      "id": "explicit-role-conflict-tex",
+      "pairId": "explicit-role-conflict",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $",
+      "cursorNeedle": "p $",
+      "expectedDecision": "conflicting",
+      "expectedSupport": "contradicted",
+      "requiredEvidenceRole": "contradicting",
+      "requiredProvenance": [],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 1
+    },
+    {
+      "id": "explicit-role-conflict-md",
+      "pairId": "explicit-role-conflict",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $",
+      "cursorNeedle": "p $",
+      "expectedDecision": "conflicting",
+      "expectedSupport": "contradicted",
+      "requiredEvidenceRole": "contradicting",
+      "requiredProvenance": [],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 1
+    }
+  ],
+  "independentlyAuthoredScenarioCoverage": [
+    {
+      "scenarioId": "CA-DEV-01",
+      "probeId": "CA-DEV-01",
+      "expectedDecision": "established",
+      "facets": ["natural-language-provenance"]
+    },
+    {
+      "scenarioId": "CFCD-02",
+      "probeId": "CFCD-02",
+      "expectedDecision": "ambiguous",
+      "facets": [
+        "cross-field-interpretations",
+        "missing-discriminator",
+        "section-scope",
+        "open-world-refusal"
+      ]
+    },
+    {
+      "scenarioId": "EM-DEV-006",
+      "probeId": "EM-DEV-006",
+      "expectedDecision": "conflicting",
+      "facets": [
+        "leading-candidate-contradiction",
+        "natural-language-provenance"
+      ]
+    },
+    {
+      "scenarioId": "EM-DEV-009",
+      "probeId": "EM-DEV-009",
+      "expectedDecision": "ambiguous",
+      "facets": [
+        "open-world-refusal"
+      ]
+    },
+    {
+      "scenarioId": "CA-DEV-04",
+      "probeId": "differential-equations-development-declaration-retraction",
+      "expectedDecision": "unsupported",
+      "facets": ["include-lifecycle", "retraction-lifecycle"]
+    },
+    {
+      "scenarioId": "probability-development-metric-name-collision",
+      "probeId": "probability-statistics-development-declaration-retraction",
+      "expectedDecision": "unsupported",
+      "facets": ["include-lifecycle", "retraction-lifecycle"]
+    }
+  ],
+  "supplementalLifecycleTests": [
+    "interpretation::tests::separates_support_from_contradiction_and_reports_lifecycle_limits",
+    "engine::tests::incremental_upsert_matches_the_new_document_version",
+    "engine::tests::same_revision_opaque_relink_reanalyzes_without_accepting_stale_text",
+    "engine::tests::referenced_document_changes_reanalyze_dependents",
+    "engine::tests::a_unique_later_negative_formula_retracts_the_earlier_relation",
+    "engine::tests::transparent_project_macro_has_the_same_meaning_and_invocation_provenance",
+    "engine::tests::symbolic_comparisons_do_not_cross_sibling_document_scopes"
+  ]
+}

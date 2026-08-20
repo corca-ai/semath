@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 15;
+pub const PROTOCOL_VERSION: u32 = 16;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1067,6 +1067,126 @@ pub struct MathNotationOccurrenceInfo {
     pub source_notation: String,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationKind {
+    SourceMeaning,
+    TypedLaw,
+    ScopedDomain,
+    StructuralAlternative,
+    ReviewedConvention,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationSupportTier {
+    Explicit,
+    Derived,
+    Supported,
+    Tentative,
+    Contradicted,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationEvidenceProvenance {
+    ExplicitDeclaration,
+    TypedStructure,
+    NaturalLanguageExtraction,
+    DomainContext,
+    ReviewedConvention,
+    DerivedEvidence,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationEvidenceRole {
+    Supporting,
+    Contradicting,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationEvidenceInfo {
+    pub role: MathInterpretationEvidenceRole,
+    pub provenance: MathInterpretationEvidenceProvenance,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationOrderingReasonKind {
+    ExplicitEvidence,
+    TypedEvidence,
+    DerivedEvidence,
+    DomainRelevance,
+    ReviewedConvention,
+    StableSourceOrder,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationOrderingReason {
+    pub kind: MathInterpretationOrderingReasonKind,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationHypothesisInfo {
+    pub hypothesis_id: String,
+    pub kind: MathInterpretationKind,
+    pub label: String,
+    pub support: MathInterpretationSupportTier,
+    pub rank: u32,
+    pub range: SourceRange,
+    pub location: Location,
+    pub document_version: u64,
+    pub scope_path: Vec<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula: Option<MathFormulaAnchorInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relation: Option<RelationInfo>,
+    pub bindings: Vec<LawBinding>,
+    pub conditions: Vec<LawConditionInfo>,
+    pub evidence: Vec<MathInterpretationEvidenceInfo>,
+    pub missing_discriminator_ids: Vec<String>,
+    pub ordering_reasons: Vec<MathInterpretationOrderingReason>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationAnalysisLimitKind {
+    CandidateSetCapped,
+    EvidenceTruncated,
+    EngineLimit,
+    GeneratedSource,
+    RetractedSource,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationAnalysisLimitInfo {
+    pub kind: MathInterpretationAnalysisLimitKind,
+    pub evidence: Vec<Evidence>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationExhaustiveness {
+    BoundedOpenWorld,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationSetInfo {
+    pub hypotheses: Vec<MathInterpretationHypothesisInfo>,
+    pub missing_discriminators: Vec<MathAuthoringRequirementInfo>,
+    pub analysis_limits: Vec<MathInterpretationAnalysisLimitInfo>,
+    pub exhaustiveness: MathInterpretationExhaustiveness,
+    pub truncated: bool,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct MathAuthoringContext {
@@ -1082,6 +1202,7 @@ pub struct MathAuthoringContext {
     pub approximation: Option<MathApproximationInfo>,
     pub claim_evidence: Vec<MathClaimEvidenceLinkInfo>,
     pub notation_occurrences: Vec<MathNotationOccurrenceInfo>,
+    pub interpretations: MathInterpretationSetInfo,
     pub lifecycle: MathSourceLifecycleInfo,
     pub truncated: bool,
 }

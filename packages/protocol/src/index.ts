@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 15 as const;
+export const SEMATH_PROTOCOL_VERSION = 16 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 8 as const;
 
 export type DocumentLanguage = "bibtex" | "latex" | "markdown";
@@ -465,6 +465,86 @@ export interface MathNotationOccurrenceInfo {
   sourceNotation: string;
 }
 
+export type MathInterpretationKind =
+  | "source-meaning"
+  | "typed-law"
+  | "scoped-domain"
+  | "structural-alternative"
+  | "reviewed-convention";
+
+export type MathInterpretationSupportTier =
+  | "explicit"
+  | "derived"
+  | "supported"
+  | "tentative"
+  | "contradicted";
+
+export type MathInterpretationEvidenceProvenance =
+  | "explicit-declaration"
+  | "typed-structure"
+  | "natural-language-extraction"
+  | "domain-context"
+  | "reviewed-convention"
+  | "derived-evidence";
+
+export interface MathInterpretationEvidenceInfo {
+  evidence: Evidence;
+  provenance: MathInterpretationEvidenceProvenance;
+  role: "supporting" | "contradicting";
+}
+
+export type MathInterpretationOrderingReasonKind =
+  | "explicit-evidence"
+  | "typed-evidence"
+  | "derived-evidence"
+  | "domain-relevance"
+  | "reviewed-convention"
+  | "stable-source-order";
+
+export interface MathInterpretationOrderingReason {
+  evidence: readonly Evidence[];
+  kind: MathInterpretationOrderingReasonKind;
+}
+
+export interface MathInterpretationHypothesisInfo {
+  bindings: readonly LawBinding[];
+  conditions: readonly LawConditionInfo[];
+  evidence: readonly MathInterpretationEvidenceInfo[];
+  formula?: MathFormulaAnchorInfo;
+  hypothesisId: string;
+  kind: MathInterpretationKind;
+  label: string;
+  location: Location;
+  documentVersion: number;
+  missingDiscriminatorIds: readonly string[];
+  orderingReasons: readonly MathInterpretationOrderingReason[];
+  range: SourceRange;
+  rank: number;
+  relation?: RelationInfo;
+  scopePath: readonly number[];
+  support: MathInterpretationSupportTier;
+}
+
+export type MathInterpretationAnalysisLimitKind =
+  | "candidate-set-capped"
+  | "evidence-truncated"
+  | "engine-limit"
+  | "generated-source"
+  | "retracted-source";
+
+export interface MathInterpretationAnalysisLimitInfo {
+  evidence: readonly Evidence[];
+  kind: MathInterpretationAnalysisLimitKind;
+}
+
+export interface MathInterpretationSetInfo {
+  analysisLimits: readonly MathInterpretationAnalysisLimitInfo[];
+  exhaustiveness: "bounded-open-world";
+  hypotheses: readonly MathInterpretationHypothesisInfo[];
+  missingDiscriminators: readonly MathAuthoringRequirementInfo[];
+  truncated: boolean;
+}
+
 export interface MathAuthoringContext {
   approximation?: MathApproximationInfo;
   claimEvidence: readonly MathClaimEvidenceLinkInfo[];
@@ -474,6 +554,7 @@ export interface MathAuthoringContext {
   equationLinks: readonly MathEquationLinkInfo[];
   formula?: MathFormulaAnchorInfo;
   lifecycle: MathSourceLifecycleInfo;
+  interpretations: MathInterpretationSetInfo;
   notationOccurrences: readonly MathNotationOccurrenceInfo[];
   requirements: readonly MathAuthoringRequirementInfo[];
   truncated: boolean;
