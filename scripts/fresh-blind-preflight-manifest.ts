@@ -36,6 +36,8 @@ export const FRESH_BLIND_CONTRACTS = {
   wasmtexSyntaxSchemaVersion: 8,
 } as const;
 
+const RELEASE_COMMAND_MAX_BUFFER_BYTES = 8 * 1024 * 1024;
+
 export interface FreshBlindPreflightManifest {
   readonly artifacts: {
     readonly checksumManifestSha256: string;
@@ -778,8 +780,15 @@ function requiredPath(name: string): string {
 function command(commandName: string, args: readonly string[]): string {
   return commandBytes(commandName, args).toString("utf8").trim();
 }
-function commandBytes(commandName: string, args: readonly string[]): Buffer {
-  const result = spawnSync(commandName, args);
+export function commandBytes(
+  commandName: string,
+  args: readonly string[],
+): Buffer {
+  const result = spawnSync(commandName, args, {
+    maxBuffer: RELEASE_COMMAND_MAX_BUFFER_BYTES,
+  });
+  if (result.error)
+    throw new Error(`${commandName} failed: ${result.error.message}`);
   if (result.status !== 0)
     throw new Error(result.stderr?.toString() || `${commandName} failed`);
   return result.stdout;
