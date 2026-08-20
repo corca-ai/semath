@@ -5,6 +5,7 @@ import {
   buildFreshBlindPreflightManifest,
   FRESH_BLIND_CONTRACTS,
   parseFreshBlindPreflightManifest,
+  retainedPackagePackArguments,
   type FreshBlindPreflightManifest,
 } from "./fresh-blind-preflight-manifest";
 
@@ -118,5 +119,20 @@ describe("fresh blind pre-blind manifest", () => {
         new TextEncoder().encode("executing"),
       ),
     ).toThrow("candidate workflow differs");
+  });
+
+  test("packs the retained tarball at one exact path", () => {
+    expect(
+      retainedPackagePackArguments(
+        ".artifacts/fresh-release/semath-0.18.0.tgz",
+      ),
+    ).toEqual([
+      "pm",
+      "pack",
+      "--filename",
+      ".artifacts/fresh-release/semath-0.18.0.tgz",
+      "--ignore-scripts",
+      "--quiet",
+    ]);
   });
 });
