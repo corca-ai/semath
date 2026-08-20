@@ -33,4 +33,4 @@ jobs:
       - run: bun run budget
       - run: bun run budget:scale
       - run: bun run package:smoke
-      - run: git diff --exit-code -- lib/wasm/semath_wasm.js lib/wasm/semath_wasm.d.ts lib/wasm/semath_wasm_bg.wasm.d.ts
+      - run: git diff --exit-code -- lib/wasm

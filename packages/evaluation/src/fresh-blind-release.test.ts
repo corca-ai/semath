@@ -45,6 +45,15 @@ describe("fresh blind release evidence", () => {
     ).toThrow("expected a semantic release id");
   });
 
+  test("requires the exact authoring oracle on every v0.37+ probe before execution", () => {
+    const value = fixtureValue();
+    value.release.id = "v0.37";
+    const release = finalize(value);
+    expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
+      "requires an exact authoring context for every primary and breadth probe",
+    );
+  });
+
   test("requires isolated Codex authors, critics, and the complete main review", () => {
     const value = fixtureValue();
     value.fixture.scenarios[0]!.review.criticId = "main-codex";

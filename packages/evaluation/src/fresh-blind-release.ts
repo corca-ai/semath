@@ -212,6 +212,16 @@ export function validateFreshBlindRelease(
       "fresh blind fixture requires one primary probe per scenario",
     );
   }
+  if (semanticReleaseNumber(release.release.id) >= 37) {
+    const missingAuthoring = fixture.probes
+      .filter((probe) => probe.expected.authoringContext === undefined)
+      .map((probe) => probe.id);
+    if (missingAuthoring.length) {
+      throw new Error(
+        `fresh blind v0.37+ requires an exact authoring context for every primary and breadth probe: ${missingAuthoring.join(", ")}`,
+      );
+    }
+  }
   for (const probe of fixture.probes) {
     const scenario = authoredScenarioFor(fixture, probe);
     const snapshot = authoredSnapshotFor(scenario, probe);

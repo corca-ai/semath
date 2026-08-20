@@ -12,12 +12,12 @@ use crate::canonical::{
 use crate::parser::test_math_regions;
 use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
-    ChangeEnvelope, DocumentLanguage, GeneratedNotationNode, GeneratedNotationTree,
-    LawBindingProof, LexicalClass, MathRoot, MathRootState, MeaningDecision, NotationArgument,
-    NotationNode, NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION, ProjectChange,
-    ProjectDocument, ProjectInclude, ProjectMacro, ProjectMacroExpansion,
+    ChangeEnvelope, CompleteSyntaxState, DocumentLanguage, GeneratedNotationNode,
+    GeneratedNotationTree, LawBindingProof, LexicalClass, MathRoot, MathRootState, MeaningDecision,
+    NotationArgument, NotationNode, NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION,
+    ProjectChange, ProjectDocument, ProjectInclude, ProjectMacro, ProjectMacroExpansion,
     ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query,
-    QueryEnvelope, QueryValue, SourceRange, SyntaxScope, SyntaxState,
+    QueryEnvelope, QueryValue, SourceRange, SyntaxScope, SyntaxState, VisibleProseSpan,
 };
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -365,12 +365,12 @@ fn interpretation_evidence_role_name(role: crate::MathInterpretationEvidenceRole
     }
 }
 
-fn authoring_requirement_name(requirement: &crate::MathAuthoringRequirementInfo) -> &str {
+fn authoring_requirement_name(requirement: &crate::MathInterpretationRequirementInfo) -> &str {
     match requirement {
-        crate::MathAuthoringRequirementInfo::Declaration { requirement_id, .. }
-        | crate::MathAuthoringRequirementInfo::RoleDeclaration { requirement_id, .. }
-        | crate::MathAuthoringRequirementInfo::Condition { requirement_id, .. }
-        | crate::MathAuthoringRequirementInfo::Disambiguation { requirement_id, .. } => {
+        crate::MathInterpretationRequirementInfo::Declaration { requirement_id, .. }
+        | crate::MathInterpretationRequirementInfo::RoleDeclaration { requirement_id, .. }
+        | crate::MathInterpretationRequirementInfo::Condition { requirement_id, .. }
+        | crate::MathInterpretationRequirementInfo::Disambiguation { requirement_id, .. } => {
             requirement_id
         }
     }
@@ -1363,7 +1363,7 @@ fn semantic_view_exposes_conventional_notation_as_a_bounded_non_authoritative_ca
             .any(|requirement| {
                 matches!(
                     requirement,
-                    crate::MathAuthoringRequirementInfo::RoleDeclaration { parameter, .. }
+                    crate::MathInterpretationRequirementInfo::RoleDeclaration { parameter, .. }
                         if parameter == "frequency"
                 )
             })
@@ -1622,6 +1622,64 @@ fn an_established_equation_routes_only_later_formulas_in_the_same_scope() {
 }
 
 #[test]
+fn an_established_equation_routes_a_later_relation_in_the_same_math_root() {
+    let source = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz}), f=1/T$.";
+    let offset = source.rfind("f=").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(source)).unwrap();
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    assert!(
+        view.authoring_context
+            .conventional_candidates
+            .iter()
+            .any(|candidate| candidate.law_id == "period-frequency-reciprocity")
+    );
+}
+
+#[test]
+fn an_established_final_equation_still_observes_its_domain_in_later_prose() {
+    let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$ Then inspect the conclusion.";
+    let offset = source.rfind("conclusion").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(source)).unwrap();
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    let mechanics = view
+        .domains
+        .first()
+        .expect("the final domain observation retains established equation evidence");
+    assert_eq!(mechanics.pack_id, "classical-mechanics");
+    assert_eq!(mechanics.support, crate::DomainSupportTier::Supported);
+}
+
+#[test]
 fn established_equation_does_not_activate_its_own_conventional_notation() {
     let source = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz})$.";
     let mut engine = SemathEngine::default();
@@ -1642,6 +1700,71 @@ fn established_equation_does_not_activate_its_own_conventional_notation() {
 
     assert!(matches!(view.decision, MeaningDecision::Established { .. }));
     assert!(view.authoring_context.conventional_candidates.is_empty());
+}
+
+#[test]
+fn established_equation_routes_a_later_formula_identically_after_incremental_upsert() {
+    let original = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz})$.";
+    let changed = "A 20 Hz crossover is converted as $\\omega_c=2\\pi(20\\,\\mathrm{Hz})$. The asserted relation is $f=1/T$.";
+    let offset = changed.rfind("f=").unwrap() as u32;
+
+    let mut incremental = SemathEngine::default();
+    incremental.reset(snapshot(original)).unwrap();
+    incremental
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", changed, 2)),
+            }],
+        })
+        .unwrap();
+    let QueryValue::SemanticView { view: incremental } = incremental
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            2,
+            2,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected incremental semantic view")
+    };
+
+    assert!(
+        incremental
+            .authoring_context
+            .conventional_candidates
+            .iter()
+            .any(|candidate| candidate.law_id == "period-frequency-reciprocity")
+    );
+
+    let mut clean_snapshot = snapshot(changed);
+    clean_snapshot.inventory_version = 2;
+    clean_snapshot.documents[0].document_version = 2;
+    let mut clean = SemathEngine::default();
+    clean.reset(clean_snapshot).unwrap();
+    let QueryValue::SemanticView { view: clean } = clean
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            2,
+            2,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected clean semantic view")
+    };
+
+    assert_eq!(incremental, clean);
 }
 
 #[test]
@@ -1897,6 +2020,109 @@ fn a_typed_law_role_can_support_one_later_law_without_backward_flow() {
             && binding.symbol == "y"
             && binding.proof == LawBindingProof::Derived
     }));
+
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.rfind("z=By").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+    let chain_evidence = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .flat_map(|hypothesis| &hypothesis.evidence)
+        .find(|evidence| evidence.evidence.kind == "law-chain-binding")
+        .expect("later interpretation retains the earlier law source");
+    let first_formula = content.find("y=Ax").unwrap() as u32;
+    assert!(chain_evidence.source_anchors.iter().any(|anchor| {
+        anchor.location.file_id == "main"
+            && anchor.location.range.start_offset <= first_formula
+            && first_formula < anchor.location.range.end_offset
+    }));
+}
+
+#[test]
+fn probability_formula_does_not_gain_cross_field_forward_law_authority() {
+    let content = r#"### Historical inputs
+
+Let \(A\) be the event that the canary exceeds its latency budget and \(B\) the event that the error-rate alert fires. Historical rollouts give
+\[
+P(A)=0.18,\qquad P(B)=0.11,\qquad P(A\cap B)=0.04.
+\]
+
+### Calculation proposed
+
+The draft go/no-go calculation added the two marginal probabilities:
+\[
+P(A\cup B)=P(A)+P(B)=0.29.
+\]
+
+### Accepted go/no-go value
+
+Review rejected that value because the simultaneous event was counted twice. The accepted calculation is
+\[
+P_{\mathrm{any}}=P(A\cup B)=P(A)+P(B)-P(A\cap B)=0.25.
+\]
+The checklist therefore uses a 25 percent chance that at least one monitored risk appears. No independence assumption is needed or supplied.
+"#;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let offset = (content.rfind("A\\cup B").unwrap() + "A\\cup ".len()) as u32;
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    let unrelated = [
+        "circuits:ohm-law",
+        "electromagnetism:electric-potential-energy",
+        "electromagnetism:electric-power-law",
+        "fluid-mechanics:steady-momentum-flux",
+        "fluid-mechanics:volumetric-flow-rate",
+        "signals-systems:wave-speed-relation",
+        "thermodynamics-heat-transfer:thermal-resistance-rate",
+    ];
+    for hypothesis in &view.authoring_context.interpretations.hypotheses {
+        if unrelated.contains(&hypothesis.hypothesis_id.as_str()) {
+            assert_eq!(
+                hypothesis.support,
+                crate::MathInterpretationSupportTier::Tentative,
+                "{} acquired cross-field support: {hypothesis:#?}",
+                hypothesis.hypothesis_id
+            );
+            assert!(
+                hypothesis.evidence.iter().all(|item| !matches!(
+                    item.evidence.kind.as_str(),
+                    "derived-binding" | "law-chain-binding"
+                )),
+                "{} acquired cross-field derived roles: {hypothesis:#?}",
+                hypothesis.hypothesis_id
+            );
+        }
+    }
+    assert!(view.domains.iter().all(|domain| {
+        domain.pack_id == "probability" || domain.support == crate::DomainSupportTier::Tentative
+    }));
 }
 
 #[test]
@@ -1953,6 +2179,60 @@ fn semantic_view_projects_claim_status_only_from_typed_index_evidence() {
     assert!(claim_link.claim.range.end_offset <= offset);
     assert!(claim_link.supporting_formulas.is_empty());
     assert!(view.authoring_context.notation_occurrences.len() >= 2);
+}
+
+#[test]
+fn authoring_claim_evidence_emits_one_link_for_one_authored_claim() {
+    let content = "The draft calls $x$ the unique estimate. Inspect $x$.";
+    let offset = content.rfind("$x$").unwrap() as u32 + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    let internal_facts = view
+        .context
+        .claims
+        .iter()
+        .filter(|claim| {
+            claim
+                .evidence
+                .iter()
+                .any(|evidence| evidence.rule_id == "english-relational-definition")
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        internal_facts
+            .iter()
+            .map(|claim| claim.predicate.as_str())
+            .collect::<std::collections::BTreeSet<_>>(),
+        ["definition", "type"].into_iter().collect()
+    );
+    assert_eq!(
+        view.authoring_context
+            .claim_evidence
+            .iter()
+            .filter(|claim| {
+                claim
+                    .evidence
+                    .iter()
+                    .any(|evidence| evidence.rule_id == "english-relational-definition")
+            })
+            .count(),
+        1
+    );
 }
 
 #[test]
@@ -2667,6 +2947,29 @@ fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
             .iter()
             .any(|limit| limit.kind == crate::MathInterpretationAnalysisLimitKind::RetractedSource)
     );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .analysis_limits
+            .iter()
+            .all(|limit| !matches!(
+                limit.kind,
+                crate::MathInterpretationAnalysisLimitKind::CandidateSetCapped
+                    | crate::MathInterpretationAnalysisLimitKind::EvidenceTruncated
+                    | crate::MathInterpretationAnalysisLimitKind::DiscriminatorSetCapped
+            ))
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .flat_map(|hypothesis| &hypothesis.evidence)
+            .flat_map(|evidence| &evidence.source_anchors)
+            .any(|anchor| {
+                anchor.lifecycle == crate::MathInterpretationSourceLifecycle::Retracted
+            })
+    );
 }
 
 #[test]
@@ -2821,6 +3124,27 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
             .analysis_limits
             .iter()
             .any(|limit| limit.kind == crate::MathInterpretationAnalysisLimitKind::GeneratedSource)
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .analysis_limits
+            .iter()
+            .all(|limit| !matches!(
+                limit.kind,
+                crate::MathInterpretationAnalysisLimitKind::CandidateSetCapped
+                    | crate::MathInterpretationAnalysisLimitKind::EvidenceTruncated
+                    | crate::MathInterpretationAnalysisLimitKind::DiscriminatorSetCapped
+            ))
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .flat_map(|hypothesis| &hypothesis.evidence)
+            .flat_map(|evidence| &evidence.source_anchors)
+            .any(|anchor| anchor.generation == crate::MathSourceGeneration::Generated)
     );
     assert!(
         !view
@@ -3167,6 +3491,25 @@ fn included_type_declarations_drive_project_law_inference() {
     };
     assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
     assert_eq!(view.context.relations[0].relation_id, "circuits:ohm-law");
+    let included_anchor = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .flat_map(|hypothesis| &hypothesis.evidence)
+        .flat_map(|evidence| &evidence.source_anchors)
+        .find(|anchor| anchor.location.file_id == "definitions")
+        .expect("included evidence keeps its own document anchor");
+    assert_eq!(included_anchor.location.path, "definitions.tex");
+    assert_eq!(included_anchor.document_version, 1);
+    assert_eq!(
+        included_anchor.lifecycle,
+        crate::MathInterpretationSourceLifecycle::Current
+    );
+    assert_eq!(
+        included_anchor.generation,
+        crate::MathSourceGeneration::Authored
+    );
 
     let symbol_result = engine
         .query(query(
@@ -3184,6 +3527,377 @@ fn included_type_declarations_drive_project_law_inference() {
     let symbol = view.symbol.expect("expected V symbol information");
     assert_eq!(symbol.roles[0].concept_id, "quantities-units:voltage");
     assert_eq!(symbol.roles[0].evidence.source_ranges[0].start_offset, 0);
+}
+
+#[test]
+fn display_led_relational_claims_are_format_neutral_and_remain_partial() {
+    let roles = "The design matrix satisfies $A\\in\\mathbb R^{m\\times n}$, the observation vector satisfies $b\\in\\mathbb R^m$, and the parameter vector satisfies $x\\in\\mathbb R^n$, with $m\\ge n$.\n";
+    let cases = [
+        (
+            DocumentLanguage::Latex,
+            "least-squares-method.tex",
+            "least-squares-roles.tex",
+            "\\section{Least-squares estimate}\nThe role declarations are provided by the exact project path \\texttt{least-squares-roles.tex}.\n\\input{least-squares-roles.tex}\nThe draft calls $\\widehat x$ the unique estimate and defines it by\n\\[\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n\\]\nNo full-column-rank assumption for $A$ is stated, so uniqueness still requires justification.\n",
+            "\\input{least-squares-roles.tex}",
+            &[
+                (9, 31),
+                (33, 93),
+                (102, 125),
+                (126, 127),
+                (160, 175),
+                (189, 226),
+                (309, 343),
+                (348, 402),
+            ][..],
+        ),
+        (
+            DocumentLanguage::Markdown,
+            "least-squares-method.md",
+            "least-squares-roles.md",
+            "# Least-squares estimate\n\nThe role declarations are provided by the exact project path [least-squares-roles.md](least-squares-roles.md). The draft calls $\\widehat x$ the unique estimate and defines it by\n\n$$\n\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2.\n$$\n\nNo full-column-rank assumption for $A$ is stated, so uniqueness still requires justification.\n",
+            "The role declarations are provided by the exact project path [least-squares-roles.md](least-squares-roles.md).",
+            &[(0, 152), (166, 203), (288, 322), (327, 381)][..],
+        ),
+    ];
+
+    for (language, main_path, roles_path, source, include_surface, visible_ranges) in cases {
+        let mut main = document_with_language("main", main_path, source, 1, language);
+        main.math_roots = main
+            .math_regions
+            .iter()
+            .enumerate()
+            .map(|(node, region)| MathRoot {
+                node: node as u32,
+                delimiter: region.delimiter.clone(),
+                full_range: region.full_range.clone(),
+                content_range: region.content_range.clone(),
+                state: MathRootState::Complete,
+            })
+            .collect();
+        main.visible_prose = visible_ranges
+            .iter()
+            .map(|(start, end)| VisibleProseSpan {
+                range: range(*start, *end),
+                state: CompleteSyntaxState::Complete,
+            })
+            .collect();
+        let include_start = source.find(include_surface).unwrap() as u32;
+        main.includes.push(ProjectInclude {
+            path: roles_path.into(),
+            kind: "input".into(),
+            source: ProjectSourceRef {
+                file_id: "main".into(),
+                path: main_path.into(),
+                range: range(include_start, include_start + include_surface.len() as u32),
+            },
+        });
+        let roles_document = document_with_language("roles", roles_path, roles, 1, language);
+        let formula_start = source.rfind("\\widehat x\\in").unwrap() as u32;
+        let mut engine = SemathEngine::default();
+        engine
+            .reset(ProjectSnapshot {
+                protocol_version: PROTOCOL_VERSION,
+                epoch: "project:1".into(),
+                inventory_version: 1,
+                project_id: "project".into(),
+                main_file_id: Some("main".into()),
+                documents: vec![main, roles_document],
+            })
+            .unwrap();
+        let QueryValue::SemanticView { view } = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: formula_start,
+                },
+                1,
+                1,
+            ))
+            .unwrap()
+            .value
+        else {
+            panic!("expected semantic view")
+        };
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Partial,
+            "{language:?}: {:#?}",
+            view.authoring_context
+        );
+        let claim_start = source.find("The draft calls").unwrap() as u32;
+        let claim_end = source
+            .find("\n\\[")
+            .or_else(|| source.find("\n\n$$"))
+            .unwrap() as u32;
+        let matching_claims = view
+            .authoring_context
+            .claim_evidence
+            .iter()
+            .filter(|claim| {
+                claim.claim.range == range(claim_start, claim_end)
+                    && claim.modality == crate::MathClaimModality::Asserted
+                    && claim.polarity == crate::MathClaimPolarity::Positive
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            matching_claims.len(),
+            1,
+            "{language:?}: {:#?}",
+            view.authoring_context.claim_evidence
+        );
+    }
+}
+
+#[test]
+fn identical_cross_document_evidence_ranges_keep_exact_source_identities() {
+    let main = "\\input{definitions-a}\n\\input{definitions-b}\n$V=RI$";
+    let definitions = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    let second_include_start = main.find("\\input{definitions-b}").unwrap() as u32;
+    main_document.includes.extend([
+        ProjectInclude {
+            path: "definitions-a".into(),
+            kind: "input".into(),
+            source: ProjectSourceRef {
+                file_id: "main".into(),
+                path: "main.tex".into(),
+                range: SourceRange {
+                    start_offset: 0,
+                    end_offset: second_include_start - 1,
+                },
+            },
+        },
+        ProjectInclude {
+            path: "definitions-b".into(),
+            kind: "input".into(),
+            source: ProjectSourceRef {
+                file_id: "main".into(),
+                path: "main.tex".into(),
+                range: SourceRange {
+                    start_offset: second_include_start,
+                    end_offset: main.rfind('\n').unwrap() as u32,
+                },
+            },
+        },
+    ]);
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("definitions-a", "definitions-a.tex", definitions, 1),
+                document("definitions-b", "definitions-b.tex", definitions, 1),
+            ],
+        })
+        .unwrap();
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.find('=').unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    let binding_evidence = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .flat_map(|hypothesis| &hypothesis.evidence)
+        .filter(|item| item.evidence.kind == "canonical-binding")
+        .collect::<Vec<_>>();
+    assert!(!binding_evidence.is_empty());
+    let anchored_files = binding_evidence
+        .iter()
+        .flat_map(|item| &item.source_anchors)
+        .map(|anchor| anchor.location.file_id.as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+    assert!(anchored_files.contains("definitions-a"));
+    assert!(anchored_files.contains("definitions-b"));
+    assert!(!anchored_files.contains("main"));
+    for item in binding_evidence {
+        assert!(!item.source_anchors.is_empty());
+        assert_eq!(item.evidence.source_ranges.len(), item.source_anchors.len());
+        assert!(
+            item.evidence
+                .source_ranges
+                .iter()
+                .zip(&item.source_anchors)
+                .all(|(range, anchor)| anchor.location.range == *range)
+        );
+        assert!(
+            item.source_anchors
+                .iter()
+                .all(|anchor| { item.evidence.source_ranges.contains(&anchor.location.range) })
+        );
+        assert!(item.evidence.source_ranges.iter().all(|range| {
+            item.source_anchors
+                .iter()
+                .any(|anchor| anchor.location.range == *range)
+        }));
+        assert!(item.source_anchors.windows(2).all(|pair| {
+            pair[0]
+                .location
+                .file_id
+                .cmp(&pair[1].location.file_id)
+                .then(pair[0].document_version.cmp(&pair[1].document_version))
+                .then(
+                    pair[0]
+                        .location
+                        .range
+                        .start_offset
+                        .cmp(&pair[1].location.range.start_offset),
+                )
+                .then(
+                    pair[0]
+                        .location
+                        .range
+                        .end_offset
+                        .cmp(&pair[1].location.range.end_offset),
+                )
+                .is_le()
+        }));
+        assert_eq!(item.evidence.source_anchors, item.source_anchors);
+    }
+}
+
+#[test]
+fn included_ordered_definition_evidence_keeps_its_source_document_anchor() {
+    let main = "\\input{roles.tex}\nThe least squares approximation remains directional: $v\\approx D\\beta$.";
+    let roles = "Let $v$, $D$, and $\\beta$ denote vector, linear operator matrix, and vector, respectively.";
+    let mut main_document = document("methods", "methods.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "roles.tex".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "methods".into(),
+            path: "methods.tex".into(),
+            range: range(0, "\\input{roles.tex}".len() as u32),
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("methods".into()),
+            documents: vec![main_document, document("roles", "roles.tex", roles, 1)],
+        })
+        .unwrap();
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "methods".into(),
+                offset: main.find("D\\beta").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    assert_eq!(
+        view.authoring_context.requirements,
+        view.authoring_context
+            .interpretations
+            .missing_discriminators
+    );
+    let projected_requirement_evidence = view
+        .authoring_context
+        .requirements
+        .iter()
+        .flat_map(|requirement| match requirement {
+            crate::MathInterpretationRequirementInfo::Declaration { evidence, .. }
+            | crate::MathInterpretationRequirementInfo::RoleDeclaration { evidence, .. }
+            | crate::MathInterpretationRequirementInfo::Disambiguation { evidence, .. } => {
+                evidence.as_slice()
+            }
+            crate::MathInterpretationRequirementInfo::Condition { condition, .. } => {
+                condition.evidence.as_slice()
+            }
+        })
+        .filter(|item| {
+            matches!(
+                item.evidence.rule_id.as_str(),
+                "english-respectively-definition" | "english-clause-ordered-definition"
+            )
+        })
+        .collect::<Vec<_>>();
+    assert!(!projected_requirement_evidence.is_empty());
+    for item in projected_requirement_evidence {
+        assert_eq!(item.evidence.source_ranges.len(), item.source_anchors.len());
+        assert!(
+            item.evidence
+                .source_ranges
+                .iter()
+                .zip(&item.source_anchors)
+                .all(|(range, anchor)| {
+                    anchor.location.file_id == "roles"
+                        && anchor.location.path == "roles.tex"
+                        && anchor.location.range == *range
+                })
+        );
+    }
+
+    let ordered_definition_evidence = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .flat_map(|hypothesis| &hypothesis.evidence)
+        .filter(|item| {
+            matches!(
+                item.evidence.rule_id.as_str(),
+                "english-respectively-definition" | "english-clause-ordered-definition"
+            )
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        ordered_definition_evidence
+            .iter()
+            .map(|item| item.evidence.rule_id.as_str())
+            .collect::<std::collections::BTreeSet<_>>(),
+        [
+            "english-clause-ordered-definition",
+            "english-respectively-definition"
+        ]
+        .into_iter()
+        .collect()
+    );
+    let roles_length = roles.encode_utf16().count() as u32;
+    for item in ordered_definition_evidence {
+        assert_eq!(item.evidence.source_ranges.len(), item.source_anchors.len());
+        assert!(
+            item.evidence
+                .source_ranges
+                .iter()
+                .zip(&item.source_anchors)
+                .all(|(range, anchor)| {
+                    anchor.location.file_id == "roles"
+                        && anchor.location.path == "roles.tex"
+                        && anchor.location.range == *range
+                        && range.end_offset <= roles_length
+                })
+        );
+        assert_eq!(item.evidence.source_anchors, item.source_anchors);
+    }
 }
 
 #[test]

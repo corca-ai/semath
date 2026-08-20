@@ -408,6 +408,7 @@ fn collect_shape_declarations(expression: &SemanticExpr, analysis: &mut ShapeObs
                         kind: "explicit-math".into(),
                         strength: "hard".into(),
                         source_ranges: vec![expression.range.clone()],
+                        source_anchors: Vec::new(),
                     },
                     refinements: Vec::new(),
                     explicit: true,

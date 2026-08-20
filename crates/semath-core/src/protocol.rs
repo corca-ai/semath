@@ -2,8 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 16;
+pub const PROTOCOL_VERSION: u32 = 17;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
+pub const MATH_INTERPRETATION_HYPOTHESIS_LIMIT: usize = 16;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -511,6 +512,8 @@ pub struct Evidence {
     pub kind: String,
     pub strength: String,
     pub source_ranges: Vec<SourceRange>,
+    #[serde(skip)]
+    pub source_anchors: Vec<MathInterpretationEvidenceSourceAnchorInfo>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1105,12 +1108,99 @@ pub enum MathInterpretationEvidenceRole {
     Contradicting,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum MathInterpretationSourceLifecycle {
+    Current,
+    Retracted,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationEvidenceSourceAnchorInfo {
+    pub location: Location,
+    pub document_version: u64,
+    pub scope_path: Vec<u32>,
+    pub lifecycle: MathInterpretationSourceLifecycle,
+    pub generation: MathSourceGeneration,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct MathInterpretationEvidenceInfo {
     pub role: MathInterpretationEvidenceRole,
     pub provenance: MathInterpretationEvidenceProvenance,
     pub evidence: Evidence,
+    pub source_anchors: Vec<MathInterpretationEvidenceSourceAnchorInfo>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationEvidenceReferenceInfo {
+    pub evidence: Evidence,
+    pub source_anchors: Vec<MathInterpretationEvidenceSourceAnchorInfo>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationConditionInfo {
+    pub condition_id: String,
+    pub kind: ScientificConstraintKind,
+    pub subjects: Vec<String>,
+    pub label: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_property: Option<OperatorProperty>,
+    pub status: ConstraintStatus,
+    pub evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationDomainRelevanceInfo {
+    pub support: DomainSupportTier,
+    pub evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationAlternativeInfo {
+    pub alternative_id: String,
+    pub label: String,
+    pub range: SourceRange,
+    pub evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relevance: Option<MathInterpretationDomainRelevanceInfo>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(
+    tag = "kind",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase"
+)]
+pub enum MathInterpretationRequirementInfo {
+    Declaration {
+        requirement_id: String,
+        symbol: String,
+        occurrence_id: SourceOccurrenceId,
+        evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
+    },
+    RoleDeclaration {
+        requirement_id: String,
+        parameter: String,
+        symbol: String,
+        constraint: SemanticConstraint,
+        evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
+    },
+    Condition {
+        requirement_id: String,
+        condition: MathInterpretationConditionInfo,
+    },
+    Disambiguation {
+        requirement_id: String,
+        alternatives: Vec<MathInterpretationAlternativeInfo>,
+        evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1128,7 +1218,7 @@ pub enum MathInterpretationOrderingReasonKind {
 #[serde(rename_all = "camelCase")]
 pub struct MathInterpretationOrderingReason {
     pub kind: MathInterpretationOrderingReasonKind,
-    pub evidence: Vec<Evidence>,
+    pub evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1159,6 +1249,7 @@ pub struct MathInterpretationHypothesisInfo {
 pub enum MathInterpretationAnalysisLimitKind {
     CandidateSetCapped,
     EvidenceTruncated,
+    DiscriminatorSetCapped,
     EngineLimit,
     GeneratedSource,
     RetractedSource,
@@ -1168,7 +1259,7 @@ pub enum MathInterpretationAnalysisLimitKind {
 #[serde(rename_all = "camelCase")]
 pub struct MathInterpretationAnalysisLimitInfo {
     pub kind: MathInterpretationAnalysisLimitKind,
-    pub evidence: Vec<Evidence>,
+    pub evidence: Vec<MathInterpretationEvidenceReferenceInfo>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1177,12 +1268,56 @@ pub enum MathInterpretationExhaustiveness {
     BoundedOpenWorld,
 }
 
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MathInterpretationCandidateCapInfo {
+    pub candidate_count_before_cap: u32,
+    pub pre_cap_semantic_key_digest: String,
+}
+
+impl<'de> Deserialize<'de> for MathInterpretationCandidateCapInfo {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        struct WireCandidateCap {
+            candidate_count_before_cap: u32,
+            pre_cap_semantic_key_digest: String,
+        }
+
+        let wire = WireCandidateCap::deserialize(deserializer)?;
+        if wire.candidate_count_before_cap <= MATH_INTERPRETATION_HYPOTHESIS_LIMIT as u32 {
+            return Err(serde::de::Error::custom(
+                "candidateCountBeforeCap must exceed the interpretation hypothesis limit",
+            ));
+        }
+        if wire.pre_cap_semantic_key_digest.len() != 64
+            || !wire
+                .pre_cap_semantic_key_digest
+                .bytes()
+                .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
+        {
+            return Err(serde::de::Error::custom(
+                "preCapSemanticKeyDigest must be 64 lowercase hexadecimal characters",
+            ));
+        }
+        Ok(Self {
+            candidate_count_before_cap: wire.candidate_count_before_cap,
+            pre_cap_semantic_key_digest: wire.pre_cap_semantic_key_digest,
+        })
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct MathInterpretationSetInfo {
     pub hypotheses: Vec<MathInterpretationHypothesisInfo>,
-    pub missing_discriminators: Vec<MathAuthoringRequirementInfo>,
+    pub missing_discriminators: Vec<MathInterpretationRequirementInfo>,
     pub analysis_limits: Vec<MathInterpretationAnalysisLimitInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub candidate_cap: Option<MathInterpretationCandidateCapInfo>,
     pub exhaustiveness: MathInterpretationExhaustiveness,
     pub truncated: bool,
 }
@@ -1193,7 +1328,7 @@ pub struct MathAuthoringContext {
     pub disposition: MathAuthoringDisposition,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub formula: Option<MathFormulaAnchorInfo>,
-    pub requirements: Vec<MathAuthoringRequirementInfo>,
+    pub requirements: Vec<MathInterpretationRequirementInfo>,
     pub conditions: Vec<LawConditionInfo>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub conventional_candidates: Vec<ConventionalCandidateInfo>,
@@ -1475,7 +1610,10 @@ pub struct AnalysisStats {
 
 #[cfg(test)]
 mod tests {
-    use super::{Evidence, MeaningDecision, PhysicalDimensionInfo, QuantityInfo};
+    use super::{
+        Evidence, MathInterpretationCandidateCapInfo, MathInterpretationExhaustiveness,
+        MathInterpretationSetInfo, MeaningDecision, PhysicalDimensionInfo, QuantityInfo,
+    };
 
     #[test]
     fn meaning_decision_rejects_fields_from_another_state() {
@@ -1507,11 +1645,56 @@ mod tests {
                 kind: "explicit-prose".into(),
                 strength: "strong".into(),
                 source_ranges: Vec::new(),
+                source_anchors: Vec::new(),
             },
             derived_from: Vec::new(),
         };
 
         let value = serde_json::to_value(quantity).unwrap();
         assert_eq!(value["derivedFrom"], serde_json::json!([]));
+    }
+
+    #[test]
+    fn interpretation_candidate_cap_uses_the_shared_native_wasm_wire_shape() {
+        let interpretations = MathInterpretationSetInfo {
+            hypotheses: Vec::new(),
+            missing_discriminators: Vec::new(),
+            analysis_limits: Vec::new(),
+            candidate_cap: Some(MathInterpretationCandidateCapInfo {
+                candidate_count_before_cap: 17,
+                pre_cap_semantic_key_digest:
+                    "da08f15f67c82e557e56b90af5aa7dd38db391b6f94c13ce982f43fb794646c4".into(),
+            }),
+            exhaustiveness: MathInterpretationExhaustiveness::BoundedOpenWorld,
+            truncated: true,
+        };
+
+        let value = serde_json::to_value(&interpretations).unwrap();
+        assert_eq!(value["candidateCap"]["candidateCountBeforeCap"], 17);
+        assert_eq!(
+            value["candidateCap"]["preCapSemanticKeyDigest"],
+            "da08f15f67c82e557e56b90af5aa7dd38db391b6f94c13ce982f43fb794646c4"
+        );
+        assert_eq!(
+            serde_json::from_value::<MathInterpretationSetInfo>(value).unwrap(),
+            interpretations
+        );
+        for invalid in [
+            serde_json::json!({
+                "candidateCountBeforeCap": 16,
+                "preCapSemanticKeyDigest": "a".repeat(64),
+            }),
+            serde_json::json!({
+                "candidateCountBeforeCap": 17,
+                "preCapSemanticKeyDigest": "A".repeat(64),
+            }),
+            serde_json::json!({
+                "candidateCountBeforeCap": 17,
+                "preCapSemanticKeyDigest": "a".repeat(64),
+                "extra": true,
+            }),
+        ] {
+            assert!(serde_json::from_value::<MathInterpretationCandidateCapInfo>(invalid).is_err());
+        }
     }
 }

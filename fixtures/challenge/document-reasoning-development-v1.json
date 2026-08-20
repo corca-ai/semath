@@ -2509,13 +2509,13 @@
       "review": {
         "correctionSummary": [
           "Applied the independent critic's source or cursor correction.",
-          "v0.34 proof-authority adjudication: formula or domain context without independent typed role roots remains Partial."
+          "v0.37 public-development adjudication: the scoped charge and potential declarations plus the attached potential-energy statement independently ground every law role and condition, so the first formula is Established despite later sibling-section shadowing."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "32c22b227684a5149f94cb422bcc4500011a1226c0800d76e4b992f4b3c01ddb",
+        "finalDigest": "b4ac018fd11a046e74587d9ce520af1a4ee66044e05eb01c05c0af00dceb2e34",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "32c22b227684a5149f94cb422bcc4500011a1226c0800d76e4b992f4b3c01ddb",
+        "reviewedAt": "2026-08-20",
+        "semanticReviewDigest": "b4ac018fd11a046e74587d9ce520af1a4ee66044e05eb01c05c0af00dceb2e34",
         "status": "corrected"
       },
       "snapshots": [
@@ -3850,13 +3850,14 @@
           "Separated the false reviewed variance claim from the accepted quadratic correction.",
           "v0.28 adjudication: replaced a formula-boundary guess with an exact occurrence, or aligned navigation with an explicitly source-defined entity.",
           "v0.28 adjudication: corrected cursor ownership or aligned navigation with the explicitly established entity.",
-          "Added reviewed distribution, moment, estimator, regression, covariance, and stochastic-process contexts with an include-removal lifecycle."
+          "Added reviewed distribution, moment, estimator, regression, covariance, and stochastic-process contexts with an include-removal lifecycle.",
+          "v0.37 public-development adjudication: the included random-variable and mean declarations plus the explicit expected-value activation ground both roles and the finite-expectation condition, so the reviewed formula is Established."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "b68ee2155fa339f213f842d63f2e9831511c821985488766121479595e4af133",
+        "finalDigest": "19db00ff67bb9877b3fac30da86c1ffeac278bfa547bdf52a5034c58b0de66ef",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-15",
-        "semanticReviewDigest": "b68ee2155fa339f213f842d63f2e9831511c821985488766121479595e4af133",
+        "reviewedAt": "2026-08-20",
+        "semanticReviewDigest": "19db00ff67bb9877b3fac30da86c1ffeac278bfa547bdf52a5034c58b0de66ef",
         "status": "corrected"
       },
       "snapshots": [
@@ -8020,7 +8021,7 @@
         "edge": "after"
       },
       "expected": {
-        "decision": "partial",
+        "decision": "established",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
@@ -8050,7 +8051,7 @@
             "status": "unavailable"
           }
         },
-        "proofGrounded": false,
+        "proofGrounded": true,
         "relations": [
           {
             "anchor": {
@@ -15077,7 +15078,7 @@
     {
       "cursor": { "edge": "after", "fileId": "statistics/moments.tex", "needle": "\\mu=\\mathbb E(X)", "snapshotId": "current" },
       "expected": {
-        "decision": "partial",
+        "decision": "established",
         "diagnostics": { "excludedCodes": [], "maximum": 0, "required": [] },
         "excludedRelationIds": [],
         "navigation": {
@@ -15086,7 +15087,7 @@
           "references": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
           "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
         },
-        "proofGrounded": false,
+        "proofGrounded": true,
         "relations": [{
           "anchor": { "fileId": "statistics/moments.tex", "needle": "\\mu=\\mathbb E(X)" },
           "relationId": "probability:expected-value-definition",

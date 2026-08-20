@@ -1,0 +1,2906 @@
+{
+  "cases": [
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "derivative-convention-tex:advisory-01",
+            "derivative-convention-tex:advisory-02",
+            "derivative-convention-tex:advisory-03",
+            "derivative-convention-tex:advisory-04",
+            "derivative-convention-tex:advisory-05",
+            "derivative-convention-tex:advisory-06",
+            "derivative-convention-tex:advisory-07",
+            "derivative-convention-tex:advisory-08",
+            "derivative-convention-tex:advisory-09",
+            "derivative-convention-tex:advisory-10",
+            "derivative-convention-tex:advisory-11"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 3,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "Chained first-derivative law recognition is not yet release-required."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "derivative-convention-tex",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "derivative-convention-tex:claim-01",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "derivative-convention-tex:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "derivative-convention-tex:claim-01",
+            "sourceNotation": "x"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "derivative-convention-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "derivative-convention-md:advisory-01",
+            "derivative-convention-md:advisory-02",
+            "derivative-convention-md:advisory-03",
+            "derivative-convention-md:advisory-04",
+            "derivative-convention-md:advisory-05",
+            "derivative-convention-md:advisory-06",
+            "derivative-convention-md:advisory-07",
+            "derivative-convention-md:advisory-08",
+            "derivative-convention-md:advisory-09",
+            "derivative-convention-md:advisory-10",
+            "derivative-convention-md:advisory-11"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 3,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "Chained first-derivative law recognition is not yet release-required."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "derivative-convention-md",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "derivative-convention-md:claim-01",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "derivative-convention-md:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "derivative-convention-md:claim-01",
+            "sourceNotation": "x"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "derivative-convention-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "gradient-definition-tex:advisory-01",
+            "gradient-definition-tex:advisory-02",
+            "gradient-definition-tex:advisory-03",
+            "gradient-definition-tex:advisory-04",
+            "gradient-definition-tex:advisory-06",
+            "gradient-definition-tex:advisory-07",
+            "gradient-definition-tex:advisory-08",
+            "gradient-definition-tex:advisory-09",
+            "gradient-definition-tex:advisory-10",
+            "gradient-definition-tex:advisory-11",
+            "gradient-definition-tex:advisory-12"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 4,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "Chained gradient-definition law recognition is not yet release-required."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "gradient-definition-tex",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "gradient-definition-tex:claim-01",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "gradient-definition-tex:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "gradient-definition-tex:claim-01",
+            "sourceNotation": "x"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "gradient-definition-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "gradient-definition-md:advisory-01",
+            "gradient-definition-md:advisory-02",
+            "gradient-definition-md:advisory-03",
+            "gradient-definition-md:advisory-04",
+            "gradient-definition-md:advisory-06",
+            "gradient-definition-md:advisory-07",
+            "gradient-definition-md:advisory-08",
+            "gradient-definition-md:advisory-09",
+            "gradient-definition-md:advisory-10",
+            "gradient-definition-md:advisory-11",
+            "gradient-definition-md:advisory-12"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 4,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "Chained gradient-definition law recognition is not yet release-required."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "gradient-definition-md",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "gradient-definition-md:claim-01",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "gradient-definition-md:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "gradient-definition-md:claim-01",
+            "sourceNotation": "x"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "gradient-definition-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "event-inclusion-exclusion-tex:advisory-01",
+            "event-inclusion-exclusion-tex:advisory-02",
+            "event-inclusion-exclusion-tex:advisory-03",
+            "event-inclusion-exclusion-tex:advisory-04",
+            "event-inclusion-exclusion-tex:advisory-05",
+            "event-inclusion-exclusion-tex:link-source-01",
+            "event-inclusion-exclusion-tex:formula.root",
+            "event-inclusion-exclusion-tex:required-typed-law-event-union-e2-a1",
+            "event-inclusion-exclusion-tex:advisory-09",
+            "event-inclusion-exclusion-tex:advisory-10",
+            "event-inclusion-exclusion-tex:advisory-11",
+            "event-inclusion-exclusion-tex:advisory-12"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 2,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [
+          {
+            "facet": "conditions",
+            "rationale": "Reviewed public-pack semantics are required with exact source-relative bindings, conditions, and evidence."
+          }
+        ],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "The complete two-event inclusion-exclusion identity is not represented by one public typed law."
+          }
+        ],
+        "relativeOrder": [
+          {
+            "before": "event-union",
+            "after": "event-intersection"
+          }
+        ],
+        "requiredHypotheses": [
+          {
+            "bindings": [
+              {
+                "parameter": "left",
+                "symbol": "A"
+              },
+              {
+                "parameter": "right",
+                "symbol": "B"
+              }
+            ],
+            "conditions": [
+              {
+                "conditionId": "common-probability-space",
+                "label": "Both operands are events in a common probability space.",
+                "status": "verified"
+              }
+            ],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "event-inclusion-exclusion-tex-typed-law-event-union-e1",
+              "event-inclusion-exclusion-tex-typed-law-event-union-e2",
+              "event-inclusion-exclusion-tex-typed-law-event-union-e3",
+              "event-inclusion-exclusion-tex-typed-law-event-union-e4",
+              "event-inclusion-exclusion-tex-typed-law-event-union-e5",
+              "event-inclusion-exclusion-tex-typed-law-event-union-e6"
+            ],
+            "id": "event-union",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "event-inclusion-exclusion-tex:formula.root",
+              "kind": "typed-law",
+              "label": "Event union",
+              "relationId": "probability:event-union"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          },
+          {
+            "bindings": [
+              {
+                "parameter": "left",
+                "symbol": "A"
+              },
+              {
+                "parameter": "right",
+                "symbol": "B"
+              }
+            ],
+            "conditions": [
+              {
+                "conditionId": "common-probability-space",
+                "label": "Both operands are events in a common probability space.",
+                "status": "verified"
+              }
+            ],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "event-inclusion-exclusion-tex-typed-law-event-intersection-e1",
+              "event-inclusion-exclusion-tex-typed-law-event-intersection-e2",
+              "event-inclusion-exclusion-tex-typed-law-event-intersection-e3",
+              "event-inclusion-exclusion-tex-typed-law-event-intersection-e4",
+              "event-inclusion-exclusion-tex-typed-law-event-intersection-e5",
+              "event-inclusion-exclusion-tex-typed-law-event-intersection-e6"
+            ],
+            "id": "event-intersection",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "event-inclusion-exclusion-tex:formula.root",
+              "kind": "typed-law",
+              "label": "Event intersection",
+              "relationId": "probability:event-intersection"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          }
+        ],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "event-inclusion-exclusion-tex",
+      "safety": {
+        "claims": [],
+        "disposition": "partial",
+        "equationLinks": [
+          {
+            "kind": "shared-entity",
+            "sourceAnchor": "event-inclusion-exclusion-tex:link-source-01",
+            "targetAnchor": "event-inclusion-exclusion-tex:formula.root"
+          }
+        ],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "event-inclusion-exclusion-tex:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [
+          "event-union",
+          "event-intersection"
+        ],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "event-inclusion-exclusion-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "event-inclusion-exclusion-md:advisory-01",
+            "event-inclusion-exclusion-md:advisory-02",
+            "event-inclusion-exclusion-md:advisory-03",
+            "event-inclusion-exclusion-md:advisory-04",
+            "event-inclusion-exclusion-md:advisory-05",
+            "event-inclusion-exclusion-md:link-source-01",
+            "event-inclusion-exclusion-md:formula.root",
+            "event-inclusion-exclusion-md:required-typed-law-event-union-e2-a1",
+            "event-inclusion-exclusion-md:advisory-09",
+            "event-inclusion-exclusion-md:advisory-10",
+            "event-inclusion-exclusion-md:advisory-11",
+            "event-inclusion-exclusion-md:advisory-12"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 2,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [
+          {
+            "facet": "conditions",
+            "rationale": "Reviewed public-pack semantics are required with exact source-relative bindings, conditions, and evidence."
+          }
+        ],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "The complete two-event inclusion-exclusion identity is not represented by one public typed law."
+          }
+        ],
+        "relativeOrder": [
+          {
+            "before": "event-union",
+            "after": "event-intersection"
+          }
+        ],
+        "requiredHypotheses": [
+          {
+            "bindings": [
+              {
+                "parameter": "left",
+                "symbol": "A"
+              },
+              {
+                "parameter": "right",
+                "symbol": "B"
+              }
+            ],
+            "conditions": [
+              {
+                "conditionId": "common-probability-space",
+                "label": "Both operands are events in a common probability space.",
+                "status": "verified"
+              }
+            ],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "event-inclusion-exclusion-md-typed-law-event-union-e1",
+              "event-inclusion-exclusion-md-typed-law-event-union-e2",
+              "event-inclusion-exclusion-md-typed-law-event-union-e3",
+              "event-inclusion-exclusion-md-typed-law-event-union-e4",
+              "event-inclusion-exclusion-md-typed-law-event-union-e5",
+              "event-inclusion-exclusion-md-typed-law-event-union-e6"
+            ],
+            "id": "event-union",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "event-inclusion-exclusion-md:formula.root",
+              "kind": "typed-law",
+              "label": "Event union",
+              "relationId": "probability:event-union"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          },
+          {
+            "bindings": [
+              {
+                "parameter": "left",
+                "symbol": "A"
+              },
+              {
+                "parameter": "right",
+                "symbol": "B"
+              }
+            ],
+            "conditions": [
+              {
+                "conditionId": "common-probability-space",
+                "label": "Both operands are events in a common probability space.",
+                "status": "verified"
+              }
+            ],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "event-inclusion-exclusion-md-typed-law-event-intersection-e1",
+              "event-inclusion-exclusion-md-typed-law-event-intersection-e2",
+              "event-inclusion-exclusion-md-typed-law-event-intersection-e3",
+              "event-inclusion-exclusion-md-typed-law-event-intersection-e4",
+              "event-inclusion-exclusion-md-typed-law-event-intersection-e5",
+              "event-inclusion-exclusion-md-typed-law-event-intersection-e6"
+            ],
+            "id": "event-intersection",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "event-inclusion-exclusion-md:formula.root",
+              "kind": "typed-law",
+              "label": "Event intersection",
+              "relationId": "probability:event-intersection"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          }
+        ],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "event-inclusion-exclusion-md",
+      "safety": {
+        "claims": [],
+        "disposition": "partial",
+        "equationLinks": [
+          {
+            "kind": "shared-entity",
+            "sourceAnchor": "event-inclusion-exclusion-md:link-source-01",
+            "targetAnchor": "event-inclusion-exclusion-md:formula.root"
+          }
+        ],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "event-inclusion-exclusion-md:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [
+          "event-union",
+          "event-intersection"
+        ],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "event-inclusion-exclusion-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "least-squares-cross-document-tex:advisory-01",
+            "least-squares-cross-document-tex:advisory-02",
+            "least-squares-cross-document-tex:advisory-03",
+            "least-squares-cross-document-tex:advisory-04",
+            "least-squares-cross-document-tex:notation-01",
+            "least-squares-cross-document-tex:notation-02"
+          ],
+          "kinds": [
+            "scoped-domain",
+            "structural-alternative"
+          ],
+          "maxCount": 6,
+          "provenances": [
+            "domain-context",
+            "natural-language-extraction",
+            "typed-structure"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "requirements",
+            "rationale": "Full-rank guidance and the complete least-squares argmin meaning remain advisory known misses."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [
+          {
+            "kind": "disambiguation"
+          }
+        ],
+        "requiredRequirements": [
+          {
+            "kind": "disambiguation"
+          }
+        ]
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "least-squares-cross-document-tex",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "least-squares-cross-document-tex:uniqueness-claim",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "least-squares-cross-document-tex:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "least-squares-cross-document-tex:notation-01",
+            "sourceNotation": "\\widehat x"
+          },
+          {
+            "anchor": "least-squares-cross-document-tex:notation-02",
+            "sourceNotation": "\\widehat x"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "least-squares-cross-document-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "least-squares-cross-document-md:advisory-01",
+            "least-squares-cross-document-md:advisory-02",
+            "least-squares-cross-document-md:advisory-03",
+            "least-squares-cross-document-md:advisory-04",
+            "least-squares-cross-document-md:notation-01",
+            "least-squares-cross-document-md:notation-02"
+          ],
+          "kinds": [
+            "scoped-domain",
+            "structural-alternative"
+          ],
+          "maxCount": 6,
+          "provenances": [
+            "domain-context",
+            "natural-language-extraction",
+            "typed-structure"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "requirements",
+            "rationale": "Full-rank guidance and the complete least-squares argmin meaning remain advisory known misses."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [
+          {
+            "kind": "disambiguation"
+          }
+        ],
+        "requiredRequirements": [
+          {
+            "kind": "disambiguation"
+          }
+        ]
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "least-squares-cross-document-md",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "least-squares-cross-document-md:uniqueness-claim",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "least-squares-cross-document-md:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "least-squares-cross-document-md:notation-01",
+            "sourceNotation": "\\widehat x"
+          },
+          {
+            "anchor": "least-squares-cross-document-md:notation-02",
+            "sourceNotation": "\\widehat x"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "least-squares-cross-document-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "uncertainty-approximation-tex:advisory-01",
+            "uncertainty-approximation-tex:approximation-relation",
+            "uncertainty-approximation-tex:advisory-03"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 1,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "Domain-specific uncertainty propagation is not yet release-required; only exact approximation range is."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "uncertainty-approximation-tex",
+      "safety": {
+        "approximation": {
+          "exactness": "approximate",
+          "relationAnchor": "uncertainty-approximation-tex:approximation-relation"
+        },
+        "claims": [],
+        "disposition": "unsupported",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "uncertainty-approximation-tex:approximation-formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "uncertainty-approximation-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "uncertainty-approximation-md:advisory-01",
+            "uncertainty-approximation-md:approximation-relation",
+            "uncertainty-approximation-md:advisory-03"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 1,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "Domain-specific uncertainty propagation is not yet release-required; only exact approximation range is."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "uncertainty-approximation-md",
+      "safety": {
+        "approximation": {
+          "exactness": "approximate",
+          "relationAnchor": "uncertainty-approximation-md:approximation-relation"
+        },
+        "claims": [],
+        "disposition": "unsupported",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "uncertainty-approximation-md:approximation-formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "uncertainty-approximation-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "capacitor-differential-law-tex:advisory-01",
+            "capacitor-differential-law-tex:advisory-02",
+            "capacitor-differential-law-tex:advisory-03",
+            "capacitor-differential-law-tex:advisory-04",
+            "capacitor-differential-law-tex:advisory-05",
+            "capacitor-differential-law-tex:advisory-07",
+            "capacitor-differential-law-tex:formula.root",
+            "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e2-a1",
+            "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e3-a1",
+            "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e4-a1",
+            "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e5-a1"
+          ],
+          "kinds": [
+            "scoped-domain",
+            "reviewed-convention"
+          ],
+          "maxCount": 4,
+          "provenances": [
+            "domain-context",
+            "reviewed-convention"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [
+          {
+            "facet": "conditions",
+            "rationale": "Reviewed public-pack semantics are required with exact source-relative bindings, conditions, and evidence."
+          }
+        ],
+        "knownMisses": [],
+        "relativeOrder": [],
+        "requiredHypotheses": [
+          {
+            "bindings": [
+              {
+                "parameter": "capacitance",
+                "symbol": "C"
+              },
+              {
+                "parameter": "time",
+                "symbol": "t"
+              },
+              {
+                "parameter": "current",
+                "symbol": "i_C(t)"
+              },
+              {
+                "parameter": "voltage",
+                "symbol": "v_C"
+              }
+            ],
+            "conditions": [
+              {
+                "conditionId": "passive-sign-convention",
+                "label": "The passive sign convention is used.",
+                "status": "verified"
+              }
+            ],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e1",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e2",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e3",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e4",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e5",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e6",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e7",
+              "capacitor-differential-law-tex-typed-law-capacitor-current-law-e8"
+            ],
+            "id": "capacitor-current",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "capacitor-differential-law-tex:formula.root",
+              "kind": "typed-law",
+              "label": "Capacitor current law",
+              "relationId": "circuits:capacitor-current-law"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          }
+        ],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": [
+          {
+            "kind": "role-declaration",
+            "parameter": "time",
+            "symbol": "t"
+          },
+          {
+            "kind": "role-declaration",
+            "parameter": "current",
+            "symbol": "i_C(t)"
+          }
+        ]
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "capacitor-differential-law-tex",
+      "safety": {
+        "claims": [],
+        "disposition": "conventional",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "capacitor-differential-law-tex:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [
+          "capacitor-current"
+        ],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "capacitor-differential-law-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "capacitor-differential-law-md:advisory-01",
+            "capacitor-differential-law-md:advisory-02",
+            "capacitor-differential-law-md:advisory-03",
+            "capacitor-differential-law-md:advisory-04",
+            "capacitor-differential-law-md:advisory-05",
+            "capacitor-differential-law-md:advisory-07",
+            "capacitor-differential-law-md:formula.root",
+            "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e2-a1",
+            "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e3-a1",
+            "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e4-a1",
+            "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e5-a1"
+          ],
+          "kinds": [
+            "scoped-domain",
+            "reviewed-convention"
+          ],
+          "maxCount": 4,
+          "provenances": [
+            "domain-context",
+            "reviewed-convention"
+          ],
+          "supportAllowed": [
+            "supported",
+            "tentative"
+          ]
+        },
+        "coverageGoals": [
+          {
+            "facet": "conditions",
+            "rationale": "Reviewed public-pack semantics are required with exact source-relative bindings, conditions, and evidence."
+          }
+        ],
+        "knownMisses": [],
+        "relativeOrder": [],
+        "requiredHypotheses": [
+          {
+            "bindings": [
+              {
+                "parameter": "capacitance",
+                "symbol": "C"
+              },
+              {
+                "parameter": "time",
+                "symbol": "t"
+              },
+              {
+                "parameter": "current",
+                "symbol": "i_C(t)"
+              },
+              {
+                "parameter": "voltage",
+                "symbol": "v_C"
+              }
+            ],
+            "conditions": [
+              {
+                "conditionId": "passive-sign-convention",
+                "label": "The passive sign convention is used.",
+                "status": "verified"
+              }
+            ],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e1",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e2",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e3",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e4",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e5",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e6",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e7",
+              "capacitor-differential-law-md-typed-law-capacitor-current-law-e8"
+            ],
+            "id": "capacitor-current",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "capacitor-differential-law-md:formula.root",
+              "kind": "typed-law",
+              "label": "Capacitor current law",
+              "relationId": "circuits:capacitor-current-law"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          }
+        ],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": [
+          {
+            "kind": "role-declaration",
+            "parameter": "time",
+            "symbol": "t"
+          },
+          {
+            "kind": "role-declaration",
+            "parameter": "current",
+            "symbol": "i_C(t)"
+          }
+        ]
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "capacitor-differential-law-md",
+      "safety": {
+        "claims": [],
+        "disposition": "conventional",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "capacitor-differential-law-md:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [
+          "capacitor-current"
+        ],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "capacitor-differential-law-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "generated-opaque-call-tex:advisory-01"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 1,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "generated",
+            "rationale": "Generated-subnode granularity is not yet release-required; whole-formula generated and non-editable lifecycle is accepted conservatively."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "generated-opaque-call-tex",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "generated-opaque-call-tex:claim-01",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "generated-opaque-call-tex:macro-call-formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": false,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "generated",
+          "retracted": false
+        },
+        "limits": [
+          {
+            "evidence": [
+              "generated-opaque-call-tex-limit-generated-source-e1"
+            ],
+            "kind": "generated-source"
+          }
+        ],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "generated-opaque-call-tex:notation-01",
+            "sourceNotation": "r"
+          },
+          {
+            "anchor": "generated-opaque-call-tex:notation-02",
+            "sourceNotation": "r"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "generated-opaque-call-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "generated-opaque-call-md:advisory-01"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 1,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "supported"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "generated",
+            "rationale": "Generated-subnode granularity is not yet release-required; whole-formula generated and non-editable lifecycle is accepted conservatively."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "generated-opaque-call-md",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "generated-opaque-call-md:claim-01",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "generated-opaque-call-md:macro-call-formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": false,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "generated",
+          "retracted": false
+        },
+        "limits": [
+          {
+            "evidence": [
+              "generated-opaque-call-md-limit-generated-source-e1"
+            ],
+            "kind": "generated-source"
+          }
+        ],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "generated-opaque-call-md:notation-01",
+            "sourceNotation": "r"
+          },
+          {
+            "anchor": "generated-opaque-call-md:notation-02",
+            "sourceNotation": "r"
+          }
+        ],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "generated-opaque-call-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "faraday-sign-conflict-tex:advisory-01",
+            "faraday-sign-conflict-tex:advisory-02",
+            "faraday-sign-conflict-tex:advisory-03",
+            "faraday-sign-conflict-tex:advisory-04",
+            "faraday-sign-conflict-tex:advisory-05",
+            "faraday-sign-conflict-tex:advisory-06",
+            "faraday-sign-conflict-tex:advisory-07"
+          ],
+          "kinds": [
+            "scoped-domain",
+            "structural-alternative"
+          ],
+          "maxCount": 5,
+          "provenances": [
+            "domain-context",
+            "typed-structure"
+          ],
+          "supportAllowed": [
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "The exact Faraday sign contradiction is not yet recognized; the rejected plus-sign formula must remain non-authoritative."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [
+          {
+            "kind": "disambiguation"
+          },
+          {
+            "kind": "declaration",
+            "symbol": "curl"
+          }
+        ],
+        "requiredRequirements": [
+          {
+            "kind": "disambiguation"
+          },
+          {
+            "kind": "declaration",
+            "symbol": "curl"
+          }
+        ]
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "faraday-sign-conflict-tex",
+      "safety": {
+        "claims": [],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [
+          {
+            "formulaAnchor": "faraday-sign-conflict-tex:rejected-formula.root",
+            "kind": "typed-law",
+            "label": "Faraday induction law",
+            "relationId": "electromagnetism:faraday-law"
+          }
+        ],
+        "formulaAnchor": "faraday-sign-conflict-tex:rejected-formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "rejected",
+      "sourceCaseId": "faraday-sign-conflict-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "faraday-sign-conflict-md:advisory-01",
+            "faraday-sign-conflict-md:advisory-02",
+            "faraday-sign-conflict-md:advisory-03",
+            "faraday-sign-conflict-md:advisory-04",
+            "faraday-sign-conflict-md:advisory-05",
+            "faraday-sign-conflict-md:advisory-06",
+            "faraday-sign-conflict-md:advisory-07"
+          ],
+          "kinds": [
+            "scoped-domain",
+            "structural-alternative"
+          ],
+          "maxCount": 5,
+          "provenances": [
+            "domain-context",
+            "typed-structure"
+          ],
+          "supportAllowed": [
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "interpretations",
+            "rationale": "The exact Faraday sign contradiction is not yet recognized; the rejected plus-sign formula must remain non-authoritative."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [
+          {
+            "kind": "disambiguation"
+          },
+          {
+            "kind": "declaration",
+            "symbol": "curl"
+          }
+        ],
+        "requiredRequirements": [
+          {
+            "kind": "disambiguation"
+          },
+          {
+            "kind": "declaration",
+            "symbol": "curl"
+          }
+        ]
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "faraday-sign-conflict-md",
+      "safety": {
+        "claims": [],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [
+          {
+            "formulaAnchor": "faraday-sign-conflict-md:rejected-formula.root",
+            "kind": "typed-law",
+            "label": "Faraday induction law",
+            "relationId": "electromagnetism:faraday-law"
+          }
+        ],
+        "formulaAnchor": "faraday-sign-conflict-md:rejected-formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "rejected",
+      "sourceCaseId": "faraday-sign-conflict-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [],
+          "kinds": [],
+          "maxCount": 0,
+          "provenances": [],
+          "supportAllowed": []
+        },
+        "coverageGoals": [
+          {
+            "facet": "interpretations",
+            "rationale": "The locally adopted rectangular-area meaning remains authoritative without manufacturing cap candidates."
+          }
+        ],
+        "knownMisses": [
+          {
+            "facet": "cap",
+            "rationale": "Public cap-plus-one behavior remains a protocol unit contract and is not asserted by this source pair."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [
+          {
+            "bindings": [],
+            "conditions": [],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "open-world-cap-plus-one-tex-source-meaning-rectangular-area-e1"
+            ],
+            "id": "adopted-local-meaning",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "open-world-cap-plus-one-tex:formula.root",
+              "kind": "source-meaning",
+              "label": "rectangular area"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          }
+        ],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "open-world-cap-plus-one-tex",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "open-world-cap-plus-one-tex:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-tex:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-tex:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-tex:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "open-world-cap-plus-one-tex:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "open-world-cap-plus-one-tex:notation-01",
+            "sourceNotation": "r"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-tex:notation-02",
+            "sourceNotation": "r"
+          }
+        ],
+        "requiredAuthority": [
+          "adopted-local-meaning"
+        ],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "open-world-cap-plus-one-tex"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [],
+          "kinds": [],
+          "maxCount": 0,
+          "provenances": [],
+          "supportAllowed": []
+        },
+        "coverageGoals": [
+          {
+            "facet": "interpretations",
+            "rationale": "The locally adopted rectangular-area meaning remains authoritative without manufacturing cap candidates."
+          }
+        ],
+        "knownMisses": [
+          {
+            "facet": "cap",
+            "rationale": "Public cap-plus-one behavior remains a protocol unit contract and is not asserted by this source pair."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [
+          {
+            "bindings": [],
+            "conditions": [],
+            "dependentFacets": [
+              "interpretations"
+            ],
+            "evidence": [
+              "open-world-cap-plus-one-md-source-meaning-rectangular-area-e1"
+            ],
+            "id": "adopted-local-meaning",
+            "releaseRequired": true,
+            "selector": {
+              "formulaAnchor": "open-world-cap-plus-one-md:formula.root",
+              "kind": "source-meaning",
+              "label": "rectangular area"
+            },
+            "supportAllowed": [
+              "supported"
+            ]
+          }
+        ],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle"
+      ],
+      "id": "open-world-cap-plus-one-md",
+      "safety": {
+        "claims": [
+          {
+            "anchor": "open-world-cap-plus-one-md:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-md:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-md:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-md:adopted-roles",
+            "modality": "asserted",
+            "polarity": "positive",
+            "strengthCeiling": "asserted"
+          }
+        ],
+        "disposition": "partial",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "open-world-cap-plus-one-md:formula.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [
+          {
+            "anchor": "open-world-cap-plus-one-md:notation-01",
+            "sourceNotation": "r"
+          },
+          {
+            "anchor": "open-world-cap-plus-one-md:notation-02",
+            "sourceNotation": "r"
+          }
+        ],
+        "requiredAuthority": [
+          "adopted-local-meaning"
+        ],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "primary",
+      "sourceCaseId": "open-world-cap-plus-one-md"
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "declaration-and-source-retraction-tex:advisory-01",
+            "declaration-and-source-retraction-tex:advisory-02",
+            "declaration-and-source-retraction-tex:advisory-03"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 1,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "retraction-transition",
+            "rationale": "Before-snapshot diffusion authority is not yet recognized; after and removed snapshots still block stale authority."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle",
+        "retraction-transition"
+      ],
+      "id": "declaration-and-source-retraction-tex",
+      "safety": {
+        "claims": [],
+        "disposition": "unsupported",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "declaration-and-source-retraction-tex:formula.before.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "before",
+      "sourceCaseId": "declaration-and-source-retraction-tex",
+      "transition": {
+        "after": {
+          "disposition": "unsupported",
+          "forbiddenAnchors": [
+            "declaration-and-source-retraction-tex:roles.before",
+            "declaration-and-source-retraction-tex:model.before",
+            "declaration-and-source-retraction-tex:formula.before.root"
+          ],
+          "forbiddenAuthority": [
+            {
+              "formulaAnchor": "declaration-and-source-retraction-tex:formula.after.root",
+              "kind": "typed-law",
+              "label": "Diffusion equation",
+              "relationId": "calculus-analysis:diffusion-equation"
+            }
+          ],
+          "formulaAnchor": "declaration-and-source-retraction-tex:formula.after.root",
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 2,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "requiredMissingDiscriminators": [],
+          "snapshotId": "declarations-removed"
+        },
+        "before": {
+          "disposition": "unsupported",
+          "formulaAnchor": "declaration-and-source-retraction-tex:formula.before.root",
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "requiredAnchors": [
+            "declaration-and-source-retraction-tex:formula.before.root"
+          ],
+          "requiredAuthority": [],
+          "snapshotId": "declared"
+        },
+        "cleanIncremental": true,
+        "removed": {
+          "context": "absent",
+          "selectionAnchor": "declaration-and-source-retraction-tex:removal.final",
+          "snapshotId": "formula-removed"
+        }
+      }
+    },
+    {
+      "advisory": {
+        "allowedExtras": {
+          "anchorAllowlist": [
+            "declaration-and-source-retraction-md:advisory-01",
+            "declaration-and-source-retraction-md:advisory-02",
+            "declaration-and-source-retraction-md:advisory-03"
+          ],
+          "kinds": [
+            "scoped-domain"
+          ],
+          "maxCount": 1,
+          "provenances": [
+            "domain-context"
+          ],
+          "supportAllowed": [
+            "tentative"
+          ]
+        },
+        "coverageGoals": [],
+        "knownMisses": [
+          {
+            "facet": "retraction-transition",
+            "rationale": "Before-snapshot diffusion authority is not yet recognized; after and removed snapshots still block stale authority."
+          }
+        ],
+        "relativeOrder": [],
+        "requiredHypotheses": [],
+        "requiredMissingDiscriminators": [],
+        "requiredRequirements": []
+      },
+      "facets": [
+        "clean-incremental",
+        "interpretations",
+        "lifecycle",
+        "retraction-transition"
+      ],
+      "id": "declaration-and-source-retraction-md",
+      "safety": {
+        "claims": [],
+        "disposition": "unsupported",
+        "equationLinks": [],
+        "forbiddenAuthority": [],
+        "formulaAnchor": "declaration-and-source-retraction-md:formula.before.root",
+        "generatedSubnodes": [],
+        "interpretationsTruncated": false,
+        "lifecycle": {
+          "capped": false,
+          "documentVersion": 1,
+          "editable": true,
+          "engineLimited": false,
+          "freshness": "current",
+          "generation": "authored",
+          "retracted": false
+        },
+        "limits": [],
+        "noUnexpectedAuthority": true,
+        "noUnexpectedContradictions": true,
+        "notation": [],
+        "requiredAuthority": [],
+        "requiredContradictions": [],
+        "truncated": false
+      },
+      "selectionId": "before",
+      "sourceCaseId": "declaration-and-source-retraction-md",
+      "transition": {
+        "after": {
+          "disposition": "unsupported",
+          "forbiddenAnchors": [
+            "declaration-and-source-retraction-md:roles.before",
+            "declaration-and-source-retraction-md:model.before",
+            "declaration-and-source-retraction-md:formula.before.root"
+          ],
+          "forbiddenAuthority": [
+            {
+              "formulaAnchor": "declaration-and-source-retraction-md:formula.after.root",
+              "kind": "typed-law",
+              "label": "Diffusion equation",
+              "relationId": "calculus-analysis:diffusion-equation"
+            }
+          ],
+          "formulaAnchor": "declaration-and-source-retraction-md:formula.after.root",
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 2,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "requiredMissingDiscriminators": [],
+          "snapshotId": "declarations-removed"
+        },
+        "before": {
+          "disposition": "unsupported",
+          "formulaAnchor": "declaration-and-source-retraction-md:formula.before.root",
+          "lifecycle": {
+            "capped": false,
+            "documentVersion": 1,
+            "editable": true,
+            "engineLimited": false,
+            "freshness": "current",
+            "generation": "authored",
+            "retracted": false
+          },
+          "requiredAnchors": [
+            "declaration-and-source-retraction-md:formula.before.root"
+          ],
+          "requiredAuthority": [],
+          "snapshotId": "declared"
+        },
+        "cleanIncremental": true,
+        "removed": {
+          "context": "absent",
+          "selectionAnchor": "declaration-and-source-retraction-md:removal.final",
+          "snapshotId": "formula-removed"
+        }
+      }
+    }
+  ],
+  "evidence": {
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e1": {
+      "anchors": [
+        "capacitor-differential-law-md:formula.root"
+      ],
+      "generation": "authored",
+      "kind": "canonical-math",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "semantic-law-unification",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e2": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "asserted-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "asserted-law-role/current",
+      "strength": "strong"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e3": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e3-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/capacitance",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e4": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e4-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/voltage",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e5": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e5-a1"
+      ],
+      "generation": "authored",
+      "kind": "asserted-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "asserted-law-role/time",
+      "strength": "strong"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e6": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e6-a1"
+      ],
+      "generation": "authored",
+      "kind": "explicit-prose",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-scientific-assumption",
+      "strength": "strong"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e7": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/current",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-md-typed-law-capacitor-current-law-e8": {
+      "anchors": [
+        "capacitor-differential-law-md:required-typed-law-capacitor-current-law-e8-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/voltage",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e1": {
+      "anchors": [
+        "capacitor-differential-law-tex:formula.root"
+      ],
+      "generation": "authored",
+      "kind": "canonical-math",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "semantic-law-unification",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e2": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "asserted-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "asserted-law-role/current",
+      "strength": "strong"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e3": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e3-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/capacitance",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e4": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e4-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/voltage",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e5": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e5-a1"
+      ],
+      "generation": "authored",
+      "kind": "asserted-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "asserted-law-role/time",
+      "strength": "strong"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e6": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e6-a1"
+      ],
+      "generation": "authored",
+      "kind": "explicit-prose",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-scientific-assumption",
+      "strength": "strong"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e7": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/current",
+      "strength": "hard"
+    },
+    "capacitor-differential-law-tex-typed-law-capacitor-current-law-e8": {
+      "anchors": [
+        "capacitor-differential-law-tex:required-typed-law-capacitor-current-law-e8-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/voltage",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-union-e1": {
+      "anchors": [
+        "event-inclusion-exclusion-md:formula.root"
+      ],
+      "generation": "authored",
+      "kind": "canonical-math",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "semantic-law-unification",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-union-e2": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-union-e3": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-union-e4": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e4-a1",
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e4-a2",
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e4-a3"
+      ],
+      "generation": "authored",
+      "kind": "explicit-prose",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-scientific-assumption",
+      "strength": "strong"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-union-e5": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e5-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-union-e6": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e6-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-intersection-e1": {
+      "anchors": [
+        "event-inclusion-exclusion-md:formula.root"
+      ],
+      "generation": "authored",
+      "kind": "canonical-math",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "semantic-law-unification",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-intersection-e2": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-intersection-e3": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-intersection-e4": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e4-a1",
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e4-a2",
+        "event-inclusion-exclusion-md:required-typed-law-event-union-e4-a3"
+      ],
+      "generation": "authored",
+      "kind": "explicit-prose",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-scientific-assumption",
+      "strength": "strong"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-intersection-e5": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-intersection-e5-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-md-typed-law-event-intersection-e6": {
+      "anchors": [
+        "event-inclusion-exclusion-md:required-typed-law-event-intersection-e6-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-union-e1": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:formula.root"
+      ],
+      "generation": "authored",
+      "kind": "canonical-math",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "semantic-law-unification",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-union-e2": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-union-e3": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-union-e4": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e4-a1",
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e4-a2",
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e4-a3"
+      ],
+      "generation": "authored",
+      "kind": "explicit-prose",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-scientific-assumption",
+      "strength": "strong"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-union-e5": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e5-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-union-e6": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e6-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-intersection-e1": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:formula.root"
+      ],
+      "generation": "authored",
+      "kind": "canonical-math",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "semantic-law-unification",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-intersection-e2": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-intersection-e3": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e2-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-intersection-e4": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e4-a1",
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e4-a2",
+        "event-inclusion-exclusion-tex:required-typed-law-event-union-e4-a3"
+      ],
+      "generation": "authored",
+      "kind": "explicit-prose",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-scientific-assumption",
+      "strength": "strong"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-intersection-e5": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-intersection-e5-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/left",
+      "strength": "hard"
+    },
+    "event-inclusion-exclusion-tex-typed-law-event-intersection-e6": {
+      "anchors": [
+        "event-inclusion-exclusion-tex:required-typed-law-event-intersection-e6-a1"
+      ],
+      "generation": "authored",
+      "kind": "canonical-binding",
+      "lifecycle": "current",
+      "provenance": "typed-structure",
+      "role": "supporting",
+      "ruleId": "typed-law-role/right",
+      "strength": "hard"
+    },
+    "generated-opaque-call-md-limit-generated-source-e1": {
+      "anchors": [
+        "generated-opaque-call-md:macro-call-formula.root"
+      ],
+      "generation": "authored",
+      "kind": "source-occurrence",
+      "lifecycle": "current",
+      "ruleId": "semath/authoring/analysis-limit",
+      "strength": "contextual"
+    },
+    "generated-opaque-call-tex-limit-generated-source-e1": {
+      "anchors": [
+        "generated-opaque-call-tex:macro-call-formula.root"
+      ],
+      "generation": "authored",
+      "kind": "source-occurrence",
+      "lifecycle": "current",
+      "ruleId": "semath/authoring/analysis-limit",
+      "strength": "contextual"
+    },
+    "open-world-cap-plus-one-md-source-meaning-rectangular-area-e1": {
+      "anchors": [
+        "open-world-cap-plus-one-md:notation-01"
+      ],
+      "generation": "authored",
+      "kind": "source-definition",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-clause-definition",
+      "strength": "hard"
+    },
+    "open-world-cap-plus-one-tex-source-meaning-rectangular-area-e1": {
+      "anchors": [
+        "open-world-cap-plus-one-tex:notation-01"
+      ],
+      "generation": "authored",
+      "kind": "source-definition",
+      "lifecycle": "current",
+      "provenance": "natural-language-extraction",
+      "role": "supporting",
+      "ruleId": "english-clause-definition",
+      "strength": "hard"
+    }
+  },
+  "pairs": [
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "derivative-convention",
+      "markdownCaseId": "derivative-convention-md",
+      "texCaseId": "derivative-convention-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "gradient-definition",
+      "markdownCaseId": "gradient-definition-md",
+      "texCaseId": "gradient-definition-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "event-inclusion-exclusion",
+      "markdownCaseId": "event-inclusion-exclusion-md",
+      "texCaseId": "event-inclusion-exclusion-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "least-squares-cross-document",
+      "markdownCaseId": "least-squares-cross-document-md",
+      "texCaseId": "least-squares-cross-document-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "uncertainty-approximation",
+      "markdownCaseId": "uncertainty-approximation-md",
+      "texCaseId": "uncertainty-approximation-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "capacitor-differential-law",
+      "markdownCaseId": "capacitor-differential-law-md",
+      "texCaseId": "capacitor-differential-law-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "generated-opaque-call",
+      "markdownCaseId": "generated-opaque-call-md",
+      "texCaseId": "generated-opaque-call-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "faraday-sign-conflict",
+      "markdownCaseId": "faraday-sign-conflict-md",
+      "texCaseId": "faraday-sign-conflict-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "open-world-cap-plus-one",
+      "markdownCaseId": "open-world-cap-plus-one-md",
+      "texCaseId": "open-world-cap-plus-one-tex"
+    },
+    {
+      "compare": {
+        "authority": "exact",
+        "hypotheses": [
+          "kind",
+          "label",
+          "relationId",
+          "formulaAnchor",
+          "support",
+          "bindings",
+          "conditions",
+          "evidence"
+        ],
+        "lifecycle": "exact",
+        "limits": "exact",
+        "ordering": "required-relative"
+      },
+      "id": "declaration-and-source-retraction",
+      "markdownCaseId": "declaration-and-source-retraction-md",
+      "texCaseId": "declaration-and-source-retraction-tex"
+    }
+  ],
+  "review": {
+    "attestationDigest": "d32aa406d2b229d703c8fd346ceae913caf702fee0c3412eb754dfa67bb0d6b5",
+    "author": "agent:/root/constraint_contract_rewrite",
+    "digest": "7693f886b6eda4c71ca29dd899aa006e03ad4a79cbede998747d8af4ac7efbe9",
+    "reviewFixture": "fixtures/challenge/math-authoring-oracle-review-v2.json",
+    "reviewedAt": "2026-08-20",
+    "reviewer": "agent:/root/oracle_v2_final_audit"
+  },
+  "schemaVersion": 2,
+  "sourceFixture": "fixtures/challenge/math-authoring-oracle-source-v2.json",
+  "sourceFixtureId": "semath-math-authoring-public-source-v2",
+  "sourceSha256": "7eaff6b13a4ee41773b60bf74368c0eeacd126f1d482976f9de4c222a7b4528a"
+}

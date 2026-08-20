@@ -1,153 +1,223 @@
 import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
+import type { FreshBlindReservation } from "./check-fresh-blind-reservation";
+import { freshBlindReservationMarker } from "./fresh-blind-reservation";
 import {
+  createFreshBlindExecutionErrorReceipt,
+  createFreshBlindStartedReceipt,
   finalizeFreshBlindReceipt,
+  freshBlindStartedReceiptPath,
+  parseFreshBlindReceipt,
   planFreshBlindReceiptTransition,
   reserveFreshBlindReceipt,
-  type FreshBlindReleaseReceipt,
+  type FreshBlindStartedReceipt,
+  type FreshBlindTerminalReceipt,
 } from "./fresh-blind-receipt";
+import {
+  FRESH_BLIND_CONTRACTS,
+  type FreshBlindPreflightManifest,
+} from "./fresh-blind-preflight-manifest";
 
-describe("fresh blind release receipt", () => {
-  test("reserves exactly once and records the terminal result", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "semath-fresh-blind-"));
+describe("fresh blind schema-2 receipt", () => {
+  test("keeps immutable started and terminal records plus content-addressed copies", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "semath-fresh-receipt-"));
     const path = join(directory, "receipt.json");
-    const started = receipt("started");
+    const started = startedReceipt();
+    const terminal = completedReceipt(started);
     try {
       await reserveFreshBlindReceipt(path, started);
       await expect(reserveFreshBlindReceipt(path, started)).rejects.toThrow();
-
-      const completed: FreshBlindReleaseReceipt = {
-        ...started,
-        completedAt: "2026-08-12T01:01:00.000Z",
-        result: { passed: 48 },
-        status: "completed",
-      };
-      await finalizeFreshBlindReceipt(path, completed);
-      expect(JSON.parse(await readFile(path, "utf8"))).toEqual(completed);
+      await finalizeFreshBlindReceipt(path, terminal);
+      expect(
+        parseFreshBlindReceipt(
+          JSON.parse(
+            await readFile(freshBlindStartedReceiptPath(path), "utf8"),
+          ) as unknown,
+        ),
+      ).toEqual(started);
+      expect(
+        parseFreshBlindReceipt(
+          JSON.parse(await readFile(path, "utf8")) as unknown,
+        ),
+      ).toEqual(terminal);
+      const files = await readdir(directory);
+      expect(
+        files.filter((file) => /receipt\.[0-9a-f]{64}\.json/u.test(file)),
+      ).toHaveLength(1);
+      expect(
+        files.filter((file) =>
+          /receipt\.started\.[0-9a-f]{64}\.json/u.test(file),
+        ),
+      ).toHaveLength(1);
+      expect(files).toContain("receipt.json.sha256");
+      expect(files).toContain("receipt.started.json.sha256");
     } finally {
       await rm(directory, { recursive: true });
     }
   });
 
-  test("rejects a non-terminal final receipt", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "semath-fresh-blind-"));
-    const path = join(directory, "receipt.json");
-    try {
-      await reserveFreshBlindReceipt(path, receipt("started"));
-      await expect(
-        finalizeFreshBlindReceipt(path, receipt("started")),
-      ).rejects.toThrow("terminal status");
-    } finally {
-      await rm(directory, { recursive: true });
-    }
-  });
-
-  test("allows only an identity-preserving started-to-terminal transition", () => {
-    const started = receipt("started");
-    for (const status of [
-      "completed",
-      "safety-failed",
-      "execution-error",
-    ] as const) {
-      const terminal: FreshBlindReleaseReceipt = {
-        ...started,
-        completedAt: "2026-08-12T01:01:00.000Z",
-        status,
-      };
-      expect(planFreshBlindReceiptTransition(started, terminal)).toBe(terminal);
-    }
-
-    expect(() =>
-      planFreshBlindReceiptTransition(receipt("completed"), {
-        ...started,
-        completedAt: "2026-08-12T01:01:00.000Z",
-        status: "completed",
-      }),
-    ).toThrow("started receipt");
+  test("allows only identity-preserving terminal transitions", () => {
+    const started = startedReceipt();
+    const terminal = completedReceipt(started);
+    expect(planFreshBlindReceiptTransition(started, terminal)).toEqual(
+      terminal,
+    );
     expect(() =>
       planFreshBlindReceiptTransition(started, {
-        ...started,
-        completedAt: "2026-08-12T01:01:00.000Z",
-        fixture: { ...started.fixture, seal: "f".repeat(64) },
-        status: "completed",
+        ...terminal,
+        release: { ...terminal.release, fixtureId: "v0.38" },
       }),
-    ).toThrow("same reserved execution");
+    ).toThrow("reservation marker does not match");
+    expect(() => planFreshBlindReceiptTransition(terminal, terminal)).toThrow(
+      "started receipt",
+    );
   });
 
-  test("atomically replaces started receipts and permanently rejects reruns", async () => {
-    for (const status of [
-      "completed",
-      "safety-failed",
-      "execution-error",
-    ] as const) {
-      const directory = await mkdtemp(join(tmpdir(), "semath-fresh-blind-"));
-      const path = join(directory, "receipt.json");
-      const started = receipt("started");
-      const terminal: FreshBlindReleaseReceipt = {
-        ...started,
-        completedAt: "2026-08-12T01:01:00.000Z",
-        status,
-      };
-      try {
-        await reserveFreshBlindReceipt(path, started);
-        await finalizeFreshBlindReceipt(path, terminal);
-        expect(JSON.parse(await readFile(path, "utf8"))).toEqual(terminal);
-        expect(await readdir(directory)).toEqual(["receipt.json"]);
-        await expect(reserveFreshBlindReceipt(path, started)).rejects.toThrow();
-        await expect(finalizeFreshBlindReceipt(path, terminal)).rejects.toThrow(
-          "started receipt",
-        );
-      } finally {
-        await rm(directory, { recursive: true });
-      }
-    }
+  test("strictly rejects malformed contracts and terminal evidence", () => {
+    const started = startedReceipt();
+    expect(() =>
+      parseFreshBlindReceipt({ ...started, schemaVersion: 1 }),
+    ).toThrow("schemaVersion");
+    expect(() => parseFreshBlindReceipt({ ...started, extra: true })).toThrow(
+      "unexpected or missing fields",
+    );
+    const terminal = completedReceipt(started);
+    expect(() =>
+      parseFreshBlindReceipt({
+        ...terminal,
+        artifacts: { ...terminal.artifacts, lifecycleSha256: null },
+      }),
+    ).toThrow("requires evaluation and lifecycle");
   });
 
-  test("does not create or mutate a receipt when transition policy rejects", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "semath-fresh-blind-"));
-    const path = join(directory, "receipt.json");
-    const started = receipt("started");
-    try {
-      await expect(
-        finalizeFreshBlindReceipt(path, {
-          ...started,
-          completedAt: "2026-08-12T01:01:00.000Z",
-          status: "completed",
-        }),
-      ).rejects.toThrow();
-      expect(await readdir(directory)).toEqual([]);
-
-      await reserveFreshBlindReceipt(path, started);
-      await expect(
-        finalizeFreshBlindReceipt(path, {
-          ...started,
-          completedAt: "2026-08-12T01:01:00.000Z",
-          fixture: { ...started.fixture, id: "v0.99" },
-          status: "completed",
-        }),
-      ).rejects.toThrow("same reserved execution");
-      expect(JSON.parse(await readFile(path, "utf8"))).toEqual(started);
-    } finally {
-      await rm(directory, { recursive: true });
-    }
+  test("terminalizes a reserved execution without claiming evaluation evidence", () => {
+    const started = startedReceipt();
+    const terminal = createFreshBlindExecutionErrorReceipt(
+      started,
+      "runner failed",
+    );
+    expect(terminal.status).toBe("execution-error");
+    expect(terminal.artifacts.evaluationSha256).toBeNull();
+    expect(terminal.artifacts.lifecycleSha256).toBeNull();
+    expect(terminal.result).toEqual({
+      error: "runner failed",
+      evaluation: null,
+    });
   });
 });
 
-function receipt(
-  status: FreshBlindReleaseReceipt["status"],
-): FreshBlindReleaseReceipt {
+function startedReceipt(): FreshBlindStartedReceipt {
+  const manifest = preflightManifest();
+  const identity = {
+    candidateSha: manifest.provenance.candidateCommit,
+    fixtureSeal: manifest.release.fixtureSeal,
+    releaseId: manifest.release.fixtureId,
+    runAttempt: "1",
+    runId: "123",
+  } as const;
+  const reservation: FreshBlindReservation = {
+    ...identity,
+    ledgerCommentId: "456",
+    marker: freshBlindReservationMarker(identity),
+    reservedAt: "2026-08-20T08:00:01.000Z",
+    schemaVersion: 1,
+  };
+  return createFreshBlindStartedReceipt({
+    manifest,
+    manifestSha256: "7".repeat(64),
+    reservation,
+    reservationSha256: "8".repeat(64),
+    startedAt: "2026-08-20T08:00:02.000Z",
+  });
+}
+
+function completedReceipt(
+  started: FreshBlindStartedReceipt,
+): FreshBlindTerminalReceipt {
   return {
-    fixture: { id: "v0.28", seal: "a".repeat(64) },
+    ...started,
+    artifacts: {
+      ...started.artifacts,
+      evaluationSha256: "9".repeat(64),
+      lifecycleSha256: "a".repeat(64),
+    },
+    completedAt: "2026-08-20T08:01:00.000Z",
+    result: {
+      evaluation: { results: [{}] },
+      facetFailureIds: [],
+      lifecycle: {
+        comparedProbes: 48,
+        comparedStages: 96,
+        fixtureId: "v0.37",
+        fixtureSeal: "0".repeat(64),
+        schemaVersion: 1,
+      },
+      safety: {
+        diagnosticsOverLimit: 0,
+        diagnosticsOverLimitIds: [],
+        falseConflict: 0,
+        falseConflictIds: [],
+        falseEstablishment: 0,
+        falseEstablishmentIds: [],
+        unsafeNavigationOrEditCaseIds: [],
+        unsafeNavigationOrEditLocations: 0,
+      },
+      validation: {
+        decisions: { partial: 1 },
+        families: { "single-document": 1 },
+        laws: 1,
+        maximumMathSimilarity: 0.2,
+        maximumProseSimilarity: 0.3,
+        probes: 1,
+        scenarios: 1,
+      },
+    },
+    status: "completed",
+  };
+}
+
+function preflightManifest(): FreshBlindPreflightManifest {
+  return {
+    artifacts: {
+      checksumManifestSha256: "1".repeat(64),
+      committedWasmSha256: "2".repeat(64),
+      nativeSha256: "3".repeat(64),
+      npmTarballPath: ".artifacts/fresh-release/semath-0.18.0.tgz",
+      npmTarballSha256: "4".repeat(64),
+      rebuiltWasmSha256: "2".repeat(64),
+      retainedChecksumPath: ".artifacts/fresh-release/SHA256SUMS",
+      retainedWasmPath: ".artifacts/fresh-release/semath_wasm_bg.wasm",
+    },
+    contracts: FRESH_BLIND_CONTRACTS,
+    gates: ["check"],
+    generatedAt: "2026-08-20T08:00:00.000Z",
     provenance: {
-      nativeSha256: "b".repeat(64),
-      semathCommit: "c".repeat(40),
-      wasmSha256: "d".repeat(64),
-      wasmtexCommit: "e".repeat(40),
+      builderIdentity: "runner",
+      candidateCommit: "5".repeat(40),
+      candidateTree: "6".repeat(40),
+      runnerArch: "X64",
+      runnerImage: "ubuntu-24.04",
+      runnerOs: "Linux",
+      tools: { bun: "1.3.14", rust: "1.96.0", wasmBindgen: "0.2.100" },
+      wasmtexCommit: "b".repeat(40),
+      workflowFileSha256: "c".repeat(64),
+      workflowRef: "workflow@main",
+      workflowSha: "d".repeat(40),
+    },
+    references: {
+      entries: [
+        { path: "fixtures/development/public.json", sha256: "e".repeat(64) },
+      ],
+      sha256: "f".repeat(64),
+    },
+    release: {
+      fixtureId: "v0.37",
+      fixtureSeal: "0".repeat(64),
+      fixtureSha256: "1".repeat(64),
+      packageVersion: "0.18.0",
     },
     schemaVersion: 1,
-    startedAt: "2026-08-12T01:00:00.000Z",
-    status,
   };
 }

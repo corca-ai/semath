@@ -1,0 +1,163 @@
+name: fresh-blind-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact 40-character candidate commit
+        required: true
+        type: string
+      confirmation:
+        description: Exact spend-once:<release_id>:<candidate_sha> confirmation
+        required: true
+        type: string
+      fixture_path:
+        description: Sealed repository-relative fresh fixture path
+        required: true
+        type: string
+      release_id:
+        description: Unused semantic release ID
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: semath-fresh-blind-one-shot
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    environment: semantic-release
+    outputs:
+      artifact-id: ${{ steps.evidence.outputs.artifact-id }}
+      reserved: ${{ steps.reserve.outcome }}
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ inputs.candidate_sha }}
+      - name: Verify exact candidate checkout
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          test "$GITHUB_REPOSITORY" = "corca-ai/semath"
+          git rev-parse HEAD | grep -Fx "$CANDIDATE_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+      - uses: dtolnay/rust-toolchain@01ba1edad32c6f80dbcce879d3e0fa5a00b2a84e
+        with:
+          toolchain: 1.96.0
+          components: clippy, rustfmt
+          targets: wasm32-unknown-unknown
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - name: Run all pre-blind gates without release credentials
+        env:
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          GITHUB_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SEMATH_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ inputs.fixture_path }}
+          SEMATH_FRESH_BLIND_PACKAGE: .artifacts/fresh-release/semath-0.18.0.tgz
+          SEMATH_FRESH_BLIND_PREFLIGHT_MANIFEST: .artifacts/fresh-release/preblind-manifest.json
+          SEMATH_FRESH_BLIND_RECEIPT: .artifacts/fresh-release/receipt.json
+          SEMATH_RELEASE_BUILDER_IDENTITY: ${{ runner.name }} / ${{ runner.os }}-${{ runner.arch }} / ${{ runner.environment }}
+          SEMATH_RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
+          SEMATH_RELEASE_ID: ${{ inputs.release_id }}
+          SEMATH_RELEASE_LEDGER_ISSUE: "354"
+          SEMATH_RELEASE_PHASE: preflight
+        run: bun run release:semantic
+      - name: Permanently reserve the release identity and fixture seal
+        id: reserve
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          GITHUB_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SEMATH_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ inputs.fixture_path }}
+          SEMATH_FRESH_BLIND_RESERVATION: .artifacts/fresh-release/reservation.json
+          SEMATH_RELEASE_ID: ${{ inputs.release_id }}
+          SEMATH_RELEASE_LEDGER_ISSUE: "354"
+        run: bun scripts/fresh-blind-reservation.ts
+      - name: Execute the reserved fresh fixture exactly once
+        id: execute
+        env:
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          GITHUB_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SEMATH_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ inputs.fixture_path }}
+          SEMATH_FRESH_BLIND_RECEIPT: .artifacts/fresh-release/receipt.json
+          SEMATH_FRESH_BLIND_RESERVATION: .artifacts/fresh-release/reservation.json
+          SEMATH_FRESH_BLIND_PREFLIGHT_MANIFEST: .artifacts/fresh-release/preblind-manifest.json
+          SEMATH_RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
+          SEMATH_RELEASE_ID: ${{ inputs.release_id }}
+          SEMATH_RELEASE_LEDGER_ISSUE: "354"
+          SEMATH_RELEASE_PHASE: execute
+        run: bun run release:semantic
+      - name: Terminalize every normally returned reserved execution
+        if: always() && steps.reserve.outcome == 'success'
+        env:
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          GITHUB_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SEMATH_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ inputs.fixture_path }}
+          SEMATH_FRESH_BLIND_PREFLIGHT_MANIFEST: .artifacts/fresh-release/preblind-manifest.json
+          SEMATH_FRESH_BLIND_RECEIPT: .artifacts/fresh-release/receipt.json
+          SEMATH_FRESH_BLIND_RESERVATION: .artifacts/fresh-release/reservation.json
+          SEMATH_RELEASE_EXECUTION_OUTCOME: ${{ steps.execute.outcome }}
+          SEMATH_RELEASE_ID: ${{ inputs.release_id }}
+          SEMATH_RELEASE_LEDGER_ISSUE: "354"
+        run: bun scripts/terminalize-fresh-blind-execution-error.ts
+      - name: Upload immutable release evidence
+        id: evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          if-no-files-found: warn
+          name: fresh-blind-${{ inputs.release_id }}-${{ inputs.candidate_sha }}
+          path: .artifacts/fresh-release/
+          retention-days: 90
+      - name: Publish the terminal result to the permanent release ledger
+        if: always() && steps.reserve.outcome == 'success' && steps.evidence.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          GITHUB_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SEMATH_FRESH_BLIND_RECEIPT: .artifacts/fresh-release/receipt.json
+          SEMATH_FRESH_BLIND_RESERVATION: .artifacts/fresh-release/reservation.json
+          SEMATH_RELEASE_ARTIFACT_DIGEST: ${{ steps.evidence.outputs.artifact-digest }}
+          SEMATH_RELEASE_ARTIFACT_ID: ${{ steps.evidence.outputs.artifact-id }}
+          SEMATH_RELEASE_LEDGER_ISSUE: "354"
+        run: bun scripts/publish-fresh-blind-result.ts
+
+  attest:
+    if: ${{ always() && needs.evaluate.outputs.reserved == 'success' && needs.evaluate.outputs.artifact-id != '' }}
+    needs: evaluate
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download the exact terminal release evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.evaluate.outputs.artifact-id }}
+          merge-multiple: true
+          path: .attested
+      - name: Attest terminal receipt, WASM, and package
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be
+        with:
+          subject-path: |
+            .attested/receipt.json
+            .attested/semath_wasm_bg.wasm
+            .attested/semath-0.18.0.tgz

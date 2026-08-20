@@ -1,0 +1,10 @@
+{
+  "oracleConstraintSha256": "0fb712e494f7b7385901e3164b4b65d92256196465f2ae052669dffc549ad9ea",
+  "reviewedAt": "2026-08-20",
+  "reviewer": "agent:/root/oracle_v2_final_audit",
+  "schemaVersion": 2,
+  "sourceFixture": "fixtures/challenge/math-authoring-oracle-source-v2.json",
+  "sourceFixtureId": "semath-math-authoring-public-source-v2",
+  "sourceSha256": "7eaff6b13a4ee41773b60bf74368c0eeacd126f1d482976f9de4c222a7b4528a",
+  "verdict": "approved"
+}

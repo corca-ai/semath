@@ -326,6 +326,7 @@ fn explicit_facts(
                     kind: "explicit-prose".into(),
                     strength: "strong".into(),
                     source_ranges: definition.evidence.source_ranges.clone(),
+                    source_anchors: definition.evidence.source_anchors.clone(),
                 },
                 derived_from: Vec::new(),
             })

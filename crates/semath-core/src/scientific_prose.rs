@@ -390,13 +390,38 @@ impl ProseEventStream {
                         && event.start <= boundary
                         && boundary <= event.end
                 })?;
-                let description_start = self
+                let description_limit = self
                     .events
                     .iter()
                     .filter(|event| {
                         event.clause_index == mention_event.clause_index
                             && boundary <= event.start
                             && event.end <= description.end
+                            && matches!(event.kind, ProseEventKind::DefinitionAction(_))
+                    })
+                    .min_by_key(|event| event.start)
+                    .map_or(description.end, |following_action| {
+                        self.events
+                            .iter()
+                            .filter(|event| {
+                                event.clause_index == mention_event.clause_index
+                                    && boundary <= event.start
+                                    && event.end <= following_action.start
+                                    && event.kind == ProseEventKind::Coordination
+                                    && source[event.end..following_action.start]
+                                        .chars()
+                                        .all(char::is_whitespace)
+                            })
+                            .max_by_key(|event| event.start)
+                            .map_or(following_action.start, |coordination| coordination.start)
+                    });
+                let description_start = self
+                    .events
+                    .iter()
+                    .filter(|event| {
+                        event.clause_index == mention_event.clause_index
+                            && boundary <= event.start
+                            && event.end <= description_limit
                             && matches!(event.kind, ProseEventKind::DefinitionLink(_))
                     })
                     .min_by_key(|event| event.start)
@@ -407,16 +432,16 @@ impl ProseEventStream {
                     .filter(|event| {
                         event.clause_index == mention_event.clause_index
                             && description_start < event.start
-                            && event.end <= description.end
+                            && event.end <= description_limit
                             && event.kind == ProseEventKind::Coordination
                     })
                     .max_by_key(|event| event.start)
                     .filter(|event| {
-                        source[event.end..description.end]
+                        source[event.end..description_limit]
                             .chars()
                             .all(|character| character.is_whitespace() || character == ',')
                     })
-                    .map_or(description.end, |event| event.start);
+                    .map_or(description_limit, |event| event.start);
                 let (description_start, description_end) =
                     trim_range(source, description_start, description_end);
                 let description_end =
@@ -435,7 +460,7 @@ impl ProseEventStream {
                     description_start,
                     description_end,
                     evidence_start: action.start.min(mention.start),
-                    evidence_end: description.end,
+                    evidence_end: description_limit,
                     frame: clause.frame.clone(),
                     coordinated,
                 })
@@ -1340,7 +1365,13 @@ fn classify_discourse_frame(
             )
         })
         .and_then(|word| lower.find(word).map(|start| (start, start + word.len())))
-        .or_else(|| first_marker(&lower, &["seems to", "appears to", "is likely to"]));
+        .or_else(|| first_marker(&lower, &["seems to", "appears to", "is likely to"]))
+        .or_else(|| {
+            words
+                .contains(&"calculation")
+                .then(|| first_marker(&lower, &["draft"]))
+                .flatten()
+        });
     let modality = if hedged_marker.is_some() {
         EvidenceModality::Hedged
     } else {
@@ -1677,6 +1708,23 @@ mod tests {
     }
 
     #[test]
+    fn limits_draft_modality_to_proposed_calculations() {
+        let proposed = segment_scientific_clauses(
+            "The draft go/no-go calculation added $P(A\\cup B)=P(A)+P(B)$.",
+            DocumentLanguage::Latex,
+            &[],
+        );
+        let retained = segment_scientific_clauses(
+            "The draft still contains $u_h\\approx u$.",
+            DocumentLanguage::Latex,
+            &[],
+        );
+
+        assert_eq!(proposed[0].frame.modality, EvidenceModality::Hedged);
+        assert_eq!(retained[0].frame.modality, EvidenceModality::Asserted);
+    }
+
+    #[test]
     fn joins_soft_wrapped_sentences_without_crossing_document_structure() {
         let latex = "Let $A$ be the set of samples, and let $B$ be the\nset of accepted samples.\n\\[A\\cap B\\]\nNext paragraph\n\nstarts here.";
         let clauses = segment_scientific_clauses(latex, DocumentLanguage::Latex, &[]);
@@ -1801,6 +1849,41 @@ mod tests {
                 &source[construction.description_start..construction.description_end],
                 "residual",
                 "unexpected description for {source:?}",
+            );
+        }
+    }
+
+    #[test]
+    fn definition_descriptions_stop_before_a_following_formula_action() {
+        for (language, separator) in [
+            (DocumentLanguage::Latex, "\n"),
+            (DocumentLanguage::Markdown, "\n\n"),
+        ] {
+            let source =
+                format!("The draft calls $x$ the unique estimate and defines it by{separator}$\n$");
+            let clauses = segment_scientific_clauses(&source, language, &[]);
+            let start = source.find("$x$").unwrap();
+            let mentions = [ScientificMention {
+                symbol: "x".into(),
+                start,
+                end: start + 3,
+                math_index: 0,
+            }];
+            let stream = normalize_prose_events(&source, &clauses, &mentions);
+            let construction = stream
+                .definition_constructions(&source, &mentions, &clauses)
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| panic!("missing construction for {language:?}"));
+
+            assert_eq!(construction.action, DefinitionAction::Call);
+            assert_eq!(
+                &source[construction.description_start..construction.description_end],
+                "the unique estimate"
+            );
+            assert_eq!(
+                construction.evidence_end,
+                source.find("and defines").unwrap()
             );
         }
     }

@@ -35,6 +35,7 @@
     "authored:development:release": "bun scripts/check-authored-development-release.ts",
     "authored:historical": "SEMATH_AUTHORED_SPLIT=holdout SEMATH_AUTHORED_FIXTURE=fixtures/challenge/document-reasoning-holdout-v1.json bun scripts/check-authored-scientific.ts",
     "authored:historical:release": "bun scripts/check-authored-historical-release.ts",
+    "math-authoring:development": "bun scripts/check-math-authoring-development.ts",
     "authored:fixture": "bun scripts/check-authored-scientific-fixture.ts",
     "budget": "bun scripts/check-budget.ts",
     "budget:report": "SEMATH_BUDGET_REPORT=.artifacts/performance-budget.json bun scripts/check-budget.ts",

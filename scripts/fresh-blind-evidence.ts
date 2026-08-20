@@ -23,6 +23,14 @@ export interface LoadedFreshBlindEvidence {
   readonly summary: FreshBlindValidationSummary;
 }
 
+export interface FreshBlindReferenceManifest {
+  readonly entries: readonly {
+    readonly path: string;
+    readonly sha256: string;
+  }[];
+  readonly sha256: string;
+}
+
 export async function loadFreshBlindEvidence(
   explicitPath: string,
 ): Promise<LoadedFreshBlindEvidence> {
@@ -46,7 +54,7 @@ export async function loadFreshBlindEvidence(
       ),
     ),
   ]);
-  const references = await referenceEvidence(path);
+  const references = await referenceEvidence();
   const reviewDigests = Object.fromEntries(
     release.fixture.scenarios.map((scenario) => [
       scenario.id,
@@ -98,15 +106,12 @@ async function readLawCatalog(): Promise<AuthoredLawCatalogEntry[]> {
   return catalog;
 }
 
-async function referenceEvidence(
-  freshPath: string,
-): Promise<{
+async function referenceEvidence(): Promise<{
   readonly documents: readonly string[];
   readonly profiles: readonly AuthoredIntegrityProfile[];
 }> {
   const documents = new Map<string, ReferenceDocument>();
-  for await (const fixturePath of new Bun.Glob("fixtures/**/*.json").scan(".")) {
-    if (resolve(fixturePath) === freshPath) continue;
+  for (const fixturePath of approvedReferenceFixturePaths()) {
     collectDocuments(
       JSON.parse(await readFile(fixturePath, "utf8")),
       fixturePath,
@@ -118,6 +123,55 @@ async function referenceEvidence(
     documents: values.map((document) => document.content),
     profiles: values.map(documentProfile),
   };
+}
+
+export const APPROVED_CHALLENGE_REFERENCES = [
+  "fixtures/challenge/document-reasoning-development-v1.json",
+  "fixtures/challenge/domain-routing-v1.json",
+  "fixtures/challenge/equivalence-v1.json",
+  "fixtures/challenge/math-authoring-oracle-source-v2.json",
+  "fixtures/challenge/recognition-frontier-v1.json",
+  "fixtures/challenge/recognition-v2.json",
+  "fixtures/challenge/recognition-v3.json",
+  "fixtures/challenge/semantic-continuity-v1.json",
+] as const;
+
+/** Historical holdout/fresh namespaces are never opened during commissioning.
+ * Only explicitly public development evidence may participate in isolation. */
+export function isApprovedReferenceFixturePath(path: string): boolean {
+  const normalized = path.replaceAll("\\", "/").replace(/^\.\//u, "");
+  return (
+    APPROVED_CHALLENGE_REFERENCES.includes(
+      normalized as (typeof APPROVED_CHALLENGE_REFERENCES)[number],
+    ) ||
+    /^(?:fixtures\/(?:corpus|development|foundation))\/.+\.json$/u.test(
+      normalized,
+    )
+  );
+}
+
+export function approvedReferenceFixturePaths(): string[] {
+  const publicDirectories = ["corpus", "development", "foundation"].flatMap(
+    (directory) => [
+      ...new Bun.Glob(`fixtures/${directory}/**/*.json`).scanSync("."),
+    ],
+  );
+  return [...APPROVED_CHALLENGE_REFERENCES, ...publicDirectories]
+    .filter(isApprovedReferenceFixturePath)
+    .sort();
+}
+
+/** A sealed, path-and-byte inventory of only the public references that the
+ * commissioning validator is allowed to open. */
+export async function freshBlindReferenceManifest(): Promise<FreshBlindReferenceManifest> {
+  const entries = await Promise.all(
+    approvedReferenceFixturePaths().map(async (path) => ({
+      path,
+      sha256: sha256(await readFile(path)),
+    })),
+  );
+  const bytes = `${JSON.stringify(entries)}\n`;
+  return { entries, sha256: sha256(bytes) };
 }
 
 interface ReferenceDocument {

@@ -289,9 +289,9 @@ PR #365 was closed without merge. No 0.18.0 package, tag, or CorTeX pin was
 published. The exposed v0.36 fixture is historical evidence and must not be
 rerun, relabeled, or used for case-specific tuning.
 
-## Protocol 16 evidence-graded development facets
+## Protocol 17 evidence-graded development facets
 
-On 2026-08-20, protocol 16 projected evidence-graded hypotheses over all 166
+On 2026-08-20, protocol 17 projected evidence-graded hypotheses over all 166
 independently authored development probes. The facet report found hypotheses
 in 160 cases and multiple bounded hypotheses in 128. Supporting evidence was
 present in 156 cases, contradictory evidence in one reviewed Faraday-law
@@ -303,12 +303,29 @@ checks found zero advisory authority, anchor, ordering, contradiction, or
 discriminator-link failures.
 
 These are separate facet counts, not a confidence score or completeness claim.
-The existing authored decision baseline on the same run remained 106 of 166
-with risk 152; the new projection reports uncertainty and provenance without
-silently improving those decisions. The public development manifest also pins
-four TeX/Markdown pairs plus independently authored cross-field, contradiction,
-section, include, retraction, generated-source, edit, and engine-limit evidence.
-No v0.36 fresh-blind input was read, rerun, or used for tuning.
+The reviewed authored decision baseline on the same run is 108 of 166 with
+risk 116, zero false establishments, zero false conflicts, and zero unsafe
+navigation or identity results. The new projection reports uncertainty and
+provenance without silently improving those decisions.
+
+The separate public MathAuthoring gate contains 20 source-authored cases in 10
+meaning-matched TeX/Markdown pairs. It checks native/WASM and clean/incremental
+parity, exact source identity, lifecycle fences, reviewed authority and
+contradiction, cross-document evidence, generated-source limits, approximation,
+and removal transitions. Eight hypotheses are release-required; 18 broader
+interpretations remain explicit known misses. Candidate-cap metadata is a
+protocol-owned 16/+1 unit contract, while production of more than 16 genuine
+document candidates remains a known miss rather than a synthetic public E2E
+claim. The canonical source, constraints, and independent attestation have raw
+SHA-256 digests `f6fcdb76a456e20129a61f819d18902e422e3735a6050fc000c16ea20a300c0c`,
+`a96023f0f9784816b666a348557e8539fc5f7d0a969a36fe00bbea9c1bfd68f8`,
+and `84e36d6f9a5a41aa6c09b8103f1a20f125d7de3d6a8a42395a8ed42306988d52`.
+The review digest is
+`7693f886b6eda4c71ca29dd899aa006e03ad4a79cbede998747d8af4ac7efbe9`;
+the passing content-addressed diagnostic digest is
+`ce472e0a45e01dd02e289e20c3460cffe3a1b521389008a9c80aa71e12948692`.
+The full diagnostic is untracked and is never an oracle input. No v0.36
+fresh-blind input was read, rerun, or used for tuning.
 
 Evaluated laws require
 100% role, evidence, and refusal preservation, at least 99% precision, and at
@@ -316,12 +333,14 @@ least 95% recall. This baseline is release evidence, not a completeness claim or
 live production telemetry. It contains no imported real-world corpus, so it must
 not be used to claim field completeness or real-world frequency.
 
-Semantic corpus execution is a deliberate manual/release gate, not a default
-pull-request check. Default CI still parses schemas, verifies the compact
-materialization ledger and generator determinism, tests the pure scorers, and
-enforces pack conformance. This keeps
-ordinary feedback fast without presenting an expensive synthetic evaluation as
-continuous production evidence.
+Full semantic corpus execution and the public MathAuthoring oracle are
+deliberate manual/release gates, not default pull-request checks. Default CI
+parses schemas, verifies generated assets, tests the pure scorers, enforces pack
+conformance, and rebuilds the x86_64 WASM artifact. The manually dispatched
+`semantic-quality` workflow then runs the public MathAuthoring release gate and
+the full corpus against that rebuilt artifact. This keeps ordinary feedback
+bounded without presenting expensive synthetic evaluation as continuous
+production evidence.
 
 Run the complete manual gate, a focused evaluation, or write a stable
 machine-readable artifact with:
@@ -340,6 +359,7 @@ bun run continuity:release
 mkdir -p .artifacts && bun run authored:baseline
 bun run authored
 bun run authored:development
+bun run math-authoring:development
 bun run authored:development:release
 bun run authored:historical:release
 bun run corpus

@@ -543,6 +543,7 @@ fn candidate_evidence(candidate: &SemanticCandidateInfo) -> Evidence {
         kind: "structural-candidate".into(),
         strength: "weak".into(),
         source_ranges: vec![candidate.range.clone()],
+        source_anchors: Vec::new(),
     }
 }
 
@@ -1045,6 +1046,7 @@ mod tests {
                 start_offset: 0,
                 end_offset: 1,
             }],
+            source_anchors: Vec::new(),
         };
         let second = Evidence {
             rule_id: "definition/role-b".into(),
@@ -1054,6 +1056,7 @@ mod tests {
                 start_offset: 3,
                 end_offset: 4,
             }],
+            source_anchors: Vec::new(),
         };
         let conflict = MeaningConflict {
             conflict_id: "typed-role-conflict".into(),
@@ -1087,6 +1090,7 @@ mod tests {
                 start_offset: 0,
                 end_offset: 10,
             }],
+            source_anchors: Vec::new(),
         };
         let conflict = MeaningConflict {
             conflict_id: "typed-role-conflict".into(),
@@ -1212,6 +1216,7 @@ mod tests {
             kind: "source-definition".into(),
             strength: "hard".into(),
             source_ranges: vec![range.clone()],
+            source_anchors: Vec::new(),
         };
         SymbolInfo {
             symbol: "H".into(),
@@ -1258,6 +1263,7 @@ mod tests {
                 start_offset,
                 end_offset,
             }],
+            source_anchors: Vec::new(),
         }
     }
 
@@ -1271,6 +1277,7 @@ mod tests {
             kind: "canonical-math".into(),
             strength: "hard".into(),
             source_ranges: vec![range.clone()],
+            source_anchors: Vec::new(),
         };
         LawRecognition {
             law_id: id.into(),

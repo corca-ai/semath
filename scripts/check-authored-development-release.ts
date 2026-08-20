@@ -4,10 +4,10 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  authoredReleaseRegressions,
+  authoredReleaseResultRegressions,
   authoredScenarioReviewPayload,
   parseAuthoredScientificFixture,
-  type AuthoredScientificScorecard,
+  parseAuthoredReleaseReport,
 } from "../packages/evaluation/src/index";
 
 const temporary = await mkdtemp(join(tmpdir(), "semath-authored-development-"));
@@ -41,21 +41,29 @@ try {
     stdio: "inherit",
   });
   if (result.status !== 0) throw new Error("development evaluation failed to execute");
-  const report = JSON.parse(await readFile(reportPath, "utf8")) as {
-    readonly results: readonly { readonly score: AuthoredScientificScorecard }[];
-  };
-  const score = report.results[0]?.score;
-  if (!score || report.results.length !== 1) {
-    throw new Error("development evaluation must produce exactly one score");
+  const authoring = spawnSync(
+    "bun",
+    ["scripts/check-math-authoring-development.ts"],
+    {
+      env: { ...process.env, SEMATH_AUTHORED_SKIP_BUILD: "1" },
+      stdio: "inherit",
+    },
+  );
+  if (authoring.status !== 0) {
+    throw new Error("exact math authoring development gate failed");
   }
-  const regressions = authoredReleaseRegressions(score, {
-    cases: 115,
-    maximumRisk: 130,
-    minimumPassed: 50,
+  const report = parseAuthoredReleaseReport(
+    JSON.parse(await readFile(reportPath, "utf8")),
+  );
+  const regressions = authoredReleaseResultRegressions(report, {
+    cases: 166,
+    maximumRisk: 116,
+    minimumPassed: 108,
   });
   if (regressions.length) {
     throw new Error(`development release regression:\n${regressions.join("\n")}`);
   }
+  const { score } = report;
   console.log(
     `development release gate OK: ${score.passed}/${score.cases}; risk ${score.risk.total}`,
   );

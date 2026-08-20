@@ -1,5 +1,6 @@
 import type {
-  MathAuthoringRequirementInfo,
+  MathInterpretationEvidenceReferenceInfo,
+  MathInterpretationRequirementInfo,
   MathInterpretationSetInfo,
 } from "../../protocol/src/index";
 
@@ -75,8 +76,12 @@ export function summarizeEvidenceGradedHypotheses(
       reviewedConventionCases += 1;
     }
 
-    if (hypotheses.every(hasExactAnchor)) exactAnchorCases += 1;
-    else failures.push(`${observation.caseId}: incomplete hypothesis anchor`);
+    if (hasExactInterpretationAnchors(interpretations)) exactAnchorCases += 1;
+    else {
+      failures.push(
+        `${observation.caseId}: incomplete interpretation evidence anchor`,
+      );
+    }
 
     if (hasDeterministicEvidenceOrdering(interpretations)) orderingCases += 1;
     else failures.push(`${observation.caseId}: invalid evidence ordering`);
@@ -159,17 +164,79 @@ export function evidenceGradedBreadthFailures(
   return failures;
 }
 
-function hasExactAnchor(
+function hasExactInterpretationAnchors(
+  interpretations: MathInterpretationSetInfo,
+): boolean {
+  return (
+    interpretations.hypotheses.every(
+      (hypothesis) =>
+        hasExactHypothesisAnchor(hypothesis) &&
+        hypothesis.evidence.every(hasExactEvidenceReference) &&
+        hypothesis.orderingReasons.every((reason) =>
+          reason.evidence.every(hasExactEvidenceReference),
+        ),
+    ) &&
+    interpretations.analysisLimits.every((limit) =>
+      limit.evidence.every(hasExactEvidenceReference),
+    ) &&
+    interpretations.missingDiscriminators.every(hasExactRequirementAnchors)
+  );
+}
+
+function hasExactHypothesisAnchor(
   hypothesis: MathInterpretationSetInfo["hypotheses"][number],
 ): boolean {
   return (
     hypothesis.location.fileId.length > 0 &&
     hypothesis.location.path.length > 0 &&
-    hypothesis.location.range.startOffset <= hypothesis.location.range.endOffset &&
+    hypothesis.location.range.startOffset < hypothesis.location.range.endOffset &&
     hypothesis.documentVersion > 0 &&
     Number.isInteger(hypothesis.documentVersion) &&
     hypothesis.scopePath.every((part) => Number.isInteger(part) && part >= 0)
   );
+}
+
+function hasExactEvidenceReference(
+  reference: MathInterpretationEvidenceReferenceInfo,
+): boolean {
+  const ranges = reference.evidence.sourceRanges;
+  if (ranges.length === 0 || ranges.length !== reference.sourceAnchors.length) return false;
+  return reference.sourceAnchors.every((anchor, index) => {
+    const range = ranges[index];
+    return (
+      range !== undefined &&
+      anchor.location.fileId.length > 0 &&
+      anchor.location.path.length > 0 &&
+      anchor.location.range.startOffset === range.startOffset &&
+      anchor.location.range.endOffset === range.endOffset &&
+      anchor.location.range.startOffset < anchor.location.range.endOffset &&
+      anchor.documentVersion > 0 &&
+      Number.isInteger(anchor.documentVersion) &&
+      anchor.scopePath.every((part) => Number.isInteger(part) && part >= 0)
+    );
+  });
+}
+
+function hasExactRequirementAnchors(
+  requirement: MathInterpretationRequirementInfo,
+): boolean {
+  switch (requirement.kind) {
+    case "declaration":
+    case "role-declaration":
+      return requirement.evidence.every(hasExactEvidenceReference);
+    case "condition":
+      return requirement.condition.evidence.every(hasExactEvidenceReference);
+    case "disambiguation":
+      return (
+        requirement.evidence.every(hasExactEvidenceReference) &&
+        requirement.alternatives.every(
+          (alternative) =>
+            alternative.evidence.every(hasExactEvidenceReference) &&
+            (alternative.relevance?.evidence.every(hasExactEvidenceReference) ??
+              true),
+        )
+      );
+  }
 }
 
 function hasDeterministicEvidenceOrdering(
@@ -186,6 +253,6 @@ function hasDeterministicEvidenceOrdering(
   );
 }
 
-function requirementId(requirement: MathAuthoringRequirementInfo): string {
+function requirementId(requirement: MathInterpretationRequirementInfo): string {
   return requirement.requirementId;
 }

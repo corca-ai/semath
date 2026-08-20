@@ -44,7 +44,7 @@ const native = spawnSync(
   {
     encoding: "utf8",
     input: JSON.stringify({ queries: plan.queries, snapshot: plan.snapshot }),
-    // Protocol 16 returns bounded advisory hypotheses in each semantic view.
+    // Protocol 17 returns bounded advisory hypotheses in each semantic view.
     // This is an aggregate batch transport ceiling, not a per-query product
     // budget; the dedicated query-result budget remains separately gated.
     maxBuffer: 256 * 1024 * 1024,
