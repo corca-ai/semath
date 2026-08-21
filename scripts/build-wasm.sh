@@ -7,6 +7,10 @@ if [ "$system" != "Linux" ] || [ "$architecture" != "x86_64" ]; then
   echo "release WASM must be built on an x86_64 Linux build host" >&2
   exit 1
 fi
+if [ -n "${RUSTFLAGS:-}" ] || [ -n "${CARGO_ENCODED_RUSTFLAGS:-}" ]; then
+  echo "release WASM does not accept external Rust compiler flags" >&2
+  exit 1
+fi
 
 build_target_dir=$PWD/target
 cargo_home=${CARGO_HOME:-$HOME/.cargo}
