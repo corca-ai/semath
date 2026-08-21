@@ -5,7 +5,7 @@ use crate::canonical::{
     SemanticExpr, SemanticExprKind, expression_children, lower_template, render_canonical,
 };
 use crate::concept::concepts_share_lineage;
-use crate::consistency::{RoleObservations, roles_conflict};
+use crate::consistency::{RoleObservations, role_shape_conflict, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{
     is_capability_pack, laws_share_collision, pack_requires_explicit_law_activation,
@@ -3055,6 +3055,8 @@ fn expression_constraints_refuted(
     external: &ExternalTypeEnvironment,
 ) -> bool {
     semantic_symbols(expression).into_iter().any(|symbol| {
+        let role_shape_refuted =
+            role_shape_constraints_refuted(&role.concept, &symbol, offset, shapes, external);
         let shape_refuted = role.shape.as_deref().is_some_and(|expected| {
             shapes
                 .claims_at(&symbol, offset)
@@ -3070,8 +3072,23 @@ fn expression_constraints_refuted(
             quantity_support(expected, &symbol, &symbol, offset, quantities, external)
                 == RoleSupport::Refuted
         });
-        shape_refuted || quantity_refuted
+        role_shape_refuted || shape_refuted || quantity_refuted
     })
+}
+
+fn role_shape_constraints_refuted(
+    role: &str,
+    symbol: &str,
+    offset: u32,
+    shapes: &ShapeObservations,
+    external: &ExternalTypeEnvironment,
+) -> bool {
+    shapes
+        .claims_at(symbol, offset)
+        .0
+        .into_iter()
+        .chain(external.shapes_at(offset, symbol))
+        .any(|shape| role_shape_conflict(role, &shape.kind))
 }
 
 fn expression_concept_support(
@@ -3249,6 +3266,9 @@ fn role_symbol_support(
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
+    if role_shape_constraints_refuted(&role.concept, symbol, offset, shapes, external) {
+        return RoleSupport::Refuted;
+    }
     if consistency.has_occurrence_role(symbol, symbol_range, &role.concept) {
         return RoleSupport::Typed;
     }

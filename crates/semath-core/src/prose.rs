@@ -44,7 +44,7 @@ static MATRIX_DIMENSIONS: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 static SQUARE_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\bsquare(?:\s+matrices?)?(?:\s+(?:of|with))?(?:\s+(?:the\s+)?(?:same|common))?\s*(?:size|order|dimension)?\s*([a-z0-9]+)\s*$").unwrap()
+    Regex::new(r"(?i)\bsquare\b(?:\s+(?:matrix|matrices))?(?:\s+(?:of|with))?(?:\s+(?:the\s+)?(?:same|common))?\s*(?:size|order|dimension)?\s*([a-z0-9]+)\s*$").unwrap()
 });
 static INLINE_VECTOR_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s*(?:be|is)\s+an?\s+\$([a-z0-9]+)\$[ -]dimensional\s+(?:real\s+)?vector")
@@ -3998,6 +3998,22 @@ mod tests {
             shape_claim("is defined by Here the current is a scalar"),
             Some((ProseShape::Scalar, Vec::new()))
         );
+    }
+
+    #[test]
+    fn squared_physical_units_are_not_square_matrix_dimensions() {
+        assert_eq!(shape_claim("metres per second squared"), None);
+        for description in [
+            "square n",
+            "square matrix of order n",
+            "square matrices of size n",
+        ] {
+            assert_eq!(
+                shape_claim(description),
+                Some((ProseShape::Matrix("n".into(), "n".into()), Vec::new())),
+                "{description}"
+            );
+        }
     }
 
     #[test]

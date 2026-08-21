@@ -2620,6 +2620,47 @@ fn incompatible_redeclarations_share_one_typed_public_conflict() {
 }
 
 #[test]
+fn incompatible_acceleration_shape_conflicts_and_blocks_newton_relation() {
+    let content = "Let $F$ denote net force. Let $m$ denote scalar mass. Let $a$ denote an acceleration matrix. The proposed model is $F=ma$.";
+    let offset = content.rfind("a$").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(
+        matches!(view.decision, MeaningDecision::Conflicting { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting
+    );
+    assert!(
+        view.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.code == "notation-role-type-conflict")
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .all(|relation| { relation.relation_id != "classical-mechanics:newton-second-law" })
+    );
+}
+
+#[test]
 fn a_typed_conflict_follows_every_participating_binding_to_later_uses() {
     for content in [
         "In this model let $u$ be a scalar temperature and let $u$ be a three-dimensional velocity vector. Use $u$ now.",

@@ -403,9 +403,11 @@ pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
 pub(crate) fn role_shape_conflict(role: &str, shape: &str) -> bool {
     let role = concept_leaf(role);
     match role {
+        "acceleration" => !matches!(shape, "scalar" | "vector"),
         "event" | "set" => true,
         "distribution" => false,
-        "function" | "operator" => shape != "matrix",
+        "function" => false,
+        "linear-operator" | "operator" => shape != "matrix",
         "index" => shape != "scalar",
         "random-variable" => false,
         _ => false,
@@ -448,7 +450,7 @@ fn first_source_offset(evidence: &Evidence) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use super::observe_roles;
+    use super::{observe_roles, role_shape_conflict};
     use crate::canonical::lower_document_region;
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
@@ -503,6 +505,23 @@ mod tests {
         assert_eq!(analysis.diagnostics[0].code, "notation-role-type-conflict");
         assert!(analysis.diagnostics[0].message.contains("`S`"));
         assert_eq!(analysis.diagnostics[0].evidence.len(), 2);
+    }
+
+    #[test]
+    fn acceleration_role_accepts_components_and_vectors_but_not_higher_rank_shapes() {
+        for shape in ["scalar", "vector"] {
+            assert!(!role_shape_conflict("quantities-units:acceleration", shape));
+        }
+        for shape in ["matrix", "tensor"] {
+            assert!(role_shape_conflict("quantities-units:acceleration", shape));
+        }
+    }
+
+    #[test]
+    fn function_value_shape_is_not_the_shape_of_the_function_role() {
+        for shape in ["scalar", "vector", "matrix", "tensor"] {
+            assert!(!role_shape_conflict("semath:function", shape));
+        }
     }
 
     #[test]
