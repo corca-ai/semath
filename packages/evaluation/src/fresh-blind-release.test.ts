@@ -6,6 +6,8 @@ import {
   parseAuthoredScientificFixture,
   type AuthoredScientificObservation,
 } from "./authored-scientific";
+import type { MathAuthoringContext } from "../../protocol/src/index";
+import { projectMathAuthoringContext } from "./math-authoring-development";
 import {
   freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
@@ -52,6 +54,100 @@ describe("fresh blind release evidence", () => {
     expect(() => validateFreshBlindRelease(release, validation(release))).toThrow(
       "requires an exact authoring context for every primary and breadth probe",
     );
+
+    const validValue = fixtureValue();
+    validValue.release.id = "v0.37";
+    addAuthoringExpectations(validValue);
+    const valid = finalize(validValue);
+    const validInput = validation(valid);
+    expect(validateFreshBlindRelease(valid, validInput).scenarios).toBe(48);
+    expect(() =>
+      validateFreshBlindRelease(valid, { ...validInput, authoringSyntaxFacts: [] })
+    ).toThrow("must cover every selected snapshot");
+    expect(() =>
+      validateFreshBlindRelease(valid, {
+        ...validInput,
+        authoringSyntaxFacts: [
+          validInput.authoringSyntaxFacts[0]!,
+          validInput.authoringSyntaxFacts[0]!,
+          ...validInput.authoringSyntaxFacts.slice(1),
+        ],
+      })
+    ).toThrow("duplicate fresh authoring syntax facts");
+    expect(() =>
+      validateFreshBlindRelease(valid, {
+        ...validInput,
+        authoringSyntaxFacts: [{
+          ...validInput.authoringSyntaxFacts[0]!,
+          documents: [],
+        }, ...validInput.authoringSyntaxFacts.slice(1)],
+      })
+    ).toThrow("syntax document facts do not match the selected snapshot");
+    const firstFact = validInput.authoringSyntaxFacts[0]!;
+    const firstDocument = firstFact.documents[0]!;
+    expect(() =>
+      validateFreshBlindRelease(valid, {
+        ...validInput,
+        authoringSyntaxFacts: [{
+          ...firstFact,
+          documents: [{
+            ...firstDocument,
+            mathRootContentRanges: [
+              firstDocument.mathRootContentRanges[0]!,
+              firstDocument.mathRootContentRanges[0]!,
+            ],
+          }],
+        }, ...validInput.authoringSyntaxFacts.slice(1)],
+      })
+    ).toThrow("duplicate math-root facts");
+    expect(() =>
+      validateFreshBlindRelease(valid, {
+        ...validInput,
+        authoringSyntaxFacts: [...validInput.authoringSyntaxFacts, {
+          documents: [],
+          scenarioId: "unknown",
+          snapshotId: "initial",
+        }],
+      })
+    ).toThrow("unexpected fresh authoring syntax facts");
+
+    const wrongVersionValue = fixtureValue();
+    wrongVersionValue.release.id = "v0.37";
+    addAuthoringExpectations(wrongVersionValue);
+    const wrongExpected = wrongVersionValue.fixture.probes[0]!.expected as {
+      authoringContext: ReturnType<typeof projectMathAuthoringContext>;
+    };
+    wrongExpected.authoringContext.lifecycle.documentVersion = 2;
+    const wrongVersion = finalize(wrongVersionValue);
+    expect(() =>
+      validateFreshBlindRelease(wrongVersion, validation(wrongVersion))
+    ).toThrow("authoringContext.lifecycle.documentVersion");
+
+    const wrongRootValue = fixtureValue();
+    wrongRootValue.release.id = "v0.37";
+    addAuthoringExpectations(wrongRootValue);
+    const wrongRootExpected = wrongRootValue.fixture.probes[0]!.expected as {
+      authoringContext: ReturnType<typeof projectMathAuthoringContext>;
+    };
+    const formula = wrongRootExpected.authoringContext.formula!;
+    formula.location.range.endOffset -= 1;
+    formula.sourceNotation = formula.sourceNotation.slice(0, -1);
+    const wrongRoot = finalize(wrongRootValue);
+    expect(() =>
+      validateFreshBlindRelease(wrongRoot, validation(wrongRoot))
+    ).toThrow("authoringContext.formula.location.range");
+
+    const wrongNotationValue = fixtureValue();
+    wrongNotationValue.release.id = "v0.37";
+    addAuthoringExpectations(wrongNotationValue);
+    const wrongNotationExpected = wrongNotationValue.fixture.probes[0]!.expected as {
+      authoringContext: ReturnType<typeof projectMathAuthoringContext>;
+    };
+    wrongNotationExpected.authoringContext.formula!.sourceNotation = "x = 1";
+    const wrongNotation = finalize(wrongNotationValue);
+    expect(() =>
+      validateFreshBlindRelease(wrongNotation, validation(wrongNotation))
+    ).toThrow("authoringContext.formula.sourceNotation");
   });
 
   test("requires isolated Codex authors, critics, and the complete main review", () => {
@@ -576,6 +672,25 @@ function validation(release: ReturnType<typeof fixture>) {
   );
   return {
     authoredSealDigest: sha256(authoredFixtureSealPayload(release.fixture)),
+    authoringSyntaxFacts: release.fixture.scenarios.map((scenario) => {
+      const snapshot = scenario.snapshots[0]!;
+      return {
+        documents: snapshot.documents.map((document) => {
+          const needle = document.content.match(/x_\d+=1/u)?.[0];
+          if (!needle) throw new Error("test fixture is missing its math root");
+          const startOffset = document.content.indexOf(needle);
+          return {
+            fileId: document.fileId,
+            mathRootContentRanges: [{
+              endOffset: startOffset + needle.length,
+              startOffset,
+            }],
+          };
+        }),
+        scenarioId: scenario.id,
+        snapshotId: snapshot.id,
+      };
+    }),
     freshIsolationProfiles: release.fixture.scenarios.map((scenario) => ({
       id: `${scenario.id}/initial/main`,
       mathFingerprints: [`math-${scenario.id}`],
@@ -598,6 +713,53 @@ function validation(release: ReturnType<typeof fixture>) {
     reviewDigests,
     sealDigest: sha256(freshBlindSealPayload(release)),
   };
+}
+
+function addAuthoringExpectations(value: FixtureValue): void {
+  value.fixture.probes.forEach((probe, index) => {
+    const scenario = value.fixture.scenarios[index]!;
+    const document = scenario.snapshots[0]!.documents[0]!;
+    const sourceNotation = `x_${index}=1`;
+    const startOffset = document.content.indexOf(sourceNotation);
+    const range = {
+      endOffset: startOffset + sourceNotation.length,
+      startOffset,
+    };
+    const formula = {
+      documentVersion: 1,
+      location: { fileId: document.fileId, path: document.path, range },
+      scopePath: [],
+      sourceNotation,
+    };
+    const context: MathAuthoringContext = {
+      claimEvidence: [],
+      conditions: [],
+      disposition: "unsupported",
+      equationLinks: [],
+      formula,
+      lifecycle: {
+        capped: false,
+        documentVersion: 1,
+        editable: true,
+        engineLimited: false,
+        freshness: "current",
+        generation: "authored",
+        retracted: false,
+      },
+      interpretations: {
+        analysisLimits: [],
+        exhaustiveness: "bounded-open-world",
+        hypotheses: [],
+        missingDiscriminators: [],
+        truncated: false,
+      },
+      notationOccurrences: [],
+      requirements: [],
+      truncated: false,
+    };
+    (probe.expected as Record<string, unknown>).authoringContext =
+      projectMathAuthoringContext(context);
+  });
 }
 
 function fixtureValue(): FixtureValue {
