@@ -13,6 +13,7 @@ const MAX_DOCUMENT_CANDIDATES: usize = 50_000;
 const MAX_DERIVATION_DEPTH: u8 = 8;
 const MAX_RESOLUTION_CANDIDATES: usize = 32;
 const MAX_CANDIDATE_EVIDENCE: usize = 32;
+pub(crate) const MAX_RELATION_ENTITIES: usize = 32;
 
 type OccurrencesByScope = BTreeMap<Vec<u32>, BTreeSet<SourceOccurrenceId>>;
 type OccurrencesBySelection = BTreeMap<(String, String), OccurrencesByScope>;
@@ -402,6 +403,10 @@ impl ClaimRelation {
                 .chain(variable)
                 .collect(),
         }
+    }
+
+    pub(crate) fn exceeds_entity_bound(&self) -> bool {
+        self.entities().len() > MAX_RELATION_ENTITIES
     }
 }
 
@@ -2012,7 +2017,7 @@ fn validate_claim_value(value: &ClaimValue) -> Result<(), String> {
         return Err("dimension claim is invalid or exceeds its bound".to_owned());
     }
     if let ClaimValue::Relation(relation) = value
-        && (relation.entities().len() > 32 || relation.canonical_digest().trim().is_empty())
+        && (relation.exceeds_entity_bound() || relation.canonical_digest().trim().is_empty())
     {
         return Err("relation claim is invalid or exceeds its bound".to_owned());
     }
@@ -3419,5 +3424,24 @@ mod tests {
             "dimension claim is invalid or exceeds its bound"
         );
         assert_eq!(index.stats(), SemanticIndexStats::default());
+    }
+
+    #[test]
+    fn relation_entity_bound_includes_the_variadic_result() {
+        let source = occurrence("relation.tex", 1, 1, 0, 1, &[], "r", Vec::new());
+        let result = entity(&source, "r");
+        let relation = |term_count| {
+            ClaimValue::Relation(Box::new(ClaimRelation::Sum {
+                result: result.clone(),
+                terms: vec![result.clone(); term_count],
+                canonical_digest: "sum".into(),
+            }))
+        };
+
+        assert_eq!(validate_claim_value(&relation(31)), Ok(()));
+        assert_eq!(
+            validate_claim_value(&relation(32)),
+            Err("relation claim is invalid or exceeds its bound".into())
+        );
     }
 }
