@@ -26,10 +26,15 @@ use crate::interpretation::{
     InterpretationEvidenceAuthority, MAX_INTERPRETATION_DISCRIMINATORS, MathInterpretationInput,
     ResolvedInterpretationEvidence, normalize_source_anchors, project_math_interpretations,
 };
-use crate::law::{ExternalTypeEnvironment, rejected_formula_sign_conflicts};
+use crate::law::{
+    ExternalTypeEnvironment, refuted_law_condition_conflicts, rejected_formula_sign_conflicts,
+};
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
-use crate::prose::{LawActivationEvidence, ScientificSemanticEvidence, definition_available_from};
+use crate::prose::{
+    LawActivationEvidence, ScientificSemanticEvidence, assumption_value_and_target,
+    definition_available_from,
+};
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
@@ -1576,19 +1581,20 @@ fn lower_typed_observation_facts(
         }
     }
     for assumption in observations.assumptions() {
+        let assumption_value = assumption_value_and_target(&assumption.value).0;
         for subject in &assumption.subjects {
             let Some((entity, _)) = closest_definition(definitions, subject, &assumption.evidence)
             else {
                 continue;
             };
-            let condition = match (assumption.kind.as_str(), assumption.value.as_str()) {
+            let condition = match (assumption.kind.as_str(), assumption_value) {
                 ("sign", "nonzero") => ClaimCondition::Nonzero(entity.clone()),
                 ("sign", "positive" | "strictly-positive") => {
                     ClaimCondition::Positive(entity.clone())
                 }
                 ("sign", "nonnegative") => ClaimCondition::Nonnegative(entity.clone()),
                 ("algebraic-property", "invertible") => ClaimCondition::Invertible(entity.clone()),
-                _ => ClaimCondition::Named(format!("{}:{}", assumption.kind, assumption.value)),
+                _ => ClaimCondition::Named(format!("{}:{assumption_value}", assumption.kind)),
             };
             let ordinal = output.claims.len();
             let evidence_id = EvidenceId(format!(
@@ -4118,10 +4124,19 @@ impl SemathEngine {
             .or_else(|| {
                 semantic_focus.and_then(|focus| self.resolved_entity(&focus.occurrence_id))
             });
-        let linked_formulas = if local_formulas.is_empty() {
+        let authoritative_local_formulas = local_formulas
+            .iter()
+            .filter(|formula| formula.status != LawRecognitionStatus::Conflicting)
+            .cloned()
+            .collect::<Vec<_>>();
+        let linked_formulas = if authoritative_local_formulas.is_empty() {
             Vec::new()
         } else {
-            self.source_linked_preceding_formulas(document, observations, &local_formulas)
+            self.source_linked_preceding_formulas(
+                document,
+                observations,
+                &authoritative_local_formulas,
+            )
         };
         let mut context_formulas = local_formulas.clone();
         if !local_formulas.is_empty() {
@@ -4139,12 +4154,17 @@ impl SemathEngine {
         let symbol_info = display_focus.as_ref().and_then(|focus| {
             self.symbol_info(document, observations, focus, offset, hygiene_enabled)
         });
+        let authoritative_context_formulas = context_formulas
+            .iter()
+            .filter(|formula| formula.status != LawRecognitionStatus::Conflicting)
+            .cloned()
+            .collect::<Vec<_>>();
         let (context, interpretation_structural_candidates) = self.semantic_context(
             observations,
             semantic_focus,
             meaning_entity.as_ref(),
             offset,
-            &context_formulas,
+            &authoritative_context_formulas,
         );
         let symbol_definition_may_establish = !queried_formula_is_rejected
             && queried_relation.is_none_or(|relation| {
@@ -4235,6 +4255,7 @@ impl SemathEngine {
                 observations.semantic_evidence(),
             ));
         }
+        typed_conflicts.extend(refuted_law_condition_conflicts(&local_formulas));
         typed_conflicts.sort_by(|left, right| left.conflict_id.cmp(&right.conflict_id));
         typed_conflicts.dedup_by(|left, right| left.conflict_id == right.conflict_id);
         let mut diagnostics = document_diagnostics(
@@ -5111,6 +5132,7 @@ impl SemathEngine {
             .laws
             .all()
             .iter()
+            .filter(|formula| formula.status != LawRecognitionStatus::Conflicting)
             .filter(|formula| formula.range.end_offset <= current_start)
             .filter_map(|formula| {
                 let shared_entities = self

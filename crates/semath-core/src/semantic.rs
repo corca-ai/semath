@@ -5,6 +5,7 @@ use crate::law::{ExternalTypeEnvironment, LawAnalysisContext, LawObservations, o
 use crate::parser::ParsedMath;
 use crate::prose::{
     FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence, observe_prose,
+    public_assumption,
 };
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
@@ -64,7 +65,12 @@ impl LocalContextProjection {
             symbol,
             entity_id,
             concepts: Vec::new(),
-            assumptions: self.assumptions.clone(),
+            assumptions: self
+                .assumptions
+                .iter()
+                .cloned()
+                .map(public_assumption)
+                .collect(),
             claims: Vec::new(),
             candidates: Vec::new(),
             relations,
@@ -167,6 +173,7 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             &[],
         );
+        let scopes = ScopeGraph::new(document);
         let analyze = |environment: &ExternalTypeEnvironment, domains: &DomainObservations| {
             observe_laws(
                 canonical_expressions,
@@ -180,6 +187,7 @@ impl DocumentSemanticObservations {
                     assumptions: &self.assumptions,
                     external: environment,
                     domains,
+                    scopes: &scopes,
                 },
             )
         };

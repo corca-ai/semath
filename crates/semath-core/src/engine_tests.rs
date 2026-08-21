@@ -387,6 +387,25 @@ fn snapshot(content: &str) -> ProjectSnapshot {
     }
 }
 
+fn semantic_view_at(content: &str, offset: u32) -> crate::SemanticViewInfo {
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    *view
+}
+
 #[test]
 fn chained_equality_stores_operands_and_source_linked_relations_without_a_system_placeholder() {
     let mut engine = SemathEngine::default();
@@ -2605,7 +2624,10 @@ fn incompatible_redeclarations_share_one_typed_public_conflict() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert!(
+        matches!(view.decision, MeaningDecision::Conflicting { .. }),
+        "{view:#?}"
+    );
     assert_eq!(
         view.authoring_context.disposition,
         crate::MathAuthoringDisposition::Conflicting
@@ -2658,6 +2680,408 @@ fn incompatible_acceleration_shape_conflicts_and_blocks_newton_relation() {
             .iter()
             .all(|relation| { relation.relation_id != "classical-mechanics:newton-second-law" })
     );
+}
+
+#[test]
+fn scalar_and_vector_acceleration_shapes_preserve_the_newton_candidate() {
+    for declaration in ["a scalar acceleration", "an acceleration vector"] {
+        let content = format!(
+            "Let $F$ denote net force. Let $m$ denote scalar mass. Let $a$ denote {declaration}. The quantities refer to one body in a common inertial frame. The model is $F=ma$."
+        );
+        let view = semantic_view_at(&content, content.rfind("F=").unwrap() as u32);
+
+        assert!(
+            !matches!(view.decision, MeaningDecision::Conflicting { .. }),
+            "{declaration}: {view:#?}"
+        );
+        assert!(
+            view.diagnostics
+                .iter()
+                .all(|diagnostic| { diagnostic.code != "notation-role-type-conflict" })
+        );
+        assert!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .any(|hypothesis| {
+                    hypothesis.relation.as_ref().is_some_and(|relation| {
+                        relation.relation_id == "classical-mechanics:newton-second-law"
+                    }) && hypothesis.support != crate::MathInterpretationSupportTier::Contradicted
+                })
+        );
+    }
+}
+
+#[test]
+fn included_acceleration_shape_conflict_blocks_the_newton_relation() {
+    let main = "\\input{definitions}\nNewton's second law is $F=ma$.";
+    for (shape, relation_expected) in [("scalar", true), ("matrix", false)] {
+        let definitions = format!(
+            "Let $F$ denote net force. Let $m$ denote scalar mass. Let $a$ denote an acceleration {shape}."
+        );
+        let mut main_document = document("main", "main.tex", main, 1);
+        main_document.includes.push(ProjectInclude {
+            path: "definitions".into(),
+            kind: "input".into(),
+            source: ProjectSourceRef {
+                file_id: "main".into(),
+                path: "main.tex".into(),
+                range: SourceRange {
+                    start_offset: 0,
+                    end_offset: 19,
+                },
+            },
+        });
+        let mut engine = SemathEngine::default();
+        engine
+            .reset(ProjectSnapshot {
+                protocol_version: PROTOCOL_VERSION,
+                epoch: "project:1".into(),
+                inventory_version: 1,
+                project_id: "project".into(),
+                main_file_id: Some("main".into()),
+                documents: vec![
+                    main_document,
+                    document("definitions", "definitions.tex", &definitions, 1),
+                ],
+            })
+            .unwrap();
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: main.rfind("F=").unwrap() as u32,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+
+        let has_relation = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .filter_map(|hypothesis| hypothesis.relation.as_ref())
+            .any(|relation| relation.relation_id == "classical-mechanics:newton-second-law");
+        assert_eq!(has_relation, relation_expected, "{shape}: {view:#?}");
+        if !relation_expected {
+            assert!(!matches!(
+                view.decision,
+                MeaningDecision::Established { .. }
+            ));
+        }
+    }
+}
+
+#[test]
+fn explicit_sign_convention_refutation_is_a_source_conflict() {
+    let content = "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Without adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$.";
+    let view = semantic_view_at(content, content.rfind("i=").unwrap() as u32);
+
+    assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .all(|relation| { relation.relation_id != "circuits:capacitor-current-law" })
+    );
+    let hypothesis =
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                })
+            })
+            .expect("refuted law hypothesis");
+    assert_eq!(
+        hypothesis.support,
+        crate::MathInterpretationSupportTier::Contradicted
+    );
+    assert!(hypothesis.conditions.iter().any(|condition| {
+        condition.condition_id == "passive-sign-convention"
+            && condition.status == crate::ConstraintStatus::Conflicting
+    }));
+    let contradicting = hypothesis
+        .evidence
+        .iter()
+        .filter(|evidence| evidence.role == crate::MathInterpretationEvidenceRole::Contradicting)
+        .collect::<Vec<_>>();
+    assert!(!contradicting.is_empty());
+    assert!(contradicting.iter().all(|evidence| {
+        evidence.evidence.rule_id == "english-scientific-assumption"
+            && matches!(
+                evidence.evidence.kind.as_str(),
+                "explicit-prose" | "attached-prose"
+            )
+    }));
+    assert!(view.authoring_context.equation_links.is_empty());
+}
+
+#[test]
+fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
+    for descriptor in ["ohm", "kirchhoff", "electric", "closed"] {
+        let content = format!(
+            "Let $C>0$ be capacitance, let $v(t)$ be voltage, let $i(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the {descriptor} law is $i(t)=C\\frac{{dv}}{{dt}}(t)$."
+        );
+        let view = semantic_view_at(&content, content.rfind("i(t)=").unwrap() as u32);
+        assert!(
+            !matches!(view.decision, MeaningDecision::Established { .. }),
+            "{descriptor}"
+        );
+        let capacitor = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                })
+            })
+            .expect("bounded capacitor candidate");
+        assert!(capacitor.conditions.iter().any(|condition| {
+            condition.condition_id == "passive-sign-convention"
+                && condition.status == crate::ConstraintStatus::Required
+        }));
+    }
+
+    for (content, formula, relation_id, condition_id) in [
+        (
+            "Let $V$ be voltage, let $R$ be resistance, and let $I$ be electric current. Under this passive sign convention, the capacitor law is. $V=RI$.",
+            "V=RI",
+            "circuits:ohm-law",
+            "consistent-references",
+        ),
+        (
+            "Let $C>0$ be capacitance, let $v(t)$ be voltage, let $i(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the capacitor law is. $i(t)=C\\frac{dv}{dt}(t)$.",
+            "i(t)=",
+            "circuits:capacitor-current-law",
+            "passive-sign-convention",
+        ),
+    ] {
+        let view = semantic_view_at(content, content.rfind(formula).unwrap() as u32);
+        assert!(!matches!(
+            view.decision,
+            MeaningDecision::Established { .. }
+        ));
+        let hypothesis = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis
+                    .relation
+                    .as_ref()
+                    .is_some_and(|relation| relation.relation_id == relation_id)
+            })
+            .expect("bounded relation candidate");
+        assert!(hypothesis.conditions.iter().any(|condition| {
+            condition.condition_id == condition_id
+                && condition.status == crate::ConstraintStatus::Required
+        }));
+    }
+}
+
+#[test]
+fn a_refuted_sign_convention_does_not_authorize_equation_links() {
+    let linked = "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Under the passive sign convention, the accepted reference is $i=C\\frac{dv}{dt}$. Let $j$ be electric current, $D$ capacitance, and $u$ voltage. Without adopting the passive sign convention, consider $j=D\\frac{du}{dt}$.";
+    let linked_view = semantic_view_at(linked, linked.rfind("j=").unwrap() as u32);
+    assert!(matches!(
+        linked_view.decision,
+        MeaningDecision::Conflicting { .. }
+    ));
+    assert!(linked_view.authoring_context.equation_links.is_empty());
+}
+
+#[test]
+fn sign_convention_evidence_is_scoped_to_its_formula() {
+    for adoption in [
+        "Under the passive sign convention, use",
+        "We explicitly use the passive sign convention, and consider",
+        "We currently use the passive sign convention, and consider",
+        "In this derivation we use the passive sign convention, and consider",
+        "For this calculation we use the passive sign convention, and consider",
+        "The calculation uses the passive sign convention, and consider",
+    ] {
+        let accepted = format!(
+            "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. {adoption} $i=C\\frac{{dv}}{{dt}}$."
+        );
+        let accepted_view = semantic_view_at(&accepted, accepted.rfind("i=").unwrap() as u32);
+        assert!(
+            matches!(accepted_view.decision, MeaningDecision::Established { .. }),
+            "{adoption}: {:?}",
+            accepted_view.decision
+        );
+        assert!(
+            accepted_view
+                .context
+                .relations
+                .iter()
+                .any(|relation| { relation.relation_id == "circuits:capacitor-current-law" })
+        );
+    }
+
+    let scoped = "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time.\n\\section{Rejected}\nWithout adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$.\n\\section{Accepted}\nUnder the passive sign convention, use $i=C\\frac{dv}{dt}$.";
+    let scoped_view = semantic_view_at(scoped, scoped.rfind("i=").unwrap() as u32);
+    assert!(matches!(
+        scoped_view.decision,
+        MeaningDecision::Established { .. }
+    ));
+    assert!(scoped_view.authoring_context.equation_links.is_empty());
+}
+
+#[test]
+fn rejecting_a_refutation_is_not_a_sign_convention_conflict() {
+    for double_negative in [
+        "Without rejecting the passive sign convention",
+        "Without ever rejecting the passive sign convention",
+        "Without not adopting the passive sign convention",
+        "Without ever repeatedly explicitly continuing to firmly and deliberately reject the passive sign convention",
+        "Without adopting, even provisionally, the passive sign convention",
+        "Without adopting the research and development passive sign convention",
+        "Without adopting the ideal source assumption and the passive sign convention",
+        "Without rejecting the active convention and the passive sign convention",
+        "With no adoption of the passive sign convention",
+        "We refuse to adopt the passive sign convention and",
+        "Declining to adopt the passive sign convention",
+        "Avoiding adoption of the passive sign convention",
+        "The passive sign convention is declined;",
+        "Rather than use the passive sign convention",
+        "Instead of adopting the passive sign convention",
+        "Prior to adopting the passive sign convention",
+        "The passive sign convention ceased to be used;",
+        "The passive sign convention is never used;",
+        "We use an auxiliary meter to describe the passive sign convention, then",
+        "The passive sign convention is described while we use an auxiliary meter, then",
+        "We use an alternative to the passive sign convention and",
+        "We adopt an alternative to the passive sign convention and",
+        "An alternative to the passive sign convention is used;",
+        "In lieu of using the passive sign convention",
+        "In place of adopting the passive sign convention",
+        "The passive sign convention is used only in a separate example, whereas here we",
+        "The auxiliary meter is never fully used under the passive sign convention, while considering",
+        "In a separate example, we use the passive sign convention, and here we",
+        "The cited note uses the passive sign convention, but here we",
+        "Smith uses the passive sign convention, but here we",
+        "For the inductor, we use the passive sign convention, and for the capacitor we",
+        "The passive sign convention applies to another circuit, but here we",
+        "The passive sign convention is used for the inductor, but for the capacitor we",
+        "The instructions say use the passive sign convention, but here we",
+        "We intend to use the passive sign convention later, but currently we",
+        "The passive sign convention applies if the reference terminal is positive, then we",
+        "We use the passive sign convention if needed, then we",
+        "One option is to use the passive sign convention, then we",
+        "The measured current $i$ is recorded, and Smith uses the passive sign convention, then we",
+        "The cited note reports current $i$ and uses the passive sign convention, then we",
+        "For the other circuit, current $i$ is recorded and Smith uses the passive sign convention, then we",
+        "The passive sign convention was used previously, and currently we",
+        "The passive sign convention applies whenever the reference terminal is positive, and we",
+        "The passive sign convention applies assuming the terminal is positive, and we",
+        "We explicitly use the passive sign convention conditionally, then we",
+        "In the cited example, $i$ uses the passive sign convention, then we",
+        "In Smiths cited model, $i$ uses the passive sign convention, then we",
+        "For the other circuit, current $i$ uses the passive sign convention, then we",
+        "For a separate circuit, $i$ uses the passive sign convention, then we",
+        "In another model, $i$ uses the passive sign convention, then we",
+        "For this inductor we use the passive sign convention, and we",
+        "For this appendix we use the passive sign convention, and we",
+        "For this example we use the passive sign convention, and in the current derivation we",
+        "Under the passive sign convention whenever the reference terminal is positive, we",
+        "Under the passive sign convention assuming the terminal is positive, we",
+        "Under the passive sign convention while analyzing the inductor, we",
+        "Under the passive sign convention subject to a positive terminal, we",
+        "Under the passive sign convention during the auxiliary analysis, we",
+    ] {
+        let content = format!(
+            "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. {double_negative}, consider $i=C\\frac{{dv}}{{dt}}$."
+        );
+        let view = semantic_view_at(&content, content.rfind("i=").unwrap() as u32);
+        assert!(
+            matches!(view.decision, MeaningDecision::Partial { .. }),
+            "{double_negative}: {:?}",
+            view.decision
+        );
+        let capacitor = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                })
+            })
+            .expect("bounded capacitor hypothesis");
+        assert!(capacitor.conditions.iter().any(|condition| {
+            condition.condition_id == "passive-sign-convention"
+                && condition.status == crate::ConstraintStatus::Required
+        }));
+    }
+}
+
+#[test]
+fn unknown_unicode_prose_cannot_authorize_a_sign_convention() {
+    for qualified in [
+        "조건부로",
+        "만약 단자가 양수라면",
+        "εάν ισχύει",
+        "若条件成立",
+    ] {
+        let content = format!(
+            "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Under the passive sign convention {qualified}, $i=C\\frac{{dv}}{{dt}}$."
+        );
+        let view = semantic_view_at(&content, content.rfind("i=").unwrap() as u32);
+        assert!(
+            !matches!(
+                view.decision,
+                MeaningDecision::Established { .. } | MeaningDecision::Conflicting { .. }
+            ),
+            "{qualified}: {:?}",
+            view.decision
+        );
+    }
+}
+
+#[test]
+fn attached_sign_evidence_does_not_leak_to_a_preceding_formula() {
+    for competing in [
+        "Let $i$ be electric current, $C$ capacitance, $v$ voltage, $t$ time, and $L$ inductance. Consider $i=C\\frac{dv}{dt}$. Under the passive sign convention, use $v=L\\frac{di}{dt}$.",
+        "Let $i$ be electric current, $C$ capacitance, $v$ voltage, $t$ time, and $L$ inductance. Compare $i=C\\frac{dv}{dt}$, but under the passive sign convention use $v=L\\frac{di}{dt}$.",
+    ] {
+        let competing_view = semantic_view_at(competing, competing.find("i=").unwrap() as u32);
+        assert!(!matches!(
+            competing_view.decision,
+            MeaningDecision::Established { .. }
+        ));
+        let competing_capacitor = competing_view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                })
+            })
+            .expect("bounded capacitor hypothesis");
+        assert!(competing_capacitor.conditions.iter().any(|condition| {
+            condition.condition_id == "passive-sign-convention"
+                && condition.status == crate::ConstraintStatus::Required
+        }));
+    }
 }
 
 #[test]

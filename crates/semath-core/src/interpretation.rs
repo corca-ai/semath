@@ -510,7 +510,14 @@ fn formula_evidence(
         .conditions
         .iter()
         .filter(|condition| condition.status == ConstraintStatus::Conflicting)
-        .flat_map(|condition| condition.evidence.clone())
+        .flat_map(|condition| {
+            condition.evidence.iter().filter(|evidence| {
+                condition.kind != crate::ScientificConstraintKind::SignConvention
+                    || (evidence.rule_id == "english-scientific-assumption"
+                        && matches!(evidence.kind.as_str(), "explicit-prose" | "attached-prose"))
+            })
+        })
+        .cloned()
         .collect::<Vec<_>>();
     if let MeaningDecision::Conflicting { conflicts, .. } = decision {
         contradicting.extend(
@@ -519,6 +526,7 @@ fn formula_evidence(
                 .flat_map(|conflict| conflict.evidence.clone()),
         );
     }
+    contradicting.retain(|evidence| !supporting.contains(evidence));
     (supporting, contradicting)
 }
 

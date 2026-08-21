@@ -15,6 +15,12 @@ import {
   compareAuthoredIntegrityProfiles,
   type AuthoredIntegrityProfile,
 } from "./authored-integrity";
+import {
+  mathAuthoringExpectationCanonicalFailures,
+  mathAuthoringExpectationFormulaRootFailures,
+  mathAuthoringExpectationSourceFailures,
+  type MathAuthoringSyntaxDocument,
+} from "./math-authoring-development";
 
 const DIGEST = /^[0-9a-f]{64}$/u;
 const RELEASE_ID = /^v0\.[1-9][0-9]*$/u;
@@ -41,6 +47,7 @@ export interface FreshBlindReleaseFixture {
 }
 
 export interface FreshBlindValidationInput {
+  readonly authoringSyntaxFacts: readonly FreshBlindSnapshotSyntaxFacts[];
   readonly authoredSealDigest: string;
   readonly freshIsolationProfiles: readonly AuthoredIntegrityProfile[];
   readonly freshProfiles: readonly AuthoredIntegrityProfile[];
@@ -49,6 +56,15 @@ export interface FreshBlindValidationInput {
   readonly referenceProfiles: readonly AuthoredIntegrityProfile[];
   readonly reviewDigests: Readonly<Record<string, string>>;
   readonly sealDigest: string;
+}
+
+export interface FreshBlindSnapshotSyntaxFacts {
+  readonly documents: readonly {
+    readonly fileId: string;
+    readonly mathRootContentRanges: readonly SourceRange[];
+  }[];
+  readonly scenarioId: string;
+  readonly snapshotId: string;
 }
 
 export interface FreshBlindValidationSummary {
@@ -221,6 +237,7 @@ export function validateFreshBlindRelease(
         `fresh blind v0.37+ requires an exact authoring context for every primary and breadth probe: ${missingAuthoring.join(", ")}`,
       );
     }
+    validateFreshAuthoringExpectations(release, input.authoringSyntaxFacts);
   }
   for (const probe of fixture.probes) {
     const scenario = authoredScenarioFor(fixture, probe);
@@ -351,6 +368,115 @@ export function validateFreshBlindRelease(
     probes: fixture.probes.length,
     scenarios: fixture.scenarios.length,
   };
+}
+
+function validateFreshAuthoringExpectations(
+  release: FreshBlindReleaseFixture,
+  facts: readonly FreshBlindSnapshotSyntaxFacts[],
+): void {
+  const fixture = release.fixture;
+  const selected = new Map<string, ReturnType<typeof authoredSnapshotFor>>();
+  for (const probe of fixture.probes) {
+    const scenario = authoredScenarioFor(fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    selected.set(`${scenario.id}\0${snapshot.id}`, snapshot);
+  }
+  const byKey = new Map<string, FreshBlindSnapshotSyntaxFacts>();
+  for (const item of facts) {
+    const key = `${item.scenarioId}\0${item.snapshotId}`;
+    if (!selected.has(key)) {
+      throw new Error(
+        `${item.scenarioId}/${item.snapshotId}: unexpected fresh authoring syntax facts`,
+      );
+    }
+    if (byKey.has(key)) {
+      throw new Error(
+        `${item.scenarioId}/${item.snapshotId}: duplicate fresh authoring syntax facts`,
+      );
+    }
+    const snapshot = selected.get(key)!;
+    const documentIds = item.documents.map((document) => document.fileId);
+    if (new Set(documentIds).size !== documentIds.length) {
+      throw new Error(
+        `${item.scenarioId}/${item.snapshotId}: duplicate syntax document facts`,
+      );
+    }
+    const expectedIds = snapshot.documents.map((document) => document.fileId).sort();
+    if (stableJson([...documentIds].sort()) !== stableJson(expectedIds)) {
+      throw new Error(
+        `${item.scenarioId}/${item.snapshotId}: syntax document facts do not match the selected snapshot`,
+      );
+    }
+    for (const document of item.documents) {
+      const source = snapshot.documents.find(
+        (candidate) => candidate.fileId === document.fileId,
+      )!;
+      const keys = document.mathRootContentRanges.map(
+        (range) => `${range.startOffset}:${range.endOffset}`,
+      );
+      if (new Set(keys).size !== keys.length) {
+        throw new Error(
+          `${item.scenarioId}/${item.snapshotId}/${document.fileId}: duplicate math-root facts`,
+        );
+      }
+      for (const range of document.mathRootContentRanges) {
+        if (
+          !Number.isInteger(range.startOffset) ||
+          !Number.isInteger(range.endOffset) ||
+          range.startOffset < 0 ||
+          range.startOffset >= range.endOffset ||
+          range.endOffset > source.content.length
+        ) {
+          throw new Error(
+            `${item.scenarioId}/${item.snapshotId}/${document.fileId}: invalid math-root fact`,
+          );
+        }
+      }
+    }
+    byKey.set(key, item);
+  }
+  if (byKey.size !== selected.size) {
+    throw new Error("fresh authoring syntax facts must cover every selected snapshot");
+  }
+
+  for (const probe of fixture.probes) {
+    const expected = probe.expected.authoringContext!;
+    const scenario = authoredScenarioFor(fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    const item = byKey.get(`${scenario.id}\0${snapshot.id}`)!;
+    const rootsByFile = new Map(
+      item.documents.map((document) => [document.fileId, document.mathRootContentRanges]),
+    );
+    const documents: MathAuthoringSyntaxDocument[] = snapshot.documents.map(
+      (document) => ({
+        ...document,
+        documentVersion: 1,
+        mathRootContentRanges: rootsByFile.get(document.fileId)!,
+      }),
+    );
+    const cursorDocument = documents.find(
+      (document) => document.fileId === probe.cursor.fileId,
+    )!;
+    const failures = [
+      ...(expected.lifecycle.documentVersion === cursorDocument.documentVersion
+        ? []
+        : [{
+            actual: expected.lifecycle.documentVersion,
+            expected: cursorDocument.documentVersion,
+            kind: "wrong-anchor" as const,
+            path: "authoringContext.lifecycle.documentVersion",
+          }]),
+      ...mathAuthoringExpectationCanonicalFailures(expected),
+      ...mathAuthoringExpectationSourceFailures(expected, documents),
+      ...mathAuthoringExpectationFormulaRootFailures(expected, documents),
+    ];
+    const first = failures[0];
+    if (first) {
+      throw new Error(
+        `${probe.id}: invalid exact authoring context at ${first.path} (${first.kind})`,
+      );
+    }
+  }
 }
 
 function validateEntitySurfaceCommissioning(

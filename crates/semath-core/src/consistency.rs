@@ -1,4 +1,4 @@
-use crate::concept::{classify_role_candidates, concepts_share_lineage};
+use crate::concept::{classify_role_candidates, concepts_share_lineage, is_pack_quantity_kind};
 use crate::prose::definition_available_from;
 use crate::scope::ScopeGraph;
 use crate::shape::{ExplicitShapeClaim, ShapeObservations};
@@ -401,9 +401,11 @@ pub(crate) fn roles_conflict(left: &str, right: &str) -> bool {
 }
 
 pub(crate) fn role_shape_conflict(role: &str, shape: &str) -> bool {
+    if is_pack_quantity_kind(role) {
+        return !matches!(shape, "scalar" | "vector");
+    }
     let role = concept_leaf(role);
     match role {
-        "acceleration" => !matches!(shape, "scalar" | "vector"),
         "event" | "set" => true,
         "distribution" => false,
         "function" => false,
@@ -508,13 +510,14 @@ mod tests {
     }
 
     #[test]
-    fn acceleration_role_accepts_components_and_vectors_but_not_higher_rank_shapes() {
+    fn pack_quantity_kinds_accept_components_and_vectors_but_not_higher_rank_shapes() {
         for shape in ["scalar", "vector"] {
             assert!(!role_shape_conflict("quantities-units:acceleration", shape));
         }
         for shape in ["matrix", "tensor"] {
             assert!(role_shape_conflict("quantities-units:acceleration", shape));
         }
+        assert!(!role_shape_conflict("unrelated:acceleration", "matrix"));
     }
 
     #[test]

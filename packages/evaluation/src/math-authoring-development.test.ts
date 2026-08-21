@@ -8,6 +8,8 @@ import {
   evaluateMathAuthoringDevelopment,
   MATH_AUTHORING_DEVELOPMENT_FACETS,
   mathAuthoringCrossDocumentEvidenceFiles,
+  mathAuthoringExpectationCanonicalFailures,
+  mathAuthoringExpectationFormulaRootFailures,
   mathAuthoringExpectedFacetPresent,
   mathAuthoringExpectationSourceFailures,
   mathAuthoringContextSafetyFailures,
@@ -102,7 +104,7 @@ describe("exact public MathAuthoringContext oracle", () => {
         ...anchor,
         location: {
           ...anchor.location,
-          range: { ...anchor.location.range, endOffset: 4 },
+          range: { ...anchor.location.range, endOffset: 5 },
         },
       },
       { ...anchor, scopePath: [1] },
@@ -511,6 +513,86 @@ describe("exact public MathAuthoringContext oracle", () => {
     expect(projectMathAuthoringContext(reordered)).toEqual(
       projectMathAuthoringContext(forward),
     );
+    expect(
+      mathAuthoringExpectationCanonicalFailures(
+        projectMathAuthoringContext(reordered),
+      ),
+    ).toEqual([]);
+
+    const firstOccurrence = baseline.notationOccurrences[0]!;
+    const notationOrderDiffersFromEntityOrder = {
+      ...baseline,
+      notationOccurrences: [
+        {
+          ...firstOccurrence,
+          entityId: {
+            ...firstOccurrence.entityId,
+            anchor: {
+              ...firstOccurrence.entityId.anchor,
+              fileId: "a-entity",
+            },
+          },
+          location: {
+            fileId: "z-location",
+            path: "z-location.tex",
+            range: firstOccurrence.location.range,
+          },
+          occurrenceId: { ...firstOccurrence.occurrenceId, fileId: "z-location" },
+          sourceNotation: "z",
+        },
+        {
+          ...firstOccurrence,
+          entityId: {
+            ...firstOccurrence.entityId,
+            anchor: {
+              ...firstOccurrence.entityId.anchor,
+              fileId: "z-entity",
+            },
+          },
+          location: {
+            fileId: "a-location",
+            path: "a-location.tex",
+            range: firstOccurrence.location.range,
+          },
+          occurrenceId: { ...firstOccurrence.occurrenceId, fileId: "a-location" },
+          sourceNotation: "a",
+        },
+      ],
+    } satisfies MathAuthoringContext;
+    expect(
+      mathAuthoringExpectationCanonicalFailures(
+        projectMathAuthoringContext(notationOrderDiffersFromEntityOrder),
+      ),
+    ).toEqual([]);
+
+    const declarationA = {
+      evidence: [],
+      kind: "declaration" as const,
+      occurrenceId: { documentVersion: 1, fileId: "a", localId: 1 },
+      requirementId: "requirement/a",
+      symbol: "a",
+    };
+    const declarationZ = {
+      ...declarationA,
+      occurrenceId: { documentVersion: 1, fileId: "z", localId: 1 },
+      requirementId: "requirement/z",
+      symbol: "z",
+    };
+    const splitDeclarationCollections = {
+      ...baseline,
+      interpretations: {
+        ...baseline.interpretations,
+        hypotheses: [],
+        missingDiscriminators: [declarationZ],
+      },
+      notationOccurrences: [],
+      requirements: [declarationA],
+    } satisfies MathAuthoringContext;
+    expect(
+      mathAuthoringExpectationCanonicalFailures(
+        projectMathAuthoringContext(splitDeclarationCollections),
+      ),
+    ).toEqual([]);
 
     const hypothesis = baseline.interpretations.hypotheses[0]!;
     const orderChanged = replaceHypothesis(baseline, {
@@ -523,6 +605,11 @@ describe("exact public MathAuthoringContext oracle", () => {
         orderChanged,
       ),
     ).not.toEqual([]);
+    expect(
+      mathAuthoringExpectationCanonicalFailures(
+        projectMathAuthoringContext(orderChanged),
+      ),
+    ).toEqual([]);
 
     const originalEvidence = hypothesis.evidence[0]!;
     const secondRange = { endOffset: 6, startOffset: 4 };
@@ -595,6 +682,84 @@ describe("exact public MathAuthoringContext oracle", () => {
         referenceReordered,
       ),
     ).not.toEqual([]);
+
+    const rawDisambiguation = rawRequirement(baseline.requirements[0]);
+    const rawAlternativeA = {
+      alternativeId: "alternative/a",
+      evidence: rawDisambiguation.evidence,
+      label: "a alternative",
+      range: { endOffset: 2, startOffset: 1 },
+    };
+    const rawAlternativeZ = {
+      ...rawAlternativeA,
+      alternativeId: "alternative/z",
+      label: "z alternative",
+      range: { endOffset: 3, startOffset: 2 },
+    };
+    const rawRequirementWithAlternatives = {
+      ...rawDisambiguation,
+      alternatives: [rawAlternativeZ, rawAlternativeA],
+    };
+    const projectedAlternatives = projectMathAuthoringContext({
+      ...baseline,
+      interpretations: {
+        ...baseline.interpretations,
+        missingDiscriminators: [rawRequirementWithAlternatives],
+      },
+      requirements: [rawRequirementWithAlternatives],
+    });
+    expect(
+      mathAuthoringExpectationCanonicalFailures(projectedAlternatives),
+    ).toEqual([]);
+
+    const missingWithCanonicalizedAlternatives = {
+      ...rawRequirementWithAlternatives,
+      alternatives: [rawAlternativeA, rawAlternativeZ],
+      requirementId: "requirement/missing",
+    };
+    const regularWithCanonicalizedAlternatives = {
+      ...rawRequirementWithAlternatives,
+      requirementId: "requirement/regular",
+    };
+    const splitEquivalentRequirements = projectMathAuthoringContext({
+      ...baseline,
+      interpretations: {
+        ...baseline.interpretations,
+        hypotheses: [],
+        missingDiscriminators: [missingWithCanonicalizedAlternatives],
+      },
+      requirements: [regularWithCanonicalizedAlternatives],
+    });
+    expect(
+      mathAuthoringExpectationCanonicalFailures(splitEquivalentRequirements),
+    ).toEqual([]);
+
+    const disambiguation = expectedRequirement(projectedAlternatives.requirements[0]);
+    const alternativeA = {
+      alternativeGroup: 1,
+      evidence: disambiguation.evidence,
+      label: "a alternative",
+      range: { endOffset: 2, startOffset: 1 },
+    };
+    const alternativeZ = {
+      alternativeGroup: 0,
+      evidence: disambiguation.evidence,
+      label: "z alternative",
+      range: { endOffset: 3, startOffset: 2 },
+    };
+    const relabeledAlternatives = {
+      ...projectMathAuthoringContext(baseline),
+      requirements: [{
+        ...disambiguation,
+        alternatives: [alternativeZ, alternativeA],
+      }],
+    };
+    expect(
+      mathAuthoringExpectationCanonicalFailures(relabeledAlternatives),
+    ).toContainEqual(expect.objectContaining({
+      kind: "mismatch",
+      path: "authoringContext.requirements[0].alternatives.alternativeGroup",
+    }));
   });
 
   test("derives cross-document coverage only from reviewed selected evidence anchors", () => {
@@ -678,7 +843,7 @@ describe("exact public MathAuthoringContext oracle", () => {
   test("rejects stable anchors outside their selected source document", () => {
     const stable = projectMathAuthoringContext(context());
     const source = {
-      content: " abc ",
+      content: " x=y ",
       documentVersion: 1,
       fileId: "main",
       path: "main.tex",
@@ -695,10 +860,67 @@ describe("exact public MathAuthoringContext oracle", () => {
       ]).map((failure) => failure.kind),
     ).toContain("wrong-anchor");
   });
+
+  test("requires exact syntax roots and canonical stable multiset order", () => {
+    const stable = projectMathAuthoringContext(context());
+    const source = {
+      content: " x=y ",
+      documentVersion: 1,
+      fileId: "main",
+      mathRootContentRanges: [{ endOffset: 4, startOffset: 1 }],
+      path: "main.tex",
+    };
+    expect(mathAuthoringExpectationFormulaRootFailures(stable, [source])).toEqual([]);
+    expect(mathAuthoringExpectationCanonicalFailures(stable)).toEqual([]);
+
+    const inner = structuredClone(stable);
+    inner.formula!.location.range = { endOffset: 3, startOffset: 1 };
+    inner.formula!.sourceNotation = "x=";
+    expect(
+      mathAuthoringExpectationFormulaRootFailures(inner, [source])[0],
+    ).toMatchObject({
+      kind: "wrong-anchor",
+      path: "authoringContext.formula.location.range",
+    });
+
+    const wrongNotation = structuredClone(stable);
+    wrongNotation.formula!.sourceNotation = "x = y";
+    expect(
+      mathAuthoringExpectationSourceFailures(wrongNotation, [source])[0],
+    ).toMatchObject({
+      kind: "wrong-anchor",
+      path: "authoringContext.formula.sourceNotation",
+    });
+
+    const noncanonical = {
+      ...stable,
+      conditions: [
+        { ...stable.conditions[0]!, conditionId: "z-condition" },
+        { ...stable.conditions[0]!, conditionId: "a-condition" },
+      ],
+    };
+    expect(
+      mathAuthoringExpectationCanonicalFailures(noncanonical)[0],
+    ).toMatchObject({ kind: "mismatch", path: "authoringContext.conditions" });
+
+    const noncanonicalRelatedFacts = structuredClone(stable);
+    if (!noncanonicalRelatedFacts.approximation) {
+      throw new Error("expected approximation context");
+    }
+    Object.assign(noncanonicalRelatedFacts.approximation, {
+      relatedFactGroups: [1, 0],
+    });
+    expect(
+      mathAuthoringExpectationCanonicalFailures(noncanonicalRelatedFacts)[0],
+    ).toMatchObject({
+      kind: "mismatch",
+      path: "authoringContext.approximation.relatedFactGroups",
+    });
+  });
 });
 
 function context(): MathAuthoringContext {
-  const range = { endOffset: 3, startOffset: 1 };
+  const range = { endOffset: 4, startOffset: 1 };
   const evidence = {
     kind: "source-structure",
     ruleId: "test/explicit",
@@ -875,6 +1097,28 @@ function replaceHypothesis(
     ...value,
     interpretations: { ...value.interpretations, hypotheses: [hypothesis] },
   };
+}
+
+function expectedRequirement(
+  value: StableMathAuthoringContext["requirements"][number] | undefined,
+): Extract<StableMathAuthoringContext["requirements"][number], {
+  kind: "disambiguation";
+}> {
+  if (value?.kind !== "disambiguation") {
+    throw new Error("expected a disambiguation requirement");
+  }
+  return value;
+}
+
+function rawRequirement(
+  value: MathAuthoringContext["requirements"][number] | undefined,
+): Extract<MathAuthoringContext["requirements"][number], {
+  kind: "disambiguation";
+}> {
+  if (value?.kind !== "disambiguation") {
+    throw new Error("expected a raw disambiguation requirement");
+  }
+  return value;
 }
 
 function replaceEvidence(

@@ -6,7 +6,9 @@ import {
   authoredFixtureSealPayload,
   authoredMathFingerprints,
   authoredProseShingles,
+  authoredScenarioFor,
   authoredScenarioReviewPayload,
+  authoredSnapshotFor,
   freshBlindSealPayload,
   parseFreshBlindReleaseFixture,
   validateFreshBlindRelease,
@@ -14,6 +16,7 @@ import {
   type AuthoredLawCatalogEntry,
   type AuthoredScientificScenario,
   type FreshBlindReleaseFixture,
+  type FreshBlindSnapshotSyntaxFacts,
   type FreshBlindValidationSummary,
 } from "../packages/evaluation/src/index";
 
@@ -63,6 +66,7 @@ export async function loadFreshBlindEvidence(
   );
   const summary = validateFreshBlindRelease(release, {
     authoredSealDigest: sha256(authoredFixtureSealPayload(release.fixture)),
+    authoringSyntaxFacts: freshAuthoringSyntaxFacts(release),
     freshIsolationProfiles,
     freshProfiles,
     lawCatalog: await readLawCatalog(),
@@ -72,6 +76,56 @@ export async function loadFreshBlindEvidence(
     sealDigest: sha256(freshBlindSealPayload(release)),
   });
   return { path, release, summary };
+}
+
+export function freshAuthoringSyntaxFacts(
+  release: FreshBlindReleaseFixture,
+): readonly FreshBlindSnapshotSyntaxFacts[] {
+  return freshAuthoringSyntaxFactsForSelections(
+    release.fixture.probes.map((probe) => {
+      const scenario = authoredScenarioFor(release.fixture, probe);
+      return {
+        scenarioId: scenario.id,
+        snapshot: authoredSnapshotFor(scenario, probe),
+      };
+    }),
+  );
+}
+
+export function freshAuthoringSyntaxFactsForSelections(
+  selections: readonly {
+    readonly scenarioId: string;
+    readonly snapshot: AuthoredScientificScenario["snapshots"][number];
+  }[],
+): readonly FreshBlindSnapshotSyntaxFacts[] {
+  const selected = new Map<string, FreshBlindSnapshotSyntaxFacts>();
+  for (const { scenarioId, snapshot } of selections) {
+    const key = `${scenarioId}\0${snapshot.id}`;
+    if (selected.has(key)) continue;
+    const service = new LatexSyntaxService();
+    service.reset({
+      documents: snapshot.documents.map((document) => ({
+        ...document,
+        documentVersion: 1,
+        language: languageOf(document.path),
+      })),
+    });
+    selected.set(key, {
+      documents: snapshot.documents.map((document) => {
+        const syntax = service.getFile(document.fileId);
+        if (!syntax) throw new Error(`${scenarioId}: missing wasmtex syntax`);
+        return {
+          fileId: document.fileId,
+          mathRootContentRanges: syntax.mathRoots.map((root) => ({
+            ...root.contentRange,
+          })),
+        };
+      }),
+      scenarioId,
+      snapshotId: snapshot.id,
+    });
+  }
+  return [...selected.values()];
 }
 
 export function sha256(value: string | Uint8Array): string {

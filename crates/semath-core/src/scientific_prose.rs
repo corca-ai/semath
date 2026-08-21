@@ -1045,6 +1045,7 @@ fn event_kind_order(kind: ProseEventKind) -> u8 {
 pub(crate) struct AssumptionCandidate {
     pub kind: String,
     pub value: String,
+    pub target_relation_id: Option<String>,
     pub subjects: Vec<ScientificMention>,
     pub phrase_start: usize,
     pub phrase_end: usize,
@@ -1183,10 +1184,20 @@ pub(crate) fn extract_assumptions(
     extract_assumptions_with_phrases(clause, mentions, &[])
 }
 
+#[cfg(test)]
 pub(crate) fn extract_assumptions_with_phrases(
     clause: &ScientificClause<'_>,
     mentions: &[ScientificMention],
     additional_phrases: &[(&str, &str, &str)],
+) -> Vec<AssumptionCandidate> {
+    extract_assumptions_with_formula_descriptors(clause, mentions, additional_phrases, &[])
+}
+
+pub(crate) fn extract_assumptions_with_formula_descriptors(
+    clause: &ScientificClause<'_>,
+    mentions: &[ScientificMention],
+    additional_phrases: &[(&str, &str, &str)],
+    formula_descriptors: &[(String, String)],
 ) -> Vec<AssumptionCandidate> {
     if !clause.frame.establishes() {
         return Vec::new();
@@ -1200,13 +1211,89 @@ pub(crate) fn extract_assumptions_with_phrases(
             let normalized_phrase = phrase.to_ascii_lowercase().replace('-', " ");
             let offset = lower.find(&normalized_phrase)?;
             let prefix = &lower[..offset];
-            let value = if negates_phrase(prefix) {
+            let suffix = &lower[offset + normalized_phrase.len()..];
+            let phrase_start = clause.start + offset;
+            let phrase_end = phrase_start + normalized_phrase.len();
+            let has_direct_math_subject = mentions
+                .iter()
+                .filter(|mention| clause.start <= mention.start && mention.end <= phrase_start)
+                .max_by_key(|mention| mention.end)
+                .is_some_and(|mention| {
+                    let subject_start = mention.start.saturating_sub(clause.start);
+                    let bridge_start = mention.end.saturating_sub(clause.start);
+                    lower
+                        .get(..subject_start)
+                        .is_some_and(math_subject_context_is_current)
+                        && lower
+                            .get(bridge_start..offset)
+                            .is_some_and(math_subject_directly_affirms_phrase)
+                });
+            let has_immediate_following_math_target = mentions
+                .iter()
+                .filter(|mention| phrase_end <= mention.start && mention.end <= clause.end)
+                .min_by_key(|mention| mention.start)
+                .is_some_and(|mention| {
+                    let bridge_end = mention.start.saturating_sub(clause.start);
+                    lower
+                        .get(offset + normalized_phrase.len()..bridge_end)
+                        .is_some_and(|bridge| {
+                            bridge.chars().all(|character| {
+                                character.is_whitespace()
+                                    || matches!(
+                                        character,
+                                        ',' | ':' | '(' | ')' | '[' | ']' | '{' | '}' | '$' | '\\'
+                                    )
+                            })
+                        })
+                });
+            let introduced_relation_id = mentions
+                .iter()
+                .filter(|mention| phrase_end <= mention.start && mention.end <= clause.end)
+                .min_by_key(|mention| mention.start)
+                .and_then(|mention| {
+                    let bridge_end = mention.start.saturating_sub(clause.start);
+                    lower
+                        .get(offset + normalized_phrase.len()..bridge_end)
+                        .and_then(|bridge| {
+                            formula_introduction_relation_id(bridge, formula_descriptors)
+                        })
+                })
+                .or_else(|| {
+                    let words = suffix
+                        .split(|character: char| !character.is_ascii_alphabetic())
+                        .filter(|word| !word.is_empty())
+                        .collect::<Vec<_>>();
+                    formula_introduction_relation_id_words(&words, formula_descriptors)
+                });
+            let formula_context = AssumptionFormulaContext {
+                has_direct_math_subject,
+                has_immediate_following_math_target,
+                introduced_relation_id,
+            };
+            let prefix_negation = match assumption_phrase_polarity(
+                prefix,
+                suffix,
+                kind,
+                &normalized_phrase,
+                formula_context,
+            ) {
+                AssumptionPhrasePolarity::Refuted { start, end } => {
+                    Some((clause.start + start, clause.start + end))
+                }
+                AssumptionPhrasePolarity::Ignored => return None,
+                AssumptionPhrasePolarity::Supported => None,
+            };
+            let value = if prefix_negation.is_some() {
                 format!("not-{value}")
             } else {
                 value.into()
             };
-            let phrase_start = clause.start + offset;
-            let phrase_end = phrase_start + normalized_phrase.len();
+            let phrase_start =
+                prefix_negation.map_or(phrase_start, |(start, _)| start.min(clause.start + offset));
+            let phrase_end = prefix_negation.map_or(
+                clause.start + offset + normalized_phrase.len(),
+                |(_, end)| end.max(clause.start + offset + normalized_phrase.len()),
+            );
             let subjects = nearest_subjects(mentions, clause, phrase_start);
             Some((
                 offset,
@@ -1214,6 +1301,9 @@ pub(crate) fn extract_assumptions_with_phrases(
                 AssumptionCandidate {
                     kind: kind.into(),
                     value,
+                    target_relation_id: (kind == "sign-convention")
+                        .then(|| introduced_relation_id.map(str::to_owned))
+                        .flatten(),
                     subjects,
                     phrase_start,
                     phrase_end,
@@ -1222,22 +1312,32 @@ pub(crate) fn extract_assumptions_with_phrases(
         })
         .collect::<Vec<_>>();
     matches.sort_by(|left, right| left.0.cmp(&right.0).then(right.1.cmp(&left.1)));
-    let mut accepted = Vec::<(usize, usize, String, String)>::new();
+    let mut accepted = Vec::<(usize, usize, String, String, Option<String>)>::new();
     matches
         .into_iter()
         .filter_map(|(start, length, candidate)| {
             let end = start + length;
-            let duplicate = accepted.iter().any(|(used_start, used_end, kind, value)| {
-                start == *used_start
-                    && end == *used_end
-                    && candidate.kind == *kind
-                    && candidate.value == *value
-            });
-            let conflicting_overlap = accepted.iter().any(|(used_start, used_end, _, _)| {
+            let duplicate =
+                accepted
+                    .iter()
+                    .any(|(used_start, used_end, kind, value, target_relation_id)| {
+                        start == *used_start
+                            && end == *used_end
+                            && candidate.kind == *kind
+                            && candidate.value == *value
+                            && candidate.target_relation_id == *target_relation_id
+                    });
+            let conflicting_overlap = accepted.iter().any(|(used_start, used_end, _, _, _)| {
                 start < *used_end && *used_start < end && (start != *used_start || end != *used_end)
             });
             (!duplicate && !conflicting_overlap).then(|| {
-                accepted.push((start, end, candidate.kind.clone(), candidate.value.clone()));
+                accepted.push((
+                    start,
+                    end,
+                    candidate.kind.clone(),
+                    candidate.value.clone(),
+                    candidate.target_relation_id.clone(),
+                ));
                 candidate
             })
         })
@@ -1639,12 +1739,413 @@ fn nearest_subjects(
     candidates
 }
 
-fn negates_phrase(prefix: &str) -> bool {
-    prefix
-        .split_whitespace()
-        .rev()
-        .take(3)
-        .any(|word| matches!(word, "not" | "never" | "neither" | "without"))
+enum AssumptionPhrasePolarity {
+    Supported,
+    Refuted { start: usize, end: usize },
+    Ignored,
+}
+
+#[derive(Clone, Copy)]
+struct AssumptionFormulaContext<'a> {
+    has_direct_math_subject: bool,
+    has_immediate_following_math_target: bool,
+    introduced_relation_id: Option<&'a str>,
+}
+
+fn assumption_phrase_polarity(
+    prefix: &str,
+    suffix: &str,
+    kind: &str,
+    phrase: &str,
+    formula_context: AssumptionFormulaContext<'_>,
+) -> AssumptionPhrasePolarity {
+    let mut words = Vec::new();
+    let mut word_start = None;
+    for (offset, character) in prefix.char_indices() {
+        if character.is_ascii_alphabetic() {
+            word_start.get_or_insert(offset);
+        } else if let Some(start) = word_start.take() {
+            words.push((start, offset, &prefix[start..offset]));
+        }
+    }
+    if let Some(start) = word_start {
+        words.push((start, prefix.len(), &prefix[start..]));
+    }
+
+    let negative_cue = |word: &str| {
+        [
+            "reject",
+            "abandon",
+            "oppos",
+            "refus",
+            "declin",
+            "avoid",
+            "exclud",
+            "omit",
+            "waiv",
+            "eschew",
+            "forbid",
+            "forgo",
+            "forego",
+            "fail",
+            "lack",
+            "deny",
+            "disavow",
+            "renounc",
+            "shun",
+            "repudiat",
+            "neglect",
+            "withdraw",
+            "refrain",
+            "stop",
+            "cease",
+            "discontinu",
+            "prohibit",
+        ]
+        .iter()
+        .any(|prefix| word.starts_with(prefix))
+    };
+    let suffix_words = suffix
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .take(8)
+        .collect::<Vec<_>>();
+    let contrastive_prefix = words.windows(2).any(|pair| {
+        matches!(
+            (pair[0].2, pair[1].2),
+            ("rather", "than")
+                | ("instead", "of")
+                | ("prior", "to")
+                | ("in", "lieu")
+                | ("in", "place")
+        )
+    }) || words
+        .iter()
+        .any(|(_, _, word)| matches!(*word, "alternative" | "before" | "until"));
+    if contrastive_prefix
+        || words.iter().any(|(_, _, word)| negative_cue(word))
+        || suffix_words.iter().any(|word| negative_cue(word))
+        || suffix_words
+            .iter()
+            .any(|word| matches!(*word, "no" | "not" | "never" | "neither" | "without"))
+    {
+        return AssumptionPhrasePolarity::Ignored;
+    }
+    let negations = words
+        .iter()
+        .filter(|(_, _, word)| matches!(*word, "no" | "not" | "never" | "neither" | "without"))
+        .collect::<Vec<_>>();
+    if negations.is_empty() {
+        if kind == "sign-convention"
+            && phrase.contains("sign convention")
+            && !sign_convention_is_affirmed(&words, &suffix_words, formula_context)
+        {
+            return AssumptionPhrasePolarity::Ignored;
+        }
+        return AssumptionPhrasePolarity::Supported;
+    }
+    if negations.len() != 1 {
+        return AssumptionPhrasePolarity::Ignored;
+    }
+    let &(start, end, _) = negations[0];
+    if words.first().map(|(start, _, _)| *start) != Some(start) {
+        return AssumptionPhrasePolarity::Ignored;
+    }
+    if !negation_precedes_positive_phrase(&prefix[end..]) {
+        return AssumptionPhrasePolarity::Ignored;
+    }
+    AssumptionPhrasePolarity::Refuted { start, end }
+}
+
+fn sign_convention_is_affirmed(
+    words: &[(usize, usize, &str)],
+    suffix_words: &[&str],
+    formula_context: AssumptionFormulaContext<'_>,
+) -> bool {
+    let prefix_cue = |word: &str| {
+        word == "under"
+            || matches!(
+                word,
+                "adopt"
+                    | "adopts"
+                    | "adopted"
+                    | "adopting"
+                    | "assume"
+                    | "assumes"
+                    | "assumed"
+                    | "assuming"
+                    | "use"
+                    | "uses"
+                    | "used"
+                    | "using"
+                    | "follow"
+                    | "follows"
+                    | "followed"
+                    | "following"
+                    | "apply"
+                    | "applies"
+                    | "applied"
+                    | "applying"
+                    | "establish"
+                    | "establishes"
+                    | "established"
+                    | "establishing"
+            )
+    };
+    let phrase_modifier = |word: &str| {
+        matches!(
+            word,
+            "a" | "an"
+                | "any"
+                | "the"
+                | "this"
+                | "that"
+                | "its"
+                | "one"
+                | "same"
+                | "stated"
+                | "consistent"
+                | "explicit"
+                | "explicitly"
+                | "reviewed"
+                | "local"
+        )
+    };
+    let cue = words.iter().rposition(|(_, _, word)| prefix_cue(word));
+    let direct_under_prefix = cue.is_some_and(|cue| {
+        words[cue].2 == "under"
+            && words[..cue].is_empty()
+            && words[cue + 1..]
+                .iter()
+                .all(|(_, _, word)| phrase_modifier(word))
+    });
+    let direct_prefix = cue.is_some_and(|cue| {
+        let before = &words[..cue];
+        let after = &words[cue + 1..];
+        let cue_word = words[cue].2;
+        let direct_subject = formula_context.has_direct_math_subject;
+        let before_words = before.iter().map(|(_, _, word)| *word).collect::<Vec<_>>();
+        let direct_author = matches!(
+            before_words.as_slice(),
+            ["we"]
+                | ["here", "we"]
+                | ["we", "explicitly" | "currently"]
+                | [
+                    "in",
+                    "this",
+                    "derivation" | "calculation" | "model" | "analysis" | "case",
+                    "we"
+                ]
+                | [
+                    "for",
+                    "this",
+                    "derivation" | "calculation" | "model" | "analysis" | "case",
+                    "we"
+                ]
+                | [
+                    "the" | "this",
+                    "derivation" | "calculation" | "model" | "analysis"
+                ]
+        );
+        let direct_imperative = before.is_empty() && cue_word != "under";
+        let direct_under = before.is_empty() && cue_word == "under";
+        after.iter().all(|(_, _, word)| phrase_modifier(word))
+            && (direct_subject || direct_author || direct_imperative || direct_under)
+    });
+    let contextual_suffix = suffix_words.iter().any(|word| {
+        matches!(
+            *word,
+            "alternative"
+                | "another"
+                | "but"
+                | "cited"
+                | "elsewhere"
+                | "example"
+                | "for"
+                | "if"
+                | "later"
+                | "only"
+                | "option"
+                | "optional"
+                | "other"
+                | "provided"
+                | "separate"
+                | "unless"
+                | "when"
+                | "whereas"
+        )
+    });
+    let direct_suffix = !contextual_suffix && direct_sign_convention_suffix(suffix_words);
+    !contextual_suffix
+        && (direct_prefix
+            && (direct_formula_continuation(suffix_words)
+                || formula_context.introduced_relation_id.is_some()
+                || direct_under_prefix
+                    && (formula_context.has_immediate_following_math_target
+                        || formula_context.introduced_relation_id.is_some()))
+            || direct_suffix)
+}
+
+fn formula_introduction_relation_id<'a>(
+    bridge: &str,
+    formula_descriptors: &'a [(String, String)],
+) -> Option<&'a str> {
+    let words = bridge
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    formula_introduction_relation_id_words(&words, formula_descriptors)
+}
+
+fn formula_introduction_relation_id_words<'a>(
+    words: &[&str],
+    formula_descriptors: &'a [(String, String)],
+) -> Option<&'a str> {
+    let [
+        "the",
+        descriptor,
+        "equation" | "formula" | "law" | "model" | "reference" | "relation",
+        "is" | "reads",
+    ] = words
+    else {
+        return None;
+    };
+    let mut matches = formula_descriptors
+        .iter()
+        .filter(|(allowed, _)| allowed == descriptor)
+        .map(|(_, relation_id)| relation_id.as_str());
+    let relation_id = matches.next()?;
+    matches.next().is_none().then_some(relation_id)
+}
+
+fn math_subject_directly_affirms_phrase(bridge: &str) -> bool {
+    let words = bridge
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    words.first().is_some_and(|word| {
+        matches!(
+            *word,
+            "adopt"
+                | "adopts"
+                | "adopted"
+                | "assume"
+                | "assumes"
+                | "assumed"
+                | "follow"
+                | "follows"
+                | "followed"
+                | "use"
+                | "uses"
+                | "used"
+        )
+    }) && words[1..].iter().all(|word| {
+        matches!(
+            *word,
+            "a" | "an" | "the" | "this" | "that" | "same" | "stated" | "reviewed"
+        )
+    })
+}
+
+fn math_subject_context_is_current(context: &str) -> bool {
+    !context
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .any(|word| {
+            matches!(
+                word,
+                "according"
+                    | "another"
+                    | "cited"
+                    | "elsewhere"
+                    | "example"
+                    | "instructions"
+                    | "note"
+                    | "other"
+                    | "previous"
+                    | "previously"
+                    | "prior"
+                    | "reported"
+                    | "separate"
+            )
+        })
+}
+
+fn direct_sign_convention_suffix(words: &[&str]) -> bool {
+    match words {
+        ["applies" | "holds", tail @ ..] => direct_formula_continuation(tail),
+        ["is" | "remains", middle @ ..] => {
+            let action = middle
+                .iter()
+                .position(|word| !matches!(*word, "explicitly" | "fully" | "currently" | "here"));
+            action.is_some_and(|action| {
+                matches!(
+                    middle[action],
+                    "adopted" | "applied" | "established" | "followed" | "used"
+                ) && direct_formula_continuation(&middle[action + 1..])
+            })
+        }
+        _ => false,
+    }
+}
+
+fn direct_formula_continuation(words: &[&str]) -> bool {
+    words.is_empty()
+        || matches!(
+            words,
+            ["consider" | "take" | "use" | "write", ..]
+                | ["and" | "then", "consider" | "take" | "use" | "write", ..]
+                | [
+                    "and" | "then",
+                    "we" | "here",
+                    "consider" | "take" | "use" | "write",
+                    ..
+                ]
+                | [
+                    "the",
+                    "accepted" | "following" | "stated",
+                    "equation" | "formula" | "law" | "model" | "reference" | "relation",
+                    "is" | "reads",
+                    ..
+                ]
+        )
+}
+
+fn negation_precedes_positive_phrase(text: &str) -> bool {
+    text.split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .all(|word| {
+            matches!(
+                word,
+                "a" | "an"
+                    | "any"
+                    | "the"
+                    | "this"
+                    | "that"
+                    | "named"
+                    | "stated"
+                    | "explicitly"
+                    | "fully"
+                    | "currently"
+                    | "here"
+                    | "adopt"
+                    | "adopted"
+                    | "adopting"
+                    | "assume"
+                    | "assumed"
+                    | "assuming"
+                    | "use"
+                    | "used"
+                    | "using"
+                    | "follow"
+                    | "followed"
+                    | "following"
+                    | "apply"
+                    | "applied"
+                    | "applying"
+                    | "under"
+            )
+        })
 }
 
 fn starts_with_any(value: &str, prefixes: &[&str]) -> bool {
@@ -2305,6 +2806,287 @@ mod tests {
                 && assumption.value == "not-included"
                 && assumption.subjects[0].symbol == "r"
         }));
+    }
+
+    #[test]
+    fn grounds_a_negated_condition_in_the_negation_and_phrase() {
+        let source = "Without adopting the passive sign convention, consider $i=Cv$.";
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .into_iter()
+            .next()
+            .unwrap();
+        let start = source.find("$i=Cv$").unwrap();
+        let mentions = [ScientificMention {
+            symbol: "i".into(),
+            start,
+            end: start + "$i=Cv$".len(),
+            math_index: 0,
+        }];
+
+        let assumptions = extract_assumptions_with_phrases(
+            &clause,
+            &mentions,
+            &[(
+                "passive sign convention",
+                "sign-convention",
+                "passive-sign-convention",
+            )],
+        );
+        let assumption = assumptions
+            .iter()
+            .find(|assumption| assumption.value == "not-passive-sign-convention")
+            .expect("negated reviewed condition phrase");
+
+        assert_eq!(
+            &source[assumption.phrase_start..assumption.phrase_end],
+            "Without adopting the passive sign convention"
+        );
+
+        for source in [
+            "Without rejecting the passive sign convention, continue.",
+            "Without ever rejecting the passive sign convention, continue.",
+            "Without not adopting the passive sign convention, continue.",
+            "Without ever repeatedly explicitly continuing to firmly and deliberately reject the passive sign convention, continue.",
+            "Without adopting, even provisionally, the passive sign convention, continue.",
+            "Without adopting the research and development passive sign convention, continue.",
+            "Without adopting the ideal source assumption and the passive sign convention, continue.",
+            "Without rejecting the active convention and the passive sign convention, continue.",
+            "With no adoption of the passive sign convention, continue.",
+            "We refuse to adopt the passive sign convention and continue.",
+            "Declining to adopt the passive sign convention, continue.",
+            "Avoiding adoption of the passive sign convention, continue.",
+            "The passive sign convention is declined; continue.",
+            "Rather than use the passive sign convention, continue.",
+            "Instead of adopting the passive sign convention, continue.",
+            "Prior to adopting the passive sign convention, continue.",
+            "The passive sign convention ceased to be used; continue.",
+            "The passive sign convention is never used; continue.",
+            "We use an auxiliary meter to describe the passive sign convention, then continue.",
+            "The passive sign convention is described while we use an auxiliary meter, then continue.",
+            "We use an alternative to the passive sign convention and continue.",
+            "We adopt an alternative to the passive sign convention and continue.",
+            "An alternative to the passive sign convention is used; continue.",
+            "In lieu of using the passive sign convention, continue.",
+            "In place of adopting the passive sign convention, continue.",
+            "The passive sign convention is used only in a separate example, whereas here we continue.",
+            "In a separate example, we use the passive sign convention, and here we continue.",
+            "The cited note uses the passive sign convention, but here we continue.",
+            "Smith uses the passive sign convention, but here we continue.",
+            "For the inductor, we use the passive sign convention, and for the capacitor we continue.",
+            "The passive sign convention applies to another circuit, but here we continue.",
+            "The passive sign convention is used for the inductor, but for the capacitor we continue.",
+            "The instructions say use the passive sign convention, but here we continue.",
+            "We intend to use the passive sign convention later, but currently continue.",
+            "The passive sign convention applies if the reference terminal is positive, then continue.",
+            "We use the passive sign convention if needed, then continue.",
+            "One option is to use the passive sign convention, then continue.",
+            "The measured current $i$ is recorded, and Smith uses the passive sign convention, then continue.",
+            "The cited note reports current $i$ and uses the passive sign convention, then continue.",
+            "For the other circuit, current $i$ is recorded and Smith uses the passive sign convention, then continue.",
+            "The passive sign convention was used previously, and currently we continue.",
+            "The passive sign convention applies whenever the reference terminal is positive, and we continue.",
+            "The passive sign convention applies assuming the terminal is positive, and we continue.",
+            "We explicitly use the passive sign convention conditionally, then continue.",
+            "In the cited example, $i$ uses the passive sign convention, then continue.",
+            "In Smiths cited model, $i$ uses the passive sign convention, then continue.",
+            "For the other circuit, current $i$ uses the passive sign convention, then continue.",
+            "For a separate circuit, $i$ uses the passive sign convention, then continue.",
+            "In another model, $i$ uses the passive sign convention, then continue.",
+            "For this inductor we use the passive sign convention, and continue.",
+            "For this appendix we use the passive sign convention, and continue.",
+            "For this example we use the passive sign convention, and in the current derivation continue.",
+            "Under the passive sign convention whenever the reference terminal is positive, continue.",
+            "Under the passive sign convention assuming the terminal is positive, continue.",
+            "Under the passive sign convention while analyzing the inductor, continue.",
+            "Under the passive sign convention subject to a positive terminal, continue.",
+            "Under the passive sign convention during the auxiliary analysis, continue.",
+            "Under the passive sign convention 조건부로, continue.",
+            "Under the passive sign convention 만약 단자가 양수라면, continue.",
+            "Under the passive sign convention εάν ισχύει, continue.",
+            "Under the passive sign convention 若条件成立, continue.",
+            "For this inductor we use the passive sign convention, and we continue.",
+            "For this appendix we use the passive sign convention, and we continue.",
+            "For this example we use the passive sign convention, and in the current derivation we continue.",
+        ] {
+            let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+                .into_iter()
+                .find(|clause| clause.text.contains("passive sign convention"))
+                .unwrap();
+            let assumptions = extract_assumptions_with_phrases(
+                &clause,
+                &[],
+                &[(
+                    "passive sign convention",
+                    "sign-convention",
+                    "passive-sign-convention",
+                )],
+            );
+            assert!(
+                assumptions.iter().all(|assumption| {
+                    !matches!(
+                        assumption.value.as_str(),
+                        "passive-sign-convention" | "not-passive-sign-convention"
+                    )
+                }),
+                "{source}: {assumptions:#?}"
+            );
+        }
+
+        for source in [
+            "We explicitly use the passive sign convention.",
+            "We currently use the passive sign convention.",
+            "In this derivation we use the passive sign convention.",
+            "For this calculation we use the passive sign convention.",
+            "The calculation uses the passive sign convention.",
+        ] {
+            let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+                .into_iter()
+                .find(|clause| clause.text.contains("passive sign convention"))
+                .unwrap();
+            let assumptions = extract_assumptions_with_phrases(
+                &clause,
+                &[],
+                &[(
+                    "passive sign convention",
+                    "sign-convention",
+                    "passive-sign-convention",
+                )],
+            );
+            assert!(
+                assumptions
+                    .iter()
+                    .any(|assumption| assumption.value == "passive-sign-convention"),
+                "{source}: {assumptions:#?}"
+            );
+        }
+
+        let formula_descriptors = vec![(
+            "capacitor".to_owned(),
+            "circuits:capacitor-current-law".to_owned(),
+        )];
+        let source = "Under this passive sign convention, the capacitor law is\n\\[\ni=Cv.\n\\]";
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .into_iter()
+            .find(|clause| clause.text.contains("passive sign convention"))
+            .unwrap();
+        let start = source.find("i=Cv").unwrap();
+        let mentions = [ScientificMention {
+            symbol: "i".into(),
+            start,
+            end: start + "i=Cv".len(),
+            math_index: 0,
+        }];
+        let phrase_end =
+            source.find("passive sign convention").unwrap() + "passive sign convention".len();
+        assert_eq!(
+            formula_introduction_relation_id(&source[phrase_end..start], &formula_descriptors),
+            Some("circuits:capacitor-current-law")
+        );
+        let descriptor_assumptions = extract_assumptions_with_formula_descriptors(
+            &clause,
+            &mentions,
+            &[(
+                "passive sign convention",
+                "sign-convention",
+                "passive-sign-convention",
+            )],
+            &formula_descriptors,
+        );
+        assert!(
+            descriptor_assumptions
+                .iter()
+                .any(|assumption| assumption.value == "passive-sign-convention"),
+            "{descriptor_assumptions:#?}"
+        );
+
+        for source in [
+            "Under this passive sign convention, the hypothetical law is $i=Cv$.",
+            "Under this passive sign convention, the rejected law is $i=Cv$.",
+            "Under this passive sign convention, the proposed law is $i=Cv$.",
+            "Under this passive sign convention, the cited law is $i=Cv$.",
+            "Under this passive sign convention, the other law is $i=Cv$.",
+            "Under this passive sign convention, the untrusted law is $i=Cv$.",
+            "Under this passive sign convention, the fictional law is $i=Cv$.",
+            "Under this passive sign convention, the obsolete law is $i=Cv$.",
+            "Under this passive sign convention, the incorrect law is $i=Cv$.",
+            "Under this passive sign convention, the capacitor law is rejected before $i=Cv$.",
+        ] {
+            let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+                .into_iter()
+                .find(|clause| clause.text.contains("passive sign convention"))
+                .unwrap();
+            let start = source.find("i=Cv").unwrap();
+            let mentions = [ScientificMention {
+                symbol: "i".into(),
+                start,
+                end: start + "i=Cv".len(),
+                math_index: 0,
+            }];
+            assert!(
+                extract_assumptions_with_formula_descriptors(
+                    &clause,
+                    &mentions,
+                    &[(
+                        "passive sign convention",
+                        "sign-convention",
+                        "passive-sign-convention",
+                    )],
+                    &formula_descriptors,
+                )
+                .iter()
+                .all(|assumption| assumption.value != "passive-sign-convention"),
+                "{source}"
+            );
+        }
+
+        let source = "The input is not singular, and after routine calibration under the passive sign convention, continue.";
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .into_iter()
+            .find(|clause| clause.text.contains("passive sign convention"))
+            .unwrap();
+        assert!(
+            extract_assumptions_with_phrases(
+                &clause,
+                &[],
+                &[(
+                    "passive sign convention",
+                    "sign-convention",
+                    "passive-sign-convention",
+                )],
+            )
+            .iter()
+            .all(|assumption| {
+                !matches!(
+                    assumption.value.as_str(),
+                    "passive-sign-convention" | "not-passive-sign-convention"
+                )
+            }),
+            "{clause:#?}"
+        );
+
+        let source = "The auxiliary meter is never fully used under the passive sign convention, while continuing.";
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .into_iter()
+            .find(|clause| clause.text.contains("passive sign convention"))
+            .unwrap();
+        let assumptions = extract_assumptions_with_phrases(
+            &clause,
+            &[],
+            &[(
+                "passive sign convention",
+                "sign-convention",
+                "passive-sign-convention",
+            )],
+        );
+        assert!(
+            assumptions.iter().all(|assumption| {
+                !matches!(
+                    assumption.value.as_str(),
+                    "passive-sign-convention" | "not-passive-sign-convention"
+                )
+            }),
+            "{clause:#?}: {assumptions:#?}"
+        );
     }
 
     #[test]
