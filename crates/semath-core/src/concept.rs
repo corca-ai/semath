@@ -127,11 +127,26 @@ static PACK_CONCEPT_ANCESTORS: LazyLock<BTreeSet<(String, String)>> = LazyLock::
     ancestors
 });
 
+static PACK_QUANTITY_KINDS: LazyLock<BTreeSet<String>> = LazyLock::new(|| {
+    built_in_packs()
+        .iter()
+        .flat_map(|pack| {
+            pack.quantity_kinds
+                .iter()
+                .map(|kind| format!("{}:{}", pack.namespace, kind.id))
+        })
+        .collect()
+});
+
 pub(crate) fn concepts_share_lineage(left: &str, right: &str) -> bool {
     left == right
         || generic_concept_family(left, right)
         || PACK_CONCEPT_ANCESTORS.contains(&(left.to_owned(), right.to_owned()))
         || PACK_CONCEPT_ANCESTORS.contains(&(right.to_owned(), left.to_owned()))
+}
+
+pub(crate) fn is_pack_quantity_kind(concept: &str) -> bool {
+    PACK_QUANTITY_KINDS.contains(concept)
 }
 
 fn generic_concept_family(left: &str, right: &str) -> bool {

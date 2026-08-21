@@ -21,7 +21,8 @@ use crate::scientific_prose::{
     AnaphorKind, CommunicativeAct, DefinitionAction, DiscourseConnective, DiscourseConstruction,
     DiscourseFrame, MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent, ProseEventKind, ProseEventStream,
     ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
-    extract_assumptions_with_phrases, normalize_prose_events, segment_scientific_clauses,
+    extract_assumptions_with_formula_descriptors, normalize_prose_events,
+    segment_scientific_clauses,
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
 use crate::{
@@ -44,7 +45,7 @@ static MATRIX_DIMENSIONS: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 static SQUARE_DIMENSION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\bsquare(?:\s+matrices?)?(?:\s+(?:of|with))?(?:\s+(?:the\s+)?(?:same|common))?\s*(?:size|order|dimension)?\s*([a-z0-9]+)\s*$").unwrap()
+    Regex::new(r"(?i)\bsquare\b(?:\s+(?:matrix|matrices))?(?:\s+(?:of|with))?(?:\s+(?:the\s+)?(?:same|common))?\s*(?:size|order|dimension)?\s*([a-z0-9]+)\s*$").unwrap()
 });
 static INLINE_VECTOR_SUFFIX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\s*(?:be|is)\s+an?\s+\$([a-z0-9]+)\$[ -]dimensional\s+(?:real\s+)?vector")
@@ -110,6 +111,33 @@ pub(crate) fn assumption_formula_targets(assumption: &AssumptionInfo) -> &[Sourc
         .saturating_sub(1)
         .max(start);
     &assumption.evidence.source_ranges[start..end]
+}
+
+const ASSUMPTION_RELATION_TARGET_SEPARATOR: char = '\u{1f}';
+
+pub(crate) fn assumption_value_and_target(value: &str) -> (&str, Option<&str>) {
+    value
+        .split_once(ASSUMPTION_RELATION_TARGET_SEPARATOR)
+        .map_or((value, None), |(value, target)| (value, Some(target)))
+}
+
+pub(crate) fn public_assumption(mut assumption: AssumptionInfo) -> AssumptionInfo {
+    assumption.value = assumption_value_and_target(&assumption.value).0.to_owned();
+    assumption
+}
+
+fn target_assumption_value(value: String, target_relation_id: Option<&str>) -> String {
+    target_relation_id.map_or(value.clone(), |target| {
+        format!("{value}{ASSUMPTION_RELATION_TARGET_SEPARATOR}{target}")
+    })
+}
+
+pub(crate) fn assumption_public_evidence(assumption: &AssumptionInfo) -> Evidence {
+    let mut evidence = assumption.evidence.clone();
+    let start = assumption.subjects.len().min(evidence.source_ranges.len());
+    let end = evidence.source_ranges.len().saturating_sub(1).max(start);
+    evidence.source_ranges.drain(start..end);
+    evidence
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -2914,6 +2942,27 @@ fn collect_assumptions(
                 .map(move |phrase| (phrase.as_str(), kind, condition.id.as_str()))
         })
         .collect::<Vec<_>>();
+    let mut condition_formula_descriptors = built_in_packs()
+        .iter()
+        .flat_map(|pack| {
+            pack.laws.iter().filter_map(move |law| {
+                law.conditions
+                    .iter()
+                    .any(|condition| condition.kind == PackConditionKind::SignConvention)
+                    .then(|| {
+                        let descriptor = law
+                            .title
+                            .split(|character: char| !character.is_ascii_alphabetic())
+                            .find(|word| !word.is_empty())?
+                            .to_ascii_lowercase();
+                        Some((descriptor, format!("{}:{}", pack.pack_id, law.id)))
+                    })
+                    .flatten()
+            })
+        })
+        .collect::<Vec<_>>();
+    condition_formula_descriptors.sort();
+    condition_formula_descriptors.dedup();
     for (clause_index, clause) in clauses.iter().enumerate() {
         let clause_targets = construction_targets
             .get(&clause.start)
@@ -2924,7 +2973,12 @@ fn collect_assumptions(
             .iter()
             .any(|target| target.identifies_formula && target.relation_centered)
             || clause_attaches_to_preceding_math(clause_index, mentions, events);
-        for assumption in extract_assumptions_with_phrases(clause, mentions, &condition_phrases) {
+        for assumption in extract_assumptions_with_formula_descriptors(
+            clause,
+            mentions,
+            &condition_phrases,
+            &condition_formula_descriptors,
+        ) {
             let phrase_range = SourceRange {
                 start_offset: index.utf16_for_byte(assumption.phrase_start),
                 end_offset: index.utf16_for_byte(assumption.phrase_end),
@@ -2936,6 +2990,9 @@ fn collect_assumptions(
                 })
                 .map(|target| target.range.clone())
                 .collect::<Vec<_>>();
+            if assumption.target_relation_id.is_some() && typed_targets.is_empty() {
+                continue;
+            }
             let has_following_math_subject = assumption
                 .subjects
                 .iter()
@@ -2952,7 +3009,10 @@ fn collect_assumptions(
             source_ranges.push(phrase_range);
             output.assumptions.push(AssumptionInfo {
                 kind: assumption.kind,
-                value: assumption.value,
+                value: target_assumption_value(
+                    assumption.value,
+                    assumption.target_relation_id.as_deref(),
+                ),
                 subjects: assumption
                     .subjects
                     .into_iter()
@@ -4046,6 +4106,22 @@ mod tests {
             shape_claim("is defined by Here the current is a scalar"),
             Some((ProseShape::Scalar, Vec::new()))
         );
+    }
+
+    #[test]
+    fn squared_physical_units_are_not_square_matrix_dimensions() {
+        assert_eq!(shape_claim("metres per second squared"), None);
+        for description in [
+            "square n",
+            "square matrix of order n",
+            "square matrices of size n",
+        ] {
+            assert_eq!(
+                shape_claim(description),
+                Some((ProseShape::Matrix("n".into(), "n".into()), Vec::new())),
+                "{description}"
+            );
+        }
     }
 
     #[test]

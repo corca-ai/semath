@@ -5,7 +5,7 @@ use crate::canonical::{
     SemanticExpr, SemanticExprKind, expression_children, lower_template, render_canonical,
 };
 use crate::concept::concepts_share_lineage;
-use crate::consistency::{RoleObservations, roles_conflict};
+use crate::consistency::{RoleObservations, role_shape_conflict, roles_conflict};
 use crate::domain::{DomainObservations, support_rank};
 use crate::domain_signature::{
     is_capability_pack, laws_share_collision, pack_requires_explicit_law_activation,
@@ -18,7 +18,7 @@ use crate::pack::{
 };
 use crate::prose::{
     FormulaOperationKind, LawActivationEvidence, ScientificSemanticEvidence,
-    assumption_formula_targets,
+    assumption_formula_targets, assumption_public_evidence, assumption_value_and_target,
 };
 use crate::quantity::QuantityObservations;
 use crate::scope::{ScopeGraph, scope_visible};
@@ -3123,6 +3123,8 @@ fn expression_constraints_refuted(
     external: &ExternalTypeEnvironment,
 ) -> bool {
     semantic_symbols(expression).into_iter().any(|symbol| {
+        let role_shape_refuted =
+            role_shape_constraints_refuted(&role.concept, &symbol, offset, shapes, external);
         let shape_refuted = role.shape.as_deref().is_some_and(|expected| {
             shapes
                 .claims_at(&symbol, offset)
@@ -3138,8 +3140,23 @@ fn expression_constraints_refuted(
             quantity_support(expected, &symbol, &symbol, offset, quantities, external)
                 == RoleSupport::Refuted
         });
-        shape_refuted || quantity_refuted
+        role_shape_refuted || shape_refuted || quantity_refuted
     })
+}
+
+fn role_shape_constraints_refuted(
+    role: &str,
+    symbol: &str,
+    offset: u32,
+    shapes: &ShapeObservations,
+    external: &ExternalTypeEnvironment,
+) -> bool {
+    shapes
+        .claims_at(symbol, offset)
+        .0
+        .into_iter()
+        .chain(external.shapes_at(offset, symbol))
+        .any(|shape| role_shape_conflict(role, &shape.kind))
 }
 
 fn expression_concept_support(
@@ -3317,6 +3334,9 @@ fn role_symbol_support(
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
+    if role_shape_constraints_refuted(&role.concept, symbol, offset, shapes, external) {
+        return RoleSupport::Refuted;
+    }
     if consistency.has_occurrence_role(symbol, symbol_range, &role.concept) {
         return RoleSupport::Typed;
     }
@@ -3706,6 +3726,7 @@ fn recognition(
         })
         .flatten()
         .collect();
+    let relation_id = format!("{}:{}", compiled.pack_id, compiled.law.id);
     let mut conditions: Vec<LawConditionInfo> = compiled
         .law
         .conditions
@@ -3716,6 +3737,7 @@ fn recognition(
                 .filter(|binding| condition.subjects.contains(&binding.parameter))
                 .collect::<Vec<_>>();
             let (evidence, mechanically_verified, explicitly_refuted) = condition_evidence(
+                &relation_id,
                 condition,
                 &compiled.law.roles,
                 &bindings,
@@ -4032,6 +4054,7 @@ fn condition_status(
 
 #[allow(clippy::too_many_arguments)]
 fn condition_evidence(
+    relation_id: &str,
     condition: &PackLawCondition,
     roles: &[PackLawRole],
     bindings: &BTreeMap<String, SemanticExpr>,
@@ -4064,6 +4087,7 @@ fn condition_evidence(
         })
         .flatten();
     let semantic_condition = assumption_condition_evidence(
+        relation_id,
         condition,
         bindings,
         formula_range,
@@ -4535,7 +4559,8 @@ enum TypedAssumption {
 }
 
 fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
-    match (assumption.kind.as_str(), assumption.value.as_str()) {
+    let value = assumption_value_and_target(&assumption.value).0;
+    match (assumption.kind.as_str(), value) {
         ("regularity", "differentiable") => TypedAssumption::Differentiable,
         ("sign", "positive" | "strictly-positive") => TypedAssumption::Positive,
         ("sign-convention", value) if value.starts_with("not-") => {
@@ -4582,6 +4607,7 @@ struct AssumptionConditionEvidence {
 }
 
 fn assumption_condition_evidence(
+    relation_id: &str,
     condition: &PackLawCondition,
     bindings: &BTreeMap<String, SemanticExpr>,
     formula_range: &SourceRange,
@@ -4591,11 +4617,15 @@ fn assumption_condition_evidence(
 ) -> AssumptionConditionEvidence {
     let symbols = bound_condition_symbols(&condition.subjects, bindings);
     let subjects_match = |assumption: &&AssumptionInfo| {
+        let (assumption_value, target_relation_id) = assumption_value_and_target(&assumption.value);
+        if target_relation_id.is_some_and(|target| target != relation_id) {
+            return false;
+        }
         if assumption.subjects.is_empty() {
             return true;
         }
-        if assumption.value == condition.id
-            || assumption.value.strip_prefix("not-") == Some(condition.id.as_str())
+        if assumption_value == condition.id
+            || assumption_value.strip_prefix("not-") == Some(condition.id.as_str())
         {
             return assumption
                 .subjects
@@ -4669,13 +4699,13 @@ fn assumption_condition_evidence(
         .chain(external_assumptions.iter().filter(subjects_match))
     {
         if resolution.supporting.is_none() && assumption_supports_condition(condition, assumption) {
-            resolution.supporting = Some(assumption.evidence.clone());
+            resolution.supporting = Some(assumption_public_evidence(assumption));
         }
         if resolution.refuting.is_none()
             && condition.kind == PackConditionKind::SignConvention
             && typed_assumption(assumption) == TypedAssumption::OpposedSignConvention
         {
-            resolution.refuting = Some(assumption.evidence.clone());
+            resolution.refuting = Some(assumption_public_evidence(assumption));
         }
         if resolution.supporting.is_some() && resolution.refuting.is_some() {
             break;
@@ -4688,7 +4718,8 @@ fn assumption_supports_condition(
     condition: &PackLawCondition,
     assumption: &AssumptionInfo,
 ) -> bool {
-    if assumption.value == condition.id {
+    let assumption_value = assumption_value_and_target(&assumption.value).0;
+    if assumption_value == condition.id {
         return true;
     }
     match (condition.kind, typed_assumption(assumption)) {
@@ -5396,6 +5427,7 @@ mod tests {
         };
         let scopes = crate::scope::ScopeGraph::new(&document);
         let first = super::assumption_condition_evidence(
+            "test:law",
             &condition,
             &bindings,
             &formula_range,
@@ -5406,6 +5438,7 @@ mod tests {
         assumption.evidence.kind = "display-only".into();
         assumption.evidence.strength = "display-only".into();
         let mutated = super::assumption_condition_evidence(
+            "test:law",
             &condition,
             &bindings,
             &formula_range,
@@ -6763,6 +6796,44 @@ This conversion is performed once per accepted timing sample so the accumulator 
             ),
             ["capacitor-current-law"]
         );
+        let public_capacitor = recognized_law_observations(
+            "Let $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal. Under this passive sign convention, the capacitor law is\n\\[\ni_C(t)=C\\frac{dv_C}{dt}(t).\n\\]",
+        );
+        let public_capacitor = public_capacitor
+            .iter()
+            .find(|recognition| recognition.law_id == "capacitor-current-law")
+            .expect("public capacitor law");
+        assert_eq!(public_capacitor.status, LawRecognitionStatus::Verified);
+        let public_condition = public_capacitor
+            .conditions
+            .iter()
+            .find(|condition| condition.condition_id == "passive-sign-convention")
+            .expect("public passive sign condition");
+        assert_eq!(public_condition.status, ConstraintStatus::Verified);
+        let public_prose = public_condition
+            .evidence
+            .iter()
+            .find(|evidence| evidence.rule_id == "english-scientific-assumption")
+            .expect("public sign convention prose");
+        assert_eq!(public_prose.source_ranges.len(), 1);
+        for descriptor in ["ohm", "kirchhoff", "electric", "closed"] {
+            let source = format!(
+                "Let $C>0$ be a constant capacitance, let $v_C(t)$ be voltage, let $i_C(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the {descriptor} law is $i_C(t)=C\\frac{{dv_C}}{{dt}}(t)$."
+            );
+            let capacitor = recognized_law_observations(&source)
+                .into_iter()
+                .find(|recognition| recognition.law_id == "capacitor-current-law")
+                .expect("bounded capacitor candidate");
+            assert_ne!(
+                capacitor.status,
+                LawRecognitionStatus::Verified,
+                "{descriptor}"
+            );
+            assert!(capacitor.conditions.iter().any(|condition| {
+                condition.condition_id == "passive-sign-convention"
+                    && condition.status == ConstraintStatus::Required
+            }));
+        }
         assert_eq!(
             recognized_laws(
                 "Current $i_{\\rm out}$ is referenced leaving the positive-voltage terminal. We write $i_{\\rm out}$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar. \\[i_{\\rm out}=-C\\,dv/dt\\]."

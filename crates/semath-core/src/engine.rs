@@ -31,7 +31,10 @@ use crate::law::{
 };
 use crate::parser::{ParsedMath, parse_snapshot, selection_path};
 use crate::project_order::{ProjectOrder, ProjectOrderDocument};
-use crate::prose::{LawActivationEvidence, ScientificSemanticEvidence, definition_available_from};
+use crate::prose::{
+    LawActivationEvidence, ScientificSemanticEvidence, assumption_value_and_target,
+    definition_available_from,
+};
 use crate::scope::ScopeGraph;
 use crate::semantic::DocumentSemanticObservations;
 use crate::semantic_index::{
@@ -1578,19 +1581,20 @@ fn lower_typed_observation_facts(
         }
     }
     for assumption in observations.assumptions() {
+        let assumption_value = assumption_value_and_target(&assumption.value).0;
         for subject in &assumption.subjects {
             let Some((entity, _)) = closest_definition(definitions, subject, &assumption.evidence)
             else {
                 continue;
             };
-            let condition = match (assumption.kind.as_str(), assumption.value.as_str()) {
+            let condition = match (assumption.kind.as_str(), assumption_value) {
                 ("sign", "nonzero") => ClaimCondition::Nonzero(entity.clone()),
                 ("sign", "positive" | "strictly-positive") => {
                     ClaimCondition::Positive(entity.clone())
                 }
                 ("sign", "nonnegative") => ClaimCondition::Nonnegative(entity.clone()),
                 ("algebraic-property", "invertible") => ClaimCondition::Invertible(entity.clone()),
-                _ => ClaimCondition::Named(format!("{}:{}", assumption.kind, assumption.value)),
+                _ => ClaimCondition::Named(format!("{}:{assumption_value}", assumption.kind)),
             };
             let ordinal = output.claims.len();
             let evidence_id = EvidenceId(format!(

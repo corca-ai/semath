@@ -2624,7 +2624,10 @@ fn incompatible_redeclarations_share_one_typed_public_conflict() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert!(
+        matches!(view.decision, MeaningDecision::Conflicting { .. }),
+        "{view:#?}"
+    );
     assert_eq!(
         view.authoring_context.disposition,
         crate::MathAuthoringDisposition::Conflicting
@@ -2636,6 +2639,143 @@ fn incompatible_redeclarations_share_one_typed_public_conflict() {
             .count(),
         1
     );
+}
+
+#[test]
+fn incompatible_acceleration_shape_conflicts_and_blocks_newton_relation() {
+    let content = "Let $F$ denote net force. Let $m$ denote scalar mass. Let $a$ denote an acceleration matrix. The proposed model is $F=ma$.";
+    let offset = content.rfind("a$").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(
+        matches!(view.decision, MeaningDecision::Conflicting { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting
+    );
+    assert!(
+        view.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.code == "notation-role-type-conflict")
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .all(|relation| { relation.relation_id != "classical-mechanics:newton-second-law" })
+    );
+}
+
+#[test]
+fn scalar_and_vector_acceleration_shapes_preserve_the_newton_candidate() {
+    for declaration in ["a scalar acceleration", "an acceleration vector"] {
+        let content = format!(
+            "Let $F$ denote net force. Let $m$ denote scalar mass. Let $a$ denote {declaration}. The quantities refer to one body in a common inertial frame. The model is $F=ma$."
+        );
+        let view = semantic_view_at(&content, content.rfind("F=").unwrap() as u32);
+
+        assert!(
+            !matches!(view.decision, MeaningDecision::Conflicting { .. }),
+            "{declaration}: {view:#?}"
+        );
+        assert!(
+            view.diagnostics
+                .iter()
+                .all(|diagnostic| { diagnostic.code != "notation-role-type-conflict" })
+        );
+        assert!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .any(|hypothesis| {
+                    hypothesis.relation.as_ref().is_some_and(|relation| {
+                        relation.relation_id == "classical-mechanics:newton-second-law"
+                    }) && hypothesis.support != crate::MathInterpretationSupportTier::Contradicted
+                })
+        );
+    }
+}
+
+#[test]
+fn included_acceleration_shape_conflict_blocks_the_newton_relation() {
+    let main = "\\input{definitions}\nNewton's second law is $F=ma$.";
+    for (shape, relation_expected) in [("scalar", true), ("matrix", false)] {
+        let definitions = format!(
+            "Let $F$ denote net force. Let $m$ denote scalar mass. Let $a$ denote an acceleration {shape}."
+        );
+        let mut main_document = document("main", "main.tex", main, 1);
+        main_document.includes.push(ProjectInclude {
+            path: "definitions".into(),
+            kind: "input".into(),
+            source: ProjectSourceRef {
+                file_id: "main".into(),
+                path: "main.tex".into(),
+                range: SourceRange {
+                    start_offset: 0,
+                    end_offset: 19,
+                },
+            },
+        });
+        let mut engine = SemathEngine::default();
+        engine
+            .reset(ProjectSnapshot {
+                protocol_version: PROTOCOL_VERSION,
+                epoch: "project:1".into(),
+                inventory_version: 1,
+                project_id: "project".into(),
+                main_file_id: Some("main".into()),
+                documents: vec![
+                    main_document,
+                    document("definitions", "definitions.tex", &definitions, 1),
+                ],
+            })
+            .unwrap();
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: main.rfind("F=").unwrap() as u32,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+
+        let has_relation = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .filter_map(|hypothesis| hypothesis.relation.as_ref())
+            .any(|relation| relation.relation_id == "classical-mechanics:newton-second-law");
+        assert_eq!(has_relation, relation_expected, "{shape}: {view:#?}");
+        if !relation_expected {
+            assert!(!matches!(
+                view.decision,
+                MeaningDecision::Established { .. }
+            ));
+        }
+    }
 }
 
 #[test]
@@ -2687,6 +2827,72 @@ fn explicit_sign_convention_refutation_is_a_source_conflict() {
             )
     }));
     assert!(view.authoring_context.equation_links.is_empty());
+}
+
+#[test]
+fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
+    for descriptor in ["ohm", "kirchhoff", "electric", "closed"] {
+        let content = format!(
+            "Let $C>0$ be capacitance, let $v(t)$ be voltage, let $i(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the {descriptor} law is $i(t)=C\\frac{{dv}}{{dt}}(t)$."
+        );
+        let view = semantic_view_at(&content, content.rfind("i(t)=").unwrap() as u32);
+        assert!(
+            !matches!(view.decision, MeaningDecision::Established { .. }),
+            "{descriptor}"
+        );
+        let capacitor = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                })
+            })
+            .expect("bounded capacitor candidate");
+        assert!(capacitor.conditions.iter().any(|condition| {
+            condition.condition_id == "passive-sign-convention"
+                && condition.status == crate::ConstraintStatus::Required
+        }));
+    }
+
+    for (content, formula, relation_id, condition_id) in [
+        (
+            "Let $V$ be voltage, let $R$ be resistance, and let $I$ be electric current. Under this passive sign convention, the capacitor law is. $V=RI$.",
+            "V=RI",
+            "circuits:ohm-law",
+            "consistent-references",
+        ),
+        (
+            "Let $C>0$ be capacitance, let $v(t)$ be voltage, let $i(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the capacitor law is. $i(t)=C\\frac{dv}{dt}(t)$.",
+            "i(t)=",
+            "circuits:capacitor-current-law",
+            "passive-sign-convention",
+        ),
+    ] {
+        let view = semantic_view_at(content, content.rfind(formula).unwrap() as u32);
+        assert!(!matches!(
+            view.decision,
+            MeaningDecision::Established { .. }
+        ));
+        let hypothesis = view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .find(|hypothesis| {
+                hypothesis
+                    .relation
+                    .as_ref()
+                    .is_some_and(|relation| relation.relation_id == relation_id)
+            })
+            .expect("bounded relation candidate");
+        assert!(hypothesis.conditions.iter().any(|condition| {
+            condition.condition_id == condition_id
+                && condition.status == crate::ConstraintStatus::Required
+        }));
+    }
 }
 
 #[test]
