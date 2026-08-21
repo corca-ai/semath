@@ -191,6 +191,10 @@ export interface MathAuthoringSourceDocument {
   readonly path: string;
 }
 
+export interface MathAuthoringSyntaxDocument extends MathAuthoringSourceDocument {
+  readonly mathRootContentRanges: readonly SourceRange[];
+}
+
 export interface MathAuthoringDevelopmentReport {
   readonly cases: number;
   readonly exactCases: number;
@@ -770,6 +774,26 @@ export function mathAuthoringExpectationSourceFailures(
   };
   const formula = (value: MathFormulaAnchorInfo, path: string) => {
     location(value.location, value.documentVersion, `${path}.location`);
+    const document = byId.get(value.location.fileId);
+    if (
+      document &&
+      document.path === value.location.path &&
+      document.documentVersion === value.documentVersion &&
+      document.content.slice(
+        value.location.range.startOffset,
+        value.location.range.endOffset,
+      ) !== value.sourceNotation
+    ) {
+      findings.push({
+        actual: value.sourceNotation,
+        expected: document.content.slice(
+          value.location.range.startOffset,
+          value.location.range.endOffset,
+        ),
+        kind: "wrong-anchor",
+        path: `${path}.sourceNotation`,
+      });
+    }
     value.provenance?.forEach((range, index) =>
       location(
         { ...value.location, range },
@@ -883,6 +907,335 @@ export function mathAuthoringExpectationSourceFailures(
     });
   }
   return findings;
+}
+
+/** Require every reviewed formula to name one exact wasmtex content root. */
+export function mathAuthoringExpectationFormulaRootFailures(
+  expected: StableMathAuthoringContext,
+  documents: readonly MathAuthoringSyntaxDocument[],
+): readonly MathAuthoringContextFailure[] {
+  const findings: MathAuthoringContextFailure[] = [];
+  const byId = new Map(documents.map((document) => [document.fileId, document]));
+  const formula = (value: MathFormulaAnchorInfo, path: string) => {
+    const document = byId.get(value.location.fileId);
+    const exactRoot = document?.path === value.location.path &&
+      document.documentVersion === value.documentVersion &&
+      document.mathRootContentRanges.some((range) =>
+        sameRange(range, value.location.range)
+      );
+    if (!exactRoot) {
+      findings.push({
+        actual: value.location,
+        expected: document?.mathRootContentRanges,
+        kind: "wrong-anchor",
+        path: `${path}.location.range`,
+      });
+    }
+  };
+  visitMathAuthoringFormulas(expected, formula);
+  return findings;
+}
+
+/** Reject stable expectations that the public projector could never emit. */
+export function mathAuthoringExpectationCanonicalFailures(
+  expected: StableMathAuthoringContext,
+): readonly MathAuthoringContextFailure[] {
+  const findings: MathAuthoringContextFailure[] = [];
+  const ordered = <T>(
+    values: readonly T[],
+    path: string,
+    compare: (left: T, right: T) => number = stableCompare,
+  ) => {
+    const canonical = [...values].sort(compare);
+    if (stableJson(values) !== stableJson(canonical)) {
+      findings.push({ actual: values, expected: canonical, kind: "mismatch", path });
+    }
+  };
+  const strings = (values: readonly string[], path: string) =>
+    ordered(values, path, (left, right) => left.localeCompare(right));
+  const numbers = (values: readonly number[], path: string) =>
+    ordered(values, path, numeric);
+  const denseOrdinals = (values: readonly number[], path: string) => {
+    const canonicalByObserved = new Map<number, number>();
+    const canonical = values.map((value) => {
+      const known = canonicalByObserved.get(value);
+      if (known !== undefined) return known;
+      const next = canonicalByObserved.size;
+      canonicalByObserved.set(value, next);
+      return next;
+    });
+    if (stableJson(values) !== stableJson(canonical)) {
+      findings.push({ actual: values, expected: canonical, kind: "mismatch", path });
+    }
+  };
+  const evidence = (value: Evidence, path: string) =>
+    ordered(value.sourceRanges, `${path}.sourceRanges`);
+  const evidenceList = (values: readonly Evidence[], path: string) => {
+    ordered(values, path);
+    values.forEach((value, index) => evidence(value, `${path}[${index}]`));
+  };
+  const references = (
+    values: readonly MathInterpretationEvidenceReferenceInfo[],
+    path: string,
+  ) => ordered(values, path);
+  const constraint = (value: SemanticConstraint, path: string) => {
+    if (value.concepts) strings(value.concepts, `${path}.concepts`);
+    if (value.dimensions) strings(value.dimensions, `${path}.dimensions`);
+    if (value.refinements) strings(value.refinements, `${path}.refinements`);
+  };
+  const binding = (value: LawBinding, path: string) => {
+    constraint(value.constraint, `${path}.constraint`);
+    evidence(value.evidence, `${path}.evidence`);
+  };
+  const condition = (value: LawConditionInfo, path: string) => {
+    evidenceList(value.evidence, `${path}.evidence`);
+    strings(value.subjects, `${path}.subjects`);
+  };
+  const formula = (value: MathFormulaAnchorInfo, path: string) => {
+    if (value.provenance) ordered(value.provenance, `${path}.provenance`);
+  };
+  const relation = (value: RelationInfo, path: string) => {
+    strings(value.conditions, `${path}.conditions`);
+    evidenceList(value.evidence, `${path}.evidence`);
+    ordered(value.roles, `${path}.roles`);
+  };
+  const requirement = (value: StableRequirement, path: string) => {
+    if (value.kind === "condition") {
+      references(value.condition.evidence, `${path}.condition.evidence`);
+      strings(value.condition.subjects, `${path}.condition.subjects`);
+      return;
+    }
+    references(value.evidence, `${path}.evidence`);
+    if (value.kind === "role-declaration") {
+      constraint(value.constraint, `${path}.constraint`);
+      return;
+    }
+    if (value.kind === "disambiguation") {
+      const alternatives = [...value.alternatives].sort((left, right) =>
+        stableCompare(
+          stableAlternativeSemanticKey(left),
+          stableAlternativeSemanticKey(right),
+        )
+      );
+      ordered(
+        value.alternatives,
+        `${path}.alternatives`,
+        (left, right) =>
+          stableCompare(
+            stableAlternativeSemanticKey(left),
+            stableAlternativeSemanticKey(right),
+          ),
+      );
+      denseOrdinals(
+        alternatives.map((alternative) => alternative.alternativeGroup),
+        `${path}.alternatives.alternativeGroup`,
+      );
+      value.alternatives.forEach((alternative, index) => {
+        const alternativePath = `${path}.alternatives[${index}]`;
+        references(alternative.evidence, `${alternativePath}.evidence`);
+        if (alternative.relevance) {
+          references(
+            alternative.relevance.evidence,
+            `${alternativePath}.relevance.evidence`,
+          );
+        }
+      });
+    }
+  };
+
+  if (expected.approximation) {
+    evidenceList(expected.approximation.evidence, "authoringContext.approximation.evidence");
+    denseOrdinals(
+      expected.approximation.relatedFactGroups ?? [],
+      "authoringContext.approximation.relatedFactGroups",
+    );
+  }
+  const claims = [...expected.claimEvidence].sort((left, right) =>
+    stableCompare(stableClaimSemanticKey(left), stableClaimSemanticKey(right))
+  );
+  ordered(
+    expected.claimEvidence,
+    "authoringContext.claimEvidence",
+    (left, right) =>
+      stableCompare(stableClaimSemanticKey(left), stableClaimSemanticKey(right)),
+  );
+  denseOrdinals(
+    [
+      ...claims.map((claim) => claim.claimGroup),
+      ...claims.flatMap((claim) => claim.supportingClaimGroups),
+    ],
+    "authoringContext.claimEvidence.claimGroup",
+  );
+  expected.claimEvidence.forEach((claim, index) => {
+    const path = `authoringContext.claimEvidence[${index}]`;
+    evidenceList(claim.evidence, `${path}.evidence`);
+    numbers(claim.supportingClaimGroups, `${path}.supportingClaimGroups`);
+    ordered(claim.supportingFormulas, `${path}.supportingFormulas`);
+    claim.supportingFormulas.forEach((item, formulaIndex) =>
+      formula(item, `${path}.supportingFormulas[${formulaIndex}]`)
+    );
+  });
+  ordered(expected.conditions, "authoringContext.conditions");
+  expected.conditions.forEach((item, index) =>
+    condition(item, `authoringContext.conditions[${index}]`)
+  );
+  if (expected.conventionalCandidates) {
+    const candidates = [...expected.conventionalCandidates].sort((left, right) =>
+      stableCompare(stableCandidateSemanticKey(left), stableCandidateSemanticKey(right))
+    );
+    ordered(
+      expected.conventionalCandidates,
+      "authoringContext.conventionalCandidates",
+      (left, right) =>
+        stableCompare(stableCandidateSemanticKey(left), stableCandidateSemanticKey(right)),
+    );
+    denseOrdinals(
+      candidates.map((candidate) => candidate.candidateGroup),
+      "authoringContext.conventionalCandidates.candidateGroup",
+    );
+    expected.conventionalCandidates.forEach((candidate, index) => {
+      const path = `authoringContext.conventionalCandidates[${index}]`;
+      ordered(candidate.bindings, `${path}.bindings`);
+      candidate.bindings.forEach((item, bindingIndex) =>
+        binding(item, `${path}.bindings[${bindingIndex}]`)
+      );
+      evidenceList(candidate.evidence, `${path}.evidence`);
+      relation(candidate.relation, `${path}.relation`);
+      evidenceList(candidate.relevance.evidence, `${path}.relevance.evidence`);
+      ordered(candidate.requirements, `${path}.requirements`);
+      candidate.requirements.forEach((item, requirementIndex) => {
+        const requirementPath = `${path}.requirements[${requirementIndex}]`;
+        if (item.kind === "condition") {
+          condition(item.condition, `${requirementPath}.condition`);
+        } else {
+          constraint(item.constraint, `${requirementPath}.constraint`);
+          evidenceList(item.evidence, `${requirementPath}.evidence`);
+        }
+      });
+    });
+  }
+  const links = [...expected.equationLinks].sort((left, right) =>
+    stableCompare(stableLinkSemanticKey(left), stableLinkSemanticKey(right))
+  );
+  ordered(
+    expected.equationLinks,
+    "authoringContext.equationLinks",
+    (left, right) => stableCompare(stableLinkSemanticKey(left), stableLinkSemanticKey(right)),
+  );
+  denseOrdinals(
+    links.map((link) => link.linkGroup),
+    "authoringContext.equationLinks.linkGroup",
+  );
+  expected.equationLinks.forEach((link, index) => {
+    const path = `authoringContext.equationLinks[${index}]`;
+    evidenceList(link.evidence, `${path}.evidence`);
+    numbers(link.sharedEntityGroups, `${path}.sharedEntityGroups`);
+    formula(link.source, `${path}.source`);
+    formula(link.target, `${path}.target`);
+  });
+  if (expected.formula) formula(expected.formula, "authoringContext.formula");
+  ordered(
+    expected.notationOccurrences,
+    "authoringContext.notationOccurrences",
+    (left, right) =>
+      stableCompare(stableNotationOrderKey(left), stableNotationOrderKey(right)),
+  );
+  expected.interpretations.hypotheses.forEach((hypothesis, index) => {
+    const path = `authoringContext.interpretations.hypotheses[${index}]`;
+    ordered(hypothesis.bindings, `${path}.bindings`);
+    hypothesis.bindings.forEach((item, bindingIndex) =>
+      binding(item, `${path}.bindings[${bindingIndex}]`)
+    );
+    ordered(hypothesis.conditions, `${path}.conditions`);
+    hypothesis.conditions.forEach((item, conditionIndex) =>
+      condition(item, `${path}.conditions[${conditionIndex}]`)
+    );
+    numbers(hypothesis.missingDiscriminatorGroups, `${path}.missingDiscriminatorGroups`);
+    if (hypothesis.formula) formula(hypothesis.formula, `${path}.formula`);
+    if (hypothesis.relation) relation(hypothesis.relation, `${path}.relation`);
+  });
+  ordered(
+    expected.interpretations.analysisLimits,
+    "authoringContext.interpretations.analysisLimits",
+  );
+  expected.interpretations.analysisLimits.forEach((limit, index) =>
+    references(
+      limit.evidence,
+      `authoringContext.interpretations.analysisLimits[${index}].evidence`,
+    )
+  );
+  ordered(
+    expected.interpretations.missingDiscriminators,
+    "authoringContext.interpretations.missingDiscriminators",
+  );
+  expected.interpretations.missingDiscriminators.forEach((item, index) =>
+    requirement(item, `authoringContext.interpretations.missingDiscriminators[${index}]`)
+  );
+  ordered(expected.requirements, "authoringContext.requirements");
+  expected.requirements.forEach((item, index) =>
+    requirement(item, `authoringContext.requirements[${index}]`)
+  );
+  const requirements = [
+    ...expected.requirements,
+    ...expected.interpretations.missingDiscriminators,
+  ].sort((left, right) =>
+    stableCompare(stableRequirementSemanticKey(left), stableRequirementSemanticKey(right)) ||
+    numeric(left.group, right.group)
+  );
+  denseOrdinals(
+    requirements.map((item) => item.group),
+    "authoringContext.requirements.group",
+  );
+  const notation = [...expected.notationOccurrences].sort((left, right) =>
+    stableCompare(stableNotationOrderKey(left), stableNotationOrderKey(right))
+  );
+  denseOrdinals(
+    [
+      ...notation.flatMap((item) => [
+        item.occurrenceGroup,
+        item.entityAnchorOccurrenceGroup,
+      ]),
+      ...requirements.flatMap((item) =>
+        item.kind === "declaration" ? [item.occurrenceGroup] : []
+      ),
+    ],
+    "authoringContext.notationOccurrences.occurrenceGroup",
+  );
+  denseOrdinals(
+    [
+      ...notation.map((item) => item.entityGroup),
+      ...links.flatMap((link) => link.sharedEntityGroups),
+    ],
+    "authoringContext.notationOccurrences.entityGroup",
+  );
+  return findings;
+}
+
+function visitMathAuthoringFormulas(
+  expected: StableMathAuthoringContext,
+  visit: (formula: MathFormulaAnchorInfo, path: string) => void,
+): void {
+  if (expected.formula) visit(expected.formula, "authoringContext.formula");
+  expected.equationLinks.forEach((link, index) => {
+    visit(link.source, `authoringContext.equationLinks[${index}].source`);
+    visit(link.target, `authoringContext.equationLinks[${index}].target`);
+  });
+  expected.claimEvidence.forEach((claim, claimIndex) =>
+    claim.supportingFormulas.forEach((formula, formulaIndex) =>
+      visit(
+        formula,
+        `authoringContext.claimEvidence[${claimIndex}].supportingFormulas[${formulaIndex}]`,
+      )
+    )
+  );
+  expected.interpretations.hypotheses.forEach((hypothesis, index) => {
+    if (hypothesis.formula) {
+      visit(
+        hypothesis.formula,
+        `authoringContext.interpretations.hypotheses[${index}].formula`,
+      );
+    }
+  });
 }
 
 function validateOccurrenceDocument(
@@ -1055,6 +1408,51 @@ function requirementSemanticKey(item: MathInterpretationRequirementInfo): unknow
   return rest;
 }
 function notationSemanticKey(item: MathAuthoringContext["notationOccurrences"][number]): unknown { return { location: item.location, scopePath: item.scopePath, sourceNotation: item.sourceNotation }; }
+function stableNotationOrderKey(item: StableNotationOccurrence): unknown { return { location: item.location, scopePath: item.scopePath, sourceNotation: item.sourceNotation }; }
+function stableAlternativeSemanticKey(item: StableMeaningAlternative): unknown {
+  const { alternativeGroup: _alternativeGroup, ...semantic } = item;
+  return semantic;
+}
+function stableCandidateSemanticKey(item: StableConventionalCandidate): unknown {
+  const { candidateGroup: _candidateGroup, ...semantic } = item;
+  return semantic;
+}
+function stableLinkSemanticKey(item: StableEquationLink): unknown {
+  return {
+    evidence: item.evidence,
+    kind: item.kind,
+    source: item.source,
+    target: item.target,
+  };
+}
+function stableClaimSemanticKey(item: StableClaimEvidence): unknown {
+  return {
+    claim: item.claim,
+    evidence: item.evidence,
+    modality: item.modality,
+    polarity: item.polarity,
+    strengthCeiling: item.strengthCeiling,
+    supportingFormulas: item.supportingFormulas,
+  };
+}
+function stableRequirementSemanticKey(item: StableRequirement): unknown {
+  switch (item.kind) {
+    case "declaration":
+      return { evidence: item.evidence, kind: item.kind, symbol: item.symbol };
+    case "role-declaration": {
+      const { group: _group, ...semantic } = item;
+      return semantic;
+    }
+    case "condition": {
+      const { group: _group, ...semantic } = item;
+      return semantic;
+    }
+    case "disambiguation": {
+      const { group: _group, ...semantic } = item;
+      return semantic;
+    }
+  }
+}
 function linkSemanticKey(item: MathAuthoringContext["equationLinks"][number]): unknown { return { evidence: item.evidence, kind: item.kind, source: item.source, target: item.target }; }
 function claimSemanticKey(item: MathAuthoringContext["claimEvidence"][number]): unknown { return { claim: item.claim, evidence: item.evidence, modality: item.modality, polarity: item.polarity, strengthCeiling: item.strengthCeiling, supportingFormulas: item.supportingFormulas }; }
 function hypothesisKey(
