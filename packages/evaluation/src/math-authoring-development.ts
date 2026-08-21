@@ -1045,6 +1045,10 @@ export function mathAuthoringExpectationCanonicalFailures(
 
   if (expected.approximation) {
     evidenceList(expected.approximation.evidence, "authoringContext.approximation.evidence");
+    denseOrdinals(
+      expected.approximation.relatedFactGroups ?? [],
+      "authoringContext.approximation.relatedFactGroups",
+    );
   }
   const claims = [...expected.claimEvidence].sort((left, right) =>
     stableCompare(stableClaimSemanticKey(left), stableClaimSemanticKey(right))

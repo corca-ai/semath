@@ -902,6 +902,20 @@ describe("exact public MathAuthoringContext oracle", () => {
     expect(
       mathAuthoringExpectationCanonicalFailures(noncanonical)[0],
     ).toMatchObject({ kind: "mismatch", path: "authoringContext.conditions" });
+
+    const noncanonicalRelatedFacts = structuredClone(stable);
+    if (!noncanonicalRelatedFacts.approximation) {
+      throw new Error("expected approximation context");
+    }
+    Object.assign(noncanonicalRelatedFacts.approximation, {
+      relatedFactGroups: [1, 0],
+    });
+    expect(
+      mathAuthoringExpectationCanonicalFailures(noncanonicalRelatedFacts)[0],
+    ).toMatchObject({
+      kind: "mismatch",
+      path: "authoringContext.approximation.relatedFactGroups",
+    });
   });
 });
 
