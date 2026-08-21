@@ -167,6 +167,7 @@ impl DocumentSemanticObservations {
             &self.semantic_evidence,
             &[],
         );
+        let scopes = ScopeGraph::new(document);
         let analyze = |environment: &ExternalTypeEnvironment, domains: &DomainObservations| {
             observe_laws(
                 canonical_expressions,
@@ -180,6 +181,7 @@ impl DocumentSemanticObservations {
                     assumptions: &self.assumptions,
                     external: environment,
                     domains,
+                    scopes: &scopes,
                 },
             )
         };

@@ -285,9 +285,9 @@
       "caseId": "constraint-passive-sign-negated-refusal",
       "documentShape": "macro-neighbor",
       "decision": {
-        "status": "established",
-        "meaning": "present",
-        "problems": "none"
+        "status": "conflicting",
+        "meaning": "absent",
+        "problems": "source-conflict"
       }
     },
     {
