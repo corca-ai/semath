@@ -4,6 +4,7 @@ import {
   parseFreshBlindLifecycle,
 } from "./run-fresh-blind-release";
 import {
+  evaluateMathAuthoringDevelopment,
   projectMathAuthoringContext,
   type MathAuthoringExpectationProbe,
 } from "../packages/evaluation/src/index";
@@ -71,6 +72,7 @@ function evaluation() {
           cases: 1,
           exactCases: 1,
           failures: [],
+          findings: [],
           required: true,
         },
         observations: [
@@ -115,6 +117,30 @@ describe("fresh blind retained report parsers", () => {
       "facet: wrong source anchor",
     ]);
     expect(parsed.mathAuthoringFailures).toEqual([]);
+  });
+
+  test("accepts honest nonempty math authoring findings from the producer", () => {
+    const raw = evaluation();
+    const result = raw.results[0];
+    const observation = result?.observations[0];
+    if (!result || !observation) throw new Error("test evaluation result is missing");
+    observation.authoringContext.truncated = true;
+    const report = evaluateMathAuthoringDevelopment(expectedProbes(), [{
+      authoringContext: observation.authoringContext,
+      caseId: observation.caseId,
+    }]);
+    expect(report.findings).toEqual([{
+      actual: true,
+      expected: false,
+      kind: "mismatch",
+      path: "case-1.authoringContext.truncated",
+    }]);
+    const honest = {
+      ...raw,
+      results: [{ ...result, mathAuthoring: { ...report, required: true } }],
+    };
+    expect(parseFreshBlindEvaluation(honest, expectedProbes()).mathAuthoringFailures)
+      .toEqual(report.failures);
   });
 
   test("rejects missing facet evidence and malformed score boundaries", () => {
@@ -178,6 +204,39 @@ describe("fresh blind retained report parsers", () => {
           ...result,
           mathAuthoring: {
             ...result.mathAuthoring,
+            findings: [{ kind: "invented", path: "case-1.authoringContext" }],
+          },
+        }],
+      }, expectedProbes()),
+    ).toThrow("mathAuthoring.findings[0].kind is invalid");
+    for (const [findings, message] of [
+      [{}, "mathAuthoring.findings must be an array"],
+      [[{ path: "case-1.authoringContext" }], "unexpected or missing fields"],
+      [[{ kind: "missing" }], "unexpected or missing fields"],
+      [[{
+        extra: true,
+        kind: "missing",
+        path: "case-1.authoringContext",
+      }], "unexpected or missing fields"],
+      [[{ kind: "missing", path: "   " }], "path must be a nonempty string"],
+    ] as const) {
+      expect(() =>
+        parseFreshBlindEvaluation({
+          ...raw,
+          results: [{
+            ...result,
+            mathAuthoring: { ...result.mathAuthoring, findings },
+          }],
+        }, expectedProbes()),
+      ).toThrow(message);
+    }
+    expect(() =>
+      parseFreshBlindEvaluation({
+        ...raw,
+        results: [{
+          ...result,
+          mathAuthoring: {
+            ...result.mathAuthoring,
             cases: 0,
             exactCases: 0,
           },
@@ -199,6 +258,21 @@ describe("fresh blind retained report parsers", () => {
             ...result.mathAuthoring,
             exactCases: 0,
             failures: ["trusted without recomputation"],
+          },
+        }],
+      }, expectedProbes()),
+    ).toThrow("does not match independent recomputation");
+    expect(() =>
+      parseFreshBlindEvaluation({
+        ...dishonest,
+        results: [{
+          ...result,
+          mathAuthoring: {
+            ...result.mathAuthoring,
+            findings: [{
+              kind: "missing",
+              path: "case-1.authoringContext.conditions[0]",
+            }],
           },
         }],
       }, expectedProbes()),

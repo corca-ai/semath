@@ -13,7 +13,9 @@ import type {
 import {
   evaluateMathAuthoringDevelopment,
   parseObservedMathAuthoringContext,
+  type MathAuthoringContextFailure,
   type MathAuthoringExpectationProbe,
+  type MathAuthoringFailureKind,
 } from "../packages/evaluation/src/index";
 import {
   checkFreshBlindReservation,
@@ -286,7 +288,7 @@ export function parseFreshBlindEvaluation(
   );
   exact(
     mathAuthoring,
-    ["cases", "exactCases", "failures", "required"],
+    ["cases", "exactCases", "failures", "findings", "required"],
     "fresh blind evaluation mathAuthoring",
   );
   if (mathAuthoring.required !== true) {
@@ -303,6 +305,10 @@ export function parseFreshBlindEvaluation(
   const mathAuthoringFailures = strings(
     mathAuthoring.failures,
     "fresh blind evaluation mathAuthoring.failures",
+  );
+  const mathAuthoringFindings = parseMathAuthoringFindings(
+    mathAuthoring.findings,
+    "fresh blind evaluation mathAuthoring.findings",
   );
   if (mathAuthoringCases === 0)
     throw new Error("fresh blind evaluation mathAuthoring.cases must be positive");
@@ -333,7 +339,8 @@ export function parseFreshBlindEvaluation(
   if (expectedProbes.length !== observations.length ||
     recomputed.cases !== mathAuthoringCases ||
     recomputed.exactCases !== mathAuthoringExactCases ||
-    !isDeepStrictEqual(recomputed.failures, mathAuthoringFailures)) {
+    !isDeepStrictEqual(recomputed.failures, mathAuthoringFailures) ||
+    !isDeepStrictEqual(recomputed.findings, mathAuthoringFindings)) {
     throw new Error(
       "fresh blind evaluation mathAuthoring does not match independent recomputation",
     );
@@ -847,6 +854,49 @@ function strings(value: unknown, label: string): readonly string[] {
   if (!Array.isArray(value) || value.some((item) => typeof item !== "string"))
     throw new Error(`${label} must be a string array`);
   return value;
+}
+function parseMathAuthoringFindings(
+  value: unknown,
+  label: string,
+): readonly MathAuthoringContextFailure[] {
+  if (!Array.isArray(value)) throw new Error(`${label} must be an array`);
+  return value.map((raw, index) => {
+    const itemLabel = `${label}[${index}]`;
+    const item = record(raw, itemLabel);
+    const allowed = new Set(["actual", "expected", "kind", "path"]);
+    if (
+      !("kind" in item) || !("path" in item) ||
+      Object.keys(item).some((key) => !allowed.has(key))
+    ) {
+      throw new Error(`${itemLabel} has unexpected or missing fields`);
+    }
+    const kind = mathAuthoringFailureKind(item.kind, `${itemLabel}.kind`);
+    if (typeof item.path !== "string" || item.path.trim().length === 0)
+      throw new Error(`${itemLabel}.path must be a nonempty string`);
+    return {
+      ...(Object.hasOwn(item, "actual") ? { actual: item.actual } : {}),
+      ...(Object.hasOwn(item, "expected") ? { expected: item.expected } : {}),
+      kind,
+      path: item.path,
+    };
+  });
+}
+function mathAuthoringFailureKind(
+  value: unknown,
+  label: string,
+): MathAuthoringFailureKind {
+  const kinds = [
+    "authority-escalation",
+    "false-conflict",
+    "mismatch",
+    "missing",
+    "unexpected",
+    "unsafe-lifecycle",
+    "wrong-anchor",
+  ] as const satisfies readonly MathAuthoringFailureKind[];
+  const kind = kinds.find((candidate) => candidate === value);
+  if (!kind) throw new Error(`${label} is invalid`);
+  return kind;
 }
 function integer(value: unknown, label: string): number {
   if (typeof value !== "number" || !Number.isInteger(value) || value < 0)
