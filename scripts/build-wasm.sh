@@ -9,7 +9,10 @@ if [ "$system" != "Linux" ] || [ "$architecture" != "x86_64" ]; then
 fi
 
 build_target_dir=$PWD/target
-CARGO_TARGET_DIR=$build_target_dir cargo build --locked --release --target wasm32-unknown-unknown -p semath-wasm
+cargo_home=${CARGO_HOME:-$HOME/.cargo}
+RUSTFLAGS="--remap-path-prefix=$cargo_home=/cargo --remap-path-prefix=$PWD=/workspace" \
+  CARGO_TARGET_DIR=$build_target_dir \
+  cargo build --locked --release --target wasm32-unknown-unknown -p semath-wasm
 mkdir -p lib/wasm
 wasm-bindgen \
   --target web \
