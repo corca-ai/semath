@@ -4096,9 +4096,16 @@ impl SemathEngine {
         .then_some(display_focus.as_ref())
         .flatten();
         let formula_meaning_owner = if focus.is_none() {
-            queried_relation
-                .and_then(|relation| self.canonical_meaning_owner(document, relation))
-                .map(|entity_id| (entity_id, false))
+            queried_relation.and_then(|relation| {
+                let exactly_owned = observations
+                    .formula_meanings
+                    .iter()
+                    .any(|fact| fact.target_range == relation.range)
+                    && (offset == relation.range.end_offset
+                        || relation_trailing_gap_is_owned(&document.document, relation, offset));
+                self.canonical_meaning_owner(document, relation)
+                    .map(|entity_id| (entity_id, exactly_owned))
+            })
         } else {
             display_focus.as_ref().and_then(|focus| {
                 if semantic_focus.is_some() && self.resolved_entity(&focus.occurrence_id).is_some()
@@ -4188,7 +4195,8 @@ impl SemathEngine {
                     .map(|fact| fact.evidence.clone()),
             );
         }
-        if exact_formula_meaning
+        if symbol_proof.is_empty()
+            && exact_formula_meaning
             && symbol_definition_may_establish
             && let Some(relation) = queried_relation
         {

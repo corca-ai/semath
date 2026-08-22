@@ -1539,8 +1539,10 @@ fn classify_discourse_frame(
         .starts_with("according to")
         .then(|| first_marker(&lower, &["according to"]))
         .flatten();
+    let attributed = formula_attribution_marker(&lower);
     let lexical_attribution = first_marker(&lower, &["as reported"])
         .or(according_to)
+        .or(attributed)
         .or_else(|| {
             starts_with_any(&lower, &["the citation ", "the reference "])
                 .then(|| first_marker(&lower, &["the citation", "the reference"]))
@@ -1582,6 +1584,34 @@ fn classify_discourse_frame(
         conditionality,
         evidence,
     }
+}
+
+fn formula_attribution_marker(lower: &str) -> Option<(usize, usize)> {
+    let words = lower
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    let is_formula_metanoun = |word: &str| {
+        matches!(
+            word,
+            "formula" | "equation" | "identity" | "law" | "model" | "relation" | "balance"
+        )
+    };
+    let attributed_descriptor = words.iter().enumerate().any(|(index, word)| {
+        *word == "attributed"
+            && words[index + 1..]
+                .iter()
+                .take(3)
+                .any(|word| is_formula_metanoun(word))
+    });
+    let attributed_metanoun = words.windows(3).any(|window| {
+        is_formula_metanoun(window[0])
+            && window[1] == "attributed"
+            && matches!(window[2], "to" | "by")
+    });
+    (attributed_descriptor || attributed_metanoun)
+        .then(|| first_marker(lower, &["attributed"]))
+        .flatten()
 }
 
 fn classify_act(lower: &str) -> (CommunicativeAct, Option<(usize, usize)>) {

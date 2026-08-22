@@ -1885,6 +1885,106 @@ fn formula_metadescription_establishes_only_the_attached_relation() {
 }
 
 #[test]
+fn formula_metadescription_retains_its_meaning_after_trailing_punctuation() {
+    let content = "The selected continuum identity is\n\\[J=-D\\nabla c.\\]";
+    let relation_end = content.rfind("c.").unwrap() as u32 + 1;
+    let punctuation_end = relation_end + 1;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    for offset in [relation_end, punctuation_end] {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert!(
+            matches!(&view.decision, MeaningDecision::Established { reasons, .. }
+            if reasons.iter().flat_map(|reason| &reason.evidence).any(|evidence| {
+                evidence.rule_id == "semath/asserted-formula-meaning"
+            })),
+            "offset {offset}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn formula_metadescription_does_not_escalate_an_existing_source_meaning() {
+    let content = "Let $r$ be rectangular area, $u$ side length, and $v$ side width. The selected relation is\n\\[r=uv.\\]";
+    let offset = content.rfind("v.").unwrap() as u32 + 2;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| {
+                hypothesis.label == "rectangular area"
+                    && hypothesis.support == crate::MathInterpretationSupportTier::Supported
+            })
+    );
+    assert!(
+        !view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .flat_map(|hypothesis| &hypothesis.evidence)
+            .any(|evidence| evidence.evidence.rule_id == "semath/asserted-formula-meaning"),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn attributed_formula_metadescription_cannot_establish_at_trailing_punctuation() {
+    let content = "The attributed firmware formula is\n\\[J=-D\\nabla c.\\]";
+    let offset = content.rfind("c.").unwrap() as u32 + 2;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        !matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+}
+
+#[test]
 fn semantic_view_does_not_project_a_nested_law_onto_the_formula_head() {
     let content = "Let $A$ and $B$ be events. The reported value is $p=P(A\\cap B)/P(B)$.";
     let mut engine = SemathEngine::default();
