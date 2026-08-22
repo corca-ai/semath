@@ -3281,10 +3281,10 @@
           "Added reviewed numerical approximation, error, convergence, solver, quadrature, time-step, least-squares, conditioning, and include-removal contexts."
         ],
         "criticId": "math-development-review",
-        "finalDigest": "86657aa3073c90b84d10c6c1ba3a4999cf2f3cf84bad193e490e85b1429d0a02",
+        "finalDigest": "99e25f15fda28956f185438134aeeff5564a4c97ed7866a345be0a7d3200cd55",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-15",
-        "semanticReviewDigest": "86657aa3073c90b84d10c6c1ba3a4999cf2f3cf84bad193e490e85b1429d0a02",
+        "semanticReviewDigest": "99e25f15fda28956f185438134aeeff5564a4c97ed7866a345be0a7d3200cd55",
         "status": "corrected"
       },
       "snapshots": [
@@ -3854,10 +3854,10 @@
           "v0.37 public-development adjudication: the included random-variable and mean declarations plus the explicit expected-value activation ground both roles and the finite-expectation condition, so the reviewed formula is Established."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "19db00ff67bb9877b3fac30da86c1ffeac278bfa547bdf52a5034c58b0de66ef",
+        "finalDigest": "0463d43d519d17897985a1f890746a741d32f171612a080e33dc3df51003eb53",
         "mainReviewer": "codex-main-agent",
         "reviewedAt": "2026-08-20",
-        "semanticReviewDigest": "19db00ff67bb9877b3fac30da86c1ffeac278bfa547bdf52a5034c58b0de66ef",
+        "semanticReviewDigest": "0463d43d519d17897985a1f890746a741d32f171612a080e33dc3df51003eb53",
         "status": "corrected"
       },
       "snapshots": [
@@ -11502,72 +11502,22 @@
         "navigation": {
           "definition": {
             "excluded": [],
-            "minimum": 1,
-            "required": [
-              {
-                "fileId": "metric-review.md",
-                "needle": "S=2X-3Y",
-                "selection": {
-                  "offset": 3,
-                  "length": 1
-                }
-              }
-            ],
-            "status": "available"
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
           },
-          "prepareRename": {
-            "placeholder": "X",
-            "range": {
-              "fileId": "metric-review.md",
-              "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
-              "selection": {
-                "offset": 20,
-                "length": 1
-              }
-            },
-            "status": "available"
-          },
+          "prepareRename": { "status": "unavailable" },
           "references": {
             "excluded": [],
-            "minimum": 2,
-            "required": [
-              {
-                "fileId": "metric-review.md",
-                "needle": "S=2X-3Y",
-                "selection": {
-                  "offset": 3,
-                  "length": 1
-                }
-              },
-              {
-                "fileId": "metric-review.md",
-                "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
-                "selection": {
-                  "offset": 20,
-                  "length": 1
-                }
-              }
-            ],
-            "status": "available"
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
           },
           "rename": {
             "excluded": [],
-            "expectedText": "X",
-            "minimum": 1,
-            "newName": "Z",
-            "replacementText": "Z",
-            "required": [
-              {
-                "fileId": "metric-review.md",
-                "needle": "\\operatorname{Var}(2X)=4\\operatorname{Var}(X)",
-                "selection": {
-                  "offset": 20,
-                  "length": 1
-                }
-              }
-            ],
-            "safety": "deterministic",
-            "status": "available"
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
           }
         },
         "proofGrounded": true,
@@ -15589,25 +15539,21 @@
     {
       "cursor": { "edge": "after", "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "snapshotId": "numerical-roles-removed" },
       "expected": {
-        "decision": "established",
+        "decision": "partial",
         "diagnostics": { "excludedCodes": [], "maximum": 2, "required": [] },
         "excludedRelationIds": ["numerical-analysis:approximate-value-relation"],
         "navigation": {
           "definition": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" },
-          "prepareRename": {
-            "placeholder": "u",
-            "range": { "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "selection": { "length": 1, "offset": 11 } },
-            "status": "available"
-          },
+          "prepareRename": { "status": "unavailable" },
           "references": {
             "excluded": [],
-            "minimum": 1,
-            "required": [{ "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "selection": { "length": 1, "offset": 11 } }],
-            "status": "available"
+            "minimum": 0,
+            "required": [],
+            "status": "unavailable"
           },
           "rename": { "excluded": [], "minimum": 0, "required": [], "status": "unavailable" }
         },
-        "proofGrounded": true,
+        "proofGrounded": false,
         "relations": [],
         "symbol": "u",
         "cursorOccurrence": { "fileId": "numerics/methods.tex", "needle": "u_h\\approx u", "selection": { "length": 1, "offset": 11 } }

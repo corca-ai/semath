@@ -180,6 +180,7 @@ pub(crate) struct ProseEventStream {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct DefinitionConstruction {
     pub action: DefinitionAction,
+    pub action_precedes_mention: bool,
     pub mention_index: usize,
     pub description_start: usize,
     pub description_end: usize,
@@ -456,6 +457,7 @@ impl ProseEventStream {
                         ProseEventKind::DefinitionAction(action) => action,
                         _ => unreachable!(),
                     },
+                    action_precedes_mention: action_precedes,
                     mention_index,
                     description_start,
                     description_end,
@@ -1503,6 +1505,8 @@ fn classify_discourse_frame(
         || lower.contains(" did not apply")
         || lower.contains(" does not assume")
         || lower.contains(" do not assume")
+        || ((lower.starts_with("drops ") || lower.contains(" drops "))
+            && lower.contains(" without assuming"))
         || lower.contains(" inapplicable")
         || [" not define", " not denote", " not represent", " not mean"]
             .iter()
@@ -3201,6 +3205,7 @@ mod tests {
         for source in [
             "Let $A$ be an event, but this law does not apply: $A \\cap B$.",
             "The cited gradient assumption is inapplicable to these data.",
+            "The document drops the product derivative and claims $i=C(t)\\frac{dv}{dt}$ without assuming $\\dot C=0$.",
         ] {
             let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
             assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);

@@ -410,10 +410,20 @@ pub(crate) fn observe_prose(
         &mut analysis,
     );
 
-    collect_coordinated_definitions(document, source, parsed, &index, &clauses, &mut analysis);
+    collect_coordinated_definitions(
+        document,
+        source,
+        parsed,
+        canonical_expressions,
+        &index,
+        &clauses,
+        &mut analysis,
+    );
     collect_anaphoric_definitions(
         document,
+        source,
         parsed,
+        canonical_expressions,
         &index,
         &clauses,
         &mentions,
@@ -437,6 +447,7 @@ pub(crate) fn observe_prose(
         document,
         source,
         parsed,
+        canonical_expressions,
         &index,
         &clauses,
         &events,
@@ -444,9 +455,14 @@ pub(crate) fn observe_prose(
     );
     for (math_index, math) in parsed.iter().enumerate() {
         analysis.match_stats.matcher_work += 1;
-        let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
-            continue;
-        };
+        let nominal_owner = definition_owner_for_math(
+            document,
+            source,
+            &index,
+            parsed,
+            canonical_expressions,
+            math,
+        );
         let start_byte = index.byte_for_utf16(math.region.full_range.start_offset);
         let end_byte = index.byte_for_utf16(math.region.full_range.end_offset);
         let clause = clause_at(&clauses, start_byte);
@@ -480,17 +496,19 @@ pub(crate) fn observe_prose(
         let trimmed_after = after.trim_start().to_ascii_lowercase();
         if let Some(captures) = INLINE_VECTOR_SUFFIX.captures(after) {
             let evidence_end = end_byte + captures.get(0).unwrap().end();
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                &format!("{}-dimensional vector", &captures[1]),
-                "english-inline-dimension-definition",
-                start_byte,
-                evidence_end,
-            );
+            if let Some((owner, owner_range)) = &nominal_owner {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    owner,
+                    owner_range,
+                    &format!("{}-dimensional vector", &captures[1]),
+                    "english-inline-dimension-definition",
+                    start_byte,
+                    evidence_end,
+                );
+            }
             continue;
         }
         if [
@@ -514,51 +532,98 @@ pub(crate) fn observe_prose(
                     .to_ascii_lowercase()
                     .find("by")
                     .map_or(0, |offset| offset + 2);
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                "function",
-                "english-formula-definition",
-                before_start,
-                evidence_end,
-            );
+            if let Some((owner, owner_range)) = &nominal_owner {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    owner,
+                    owner_range,
+                    "function",
+                    "english-formula-definition",
+                    before_start,
+                    evidence_end,
+                );
+            }
         } else if let Some(passive) = match_passive_definition(before, after) {
+            if let Some((owner, owner_range)) = &nominal_owner {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    owner,
+                    owner_range,
+                    passive.description,
+                    passive.rule_id,
+                    before_start + passive.prefix_start,
+                    end_byte + passive.suffix_end,
+                );
+            } else {
+                push_formula_metadescription(
+                    &mut analysis,
+                    &index,
+                    canonical_expressions.get(math_index),
+                    passive.description,
+                    before_start + passive.prefix_start,
+                    end_byte + passive.suffix_end,
+                );
+            }
+        } else if asserted_relation_definition_lead(before)
+            && let Some((owner, owner_range)) = canonical_expressions
+                .get(math_index)
+                .and_then(|expression| relation_result_owner(source, &index, expression))
+        {
             push_claim(
                 &mut analysis,
                 document,
                 &index,
-                &symbol,
-                &symbol_range,
-                passive.description,
-                passive.rule_id,
-                before_start + passive.prefix_start,
-                end_byte + passive.suffix_end,
+                &owner,
+                &owner_range,
+                "authored relation result",
+                "english-relation-result-definition",
+                before_start,
+                end_byte,
             );
         } else if math.symbols.len() > 1
             && let Some((description, prefix_start, suffix_end)) =
                 fronted_shared_description(before, after)
         {
-            for (listed_symbol, listed_range) in &math.symbols {
-                push_claim(
-                    &mut analysis,
-                    document,
-                    &index,
-                    listed_symbol,
-                    listed_range,
-                    description,
-                    "english-fronted-inline-list-definition",
-                    before_start + prefix_start,
-                    end_byte + suffix_end,
-                );
+            let owners = canonical_expressions
+                .get(math_index)
+                .and_then(|expression| nominal_list_owners(source, &index, expression))
+                .or_else(|| nominal_owner.clone().map(|owner| vec![owner]));
+            if let Some(owners) = owners {
+                for (owner, owner_range) in owners {
+                    push_claim(
+                        &mut analysis,
+                        document,
+                        &index,
+                        &owner,
+                        &owner_range,
+                        description,
+                        "english-fronted-inline-list-definition",
+                        before_start + prefix_start,
+                        end_byte + suffix_end,
+                    );
+                }
             }
         } else if let Some(explicit) = explicit_single_definition(before, after, math) {
             let expression = canonical_expressions.get(math_index);
-            if let Some((owner, owner_range)) = expression.and_then(|expression| {
-                explicit_definition_owner(source, &index, expression, &explicit)
-            }) {
+            if let Some((owner, owner_range)) = expression
+                .and_then(|expression| {
+                    explicit_definition_owner(source, &index, expression, &explicit)
+                })
+                .or_else(|| {
+                    definition_owner_for_math(
+                        document,
+                        source,
+                        &index,
+                        parsed,
+                        canonical_expressions,
+                        math,
+                    )
+                })
+            {
                 push_claim(
                     &mut analysis,
                     document,
@@ -596,77 +661,110 @@ pub(crate) fn observe_prose(
                     unreachable!()
                 }
             };
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                &source[active.description_start..active.description_end],
-                rule_id,
-                active.evidence_start,
-                active.evidence_end,
-            );
+            let description = &source[active.description_start..active.description_end];
+            let active_owner = nominal_owner.clone().or_else(|| {
+                (active.action == DefinitionAction::Define && active.action_precedes_mention)
+                    .then_some(())?;
+                relation_left_owner(source, &index, canonical_expressions.get(math_index)?)
+            });
+            if let Some((owner, owner_range)) = active_owner {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    &owner,
+                    &owner_range,
+                    description,
+                    rule_id,
+                    active.evidence_start,
+                    active.evidence_end,
+                );
+            }
         } else if let Some(apposition) = match_apposition(after) {
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                apposition.description,
-                apposition.rule_id,
-                start_byte,
-                end_byte + apposition.suffix_end,
-            );
+            if let Some((owner, owner_range)) = &nominal_owner {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    owner,
+                    owner_range,
+                    apposition.description,
+                    apposition.rule_id,
+                    start_byte,
+                    end_byte + apposition.suffix_end,
+                );
+            }
         } else if let Some(parenthetical) = match_parenthetical(before, after) {
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                parenthetical.description,
-                parenthetical.rule_id,
-                before_start + parenthetical.prefix_start,
-                end_byte + parenthetical.suffix_end,
-            );
+            if let Some((owner, owner_range)) = &nominal_owner {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    owner,
+                    owner_range,
+                    parenthetical.description,
+                    parenthetical.rule_id,
+                    before_start + parenthetical.prefix_start,
+                    end_byte + parenthetical.suffix_end,
+                );
+            }
         } else if let Some(quantified) = match_quantified(before, after) {
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                quantified.description,
-                quantified.rule_id,
-                before_start + quantified.prefix_start,
-                end_byte + quantified.suffix_end,
-            );
-        } else if is_declaration_lead(before) && math.symbols.len() > 1 {
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                "explicit mathematical declaration",
-                "english-let-math-declaration",
-                start_byte,
-                end_byte,
-            );
+            if let Some((owner, owner_range)) = nominal_owner.clone().or_else(|| {
+                definition_owner_for_description(
+                    document,
+                    source,
+                    &index,
+                    parsed,
+                    canonical_expressions,
+                    math,
+                    quantified.description,
+                )
+            }) {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    &owner,
+                    &owner_range,
+                    quantified.description,
+                    quantified.rule_id,
+                    before_start + quantified.prefix_start,
+                    end_byte + quantified.suffix_end,
+                );
+            }
+        } else if is_declaration_lead(before)
+            && math.symbols.len() > 1
+            && let Some(owners) = canonical_expressions
+                .get(math_index)
+                .and_then(|expression| nominal_list_owners(source, &index, expression))
+        {
+            for (owner, owner_range) in owners {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    &owner,
+                    &owner_range,
+                    "explicit mathematical declaration",
+                    "english-let-math-declaration",
+                    start_byte,
+                    end_byte,
+                );
+            }
         }
 
-        collect_notation_table(
-            document,
-            source,
-            &index,
-            &symbol,
-            &symbol_range,
-            start_byte,
-            end_byte,
-            &mut analysis,
-        );
+        if let Some((owner, owner_range)) = &nominal_owner {
+            collect_notation_table(
+                document,
+                source,
+                &index,
+                owner,
+                owner_range,
+                start_byte,
+                end_byte,
+                &mut analysis,
+            );
+        }
     }
     let document_index = SourceIndex::new(&document.content);
     attach_equation_reference_definitions(
@@ -815,12 +913,6 @@ fn collect_role_first_nominal_definitions(
             else {
                 continue;
             };
-            if !canonical_expressions
-                .get(mention.math_index)
-                .is_some_and(is_nominal_mention)
-            {
-                continue;
-            }
             let Some((span_start, span_end)) =
                 events.description_before(source, clause_index, mention.start)
             else {
@@ -887,7 +979,15 @@ fn collect_role_first_nominal_definitions(
             if multiline_fallback && !semantic_only {
                 continue;
             }
-            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+            let Some((symbol, symbol_range)) = definition_owner_for_description(
+                document,
+                source,
+                index,
+                parsed,
+                canonical_expressions,
+                math,
+                selected.description,
+            ) else {
                 continue;
             };
             if semantic_only {
@@ -917,15 +1017,6 @@ fn collect_role_first_nominal_definitions(
             }
         }
     }
-}
-
-fn is_nominal_mention(expression: &SemanticExpr) -> bool {
-    matches!(
-        expression.kind,
-        SemanticExprKind::Symbol(_)
-            | SemanticExprKind::Index { .. }
-            | SemanticExprKind::Apply { .. }
-    )
 }
 
 fn attach_equation_reference_definitions(
@@ -994,7 +1085,9 @@ fn attach_equation_reference_definitions(
 #[allow(clippy::too_many_arguments)]
 fn collect_anaphoric_definitions(
     document: &ProjectDocument,
+    source: &str,
     parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
@@ -1027,12 +1120,27 @@ fn collect_anaphoric_definitions(
             .collect::<Vec<_>>();
         let mut seen_symbols = std::collections::BTreeSet::new();
         antecedents.retain(|mention| {
-            primary_symbol(document, &parsed[mention.math_index])
-                .is_some_and(|(symbol, _)| seen_symbols.insert(symbol))
+            definition_owner_for_math(
+                document,
+                source,
+                index,
+                parsed,
+                canonical_expressions,
+                &parsed[mention.math_index],
+            )
+            .is_some_and(|(symbol, _)| seen_symbols.insert(symbol))
         });
         if antecedents.len() > 1 && text.to_ascii_lowercase().starts_with("this vector field") {
             antecedents.retain(|mention| {
-                primary_symbol(document, &parsed[mention.math_index]).is_some_and(|(symbol, _)| {
+                definition_owner_for_math(
+                    document,
+                    source,
+                    index,
+                    parsed,
+                    canonical_expressions,
+                    &parsed[mention.math_index],
+                )
+                .is_some_and(|(symbol, _)| {
                     output.shapes.iter().any(|claim| {
                         claim.symbol == symbol
                             && claim.available_from
@@ -1099,7 +1207,15 @@ fn collect_anaphoric_definitions(
             }
             for (mention, description) in antecedents.into_iter().zip([former, latter]) {
                 let math = &parsed[mention.math_index];
-                let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                let Some((symbol, symbol_range)) = definition_owner_for_description(
+                    document,
+                    source,
+                    index,
+                    parsed,
+                    canonical_expressions,
+                    math,
+                    &description,
+                ) else {
                     continue;
                 };
                 push_claim(
@@ -1139,7 +1255,15 @@ fn collect_anaphoric_definitions(
         };
         for (mention, description) in antecedents.into_iter().zip(descriptions) {
             let math = &parsed[mention.math_index];
-            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+            let Some((symbol, symbol_range)) = definition_owner_for_description(
+                document,
+                source,
+                index,
+                parsed,
+                canonical_expressions,
+                math,
+                description,
+            ) else {
                 continue;
             };
             push_claim(
@@ -1443,7 +1567,7 @@ fn collect_equation_flow_definitions(
                 output.formula_meanings.push(FormulaMeaningFact {
                     target_range: target.range.clone(),
                     evidence: Evidence {
-                        rule_id: "english-equation-flow-meaning".into(),
+                        rule_id: formula_meaning_rule_id(&description).into(),
                         kind: "attached-prose".into(),
                         strength: "strong".into(),
                         source_ranges: vec![SourceRange {
@@ -1458,8 +1582,16 @@ fn collect_equation_flow_definitions(
             continue;
         }
         let Some((symbol, symbol_range)) =
-            relation_head_symbol(document, &math.region.content_range)
-                .or_else(|| primary_symbol(document, math))
+            relation_head_symbol(document, &math.region.content_range).or_else(|| {
+                definition_owner_for_math(
+                    document,
+                    source,
+                    index,
+                    parsed,
+                    canonical_expressions,
+                    math,
+                )
+            })
         else {
             continue;
         };
@@ -1470,7 +1602,7 @@ fn collect_equation_flow_definitions(
             output.formula_meanings.push(FormulaMeaningFact {
                 target_range: symbol_range,
                 evidence: Evidence {
-                    rule_id: "english-equation-flow-meaning".into(),
+                    rule_id: formula_meaning_rule_id(&description).into(),
                     kind: "attached-prose".into(),
                     strength: "strong".into(),
                     source_ranges: vec![SourceRange {
@@ -1682,6 +1814,17 @@ fn is_formula_metadescription(description: &str) -> bool {
         .is_some_and(|word| is_formula_metaword(&word))
 }
 
+fn formula_meaning_rule_id(description: &str) -> &'static str {
+    if formula_description_words(description)
+        .last()
+        .is_some_and(|word| word == "notation")
+    {
+        "english-notation-meaning"
+    } else {
+        "english-equation-flow-meaning"
+    }
+}
+
 fn relation_description_is_formula_metadescription(description: &str) -> bool {
     relation_description_head_words(description).any(|word| is_formula_metaword(&word))
 }
@@ -1740,6 +1883,7 @@ fn is_formula_metaword(word: &str) -> bool {
             | "inequality"
             | "law"
             | "model"
+            | "notation"
             | "relation"
             | "rule"
             | "statement"
@@ -2682,10 +2826,12 @@ pub(crate) fn citation_byte_ranges(
         .collect()
 }
 
+#[allow(clippy::too_many_arguments)]
 fn collect_clause_definitions(
     document: &ProjectDocument,
     source: &str,
     parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     events: &ProseEventStream,
@@ -2717,6 +2863,7 @@ fn collect_clause_definitions(
                 document,
                 source,
                 parsed,
+                canonical_expressions,
                 index,
                 output,
                 sentence_start,
@@ -2772,7 +2919,15 @@ fn collect_clause_definitions(
             .collect::<Vec<_>>();
         if let Some(descriptions) = fronted_labeled_descriptions(&label_segments) {
             for (math, description) in regions.iter().zip(descriptions) {
-                let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+                let Some((symbol, symbol_range)) = definition_owner_for_description(
+                    document,
+                    source,
+                    index,
+                    parsed,
+                    canonical_expressions,
+                    math,
+                    description,
+                ) else {
                     continue;
                 };
                 push_claim(
@@ -2826,9 +2981,6 @@ fn collect_clause_definitions(
             continue;
         }
         for (position, math) in regions.iter().enumerate() {
-            let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
-                continue;
-            };
             let end = index.byte_for_utf16(math.region.full_range.end_offset);
             let next = regions.get(position + 1).map_or(sentence_end, |next| {
                 index.byte_for_utf16(next.region.full_range.start_offset)
@@ -2838,6 +2990,17 @@ fn collect_clause_definitions(
                 continue;
             };
             let clipped = clip_before_nested_nominal_role(description);
+            let Some((symbol, symbol_range)) = definition_owner_for_description(
+                document,
+                source,
+                index,
+                parsed,
+                canonical_expressions,
+                math,
+                clipped,
+            ) else {
+                continue;
+            };
             push_claim(
                 output,
                 document,
@@ -2899,10 +3062,12 @@ fn trim_trailing_relation_word(value: &str) -> &str {
     trimmed
 }
 
+#[allow(clippy::too_many_arguments)]
 fn collect_ordered_clause_definition(
     document: &ProjectDocument,
     source: &str,
     parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     index: &SourceIndex,
     output: &mut ProseObservations,
     sentence_start: usize,
@@ -2919,7 +3084,6 @@ fn collect_ordered_clause_definition(
                 && is_definition_slot_math(math)
                 && !is_description_parameter(source, math, sentence_start, sentence_end, index)
         })
-        .filter(|math| primary_symbol(document, math).is_some())
         .collect::<Vec<_>>();
     if regions.len() < 2 {
         return;
@@ -2944,7 +3108,15 @@ fn collect_ordered_clause_definition(
         return;
     };
     for (math, description) in regions.into_iter().zip(descriptions) {
-        let Some((symbol, symbol_range)) = primary_symbol(document, math) else {
+        let Some((symbol, symbol_range)) = definition_owner_for_description(
+            document,
+            source,
+            index,
+            parsed,
+            canonical_expressions,
+            math,
+            description,
+        ) else {
             return;
         };
         push_claim(
@@ -3350,8 +3522,38 @@ fn nominal_expression_owner(
 ) -> Option<(String, SourceRange)> {
     match &target.kind {
         SemanticExprKind::Symbol(name) => Some((name.clone(), target.range.clone())),
+        SemanticExprKind::Product(items)
+            if source_parenthesized_application_owner(source, index, items).is_some() =>
+        {
+            source_parenthesized_application_owner(source, index, items)
+        }
+        SemanticExprKind::Product(items)
+            if items.len() == 2
+                && matches!(&items[0].kind, SemanticExprKind::Symbol(wrapper) if is_presentation_wrapper(wrapper)) =>
+        {
+            let SemanticExprKind::Symbol(wrapper) = &items[0].kind else {
+                unreachable!()
+            };
+            Some((wrapper.clone(), items[0].range.clone()))
+        }
         SemanticExprKind::Index { .. } => Some((expression_name(target)?, target.range.clone())),
-        SemanticExprKind::Apply { operator, .. } => {
+        SemanticExprKind::Power(base, exponent)
+            if is_decorative_star(exponent)
+                || decorative_star_source(source, index, base, target) =>
+        {
+            let (owner, _) = nominal_expression_owner(source, index, base)?;
+            Some((owner, target.range.clone()))
+        }
+        SemanticExprKind::Derivative { expression, .. }
+            if dot_decorated_source(source, index, target) =>
+        {
+            let (owner, _) = nominal_expression_owner(source, index, expression)?;
+            Some((owner, target.range.clone()))
+        }
+        SemanticExprKind::Apply {
+            operator,
+            arguments,
+        } => {
             let start = index.byte_for_utf16(operator.range.start_offset);
             let end = index.byte_for_utf16(operator.range.end_offset);
             let surface = source.get(start..end).unwrap_or_default().trim();
@@ -3360,11 +3562,238 @@ fn nominal_expression_owner(
                 .strip_prefix("\\operatorname{")
                 .and_then(|name| name.strip_suffix('}'))
                 .is_some_and(|name| name == operator.as_str());
-            (direct_identifier || explicit_named_operator)
-                .then(|| (operator.value.clone(), operator.range.clone()))
+            if direct_identifier || explicit_named_operator {
+                return Some((operator.value.clone(), operator.range.clone()));
+            }
+            if is_presentation_wrapper(operator.as_str()) && arguments.len() == 1 {
+                return Some((operator.value.clone(), operator.range.clone()));
+            }
+            None
         }
         _ => None,
     }
+}
+
+fn source_parenthesized_application_owner(
+    source: &str,
+    index: &SourceIndex,
+    items: &[SemanticExpr],
+) -> Option<(String, SourceRange)> {
+    let [operator, argument] = items else {
+        return None;
+    };
+    let between_start = index.byte_for_utf16(operator.range.end_offset);
+    let between_end = index.byte_for_utf16(argument.range.start_offset);
+    let after = index.byte_for_utf16(argument.range.end_offset);
+    let directly_parenthesized = source
+        .get(between_start..between_end)?
+        .trim()
+        .starts_with('(')
+        && source.get(after..)?.trim_start().starts_with(')');
+    directly_parenthesized.then(|| nominal_expression_owner(source, index, operator))?
+}
+
+fn is_decorative_star(expression: &SemanticExpr) -> bool {
+    matches!(
+        &expression.kind,
+        SemanticExprKind::Symbol(value) | SemanticExprKind::Unknown(value)
+            if matches!(value.as_str(), "*" | "star" | "\\star")
+    )
+}
+
+fn decorative_star_source(
+    source: &str,
+    index: &SourceIndex,
+    base: &SemanticExpr,
+    expression: &SemanticExpr,
+) -> bool {
+    let start = index.byte_for_utf16(base.range.end_offset);
+    let end = index.byte_for_utf16(expression.range.end_offset);
+    source
+        .get(start..end)
+        .is_some_and(|suffix| matches!(suffix.trim(), "^*" | "^\\star" | "^{\\star}"))
+}
+
+fn dot_decorated_source(source: &str, index: &SourceIndex, expression: &SemanticExpr) -> bool {
+    let start = index.byte_for_utf16(expression.range.start_offset);
+    let end = index.byte_for_utf16(expression.range.end_offset);
+    source.get(start..end).is_some_and(|surface| {
+        let surface = surface.trim_start();
+        surface.starts_with("\\dot{") || surface.starts_with("\\ddot{")
+    })
+}
+
+fn is_presentation_wrapper(value: &str) -> bool {
+    matches!(
+        value,
+        "bar"
+            | "boldsymbol"
+            | "hat"
+            | "mathbf"
+            | "mathit"
+            | "mathrm"
+            | "mathsf"
+            | "mathtt"
+            | "overline"
+            | "tilde"
+            | "vec"
+            | "widehat"
+            | "widetilde"
+    )
+}
+
+fn nominal_list_owners(
+    source: &str,
+    index: &SourceIndex,
+    expression: &SemanticExpr,
+) -> Option<Vec<(String, SourceRange)>> {
+    let SemanticExprKind::Product(items) = &expression.kind else {
+        return None;
+    };
+    if items.len() < 3 || items.len().is_multiple_of(2) {
+        return None;
+    }
+    let mut owners = Vec::with_capacity(items.len().div_ceil(2));
+    for (position, item) in items.iter().enumerate() {
+        if position % 2 == 1 {
+            if !matches!(&item.kind, SemanticExprKind::Symbol(separator) if separator == ",") {
+                return None;
+            }
+            continue;
+        }
+        owners.push(nominal_expression_owner(source, index, item)?);
+    }
+    Some(owners)
+}
+
+fn definition_owner_for_math(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    math: &ParsedMath,
+) -> Option<(String, SourceRange)> {
+    let math_index = parsed
+        .iter()
+        .position(|candidate| std::ptr::eq(candidate, math))?;
+    canonical_expressions
+        .get(math_index)
+        .and_then(|expression| nominal_expression_owner(source, index, expression))
+        .or_else(|| {
+            let (owner, owner_range) = primary_symbol(document, math)?;
+            (owner_range == math.region.content_range).then_some((owner, owner_range))
+        })
+}
+
+fn definition_owner_for_description(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    math: &ParsedMath,
+    description: &str,
+) -> Option<(String, SourceRange)> {
+    definition_owner_for_math(document, source, index, parsed, canonical_expressions, math).or_else(
+        || {
+            let math_index = parsed
+                .iter()
+                .position(|candidate| std::ptr::eq(candidate, math))?;
+            guarded_relation_owner(
+                source,
+                index,
+                canonical_expressions.get(math_index)?,
+                description,
+            )
+        },
+    )
+}
+
+fn guarded_relation_owner(
+    source: &str,
+    index: &SourceIndex,
+    expression: &SemanticExpr,
+    description: &str,
+) -> Option<(String, SourceRange)> {
+    let SemanticExprKind::Relation {
+        operator,
+        left,
+        right,
+    } = &expression.kind
+    else {
+        return None;
+    };
+    let bounded_guard = operator.as_str() == "member-of"
+        || matches!(
+            operator.as_str(),
+            "greater-than" | "greater-or-equal" | "less-than" | "less-or-equal"
+        ) && matches!(right.kind, SemanticExprKind::Number(_));
+    (bounded_guard
+        && relation_description_classifies_role(description)
+        && !relation_description_is_formula_metadescription(description))
+    .then(|| nominal_expression_owner(source, index, left))?
+}
+
+fn relation_left_owner(
+    source: &str,
+    index: &SourceIndex,
+    expression: &SemanticExpr,
+) -> Option<(String, SourceRange)> {
+    let SemanticExprKind::Relation { left, .. } = &expression.kind else {
+        return None;
+    };
+    nominal_expression_owner(source, index, left)
+}
+
+fn relation_result_owner(
+    source: &str,
+    index: &SourceIndex,
+    expression: &SemanticExpr,
+) -> Option<(String, SourceRange)> {
+    let SemanticExprKind::Relation { operator, .. } = &expression.kind else {
+        return None;
+    };
+    (operator.as_str() == "equals").then(|| relation_left_owner(source, index, expression))?
+}
+
+fn asserted_relation_definition_lead(before: &str) -> bool {
+    before
+        .trim_end()
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .rfind(|word| !word.is_empty())
+        .is_some_and(|word| matches!(word.to_ascii_lowercase().as_str(), "define" | "defines"))
+}
+
+fn push_formula_metadescription(
+    analysis: &mut ProseObservations,
+    index: &SourceIndex,
+    expression: Option<&SemanticExpr>,
+    description: &str,
+    evidence_start: usize,
+    evidence_end: usize,
+) {
+    let Some(expression) = expression.filter(|expression| {
+        matches!(
+            expression.kind,
+            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+        ) && is_formula_metadescription(description)
+    }) else {
+        return;
+    };
+    analysis.formula_meanings.push(FormulaMeaningFact {
+        target_range: expression.range.clone(),
+        evidence: Evidence {
+            rule_id: formula_meaning_rule_id(description).into(),
+            kind: "attached-prose".into(),
+            strength: "strong".into(),
+            source_ranges: vec![SourceRange {
+                start_offset: index.utf16_for_byte(evidence_start),
+                end_offset: index.utf16_for_byte(evidence_end),
+            }],
+            source_anchors: Vec::new(),
+        },
+    });
 }
 
 fn contains_assignment(node: &crate::EquationNode) -> bool {
@@ -3397,6 +3826,7 @@ fn collect_coordinated_definitions(
     document: &ProjectDocument,
     source: &str,
     parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     analysis: &mut ProseObservations,
@@ -3404,8 +3834,15 @@ fn collect_coordinated_definitions(
     for arity in (2..=8).rev() {
         for group in parsed.windows(arity) {
             analysis.match_stats.matcher_work += 1;
-            let Some(definitions) = coordinated_group(document, source, group, index, clauses)
-            else {
+            let Some(definitions) = coordinated_group(
+                document,
+                source,
+                parsed,
+                canonical_expressions,
+                group,
+                index,
+                clauses,
+            ) else {
                 continue;
             };
             for definition in definitions {
@@ -3437,16 +3874,18 @@ struct CoordinatedDefinition {
 fn coordinated_group(
     document: &ProjectDocument,
     source: &str,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
     group: &[ParsedMath],
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
 ) -> Option<Vec<CoordinatedDefinition>> {
     group.first()?;
     group.last()?;
-    if group
-        .iter()
-        .any(|math| primary_symbol(document, math).is_none())
-    {
+    if group.iter().any(|math| {
+        definition_owner_for_math(document, source, index, parsed, canonical_expressions, math)
+            .is_none()
+    }) {
         return None;
     }
     let starts = group
@@ -3475,7 +3914,14 @@ fn coordinated_group(
     {
         let mut definitions = Vec::with_capacity(group.len());
         for math in group {
-            let (symbol, range) = primary_symbol(document, math)?;
+            let (symbol, range) = definition_owner_for_math(
+                document,
+                source,
+                index,
+                parsed,
+                canonical_expressions,
+                math,
+            )?;
             definitions.push(CoordinatedDefinition {
                 symbol,
                 range,
@@ -3495,7 +3941,14 @@ fn coordinated_group(
 
     let mut definitions = Vec::with_capacity(group.len());
     for (math, description) in group.iter().zip(descriptions) {
-        let (symbol, range) = primary_symbol(document, math)?;
+        let (symbol, range) = definition_owner_for_math(
+            document,
+            source,
+            index,
+            parsed,
+            canonical_expressions,
+            math,
+        )?;
         definitions.push(CoordinatedDefinition {
             symbol,
             range,
@@ -5342,6 +5795,206 @@ Define the mean axial speed by the flow relation
             "{:?}",
             assigned_product.definitions
         );
+    }
+
+    #[test]
+    fn composite_definition_owners_do_not_escape_through_sibling_prose_forms() {
+        let cases = [
+            ("defines-by", "Define $Ax$ by the following relation.", "A"),
+            (
+                "defines-relation-by",
+                "Define $x=y$ by the following relation.",
+                "x",
+            ),
+            ("passive", "The transformed vector is denoted by $Ax$.", "A"),
+            (
+                "role-first",
+                "The determinant $\\det(A)$ is recorded.",
+                "det",
+            ),
+            ("active", "$Ax$ defines the transformed vector.", "A"),
+            (
+                "relation-actor",
+                "$x=y$ defines the response function.",
+                "x",
+            ),
+            (
+                "apposition",
+                "$Ax$, the transformed vector, is recorded.",
+                "A",
+            ),
+            (
+                "parenthetical",
+                "The transformed vector ($Ax$) is recorded.",
+                "A",
+            ),
+            (
+                "quantified",
+                "For each transformed vector $Ax$, continue.",
+                "A",
+            ),
+            (
+                "inline-dimension",
+                "$Ax$ is an $n$-dimensional vector.",
+                "A",
+            ),
+            (
+                "coordinated",
+                "Let $Ax$ be transformed vector and $z$ be output.",
+                "A",
+            ),
+            (
+                "clause",
+                "Where $Ax$ transformed vector, and $z$ output.",
+                "A",
+            ),
+            (
+                "anaphoric",
+                "The symbols $Ax$ and $z$ are introduced. The former is transformed vector and the latter is output.",
+                "A",
+            ),
+            ("notation-table", "| $Ax$ | transformed vector |", "A"),
+            (
+                "equation-flow",
+                "The draft calls $Ax$ the transformed vector and defines it by\\n\\[Ax=z.\\]",
+                "A",
+            ),
+        ];
+
+        let leaks = cases
+            .into_iter()
+            .filter_map(|(name, source, poisoned_symbol)| {
+                let analysis = analyze(source);
+                analysis
+                    .definitions
+                    .iter()
+                    .any(|definition| definition.symbol == poisoned_symbol)
+                    .then_some((name, analysis.definitions))
+            })
+            .collect::<Vec<_>>();
+
+        assert!(leaks.is_empty(), "{leaks:#?}");
+    }
+
+    #[test]
+    fn relation_metadescriptions_attach_to_the_formula_without_defining_its_left_side() {
+        let source = "The detached warehouse notation is $orchid_{dev}=quartz_{dev}$, and no scientific role is declared for either symbol.";
+        let analysis = analyze_surface_language(source, DocumentLanguage::Latex);
+
+        assert!(
+            analysis.definitions.is_empty(),
+            "{:#?}",
+            analysis.definitions
+        );
+        assert_eq!(analysis.formula_meanings.len(), 1, "{analysis:#?}");
+        let meaning = &analysis.formula_meanings[0];
+        assert_eq!(meaning.evidence.rule_id, "english-notation-meaning");
+        let target_start = source.find("orchid_{dev}=quartz_{dev}").unwrap() as u32;
+        assert_eq!(meaning.target_range.start_offset, target_start);
+        assert_eq!(
+            meaning.target_range.end_offset,
+            target_start + "orchid_{dev}=quartz_{dev}".len() as u32
+        );
+    }
+
+    #[test]
+    fn nominal_definition_owners_survive_across_sibling_prose_forms() {
+        let cases = [
+            (
+                "defines-by",
+                "Define $f(x)$ by the following relation.",
+                "f",
+            ),
+            (
+                "passive",
+                "The response function is denoted by $f(x)$.",
+                "f",
+            ),
+            (
+                "role-first",
+                "The response function $f(x)$ is recorded.",
+                "f",
+            ),
+            ("active", "$f(x)$ defines the response function.", "f"),
+            (
+                "active-preceding-relation",
+                "The model defines $S=2X-3Y$, so the result is recorded.",
+                "S",
+            ),
+            (
+                "apposition",
+                "$f(x)$, the response function, is recorded.",
+                "f",
+            ),
+            (
+                "parenthetical",
+                "The response function ($f(x)$) is recorded.",
+                "f",
+            ),
+            (
+                "quantified",
+                "For each response function $f(x)$, continue.",
+                "f",
+            ),
+            ("inline-dimension", "$x$ is an $n$-dimensional vector.", "x"),
+            (
+                "coordinated",
+                "Let $f(x)$ be response function and $z$ be output.",
+                "f",
+            ),
+            (
+                "clause",
+                "Where $f(x)$ response function, and $z$ output.",
+                "f",
+            ),
+            (
+                "anaphoric",
+                "The symbols $f(x)$ and $z$ are introduced. The former is response function and the latter is output.",
+                "f",
+            ),
+            ("notation-table", "| $f(x)$ | response function |", "f"),
+            (
+                "decorative-star",
+                "Assume that $f$ is differentiable on an open neighborhood of $x^\\star$ and that $x^\\star$ is an unconstrained local minimizer.",
+                "x",
+            ),
+            (
+                "dot-decoration",
+                "Let $\\dot{\\gamma}$ be shear rate.",
+                "gamma",
+            ),
+            (
+                "fronted-callable",
+                "The capacitance is $C(t)$, yet the model is reviewed.",
+                "C",
+            ),
+        ];
+
+        let missing = cases
+            .into_iter()
+            .filter_map(|(name, source, owner)| {
+                let analysis = analyze(source);
+                (!analysis
+                    .definitions
+                    .iter()
+                    .any(|definition| definition.symbol == owner))
+                .then_some((name, analysis.definitions))
+            })
+            .collect::<Vec<_>>();
+
+        assert!(missing.is_empty(), "{missing:#?}");
+
+        let inline_list = analyze("Vectors $x,y$ are defined on a common space.");
+        for owner in ["x", "y"] {
+            assert!(
+                inline_list
+                    .definitions
+                    .iter()
+                    .any(|definition| definition.symbol == owner),
+                "{owner}: {:?}",
+                inline_list.definitions
+            );
+        }
     }
 
     #[test]
