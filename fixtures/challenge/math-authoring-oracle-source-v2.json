@@ -1653,6 +1653,12 @@
           "needle": "The vendor interface states that $z$ is a raw measurement and that $r$ is the calibrated range returned by the sealed transformation."
         },
         {
+          "fileId": "generated-opaque-call.tex",
+          "id": "claim-evidence-span",
+          "needle": "Sealed calibration output}\nThe vendor interface states that $z$ is a raw measurement and that $r$ is the calibrated range returned by the sealed transformation.",
+          "snapshotId": "current"
+        },
+        {
           "id": "source-generation-boundary",
           "snapshotId": "current",
           "fileId": "generated-opaque-call.tex",
@@ -1705,6 +1711,13 @@
           "fileId": "generated-opaque-call.tex",
           "id": "claim-01",
           "needle": "The top-level source call $r=\\sealedrange{z}$ is authored and editable;",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.tex",
+          "id": "notation-00",
+          "needle": "r",
+          "occurrence": 8,
           "snapshotId": "current"
         },
         {
@@ -1820,6 +1833,13 @@
           "fileId": "generated-opaque-call.md",
           "id": "claim-01",
           "needle": "The top-level source call $r=\\sealedrange{z}$ is authored and editable;",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "generated-opaque-call.md",
+          "id": "notation-00",
+          "needle": "r",
+          "occurrence": 10,
           "snapshotId": "current"
         },
         {

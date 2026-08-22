@@ -146,9 +146,9 @@ definitions or relations. Applying only those explicit adjudications produces
 the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
 cases stay visible as coverage work.
 
-The current 2026-08-15 development frontier passes 108 of 166 probes with risk
+The current 2026-08-22 development frontier passes 108 of 166 probes with risk
 116 and no false establishment, false conflict, identity, or navigation risk.
-Its first-loss atlas is 21 attachment, 19 typed-fact, and 18 pack-unification
+Its first-loss atlas is 24 attachment, 18 typed-fact, and 16 pack-unification
 misses. The additional reviewed probes cover typed linear-algebra,
 differential-equation, probability/statistics, and numerical-analysis relation
 families plus declaration retraction and exact navigation behavior. This
@@ -298,11 +298,11 @@ rerun, relabeled, or used for case-specific tuning.
 
 ## Protocol 17 evidence-graded development facets
 
-On 2026-08-20, protocol 17 projected evidence-graded hypotheses over all 166
+On 2026-08-22, protocol 17 projected evidence-graded hypotheses over all 166
 independently authored development probes. The facet report found hypotheses
-in 160 cases and multiple bounded hypotheses in 128. Supporting evidence was
-present in 156 cases, contradictory evidence in one reviewed Faraday-law
-conflict, missing discriminators in 120, natural-language provenance in 81,
+in 160 cases and multiple bounded hypotheses in 127. Supporting evidence was
+present in 155 cases, contradictory evidence in one reviewed Faraday-law
+conflict, missing discriminators in 120, natural-language provenance in 77,
 scoped-domain provenance in 147, and reviewed conventions in 11. All 166 cases
 reported bounded-open-world exhaustiveness, exact file/path/range/revision/scope
 anchors, and deterministic evidence-bearing ordering. The dedicated safety

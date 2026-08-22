@@ -1,6 +1,6 @@
 # Pack maturity report
 
-This is measured repository state on 2026-08-15, not live production telemetry
+This is measured repository state on 2026-08-22, not live production telemetry
 and not a future plan. The [quality manifest](../fixtures/corpus-manifest.json)
 holds approved support policy; GitHub issues hold planned work.
 
@@ -93,16 +93,16 @@ holds approved support policy; GitHub issues hold planned work.
   false conflict, or missed-coverage risk under the reviewed targets.
 - Final stable x86_64 full-path measurements use five isolated processes per
   size and retain every raw sample. At 61 documents, median peak and live
-  retained RSS growth are 125,005,824 and 90,054,656 bytes, edit p95 is 8.60
-  ms, and semantic-view p95 is 1.85 ms. At 501 documents, the corresponding
-  values are 155,803,648 and 152,989,696 bytes, 29.06 ms, and 3.10 ms. The
+  retained RSS growth are 110,440,448 and 82,067,456 bytes, edit p95 is 10.85
+  ms, and semantic-view p95 is 3.40 ms. At 501 documents, the corresponding
+  values are 156,672,000 and 156,672,000 bytes, 36.39 ms, and 3.78 ms. The
   same-host `956d89c` baseline records 7.30/27.06 ms edit p95 and
   116,846,592/149,200,896 bytes retained RSS; semantic-only edits record
   7.92/25.29 ms versus 9.30/29.30 ms. All approved limits remain unchanged. The
-  stored semantic entity count falls from 1,010/8,347 to 1,007/8,291 despite
-  broader source-grounded claims. Dispatch visits 1,385 and 11,501 law rules at
+  current candidate stores 901 and 7,341 semantic entities at the two sizes.
+  Dispatch visits 590 and 4,873 law rules at
   61 and 501 documents, below the unchanged 24-per-document caps; the release
-  WASM is 3,560,914 bytes.
+  WASM is 4,353,232 bytes.
 - The v0.27 authored document baseline was run manually against Semath commit
   `0380421` after its 96 development scenarios were reviewed and its 48 holdout
   scenarios were separately reviewed and frozen before engine execution. The
@@ -183,7 +183,7 @@ holds approved support policy; GitHub issues hold planned work.
   `d81e92197d914f76f5cab84c0467c39d494c26169907c469078c78c20efcf684`.
 - The practical-STEM benchmark was commissioned at
   `16e1797286fd5143144e78657230cebedd433943`, where it passed 57 of 115
-  authored development probes with risk 116. The current 2026-08-15 state
+  authored development probes with risk 116. The current 2026-08-22 state
   passes 108 of 166 with the same risk and zero false establishment, false
   conflict, identity, or navigation risk. Its field-by-capability matrix now
   references 104 unique reviewed probes across all 50 cells. Linear algebra,
@@ -193,20 +193,20 @@ holds approved support policy; GitHub issues hold planned work.
 
   | Program field            | Passed | Cases |
   | ------------------------ | -----: | ----: |
-  | Shared foundations       |     20 |    31 |
+  | Shared foundations       |     21 |    31 |
   | Linear algebra           |     43 |    50 |
-  | Differential equations   |     41 |    53 |
+  | Differential equations   |     38 |    53 |
   | Probability/statistics   |     41 |    52 |
   | Numerical analysis       |     57 |    74 |
 
   | Capability            | Passed | Cases |
   | --------------------- | -----: | ----: |
-  | Vocabulary            |     26 |    30 |
-  | Typing                |     24 |    27 |
+  | Vocabulary            |     25 |    30 |
+  | Typing                |     23 |    27 |
   | Relation recognition  |     30 |    41 |
-  | Equivalent forms      |     11 |    19 |
+  | Equivalent forms      |     12 |    19 |
   | Conditions            |     22 |    30 |
-  | Document attachment   |     24 |    27 |
+  | Document attachment   |     23 |    27 |
   | Project lifecycle     |     11 |    12 |
   | Decision quality      |     19 |    29 |
   | Navigation            |     17 |    22 |
