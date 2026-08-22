@@ -7529,6 +7529,41 @@ P_s=V_sI_s.
     }
 
     #[test]
+    fn composite_derivative_notation_does_not_poison_a_later_typed_law() {
+        let recognized = recognized_law_observations(
+            "Let $y$ be a function and $x$ a variable. $y$ is differentiable in $x$. We use $\\frac{dy}{dx}(x)$ for the derivative value. $y'(x)=\\frac{dy}{dx}(x)$",
+        );
+        let recognition = recognized
+            .iter()
+            .find(|law| law.law_id == "first-derivative-relation")
+            .expect("first derivative recognition");
+        assert_eq!(recognition.status, LawRecognitionStatus::Verified);
+        let relation = recognition.relation.as_ref().expect("recognized relation");
+        assert_eq!(relation.roles.len(), 3);
+        assert_eq!(
+            relation
+                .roles
+                .iter()
+                .map(|role| (role.role.as_str(), role.symbol.as_str()))
+                .collect::<BTreeMap<_, _>>(),
+            BTreeMap::from([
+                ("derivative", "y'(x)"),
+                ("function", "y"),
+                ("variable", "x"),
+            ])
+        );
+
+        assert!(
+            recognized_law_observations(
+                "Let $y$ be a function and $x$ a variable. $y$ is differentiable in $x$. We use $y$ for the derivative value. $y'(x)=\\frac{dy}{dx}(x)"
+            )
+            .iter()
+            .all(|law| law.law_id != "first-derivative-relation"),
+            "an explicit conflicting definition of y must still refuse the law"
+        );
+    }
+
+    #[test]
     fn typed_structural_variants_preserve_authored_relations() {
         let failures = [
             (
