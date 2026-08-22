@@ -979,14 +979,15 @@ fn collect_role_first_nominal_definitions(
             if multiline_fallback && !semantic_only {
                 continue;
             }
-            let Some((symbol, symbol_range)) = definition_owner_for_description(
-                document,
+            if role_first_has_nondefining_imperative(&source[clause.start..mention.start]) {
+                continue;
+            }
+            let Some((symbol, symbol_range)) = direct_nominal_owner_for_description(
                 source,
                 index,
                 parsed,
                 canonical_expressions,
                 math,
-                selected.description,
             ) else {
                 continue;
             };
@@ -3739,6 +3740,51 @@ fn definition_owner_for_description(
     )
 }
 
+fn direct_nominal_owner_for_description(
+    source: &str,
+    index: &SourceIndex,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    math: &ParsedMath,
+) -> Option<(String, SourceRange)> {
+    let math_index = parsed
+        .iter()
+        .position(|candidate| std::ptr::eq(candidate, math))?;
+    let expression = canonical_expressions.get(math_index)?;
+    match &expression.kind {
+        SemanticExprKind::Symbol(_)
+        | SemanticExprKind::Index { .. }
+        | SemanticExprKind::Apply { .. } => nominal_expression_owner(source, index, expression),
+        SemanticExprKind::Derivative { .. } => {
+            let start = index.byte_for_utf16(expression.range.start_offset);
+            let end = index.byte_for_utf16(expression.range.end_offset);
+            let surface = source.get(start..end)?.trim();
+            (!surface.is_empty()).then(|| (surface.to_owned(), expression.range.clone()))
+        }
+        SemanticExprKind::Product(items)
+            if source_parenthesized_application_owner(source, index, items).is_some() =>
+        {
+            source_parenthesized_application_owner(source, index, items)
+        }
+        _ => None,
+    }
+}
+
+fn role_first_has_nondefining_imperative(prefix: &str) -> bool {
+    let lead = prefix.trim_start().to_ascii_lowercase();
+    [
+        "check ",
+        "compare ",
+        "consider ",
+        "evaluate ",
+        "inspect ",
+        "observe ",
+        "plot ",
+    ]
+    .iter()
+    .any(|verb| lead.starts_with(verb))
+}
+
 fn guarded_relation_owner(
     source: &str,
     index: &SourceIndex,
@@ -5842,6 +5888,36 @@ Define the mean axial speed by the flow relation
             "{:?}",
             assigned_product.definitions
         );
+    }
+
+    #[test]
+    fn role_first_composite_does_not_retype_its_internal_symbol() {
+        let source = "Let $x$ denote the state vector. Its derivative $\\dot{x}$ drives the model.";
+        let analysis = analyze(source);
+        let derivative = analysis
+            .definitions
+            .iter()
+            .find(|definition| {
+                definition.evidence.rule_id == "english-role-first-nominal-definition"
+            })
+            .expect("the asserted derivative has its own definition");
+        assert_eq!(derivative.symbol, "\\dot{x}");
+        assert_eq!(
+            &source[derivative.location.range.start_offset as usize
+                ..derivative.location.range.end_offset as usize],
+            "\\dot{x}"
+        );
+        assert!(analysis.definitions.iter().all(|definition| {
+            definition.evidence.rule_id != "english-role-first-nominal-definition"
+                || definition.symbol != "x"
+        }));
+
+        let inspected = analyze(
+            "Let $x(t)$ be an n-dimensional state vector. Inspect its derivative $\\dot{x}(t)$.",
+        );
+        assert!(inspected.definitions.iter().all(|definition| {
+            definition.evidence.rule_id != "english-role-first-nominal-definition"
+        }));
     }
 
     #[test]

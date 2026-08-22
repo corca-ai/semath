@@ -140,11 +140,14 @@ an unrelated probe cannot fill them.
 
 The 2026-08-13 v0.28 pre-blind evaluation passes 50 of 115 editable development
 probes (risk 130, no false establishment, false conflict, or navigation risk).
-The immutable semantic-continuity report is 22 of 48 with raw risk 202; fifteen
-reviewed `partial` to `established` transitions now have exact source-backed
-definitions or relations. Applying only those explicit adjudications produces
-the release score 37 of 48 with risk 22 and no unsafe risk. The remaining eleven
-cases stay visible as coverage work.
+The immutable semantic-continuity report remains the historical target surface.
+The release gate applies thirty exact, independently reviewed decision
+transitions without changing its shape, Problems, relation, or identity
+expectations: nineteen source-backed `partial` to `established` transitions,
+ten unsupported-ambiguity `ambiguous` to `partial` transitions, and one
+source-grounded derivative `ambiguous` to `established` transition. The current
+release score is 44 of 48 with risk 8 and no unsafe risk; the four remaining
+vector-shape misses stay visible as coverage work.
 
 The current 2026-08-22 development frontier passes 108 of 166 probes with risk
 116 and no false establishment, false conflict, identity, or navigation risk.
