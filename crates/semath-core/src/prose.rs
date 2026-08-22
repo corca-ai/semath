@@ -555,17 +555,22 @@ pub(crate) fn observe_prose(
                 );
             }
         } else if let Some(explicit) = explicit_single_definition(before, after, math) {
-            push_claim(
-                &mut analysis,
-                document,
-                &index,
-                &symbol,
-                &symbol_range,
-                explicit.description,
-                explicit.rule_id,
-                before_start + explicit.prefix_start,
-                end_byte + explicit.suffix_end,
-            );
+            let expression = canonical_expressions.get(math_index);
+            if let Some((owner, owner_range)) = expression.and_then(|expression| {
+                explicit_definition_owner(source, &index, expression, &explicit)
+            }) {
+                push_claim(
+                    &mut analysis,
+                    document,
+                    &index,
+                    &owner,
+                    &owner_range,
+                    explicit.description,
+                    explicit.rule_id,
+                    before_start + explicit.prefix_start,
+                    end_byte + explicit.suffix_end,
+                );
+            }
         } else if let Some(active) = mentions
             .iter()
             .position(|mention| mention.math_index == math_index)
@@ -1672,24 +1677,72 @@ fn strip_trailing_flow_adverbs(mut value: &str) -> &str {
 }
 
 fn is_formula_metadescription(description: &str) -> bool {
+    formula_description_words(description)
+        .last()
+        .is_some_and(|word| is_formula_metaword(&word))
+}
+
+fn relation_description_is_formula_metadescription(description: &str) -> bool {
+    relation_description_head_words(description).any(|word| is_formula_metaword(&word))
+}
+
+fn relation_description_classifies_role(description: &str) -> bool {
+    classify_role(description).is_some()
+}
+
+fn relation_description_head_words(description: &str) -> impl Iterator<Item = String> + '_ {
+    formula_description_words(description).take_while(|word| !is_description_preposition(word))
+}
+
+fn formula_description_words(description: &str) -> impl Iterator<Item = String> + '_ {
+    description
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .map(str::to_ascii_lowercase)
+}
+
+fn is_description_preposition(word: &str) -> bool {
     matches!(
-        description
-            .split(|character: char| !character.is_ascii_alphabetic())
-            .rfind(|word| !word.is_empty())
-            .map(str::to_ascii_lowercase)
-            .as_deref(),
-        Some(
-            "balance"
-                | "check"
-                | "condition"
-                | "equation"
-                | "expression"
-                | "formula"
-                | "identity"
-                | "law"
-                | "model"
-                | "relation"
-        )
+        word,
+        "about"
+            | "across"
+            | "at"
+            | "between"
+            | "by"
+            | "for"
+            | "from"
+            | "in"
+            | "of"
+            | "on"
+            | "over"
+            | "to"
+            | "under"
+            | "with"
+            | "within"
+            | "without"
+    )
+}
+
+fn is_formula_metaword(word: &str) -> bool {
+    matches!(
+        word,
+        "balance"
+            | "check"
+            | "condition"
+            | "comparison"
+            | "constraint"
+            | "equation"
+            | "equality"
+            | "equivalence"
+            | "expression"
+            | "formula"
+            | "identity"
+            | "inequality"
+            | "law"
+            | "model"
+            | "relation"
+            | "rule"
+            | "statement"
     )
 }
 
@@ -3246,6 +3299,72 @@ fn explicit_single_definition<'a>(
     math: &ParsedMath,
 ) -> Option<crate::construction::DefinitionConstruction<'a>> {
     match_definition(before, after, contains_assignment(&math.root))
+}
+
+fn explicit_definition_owner(
+    source: &str,
+    index: &SourceIndex,
+    expression: &SemanticExpr,
+    explicit: &crate::construction::DefinitionConstruction<'_>,
+) -> Option<(String, SourceRange)> {
+    let target = match &expression.kind {
+        SemanticExprKind::Relation {
+            operator,
+            left,
+            right,
+        } if (((explicit.rule_id == "english-construction-definition"
+            && matches!(right.kind, SemanticExprKind::Number(_))
+            || explicit.rule_id == "english-math-assignment-definition"
+                && relation_operator_source(source, index, left, right).contains(":="))
+            && relation_description_classifies_role(explicit.description))
+            || operator.as_str() == "equals"
+                && matches!(
+                    left.kind,
+                    SemanticExprKind::Apply { .. } | SemanticExprKind::Index { .. }
+                ))
+            && !relation_description_is_formula_metadescription(explicit.description) =>
+        {
+            left.as_ref()
+        }
+        SemanticExprKind::Relation { .. } => return None,
+        _ => expression,
+    };
+    nominal_expression_owner(source, index, target)
+}
+
+fn relation_operator_source<'a>(
+    source: &'a str,
+    index: &SourceIndex,
+    left: &SemanticExpr,
+    right: &SemanticExpr,
+) -> &'a str {
+    let start = index.byte_for_utf16(left.range.end_offset);
+    let end = index.byte_for_utf16(right.range.start_offset);
+    source.get(start..end).unwrap_or_default()
+}
+
+fn nominal_expression_owner(
+    source: &str,
+    index: &SourceIndex,
+    target: &SemanticExpr,
+) -> Option<(String, SourceRange)> {
+    match &target.kind {
+        SemanticExprKind::Symbol(name) => Some((name.clone(), target.range.clone())),
+        SemanticExprKind::Index { .. } => Some((expression_name(target)?, target.range.clone())),
+        SemanticExprKind::Apply { operator, .. } => {
+            let start = index.byte_for_utf16(operator.range.start_offset);
+            let end = index.byte_for_utf16(operator.range.end_offset);
+            let surface = source.get(start..end).unwrap_or_default().trim();
+            let direct_identifier = surface.chars().next().is_some_and(char::is_alphabetic);
+            let explicit_named_operator = surface
+                .strip_prefix("\\operatorname{")
+                .and_then(|name| name.strip_suffix('}'))
+                .is_some_and(|name| name == operator.as_str());
+            (direct_identifier || explicit_named_operator)
+                .then(|| (operator.value.clone(), operator.range.clone()))
+        }
+        _ => None,
+    }
 }
 
 fn contains_assignment(node: &crate::EquationNode) -> bool {
@@ -5099,6 +5218,130 @@ Define the mean axial speed by the flow relation
         assert_eq!(analysis.definitions[7].description, "the linear operator");
         assert_eq!(analysis.definitions[8].description, "the row count");
         assert_eq!(analysis.definitions[9].description, "combined function");
+    }
+
+    #[test]
+    fn composite_use_definition_does_not_retype_an_internal_symbol() {
+        let source = "We use $\\frac{dy}{dx}(x)$ for the derivative value.";
+        let composite = analyze(source);
+        assert!(
+            composite.definitions.is_empty(),
+            "{:?}",
+            composite.definitions
+        );
+        assert!(composite.formula_meanings.is_empty());
+
+        let simple = analyze("We use $z$ for the derivative value.");
+        assert!(simple.definitions.iter().any(|definition| {
+            definition.symbol == "z" && definition.description == "the derivative value"
+        }));
+
+        let indexed = analyze("We use $x_k$ for the current iterate.");
+        assert!(indexed.definitions.iter().any(|definition| {
+            definition.symbol == "x_k" && definition.description == "the current iterate"
+        }));
+
+        let application = analyze("We use $f(x)$ for the response function.");
+        assert!(application.definitions.iter().any(|definition| {
+            definition.symbol == "f" && definition.description == "the response function"
+        }));
+
+        let named_operator =
+            analyze("We use $\\operatorname{score}(x)$ for the calibration score.");
+        assert!(named_operator.definitions.iter().any(|definition| {
+            definition.symbol == "score" && definition.description == "the calibration score"
+        }));
+
+        let norm = analyze("We use $\\lVert x\\rVert$ for the vector norm.");
+        assert!(norm.definitions.is_empty(), "{:?}", norm.definitions);
+
+        for source in [
+            "We use $A^\\top$ for the transpose.",
+            "We use $\\nabla f(x)$ for the gradient.",
+            "We use $\\det(A)$ for the determinant.",
+            "We use $\\sin(x)$ for the sine value.",
+        ] {
+            let structural = analyze(source);
+            assert!(
+                structural.definitions.is_empty(),
+                "{source}: {:?}",
+                structural.definitions
+            );
+        }
+
+        let product = analyze("We use $Ax$ for the transformed vector.");
+        assert!(product.definitions.is_empty(), "{:?}", product.definitions);
+        assert!(product.formula_meanings.is_empty());
+
+        let assignment = analyze("$f := g+h$ defines the combined function.");
+        assert!(assignment.definitions.iter().any(|definition| {
+            definition.symbol == "f" && definition.description == "combined function"
+        }));
+        let indexed_assignment = analyze("$x_k := z$ defines the current iterate.");
+        assert!(
+            indexed_assignment
+                .definitions
+                .iter()
+                .any(|definition| definition.symbol == "x_k")
+        );
+        let guarded = analyze("Let $C>0$ be a constant capacitance.");
+        assert!(guarded.definitions.iter().any(|definition| {
+            definition.symbol == "C" && definition.description == "a constant capacitance"
+        }));
+        let indexed_guard = analyze("Let $x_k>0$ be the current iterate.");
+        assert!(
+            indexed_guard
+                .definitions
+                .iter()
+                .any(|definition| definition.symbol == "x_k")
+        );
+        let callable_relation =
+            analyze("Let $R(\\theta)=\\lVert\\theta\\rVert_2^2/2$ denote the weight penalty.");
+        assert!(callable_relation.definitions.iter().any(|definition| {
+            definition.symbol == "R" && definition.description == "the weight penalty"
+        }));
+
+        for source in [
+            "We use $x<y$ for the ordering constraint.",
+            "We use $x\\approx y$ for the approximate relation.",
+            "We use $x=y$ for the equality relation.",
+            "We use $x=y$ for the equality relation between the variables.",
+            "We use $x=y$ for the equality relation here.",
+            "We use $x=y$ for the equality relation valid globally.",
+            "We use $x=y$ for the equality relation, valid between variables.",
+            "We use $x=y$ for the equality.",
+            "We use $x=y$ for the equivalence.",
+            "We use $x=y$ for the comparison.",
+            "We use $x=y$ for the inequality.",
+            "We use $x=y$ for the mathematical statement.",
+            "We use $x=y$ for the inference rule.",
+            "We use $x=y$ for the equality between functions.",
+            "We use $x=y$ for the equivalence of sets.",
+            "We use $x=y$ for the mathematical statement about a probability distribution.",
+            "We use $x=y$ for the inference rule for functions.",
+            "We use $x=y$ for the equality of capacitances.",
+            "$R := x^2$ defines the equality regularization penalty.",
+            "$R := x^2$ defines the equivalence regularization penalty.",
+            "$R := x^2$ defines the inference rule regularization penalty.",
+            "Here $x<y$ is the ordering relation.",
+            "Given $x\\approx y$ is the approximation formula.",
+            "Let $x<y$ be an ordering constraint.",
+            "Let $x<y$ be the ordering relation between the variables.",
+        ] {
+            let comparison = analyze(source);
+            assert!(
+                comparison.definitions.is_empty(),
+                "{source}: {:?}",
+                comparison.definitions
+            );
+        }
+
+        let assigned_product = analyze("$Ax := z$ defines the transformed vector.");
+        assert!(
+            assigned_product.definitions.is_empty(),
+            "{:?}",
+            assigned_product.definitions
+        );
     }
 
     #[test]
