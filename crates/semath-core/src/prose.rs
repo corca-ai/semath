@@ -4529,6 +4529,10 @@ gain.";
 
         for source in [
             "According to the cited note, the selected constitutive model is\n\\[J=-D\\nabla c.\\]",
+            "The attributed firmware formula is\n\\[J=-D\\nabla c.\\]",
+            "An attributed firmware formula is\n\\[J=-D\\nabla c.\\]",
+            "This attributed firmware formula is\n\\[J=-D\\nabla c.\\]",
+            "The firmware formula attributed to the manual is\n\\[J=-D\\nabla c.\\]",
             "The selected constitutive model is not\n\\[J=-D\\nabla c.\\]",
             "If the optional backend is enabled, the selected constitutive model is\n\\[J=-D\\nabla c.\\]",
         ] {
