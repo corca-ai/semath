@@ -1425,6 +1425,7 @@ fn collect_equation_flow_definitions(
     output: &mut ProseObservations,
 ) {
     let scopes = ScopeGraph::new(document);
+    let document_index = SourceIndex::new(&document.content);
     let mut resolved_mentions = std::collections::BTreeSet::new();
     for construction in constructions {
         let DiscourseConstruction::OutputDefinition {
@@ -1581,8 +1582,16 @@ fn collect_equation_flow_definitions(
             }
             continue;
         }
-        let Some((symbol, symbol_range)) =
-            relation_head_symbol(document, &math.region.content_range).or_else(|| {
+        let expression = lower_document_region(document, &math.region.content_range);
+        let dot_owner = relation_head_symbol(document, &math.region.content_range).and_then(
+            |(owner, owner_range)| {
+                dot_decorated_range(&document.content, &document_index, &owner_range)
+                    .then_some((owner, owner_range))
+            },
+        );
+        let Some((symbol, symbol_range)) = dot_owner
+            .or_else(|| relation_result_owner(source, index, &expression))
+            .or_else(|| {
                 definition_owner_for_math(
                     document,
                     source,
@@ -3545,7 +3554,8 @@ fn nominal_expression_owner(
             Some((owner, target.range.clone()))
         }
         SemanticExprKind::Derivative { expression, .. }
-            if dot_decorated_source(source, index, target) =>
+            if dot_decorated_source(source, index, target)
+                || dot_decorated_source(source, index, expression) =>
         {
             let (owner, _) = nominal_expression_owner(source, index, expression)?;
             Some((owner, target.range.clone()))
@@ -3615,12 +3625,31 @@ fn decorative_star_source(
 }
 
 fn dot_decorated_source(source: &str, index: &SourceIndex, expression: &SemanticExpr) -> bool {
-    let start = index.byte_for_utf16(expression.range.start_offset);
-    let end = index.byte_for_utf16(expression.range.end_offset);
-    source.get(start..end).is_some_and(|surface| {
+    dot_decorated_range(source, index, &expression.range)
+}
+
+fn dot_decorated_range(source: &str, index: &SourceIndex, range: &SourceRange) -> bool {
+    let start = index.byte_for_utf16(range.start_offset);
+    let end = index.byte_for_utf16(range.end_offset);
+    let directly_decorated = source.get(start..end).is_some_and(|surface| {
         let surface = surface.trim_start();
-        surface.starts_with("\\dot{") || surface.starts_with("\\ddot{")
-    })
+        ["\\dot", "\\ddot"].into_iter().any(|command| {
+            surface.strip_prefix(command).is_some_and(|argument| {
+                argument.starts_with('{')
+                    || argument
+                        .chars()
+                        .next()
+                        .is_some_and(|character| character.is_whitespace() || character == '\\')
+            })
+        })
+    });
+    directly_decorated
+        || source.get(..start).is_some_and(|prefix| {
+            let prefix = prefix.trim_end();
+            ["\\dot", "\\ddot"].into_iter().any(|command| {
+                prefix.ends_with(command) || prefix.ends_with(&format!("{command}{{"))
+            })
+        })
 }
 
 fn is_presentation_wrapper(value: &str) -> bool {
@@ -3751,10 +3780,17 @@ fn relation_result_owner(
     index: &SourceIndex,
     expression: &SemanticExpr,
 ) -> Option<(String, SourceRange)> {
-    let SemanticExprKind::Relation { operator, .. } = &expression.kind else {
-        return None;
-    };
-    (operator.as_str() == "equals").then(|| relation_left_owner(source, index, expression))?
+    match &expression.kind {
+        SemanticExprKind::Relation { operator, .. }
+            if matches!(operator.as_str(), "=" | "equals") =>
+        {
+            relation_left_owner(source, index, expression)
+        }
+        SemanticExprKind::System(relations) => relations
+            .first()
+            .and_then(|relation| relation_result_owner(source, index, relation)),
+        _ => None,
+    }
 }
 
 fn asserted_relation_definition_lead(before: &str) -> bool {
@@ -5114,39 +5150,50 @@ gain.";
 
     #[test]
     fn equation_flow_survives_wasmtex_visible_prose_masking() {
-        let source = "The momentum balance then gives\n\\[F_x=\\dot m\\,\\Delta v.\\]";
-        let mut document = ProjectDocument {
-            prose_annotations: vec![],
-            file_id: "main".into(),
-            path: "main.tex".into(),
-            language: DocumentLanguage::Latex,
-            content: source.into(),
-            document_version: 1,
-            schema_version: 8,
-            nodes: Vec::new(),
-            math_roots: Vec::new(),
-            visible_prose: Vec::new(),
-            scopes: Vec::new(),
-            blocks: Vec::new(),
-            declarations: Vec::new(),
-            math_regions: test_math_regions(source, DocumentLanguage::Latex),
-            macros: Vec::new(),
-            includes: Vec::new(),
+        let analyze_masked = |source: &str| {
+            let mut document = ProjectDocument {
+                prose_annotations: vec![],
+                file_id: "main".into(),
+                path: "main.tex".into(),
+                language: DocumentLanguage::Latex,
+                content: source.into(),
+                document_version: 1,
+                schema_version: 8,
+                nodes: Vec::new(),
+                math_roots: Vec::new(),
+                visible_prose: Vec::new(),
+                scopes: Vec::new(),
+                blocks: Vec::new(),
+                declarations: Vec::new(),
+                math_regions: test_math_regions(source, DocumentLanguage::Latex),
+                macros: Vec::new(),
+                includes: Vec::new(),
+            };
+            document.visible_prose.push(VisibleProseSpan {
+                range: SourceRange {
+                    start_offset: 0,
+                    end_offset: source.find("\\[").unwrap() as u32,
+                },
+                state: CompleteSyntaxState::Complete,
+            });
+            analyze_document(&document)
         };
-        document.visible_prose.push(VisibleProseSpan {
-            range: SourceRange {
-                start_offset: 0,
-                end_offset: source.find("\\[").unwrap() as u32,
-            },
-            state: CompleteSyntaxState::Complete,
-        });
 
-        let analysis = analyze_document(&document);
+        let analysis =
+            analyze_masked("The momentum balance then gives\n\\[F_x=\\dot m\\,\\Delta v.\\]");
         assert!(
             !analysis.formula_meanings.is_empty(),
             "{:?}",
             analysis.semantic_evidence.law_activations
         );
+
+        let analysis = analyze_masked(
+            "The corresponding mass rate is written as\n\\[\\dot m=\\rho Q=\\rho A v.\\]",
+        );
+        assert!(analysis.definitions.iter().any(|definition| {
+            definition.symbol == "m"
+                && definition.evidence.rule_id == "english-equation-flow-definition"
+        }));
     }
 
     #[test]
@@ -5877,6 +5924,28 @@ Define the mean axial speed by the flow relation
     }
 
     #[test]
+    fn equation_flow_does_not_define_a_composite_relations_internal_symbol() {
+        for (source, poisoned_symbol) in [
+            (
+                "The derivative value is\n\\[\\frac{dy}{dx}(x)=y'(x).\\]",
+                "y",
+            ),
+            ("The transformed vector is\n\\[Ax=z.\\]", "A"),
+            ("The determinant is\n\\[\\det(A)=d.\\]", "det"),
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis
+                    .definitions
+                    .iter()
+                    .all(|definition| definition.symbol != poisoned_symbol),
+                "{source}: {:?}",
+                analysis.definitions
+            );
+        }
+    }
+
+    #[test]
     fn relation_metadescriptions_attach_to_the_formula_without_defining_its_left_side() {
         let source = "The detached warehouse notation is $orchid_{dev}=quartz_{dev}$, and no scientific role is declared for either symbol.";
         let analysis = analyze_surface_language(source, DocumentLanguage::Latex);
@@ -5962,6 +6031,11 @@ Define the mean axial speed by the flow relation
                 "dot-decoration",
                 "Let $\\dot{\\gamma}$ be shear rate.",
                 "gamma",
+            ),
+            (
+                "dot-token-decoration",
+                "Let $\\dot m$ be mass flow rate.",
+                "m",
             ),
             (
                 "fronted-callable",
