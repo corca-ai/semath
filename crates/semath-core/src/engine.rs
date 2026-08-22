@@ -74,6 +74,10 @@ const MAX_CONVENTIONAL_REQUIREMENTS: usize = 16;
 const MAX_AUTHORING_ITEMS: usize = 16;
 const MAX_VIEW_CLAIMS: usize = 32;
 
+fn formula_meaning_owns_relation_head(fact: &crate::prose::FormulaMeaningFact) -> bool {
+    fact.evidence.rule_id == "english-notation-meaning"
+}
+
 #[derive(Debug, Error)]
 pub enum EngineError {
     #[error("unsupported protocol version {0}")]
@@ -3979,12 +3983,15 @@ impl SemathEngine {
             .filter(matches_occurrence)
             .filter_map(|seed| seed.application_end_offset)
             .max();
-        let attached_relation_fact = offset == relation.range.end_offset
-            && focus.range.end_offset == relation.range.end_offset
-            && observations
-                .formula_meanings
-                .iter()
-                .any(|fact| fact.target_range == relation.range);
+        let focus_is_relation_head = focus.range.start_offset == relation.range.start_offset
+            || relation_head(relation)
+                .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range));
+        let attached_relation_fact = observations.formula_meanings.iter().any(|fact| {
+            fact.target_range == relation.range
+                && (offset == relation.range.end_offset
+                    && focus.range.end_offset == relation.range.end_offset
+                    || focus_is_relation_head && formula_meaning_owns_relation_head(fact))
+        });
         let owner = if attached_relation_fact {
             relation
         } else {
@@ -4000,10 +4007,9 @@ impl SemathEngine {
             .occurrence_id_for_range(&document.document.file_id, &owner.range)?;
         let occurrence = self.index.semantic.occurrence(&occurrence_id)?;
         let entity_id = canonical_expression_entity(owner, occurrence);
-        self.index
-            .semantic
-            .contains_entity(&entity_id)
-            .then_some(())?;
+        if !attached_relation_fact && !self.index.semantic.contains_entity(&entity_id) {
+            return None;
+        }
         let carries_formula_fact = attached_relation_fact || expression_carries_formula_fact(owner);
         Some((entity_id, carries_formula_fact))
     }
@@ -4039,15 +4045,27 @@ impl SemathEngine {
             || parsed.is_some_and(|math| {
                 is_formula_trailing_boundary(&document.document, &math.region.content_range, offset)
             });
-        let queried_relation = parsed.and_then(|math| {
-            relation_expression_at_cursor(
-                &document.canonical_expressions,
-                &document.document,
-                &math.region.content_range,
-                focus.map(|focus| &focus.range),
-                offset,
-            )
-        });
+        let queried_relation = parsed
+            .and_then(|math| {
+                relation_expression_at_cursor(
+                    &document.canonical_expressions,
+                    &document.document,
+                    &math.region.content_range,
+                    focus.map(|focus| &focus.range),
+                    offset,
+                )
+            })
+            .or_else(|| {
+                let focus = focus?;
+                document.canonical_expressions.iter().find(|expression| {
+                    observations.formula_meanings.iter().any(|fact| {
+                        fact.target_range == expression.range
+                            && formula_meaning_owns_relation_head(fact)
+                    }) && (focus.range.start_offset == expression.range.start_offset
+                        || relation_head(expression)
+                            .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range)))
+                })
+            });
         let queried_formula_range = parsed.map(|math| &math.region.content_range);
         let queried_formula_is_rejected = queried_formula_range
             .is_some_and(|range| observations.semantic_evidence().formula_is_rejected(range));
@@ -4059,9 +4077,11 @@ impl SemathEngine {
             projected_formulas = observations.laws.overlapping(&math.region.content_range);
         }
         let focus_is_relation_head = focus.is_some_and(|focus| {
-            queried_relation
-                .and_then(relation_head)
-                .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range))
+            queried_relation.is_some_and(|relation| {
+                focus.range.start_offset == relation.range.start_offset
+                    || relation_head(relation)
+                        .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range))
+            })
         });
         if focus_is_relation_head {
             projected_formulas.retain(|formula| {
@@ -4108,7 +4128,18 @@ impl SemathEngine {
             })
         } else {
             display_focus.as_ref().and_then(|focus| {
-                if semantic_focus.is_some() && self.resolved_entity(&focus.occurrence_id).is_some()
+                let focus_has_relation_meaning = queried_relation.is_some_and(|relation| {
+                    (focus.range.start_offset == relation.range.start_offset
+                        || relation_head(relation)
+                            .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range)))
+                        && observations.formula_meanings.iter().any(|fact| {
+                            fact.target_range == relation.range
+                                && formula_meaning_owns_relation_head(fact)
+                        })
+                });
+                if !focus_has_relation_meaning
+                    && semantic_focus.is_some()
+                    && self.resolved_entity(&focus.occurrence_id).is_some()
                 {
                     return None;
                 }
@@ -4200,13 +4231,23 @@ impl SemathEngine {
             && symbol_definition_may_establish
             && let Some(relation) = queried_relation
         {
-            symbol_proof.push(Evidence {
-                rule_id: "semath/asserted-formula-meaning".into(),
-                kind: "source-claim".into(),
-                strength: "hard".into(),
-                source_ranges: vec![relation.range.clone()],
-                source_anchors: Vec::new(),
-            });
+            if focus_is_relation_head {
+                symbol_proof.extend(
+                    observations
+                        .formula_meanings
+                        .iter()
+                        .filter(|fact| fact.target_range == relation.range)
+                        .map(|fact| fact.evidence.clone()),
+                );
+            } else {
+                symbol_proof.push(Evidence {
+                    rule_id: "semath/asserted-formula-meaning".into(),
+                    kind: "source-claim".into(),
+                    strength: "hard".into(),
+                    source_ranges: vec![relation.range.clone()],
+                    source_anchors: Vec::new(),
+                });
+            }
         }
         let mut declarations = symbol_info
             .as_ref()

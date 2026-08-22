@@ -163,8 +163,8 @@ fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
         assert_eq!(
             meaning_decision_name(&view.decision),
             case.expected_decision,
-            "{} decision",
-            case.id
+            "{} decision: {view:#?}",
+            case.id,
         );
         assert_eq!(
             view.authoring_context.interpretations.exhaustiveness,
@@ -1862,6 +1862,29 @@ fn formula_metadescription_establishes_only_the_attached_relation() {
         "{view:#?}"
     );
     assert!(view.symbol.is_some_and(|symbol| symbol.entity_id.is_none()));
+    assert!(view.context.entity_id.is_some());
+
+    let head = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.find("J=").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = head.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        matches!(view.decision, MeaningDecision::Partial { .. }),
+        "{view:#?}"
+    );
+    assert!(
+        view.symbol
+            .is_some_and(|symbol| symbol.definitions.is_empty())
+    );
     assert!(view.context.entity_id.is_some());
 
     let inner = engine
