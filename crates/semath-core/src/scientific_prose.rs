@@ -1505,6 +1505,13 @@ fn classify_discourse_frame(
         || lower.contains(" did not apply")
         || lower.contains(" does not assume")
         || lower.contains(" do not assume")
+        || lower.contains(" did not adopt")
+        || lower.contains(" does not adopt")
+        || lower.contains(" do not adopt")
+        || lower.contains(" is not adopted")
+        || lower.contains(" are not adopted")
+        || lower.contains(" was not adopted")
+        || lower.contains(" were not adopted")
         || ((lower.starts_with("drops ") || lower.contains(" drops "))
             && lower.contains(" without assuming"))
         || lower.contains(" inapplicable")
@@ -3206,6 +3213,7 @@ mod tests {
             "Let $A$ be an event, but this law does not apply: $A \\cap B$.",
             "The cited gradient assumption is inapplicable to these data.",
             "The document drops the product derivative and claims $i=C(t)\\frac{dv}{dt}$ without assuming $\\dot C=0$.",
+            "For comparison only, the report mentions $K=\\frac12mv^2$ but does not adopt the kinetic-energy model.",
         ] {
             let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
             assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);

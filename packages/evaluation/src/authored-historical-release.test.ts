@@ -1,15 +1,22 @@
 import { describe, expect, test } from "bun:test";
 import { authoredHistoricalReleaseRegressions } from "./authored-historical-release";
+import type { AuthoredHistoricalReleaseBaseline } from "./authored-historical-release";
+import {
+  authoredFalseEstablishmentCases,
+  scoreAuthoredScientificFixture,
+} from "./authored-scientific";
 import type {
   AuthoredScientificFixture,
   AuthoredScientificObservation,
   AuthoredScientificScorecard,
 } from "./authored-scientific";
 
-const baseline = {
+const baseline: AuthoredHistoricalReleaseBaseline = {
   approvedConservativeDecisionIds: [],
   approvedCursorBoundaryIdentityIds: [],
-  approvedFalseEstablishmentIds: ["reviewed-transition"],
+  approvedFalseEstablishments: [
+    { caseId: "reviewed-transition", causes: ["decision"] },
+  ],
   approvedSourceGroundedNavigationRecoveries: [],
   cases: 2,
   maximumMissedCoverage: 1,
@@ -20,9 +27,20 @@ const baseline = {
 
 describe("authored historical release policy", () => {
   test("accepts only a reviewed, source-grounded frozen-contract mismatch", () => {
+    const reviewed = probe("reviewed-transition");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          expected: { ...reviewed.expected, proofGrounded: true },
+        },
+      ],
+      scenarios: [scenario()],
+    };
     expect(
       authoredHistoricalReleaseRegressions(
-        fixture(),
+        reviewedFixture,
         [observation("reviewed-transition", "established", true)],
         score({ falseEstablishment: 1, total: 26 }),
         baseline,
@@ -42,6 +60,185 @@ describe("authored historical release policy", () => {
       "unreviewed false establishment ordinary-miss",
       "false establishment ordinary-miss is not source grounded",
     ]);
+  });
+
+  test("rejects cause substitution for a reviewed false establishment", () => {
+    const reviewed = probe("reviewed-transition");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          expected: {
+            ...reviewed.expected,
+            excludedRelationIds: ["test:excluded-law"],
+          },
+        },
+        probe("ordinary-miss"),
+      ],
+    };
+    const reviewedObservation: AuthoredScientificObservation = {
+      ...observation("reviewed-transition", "partial", false),
+      relations: [
+        {
+          fileId: "main",
+          relationId: "test:excluded-law",
+          range: { startOffset: 0, endOffset: 1 },
+          roles: [],
+          sourceGrounded: true,
+        },
+      ],
+    };
+
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [reviewedObservation],
+        score({ falseEstablishment: 1, total: 26 }),
+        baseline,
+      ),
+    ).toEqual([
+      "false establishment reviewed-transition causes excluded-relation differ from approved decision",
+    ]);
+  });
+
+  test("rejects an extra relation leak beside an approved decision cause", () => {
+    const reviewed = probe("reviewed-transition");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          expected: {
+            ...reviewed.expected,
+            excludedRelationIds: ["test:excluded-law"],
+            proofGrounded: true,
+          },
+        },
+      ],
+      scenarios: [scenario()],
+    };
+    const reviewedObservation: AuthoredScientificObservation = {
+      ...observation("reviewed-transition", "established", true),
+      relations: [
+        {
+          fileId: "main",
+          relationId: "test:excluded-law",
+          range: { startOffset: 0, endOffset: 1 },
+          roles: [],
+          sourceGrounded: true,
+        },
+      ],
+    };
+
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [reviewedObservation],
+        score({ falseEstablishment: 1, total: 26 }),
+        baseline,
+      ),
+    ).toEqual([
+      "false establishment reviewed-transition causes decision,excluded-relation differ from approved decision",
+    ]);
+  });
+
+  test("classifies every false-establishment cause from one shared contract", () => {
+    const reviewed = probe("reviewed-transition");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          expected: {
+            ...reviewed.expected,
+            excludedRelationIds: ["test:excluded-law"],
+            relations: [
+              {
+                anchor: { fileId: "main", needle: "x" },
+                relationId: "test:expected-law",
+                roles: [],
+                sourceGrounded: false,
+              },
+            ],
+          },
+        },
+      ],
+      scenarios: [scenario()],
+    };
+    const reviewedObservation: AuthoredScientificObservation = {
+      ...observation("reviewed-transition", "established", true),
+      relations: [
+        {
+          fileId: "main",
+          relationId: "test:expected-law",
+          range: { startOffset: 0, endOffset: 1 },
+          roles: [],
+          sourceGrounded: true,
+        },
+        {
+          fileId: "main",
+          relationId: "test:excluded-law",
+          range: { startOffset: 0, endOffset: 1 },
+          roles: [],
+          sourceGrounded: true,
+        },
+      ],
+    };
+
+    expect(
+      authoredFalseEstablishmentCases(reviewedFixture, [reviewedObservation]),
+    ).toEqual([
+      {
+        caseId: "reviewed-transition",
+        causes: [
+          "decision",
+          "proof-grounding",
+          "relation-grounding",
+          "excluded-relation",
+        ],
+        sourceGrounded: true,
+      },
+    ]);
+  });
+
+  test("keeps an independent coverage miss beside a relation leak", () => {
+    const reviewed = probe("reviewed-transition");
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [
+        {
+          ...reviewed,
+          expected: {
+            ...reviewed.expected,
+            excludedRelationIds: ["test:excluded-law"],
+          },
+        },
+      ],
+      scenarios: [scenario()],
+    };
+    const reviewedObservation: AuthoredScientificObservation = {
+      ...observation("reviewed-transition", "unsupported", false),
+      relations: [
+        {
+          fileId: "main",
+          relationId: "test:excluded-law",
+          range: { startOffset: 0, endOffset: 1 },
+          roles: [],
+          sourceGrounded: true,
+        },
+      ],
+    };
+
+    expect(
+      scoreAuthoredScientificFixture(reviewedFixture, [reviewedObservation]).risk,
+    ).toEqual({
+      falseConflict: 0,
+      falseEstablishment: 1,
+      missedCoverage: 1,
+      navigationOrIdentity: 0,
+      total: 14,
+    });
   });
 
   test("adjudicates only a reviewed unsupported cursor at a formula boundary", () => {
@@ -129,6 +326,7 @@ describe("authored historical release policy", () => {
           },
         },
       ],
+      scenarios: [scenario()],
     };
     const reviewedObservation = {
       ...observation("reviewed-conservative", "partial", false),

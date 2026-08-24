@@ -102,31 +102,32 @@ holds approved support policy; GitHub issues hold planned work.
   current candidate stores 901 and 7,341 semantic entities at the two sizes.
   Dispatch visits 590 and 4,873 law rules at
   61 and 501 documents, below the unchanged 24-per-document caps; the release
-  WASM is 4,353,232 bytes.
+  WASM is 4,355,321 bytes.
 - The v0.27 authored document baseline was run manually against Semath commit
   `0380421` after its 96 development scenarios were reviewed and its 48 holdout
   scenarios were separately reviewed and frozen before engine execution. The
   baseline passed 7 of 115 development probes with risk 484 and 4 of 97 holdout
   probes with risk 732. The v0.28 pre-blind release passes 50 development probes
-  with risk 130 and 6 historical holdout probes with risk 720. Development has
+  with risk 130 and the current engine passes 7 historical holdout probes with
+  raw risk 720. Development has
   no false establishment, false conflict, or navigation risk. The frozen
-  holdout has two exact, reviewed source-grounded contract disagreements. One
-  asks prose in a disconnected file to retract an established relation in
-  another component; preserving the component boundary is safer. The other
-  expects a partial decision where the source directly states that an overlap
-  is \(A\cap B\). The release policy names these cases and rejects any new or
-  ungrounded substitution. The current first losses localize as follows:
+  holdout has one remaining exact, reviewed source-grounded contract disagreement.
+  It expects prose in a disconnected project component to retract a relation
+  established in another component; Semath preserves that dependency boundary.
+  The release policy binds the exact decision, proof, and relation causes and
+  rejects any new or ungrounded substitution. The current first losses localize
+  as follows:
 
   | First loss                       |   Development |       Holdout |
   | -------------------------------- | ------------: | ------------: |
   | Neutral syntax                   |             0 |             0 |
-  | Prose attachment                 |            21 |            23 |
-  | Identity or scope                |             0 |            42 |
+  | Prose attachment                 |            21 |            26 |
+  | Identity or scope                |             0 |            40 |
   | Canonical IR                     |             0 |             0 |
-  | Typed fact or condition          |            19 |            10 |
+  | Typed fact or condition          |            19 |             8 |
   | Local-to-observation propagation |             0 |             0 |
-  | Pack unification                 |            18 |            12 |
-  | Decision                         |             0 |             4 |
+  | Pack unification                 |            18 |            13 |
+  | Decision                         |             0 |             3 |
   | Host projection                  | Not exercised | Not exercised |
 
   The scorer reuses the existing recognition-frontier signals and queries

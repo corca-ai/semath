@@ -45,9 +45,11 @@ try {
     {
       approvedConservativeDecisionIds: ["CA-HO-06-probe"],
       approvedCursorBoundaryIdentityIds: ["CA-HO-05-probe"],
-      approvedFalseEstablishmentIds: [
-        "DMH-06-probe-revision-before-equation",
-        "FMH-027-06-probe-stage-6-retracted-volume-flow",
+      approvedFalseEstablishments: [
+        {
+          caseId: "FMH-027-06-probe-stage-6-retracted-volume-flow",
+          causes: ["decision", "excluded-relation", "proof-grounding"],
+        },
       ],
       approvedSourceGroundedNavigationRecoveries: [
         {
