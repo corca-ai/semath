@@ -2109,6 +2109,21 @@ fn semantic_view_projects_bounded_index_constraints_without_formula_reparsing() 
 }
 
 #[test]
+fn a_role_first_derivative_keeps_structural_identity_without_a_false_conflict() {
+    let content =
+        "Let $x(t)$ be an n-dimensional state vector. Inspect its derivative $\\dot{x}(t)$.";
+    let view = semantic_view_at(content, content.find("dot{x}").unwrap() as u32);
+
+    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
+    assert!(view.diagnostics.is_empty(), "{:?}", view.diagnostics);
+
+    let asserted = "Let $x$ denote the state vector. Its derivative $\\dot{x}$ drives the model.";
+    let view = semantic_view_at(asserted, asserted.find("x}$ drives").unwrap() as u32);
+    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
+    assert!(view.diagnostics.is_empty(), "{:?}", view.diagnostics);
+}
+
+#[test]
 fn law_roles_are_retained_as_retractable_derived_index_claims() {
     let content = "Let $A$ be an n by n matrix and $x$ an n-dimensional vector. Define $y=Ax$. Let $B$ be an n by n matrix and $z$ an n-dimensional vector. Then $z=By$. Inspect $y$.";
     let offset = content.rfind("$y$").unwrap() as u32 + 1;

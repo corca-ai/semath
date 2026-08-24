@@ -55,7 +55,7 @@
             "strengthCeiling": "asserted"
           }
         ],
-        "disposition": "partial",
+        "disposition": "unsupported",
         "equationLinks": [],
         "forbiddenAuthority": [],
         "formulaAnchor": "derivative-convention-tex:formula.root",
@@ -141,7 +141,7 @@
             "strengthCeiling": "asserted"
           }
         ],
-        "disposition": "partial",
+        "disposition": "unsupported",
         "equationLinks": [],
         "forbiddenAuthority": [],
         "formulaAnchor": "derivative-convention-md:formula.root",
@@ -227,7 +227,7 @@
             "strengthCeiling": "asserted"
           }
         ],
-        "disposition": "partial",
+        "disposition": "unsupported",
         "equationLinks": [],
         "forbiddenAuthority": [],
         "formulaAnchor": "gradient-definition-tex:formula.root",
@@ -313,7 +313,7 @@
             "strengthCeiling": "asserted"
           }
         ],
-        "disposition": "partial",
+        "disposition": "unsupported",
         "equationLinks": [],
         "forbiddenAuthority": [],
         "formulaAnchor": "gradient-definition-md:formula.root",
@@ -1348,7 +1348,7 @@
       "safety": {
         "claims": [
           {
-            "anchor": "generated-opaque-call-tex:claim-01",
+            "anchor": "generated-opaque-call-tex:claim-evidence-span",
             "modality": "asserted",
             "polarity": "positive",
             "strengthCeiling": "asserted"
@@ -1380,6 +1380,10 @@
         "noUnexpectedAuthority": true,
         "noUnexpectedContradictions": true,
         "notation": [
+          {
+            "anchor": "generated-opaque-call-tex:notation-00",
+            "sourceNotation": "r"
+          },
           {
             "anchor": "generated-opaque-call-tex:notation-01",
             "sourceNotation": "r"
@@ -1434,7 +1438,7 @@
       "safety": {
         "claims": [
           {
-            "anchor": "generated-opaque-call-md:claim-01",
+            "anchor": "generated-opaque-call-md:roles",
             "modality": "asserted",
             "polarity": "positive",
             "strengthCeiling": "asserted"
@@ -1466,6 +1470,10 @@
         "noUnexpectedAuthority": true,
         "noUnexpectedContradictions": true,
         "notation": [
+          {
+            "anchor": "generated-opaque-call-md:notation-00",
+            "sourceNotation": "r"
+          },
           {
             "anchor": "generated-opaque-call-md:notation-01",
             "sourceNotation": "r"
@@ -2892,15 +2900,15 @@
     }
   ],
   "review": {
-    "attestationDigest": "d32aa406d2b229d703c8fd346ceae913caf702fee0c3412eb754dfa67bb0d6b5",
+    "attestationDigest": "7f2eff4ecef420737f06dcdabeb5cef6238f2b27590257331349383fa71250ab",
     "author": "agent:/root/constraint_contract_rewrite",
-    "digest": "7693f886b6eda4c71ca29dd899aa006e03ad4a79cbede998747d8af4ac7efbe9",
+    "digest": "11dc3cdaefbe765ed6a451b2b992b225c624de1526dda55bb7dd07d18d0a1cf1",
     "reviewFixture": "fixtures/challenge/math-authoring-oracle-review-v2.json",
-    "reviewedAt": "2026-08-20",
-    "reviewer": "agent:/root/oracle_v2_final_audit"
+    "reviewedAt": "2026-08-22",
+    "reviewer": "agent:/root/v039_release_contract"
   },
   "schemaVersion": 2,
   "sourceFixture": "fixtures/challenge/math-authoring-oracle-source-v2.json",
   "sourceFixtureId": "semath-math-authoring-public-source-v2",
-  "sourceSha256": "7eaff6b13a4ee41773b60bf74368c0eeacd126f1d482976f9de4c222a7b4528a"
+  "sourceSha256": "9f82b6362ca7654e3b4c4d010837e3a010b37b0e9a1a6df6d6e4f17f36d9d59a"
 }

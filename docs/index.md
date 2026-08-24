@@ -46,6 +46,8 @@ artifacts.
   smallest authoritative test layer for each capability.
 - [Semantic quality scorecards](semantic-quality-scorecards.md) — interpret and
   change calibration, refusal, corpus, parity, and performance budgets.
+- [Spent holdout postmortems](spent-holdout-postmortems.md) — understand the
+  historical v0.38/v0.39 failures, public regression atlas, and reuse boundary.
 - [Practical STEM breadth benchmark](stem-breadth-benchmark.md) — interpret the
   reviewed field-by-capability development matrix and its commissioned gaps.
 - Inspect the dated cursor, identity, navigation, and lifecycle fixture review in

@@ -1,7 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
-export function inspectPackCatalog(payload: Uint8Array): Uint8Array;
 export function createPackTemplate(pack_id: string): string;
+export function inspectPackCatalog(payload: Uint8Array): Uint8Array;
 export class SemathEngine {
   free(): void;
   beginReset(payload: Uint8Array): void;

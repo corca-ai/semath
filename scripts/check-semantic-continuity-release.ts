@@ -10,7 +10,7 @@ import {
   type SemanticContinuityObservation,
 } from "../packages/evaluation/src/index";
 
-const DECISION_ADJUDICATIONS = [
+const PARTIAL_TO_ESTABLISHED = [
   "lifetime-sibling-sections",
   "lifetime-equation-clusters",
   "lifetime-theorem-local",
@@ -26,11 +26,42 @@ const DECISION_ADJUDICATIONS = [
   "canonical-norm",
   "canonical-tensor-contraction",
   "safety-ambiguous-anaphora",
+  "propagation-matrix-vector",
+  "propagation-vector-sum",
+  "propagation-unit-balance",
+  "propagation-retraction-seed",
 ].map((caseId) => ({
   caseId,
   from: "partial" as const,
   to: "established" as const,
 }));
+
+const AMBIGUOUS_TO_PARTIAL = [
+  "identity-hat-nucleus-before",
+  "identity-hat-nucleus-after",
+  "identity-styled-symbol",
+  "identity-indexed-family",
+  "identity-transparent-macro",
+  "canonical-expectation-binder",
+  "canonical-aligned-system",
+  "canonical-limit",
+  "canonical-boundary-condition",
+  "propagation-derivative-shape",
+].map((caseId) => ({
+  caseId,
+  from: "ambiguous" as const,
+  to: "partial" as const,
+}));
+
+const DECISION_ADJUDICATIONS = [
+  ...PARTIAL_TO_ESTABLISHED,
+  ...AMBIGUOUS_TO_PARTIAL,
+  {
+    caseId: "identity-derivative-nucleus",
+    from: "ambiguous" as const,
+    to: "established" as const,
+  },
+];
 
 const temporary = await mkdtemp(join(tmpdir(), "semath-continuity-release-"));
 const reportPath = join(temporary, "report.json");
