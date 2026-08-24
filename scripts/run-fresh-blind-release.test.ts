@@ -245,6 +245,41 @@ describe("fresh blind retained report parsers", () => {
     ).toThrow("mathAuthoring.cases must be positive");
   });
 
+  test("accepts the v0.41 safety-only envelope without an exact internal golden", () => {
+    const raw = evaluation();
+    const result = raw.results[0]!;
+    const safetyOnly = {
+      ...raw,
+      results: [{
+        ...result,
+        mathAuthoring: {
+          cases: 0,
+          exactCases: 0,
+          failures: [],
+          findings: [],
+          required: false,
+        },
+      }],
+    };
+    const parsed = parseFreshBlindEvaluation(safetyOnly, []);
+    expect(parsed.mathAuthoringRequired).toBe(false);
+    expect(parsed.mathAuthoringCases).toBe(0);
+
+    expect(() =>
+      parseFreshBlindEvaluation({
+        ...safetyOnly,
+        results: [{
+          ...safetyOnly.results[0]!,
+          mathAuthoring: {
+            ...safetyOnly.results[0]!.mathAuthoring,
+            cases: 1,
+            exactCases: 1,
+          },
+        }],
+      }, [])
+    ).toThrow("must be 0/0 with no findings");
+  });
+
   test("recomputes exact authoring results and rejects malformed nested unions", () => {
     const dishonest = evaluation();
     const result = dishonest.results[0];

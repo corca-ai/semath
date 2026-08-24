@@ -21,6 +21,17 @@ import {
   mathAuthoringExpectationSourceFailures,
   type MathAuthoringSyntaxDocument,
 } from "./math-authoring-development";
+import {
+  parseFreshBlindAuthoringSafety,
+  validateFreshAuthoringSafetyExpectations,
+  type FreshBlindAuthoringSafetyExpectation,
+} from "./fresh-blind-authoring-safety";
+export {
+  freshBlindAuthoringSafetySummary,
+  type FreshBlindAuthoringHypothesisSelector,
+  type FreshBlindAuthoringSafetyExpectation,
+  type FreshBlindAuthoringSafetySummary,
+} from "./fresh-blind-authoring-safety";
 
 const DIGEST = /^[0-9a-f]{64}$/u;
 const RELEASE_ID = /^v0\.[1-9][0-9]*$/u;
@@ -28,6 +39,7 @@ const REQUIRED_SCENARIOS = 48;
 const REQUIRED_FAMILY_SCENARIOS = 8;
 
 export interface FreshBlindReleaseFixture {
+  readonly authoringSafety?: readonly FreshBlindAuthoringSafetyExpectation[];
   readonly commissioning: {
     readonly authoringMethod: "isolated-codex-subagents";
     readonly criticMethod: "independent-codex-subagents";
@@ -43,7 +55,7 @@ export interface FreshBlindReleaseFixture {
     readonly seal: string;
     readonly taskCardDigest: string;
   };
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 1 | 2;
 }
 
 export interface FreshBlindValidationInput {
@@ -100,14 +112,23 @@ export function parseFreshBlindReleaseFixture(
   value: unknown,
 ): FreshBlindReleaseFixture {
   const root = record(value, "fresh blind release");
+  const schemaVersion = root.schemaVersion;
+  if (schemaVersion !== 1 && schemaVersion !== 2) {
+    throw new Error("fresh blind release.schemaVersion: must be 1 or 2");
+  }
   exact(
     root,
-    ["schemaVersion", "release", "commissioning", "fixture"],
+    schemaVersion === 1
+      ? ["schemaVersion", "release", "commissioning", "fixture"]
+      : [
+          "schemaVersion",
+          "release",
+          "commissioning",
+          "fixture",
+          "authoringSafety",
+        ],
     "fresh blind release",
   );
-  if (root.schemaVersion !== 1) {
-    throw new Error("fresh blind release.schemaVersion: must be 1");
-  }
   const release = record(root.release, "fresh blind release.release");
   exact(
     release,
@@ -149,7 +170,14 @@ export function parseFreshBlindReleaseFixture(
       "fresh blind release.commissioning.engineExecutionsBeforeSeal: must be 0",
     );
   }
+  const authoringSafety = schemaVersion === 2
+    ? parseFreshBlindAuthoringSafety(
+        root.authoringSafety,
+        "fresh blind release.authoringSafety",
+      )
+    : undefined;
   return {
+    ...(authoringSafety === undefined ? {} : { authoringSafety }),
     commissioning: {
       authoringMethod: "isolated-codex-subagents",
       criticMethod: "independent-codex-subagents",
@@ -177,7 +205,7 @@ export function parseFreshBlindReleaseFixture(
         "fresh blind release.release.taskCardDigest",
       ),
     },
-    schemaVersion: 1,
+    schemaVersion,
   };
 }
 
@@ -228,16 +256,35 @@ export function validateFreshBlindRelease(
       "fresh blind fixture requires one primary probe per scenario",
     );
   }
-  if (semanticReleaseNumber(release.release.id) >= 37) {
+  const releaseNumber = semanticReleaseNumber(release.release.id);
+  if (releaseNumber <= 40 && release.schemaVersion !== 1) {
+    throw new Error("fresh blind schema 2 is reserved for v0.41 and later");
+  }
+  if (releaseNumber >= 37 && releaseNumber <= 40) {
     const missingAuthoring = fixture.probes
       .filter((probe) => probe.expected.authoringContext === undefined)
       .map((probe) => probe.id);
     if (missingAuthoring.length) {
       throw new Error(
-        `fresh blind v0.37+ requires an exact authoring context for every primary and breadth probe: ${missingAuthoring.join(", ")}`,
+        `fresh blind v0.37-v0.40 requires an exact authoring context for every primary and breadth probe: ${missingAuthoring.join(", ")}`,
       );
     }
     validateFreshAuthoringExpectations(release, input.authoringSyntaxFacts);
+  } else if (releaseNumber >= 41) {
+    if (release.schemaVersion !== 2 || !release.authoringSafety) {
+      throw new Error(
+        "fresh blind v0.41+ requires the sealed authoring safety contract",
+      );
+    }
+    const forbiddenExact = fixture.probes
+      .filter((probe) => probe.expected.authoringContext !== undefined)
+      .map((probe) => probe.id);
+    if (forbiddenExact.length) {
+      throw new Error(
+        `fresh blind v0.41+ forbids guessed exact authoring contexts: ${forbiddenExact.join(", ")}`,
+      );
+    }
+    validateFreshAuthoringSafetyExpectations(release);
   }
   for (const probe of fixture.probes) {
     const scenario = authoredScenarioFor(fixture, probe);

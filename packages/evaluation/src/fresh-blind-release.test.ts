@@ -9,6 +9,7 @@ import {
 import type { MathAuthoringContext } from "../../protocol/src/index";
 import { projectMathAuthoringContext } from "./math-authoring-development";
 import {
+  freshBlindAuthoringSafetySummary,
   freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
   freshBlindSealPayload,
@@ -47,7 +48,7 @@ describe("fresh blind release evidence", () => {
     ).toThrow("expected a semantic release id");
   });
 
-  test("requires the exact authoring oracle on every v0.37+ probe before execution", () => {
+  test("retains the exact authoring oracle for immutable v0.37-v0.40 evidence", () => {
     const value = fixtureValue();
     value.release.id = "v0.37";
     const release = finalize(value);
@@ -148,6 +149,234 @@ describe("fresh blind release evidence", () => {
     expect(() =>
       validateFreshBlindRelease(wrongNotation, validation(wrongNotation))
     ).toThrow("authoringContext.formula.sourceNotation");
+  });
+
+  test("replaces guessed exact contexts with a sealed safety contract from v0.41", () => {
+    const value = fixtureValue();
+    addAuthoringSafety(value);
+    const release = finalize(value);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios).toBe(48);
+
+    const premature = fixtureValue();
+    addAuthoringSafety(premature);
+    premature.release.id = "v0.40";
+    const prematureRelease = finalize(premature);
+    expect(() =>
+      validateFreshBlindRelease(prematureRelease, validation(prematureRelease))
+    ).toThrow("schema 2 is reserved for v0.41 and later");
+
+    const legacy = fixtureValue();
+    legacy.release.id = "v0.41";
+    const legacyRelease = finalize(legacy);
+    expect(() =>
+      validateFreshBlindRelease(legacyRelease, validation(legacyRelease))
+    ).toThrow("v0.41+ requires the sealed authoring safety contract");
+
+    const guessed = fixtureValue();
+    addAuthoringSafety(guessed);
+    addAuthoringExpectations(guessed);
+    const guessedRelease = finalize(guessed);
+    expect(() =>
+      validateFreshBlindRelease(guessedRelease, validation(guessedRelease))
+    ).toThrow("forbids guessed exact authoring contexts");
+
+    const incomplete = fixtureValue();
+    addAuthoringSafety(incomplete);
+    incomplete.authoringSafety!.pop();
+    const incompleteRelease = finalize(incomplete);
+    expect(() =>
+      validateFreshBlindRelease(incompleteRelease, validation(incompleteRelease))
+    ).toThrow("must cover every primary and breadth probe");
+
+    const reordered = fixtureValue();
+    addAuthoringSafety(reordered);
+    reordered.authoringSafety!.reverse();
+    const reorderedRelease = finalize(reordered);
+    expect(() =>
+      validateFreshBlindRelease(reorderedRelease, validation(reorderedRelease))
+    ).toThrow("must follow canonical probe order");
+
+    const unallowed = fixtureValue();
+    addAuthoringSafety(unallowed);
+    unallowed.authoringSafety![0]!.requiredAuthority = [{
+      anchor: { fileId: "main", needle: "$x_0=1$" },
+      kind: "source-meaning",
+      relationId: null,
+    }];
+    const unallowedRelease = finalize(unallowed);
+    expect(() =>
+      validateFreshBlindRelease(unallowedRelease, validation(unallowedRelease))
+    ).toThrow("required selectors must be allowed");
+  });
+
+  test("gates only reviewed authoring authority, contradiction, and lifecycle boundaries", () => {
+    const value = fixtureValue();
+    addAuthoringSafety(value);
+    const release = finalize(value);
+    const observations = release.fixture.probes.map((probe) => ({
+      authoringContext: unsupportedAuthoringContext(),
+      caseId: probe.id,
+      decision: "unsupported" as const,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: false,
+      references: [],
+      relations: [],
+      renameEdits: [],
+      symbol: null,
+    }));
+    expect(freshBlindAuthoringSafetySummary(release, observations)).toEqual({
+      cases: 48,
+      failures: [],
+    });
+
+    const first = observations[0]!;
+    const document = release.fixture.scenarios[0]!.snapshots[0]!.documents[0]!;
+    const needle = "$x_0=1$";
+    const startOffset = document.content.indexOf(needle);
+    const authority = {
+      ...first,
+      authoringContext: {
+        ...first.authoringContext,
+        disposition: "established" as const,
+        interpretations: {
+          ...first.authoringContext.interpretations,
+          hypotheses: [{
+            bindings: [],
+            conditions: [],
+            documentVersion: 1,
+            evidence: [],
+            formula: {
+              documentVersion: 1,
+              location: {
+                fileId: document.fileId,
+                path: document.path,
+                range: { startOffset, endOffset: startOffset + needle.length },
+              },
+              scopePath: [],
+              sourceNotation: needle,
+            },
+            hypothesisId: "unexpected-authority",
+            kind: "source-meaning" as const,
+            label: "unexpected authority",
+            location: {
+              fileId: document.fileId,
+              path: document.path,
+              range: { startOffset, endOffset: startOffset + needle.length },
+            },
+            missingDiscriminatorIds: [],
+            orderingReasons: [],
+            range: { startOffset, endOffset: startOffset + needle.length },
+            rank: 0,
+            scopePath: [],
+            support: "explicit" as const,
+          }],
+        },
+        lifecycle: { ...first.authoringContext.lifecycle, editable: false },
+      },
+    };
+    const unsafe = freshBlindAuthoringSafetySummary(release, [
+      authority,
+      ...observations.slice(1),
+    ]);
+    expect(unsafe.failures.map((failure) => failure.kind)).toEqual([
+      "unsafe-lifecycle",
+      "authority-escalation",
+      "authority-escalation",
+    ]);
+
+    const permitted = fixtureValue();
+    addAuthoringSafety(permitted);
+    const selector = {
+      anchor: { fileId: document.fileId, needle },
+      kind: "source-meaning",
+      relationId: null,
+    };
+    permitted.authoringSafety![0] = {
+      ...permitted.authoringSafety![0]!,
+      allowedAuthority: [selector],
+      forbiddenDispositions: [],
+      lifecycle: {
+        ...permitted.authoringSafety![0]!.lifecycle,
+        editable: false,
+      },
+      requiredAuthority: [selector],
+    };
+    expect(
+      freshBlindAuthoringSafetySummary(finalize(permitted), [
+        authority,
+        ...observations.slice(1),
+      ]).failures,
+    ).toEqual([]);
+
+    const missingRequired = freshBlindAuthoringSafetySummary(
+      finalize(permitted),
+      [{
+        ...first,
+        authoringContext: {
+          ...first.authoringContext,
+          lifecycle: { ...first.authoringContext.lifecycle, editable: false },
+        },
+      }, ...observations.slice(1)],
+    );
+    expect(missingRequired.failures).toEqual([
+      {
+        expected: selector,
+        kind: "missing",
+        path: `${first.caseId}.authoringContext.interpretations.authority.required[0]`,
+      },
+    ]);
+
+    const contradicted = {
+      ...first,
+      authoringContext: {
+        ...first.authoringContext,
+        disposition: "conflicting" as const,
+        interpretations: {
+          ...first.authoringContext.interpretations,
+          hypotheses: [{
+            ...authority.authoringContext.interpretations.hypotheses[0]!,
+            evidence: [{
+              evidence: {
+                kind: "synthetic-source-contradiction",
+                ruleId: "synthetic-source-contradiction",
+                sourceRanges: [{
+                  startOffset,
+                  endOffset: startOffset + needle.length,
+                }],
+                strength: "asserted",
+              },
+              provenance: "explicit-declaration" as const,
+              role: "contradicting" as const,
+              sourceAnchors: [{
+                documentVersion: 1,
+                generation: "authored" as const,
+                lifecycle: "current" as const,
+                location: {
+                  fileId: document.fileId,
+                  path: document.path,
+                  range: {
+                    startOffset,
+                    endOffset: startOffset + needle.length,
+                  },
+                },
+                scopePath: [],
+              }],
+            }],
+            support: "contradicted" as const,
+          }],
+        },
+      },
+    };
+    const unexpectedContradiction = freshBlindAuthoringSafetySummary(release, [
+      contradicted,
+      ...observations.slice(1),
+    ]);
+    expect(unexpectedContradiction.failures.map((failure) => failure.kind)).toEqual([
+      "false-conflict",
+      "false-conflict",
+    ]);
   });
 
   test("requires isolated Codex authors, critics, and the complete main review", () => {
@@ -762,6 +991,54 @@ function addAuthoringExpectations(value: FixtureValue): void {
   });
 }
 
+function addAuthoringSafety(value: FixtureValue): void {
+  value.release.id = "v0.41";
+  value.schemaVersion = 2;
+  value.authoringSafety = value.fixture.probes.map((probe) => ({
+    allowedAuthority: [],
+    allowedContradictions: [],
+    forbiddenDispositions: ["conflicting", "established"],
+    lifecycle: {
+      capped: false,
+      editable: true,
+      engineLimited: false,
+      generation: "authored",
+      retracted: false,
+    },
+    probeId: String(probe.id),
+    requiredAuthority: [],
+    requiredContradictions: [],
+  }));
+}
+
+function unsupportedAuthoringContext(): MathAuthoringContext {
+  return {
+    claimEvidence: [],
+    conditions: [],
+    disposition: "unsupported",
+    equationLinks: [],
+    lifecycle: {
+      capped: false,
+      documentVersion: 1,
+      editable: true,
+      engineLimited: false,
+      freshness: "current",
+      generation: "authored",
+      retracted: false,
+    },
+    interpretations: {
+      analysisLimits: [],
+      exhaustiveness: "bounded-open-world",
+      hypotheses: [],
+      missingDiscriminators: [],
+      truncated: false,
+    },
+    notationOccurrences: [],
+    requirements: [],
+    truncated: false,
+  };
+}
+
 function fixtureValue(): FixtureValue {
   const taskCardDigest = "c".repeat(64);
   const families = [
@@ -893,6 +1170,21 @@ type AuthoredProbeExpected = {
 
 function fixtureValueShape() {
   return {} as {
+    authoringSafety?: Array<{
+      allowedAuthority: unknown[];
+      allowedContradictions: unknown[];
+      forbiddenDispositions: string[];
+      lifecycle: {
+        capped: boolean;
+        editable: boolean;
+        engineLimited: boolean;
+        generation: string;
+        retracted: boolean;
+      };
+      probeId: string;
+      requiredAuthority: unknown[];
+      requiredContradictions: unknown[];
+    }>;
     commissioning: {
       authoringMethod: "isolated-codex-subagents";
       criticMethod: "independent-codex-subagents";
@@ -927,6 +1219,6 @@ function fixtureValueShape() {
       seal: string;
       taskCardDigest: string;
     };
-    schemaVersion: 1;
+    schemaVersion: 1 | 2;
   };
 }

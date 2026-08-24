@@ -10,6 +10,7 @@ export const SEMANTIC_RELEASE_STEPS = [
   "check",
   "quality",
   "authored-development",
+  "math-authoring-public",
   "docs",
   "wasm-build",
   "wasm-checksum",
@@ -52,6 +53,7 @@ export function assertSemanticReleaseStepPlan(
     "wasm-checksum",
     "wasm-committed",
     "worktree-clean",
+    "math-authoring-public",
     "fresh-static-validation",
     "identity-recheck",
     "preblind-manifest",
@@ -143,6 +145,7 @@ function runSemanticReleasePreflight(
   run("bun", ["run", "check"]);
   run("bun", ["run", "quality"]);
   run("bun", ["run", "authored:development:release"]);
+  run("bun", ["run", "math-authoring:development"]);
   run("awiki", ["lint", "-r"]);
   run("sh", ["scripts/build-wasm.sh"]);
   run("sha256sum", ["-c", "SHA256SUMS"], { cwd: "lib/wasm" });

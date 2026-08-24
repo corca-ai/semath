@@ -20,6 +20,11 @@ metadata until that workflow succeeds. Only then may the exact retained
 package be published with its npm version, Git tag, and GitHub Release; hosts
 must not pin an unpublished candidate.
 
+Fresh release-envelope schema 2 applies from v0.41. It replaces a guessed full
+internal authoring-context golden with a sealed safety envelope and does not
+change protocol 17. Older spent envelopes remain readable as immutable
+evidence, but schema 1 is rejected for a new v0.41-or-later commissioning.
+
 Before 1.0, correctness and a concise architecture take precedence over public
 compatibility. A minor release may remove APIs and change host UI without a
 compatibility layer. It must increment the protocol or pack schema when the

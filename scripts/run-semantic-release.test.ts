@@ -15,6 +15,9 @@ describe("semantic release orchestration", () => {
     expect(SEMANTIC_RELEASE_STEPS.indexOf("worktree-clean")).toBeLessThan(
       SEMANTIC_RELEASE_STEPS.length,
     );
+    expect(SEMANTIC_RELEASE_STEPS.indexOf("math-authoring-public")).toBeLessThan(
+      SEMANTIC_RELEASE_STEPS.indexOf("fresh-static-validation"),
+    );
     expect(SEMANTIC_RELEASE_SPEND_STEPS.slice(0, 2)).toEqual([
       "global-reservation",
       "reservation-identity",
@@ -36,6 +39,7 @@ describe("semantic release orchestration", () => {
         "wasm-build",
         "wasm-checksum",
         "worktree-clean",
+        "math-authoring-public",
         "fresh-static-validation",
         "identity-recheck",
         "native-build",

@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import {
+  freshBlindAuthoringSafetySummary,
   freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
 } from "../packages/evaluation/src/fresh-blind-release";
@@ -115,10 +116,14 @@ async function runFreshBlindRelease(): Promise<void> {
       bytes: evaluationBytes,
       parsed: parseFreshBlindEvaluation(
         JSON.parse(evaluationBytes.toString("utf8")) as unknown,
-        evidence.release.fixture.probes.map((probe) => ({
-          expected: { authoringContext: probe.expected.authoringContext! },
-          id: probe.id,
-        })),
+        evidence.release.fixture.probes.flatMap((probe) =>
+          probe.expected.authoringContext === undefined
+            ? []
+            : [{
+                expected: { authoringContext: probe.expected.authoringContext },
+                id: probe.id,
+              }]
+        ),
       ),
     };
     run("bun", ["scripts/check-fresh-blind-lifecycle.ts"], {
@@ -138,16 +143,25 @@ async function runFreshBlindRelease(): Promise<void> {
       evidence.release.fixture,
       evaluation.parsed.observations,
     );
+    const authoringSafety = freshBlindAuthoringSafetySummary(
+      evidence.release,
+      evaluation.parsed.observations,
+    );
     const facetFailures = [
       ...evaluation.parsed.evidenceGradedFailures,
-      ...evaluation.parsed.mathAuthoringFailures,
-      ...(evaluation.parsed.mathAuthoringCases ===
-      evaluation.parsed.mathAuthoringExactCases
-        ? []
-        : [
-            `exact authoring context ${evaluation.parsed.mathAuthoringExactCases}/${evaluation.parsed.mathAuthoringCases}`,
-          ]),
+      ...authoringSafety.failures.map(
+        (failure) => `${failure.path}: ${failure.kind}`,
+      ),
     ];
+    if (evaluation.parsed.mathAuthoringRequired) {
+      facetFailures.push(...evaluation.parsed.mathAuthoringFailures);
+      if (evaluation.parsed.mathAuthoringCases !==
+        evaluation.parsed.mathAuthoringExactCases) {
+        facetFailures.push(
+          `exact authoring context ${evaluation.parsed.mathAuthoringExactCases}/${evaluation.parsed.mathAuthoringCases}`,
+        );
+      }
+    }
     const safetyFailed =
       freshBlindSafetyGateFailed(safety) || facetFailures.length > 0;
     const completed = terminalReceipt(started, {
@@ -193,6 +207,7 @@ interface ParsedEvaluation {
   readonly mathAuthoringCases: number;
   readonly mathAuthoringExactCases: number;
   readonly mathAuthoringFailures: readonly string[];
+  readonly mathAuthoringRequired: boolean;
   readonly observations: readonly AuthoredScientificObservation[];
   readonly raw: unknown;
   readonly score: AuthoredScientificScorecard;
@@ -291,8 +306,11 @@ export function parseFreshBlindEvaluation(
     ["cases", "exactCases", "failures", "findings", "required"],
     "fresh blind evaluation mathAuthoring",
   );
-  if (mathAuthoring.required !== true) {
-    throw new Error("fresh blind evaluation mathAuthoring.required must be true");
+  const mathAuthoringRequired = expectedProbes.length > 0;
+  if (mathAuthoring.required !== mathAuthoringRequired) {
+    throw new Error(
+      `fresh blind evaluation mathAuthoring.required must be ${mathAuthoringRequired}`,
+    );
   }
   const mathAuthoringCases = integer(
     mathAuthoring.cases,
@@ -310,8 +328,15 @@ export function parseFreshBlindEvaluation(
     mathAuthoring.findings,
     "fresh blind evaluation mathAuthoring.findings",
   );
-  if (mathAuthoringCases === 0)
+  if (mathAuthoringRequired && mathAuthoringCases === 0)
     throw new Error("fresh blind evaluation mathAuthoring.cases must be positive");
+  if (!mathAuthoringRequired &&
+    (mathAuthoringCases !== 0 || mathAuthoringExactCases !== 0 ||
+      mathAuthoringFailures.length > 0 || mathAuthoringFindings.length > 0)) {
+    throw new Error(
+      "fresh blind evaluation non-required mathAuthoring must be 0/0 with no findings",
+    );
+  }
   if (mathAuthoringExactCases > mathAuthoringCases)
     throw new Error(
       "fresh blind evaluation mathAuthoring.exactCases exceeds cases",
@@ -321,23 +346,27 @@ export function parseFreshBlindEvaluation(
   if (
     score.cases !== observations.length ||
     evidenceCases !== score.cases ||
-    mathAuthoringCases !== score.cases
+    (mathAuthoringRequired
+      ? mathAuthoringCases !== score.cases
+      : mathAuthoringCases !== 0)
   ) {
     throw new Error("fresh blind evaluation case counts disagree");
   }
   if (score.passed > score.cases)
     throw new Error("fresh blind evaluation passed exceeds cases");
+  const expectedIds = new Set(expectedProbes.map((probe) => probe.id));
   const recomputed = evaluateMathAuthoringDevelopment(
     expectedProbes,
-    observations.map((observation) => ({
-      ...(observation.authoringContext === undefined
-        ? {}
-        : { authoringContext: observation.authoringContext }),
-      caseId: observation.caseId,
-    })),
+    observations
+      .filter((observation) => expectedIds.has(observation.caseId))
+      .map((observation) => ({
+        ...(observation.authoringContext === undefined
+          ? {}
+          : { authoringContext: observation.authoringContext }),
+        caseId: observation.caseId,
+      })),
   );
-  if (expectedProbes.length !== observations.length ||
-    recomputed.cases !== mathAuthoringCases ||
+  if (recomputed.cases !== mathAuthoringCases ||
     recomputed.exactCases !== mathAuthoringExactCases ||
     !isDeepStrictEqual(recomputed.failures, mathAuthoringFailures) ||
     !isDeepStrictEqual(recomputed.findings, mathAuthoringFindings)) {
@@ -353,6 +382,7 @@ export function parseFreshBlindEvaluation(
     mathAuthoringCases,
     mathAuthoringExactCases,
     mathAuthoringFailures,
+    mathAuthoringRequired,
     observations,
     raw: value,
     score,
