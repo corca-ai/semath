@@ -1,10 +1,10 @@
 # Spent holdout postmortems
 
-This document is a historical record of the terminal v0.38 and v0.39 semantic
+This document is a historical record of the terminal v0.38, v0.39, and v0.40 semantic
 release evaluations. It is not a current scorecard, a release plan, or a source
 of expected answers for another holdout.
 
-Both fixtures are permanently spent. They must not be rerun, edited into a new
+All three fixtures are permanently spent. They must not be rerun, edited into a new
 holdout, or used as answer templates. Public regressions derived from them use
 new source text and the lowest authoritative public test layer.
 
@@ -14,6 +14,7 @@ new source text and the lowest authoritative public test layer.
 | --- | --- | --- | --- | --- | --- |
 | v0.38 | `32462617124` | `9440104778` | `1c11dcafc8801df0a34cf9f61829ef843dbc8534` | `fb1ced3d602a32ef697022f36bc67a57ca0fc4b5fe014eff2bedcf4314f3aa94` | `de733715718f3e6f8093ce0fac6101c277620ff2672536ceef857c53675b2cdb` |
 | v0.39 | `32571193980` | `9475579401` | `b61758bf3783954f2a4b057aabc048c3b0f913ad` | `68a23c8d1135e80d25c31c72e8136e6a436da0ea9d0d4748c21741a4913befce` | `d6ed5e53b7fc56372b8088df117aca11a0eb1792f1399767de3516f48b0f9103` |
+| v0.40 | `32730705424` | `9522100540` | `1fea214aa45224cc1767047dd78f46b02292183e` | `2e32389b8386845ee8ce491b3fc0a3fa55114abc3b1351c0f29152fba7a92e17` | `789011bea34fba2c4249231f9c70c7cebac6197b18b9c8c7447ce9c2abd1544d` |
 
 Each run passed the pre-reservation gates, permanently reserved its release
 identity, executed the engine once, terminalized, and retained its result. The
@@ -85,6 +86,30 @@ The batch also reported zero contradiction cases. A batch commissioned to test
 conflict must contain at least one public-contract-valid hypothesis with exact
 contradicting evidence; merely writing `expected: conflicting` is insufficient.
 
+## Lessons retained from v0.40
+
+The v0.40 run passed reservation and artifact checks, then completed as
+`safety-failed`: 9 of 48 cases passed with risk 302. The retained result reported
+10 false establishments, one false conflict, 30 coverage misses, and 11
+navigation or identity failures. Infrastructure was not the cause: syntax was
+available for every case, the engine was not limited, lifecycle evidence was
+retained, and committed and rebuilt WASM digests agreed.
+
+Mechanical formula roots, UTF-16 ranges, and section scopes were correct, but
+the strict authoring projection was still 0 of 48 exact with 3,338 findings.
+Reviewers had been required to predict the producer's complete stable
+hypothesis, requirement, evidence, and anchor graph without executing it. That
+is not a valid blind commissioning task. Most differences were representational
+and hid 19 high-severity authority, conflict, or lifecycle findings.
+
+Starting with v0.41, a fresh fixture must use release-envelope schema 2. It
+forbids a guessed complete `StableMathAuthoringContext` and instead seals a
+bounded authoring-safety contract: exact lifecycle, forbidden dispositions,
+and exact allowlists for mathematical authority and contradictions. Intrinsic
+anchor, ordering, authority, and lifecycle invariants remain release-blocking.
+Missing semantic coverage remains visible through the ordinary score rather
+than being disguised as thousands of internal-object diffs.
+
 ## Public regression atlas
 
 The following regression families are safe to promote. Tests must use newly
@@ -119,8 +144,10 @@ The next holdout uses the following lightweight boundary:
    never terminal scenario text, anchors, per-case findings, or expected output.
 2. The static gate derives formula roots, versions, scope paths, ordering, and
    generated ordinals from the public producer contract before reservation.
-3. A strict complete authoring context is either fully commissioned or rejected;
-   an omitted field is not silently treated as expected absence.
+3. v0.41 and later forbid a hand-authored complete authoring context. Every
+   probe instead has a sealed safety envelope covering lifecycle, forbidden
+   dispositions, and allowed or required authority and contradictions. The
+   public MathAuthoring oracle must pass before reservation.
 4. Conflict coverage requires at least one independently grounded public-shaped
    contradiction case before the batch can be sealed.
 5. The spent registry rejects reused release, batch, scenario and probe IDs,
@@ -133,6 +160,9 @@ The next holdout uses the following lightweight boundary:
 7. There is no retry-until-pass loop. Reservation still makes every executed
    fixture permanently spent regardless of success, failure, or infrastructure
    interruption.
+8. A new holdout is not commissioned while a known public P0 safety regression
+   or release-oracle defect remains. Fresh execution is final qualification,
+   not a debugging loop.
 
 The machine-readable [`spent-holdout-registry-v1.json`](../fixtures/challenge/spent-holdout-registry-v1.json)
 stores those lineage profiles.
