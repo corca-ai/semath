@@ -1,7 +1,14 @@
 import { describe, expect, test } from "bun:test";
+import { LatexSyntaxService } from "wasmtex/syntax";
+import {
+  authoredMathFingerprints,
+  authoredProseShingles,
+  spentHoldoutProfile,
+} from "../packages/evaluation/src/index";
 import {
   freshAuthoringSyntaxFactsForSelections,
   isApprovedReferenceFixturePath,
+  sha256,
 } from "./fresh-blind-evidence";
 
 describe("fresh blind reference isolation", () => {
@@ -63,5 +70,49 @@ describe("fresh blind reference isolation", () => {
       const range = document.mathRootContentRanges[0]!;
       expect(content.slice(range.startOffset, range.endOffset)).toBe(notation);
     }
+  });
+
+  test("versions the exact document, math, and prose lineage algorithms", () => {
+    const content =
+      "The calibrated relation follows the reviewed balance.\n\\[\na+b=c\n\\]\n";
+    const service = new LatexSyntaxService();
+    service.reset({
+      documents: [
+        {
+          content,
+          documentVersion: 1,
+          fileId: "golden",
+          language: "latex",
+          path: "golden.tex",
+        },
+      ],
+    });
+    const syntax = service.getFile("golden");
+    if (!syntax) throw new Error("missing golden lineage syntax");
+    expect(
+      spentHoldoutProfile(
+        "golden",
+        [sha256(content)],
+        {
+          id: "golden",
+          mathFingerprints: authoredMathFingerprints(syntax),
+          proseShingles: authoredProseShingles(content, syntax),
+        },
+        sha256,
+      ),
+    ).toEqual({
+      documentSha256: [
+        "6248391d046e9a9515135aa8aad41765f862cf08c0d85f46f93d4507b1a5d231",
+      ],
+      id: "golden",
+      mathFingerprintSha256: [
+        "ef3c1507993477a8b3c835da762f890cda1e42d5e5fa21f3a3f3c78864d0f8e3",
+      ],
+      proseShingleSha256: [
+        "3c4aaa44f2b26cfaa92ab5f9b1b7fad5b8a3c2af91306774279ec7469f0f6c7f",
+        "884b72842636eeeee44e09cab625db17a96c27d9791c45f62900ce70f952ae10",
+        "f766f0011895d872ccd10d420eb45380cb4cec8299d21609c1dd6dc9ecd233ae",
+      ],
+    });
   });
 });

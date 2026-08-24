@@ -11,6 +11,7 @@ import {
   authoredSnapshotFor,
   freshBlindSealPayload,
   parseFreshBlindReleaseFixture,
+  spentHoldoutProfile,
   validateFreshBlindRelease,
   type AuthoredIntegrityProfile,
   type AuthoredLawCatalogEntry,
@@ -18,6 +19,7 @@ import {
   type FreshBlindReleaseFixture,
   type FreshBlindSnapshotSyntaxFacts,
   type FreshBlindValidationSummary,
+  type SpentHoldoutLineage,
 } from "../packages/evaluation/src/index";
 
 export interface LoadedFreshBlindEvidence {
@@ -130,6 +132,50 @@ export function freshAuthoringSyntaxFactsForSelections(
 
 export function sha256(value: string | Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
+}
+
+export function freshSpentHoldoutLineage(
+  release: FreshBlindReleaseFixture,
+): SpentHoldoutLineage {
+  return {
+    batchId: release.fixture.batch.id,
+    probeIds: release.fixture.probes.map((probe) => probe.id).sort(),
+    profiles: release.fixture.scenarios
+      .flatMap((scenario) => {
+        const documents = scenario.snapshots.flatMap((snapshot) =>
+          snapshot.documents.map((document) => ({
+            document,
+            id: `${scenario.id}/${snapshot.id}/${document.fileId}`,
+          })),
+        );
+        return [
+          spentHoldoutProfile(
+            scenario.id,
+            documents.map(({ document }) => sha256(document.content)),
+            scenarioProfile(scenario),
+            sha256,
+          ),
+          ...documents.map(({ document, id }) =>
+            spentHoldoutProfile(
+              id,
+              [sha256(document.content)],
+              documentProfile({
+                content: document.content,
+                id,
+                path: document.path,
+              }),
+              sha256,
+            ),
+          ),
+        ];
+      })
+      .sort((left, right) => left.id.localeCompare(right.id)),
+    rawDigests: release.fixture.scenarios
+      .map((scenario) => scenario.provenance.rawDigest)
+      .sort(),
+    releaseId: release.release.id,
+    scenarioIds: release.fixture.scenarios.map((scenario) => scenario.id).sort(),
+  };
 }
 
 async function readLawCatalog(): Promise<AuthoredLawCatalogEntry[]> {

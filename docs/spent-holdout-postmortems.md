@@ -1,0 +1,146 @@
+# Spent holdout postmortems
+
+This document is a historical record of the terminal v0.38 and v0.39 semantic
+release evaluations. It is not a current scorecard, a release plan, or a source
+of expected answers for another holdout.
+
+Both fixtures are permanently spent. They must not be rerun, edited into a new
+holdout, or used as answer templates. Public regressions derived from them use
+new source text and the lowest authoritative public test layer.
+
+## Immutable evidence
+
+| Release | Run | Artifact | Candidate | Fixture SHA-256 | Evaluation SHA-256 |
+| --- | --- | --- | --- | --- | --- |
+| v0.38 | `32462617124` | `9440104778` | `1c11dcafc8801df0a34cf9f61829ef843dbc8534` | `fb1ced3d602a32ef697022f36bc67a57ca0fc4b5fe014eff2bedcf4314f3aa94` | `de733715718f3e6f8093ce0fac6101c277620ff2672536ceef857c53675b2cdb` |
+| v0.39 | `32571193980` | `9475579401` | `b61758bf3783954f2a4b057aabc048c3b0f913ad` | `68a23c8d1135e80d25c31c72e8136e6a436da0ea9d0d4748c21741a4913befce` | `d6ed5e53b7fc56372b8088df117aca11a0eb1792f1399767de3516f48b0f9103` |
+
+Each run passed the pre-reservation gates, permanently reserved its release
+identity, executed the engine once, terminalized, and retained its result. The
+low scores were semantic evaluation outcomes, not retryable workflow failures.
+
+## What the raw scores hid
+
+| Release | Passed | Risk | Mechanical oracle or commissioning | Evaluator contract or diagnostic | Engine safety | Engine coverage |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| v0.38 | 1/48 | 488 | 16 | 2 | 4 | 25 |
+| v0.39 | 2/48 | 220 | 9 | 1 | 6 | 30 |
+
+The v0.38 classification covers its 47 failed top-level probes. The v0.39
+classification covers its 46 failed top-level probes; its two top-level passes
+still had non-exact strict authoring contexts. These are adjudicated primary
+causes, not counts emitted directly by the scorer.
+
+The raw results therefore do not mean that the engine had 47 or 46 independent
+defects. They combined four layers:
+
+1. A malformed or stale expected surface.
+2. A scorer or diagnostic that grouped unlike signals.
+3. Unsafe engine authority, such as an excluded relation leaking or an
+   unsupported expression becoming established.
+4. Safe incompleteness, such as a missing attachment, role binding, or pack-law
+   relation.
+
+## Lessons retained from v0.38
+
+The dominant commissioning defect was an exact authoring oracle that did not
+match the public projection contract. All 48 authoring contexts differed and
+produced 2,619 findings. Repeated causes included a trimmed inner equation where
+the protocol owns the display content root, handwritten document version 2 for
+a standalone version-1 observation, noncanonical ordering and generated group
+ordinals, and empty scope paths where the syntax projection owned a section.
+
+The scorer also mixed cursor-symbol decisions with formula authoring
+dispositions. An established symbol inside a partial formula was counted like
+an established formula. Its false-establishment count combined five decision
+signals with three excluded-relation leaks, while a historical helper attempted
+to reconstruct the same count from decisions alone.
+
+Four cases did demonstrate safety defects: an incompatible Newton relation
+leaked, a guarded probability relation established without its condition, a
+conflicting thermodynamic relation leaked, and a retracted independence
+relation survived a lifecycle change. Twenty-five failures were primarily
+coverage gaps.
+
+## Lessons retained from v0.39
+
+Mechanical noise fell, especially the top-level navigation/identity risk, but
+the strict authoring oracle still had 0/48 exact cases and 433 findings. Empty
+expected arrays were being read as authoritative absence even where the public
+producer emitted a larger stable context. Several requested `ambiguous`,
+`conflicting`, or `unsupported` decisions lacked two source-backed hypotheses,
+contradicting evidence, or explicit refusal evidence in the terminal record.
+
+Six scored false establishments were confirmed safety candidates: excluded
+Newton, Ohm, and kinetic-energy relations leaked in reviewed negative cases; an
+undeclared structural power expression established without asserted source
+meaning; and a temperature symbol established with no claim evidence while its
+declaration discriminator remained outstanding. One other establishment flag
+was an evaluator error because the selected entity had a hard source claim even
+though the named law was missing. Navigation risk meanwhile mixed two compound
+identity misses, two noncanonical operator-wrapper expectations, and one
+directionless navigation mismatch rather than proving five unsafe leaks.
+
+The batch also reported zero contradiction cases. A batch commissioned to test
+conflict must contain at least one public-contract-valid hypothesis with exact
+contradicting evidence; merely writing `expected: conflicting` is insufficient.
+
+## Public regression atlas
+
+The following regression families are safe to promote. Tests must use newly
+written public source, not holdout sentences, anchors, IDs, or observed output.
+
+| Priority | Public regression family | Lowest authoritative assertion |
+| --- | --- | --- |
+| P0 | Formula-root commissioning | TeX and Markdown multiline displays derive exact root range, notation, scope, and version from syntax facts before sealing. |
+| P0 | Decision-domain separation | An established cursor entity inside a partial formula is scored as two different contracts. |
+| P0 | Risk subtype consistency | Decision, proof, source-grounding, and excluded-relation signals share one typed case record; no helper reconstructs a different ID set. |
+| P0 | Guarded authority | A missing declaration or law condition cannot yield established or proof-grounded output. |
+| P0 | Conflict authority | Incompatible source evidence yields an anchored conflict and exports no established relation. |
+| P0 | Lifecycle retraction | Removing or weakening authorizing evidence retracts the relation, proof, navigation, and edit authority together. |
+| P0 | Navigation scope | A shadowed or out-of-scope entity exposes no definition, reference, or rename location outside its reviewed scope. |
+| P0 | Structural refusal | An undeclared power or opaque operator remains partial or unsupported and never receives source proof. |
+| P1 | Attachment | Explicit discourse attaches to the intended local or cross-document formula without leaking to a neighboring formula. |
+| P1 | Composite identity | Command-token cursors project the owned compound entity, such as a prefixed quantity, rather than only its command token. |
+| P1 | Pack unification | Canonical public laws bind equivalent formula shapes, indexed roles, and required conditions at exact ranges. |
+| P1 | Ambiguity and dispatch | Ambiguous requires at least two independently supported candidates and deterministic discriminator groups. |
+| P1 | Macro and edit identity | Transparent macros and snapshot edits preserve canonical entity identity and re-anchor all source evidence. |
+
+The existing public formula-root, canonical-order, dot-derivative ownership,
+imperative-refusal, MathAuthoring, and continuity tests are part of this atlas.
+New engine tests should be added only when a fresh public reproduction isolates
+one missing boundary.
+
+## Commissioning policy after these failures
+
+The next holdout uses the following lightweight boundary:
+
+1. Authors and reviewers receive public regression IDs and commissioning rules,
+   never terminal scenario text, anchors, per-case findings, or expected output.
+2. The static gate derives formula roots, versions, scope paths, ordering, and
+   generated ordinals from the public producer contract before reservation.
+3. A strict complete authoring context is either fully commissioned or rejected;
+   an omitted field is not silently treated as expected absence.
+4. Conflict coverage requires at least one independently grounded public-shaped
+   contradiction case before the batch can be sealed.
+5. The spent registry rejects reused release, batch, scenario and probe IDs,
+   scenario raw digests, exact document digests, and suspicious prose/math
+   similarity. Only SHA-256 lineage profiles are checked; spent source and
+   terminal answers are not opened during commissioning.
+6. Oracle, evaluator, engine-safety, engine-coverage, and infrastructure outcomes
+   are recorded separately. Only a valid sealed oracle plus a green evaluator
+   can support an engine conclusion.
+7. There is no retry-until-pass loop. Reservation still makes every executed
+   fixture permanently spent regardless of success, failure, or infrastructure
+   interruption.
+
+The machine-readable [`spent-holdout-registry-v1.json`](../fixtures/challenge/spent-holdout-registry-v1.json)
+stores those lineage profiles.
+`bun run spent-holdout:check` validates its closed shape, and
+`bun run fresh-blind:validate` compares a proposed fixture with every registered
+spent profile before reservation. The registry is an isolation aid, not a
+semantic oracle and not evidence that a short hashed phrase is confidential.
+Its algorithm names and public golden vector make extractor changes explicit.
+As a lightweight heuristic, it intentionally cannot compare prose shorter than
+five visible words or common math alone; exact document and raw-digest checks
+still apply to those cases.
