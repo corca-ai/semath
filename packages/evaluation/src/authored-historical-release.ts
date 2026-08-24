@@ -1,4 +1,5 @@
 import type {
+  AuthoredFalseEstablishmentCause,
   AuthoredSourceAnchor,
   AuthoredScientificFixture,
   AuthoredScientificObservation,
@@ -6,6 +7,7 @@ import type {
   ObservedLocation,
 } from "./authored-scientific";
 import {
+  authoredFalseEstablishmentCases,
   authoredProbeIdentityFailures,
   authoredScenarioFor,
   authoredSnapshotFor,
@@ -20,10 +22,15 @@ export interface ApprovedSourceGroundedNavigationRecovery {
   readonly symbolOccurrence: AuthoredSourceAnchor;
 }
 
+export interface ApprovedFalseEstablishment {
+  readonly caseId: string;
+  readonly causes: readonly AuthoredFalseEstablishmentCause[];
+}
+
 export interface AuthoredHistoricalReleaseBaseline {
   readonly approvedConservativeDecisionIds: readonly string[];
   readonly approvedCursorBoundaryIdentityIds: readonly string[];
-  readonly approvedFalseEstablishmentIds: readonly string[];
+  readonly approvedFalseEstablishments: readonly ApprovedFalseEstablishment[];
   readonly approvedSourceGroundedNavigationRecoveries: readonly ApprovedSourceGroundedNavigationRecovery[];
   readonly cases: number;
   readonly maximumMissedCoverage: number;
@@ -39,26 +46,32 @@ export function authoredHistoricalReleaseRegressions(
   baseline: AuthoredHistoricalReleaseBaseline,
 ): readonly string[] {
   const regressions: string[] = [];
-  const expectedById = new Map(
-    fixture.probes.map((probe) => [probe.id, probe.expected] as const),
+  const falseEstablishmentCases = authoredFalseEstablishmentCases(
+    fixture,
+    observations,
   );
-  const falseEstablishmentIds = observations
-    .filter((observation) => {
-      const expected = expectedById.get(observation.caseId);
-      return (
-        expected?.decision !== "established" &&
-        observation.decision === "established"
-      );
-    })
-    .map((observation) => observation.caseId)
+  const falseEstablishmentIds = falseEstablishmentCases
+    .map((item) => item.caseId)
     .sort();
-  const approved = new Set(baseline.approvedFalseEstablishmentIds);
-  for (const caseId of falseEstablishmentIds) {
-    if (!approved.has(caseId)) {
-      regressions.push(`unreviewed false establishment ${caseId}`);
+  const approved = new Map<string, readonly AuthoredFalseEstablishmentCause[]>();
+  for (const item of baseline.approvedFalseEstablishments) {
+    if (approved.has(item.caseId)) {
+      regressions.push(`duplicate false establishment adjudication ${item.caseId}`);
+      continue;
     }
-    const observation = observations.find((item) => item.caseId === caseId);
-    if (!observation?.proofGrounded) {
+    approved.set(item.caseId, item.causes);
+  }
+  for (const falseEstablishment of falseEstablishmentCases) {
+    const caseId = falseEstablishment.caseId;
+    const approvedCauses = approved.get(caseId);
+    if (!approvedCauses) {
+      regressions.push(`unreviewed false establishment ${caseId}`);
+    } else if (!sameCauseSet(falseEstablishment.causes, approvedCauses)) {
+      regressions.push(
+        `false establishment ${caseId} causes ${[...falseEstablishment.causes].sort().join(",")} differ from approved ${[...approvedCauses].sort().join(",")}`,
+      );
+    }
+    if (!falseEstablishment.sourceGrounded) {
       regressions.push(`false establishment ${caseId} is not source grounded`);
     }
   }
@@ -233,6 +246,20 @@ export function authoredHistoricalReleaseRegressions(
     );
   }
   return regressions;
+}
+
+function sameCauseSet(
+  left: readonly AuthoredFalseEstablishmentCause[],
+  right: readonly AuthoredFalseEstablishmentCause[],
+): boolean {
+  const uniqueLeft = [...new Set(left)].sort();
+  const uniqueRight = [...new Set(right)].sort();
+  return (
+    uniqueLeft.length === left.length &&
+    uniqueRight.length === right.length &&
+    uniqueLeft.length === uniqueRight.length &&
+    uniqueLeft.every((cause, index) => cause === uniqueRight[index])
+  );
 }
 
 function sameLocations(

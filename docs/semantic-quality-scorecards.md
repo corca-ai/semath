@@ -158,14 +158,13 @@ families plus declaration retraction and exact navigation behavior. This
 supersedes the older editable-development measurement above for current release
 work without changing the historical v0.28 and v0.35 records.
 
-The now-exposed historical authored holdout remains 6 of 97 with raw risk 742.
+The now-exposed historical authored holdout passes 7 of 97 with raw risk 720.
 These deliberately difficult documents are a first-loss map, not a release
-pass-rate target. Its two raw false-establishment counts are exact, reviewed
-frozen-contract disagreements. One lifecycle expects prose in a disconnected
-project component to retract a relation in another component; Semath preserves
-the dependency boundary. The other expects `partial` for prose that directly
-asserts an overlap as \(A\cap B\); the current source-grounded entity decision is
-`established`. The release gate permits only these named, proof-grounded cases
+pass-rate target. Its remaining raw false-establishment count is an exact,
+reviewed frozen-contract disagreement: the fixture expects prose in a
+disconnected project component to retract a relation established in another
+component, while Semath preserves that dependency boundary. The release gate
+permits only this named, proof-grounded decision, proof, and relation case
 and rejects substitution by any new false establishment. It also adjudicates
 one frozen cursor contract that asks an `edge: after` formula-boundary query to
 select an arbitrary internal symbol; exact boundary ownership correctly returns
@@ -179,7 +178,7 @@ only when every reviewed source location matches and no rename edit is emitted;
 it does not change the frozen fixture or the release thresholds. Current
 historical first losses are 26
 attachment, 40 identity or scope, eight typed-fact, 13 pack-unification, and
-four decision cases. See
+three decision cases. See
 [Pack maturity](pack-maturity.md) for interpretation by capability.
 
 The sealed v0.28 fresh blind was executed once on 2026-08-13 after every

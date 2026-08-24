@@ -278,6 +278,18 @@ export interface AuthoredScientificScorecard {
   };
 }
 
+export type AuthoredFalseEstablishmentCause =
+  | "decision"
+  | "excluded-relation"
+  | "proof-grounding"
+  | "relation-grounding";
+
+export interface AuthoredFalseEstablishmentCase {
+  readonly caseId: string;
+  readonly causes: readonly AuthoredFalseEstablishmentCause[];
+  readonly sourceGrounded: boolean;
+}
+
 export interface AuthoredTrancheSummary {
   readonly decisions: Readonly<Record<ScientificDecision, number>>;
   readonly developmentCases: number;
@@ -473,6 +485,12 @@ export function scoreAuthoredScientificFixture(
   let falseEstablishment = 0;
   let missedCoverage = 0;
   let navigationOrIdentity = 0;
+  const falseEstablishmentById = new Map(
+    authoredFalseEstablishmentCases(fixture, observations).map((item) => [
+      item.caseId,
+      item,
+    ]),
+  );
   for (const probe of fixture.probes) {
     const observed = byId.get(probe.id);
     if (!observed) {
@@ -483,23 +501,24 @@ export function scoreAuthoredScientificFixture(
     }
     const caseFailures: string[] = [];
     let caseFalseConflict = false;
-    let caseFalseEstablishment = false;
+    const falseEstablishmentCauses = new Set(
+      falseEstablishmentById.get(probe.id)?.causes,
+    );
+    const caseFalseEstablishment = falseEstablishmentCauses.size > 0;
     let caseMissedCoverage = false;
     let caseNavigation = false;
     if (observed.decision !== probe.expected.decision) {
       caseFailures.push(`decision ${observed.decision}; expected ${probe.expected.decision}`);
-      caseFalseEstablishment =
-        observed.decision === "established" && probe.expected.decision !== "established";
       caseFalseConflict =
         observed.decision === "conflicting" && probe.expected.decision !== "conflicting";
-      caseMissedCoverage = !caseFalseEstablishment && !caseFalseConflict;
+      caseMissedCoverage =
+        !falseEstablishmentCauses.has("decision") && !caseFalseConflict;
     }
     if (observed.proofGrounded !== probe.expected.proofGrounded) {
       caseFailures.push(
         `proof grounding ${observed.proofGrounded}; expected ${probe.expected.proofGrounded}`,
       );
-      if (observed.proofGrounded) caseFalseEstablishment = true;
-      else caseMissedCoverage = true;
+      if (!observed.proofGrounded) caseMissedCoverage = true;
     }
     for (const expected of probe.expected.relations) {
       const expectedAnchor = resolveAuthoredAnchor(
@@ -532,14 +551,12 @@ export function scoreAuthoredScientificFixture(
         caseFailures.push(
           `${expected.relationId}: source grounding ${relation.sourceGrounded}; expected ${expected.sourceGrounded}`,
         );
-        if (relation.sourceGrounded) caseFalseEstablishment = true;
-        else caseMissedCoverage = true;
+        if (!relation.sourceGrounded) caseMissedCoverage = true;
       }
     }
     for (const relationId of probe.expected.excludedRelationIds) {
       if (observed.relations.some((relation) => relation.relationId === relationId)) {
         caseFailures.push(`leaked relation ${relationId}`);
-        caseFalseEstablishment = true;
       }
     }
     const scenario = authoredScenarioFor(fixture, probe);
@@ -605,6 +622,82 @@ export function scoreAuthoredScientificFixture(
         missedCoverage * 2,
     },
   };
+}
+
+export function authoredFalseEstablishmentCases(
+  fixture: AuthoredScientificFixture,
+  observations: readonly AuthoredScientificObservation[],
+): readonly AuthoredFalseEstablishmentCase[] {
+  const expectedIds = new Set(fixture.probes.map((probe) => probe.id));
+  const byId = new Map<string, AuthoredScientificObservation>();
+  for (const observation of observations) {
+    if (expectedIds.has(observation.caseId) && !byId.has(observation.caseId)) {
+      byId.set(observation.caseId, observation);
+    }
+  }
+  const cases: AuthoredFalseEstablishmentCase[] = [];
+  for (const probe of fixture.probes) {
+    const observed = byId.get(probe.id);
+    if (!observed) continue;
+    const causes = new Set<AuthoredFalseEstablishmentCause>();
+    const grounding: boolean[] = [];
+    if (
+      observed.decision === "established" &&
+      probe.expected.decision !== "established"
+    ) {
+      causes.add("decision");
+      grounding.push(observed.proofGrounded);
+    }
+    if (observed.proofGrounded && !probe.expected.proofGrounded) {
+      causes.add("proof-grounding");
+      grounding.push(true);
+    }
+    for (const expected of probe.expected.relations) {
+      const snapshot = authoredSnapshotFor(
+        authoredScenarioFor(fixture, probe),
+        probe,
+      );
+      const expectedAnchor = resolveAuthoredAnchor(snapshot, expected.anchor);
+      const expectedDocument = snapshot.documents.find(
+        (document) => document.fileId === expectedAnchor.fileId,
+      );
+      const relation = observed.relations.find(
+        (item) =>
+          item.relationId === expected.relationId &&
+          item.fileId === expectedAnchor.fileId &&
+          expectedDocument !== undefined &&
+          authoredRelationRangeMatches(
+            expectedDocument.content,
+            item.range,
+            expectedAnchor.range,
+            item.formulaRange,
+          ) &&
+          roleInstancesMatch(item.roles, expected.roles, undefined),
+      );
+      if (
+        relation?.sourceGrounded &&
+        relation.sourceGrounded !== expected.sourceGrounded
+      ) {
+        causes.add("relation-grounding");
+        grounding.push(true);
+      }
+    }
+    const leakedRelations = observed.relations.filter((relation) =>
+      probe.expected.excludedRelationIds.includes(relation.relationId),
+    );
+    if (leakedRelations.length > 0) {
+      causes.add("excluded-relation");
+      grounding.push(leakedRelations.every((relation) => relation.sourceGrounded));
+    }
+    if (causes.size > 0) {
+      cases.push({
+        caseId: probe.id,
+        causes: [...causes],
+        sourceGrounded: grounding.every(Boolean),
+      });
+    }
+  }
+  return cases;
 }
 
 export function observeAuthoredScientificProbe(

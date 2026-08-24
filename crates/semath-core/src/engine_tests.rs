@@ -1637,6 +1637,74 @@ fn field_context_alone_does_not_authorize_a_complete_looking_law() {
 }
 
 #[test]
+fn rejected_or_undeclared_formulae_never_export_authoritative_relations() {
+    for (content, needle, excluded_relation) in [
+        (
+            "The worksheet lists $F=ma$ only as a rejected candidate; this analysis does not use that equation.",
+            "F=ma",
+            "classical-mechanics:newton-second-law",
+        ),
+        (
+            "Do not apply Ohm's law in this nonlinear device. The archived comparison is $V=RI$.",
+            "V=RI",
+            "circuits:ohm-law",
+        ),
+        (
+            "For comparison only, the report mentions $K=\\frac12mv^2$ but does not adopt the kinetic-energy model.",
+            "K=\\frac12mv^2",
+            "classical-mechanics:kinetic-energy-definition",
+        ),
+    ] {
+        let view = semantic_view_at(
+            content,
+            (content.find(needle).unwrap() + needle.len()) as u32,
+        );
+        assert!(
+            !matches!(view.decision, MeaningDecision::Established { .. }),
+            "{content}: {:?}",
+            view.decision
+        );
+        assert!(
+            view.context
+                .relations
+                .iter()
+                .all(|relation| relation.relation_id != excluded_relation),
+            "{content}: {:#?}",
+            view.context.relations
+        );
+    }
+}
+
+#[test]
+fn an_outstanding_declaration_cannot_establish_a_bare_symbol() {
+    for (content, needle) in [
+        (
+            "The undecided notation $T$ still requires a declaration; do not assign it a physical role.",
+            "T",
+        ),
+        (
+            "The audit records the undeclared expression $w=q^3$ without assigning it a meaning.",
+            "w=q^3",
+        ),
+    ] {
+        let view = semantic_view_at(
+            content,
+            (content.find(needle).unwrap() + needle.len()) as u32,
+        );
+        assert!(
+            !matches!(view.decision, MeaningDecision::Established { .. }),
+            "{content}: {:?}",
+            view.decision
+        );
+        assert!(
+            view.context.relations.is_empty(),
+            "{content}: {:#?}",
+            view.context.relations
+        );
+    }
+}
+
+#[test]
 fn an_established_equation_routes_only_later_formulas_in_the_same_scope() {
     let source = "Let $P$ be power. Let $F$ be force. Let $v$ be velocity. $P=\\mathbf{F}\\cdot\\mathbf{v}$ Then inspect $z$.";
     let mut engine = SemathEngine::default();
