@@ -3058,7 +3058,15 @@ fn semantic_view_projects_claim_status_only_from_typed_index_evidence() {
             .iter()
             .any(|item| item.concept_id == concept.value)
     );
-    assert!(view.authoring_context.claim_evidence.is_empty());
+    assert!(!view.authoring_context.claim_evidence.is_empty());
+    assert!(view.authoring_context.claim_evidence.iter().all(|claim| {
+        claim.claim.file_id == "main"
+            && claim.claim.range.end_offset <= offset
+            && claim
+                .evidence
+                .iter()
+                .all(|evidence| evidence.rule_id != "semath/canonical-symbol-identity")
+    }));
     assert!(view.authoring_context.notation_occurrences.len() >= 2);
 }
 
@@ -3101,7 +3109,11 @@ fn authoring_claim_evidence_emits_one_link_for_one_authored_claim() {
             .collect::<std::collections::BTreeSet<_>>(),
         ["definition", "type"].into_iter().collect()
     );
-    assert!(view.authoring_context.claim_evidence.is_empty());
+    assert_eq!(view.authoring_context.claim_evidence.len(), 1);
+    assert_eq!(
+        view.authoring_context.claim_evidence[0].claim_id,
+        "main:1:definition-claim:0"
+    );
 }
 
 #[test]
@@ -3896,7 +3908,9 @@ fn rejecting_a_refutation_is_not_a_sign_convention_conflict() {
                     relation.relation_id == "circuits:capacitor-current-law"
                 })
             })
-            .expect("bounded capacitor hypothesis");
+            .unwrap_or_else(|| {
+                panic!("bounded capacitor hypothesis: {double_negative}: {view:#?}")
+            });
         assert!(capacitor.conditions.iter().any(|condition| {
             condition.condition_id == "passive-sign-convention"
                 && condition.status == crate::ConstraintStatus::Required
@@ -4355,15 +4369,8 @@ fn a_unique_later_negative_formula_retracts_the_earlier_relation() {
             ))
     );
     assert!(
-        view.authoring_context
-            .interpretations
-            .hypotheses
-            .iter()
-            .flat_map(|hypothesis| &hypothesis.evidence)
-            .flat_map(|evidence| &evidence.source_anchors)
-            .any(|anchor| {
-                anchor.lifecycle == crate::MathInterpretationSourceLifecycle::Retracted
-            })
+        view.authoring_context.interpretations.hypotheses.is_empty(),
+        "retracted source must not retain supporting interpretations: {view:#?}"
     );
 }
 
@@ -4571,10 +4578,10 @@ fn unsupported_formula_refuses_instead_of_guessing() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
+    assert!(matches!(view.decision, MeaningDecision::Unsupported { .. }));
     assert_eq!(
         view.authoring_context.disposition,
-        crate::MathAuthoringDisposition::Partial
+        crate::MathAuthoringDisposition::Unsupported
     );
     assert!(view.context.relations.is_empty());
 }
@@ -4874,6 +4881,99 @@ fn standalone_math_root_uses_formula_adjudication_without_cursor_entity_proof() 
 }
 
 #[test]
+fn compacted_snapshot_keeps_the_analyzed_selected_root() {
+    let content = "The selected relation is $a=b$.";
+    let start = content.find("a=b").unwrap() as u32;
+    let mut input = document("main", "main.tex", content, 1);
+    input.nodes = [
+        ("a", LexicalClass::Identifier),
+        ("=", LexicalClass::Operator),
+        ("b", LexicalClass::Identifier),
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(index, (text, lexical_class))| NotationNode {
+        kind: NotationNodeKind::Token,
+        parent: Some(3),
+        children: Vec::new(),
+        ranges: NotationNodeRanges {
+            full: range(start + index as u32, start + index as u32 + 1),
+            command: None,
+            name: None,
+            nucleus: None,
+            editable: Some(range(start + index as u32, start + index as u32 + 1)),
+        },
+        state: SyntaxState::Complete,
+        name: None,
+        text: Some(text.into()),
+        arguments: Vec::new(),
+        lexical_class: Some(lexical_class),
+        math_class: None,
+        provenance: None,
+    })
+    .chain(std::iter::once(NotationNode {
+        kind: NotationNodeKind::Sequence,
+        parent: None,
+        children: vec![0, 1, 2],
+        ranges: NotationNodeRanges {
+            full: range(start, start + 3),
+            command: None,
+            name: None,
+            nucleus: None,
+            editable: Some(range(start, start + 3)),
+        },
+        state: SyntaxState::Complete,
+        name: None,
+        text: None,
+        arguments: Vec::new(),
+        lexical_class: None,
+        math_class: None,
+        provenance: None,
+    }))
+    .collect();
+    input.math_roots = vec![MathRoot {
+        node: 3,
+        delimiter: "inline-dollar".into(),
+        full_range: range(start - 1, start + 4),
+        content_range: range(start, start + 3),
+        state: MathRootState::Complete,
+    }];
+    input.scopes = vec![SyntaxScope {
+        kind: "document".into(),
+        parent: None,
+        range: range(0, content.len() as u32),
+        state: MathRootState::Complete,
+        name: None,
+        level: None,
+        source: None,
+    }];
+
+    let mut engine = SemathEngine::default();
+    let mut project = snapshot(content);
+    project.documents = vec![input];
+    engine.reset(project).unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: start,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+}
+
+#[test]
 fn subrelation_source_meaning_cannot_establish_a_mixed_sibling_root() {
     let content = "The selected relation is $a=b\\land c=d$.";
     let view = semantic_view_at(content, content.rfind("c=d").unwrap() as u32);
@@ -5091,6 +5191,36 @@ fn asserted_only_recognition_is_tentative_and_cannot_export_a_relation() {
 }
 
 #[test]
+fn strictly_exported_selected_root_is_established_and_explicit() {
+    let content = "Let $M$ be a p by q matrix, $x$ a q-dimensional vector, and $w$ a p-dimensional vector. The mapped vector is $w=Mx$.";
+    let view = semantic_view_at(content, content.rfind("w=Mx").unwrap() as u32);
+
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| { relation.relation_id == "linear-algebra:matrix-vector-product" }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| {
+                hypothesis.hypothesis_id == "linear-algebra:matrix-vector-product"
+                    && hypothesis.support == crate::MathInterpretationSupportTier::Explicit
+            }),
+        "{view:#?}"
+    );
+}
+
+#[test]
 fn asserted_only_preceding_recognition_cannot_form_an_equation_link() {
     let content = "For a Newtonian fluid, the Newtonian shear relation is $x=y\\dot z$, but the report does not identify the roles of x, y, or z. Let $P$ be power, $F$ force, and $x$ velocity. The accepted power relation is $P=F\\cdot x$.";
     let prior = semantic_view_at(content, content.find("x=y\\dot z").unwrap() as u32);
@@ -5139,13 +5269,13 @@ fn source_grounded_capacitor_roles_support_the_conventional_formula() {
 }
 
 #[test]
-fn closed_source_described_formula_is_partial_without_exporting_authority() {
+fn proposed_source_described_formula_is_unsupported_without_exporting_authority() {
     let content = "The proposed estimator is $\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2$.";
     let view = semantic_view_at(content, content.find("\\widehat x").unwrap() as u32);
 
     assert_eq!(
         view.authoring_context.disposition,
-        crate::MathAuthoringDisposition::Partial,
+        crate::MathAuthoringDisposition::Unsupported,
         "{view:#?}"
     );
     assert!(view.context.relations.is_empty(), "{view:#?}");
@@ -5671,8 +5801,9 @@ fn display_led_relational_claims_are_format_neutral_and_remain_partial() {
                     && claim.polarity == crate::MathClaimPolarity::Positive
             })
             .collect::<Vec<_>>();
-        assert!(
-            matching_claims.is_empty(),
+        assert_eq!(
+            matching_claims.len(),
+            1,
             "{language:?}: {:#?}",
             view.authoring_context.claim_evidence
         );

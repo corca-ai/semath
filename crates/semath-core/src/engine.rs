@@ -4075,8 +4075,13 @@ impl SemathEngine {
             })
             .into_iter()
             .collect::<Vec<_>>();
-        let selected_root = parsed
-            .map(|math| lower_document_region(&document.document, &math.region.content_range));
+        let selected_root = parsed.and_then(|math| {
+            document
+                .parsed
+                .iter()
+                .position(|candidate| std::ptr::eq(candidate, math))
+                .and_then(|index| document.canonical_expressions.get(index))
+        });
         let selected_root_meaning_evidence = selected_root
             .as_ref()
             .map(|root| {
@@ -4100,6 +4105,9 @@ impl SemathEngine {
             || projected_formulas
                 .iter()
                 .any(|formula| self.formula_is_retracted(document, formula));
+        if queried_formula_is_explicitly_retracted {
+            projected_formulas.clear();
+        }
         projected_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
         let (conventional_candidates, conventional_candidates_truncated) =
             conventional_candidates(&projected_formulas);
@@ -4389,14 +4397,17 @@ impl SemathEngine {
             } else {
                 (context.clone(), Vec::new())
             };
-        if let Some(range) = queried_formula_range {
-            self.append_formula_index_claims(document, range, &mut formula_context);
+        if let Some(root) = selected_root {
+            self.append_formula_index_claims(document, root, &mut formula_context);
         }
-        let (interpretation_domains, formula_domains_truncated) = queried_formula_range
+        let (mut interpretation_domains, formula_domains_truncated) = queried_formula_range
             .map_or_else(
                 || (observations.domains.all_at(offset), domains_truncated),
                 |range| observations.domains.all_for_range_with_truncation(range),
             );
+        if formula_retracted {
+            interpretation_domains.clear();
+        }
         let formula_engine_limited = queried_formula_range.map_or(engine_limited, |root_range| {
             document
                 .engine_limited_ranges
@@ -4415,10 +4426,7 @@ impl SemathEngine {
         });
         let formula_truncated = conventional_candidates_truncated
             || formula_domains_truncated
-            || formula_context.truncated
-            || formula_symbol_info
-                .as_ref()
-                .is_some_and(|symbol| symbol.truncated);
+            || formula_context.truncated;
         let unsupported_formula_context = local_formulas.is_empty()
             && (queried_formula_is_rejected
                 || queried_formula_range.is_some_and(|root_range| {
@@ -4439,7 +4447,7 @@ impl SemathEngine {
         });
         let mut formula_decision = decide_meaning(MeaningDecisionInput {
             formulas: &local_formulas,
-            symbol: formula_symbol_info.as_ref(),
+            symbol: None,
             symbol_proof: &[],
             candidates: &formula_context.candidates,
             conflicts: &formula_conflicts,
@@ -4447,6 +4455,32 @@ impl SemathEngine {
             unsupported_relation_context: unsupported_formula_context,
             truncated: formula_truncated,
         });
+        if !queried_formula_is_rejected
+            && !formula_engine_limited
+            && matches!(formula_decision, MeaningDecision::Unsupported { .. })
+            && !formula_context.claims.is_empty()
+        {
+            formula_decision = MeaningDecision::Partial {
+                meaning: crate::MeaningConclusion {
+                    label: selected_root
+                        .and_then(relation_head)
+                        .map(|(name, _)| name)
+                        .unwrap_or_else(|| "selected formula".into()),
+                    relation_id: None,
+                },
+                facts: Vec::new(),
+                requirements: Vec::new(),
+                reasons: vec![crate::DecisionReason {
+                    kind: crate::DecisionReasonKind::Proof,
+                    label: "Partial meaning is grounded in reviewed source claims.".into(),
+                    evidence: formula_context
+                        .claims
+                        .iter()
+                        .flat_map(|claim| claim.evidence.iter().cloned())
+                        .collect(),
+                }],
+            };
+        }
         if !selected_root_is_recognized
             && let MeaningDecision::Established { meaning, reasons } = &formula_decision
         {
@@ -5408,67 +5442,55 @@ impl SemathEngine {
     fn append_formula_index_claims(
         &self,
         document: &AnalyzedDocument,
-        range: &SourceRange,
+        root: &SemanticExpr,
         context: &mut SemanticContextInfo,
     ) {
-        let mut seen_entities = BTreeSet::new();
-        let mut claim_sources = Vec::new();
-        let mut claim_sources_truncated = false;
-        for seed in document.semantic_occurrences.iter().filter(|occurrence| {
-            range.start_offset <= occurrence.selection_range.start_offset
-                && occurrence.selection_range.end_offset <= range.end_offset
-        }) {
-            let Some(focus) = self.index.cursor_focus(&document.document.file_id, seed) else {
-                continue;
-            };
-            let Some(entity) = self.resolved_entity(&focus.occurrence_id) else {
-                continue;
-            };
-            if !seen_entities.insert(entity.clone()) {
-                continue;
-            }
-            if claim_sources.len() == MAX_VIEW_CLAIMS {
-                claim_sources_truncated = true;
-                break;
-            }
-            claim_sources.push((entity, focus.occurrence_id));
-        }
-        let mut claims = Vec::new();
-        for (entity, occurrence_id) in claim_sources {
-            let Some(occurrence) = self.index.semantic.occurrence(&occurrence_id) else {
-                continue;
-            };
-            claims.extend(index_claims(
-                &self.index.semantic,
-                &self.index.documents,
-                &entity,
-                occurrence,
-            ));
-        }
-        claims.retain(|claim| {
-            claim.evidence.iter().any(|evidence| {
-                evidence.source_anchors.iter().any(|anchor| {
-                    anchor.location.file_id == document.document.file_id
-                        && ranges_overlap(&anchor.location.range, range)
-                })
-            }) || self
-                .index
-                .semantic
-                .claim(&ClaimId(claim.claim_id.clone()))
-                .and_then(|claim| self.index.semantic.evidence(&claim.evidence_id))
-                .is_some_and(|evidence| {
-                    evidence.provenance.iter().any(|occurrence_id| {
-                        occurrence_id.file_id == document.document.file_id
-                            && self
-                                .index
-                                .semantic
-                                .occurrence(occurrence_id)
-                                .is_some_and(|occurrence| ranges_overlap(&occurrence.range, range))
-                    })
-                })
-        });
+        let owner_range = relation_head(root)
+            .map(|(_, range)| range)
+            .unwrap_or_else(|| root.range.clone());
+        let Some((entity, occurrence_id)) = document
+            .semantic_occurrences
+            .iter()
+            .filter(|seed| ranges_overlap(&seed.selection_range, &owner_range))
+            .filter_map(|seed| {
+                let focus = self.index.cursor_focus(&document.document.file_id, seed)?;
+                let entity = self.resolved_entity(&focus.occurrence_id)?;
+                Some((
+                    entity,
+                    focus.occurrence_id,
+                    (
+                        u8::from(seed.selection_range != owner_range),
+                        seed.selection_range.start_offset,
+                        seed.selection_range.end_offset - seed.selection_range.start_offset,
+                    ),
+                ))
+            })
+            .min_by_key(|(_, _, order)| *order)
+            .map(|(entity, occurrence_id, _)| (entity, occurrence_id))
+        else {
+            return;
+        };
+        let Some(occurrence) = self.index.semantic.occurrence(&occurrence_id) else {
+            return;
+        };
+        let claims = index_claims_matching(
+            &self.index.semantic,
+            &self.index.documents,
+            &entity,
+            occurrence,
+            |claim, evidence| {
+                evidence.source.file_id == document.document.file_id
+                    && evidence.origin == EvidenceOrigin::Explicit
+                    && evidence.polarity == EvidencePolarity::Positive
+                    && evidence.modality == EvidenceModality::Asserted
+                    && evidence.rule_id != "semath/canonical-symbol-identity"
+                    && !matches!(
+                        claim.predicate,
+                        ClaimPredicate::Assumes | ClaimPredicate::Relates
+                    )
+            },
+        );
         append_context_claims(context, claims);
-        context.truncated |= claim_sources_truncated;
     }
 
     fn has_prior_excluding_occurrence(
@@ -6466,11 +6488,22 @@ fn index_claims(
     entity: &EntityId,
     occurrence: &SourceOccurrence,
 ) -> Vec<crate::SemanticClaimInfo> {
+    index_claims_matching(index, documents, entity, occurrence, |_, _| true)
+}
+
+fn index_claims_matching(
+    index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
+    entity: &EntityId,
+    occurrence: &SourceOccurrence,
+    mut eligible: impl FnMut(&Claim, &EvidenceRecord) -> bool,
+) -> Vec<crate::SemanticClaimInfo> {
     let raw = index
         .claims_for_entity_at(entity, occurrence)
         .into_iter()
         .filter_map(|claim| {
             let evidence = index.evidence(&claim.evidence_id)?;
+            eligible(claim, evidence).then_some(())?;
             let value = claim_object_display(index, &claim.object)?;
             Some((claim, evidence, value))
         })

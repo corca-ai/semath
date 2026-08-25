@@ -1609,7 +1609,8 @@ fn classify_discourse_frame(
             " have been withdrawn",
             " had been withdrawn",
         ],
-    );
+    )
+    .or_else(|| active_demonstrative_formula_refusal_marker(&lower));
     let explicit_negative_action_marker = first_marker(
         &lower,
         &[
@@ -1835,6 +1836,51 @@ fn first_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {
                 .map(|start| (start, start + marker.len()))
         })
         .min_by_key(|(start, _)| *start)
+}
+
+fn active_demonstrative_formula_refusal_marker(value: &str) -> Option<(usize, usize)> {
+    let mut words = Vec::new();
+    let mut start = None;
+    for (offset, character) in value.char_indices() {
+        if character.is_ascii_alphabetic() {
+            start.get_or_insert(offset);
+        } else if let Some(start) = start.take() {
+            words.push((start, offset, &value[start..offset]));
+        }
+    }
+    if let Some(start) = start {
+        words.push((start, value.len(), &value[start..]));
+    }
+    words.windows(3).find_map(|window| {
+        matches!(
+            window[0].2,
+            "reject"
+                | "rejects"
+                | "rejected"
+                | "withdraw"
+                | "withdraws"
+                | "withdrew"
+                | "discard"
+                | "discards"
+                | "discarded"
+        )
+        .then_some(())?;
+        matches!(window[1].2, "this" | "that").then_some(())?;
+        matches!(
+            window[2].2,
+            "formula"
+                | "equation"
+                | "identity"
+                | "law"
+                | "model"
+                | "relation"
+                | "balance"
+                | "estimate"
+                | "calculation"
+                | "proposal"
+        )
+        .then_some((window[0].0, window[0].1))
+    })
 }
 
 fn first_bounded_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {
