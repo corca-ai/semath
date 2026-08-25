@@ -99,7 +99,14 @@ pub(crate) struct ProseObservations {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct FormulaMeaningFact {
     pub target_range: SourceRange,
+    pub ownership: FormulaMeaningOwnership,
     pub evidence: Evidence,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum FormulaMeaningOwnership {
+    ExactTarget,
+    RelationHead,
 }
 
 pub(crate) fn assumption_formula_targets(assumption: &AssumptionInfo) -> &[SourceRange] {
@@ -1725,6 +1732,7 @@ fn collect_equation_flow_definitions(
             if let Some(target) = target {
                 output.formula_meanings.push(FormulaMeaningFact {
                     target_range: target.range.clone(),
+                    ownership: formula_meaning_ownership(&description),
                     evidence: Evidence {
                         rule_id: formula_meaning_rule_id(&description).into(),
                         kind: "attached-prose".into(),
@@ -1768,6 +1776,7 @@ fn collect_equation_flow_definitions(
         if classify_role(&description).is_none() {
             output.formula_meanings.push(FormulaMeaningFact {
                 target_range: symbol_range,
+                ownership: formula_meaning_ownership(&description),
                 evidence: Evidence {
                     rule_id: formula_meaning_rule_id(&description).into(),
                     kind: "attached-prose".into(),
@@ -1989,6 +1998,17 @@ fn formula_meaning_rule_id(description: &str) -> &'static str {
         "english-notation-meaning"
     } else {
         "english-equation-flow-meaning"
+    }
+}
+
+fn formula_meaning_ownership(description: &str) -> FormulaMeaningOwnership {
+    if formula_description_words(description)
+        .last()
+        .is_some_and(|word| word == "notation")
+    {
+        FormulaMeaningOwnership::RelationHead
+    } else {
+        FormulaMeaningOwnership::ExactTarget
     }
 }
 
@@ -4693,6 +4713,7 @@ fn push_formula_metadescription(
     };
     analysis.formula_meanings.push(FormulaMeaningFact {
         target_range: expression.range.clone(),
+        ownership: formula_meaning_ownership(description),
         evidence: Evidence {
             rule_id: formula_meaning_rule_id(description).into(),
             kind: "attached-prose".into(),

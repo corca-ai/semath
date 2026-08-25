@@ -4,8 +4,8 @@ use crate::domain::{DomainObservations, observe_domains};
 use crate::law::{ExternalTypeEnvironment, LawAnalysisContext, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
 use crate::prose::{
-    FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence, observe_prose,
-    public_assumption,
+    FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence, assumption_formula_targets,
+    observe_prose, public_assumption,
 };
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
@@ -268,6 +268,20 @@ impl DocumentSemanticObservations {
             .context(symbol, entity_id)
     }
 
+    pub fn formula_context(
+        &self,
+        entity_id: Option<EntityId>,
+        range: &crate::SourceRange,
+        formulas: Vec<LawRecognition>,
+    ) -> SemanticContextInfo {
+        let relations = formulas
+            .iter()
+            .filter_map(|formula| formula.relation.clone())
+            .collect();
+        LocalContextProjection::new(relations, Vec::new(), self.assumptions_for_formula(range))
+            .context(None, entity_id)
+    }
+
     fn assumptions_at(&self, offset: u32) -> Vec<AssumptionInfo> {
         self.assumptions
             .iter()
@@ -283,6 +297,26 @@ impl DocumentSemanticObservations {
                             .source_ranges
                             .iter()
                             .any(|range| range.contains(offset)))
+            })
+            .cloned()
+            .collect()
+    }
+
+    fn assumptions_for_formula(&self, formula_range: &crate::SourceRange) -> Vec<AssumptionInfo> {
+        self.assumptions
+            .iter()
+            .filter(|assumption| {
+                let Some(phrase) = assumption.evidence.source_ranges.last() else {
+                    return false;
+                };
+                let scope_id = self.assumption_scopes.id_at(phrase.start_offset);
+                self.assumption_scopes
+                    .visible(scope_id, formula_range.start_offset)
+                    && (phrase.end_offset <= formula_range.start_offset
+                        || assumption_formula_targets(assumption).iter().any(|target| {
+                            target.start_offset < formula_range.end_offset
+                                && formula_range.start_offset < target.end_offset
+                        }))
             })
             .cloned()
             .collect()

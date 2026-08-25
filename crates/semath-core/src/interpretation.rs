@@ -1,3 +1,4 @@
+use crate::decision::formula_has_establishment_proof;
 use crate::domain::formula_has_independent_typed_evidence;
 use crate::{
     ConstraintStatus, ConventionalCandidateInfo, DomainActivation, DomainSupportTier, Evidence,
@@ -383,19 +384,7 @@ fn formula_support(
     {
         return MathInterpretationSupportTier::Contradicted;
     }
-    if formula.conventional_candidate
-        || formula.status == LawRecognitionStatus::ConditionMissing
-        || formula.bindings.iter().any(|binding| {
-            !matches!(
-                binding.proof,
-                LawBindingProof::Typed | LawBindingProof::Derived | LawBindingProof::Asserted
-            )
-        })
-        || formula
-            .conditions
-            .iter()
-            .any(|condition| condition.status != ConstraintStatus::Verified)
-    {
+    if formula.conventional_candidate || !formula_has_establishment_proof(formula) {
         return MathInterpretationSupportTier::Tentative;
     }
     match decision {

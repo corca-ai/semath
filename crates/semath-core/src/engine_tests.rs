@@ -2,8 +2,8 @@ use std::collections::{BTreeSet, HashMap};
 
 use super::{
     EngineError, SemathEngine, canonical_expression_owner, expression_carries_formula_fact,
-    index_occurrence_range, notation_occurrence_range, occurrence_id_at_range,
-    relation_expression_at_cursor, stable_text_digest,
+    formula_meaning_owns_relation_head, index_occurrence_range, notation_occurrence_range,
+    occurrence_id_at_range, relation_expression_at_cursor, stable_text_digest,
 };
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
@@ -12,13 +12,38 @@ use crate::canonical::{
 use crate::parser::test_math_regions;
 use crate::semantic_index::{OccurrenceKind, SourceOccurrence, SourceOccurrenceId};
 use crate::{
-    ChangeEnvelope, CompleteSyntaxState, DocumentLanguage, GeneratedNotationNode,
+    ChangeEnvelope, CompleteSyntaxState, DocumentLanguage, Evidence, GeneratedNotationNode,
     GeneratedNotationTree, LawBindingProof, LexicalClass, MathRoot, MathRootState, MeaningDecision,
     NotationArgument, NotationNode, NotationNodeKind, NotationNodeRanges, PROTOCOL_VERSION,
     ProjectChange, ProjectDocument, ProjectInclude, ProjectMacro, ProjectMacroExpansion,
     ProjectMacroExpansionStatus, ProjectMacroKind, ProjectSnapshot, ProjectSourceRef, Query,
     QueryEnvelope, QueryValue, SourceRange, SyntaxScope, SyntaxState, VisibleProseSpan,
 };
+
+#[test]
+fn formula_meaning_ownership_is_independent_of_provenance_rule_id() {
+    let mut fact = crate::prose::FormulaMeaningFact {
+        target_range: SourceRange {
+            start_offset: 4,
+            end_offset: 9,
+        },
+        ownership: crate::prose::FormulaMeaningOwnership::RelationHead,
+        evidence: Evidence {
+            rule_id: "public/notation-provenance-v1".into(),
+            kind: "attached-prose".into(),
+            strength: "strong".into(),
+            source_ranges: vec![SourceRange {
+                start_offset: 0,
+                end_offset: 3,
+            }],
+            source_anchors: Vec::new(),
+        },
+    };
+
+    assert!(formula_meaning_owns_relation_head(&fact));
+    fact.evidence.rule_id = "public/notation-provenance-v2".into();
+    assert!(formula_meaning_owns_relation_head(&fact));
+}
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
     document_with_language(file_id, path, content, version, DocumentLanguage::Latex)
@@ -4325,7 +4350,7 @@ fn a_negative_formula_in_a_disconnected_document_does_not_retract_a_relation() {
 
 #[test]
 fn formula_meaning_includes_a_source_ordered_relation_linked_by_entity_identity() {
-    let content = "The volumetric flow rate $Q$ equals the area $A$ times a measured speed.\n\\[Q=A v.\\] Here $v$ is the section-averaged normal speed. For mass flow rate, let $\\dot m$ denote mass flow rate scalar and $\\rho$ density scalar. Particle tracking supplied the area-mean exit speed $v$. The corresponding mass rate is\n\\[\\dot m=\\rho Q=\\rho A v.\\]";
+    let content = "Let $P$ be power. Let $R$ be power. Let $F$ be force. Let $v$ be velocity. The first measured balance is\n\\[P=F\\cdot v.\\] The corresponding measured balance is\n\\[R=F\\cdot v.\\]";
     let mut engine = SemathEngine::default();
     engine
         .reset(ProjectSnapshot {
@@ -4342,7 +4367,7 @@ fn formula_meaning_includes_a_source_ordered_relation_linked_by_entity_identity(
         .query(query(
             Query::SemanticView {
                 file_id: "main".into(),
-                offset: content.rfind("\\dot m").unwrap() as u32 + 1,
+                offset: content.rfind("R=F\\cdot v").unwrap() as u32,
             },
             1,
             1,
@@ -4359,10 +4384,8 @@ fn formula_meaning_includes_a_source_ordered_relation_linked_by_entity_identity(
         .collect::<BTreeSet<_>>();
     assert_eq!(
         relation_ids,
-        BTreeSet::from([
-            "fluid-mechanics:mass-flow-rate",
-            "fluid-mechanics:volumetric-flow-rate",
-        ])
+        BTreeSet::from(["classical-mechanics:mechanical-power"]),
+        "{view:#?}"
     );
     let link = view
         .authoring_context
@@ -4370,8 +4393,8 @@ fn formula_meaning_includes_a_source_ordered_relation_linked_by_entity_identity(
         .first()
         .expect("source-backed prior equation link");
     assert_eq!(link.kind, crate::MathEquationLinkKind::SharedEntity);
-    assert!(link.source.source_notation.contains("Q=A v"));
-    assert!(link.target.source_notation.contains("\\dot m=\\rho Q"));
+    assert!(link.source.source_notation.contains("P=F\\cdot v"));
+    assert!(link.target.source_notation.contains("R=F\\cdot v"));
     assert!(!link.shared_entities.is_empty());
     assert!(!link.evidence.is_empty());
 }
@@ -4860,6 +4883,26 @@ fn selected_root_formula_adjudication_is_invariant_across_sibling_cursors() {
         first.authoring_context.disposition,
         second.authoring_context.disposition
     );
+    assert_eq!(
+        first.authoring_context.requirements,
+        second.authoring_context.requirements
+    );
+    assert_eq!(
+        first.authoring_context.conditions,
+        second.authoring_context.conditions
+    );
+    assert_eq!(
+        first.authoring_context.interpretations,
+        second.authoring_context.interpretations
+    );
+    assert_eq!(
+        first.authoring_context.lifecycle.engine_limited,
+        second.authoring_context.lifecycle.engine_limited
+    );
+    assert_eq!(
+        first.authoring_context.truncated,
+        second.authoring_context.truncated
+    );
 }
 
 #[test]
@@ -4955,6 +4998,48 @@ fn retracted_preceding_formula_cannot_form_an_equation_link() {
     let content = "Let $P$ and $R$ be power, $F$ force, and $v$ velocity. The relation displayed next is withdrawn and retained only as an archival quotation: $P=F\\cdot v$. The accepted relation is $R=F\\cdot v$.";
     let current = semantic_view_at(content, content.rfind("R=").unwrap() as u32);
 
+    assert_eq!(
+        current.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{current:#?}"
+    );
+    assert!(
+        current.authoring_context.equation_links.is_empty(),
+        "{current:#?}"
+    );
+}
+
+#[test]
+fn asserted_only_recognition_is_tentative_and_cannot_export_a_relation() {
+    let content = "For a Newtonian fluid, the Newtonian shear relation is $x=y\\dot z$, but the report does not identify the roles of x, y, or z.";
+    let view = semantic_view_at(content, content.find("x=y\\dot z").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{view:#?}"
+    );
+    assert!(view.context.relations.is_empty(), "{view:#?}");
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .filter(|hypothesis| hypothesis.hypothesis_id.contains("newtonian-shear"))
+            .all(|hypothesis| {
+                hypothesis.support == crate::MathInterpretationSupportTier::Tentative
+            }),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn asserted_only_preceding_recognition_cannot_form_an_equation_link() {
+    let content = "For a Newtonian fluid, the Newtonian shear relation is $x=y\\dot z$, but the report does not identify the roles of x, y, or z. Let $P$ be power, $F$ force, and $x$ velocity. The accepted power relation is $P=F\\cdot x$.";
+    let prior = semantic_view_at(content, content.find("x=y\\dot z").unwrap() as u32);
+    assert!(prior.context.relations.is_empty(), "{prior:#?}");
+
+    let current = semantic_view_at(content, content.rfind("P=F\\cdot x").unwrap() as u32);
     assert_eq!(
         current.authoring_context.disposition,
         crate::MathAuthoringDisposition::Established,
@@ -5117,6 +5202,90 @@ fn same_revision_opaque_relink_reanalyzes_without_accepting_stale_text() {
     assert!(!view.authoring_context.lifecycle.editable);
     assert!(
         view.authoring_context
+            .interpretations
+            .analysis_limits
+            .iter()
+            .any(|limit| { limit.kind == crate::MathInterpretationAnalysisLimitKind::EngineLimit })
+    );
+}
+
+#[test]
+fn formula_authoring_limits_are_invariant_across_opaque_and_ordinary_siblings() {
+    let content = "Let $x$ denote the state. The mixed expression is $x+\\joint{A}{B}$.";
+    let macro_start = content.find("\\joint").unwrap() as u32;
+    let macro_end = macro_start + "\\joint{A}{B}".len() as u32;
+    let mut opaque = document("main", "main.tex", content, 1);
+    opaque.macros.push(ProjectMacro {
+        kind: ProjectMacroKind::Call,
+        name: "joint".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(macro_start, macro_start + "\\joint".len() as u32),
+        },
+        definitions: Vec::new(),
+        expansion: ProjectMacroExpansion {
+            status: ProjectMacroExpansionStatus::Expanded,
+            depth: 1,
+            editable: false,
+            surface: Some("\\csname A\\endcsname".into()),
+            input_range: Some(range(macro_start, macro_end)),
+            notation: Some(GeneratedNotationTree {
+                nodes: vec![GeneratedNotationNode {
+                    kind: NotationNodeKind::Command,
+                    children: Vec::new(),
+                    state: SyntaxState::Opaque,
+                    name: Some("csname".into()),
+                    text: None,
+                    arguments: Vec::new(),
+                    lexical_class: None,
+                    math_class: None,
+                }],
+                root: 0,
+            }),
+        },
+    });
+    let mut project = snapshot(content);
+    project.documents = vec![opaque];
+    let mut engine = SemathEngine::default();
+    engine.reset(project).unwrap();
+    let query_view = |offset| {
+        let QueryValue::SemanticView { view } = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap()
+            .value
+        else {
+            panic!("expected semantic view")
+        };
+        view
+    };
+    let ordinary_offset = content.find("$x+").unwrap() as u32 + 1;
+    let ordinary = query_view(ordinary_offset);
+    let opaque = query_view(macro_start + 1);
+
+    assert_eq!(
+        ordinary.authoring_context.disposition,
+        opaque.authoring_context.disposition
+    );
+    assert_eq!(
+        ordinary.authoring_context.lifecycle.engine_limited,
+        opaque.authoring_context.lifecycle.engine_limited
+    );
+    assert!(ordinary.authoring_context.lifecycle.engine_limited);
+    assert_eq!(
+        ordinary.authoring_context.interpretations.analysis_limits,
+        opaque.authoring_context.interpretations.analysis_limits
+    );
+    assert!(
+        ordinary
+            .authoring_context
             .interpretations
             .analysis_limits
             .iter()
