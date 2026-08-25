@@ -5174,25 +5174,94 @@ fn collect_typed_regularity_assumptions(
     output: &mut ProseObservations,
 ) {
     for clause in clauses.iter().filter(|clause| clause.frame.establishes()) {
-        for mention in mentions
+        let clause_mentions = mentions
             .iter()
             .filter(|mention| clause.start <= mention.start && mention.end <= clause.end)
-        {
+            .collect::<Vec<_>>();
+        for mention in &clause_mentions {
             let typed_expression = &source[mention.start..mention.end];
-            if !is_differentiability_membership(typed_expression) {
+            if is_differentiability_membership(typed_expression) {
+                output.assumptions.push(AssumptionInfo {
+                    kind: "regularity".into(),
+                    value: "differentiable".into(),
+                    subjects: vec![mention.symbol.clone()],
+                    evidence: Evidence {
+                        rule_id: "scientific-prose/function-space-regularity".into(),
+                        kind: "typed-math-condition".into(),
+                        strength: "strong".into(),
+                        source_ranges: vec![SourceRange {
+                            start_offset: index.utf16_for_byte(mention.start),
+                            end_offset: index.utf16_for_byte(mention.end),
+                        }],
+                        source_anchors: Vec::new(),
+                    },
+                });
+            }
+            let trailing_words = source[mention.end..clause.end]
+                .split(|character: char| !character.is_ascii_alphabetic())
+                .filter(|word| !word.is_empty())
+                .map(str::to_ascii_lowercase)
+                .take(3)
+                .collect::<Vec<_>>();
+            if matches!(
+                trailing_words.as_slice(),
+                [copula, state, ..]
+                    if matches!(copula.as_str(), "is" | "remains")
+                        && state == "undeclared"
+            ) || matches!(
+                trailing_words.as_slice(),
+                [copula, negator, state, ..]
+                    if matches!(copula.as_str(), "is" | "remains")
+                        && negator == "not"
+                        && state == "declared"
+            ) {
+                output.assumptions.push(AssumptionInfo {
+                    kind: "declaration-status".into(),
+                    value: "undeclared".into(),
+                    subjects: vec![mention.symbol.clone()],
+                    evidence: Evidence {
+                        rule_id: "scientific-prose/undeclared-symbol".into(),
+                        kind: "explicit-prose".into(),
+                        strength: "strong".into(),
+                        source_ranges: vec![SourceRange {
+                            start_offset: index.utf16_for_byte(mention.start),
+                            end_offset: index.utf16_for_byte(clause.end),
+                        }],
+                        source_anchors: Vec::new(),
+                    },
+                });
+            }
+        }
+        for pair in clause_mentions.windows(2) {
+            let [function, variable] = pair else {
+                continue;
+            };
+            let bridge_words = source[function.end..variable.start]
+                .split(|character: char| !character.is_ascii_alphabetic())
+                .filter(|word| !word.is_empty())
+                .map(str::to_ascii_lowercase)
+                .collect::<Vec<_>>();
+            if !matches!(
+                bridge_words.as_slice(),
+                [verb, article, noun, preposition]
+                    if matches!(verb.as_str(), "be" | "is")
+                        && article == "a"
+                        && noun == "function"
+                        && preposition == "of"
+            ) {
                 continue;
             }
             output.assumptions.push(AssumptionInfo {
-                kind: "regularity".into(),
-                value: "differentiable".into(),
-                subjects: vec![mention.symbol.clone()],
+                kind: "function-dependency".into(),
+                value: "function-of".into(),
+                subjects: vec![function.symbol.clone(), variable.symbol.clone()],
                 evidence: Evidence {
-                    rule_id: "scientific-prose/function-space-regularity".into(),
+                    rule_id: "scientific-prose/function-dependency".into(),
                     kind: "typed-math-condition".into(),
                     strength: "strong".into(),
                     source_ranges: vec![SourceRange {
-                        start_offset: index.utf16_for_byte(mention.start),
-                        end_offset: index.utf16_for_byte(mention.end),
+                        start_offset: index.utf16_for_byte(function.start),
+                        end_offset: index.utf16_for_byte(variable.end),
                     }],
                     source_anchors: Vec::new(),
                 },
@@ -5349,6 +5418,7 @@ fn is_non_defining_passive(clause: &str) -> bool {
                 | "referenced"
                 | "reported"
                 | "shown"
+                | "undeclared"
                 | "used"
         )
     ) || participle == Some("measured") && !lower.starts_with("measured in ")
@@ -8460,6 +8530,36 @@ Define the mean axial speed by the flow relation
                 analysis.definitions
             );
         }
+    }
+
+    #[test]
+    fn an_undeclared_symbol_state_is_not_a_positive_definition() {
+        let analysis = analyze("Let $f$ be a function, but $z$ is undeclared.");
+
+        assert!(
+            analysis
+                .definitions
+                .iter()
+                .all(|definition| definition.symbol != "z"),
+            "{:#?}",
+            analysis.definitions
+        );
+        assert!(analysis.assumptions.iter().any(|assumption| {
+            assumption.kind == "declaration-status"
+                && assumption.value == "undeclared"
+                && assumption.subjects == ["z"]
+        }));
+    }
+
+    #[test]
+    fn function_dependencies_preserve_the_exact_declared_variable() {
+        let analysis = analyze("Let $f$ be a function of $x$.");
+
+        assert!(analysis.assumptions.iter().any(|assumption| {
+            assumption.kind == "function-dependency"
+                && assumption.value == "function-of"
+                && assumption.subjects == ["f", "x"]
+        }));
     }
 
     #[test]

@@ -2827,6 +2827,16 @@ fn is_differentiable_function_evidence(assumption: &AssumptionInfo, symbol: &str
         && assumption.subjects.iter().any(|subject| subject == symbol)
 }
 
+fn is_function_dependency_evidence(
+    assumption: &AssumptionInfo,
+    function: &str,
+    variable: &str,
+) -> bool {
+    assumption.kind == "function-dependency"
+        && assumption.value == "function-of"
+        && assumption.subjects == [function, variable]
+}
+
 fn role_binding_evidence_ranges(
     expression: &SemanticExpr,
     proof: RoleBindingProof,
@@ -3476,6 +3486,13 @@ fn role_symbol_support(
     assumptions: &[AssumptionInfo],
     external: &ExternalTypeEnvironment,
 ) -> RoleSupport {
+    if assumptions.iter().any(|assumption| {
+        assumption.kind == "declaration-status"
+            && assumption.value == "undeclared"
+            && assumption.subjects.iter().any(|subject| subject == symbol)
+    }) {
+        return RoleSupport::Refuted;
+    }
     if role_shape_constraints_refuted(&role.concept, symbol, offset, shapes, external) {
         return RoleSupport::Refuted;
     }
@@ -4251,9 +4268,15 @@ fn condition_evidence(
     if let Some(condition_evidence) = &semantic_condition.unselected {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
-    let structural_condition =
-        structural_condition_evidence(condition, roles, bindings, actual, role_support)
-            .or_else(|| explicit_named_law_condition_evidence(roles, role_support, activation));
+    let structural_condition = structural_condition_evidence(
+        condition,
+        roles,
+        bindings,
+        actual,
+        role_support,
+        assumptions,
+    )
+    .or_else(|| explicit_named_law_condition_evidence(roles, role_support, activation));
     if let Some(condition_evidence) = &structural_condition {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
@@ -4375,6 +4398,7 @@ fn structural_condition_evidence(
     bindings: &BTreeMap<String, SemanticExpr>,
     actual: &SemanticExpr,
     role_support: &RoleSupportPlan,
+    assumptions: &[AssumptionInfo],
 ) -> Option<Evidence> {
     if condition.kind == PackConditionKind::DomainMembership
         && condition.subjects.iter().all(|subject| {
@@ -4395,7 +4419,16 @@ fn structural_condition_evidence(
     if condition.kind == PackConditionKind::Differentiable && condition.subjects.len() == 2 {
         let function = bindings.get(&condition.subjects[0])?;
         let variable = bindings.get(&condition.subjects[1])?;
-        if expression_asserts_derivative(actual, function, variable) {
+        let function_symbol = semantic_symbol(function)?;
+        let variable_symbol = semantic_symbol(variable)?;
+        let declared_dependency = assumptions.iter().any(|assumption| {
+            is_function_dependency_evidence(assumption, &function_symbol, &variable_symbol)
+        });
+        let declared_regularity =
+            has_differentiable_function_evidence(assumptions, &function_symbol);
+        if expression_asserts_derivative(actual, function, variable)
+            && (declared_dependency || declared_regularity)
+        {
             return Some(Evidence {
                 rule_id: "canonical-regularity/asserted-derivative".into(),
                 kind: "canonical-binding".into(),
@@ -6319,6 +6352,19 @@ mod tests {
                 .source_ranges
                 .iter()
                 .any(|range| recognition.range.contains(range.start_offset))
+        );
+    }
+
+    #[test]
+    fn a_derivative_cannot_substitute_an_undeclared_variable_for_the_declared_dependency() {
+        let source = "Let $f$ be a function of $x$ and $g$ its derivative, but $z$ is undeclared. $g=\\frac{d f}{d z}$";
+        let recognized = recognized_law_observations(source);
+
+        assert!(
+            recognized
+                .iter()
+                .all(|law| law.law_id != "first-derivative-relation"),
+            "{recognized:#?}"
         );
     }
 

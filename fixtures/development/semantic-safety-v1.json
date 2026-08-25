@@ -21,7 +21,7 @@
         "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
         "expected": {
           "decisionDomain": "selected-formula",
-          "decisions": ["conventional"],
+          "decisions": ["established"],
           "proofGrounded": false,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
@@ -113,7 +113,7 @@
         "semanticCursor": {"fileId": "drive", "needle": "V=RI", "edge": "after"},
         "expected": {
           "decisionDomain": "selected-formula",
-          "decisions": ["conventional"],
+          "decisions": ["established"],
           "proofGrounded": false,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
