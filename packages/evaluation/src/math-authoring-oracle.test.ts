@@ -26,11 +26,11 @@ describe("source-authored MathAuthoring oracle v2", () => {
     const review = await Bun.file("fixtures/challenge/math-authoring-oracle-review-v2.json").json();
     const compiled = compileMathAuthoringOracle(source, oracle, review);
     expect(compiled.oracle.review).toEqual({
-      attestationDigest: "3098aafd1b20618514c0011cc315c96b2d26f4121d4d574e51c28c6da3559607",
+      attestationDigest: "8110b12e643cffc0bd2326d6fdaf47ae4c9f589a9bfcdeb49d4d450f4c205d9c",
       author: "agent:/root",
-      digest: "bf9d361ed7cd66f75b3fe9dc40a62d89d6add93ef3f06cccac5c56bff7c8adb2",
+      digest: "05bfb1edaeb70e9425ebb1c8167a24526cc6c15200bf57671ec7b2d85b8b751c",
       reviewFixture: "fixtures/challenge/math-authoring-oracle-review-v2.json",
-      reviewedAt: "2026-08-25",
+      reviewedAt: "2026-08-26",
       reviewer: "agent:/root/v042-main-reviewer",
     });
     expect(compiled.oracle.cases.find((item) => item.id === "open-world-cap-plus-one-tex")?.safety.disposition)
