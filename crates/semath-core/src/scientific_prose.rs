@@ -1518,8 +1518,43 @@ fn classify_discourse_frame(
             " are rejected",
             " is withdrawn",
             " are withdrawn",
+            " was discarded",
+            " were discarded",
+            " was excluded",
+            " were excluded",
+            " was rejected",
+            " were rejected",
+            " was withdrawn",
+            " were withdrawn",
+            " has been discarded",
+            " have been discarded",
+            " had been discarded",
+            " has been excluded",
+            " have been excluded",
+            " had been excluded",
+            " has been rejected",
+            " have been rejected",
+            " had been rejected",
+            " has been withdrawn",
+            " have been withdrawn",
+            " had been withdrawn",
         ],
     );
+    let explicit_negative_action_marker = first_marker(
+        &lower,
+        &[
+            " does not use ",
+            " did not use ",
+            " is never used",
+            " are never used",
+            " was never used",
+            " were never used",
+            " has not been used",
+            " have not been used",
+            " had not been used",
+        ],
+    );
+    let bounded_negative_action_marker = negative_formula_action_marker(&lower);
     let negative_marker = if starts_with_any(
         &lower,
         &[
@@ -1527,6 +1562,7 @@ fn classify_discourse_frame(
             "do not ",
             "does not ",
             "we do not ",
+            "cannot ",
             "never ",
             "no longer ",
         ],
@@ -1547,6 +1583,8 @@ fn classify_discourse_frame(
         || lower.contains(" was not adopted")
         || lower.contains(" were not adopted")
         || explicit_refusal_marker.is_some()
+        || explicit_negative_action_marker.is_some()
+        || bounded_negative_action_marker.is_some()
         || ((lower.starts_with("drops ") || lower.contains(" drops "))
             && lower.contains(" without assuming"))
         || lower.contains(" inapplicable")
@@ -1554,11 +1592,22 @@ fn classify_discourse_frame(
             .iter()
             .any(|marker| lower.contains(marker))
     {
-        first_marker(
+        first_bounded_marker(
             &lower,
-            &["not", "never", "without", "no longer", "inapplicable"],
+            &[
+                "not",
+                "never",
+                "cannot",
+                "without",
+                "no longer",
+                "inapplicable",
+            ],
         )
-        .or(explicit_refusal_marker)
+        .into_iter()
+        .chain(explicit_refusal_marker)
+        .chain(explicit_negative_action_marker)
+        .chain(bounded_negative_action_marker)
+        .min_by_key(|(start, _)| *start)
     } else {
         None
     };
@@ -1641,7 +1690,14 @@ fn formula_attribution_marker(lower: &str) -> Option<(usize, usize)> {
     let is_formula_metanoun = |word: &str| {
         matches!(
             word,
-            "formula" | "equation" | "identity" | "law" | "model" | "relation" | "balance"
+            "formula"
+                | "equation"
+                | "identity"
+                | "law"
+                | "model"
+                | "relation"
+                | "balance"
+                | "comparison"
         )
     };
     let attributed_descriptor = words.iter().enumerate().any(|(index, word)| {
@@ -1656,8 +1712,15 @@ fn formula_attribution_marker(lower: &str) -> Option<(usize, usize)> {
             && window[1] == "attributed"
             && matches!(window[2], "to" | "by")
     });
-    (attributed_descriptor || attributed_metanoun)
-        .then(|| first_marker(lower, &["attributed"]))
+    let archived_descriptor = words.iter().enumerate().any(|(index, word)| {
+        *word == "archived"
+            && words[index + 1..]
+                .iter()
+                .take(3)
+                .any(|word| is_formula_metanoun(word))
+    });
+    (attributed_descriptor || attributed_metanoun || archived_descriptor)
+        .then(|| first_marker(lower, &["attributed", "archived"]))
         .flatten()
 }
 
@@ -1702,6 +1765,98 @@ fn first_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {
                 .map(|start| (start, start + marker.len()))
         })
         .min_by_key(|(start, _)| *start)
+}
+
+fn first_bounded_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {
+    markers
+        .iter()
+        .flat_map(|marker| value.match_indices(marker))
+        .filter(|(start, marker)| {
+            let end = start + marker.len();
+            value[..*start]
+                .chars()
+                .next_back()
+                .is_none_or(|character| !character.is_ascii_alphabetic())
+                && value[end..]
+                    .chars()
+                    .next()
+                    .is_none_or(|character| !character.is_ascii_alphabetic())
+        })
+        .map(|(start, marker)| (start, start + marker.len()))
+        .min_by_key(|(start, _)| *start)
+}
+
+fn negative_formula_action_marker(value: &str) -> Option<(usize, usize)> {
+    let words = value
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    let has_negative_action = words.iter().enumerate().any(|(index, word)| {
+        if !matches!(*word, "no" | "not" | "never" | "cannot") {
+            return false;
+        }
+        if index > 0 && words[index - 1] == "without" {
+            return false;
+        }
+        let tail = &words[index + 1..];
+        let modifiers = tail
+            .iter()
+            .take_while(|word| {
+                matches!(
+                    **word,
+                    "be" | "been"
+                        | "being"
+                        | "ever"
+                        | "longer"
+                        | "still"
+                        | "currently"
+                        | "directly"
+                        | "explicitly"
+                        | "necessarily"
+                )
+            })
+            .count();
+        tail.get(modifiers).is_some_and(|action| {
+            matches!(
+                *action,
+                "publish"
+                    | "publishes"
+                    | "published"
+                    | "publishing"
+                    | "assert"
+                    | "asserts"
+                    | "asserted"
+                    | "asserting"
+                    | "assume"
+                    | "assumes"
+                    | "assumed"
+                    | "assuming"
+                    | "use"
+                    | "uses"
+                    | "used"
+                    | "using"
+                    | "apply"
+                    | "applies"
+                    | "applied"
+                    | "applying"
+                    | "adopt"
+                    | "adopts"
+                    | "adopted"
+                    | "adopting"
+                    | "accept"
+                    | "accepts"
+                    | "accepted"
+                    | "accepting"
+                    | "select"
+                    | "selects"
+                    | "selected"
+                    | "selecting"
+            )
+        })
+    });
+    has_negative_action
+        .then(|| first_bounded_marker(value, &["no", "not", "never", "cannot"]))
+        .flatten()
 }
 
 fn push_marker_evidence(
@@ -1887,6 +2042,75 @@ fn assumption_phrase_polarity(
         .filter(|word| !word.is_empty())
         .take(8)
         .collect::<Vec<_>>();
+    let direct_modifier = |word: &str| {
+        word.ends_with("ly")
+            || matches!(
+                word,
+                "a" | "an" | "the" | "this" | "that" | "only" | "its" | "their" | "our" | "any"
+            )
+    };
+    let withholding_word =
+        |word: &str| word.starts_with("withhold") || word.starts_with("withheld");
+    let suffix_withholds = |head: usize| {
+        suffix_words.get(head..).is_some_and(|tail| {
+            let modifiers = tail.iter().take_while(|word| direct_modifier(word)).count();
+            tail.get(modifiers)
+                .is_some_and(|word| withholding_word(word))
+        })
+    };
+    let direct_withholding = words
+        .iter()
+        .rposition(|(_, _, word)| withholding_word(word))
+        .is_some_and(|cue| {
+            let bridge = &words[cue + 1..];
+            let leading_modifiers = bridge
+                .iter()
+                .take_while(|(_, _, word)| direct_modifier(word))
+                .count();
+            bridge.iter().all(|(_, _, word)| direct_modifier(word))
+                || (matches!(bridge, [(_, _, "of"), ..])
+                    && bridge[1..].iter().all(|(_, _, word)| direct_modifier(word)))
+                || (matches!(
+                    &bridge[leading_modifiers..],
+                    [(_, _, "adoption" | "use" | "application"), (_, _, "of"), ..]
+                ) && bridge[leading_modifiers + 2..]
+                    .iter()
+                    .all(|(_, _, word)| direct_modifier(word)))
+        })
+        || (suffix_words.first().is_some_and(|word| {
+            matches!(
+                *word,
+                "is" | "are" | "was" | "were" | "remain" | "remains" | "remained"
+            )
+        }) && suffix_withholds(1))
+        || (matches!(
+            suffix_words.as_slice(),
+            ["has" | "have" | "had", "been", ..]
+        ) && suffix_withholds(2))
+        || (matches!(
+            suffix_words.as_slice(),
+            ["must" | "should" | "will", "be", ..]
+        ) && suffix_withholds(2))
+        || (matches!(suffix_words.as_slice(), ["cannot", "be", ..]) && suffix_withholds(2));
+    let headed_withholding = suffix_words.first().is_some_and(|word| {
+        matches!(
+            *word,
+            "assumption" | "condition" | "convention" | "hypothesis" | "requirement"
+        )
+    }) && ((suffix_words.get(1).is_some_and(|word| {
+        matches!(
+            *word,
+            "is" | "are" | "was" | "were" | "remain" | "remains" | "remained"
+        )
+    }) && suffix_withholds(2))
+        || (matches!(
+            suffix_words.get(1..3),
+            Some(["has" | "have" | "had", "been"])
+        ) && suffix_withholds(3))
+        || (matches!(
+            suffix_words.get(1..3),
+            Some(["must" | "should" | "will", "be"])
+        ) && suffix_withholds(3)));
     let contrastive_prefix = words.windows(2).any(|pair| {
         matches!(
             (pair[0].2, pair[1].2),
@@ -1899,7 +2123,9 @@ fn assumption_phrase_polarity(
     }) || words
         .iter()
         .any(|(_, _, word)| matches!(*word, "alternative" | "before" | "until"));
-    if contrastive_prefix
+    if direct_withholding
+        || headed_withholding
+        || contrastive_prefix
         || words.iter().any(|(_, _, word)| negative_cue(word))
         || suffix_words.iter().any(|word| negative_cue(word))
         || suffix_words
@@ -3164,6 +3390,151 @@ mod tests {
             }),
             "{clause:#?}: {assumptions:#?}"
         );
+    }
+
+    #[test]
+    fn withheld_condition_phrases_do_not_become_supporting_assumptions() {
+        let source =
+            "The analysis withholds the uniform section condition before evaluating $r=abc$.";
+        let clause = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .into_iter()
+            .next()
+            .unwrap();
+        let start = source.find("$r=abc$").unwrap();
+        let mentions = [ScientificMention {
+            symbol: "r".into(),
+            start,
+            end: start + "$r=abc$".len(),
+            math_index: 0,
+        }];
+
+        let assumptions = extract_assumptions_with_phrases(
+            &clause,
+            &mentions,
+            &[("uniform section", "uniformity", "uniform")],
+        );
+
+        assert!(assumptions.is_empty(), "{assumptions:#?}");
+    }
+
+    #[test]
+    fn unrelated_withholding_does_not_suppress_a_positive_condition() {
+        let context = AssumptionFormulaContext {
+            has_direct_math_subject: false,
+            has_immediate_following_math_target: true,
+            introduced_relation_id: None,
+        };
+
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "the recorder withholds metadata under the ",
+                " before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Supported
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "the analysis withholds the ",
+                " before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "the analysis withholds only the ",
+                " before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "under the ",
+                " condition is explicitly withheld before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "under the ",
+                " condition has been explicitly withheld before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "under the ",
+                " condition is intentionally withheld before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "under the ",
+                " condition is purposefully withheld before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "under the ",
+                " condition is temporarily withheld before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "the analysis withholds adoption of the ",
+                " before evaluation",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "the analysis withholds its adoption of the ",
+                " condition while evaluating",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
+        assert!(matches!(
+            assumption_phrase_polarity(
+                "the analysis records the withholding of the ",
+                " condition while evaluating",
+                "uniformity",
+                "uniform section",
+                context,
+            ),
+            AssumptionPhrasePolarity::Ignored
+        ));
     }
 
     #[test]

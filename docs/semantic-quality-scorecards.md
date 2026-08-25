@@ -110,12 +110,17 @@ main-review identities must be distinct, and the validator rejects source
 reuse or suspicious math/prose similarity with any checked-in fixture.
 
 Fresh execution is a final qualification step, not a debugging cadence. v0.41
-and later use the sealed authoring-safety envelope from release schema 2; they
-must not contain a reviewer-guessed complete `StableMathAuthoringContext`.
-Exact lifecycle and authority boundaries remain release-blocking, while
-representational projection detail is exercised by the versioned public
-MathAuthoring oracle before reservation. A new tranche is not commissioned
-while that oracle or a known public P0 safety regression is failing.
+uses the sealed authoring-safety envelope from release schema 2; v0.42 and later
+use release schema 3 with authored-fixture schema 2. The latter gives every
+probe separate cursor-entity and selected-formula decisions, with the formula
+anchored to one exact syntax math root. Neither contract may contain a
+reviewer-guessed complete `StableMathAuthoringContext`. Exact lifecycle and
+authority boundaries remain release-blocking, while representational
+projection detail is exercised by the versioned public MathAuthoring oracle
+before reservation. Receipt policy 3 retains the structured authoring-safety
+summary instead of flattening it into case IDs. A new tranche is not
+commissioned while that oracle or a known public P0 safety regression is
+failing.
 
 The blind path is always explicit: set `SEMATH_FRESH_BLIND_FIXTURE` and
 `SEMATH_FRESH_BLIND_RECEIPT`, then run `bun run release:semantic` on the separate

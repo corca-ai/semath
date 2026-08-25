@@ -19,12 +19,13 @@ use crate::pack::{PackActivationStructure, PackConditionKind, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::scientific_prose::{
     AnaphorKind, CommunicativeAct, DefinitionAction, DiscourseConnective, DiscourseConstruction,
-    DiscourseFrame, MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent, ProseEventKind, ProseEventStream,
-    ScientificClause, ScientificMention, align_ordered_descriptions, clause_at,
-    extract_assumptions_with_formula_descriptors, normalize_prose_events,
-    segment_scientific_clauses,
+    DiscourseFeatureKind, DiscourseFrame, MAX_ATTACHMENT_DISTANCE_BYTES, ProseEvent,
+    ProseEventKind, ProseEventStream, ScientificClause, ScientificMention,
+    align_ordered_descriptions, clause_at, extract_assumptions_with_formula_descriptors,
+    normalize_prose_events, segment_scientific_clauses,
 };
 use crate::scope::{AttachmentGraph, ScopeGraph, scope_visible};
+use crate::semantic_index::{EvidenceModality, EvidencePolarity};
 use crate::{
     AssumptionInfo, DefinitionInfo, Evidence, Location, ProjectDocument, ProjectInclude,
     ProjectSourceRef, SourceIndex, SourceRange,
@@ -68,6 +69,8 @@ pub(crate) struct ProseShapeClaim {
     pub evidence: Evidence,
     pub shape: ProseShape,
     pub refinements: Vec<String>,
+    pub polarity: EvidencePolarity,
+    pub modality: EvidenceModality,
 }
 
 pub(crate) fn definition_available_from(definition: &DefinitionInfo) -> u32 {
@@ -151,6 +154,8 @@ pub(crate) struct ProseMatchStats {
 pub(crate) struct ScientificClauseEvidence {
     pub range: SourceRange,
     pub frame: DiscourseFrame,
+    limited_formula_range: Option<SourceRange>,
+    rejected_formula_range: Option<SourceRange>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -222,6 +227,12 @@ impl ScientificSemanticEvidence {
 
     pub(crate) fn formula_is_rejected(&self, range: &SourceRange) -> bool {
         self.formula_disposition(range).0 == crate::semantic_index::EvidencePolarity::Negative
+    }
+
+    pub(crate) fn formula_is_explicitly_retracted(&self, range: &SourceRange) -> bool {
+        self.clauses
+            .iter()
+            .any(|clause| clause.rejected_formula_range.as_ref() == Some(range))
     }
 
     pub fn law_activation(
@@ -324,6 +335,15 @@ impl ScientificSemanticEvidence {
                 clause.range.end_offset <= range.start_offset
                     && range.start_offset - clause.range.end_offset <= 32
                     && !clause.frame.evidence.is_empty()
+                    && (clause.frame.polarity != crate::semantic_index::EvidencePolarity::Negative
+                        || clause
+                            .rejected_formula_range
+                            .as_ref()
+                            .is_some_and(|target| ranges_overlap(target, range))
+                        || clause
+                            .limited_formula_range
+                            .as_ref()
+                            .is_some_and(|target| ranges_overlap(target, range)))
                     && self.attachment.permits(&clause.range, range)
             })
             .max_by_key(|clause| clause.range.end_offset)
@@ -384,6 +404,7 @@ pub(crate) fn observe_prose(
         source,
         &index,
         &clauses,
+        parsed,
         canonical_expressions,
         &construction_targets,
     );
@@ -775,8 +796,127 @@ pub(crate) fn observe_prose(
         &mut analysis,
     );
     deduplicate(&mut analysis);
+    mark_explicitly_unselected_shape_roots(
+        document,
+        source,
+        &index,
+        &clauses,
+        &mut analysis.shapes,
+    );
     attach_formula_occurrence_roles(parsed, canonical_expressions, &mut analysis);
     analysis
+}
+
+fn mark_explicitly_unselected_shape_roots(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    claims: &mut [ProseShapeClaim],
+) {
+    fn words(text: &str) -> Vec<String> {
+        text.to_ascii_lowercase()
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .map(str::to_owned)
+            .collect()
+    }
+
+    fn alternative_root_kind(word: &str) -> Option<&'static str> {
+        match word.trim_end_matches('s') {
+            "alternative" => Some("alternative"),
+            "candidate" => Some("candidate"),
+            "choice" => Some("choice"),
+            "convention" => Some("convention"),
+            "option" => Some("option"),
+            "root" => Some("root"),
+            "variant" => Some("variant"),
+            _ => None,
+        }
+    }
+
+    fn unselected_root_kind(text: &str) -> Option<&'static str> {
+        let words = words(text);
+        let copula = |word: &str| matches!(word, "is" | "are" | "was" | "were");
+        let (kind_index, predicate_start) = if words.len() >= 4
+            && matches!(words[0].as_str(), "neither" | "no")
+            && copula(&words[2])
+        {
+            (1, 3)
+        } else if words.len() >= 5 && words[0] == "none" && words[1] == "of" && copula(&words[3]) {
+            (2, 4)
+        } else if words.len() >= 6
+            && words[0] == "none"
+            && words[1] == "of"
+            && words[2] == "the"
+            && copula(&words[4])
+        {
+            (3, 5)
+        } else {
+            return None;
+        };
+        let kind = alternative_root_kind(&words[kind_index])?;
+        (words.len() == predicate_start + 1
+            && ["select", "chosen", "adopt", "accept", "prefer", "designat"]
+                .iter()
+                .any(|prefix| words[predicate_start].starts_with(prefix)))
+        .then_some(kind)
+    }
+
+    fn alternative_root_kinds(text: &str) -> BTreeSet<&'static str> {
+        words(text)
+            .into_iter()
+            .filter_map(|word| alternative_root_kind(&word))
+            .collect()
+    }
+
+    let scopes = ScopeGraph::new(document);
+    for selection_clause in clauses {
+        let Some(selection_kind) = unselected_root_kind(selection_clause.text) else {
+            continue;
+        };
+        let selection_scope = scopes.id_at(index.utf16_for_byte(selection_clause.start));
+        let paragraph_start = source[..selection_clause.start]
+            .rfind("\n\n")
+            .map_or(0, |offset| offset + 2);
+        let mut roots_by_symbol = BTreeMap::<String, Vec<(usize, usize)>>::new();
+        for (claim_index, claim) in claims.iter().enumerate() {
+            let Some(evidence_range) = claim.evidence.source_ranges.first() else {
+                continue;
+            };
+            let evidence_start = index.byte_for_utf16(evidence_range.start_offset);
+            if evidence_start < paragraph_start || evidence_start >= selection_clause.start {
+                continue;
+            }
+            if scopes.id_at(evidence_range.start_offset) != selection_scope {
+                continue;
+            }
+            let Some(root_clause) = clause_at(clauses, evidence_start) else {
+                continue;
+            };
+            let root_kinds = alternative_root_kinds(root_clause.text);
+            if root_kinds.contains(selection_kind) {
+                roots_by_symbol
+                    .entry(claim.symbol.clone())
+                    .or_default()
+                    .push((claim_index, root_clause.start));
+            }
+        }
+        for roots in roots_by_symbol.values() {
+            if roots
+                .iter()
+                .map(|(_, clause_start)| clause_start)
+                .collect::<BTreeSet<_>>()
+                .len()
+                < 2
+            {
+                continue;
+            }
+            for (root, _) in roots {
+                claims[*root].modality = EvidenceModality::Hypothetical;
+            }
+        }
+    }
 }
 
 fn collect_project_references(
@@ -2001,17 +2141,583 @@ fn collect_semantic_evidence(
     source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
+    parsed: &[ParsedMath],
     canonical_expressions: &[SemanticExpr],
     construction_targets: &BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
 ) -> ScientificSemanticEvidence {
+    fn limits_following_formula_context(value: &str) -> bool {
+        let words = value
+            .to_ascii_lowercase()
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        let context_noun = |word: &str| {
+            matches!(
+                word,
+                "application" | "interpretation" | "meaning" | "role" | "roles"
+            )
+        };
+        let directly_owned_context = |prefix: &[String]| match prefix {
+            [noun] => context_noun(noun),
+            [article, noun] => {
+                matches!(article.as_str(), "a" | "an" | "the" | "this" | "that")
+                    && context_noun(noun)
+            }
+            [article, qualifier, noun] => {
+                matches!(article.as_str(), "a" | "an" | "the" | "this" | "that")
+                    && matches!(
+                        qualifier.as_str(),
+                        "current" | "intended" | "prior" | "proposed"
+                    )
+                    && context_noun(noun)
+            }
+            _ => false,
+        };
+        words.iter().enumerate().any(|(not, word)| {
+            if word != "not" || not < 2 {
+                return false;
+            }
+            let auxiliary = words[not - 1].as_str();
+            let subject_start = words[..not - 1]
+                .iter()
+                .rposition(|word| {
+                    matches!(
+                        word.as_str(),
+                        "although" | "but" | "however" | "though" | "whereas" | "while" | "yet"
+                    )
+                })
+                .map_or(0, |boundary| boundary + 1);
+            let subject = &words[subject_start..not - 1];
+            let action = words.get(not + 1).map(String::as_str);
+            let tail = &words[not + 2..];
+            let bounded_predicate = (matches!(auxiliary, "is" | "are" | "was" | "were")
+                && matches!(
+                    action,
+                    Some("stated" | "specified" | "declared" | "identified")
+                )
+                && (tail.is_empty() || tail == ["here"]))
+                || (matches!(auxiliary, "do" | "does" | "did")
+                    && action == Some("apply")
+                    && (tail.is_empty() || tail == ["here"]));
+            bounded_predicate && directly_owned_context(subject)
+        })
+    }
+
+    fn directly_bridges_limited_context(value: &str) -> bool {
+        let lower = value.to_ascii_lowercase();
+        let words = lower
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .collect::<Vec<_>>();
+        if !matches!(words.as_slice(), [] | ["consider"] | ["then", "consider"]) {
+            return false;
+        }
+        value.chars().all(|character| {
+            character.is_ascii_alphabetic()
+                || character.is_whitespace()
+                || matches!(character, '$' | '\\' | ':' | '(' | '[' | '{')
+        })
+    }
+
+    let formula_refusal = |subject: &str,
+                           predicate: &str,
+                           formula_precedes_marker: bool,
+                           formula_is_in_clause: bool| {
+        let is_formula_metanoun = |word: &str| {
+            matches!(
+                word,
+                "formula"
+                    | "equation"
+                    | "identity"
+                    | "law"
+                    | "model"
+                    | "relation"
+                    | "balance"
+                    | "estimate"
+                    | "calculation"
+            )
+        };
+        let is_target_tail = |word: &str| {
+            matches!(
+                word,
+                "above"
+                    | "below"
+                    | "displayed"
+                    | "earlier"
+                    | "following"
+                    | "given"
+                    | "next"
+                    | "preceding"
+                    | "previous"
+                    | "previously"
+                    | "shown"
+                    | "is"
+                    | "are"
+                    | "was"
+                    | "were"
+                    | "has"
+                    | "have"
+                    | "had"
+                    | "will"
+                    | "must"
+                    | "should"
+                    | "can"
+                    | "could"
+                    | "may"
+                    | "might"
+            )
+        };
+        let metanoun_is_directly_owned = |words: &[String], metanoun: usize| {
+            let prefix = words[..metanoun]
+                .iter()
+                .map(String::as_str)
+                .collect::<Vec<_>>();
+            let determiner = |word: &str| matches!(word, "a" | "an" | "the" | "this" | "that");
+            let descriptor = |word: &str| {
+                matches!(
+                    word,
+                    "above"
+                        | "archived"
+                        | "below"
+                        | "current"
+                        | "displayed"
+                        | "earlier"
+                        | "following"
+                        | "given"
+                        | "next"
+                        | "preceding"
+                        | "previous"
+                        | "reviewed"
+                        | "selected"
+                        | "shown"
+                )
+            };
+            match prefix.as_slice() {
+                [] => true,
+                [word] => determiner(word) || descriptor(word),
+                [article, modifier] => determiner(article) && descriptor(modifier),
+                _ => false,
+            }
+        };
+        let lower = predicate.to_ascii_lowercase();
+        let words = lower
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .collect::<Vec<_>>();
+        let subject_words = subject
+            .to_ascii_lowercase()
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        let formula_subject = subject_words
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, word)| is_formula_metanoun(word))
+            .is_some_and(|(index, _)| {
+                metanoun_is_directly_owned(&subject_words, index)
+                    && subject_words[index + 1..]
+                        .iter()
+                        .all(|word| is_target_tail(word))
+            });
+        let refusal_word = |word: &str| {
+            matches!(
+                word,
+                "withdraw"
+                    | "withdraws"
+                    | "withdrew"
+                    | "withdrawn"
+                    | "withdrawing"
+                    | "reject"
+                    | "rejects"
+                    | "rejected"
+                    | "rejecting"
+                    | "discard"
+                    | "discards"
+                    | "discarded"
+                    | "discarding"
+                    | "exclude"
+                    | "excludes"
+                    | "excluded"
+                    | "excluding"
+                    | "forbid"
+                    | "forbids"
+                    | "forbade"
+                    | "forbidden"
+                    | "forbidding"
+                    | "prohibit"
+                    | "prohibits"
+                    | "prohibited"
+                    | "prohibiting"
+                    | "invalid"
+                    | "unusable"
+                    | "unavailable"
+                    | "inapplicable"
+                    | "ignore"
+                    | "ignores"
+                    | "ignored"
+                    | "ignoring"
+            )
+        };
+        let refusal_prefix = words
+            .iter()
+            .take_while(|word| {
+                matches!(
+                    **word,
+                    "is" | "are"
+                        | "was"
+                        | "were"
+                        | "has"
+                        | "have"
+                        | "had"
+                        | "must"
+                        | "should"
+                        | "cannot"
+                        | "be"
+                        | "been"
+                        | "being"
+                        | "directly"
+                        | "explicitly"
+                )
+            })
+            .count();
+        let targeted_refusal = (formula_subject || formula_precedes_marker)
+            && words.get(refusal_prefix).is_some_and(|word| {
+                if !refusal_word(word) {
+                    return false;
+                }
+                let continuation = &words[refusal_prefix + 1..];
+                continuation.is_empty()
+                    || (matches!(*word, "withdraw" | "withdraws" | "withdrew" | "withdrawn")
+                        && continuation.first() == Some(&"and")
+                        && continuation.contains(&"archival")
+                        && continuation.last() == Some(&"quotation"))
+            });
+        let negative_action = words.iter().enumerate().any(|(index, word)| {
+            if !matches!(*word, "no" | "not" | "never" | "cannot") {
+                return false;
+            }
+            let local_start = words[..index]
+                .iter()
+                .rposition(|word| matches!(*word, "but" | "while" | "whereas" | "yet"))
+                .map_or(0, |boundary| boundary + 1);
+            let local_subject = &words[local_start..index];
+            let active_subject = local_subject
+                .last()
+                .is_some_and(|word| matches!(*word, "do" | "does" | "did"))
+                || (local_start == 0
+                    && subject_words.last().is_some_and(|word| {
+                        matches!(
+                            word.as_str(),
+                            "do" | "does" | "did" | "can" | "will" | "must" | "should"
+                        )
+                    }))
+                || (local_subject.is_empty()
+                    && ((matches!(*word, "cannot")
+                        || (subject_words.is_empty() && *word == "never"))
+                        || (subject_words.as_slice() == ["we"] && *word == "never")));
+            let formula_precedes_locally = formula_precedes_marker
+                && local_start == 0
+                && local_subject.iter().all(|word| {
+                    matches!(
+                        *word,
+                        "is" | "are"
+                            | "was"
+                            | "were"
+                            | "has"
+                            | "have"
+                            | "had"
+                            | "will"
+                            | "must"
+                            | "should"
+                            | "can"
+                            | "could"
+                            | "may"
+                            | "might"
+                            | "be"
+                            | "been"
+                            | "being"
+                    )
+                });
+            let tail = &words[index + 1..];
+            let modifiers = tail
+                .iter()
+                .take_while(|word| {
+                    matches!(
+                        **word,
+                        "be" | "been"
+                            | "being"
+                            | "ever"
+                            | "longer"
+                            | "still"
+                            | "currently"
+                            | "directly"
+                            | "explicitly"
+                            | "necessarily"
+                    )
+                })
+                .count();
+            let Some(action) = tail.get(modifiers) else {
+                return false;
+            };
+            let direct_formula_bridge = lower.rfind(action).is_some_and(|start| {
+                lower[start + action.len()..].chars().all(|character| {
+                    character.is_whitespace()
+                        || matches!(character, '$' | '\\' | ':' | '(' | '[' | '{')
+                })
+            });
+            let recognized = matches!(
+                *action,
+                "publish"
+                    | "publishes"
+                    | "published"
+                    | "publishing"
+                    | "assert"
+                    | "asserts"
+                    | "asserted"
+                    | "asserting"
+                    | "assume"
+                    | "assumes"
+                    | "assumed"
+                    | "assuming"
+                    | "use"
+                    | "uses"
+                    | "used"
+                    | "using"
+                    | "apply"
+                    | "applies"
+                    | "applied"
+                    | "applying"
+                    | "adopt"
+                    | "adopts"
+                    | "adopted"
+                    | "adopting"
+                    | "accept"
+                    | "accepts"
+                    | "accepted"
+                    | "accepting"
+                    | "select"
+                    | "selects"
+                    | "selected"
+                    | "selecting"
+            );
+            if !recognized {
+                return false;
+            }
+            let takes_following_formula = matches!(
+                *action,
+                "publish"
+                    | "publishes"
+                    | "published"
+                    | "publishing"
+                    | "assert"
+                    | "asserts"
+                    | "asserted"
+                    | "asserting"
+                    | "assume"
+                    | "assumes"
+                    | "assumed"
+                    | "assuming"
+                    | "use"
+                    | "uses"
+                    | "used"
+                    | "using"
+                    | "adopt"
+                    | "adopts"
+                    | "adopted"
+                    | "adopting"
+                    | "accept"
+                    | "accepts"
+                    | "accepted"
+                    | "accepting"
+                    | "select"
+                    | "selects"
+                    | "selected"
+                    | "selecting"
+            );
+            let imperative_apply = matches!(*action, "apply" | "applies" | "applied" | "applying")
+                && subject_words
+                    .iter()
+                    .all(|word| matches!(word.as_str(), "we" | "do" | "does" | "did"));
+            let target_words = &tail[modifiers + 1..];
+            let direct_formula_target = target_words
+                .iter()
+                .enumerate()
+                .rev()
+                .find(|(_, word)| is_formula_metanoun(word))
+                .is_some_and(|(metanoun, _)| {
+                    metanoun_is_directly_owned(
+                        &target_words
+                            .iter()
+                            .map(|word| (*word).to_owned())
+                            .collect::<Vec<_>>(),
+                        metanoun,
+                    ) && target_words[metanoun + 1..]
+                        .iter()
+                        .all(|word| is_target_tail(word))
+                });
+            if !target_words.is_empty() && !direct_formula_target {
+                return false;
+            }
+            (formula_subject && local_start == 0)
+                || formula_precedes_locally
+                || direct_formula_target
+                || (target_words.is_empty()
+                    && formula_is_in_clause
+                    && (active_subject
+                        && direct_formula_bridge
+                        && (takes_following_formula || imperative_apply)))
+        });
+        targeted_refusal || negative_action
+    };
+    let attachment = AttachmentGraph::new(document);
+    let scopes = ScopeGraph::new(document);
     let clause_evidence = clauses
         .iter()
-        .map(|clause| ScientificClauseEvidence {
-            range: SourceRange {
+        .map(|clause| {
+            let range = SourceRange {
                 start_offset: index.utf16_for_byte(clause.start),
                 end_offset: index.utf16_for_byte(clause.end),
-            },
-            frame: clause.frame.clone(),
+            };
+            let polarity_marker = clause
+                .frame
+                .evidence
+                .iter()
+                .find(|evidence| evidence.kind == DiscourseFeatureKind::Polarity);
+            let polarity_range = polarity_marker.map(|evidence| SourceRange {
+                start_offset: index.utf16_for_byte(evidence.start),
+                end_offset: index.utf16_for_byte(evidence.end),
+            });
+            let limited_formula_range = if clause.frame.polarity == EvidencePolarity::Negative
+                && limits_following_formula_context(&source[clause.start..clause.end])
+            {
+                let clause_scope = scopes.path_at(range.start_offset);
+                let mut candidates = parsed
+                    .iter()
+                    .map(|math| math.region.content_range.clone())
+                    .filter(|formula| {
+                        if range.end_offset > formula.start_offset
+                            || formula.start_offset - range.end_offset > 32
+                            || !scope_visible(&clause_scope, &scopes.path_at(formula.start_offset))
+                            || !attachment.permits(&range, formula)
+                        {
+                            return false;
+                        }
+                        let bridge_start = index.byte_for_utf16(range.end_offset);
+                        let bridge_end = index.byte_for_utf16(formula.start_offset);
+                        directly_bridges_limited_context(&source[bridge_start..bridge_end])
+                    })
+                    .collect::<Vec<_>>();
+                candidates.sort_by_key(|formula| (formula.start_offset, formula.end_offset));
+                candidates.first().cloned()
+            } else {
+                None
+            };
+            let rejected_formula_range = if clause.frame.polarity == EvidencePolarity::Negative {
+                polarity_range.clone().and_then(|marker| {
+                    let clause_scope = scopes.path_at(range.start_offset);
+                    let mut candidates = parsed
+                        .iter()
+                        .map(|math| math.region.content_range.clone())
+                        .filter(|formula| {
+                            scope_visible(&clause_scope, &scopes.path_at(formula.start_offset))
+                                && attachment.permits(&range, formula)
+                        })
+                        .filter_map(|formula| {
+                            let marker_distance = if formula.end_offset <= marker.start_offset {
+                                marker.start_offset.saturating_sub(formula.end_offset)
+                            } else if marker.end_offset <= formula.start_offset {
+                                formula.start_offset.saturating_sub(marker.end_offset)
+                            } else {
+                                0
+                            };
+                            let clause_distance = if formula.end_offset <= range.start_offset {
+                                range.start_offset.saturating_sub(formula.end_offset)
+                            } else if range.end_offset <= formula.start_offset {
+                                formula.start_offset.saturating_sub(range.end_offset)
+                            } else {
+                                0
+                            };
+                            (clause_distance <= 32).then_some((marker_distance, formula))
+                        })
+                        .collect::<Vec<_>>();
+                    let clause_words = source[clause.start..clause.end]
+                        .to_ascii_lowercase()
+                        .split(|character: char| !character.is_ascii_alphabetic())
+                        .filter(|word| !word.is_empty())
+                        .map(str::to_owned)
+                        .collect::<Vec<_>>();
+                    if candidates.len() > 1
+                        && clause_words.iter().any(|word| {
+                            matches!(
+                                word.as_str(),
+                                "first" | "second" | "third" | "former" | "latter" | "previous"
+                            )
+                        })
+                    {
+                        return None;
+                    }
+                    candidates.sort_by_key(|(distance, formula)| {
+                        (*distance, formula.start_offset, formula.end_offset)
+                    });
+                    let first = candidates.first()?;
+                    if candidates.get(1).map(|next| next.0) == Some(first.0) {
+                        return None;
+                    }
+                    let formula = first.1.clone();
+                    let marker_start = index.byte_for_utf16(marker.start_offset);
+                    let formula_start = index.byte_for_utf16(formula.start_offset);
+                    let formula_end = index.byte_for_utf16(formula.end_offset);
+                    let predicate_end = if marker.end_offset <= formula.start_offset {
+                        formula_start
+                    } else {
+                        clause.end
+                    };
+                    let formula_precedes_marker = formula.end_offset <= marker.start_offset
+                        && source[formula_end..marker_start]
+                            .split(|character: char| !character.is_ascii_alphabetic())
+                            .filter(|word| !word.is_empty())
+                            .all(|word| {
+                                matches!(
+                                    word.to_ascii_lowercase().as_str(),
+                                    "is" | "are"
+                                        | "was"
+                                        | "were"
+                                        | "has"
+                                        | "have"
+                                        | "had"
+                                        | "will"
+                                        | "must"
+                                        | "should"
+                                )
+                            });
+                    let refusal_before_formula = formula_refusal(
+                        &source[clause.start..marker_start],
+                        &source[marker_start..predicate_end],
+                        formula_precedes_marker,
+                        ranges_overlap(&range, &formula),
+                    );
+                    let refusal_after_formula = marker.end_offset <= formula.start_offset
+                        && formula.end_offset < range.end_offset
+                        && formula_refusal(
+                            "",
+                            &source[formula_end..clause.end],
+                            true,
+                            ranges_overlap(&range, &formula),
+                        );
+                    (refusal_before_formula || refusal_after_formula).then_some(formula)
+                })
+            } else {
+                None
+            };
+            ScientificClauseEvidence {
+                range,
+                frame: clause.frame.clone(),
+                limited_formula_range,
+                rejected_formula_range,
+            }
         })
         .collect::<Vec<_>>();
     let mut domain_priors = Vec::new();
@@ -4207,6 +4913,8 @@ fn push_claim(
             },
             shape,
             refinements,
+            polarity: EvidencePolarity::Positive,
+            modality: EvidenceModality::Asserted,
         });
     }
 }
@@ -5623,6 +6331,122 @@ gain.";
                 "{source}"
             );
         }
+    }
+
+    #[test]
+    fn a_bounded_context_disclaimer_limits_only_the_following_formula() {
+        for source in [
+            "The prior interpretation does not apply here.\n$j=-d\\nabla c$",
+            "The application is not stated. Consider $q=-k\\nabla T$.",
+            "The application is not stated here. Consider $q=-k\\nabla T$.",
+        ] {
+            let analysis = analyze(source);
+            let formula = test_math_regions(source, DocumentLanguage::Latex)
+                .into_iter()
+                .next()
+                .unwrap();
+            assert_eq!(
+                analysis
+                    .semantic_evidence
+                    .formula_disposition(&formula.content_range),
+                (
+                    crate::semantic_index::EvidencePolarity::Negative,
+                    crate::semantic_index::EvidenceModality::Asserted,
+                ),
+                "{source}"
+            );
+            assert!(
+                !analysis
+                    .semantic_evidence
+                    .formula_is_explicitly_retracted(&formula.content_range),
+                "a context disclaimer must not create edit-lifecycle retraction: {source}"
+            );
+        }
+
+        let source = "The controller is not stable.\n$V=IR$";
+        let analysis = analyze(source);
+        let formula = test_math_regions(source, DocumentLanguage::Latex)
+            .into_iter()
+            .next()
+            .unwrap();
+        assert_eq!(
+            analysis
+                .semantic_evidence
+                .formula_disposition(&formula.content_range),
+            (
+                crate::semantic_index::EvidencePolarity::Positive,
+                crate::semantic_index::EvidenceModality::Asserted,
+            )
+        );
+
+        let source = "The interpretation is not stated.\n$A=B$\n$C=D$";
+        let analysis = analyze(source);
+        let formulas = test_math_regions(source, DocumentLanguage::Latex);
+        assert_eq!(formulas.len(), 2);
+        assert!(
+            analysis
+                .semantic_evidence
+                .formula_is_rejected(&formulas[0].content_range)
+        );
+        assert!(
+            !analysis
+                .semantic_evidence
+                .formula_is_rejected(&formulas[1].content_range),
+            "a context disclaimer is consumed only by its nearest formula"
+        );
+
+        for source in [
+            "The prior interpretation does not apply, but the current interpretation is valid.\n$V=IR$",
+            "The controller is stable while the interpretation does not apply.\n$V=IR$",
+        ] {
+            let analysis = analyze(source);
+            let formula = test_math_regions(source, DocumentLanguage::Latex)
+                .into_iter()
+                .next()
+                .unwrap();
+            assert_eq!(
+                analysis
+                    .semantic_evidence
+                    .formula_is_rejected(&formula.content_range),
+                source.contains("while"),
+                "only the final bounded discourse segment controls the following formula: {source}"
+            );
+        }
+
+        let source = "The interpretation is not stated. New topic. $V=IR$ remains active.";
+        let analysis = analyze(source);
+        let formula = test_math_regions(source, DocumentLanguage::Latex)
+            .into_iter()
+            .next()
+            .unwrap();
+        assert!(
+            !analysis
+                .semantic_evidence
+                .formula_is_rejected(&formula.content_range),
+            "a context disclaimer cannot cross an intervening prose sentence"
+        );
+    }
+
+    #[test]
+    fn explicit_withdrawal_selects_only_the_nearest_formula_in_its_clause() {
+        let source =
+            "This relation is withdrawn: $V=IR$, while another relation remains active: $P=VI$.";
+        let analysis = analyze(source);
+        let formulas = test_math_regions(source, DocumentLanguage::Latex);
+
+        assert_eq!(formulas.len(), 2);
+        assert!(
+            analysis
+                .semantic_evidence
+                .formula_is_explicitly_retracted(&formulas[0].content_range),
+            "{:#?}",
+            analysis.semantic_evidence.clauses
+        );
+        assert!(
+            !analysis
+                .semantic_evidence
+                .formula_is_explicitly_retracted(&formulas[1].content_range)
+        );
     }
 
     #[test]

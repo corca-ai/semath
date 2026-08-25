@@ -1,6 +1,7 @@
 use crate::concept::{classify_role_candidates, concepts_share_lineage, is_pack_quantity_kind};
 use crate::prose::definition_available_from;
 use crate::scope::ScopeGraph;
+use crate::semantic_index::{EvidenceModality, EvidencePolarity};
 use crate::shape::{ExplicitShapeClaim, ShapeObservations};
 use crate::{DefinitionInfo, Evidence, ProjectDocument, RoleInfo, SemanticDiagnostic, SourceRange};
 use std::collections::{BTreeMap, BTreeSet};
@@ -167,6 +168,10 @@ pub(crate) fn observe_roles(
     let shape_claims = shapes
         .explicit_claims()
         .into_iter()
+        .filter(|claim| {
+            claim.polarity == EvidencePolarity::Positive
+                && claim.modality == EvidenceModality::Asserted
+        })
         .map(|claim| ScopedShapeClaim {
             scope_id: scopes.id_at(claim.symbol_range.start_offset),
             claim,

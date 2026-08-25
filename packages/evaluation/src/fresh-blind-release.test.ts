@@ -209,6 +209,61 @@ describe("fresh blind release evidence", () => {
     ).toThrow("required selectors must be allowed");
   });
 
+  test("commissions schema 3 with separate entity and formula decisions", () => {
+    const value = fixtureValue();
+    addDecisionDomains(value);
+    const release = finalize(value);
+    expect(validateFreshBlindRelease(release, validation(release)).scenarios)
+      .toBe(48);
+    expect(release).toMatchObject({
+      fixture: { schemaVersion: 2 },
+      release: { id: "v0.42" },
+      schemaVersion: 3,
+    });
+
+    const legacyInner = fixtureValue();
+    addAuthoringSafety(legacyInner);
+    legacyInner.release.id = "v0.42";
+    legacyInner.schemaVersion = 3;
+    expect(() => finalize(legacyInner)).toThrow(
+      "schema 3 requires authored fixture schema 2",
+    );
+
+    const legacyOuter = fixtureValue();
+    addDecisionDomains(legacyOuter);
+    legacyOuter.schemaVersion = 2;
+    expect(() => finalize(legacyOuter)).toThrow(
+      "schema 2 requires authored fixture schema 1",
+    );
+
+    const wrongFormula = fixtureValue();
+    addDecisionDomains(wrongFormula);
+    const expected = wrongFormula.fixture.probes[0]!.expected as {
+      formulaDecision: {
+        anchor: { selection: { length: number; offset: number } };
+      };
+    };
+    expected.formulaDecision.anchor.selection.length -= 1;
+    const invalid = finalize(wrongFormula);
+    expect(() => validateFreshBlindRelease(invalid, validation(invalid)))
+      .toThrow("formulaDecision.anchor must equal one selected math root");
+
+    const boundaryCursor = fixtureValue();
+    addDecisionDomains(boundaryCursor);
+    (boundaryCursor.fixture.probes[0]!.cursor as Record<string, unknown>).offset =
+      "x_0=1".length + 1;
+    const boundaryRelease = finalize(boundaryCursor);
+    expect(() =>
+      validateFreshBlindRelease(boundaryRelease, validation(boundaryRelease))
+    ).toThrow("cursor and formulaDecision.anchor must select the same math root");
+
+    const invalidFacts = validation(release);
+    invalidFacts.authoringSyntaxFacts[0]!.documents[0]!
+      .mathRootContentRanges[0]!.startOffset = -1;
+    expect(() => validateFreshBlindRelease(release, invalidFacts))
+      .toThrow("invalid formula math-root fact");
+  });
+
   test("gates only reviewed authoring authority, contradiction, and lifecycle boundaries", () => {
     const value = fixtureValue();
     addAuthoringSafety(value);
@@ -1011,6 +1066,63 @@ function addAuthoringSafety(value: FixtureValue): void {
   }));
 }
 
+function addDecisionDomains(value: FixtureValue): void {
+  addAuthoringSafety(value);
+  value.release.id = "v0.42";
+  value.schemaVersion = 3;
+  value.fixture.schemaVersion = 2;
+  value.fixture.probes.forEach((probe, index) => {
+    const cursor = probe.cursor as Record<string, unknown>;
+    delete cursor.edge;
+    cursor.offset = 1;
+    const expected = probe.expected as Record<string, unknown>;
+    const formulaStatus = expected.decision;
+    expected.decision = "established";
+    expected.proofGrounded = false;
+    expected.symbol = "x";
+    expected.formulaDecision = {
+      anchor: {
+        fileId: "main",
+        needle: `$x_${index}=1$`,
+        selection: { length: `x_${index}=1`.length, offset: 1 },
+      },
+      status: formulaStatus,
+    };
+    const safety = value.authoringSafety![index]!;
+    if (formulaStatus === "established") {
+      const selector = {
+        anchor: {
+          fileId: "main",
+          needle: `$x_${index}=1$`,
+          selection: { length: `x_${index}=1`.length, offset: 1 },
+        },
+        kind: "source-meaning",
+        relationId: null,
+      };
+      safety.allowedAuthority = [selector];
+      safety.requiredAuthority = [selector];
+      safety.forbiddenDispositions = ["conflicting"];
+    } else if (formulaStatus === "conflicting") {
+      const selector = {
+        anchor: {
+          fileId: "main",
+          needle: `$x_${index}=1$`,
+          selection: { length: `x_${index}=1`.length, offset: 1 },
+        },
+        kind: "source-meaning",
+        relationId: null,
+      };
+      safety.allowedContradictions = [selector];
+      safety.requiredContradictions = [selector];
+      safety.forbiddenDispositions = ["established"];
+    }
+    const navigation = expected.navigation as {
+      rename: Record<string, unknown>;
+    };
+    navigation.rename.newName = "y";
+  });
+}
+
 function unsupportedAuthoringContext(): MathAuthoringContext {
   return {
     claimEvidence: [],
@@ -1210,7 +1322,7 @@ function fixtureValueShape() {
           id: string;
         }>;
       }>;
-      schemaVersion: 1;
+      schemaVersion: 1 | 2;
     };
     release: {
       createdAt: string;
@@ -1219,6 +1331,6 @@ function fixtureValueShape() {
       seal: string;
       taskCardDigest: string;
     };
-    schemaVersion: 1 | 2;
+    schemaVersion: 1 | 2 | 3;
   };
 }

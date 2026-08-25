@@ -55,7 +55,7 @@ export interface FreshBlindReleaseFixture {
     readonly seal: string;
     readonly taskCardDigest: string;
   };
-  readonly schemaVersion: 1 | 2;
+  readonly schemaVersion: 1 | 2 | 3;
 }
 
 export interface FreshBlindValidationInput {
@@ -113,8 +113,8 @@ export function parseFreshBlindReleaseFixture(
 ): FreshBlindReleaseFixture {
   const root = record(value, "fresh blind release");
   const schemaVersion = root.schemaVersion;
-  if (schemaVersion !== 1 && schemaVersion !== 2) {
-    throw new Error("fresh blind release.schemaVersion: must be 1 or 2");
+  if (schemaVersion !== 1 && schemaVersion !== 2 && schemaVersion !== 3) {
+    throw new Error("fresh blind release.schemaVersion: must be 1, 2, or 3");
   }
   exact(
     root,
@@ -170,12 +170,23 @@ export function parseFreshBlindReleaseFixture(
       "fresh blind release.commissioning.engineExecutionsBeforeSeal: must be 0",
     );
   }
-  const authoringSafety = schemaVersion === 2
+  const authoringSafety = schemaVersion >= 2
     ? parseFreshBlindAuthoringSafety(
         root.authoringSafety,
         "fresh blind release.authoringSafety",
       )
     : undefined;
+  const fixture = parseAuthoredScientificFixture(root.fixture);
+  if (schemaVersion === 3 && fixture.schemaVersion !== 2) {
+    throw new Error(
+      "fresh blind release schema 3 requires authored fixture schema 2",
+    );
+  }
+  if (schemaVersion < 3 && fixture.schemaVersion !== 1) {
+    throw new Error(
+      `fresh blind release schema ${schemaVersion} requires authored fixture schema 1`,
+    );
+  }
   return {
     ...(authoringSafety === undefined ? {} : { authoringSafety }),
     commissioning: {
@@ -188,7 +199,7 @@ export function parseFreshBlindReleaseFixture(
         "fresh blind release.commissioning.mainReviewerId",
       ),
     },
-    fixture: parseAuthoredScientificFixture(root.fixture),
+    fixture,
     release: {
       createdAt: date(
         release.createdAt,
@@ -270,7 +281,7 @@ export function validateFreshBlindRelease(
       );
     }
     validateFreshAuthoringExpectations(release, input.authoringSyntaxFacts);
-  } else if (releaseNumber >= 41) {
+  } else if (releaseNumber === 41) {
     if (release.schemaVersion !== 2 || !release.authoringSafety) {
       throw new Error(
         "fresh blind v0.41+ requires the sealed authoring safety contract",
@@ -285,6 +296,25 @@ export function validateFreshBlindRelease(
       );
     }
     validateFreshAuthoringSafetyExpectations(release);
+  } else if (releaseNumber >= 42) {
+    if (
+      release.schemaVersion !== 3 || fixture.schemaVersion !== 2 ||
+      !release.authoringSafety
+    ) {
+      throw new Error(
+        "fresh blind v0.42+ requires release schema 3, authored fixture schema 2, and the sealed authoring safety contract",
+      );
+    }
+    const forbiddenExact = fixture.probes
+      .filter((probe) => probe.expected.authoringContext !== undefined)
+      .map((probe) => probe.id);
+    if (forbiddenExact.length) {
+      throw new Error(
+        `fresh blind v0.42+ forbids guessed exact authoring contexts: ${forbiddenExact.join(", ")}`,
+      );
+    }
+    validateFreshAuthoringSafetyExpectations(release);
+    validateFormulaDecisionExpectations(release, input.authoringSyntaxFacts);
   }
   for (const probe of fixture.probes) {
     const scenario = authoredScenarioFor(fixture, probe);
@@ -348,12 +378,15 @@ export function validateFreshBlindRelease(
         `${probe.id}: rename must preserve one exact editable notation family`,
       );
     }
+    const unavailableContract = fixture.schemaVersion === 2
+      ? [rename.expectedText, rename.replacementText, rename.safety]
+      : contract;
     if (
       rename.status === "unavailable" &&
-      contract.some((value) => value !== undefined)
+      unavailableContract.some((value) => value !== undefined)
     ) {
       throw new Error(
-        `${probe.id}: unavailable rename cannot define an edit contract`,
+        `${probe.id}: unavailable rename cannot define an edit result contract`,
       );
     }
     if (semanticReleaseNumber(release.release.id) >= 35) {
@@ -368,7 +401,9 @@ export function validateFreshBlindRelease(
       );
     }
   }
-  const decisions = count(primary.map((probe) => probe.expected.decision));
+  const decisions = count(primary.map((probe) =>
+    probe.expected.formulaDecision?.status ?? probe.expected.decision
+  ));
   for (const decision of [
     "established",
     "partial",
@@ -521,6 +556,142 @@ function validateFreshAuthoringExpectations(
     if (first) {
       throw new Error(
         `${probe.id}: invalid exact authoring context at ${first.path} (${first.kind})`,
+      );
+    }
+  }
+}
+
+function validateFormulaDecisionExpectations(
+  release: FreshBlindReleaseFixture,
+  facts: readonly FreshBlindSnapshotSyntaxFacts[],
+): void {
+  const expectedKeys = new Set(
+    release.fixture.probes.map((probe) =>
+      `${probe.scenarioId}\0${probe.cursor.snapshotId}`
+    ),
+  );
+  const factsByKey = new Map<string, FreshBlindSnapshotSyntaxFacts>();
+  for (const fact of facts) {
+    const key = `${fact.scenarioId}\0${fact.snapshotId}`;
+    if (!expectedKeys.has(key)) {
+      throw new Error(
+        `${fact.scenarioId}/${fact.snapshotId}: unexpected formula syntax facts`,
+      );
+    }
+    if (factsByKey.has(key)) {
+      throw new Error(
+        `${fact.scenarioId}/${fact.snapshotId}: duplicate formula syntax facts`,
+      );
+    }
+    const probe = release.fixture.probes.find((candidate) =>
+      candidate.scenarioId === fact.scenarioId &&
+      candidate.cursor.snapshotId === fact.snapshotId
+    )!;
+    const snapshot = authoredSnapshotFor(
+      authoredScenarioFor(release.fixture, probe),
+      probe,
+    );
+    const documentIds = fact.documents.map((document) => document.fileId);
+    if (new Set(documentIds).size !== documentIds.length) {
+      throw new Error(
+        `${fact.scenarioId}/${fact.snapshotId}: duplicate formula syntax documents`,
+      );
+    }
+    const expectedDocumentIds = snapshot.documents
+      .map((document) => document.fileId)
+      .sort();
+    if (stableJson([...documentIds].sort()) !== stableJson(expectedDocumentIds)) {
+      throw new Error(
+        `${fact.scenarioId}/${fact.snapshotId}: formula syntax documents do not match the selected snapshot`,
+      );
+    }
+    for (const document of fact.documents) {
+      const source = snapshot.documents.find(
+        (candidate) => candidate.fileId === document.fileId,
+      )!;
+      const ranges = document.mathRootContentRanges.map(
+        (range) => `${range.startOffset}:${range.endOffset}`,
+      );
+      if (new Set(ranges).size !== ranges.length) {
+        throw new Error(
+          `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: duplicate formula math-root facts`,
+        );
+      }
+      for (const range of document.mathRootContentRanges) {
+        if (
+          !Number.isInteger(range.startOffset) ||
+          !Number.isInteger(range.endOffset) ||
+          range.startOffset < 0 || range.startOffset >= range.endOffset ||
+          range.endOffset > source.content.length
+        ) {
+          throw new Error(
+            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: invalid formula math-root fact`,
+          );
+        }
+      }
+    }
+    factsByKey.set(key, fact);
+  }
+  if (factsByKey.size !== expectedKeys.size) {
+    throw new Error("formula syntax facts must cover every selected snapshot");
+  }
+
+  const safetyById = new Map(
+    (release.authoringSafety ?? []).map((item) => [item.probeId, item]),
+  );
+  for (const probe of release.fixture.probes) {
+    const expected = probe.expected.formulaDecision!;
+    const scenario = authoredScenarioFor(release.fixture, probe);
+    const snapshot = authoredSnapshotFor(scenario, probe);
+    const selected = resolveAuthoredAnchor(snapshot, expected.anchor);
+    const fact = factsByKey.get(
+      `${probe.scenarioId}\0${probe.cursor.snapshotId}`,
+    )!;
+    const document = fact.documents.find(
+      (candidate) => candidate.fileId === selected.fileId,
+    );
+    const roots = document?.mathRootContentRanges.filter(
+      (range) =>
+        range.startOffset === selected.range.startOffset &&
+        range.endOffset === selected.range.endOffset,
+    ) ?? [];
+    if (roots.length !== 1) {
+      throw new Error(
+        `${probe.id}: formulaDecision.anchor must equal one selected math root`,
+      );
+    }
+    const cursorAnchor = resolveAuthoredAnchor(snapshot, probe.cursor);
+    const cursorOffset = probe.cursor.offset !== undefined
+      ? cursorAnchor.range.startOffset + probe.cursor.offset
+      : probe.cursor.edge === "after"
+      ? cursorAnchor.range.endOffset
+      : cursorAnchor.range.startOffset;
+    const root = roots[0]!;
+    if (
+      cursorAnchor.fileId !== selected.fileId ||
+      cursorOffset < root.startOffset || cursorOffset >= root.endOffset
+    ) {
+      throw new Error(
+        `${probe.id}: cursor and formulaDecision.anchor must select the same math root`,
+      );
+    }
+    const safety = safetyById.get(probe.id)!;
+    if (safety.forbiddenDispositions.includes(expected.status)) {
+      throw new Error(
+        `${probe.id}: formula decision is forbidden by authoring safety`,
+      );
+    }
+    if (expected.status === "established" && !safety.requiredAuthority.length) {
+      throw new Error(
+        `${probe.id}: established formula decision requires reviewed authority`,
+      );
+    }
+    if (
+      expected.status === "conflicting" &&
+      !safety.requiredContradictions.length
+    ) {
+      throw new Error(
+        `${probe.id}: conflicting formula decision requires reviewed contradiction`,
       );
     }
   }

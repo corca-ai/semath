@@ -124,6 +124,7 @@ async function runFreshBlindRelease(): Promise<void> {
                 id: probe.id,
               }]
         ),
+        { formulaDecisionRequired: evidence.release.schemaVersion === 3 },
       ),
     };
     run("bun", ["scripts/check-fresh-blind-lifecycle.ts"], {
@@ -168,6 +169,7 @@ async function runFreshBlindRelease(): Promise<void> {
       evaluationSha256: sha256(evaluationBytes),
       lifecycleSha256: sha256(lifecycleBytes),
       result: {
+        authoringSafety,
         evaluation: evaluation.parsed.raw,
         facetFailureIds: facetFailures,
         lifecycle,
@@ -216,6 +218,7 @@ interface ParsedEvaluation {
 export function parseFreshBlindEvaluation(
   value: unknown,
   expectedProbes: readonly MathAuthoringExpectationProbe[],
+  options: { readonly formulaDecisionRequired?: boolean } = {},
 ): ParsedEvaluation {
   const report = record(value, "fresh blind evaluation");
   exact(report, ["results"], "fresh blind evaluation");
@@ -239,7 +242,11 @@ export function parseFreshBlindEvaluation(
   if (!Array.isArray(result.observations))
     throw new Error("fresh blind evaluation observations must be an array");
   const observations = result.observations.map((item, index) =>
-    parseObservation(item, `fresh blind evaluation observations[${index}]`),
+    parseObservation(
+      item,
+      `fresh blind evaluation observations[${index}]`,
+      options.formulaDecisionRequired === true,
+    ),
   );
   if (
     new Set(observations.map((item) => item.caseId)).size !==
@@ -552,6 +559,7 @@ function parseScore(value: unknown): AuthoredScientificScorecard {
 function parseObservation(
   value: unknown,
   label: string,
+  formulaDecisionRequired: boolean,
 ): AuthoredScientificObservation {
   const item = record(value, label);
   const requiredKeys = [
@@ -560,6 +568,7 @@ function parseObservation(
     "decision",
     "definitions",
     "diagnostics",
+    ...(formulaDecisionRequired ? ["formulaDecision"] : []),
     "prepareRename",
     "proofGrounded",
     "references",
@@ -575,6 +584,9 @@ function parseObservation(
   ]);
   const missing = requiredKeys.filter((key) => !(key in item));
   const unknown = Object.keys(item).filter((key) => !allowedKeys.has(key));
+  if (formulaDecisionRequired && !("formulaDecision" in item)) {
+    throw new Error(`${label}.formulaDecision is required`);
+  }
   if (missing.length || unknown.length)
     throw new Error(`${label} has unexpected or missing fields`);
   const caseId = nonemptyString(item.caseId, `${label}.caseId`);
@@ -750,6 +762,20 @@ function parseObservation(
         item.authoringContext,
         `${label}.authoringContext`,
       );
+  const formulaDecision = item.formulaDecision === undefined
+    ? undefined
+    : parseObservedFormulaDecision(item.formulaDecision, `${label}.formulaDecision`);
+  if (
+    formulaDecision &&
+    (!authoringContext ||
+      formulaDecision.status !== authoringContext.disposition ||
+      !isDeepStrictEqual(
+        formulaDecision.location,
+        authoringContext.formula?.location ?? null,
+      ))
+  ) {
+    throw new Error(`${label}.formulaDecision must match authoringContext`);
+  }
   if (item.interpretations !== undefined)
     record(item.interpretations, `${label}.interpretations`);
   if (item.interpretations !== undefined &&
@@ -769,6 +795,7 @@ function parseObservation(
     decision,
     definitions,
     diagnostics,
+    ...(formulaDecision === undefined ? {} : { formulaDecision }),
     ...(item.interpretations === undefined
       ? {}
       : {
@@ -805,6 +832,25 @@ function locations(value: unknown, label: string) {
   return array(value, label).map((item, index) =>
     location(item, `${label}[${index}]`),
   );
+}
+function parseObservedFormulaDecision(
+  value: unknown,
+  label: string,
+): NonNullable<AuthoredScientificObservation["formulaDecision"]> {
+  const item = record(value, label);
+  exact(item, ["location", "status"], label);
+  return {
+    location: item.location === null
+      ? null
+      : location(item.location, `${label}.location`),
+    status: checked(
+      item.status,
+      /^(?:ambiguous|conflicting|conventional|engine-limited|established|partial|unsupported)$/u,
+      `${label}.status`,
+    ) as NonNullable<
+      AuthoredScientificObservation["formulaDecision"]
+    >["status"],
+  };
 }
 function location(value: unknown, label: string) {
   const item = record(value, label);

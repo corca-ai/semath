@@ -2099,7 +2099,7 @@ pub(crate) fn rejected_formula_sign_conflicts(
     actual: &SemanticExpr,
     semantic_evidence: &ScientificSemanticEvidence,
 ) -> Vec<MeaningConflict> {
-    if !semantic_evidence.formula_is_rejected(&actual.range) {
+    if !semantic_evidence.formula_is_explicitly_retracted(&actual.range) {
         return Vec::new();
     }
     COMPILED_LAWS
@@ -5320,7 +5320,7 @@ mod tests {
 
     #[test]
     fn rejected_formula_conflicts_with_an_attached_activated_law_sign() {
-        let source = "Our laboratory convention uses a right-handed coordinate system and assigns\nthe conventional minus sign to the magnetic-field derivative in Faraday's law.\nI have not determined whether the probe channel was inverted or the export routine\ndropped the sign. The following plus-sign rule is therefore quoted only as the\nacquisition notebook's exported output and must not be used as a corrected physical field equation:\n$\\nabla\\times E=+\\frac{\\partial B}{\\partial t}$.";
+        let source = "Our laboratory convention assigns the conventional minus sign to the magnetic-field derivative in Faraday's law.\nThe following formula is rejected:\n$\\nabla\\times E=+\\frac{\\partial B}{\\partial t}$.";
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             prose_annotations: vec![],
@@ -5364,6 +5364,31 @@ mod tests {
         assert_eq!(
             conflicts[0].conflict_id,
             "electromagnetism:faraday-law/explicit-sign-mismatch"
+        );
+
+        let source = "Our convention assigns the minus sign in Faraday's law.\nThe application is not stated. Consider $\\nabla\\times E=+\\frac{\\partial B}{\\partial t}$.";
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
+        let document = ProjectDocument {
+            content: source.into(),
+            math_regions: regions.clone(),
+            ..document
+        };
+        let parsed = parse_regions(source, &regions);
+        let canonical = canonical_expressions(&document, &parsed);
+        let prose = observe_prose(&document, &parsed, &canonical);
+        assert!(
+            prose
+                .semantic_evidence
+                .formula_is_rejected(&canonical[0].range)
+        );
+        assert!(
+            !prose
+                .semantic_evidence
+                .formula_is_explicitly_retracted(&canonical[0].range)
+        );
+        assert!(
+            rejected_formula_sign_conflicts(&canonical[0], &prose.semantic_evidence).is_empty(),
+            "a missing application is not an explicit sign refutation"
         );
     }
 
@@ -7683,6 +7708,28 @@ This vector field is the gradient of $f$; hence, after the characterization abov
         assert!(gradient.conditions.iter().all(|condition| {
             condition.status == ConstraintStatus::Verified && !condition.evidence.is_empty()
         }));
+    }
+
+    #[test]
+    fn withheld_pack_condition_is_not_verified() {
+        let recognized = recognized_law_observations(
+            r"Let $m$ be mass flow rate, $\rho$ density, $A$ area, and $u$ velocity.
+The analysis withholds the uniform section condition for the displayed mass-flow relation.
+\[
+m=\rho A u
+\]",
+        );
+        let flow = recognized
+            .iter()
+            .find(|law| law.law_id == "mass-flow-rate")
+            .expect("mass-flow relation remains visible");
+        let condition = flow
+            .conditions
+            .iter()
+            .find(|condition| condition.condition_id == "uniform-section-values")
+            .expect("uniform-section condition");
+
+        assert_ne!(condition.status, ConstraintStatus::Verified, "{flow:#?}");
     }
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {

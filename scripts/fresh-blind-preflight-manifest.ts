@@ -25,14 +25,14 @@ export const FRESH_BLIND_RELEASE_CONTRACT = {
   packageVersion: "0.18.0",
   packSchemaVersion: 12,
   protocolVersion: 17,
-  receiptPolicyVersion: 2,
+  receiptPolicyVersion: 3,
   wasmtexSyntaxSchemaVersion: 8,
 } as const;
 
 export const FRESH_BLIND_CONTRACTS = {
   packSchemaVersion: 12,
   protocolVersion: 17,
-  receiptPolicyVersion: 2,
+  receiptPolicyVersion: 3,
   wasmtexSyntaxSchemaVersion: 8,
 } as const;
 
@@ -52,7 +52,7 @@ export interface FreshBlindPreflightManifest {
   readonly contracts: {
     readonly packSchemaVersion: 12;
     readonly protocolVersion: 17;
-    readonly receiptPolicyVersion: 2;
+    readonly receiptPolicyVersion: 3;
     readonly wasmtexSyntaxSchemaVersion: 8;
   };
   readonly gates: readonly string[];
@@ -195,7 +195,7 @@ export function parseFreshBlindPreflightManifest(
   );
   literal(
     contracts.receiptPolicyVersion,
-    2,
+    3,
     "pre-blind manifest.contracts.receiptPolicyVersion",
   );
 
