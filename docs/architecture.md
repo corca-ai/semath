@@ -377,9 +377,13 @@ from notation. wasmtex supplies neutral syntax and lexical classes, Semath adds
 typed mathematical meaning, and hosts consume results; dependencies never run
 in the opposite direction.
 
-The public meaning states are `established`, `partial`, `ambiguous`,
-`conflicting`, and `unsupported`. A decision carries a typed reason slice:
-proof, neutral uncertainty, engine limit, or demonstrated source conflict.
+The public cursor-entity meaning states are `established`, `partial`,
+`ambiguous`, `conflicting`, and `unsupported`. The selected complete formula is
+adjudicated independently and projected through the authoring context. Entity
+proof cannot establish or conflict the formula, formula proof cannot establish
+or conflict a nested entity, and only the cursor-entity decision controls
+navigation and edit authority. Each state carries a typed reason slice: proof,
+neutral uncertainty, engine limit, or demonstrated source conflict.
 Decision state is not diagnostic severity. Missing engine evidence never
 becomes a document warning; only exact source-linked contradictions and invalid
 typed constraints do. Only deterministic results with verified side conditions
@@ -390,22 +394,25 @@ units and coordinate frames.
 ## Public boundary
 
 Protocol 15 exposes selection, `semanticView`, definition, references, rename,
-and diagnostics. `semanticView.decision` is the sole exhaustive meaning state:
-established, partial, ambiguous, conflicting, or unsupported. Known decisions
-carry a structured meaning; all decisions carry bounded typed reasons. There is
-no summary-string or missing-evidence presentation policy in the protocol. Native, WASM,
-Worker, LSP, and CorTeX consume the same result model, and raw parser trees are
-not public.
+and diagnostics. `semanticView.decision` is the exhaustive meaning state for
+the exact cursor entity: established, partial, ambiguous, conflicting, or
+unsupported. Known decisions carry a structured meaning; all decisions carry
+bounded typed reasons. There is no summary-string or missing-evidence
+presentation policy in the protocol. Native, WASM, Worker, LSP, and CorTeX
+consume the same result model, and raw parser trees are not public.
 
-`semanticView.authoringContext` is a neutral bounded projection over that same
-authority for writing-assistance hosts. It exposes one exact formula anchor,
-structured role and condition requirements, conventional candidates, typed
-conditions, source-backed equation links, explicit approximation disposition,
-prose-claim evidence links, same-entity notation occurrences, and current
-source lifecycle. It does not introduce a second decision, infer rhetorical
-intent, or encode phrases, English wording, UI categories, or recommendation
-scores. Shared-entity equation links remain distinct from derived-law links so
-a host cannot turn mere reuse into “follows from” language.
+`semanticView.authoringContext` is a neutral bounded projection for
+writing-assistance hosts. It exposes one exact formula anchor and an
+independently computed selected-formula disposition, plus structured role and
+condition requirements, conventional candidates, typed conditions,
+source-backed equation links, explicit approximation disposition, prose-claim
+evidence links, same-entity notation occurrences, and current source lifecycle.
+The formula disposition is not a second cursor-entity decision and grants no
+identity, navigation, rename, or edit authority. The projection does not infer
+rhetorical intent or encode phrases, English wording, UI categories, or
+recommendation scores. Shared-entity equation links remain distinct from
+derived-law links so a host cannot turn mere reuse into “follows from”
+language.
 
 Cursor ownership is one pure UTF-16 range policy over real occurrence,
 structural selection, and complete-application boundaries. Exact containment

@@ -30,13 +30,17 @@ The query surface is:
 - `diagnostics` and `explainDiagnostic`
 
 `semanticView` returns an established, partial, ambiguous, conflicting, or
-unsupported `decision` as a discriminated union. Established and partial
-decisions contain a structured known meaning; partial decisions may also carry
-neutral requirements for optional tooling. Ambiguous decisions contain bounded
-alternatives, and conflicting decisions contain source-linked conflicts. Every
-state has a deterministic bounded reason slice whose kinds distinguish proof,
-uncertainty, engine limits, and demonstrated source conflicts. A host must not
-turn uncertainty or an engine limit into a document diagnostic. Required or
+unsupported cursor-entity `decision` as a discriminated union. Established and
+partial decisions contain a structured known meaning; partial decisions may
+also carry neutral requirements for optional tooling. Ambiguous decisions
+contain bounded alternatives, and conflicting decisions contain source-linked
+conflicts. The selected formula has its own independently derived disposition
+in `semanticView.authoringContext`: evidence about the complete formula cannot
+establish or conflict the entity at an interior cursor, and an independently
+established entity cannot establish the surrounding formula. Every state has a
+deterministic bounded reason slice whose kinds distinguish proof, uncertainty,
+engine limits, and demonstrated source conflicts. A host must not turn
+uncertainty or an engine limit into a document diagnostic. Required or
 unsupported law conditions and truncated evidence cannot produce `established`.
 `context.assumptions` contains explicit, source-linked assumptions with their
 subjects; omission means none were established. Parser ASTs, free-form refusal
@@ -128,9 +132,12 @@ hosts and release gates can detect routing regressions without reimplementing
 policy.
 
 `semanticView.authoringContext` is always present on a current successful
-semantic query. Its optional `formula` supplies the exact file, path, revision,
-scope, UTF-16 range, authored source notation, and generated provenance for the
-complete math region. `lifecycle` reports only Semath-owned source facts:
+semantic query. Its `disposition` is the independently computed state of the
+selected complete formula: established, conventional, partial, ambiguous,
+conflicting, unsupported, or engine-limited. Its optional `formula` supplies
+the exact file, path, revision, scope, UTF-16 range, authored source notation,
+and generated provenance for the complete math region. `lifecycle` reports only
+Semath-owned source facts:
 authored versus generated, current freshness, retraction, editability of the
 source surface, capping, and engine limits. A stale query returns the existing
 typed query error rather than a stale authoring context.
