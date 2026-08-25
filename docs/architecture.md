@@ -414,6 +414,14 @@ recommendation scores. Shared-entity equation links remain distinct from
 derived-law links so a host cannot turn mere reuse into “follows from”
 language.
 
+Formula evidence is anchored independently of the cursor projection. A single
+evidence item may connect a retracted formula root to a current refutation
+clause, so each source anchor retains its own lifecycle and generation state.
+Candidate relations may remain visible for explanation, but only complete
+grounded role bindings with verified conditions reach establishment-grade
+authority. Cursor-only claim or notation caps cannot change the selected
+formula's disposition, lifecycle, or truncation state.
+
 Cursor ownership is one pure UTF-16 range policy over real occurrence,
 structural selection, and complete-application boundaries. Exact containment
 outranks trailing edges; gaps and ambiguous containers fail locally. Every
