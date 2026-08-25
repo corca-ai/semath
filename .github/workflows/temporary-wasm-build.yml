@@ -1,0 +1,24 @@
+name: temporary-wasm-build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# TEMP-CODE(issue: #396, remove-when: PR #395 has the verified Linux x86_64 WASM artifact): one-shot release artifact builder.
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          targets: wasm32-unknown-unknown
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - run: scripts/build-wasm.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: semath-linux-x86_64-wasm
+          path: lib/wasm/
+          retention-days: 1
