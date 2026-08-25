@@ -12,7 +12,6 @@ import type {
 } from "./challenge";
 
 export interface SelectedFormulaObservationInput {
-  readonly authoritativeRelationIds: ReadonlySet<string>;
   readonly disposition: MathAuthoringDisposition | undefined;
   readonly formula: MathFormulaAnchorInfo | undefined;
   readonly hypotheses: readonly MathInterpretationHypothesisInfo[];
@@ -40,9 +39,7 @@ export function observeSelectedFormulaDecision(
   const recognizedRelations = anchoredRelations
     .map(
       (hypothesis): ChallengeRecognizedRelation => ({
-        authority: input.authoritativeRelationIds.has(
-          hypothesis.relation.relationId,
-        )
+        authority: hypothesisIsEstablishmentGrade(hypothesis)
           ? "authoritative"
           : "candidate",
         formulaAnchor: "selected-formula",
@@ -72,15 +69,17 @@ export function observeSelectedFormulaDecision(
         evidence.length > 0 &&
         evidence.every(interpretationEvidenceIsGrounded) &&
         selectedFormula !== undefined &&
-        evidence.some((item) => evidenceAnchorsFormula(item, selectedFormula))
+        hypothesisContradictsFormula(hypothesis, selectedFormula)
       );
     });
   const meaningGrounded = Boolean(
-    meaning?.evidence.some(
-      (evidence) =>
-        evidence.role === "supporting" &&
-        interpretationEvidenceIsGrounded(evidence),
-    ),
+    selectedFormula &&
+      meaning?.evidence.some(
+        (evidence) =>
+          evidence.role === "supporting" &&
+          interpretationEvidenceIsGrounded(evidence) &&
+          evidenceOwnsFormula(evidence, selectedFormula),
+      ),
   );
   return {
     decision: {
@@ -98,6 +97,17 @@ export function observeSelectedFormulaDecision(
     },
     recognizedRelations,
   };
+}
+
+function hypothesisIsEstablishmentGrade(
+  hypothesis: FormulaRelationHypothesis,
+): boolean {
+  return (
+    (hypothesis.support === "explicit" || hypothesis.support === "derived") &&
+    hypothesis.missingDiscriminatorIds.length === 0 &&
+    hypothesis.bindings.every((binding) => binding.proof !== "candidate") &&
+    hypothesis.conditions.every((condition) => condition.status === "verified")
+  );
 }
 
 function selectFormulaMeaning(
@@ -133,14 +143,18 @@ function hypothesisContradictsFormula(
   hypothesis: MathInterpretationHypothesisInfo,
   formula: MathFormulaAnchorInfo,
 ): boolean {
-  return hypothesis.evidence.some(
-    (evidence) =>
-      evidence.role === "contradicting" &&
-      evidenceAnchorsFormula(evidence, formula),
+  return (
+    (hypothesis.formula !== undefined &&
+      sameFormulaAnchor(hypothesis.formula, formula)) ||
+    hypothesis.evidence.some(
+      (evidence) =>
+        evidence.role === "contradicting" &&
+        evidenceOwnsFormula(evidence, formula),
+    )
   );
 }
 
-function evidenceAnchorsFormula(
+function evidenceOwnsFormula(
   evidence: MathInterpretationEvidenceInfo,
   formula: MathFormulaAnchorInfo,
 ): boolean {
@@ -150,7 +164,8 @@ function evidenceAnchorsFormula(
       anchor.documentVersion === formula.documentVersion &&
       anchor.location.fileId === formula.location.fileId &&
       anchor.location.path === formula.location.path &&
-      rangesOverlap(anchor.location.range, formula.location.range),
+      sameRange(anchor.location.range, formula.location.range) &&
+      sameScope(anchor.scopePath, formula.scopePath),
   );
 }
 
@@ -164,6 +179,16 @@ function interpretationEvidenceIsGrounded(
       (anchor) =>
         anchor.lifecycle === "current" &&
         anchor.location.range.endOffset > anchor.location.range.startOffset,
+    ) &&
+    evidence.evidence.sourceRanges.every((range) =>
+      evidence.sourceAnchors.some((anchor) =>
+        sameRange(anchor.location.range, range),
+      ),
+    ) &&
+    evidence.sourceAnchors.every((anchor) =>
+      evidence.evidence.sourceRanges.some((range) =>
+        sameRange(anchor.location.range, range),
+      ),
     )
   );
 }
@@ -184,8 +209,15 @@ function sameFormulaAnchor(
   );
 }
 
-function rangesOverlap(left: SourceRange, right: SourceRange): boolean {
+function sameRange(left: SourceRange, right: SourceRange): boolean {
   return (
-    left.startOffset < right.endOffset && right.startOffset < left.endOffset
+    left.startOffset === right.startOffset && left.endOffset === right.endOffset
+  );
+}
+
+function sameScope(left: readonly number[], right: readonly number[]): boolean {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
   );
 }

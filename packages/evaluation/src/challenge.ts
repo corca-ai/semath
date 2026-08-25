@@ -1,4 +1,10 @@
+import { createHash } from "node:crypto";
 import type { CorpusDocument } from "./model";
+
+export const CHALLENGE_RECOGNITION_V2_SHA256 =
+  "b9a5691048b3292afae8d0c2296b6707f1c8b64f4223b9fc726cb3987808d4d7";
+export const CHALLENGE_RECOGNITION_V3_SHA256 =
+  "14b4bb40905567bc8f277fc117561a82e1aeb74e5002f03cd892b0845afda8f2";
 
 export const CHALLENGE_LAYERS = [
   "binding",
@@ -332,15 +338,21 @@ export function parseChallengeV3(
  * predecessor fixture.
  */
 export function parseChallengeV4(
-  baseValue: unknown,
-  v3Value: unknown,
+  baseSource: string,
+  v3Source: string,
   profileValue: unknown,
 ): ChallengeCorpus {
+  const baseValue = parseJsonSource(baseSource, "challenge-v2 source");
+  const parsedBase = parseChallengeCorpus(baseValue);
+  if (parsedBase.cases.length !== 48) {
+    throw new Error("challenge-v4 base: must contain exactly 48 cases");
+  }
+  const v3Value = parseJsonSource(v3Source, "challenge-v3 source");
   const base = parseChallengeV3(baseValue, v3Value);
   const root = record(profileValue, "challenge-v4");
   exact(
     root,
-    ["schemaVersion", "baseSchemaVersion", "profiles"],
+    ["schemaVersion", "baseSchemaVersion", "baseDigests", "profiles"],
     "challenge-v4",
   );
   if (root.schemaVersion !== 4)
@@ -348,6 +360,24 @@ export function parseChallengeV4(
   if (root.baseSchemaVersion !== 3) {
     throw new Error("challenge-v4.baseSchemaVersion: must be 3");
   }
+  const digests = record(root.baseDigests, "challenge-v4.baseDigests");
+  exact(
+    digests,
+    ["recognitionV2Sha256", "recognitionV3Sha256"],
+    "challenge-v4.baseDigests",
+  );
+  validatePinnedDigest(
+    digests.recognitionV2Sha256,
+    CHALLENGE_RECOGNITION_V2_SHA256,
+    sha256(baseSource),
+    "challenge-v4.baseDigests.recognitionV2Sha256",
+  );
+  validatePinnedDigest(
+    digests.recognitionV3Sha256,
+    CHALLENGE_RECOGNITION_V3_SHA256,
+    sha256(v3Source),
+    "challenge-v4.baseDigests.recognitionV3Sha256",
+  );
   if (
     !Array.isArray(root.profiles) ||
     root.profiles.length !== base.cases.length
@@ -388,7 +418,10 @@ export function parseChallengeV4(
         `challenge-v4.profiles.${item.id}: relation ${relationId} must be reviewed`,
       );
     }
-    if (relationId && profile.decisionDomain !== "selected-formula") {
+    if (
+      (relationId || item.expectation.excludedRelationId) &&
+      profile.decisionDomain !== "selected-formula"
+    ) {
       throw new Error(
         `challenge-v4.profiles.${item.id}: relation decisions must use selected-formula`,
       );
@@ -468,7 +501,7 @@ export function scoreChallenge(
       (!sameRecognizedRelations(
         item.recognizedRelations,
         observation.recognizedRelations,
-      ) || !recognizedRelationAuthorityIsCoherent(observation))
+      ) || !recognizedRelationAuthorityIsSupportCoherent(observation))
         ? "recognized relations"
         : undefined;
     if (decision && !decisionMismatch) decisionPassed.add(item.id);
@@ -525,11 +558,15 @@ export function scoreChallenge(
         ? `excluded definition ${expected.excludedDefinitionSymbol}`
         : undefined,
       expected.excludedRelationId &&
-      observation.relationIds.includes(expected.excludedRelationId)
+      authoritativeRelationObserved(
+        item,
+        observation,
+        expected.excludedRelationId,
+      )
         ? `excluded relation ${expected.excludedRelationId}`
         : undefined,
       expected.relationId &&
-      !observation.relationIds.includes(expected.relationId)
+      !authoritativeRelationObserved(item, observation, expected.relationId)
         ? `relation ${expected.relationId}`
         : undefined,
       expected.shape && !observation.shapes.includes(expected.shape)
@@ -849,16 +886,34 @@ function sameRecognizedRelations(
   return expectedKeys.every((value, index) => value === actualKeys[index]);
 }
 
-function recognizedRelationAuthorityIsCoherent(
+function recognizedRelationAuthorityIsSupportCoherent(
   observation: ChallengeObservation,
 ): boolean {
   return Boolean(
     observation.recognizedRelations?.every(
       (recognized) =>
-        observation.relationIds.includes(recognized.relationId) ===
-        (recognized.authority === "authoritative"),
+        recognized.authority !== "authoritative" ||
+        recognized.support === "explicit" ||
+        recognized.support === "derived",
     ),
   );
+}
+
+function authoritativeRelationObserved(
+  item: ChallengeCase,
+  observation: ChallengeObservation,
+  relationId: string,
+): boolean {
+  if (item.recognizedRelations) {
+    return Boolean(
+      observation.recognizedRelations?.some(
+        (recognized) =>
+          recognized.authority === "authoritative" &&
+          recognized.relationId === relationId,
+      ),
+    );
+  }
+  return observation.relationIds.includes(relationId);
 }
 
 function countedExpected(
@@ -1026,6 +1081,29 @@ function validateBoundaryPairs(cases: readonly ChallengeCase[]): void {
 
 function normalizedSource(source: string): string {
   return source.replace(/\s+/gu, " ").trim();
+}
+
+function parseJsonSource(source: string, path: string): unknown {
+  try {
+    return JSON.parse(source) as unknown;
+  } catch {
+    throw new Error(`${path}: must be valid JSON`);
+  }
+}
+
+function validatePinnedDigest(
+  value: unknown,
+  pinned: string,
+  actual: string,
+  path: string,
+): void {
+  const declared = text(value, path);
+  if (declared !== pinned) throw new Error(`${path}: must equal ${pinned}`);
+  if (actual !== declared) throw new Error(`${path}: source digest mismatch`);
+}
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
 }
 
 function tally<

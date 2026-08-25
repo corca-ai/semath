@@ -1,6 +1,10 @@
 {
   "schemaVersion": 4,
   "baseSchemaVersion": 3,
+  "baseDigests": {
+    "recognitionV2Sha256": "b9a5691048b3292afae8d0c2296b6707f1c8b64f4223b9fc726cb3987808d4d7",
+    "recognitionV3Sha256": "14b4bb40905567bc8f277fc117561a82e1aeb74e5002f03cd892b0845afda8f2"
+  },
   "profiles": [
     {
       "caseId": "binding-metric-long-short",
@@ -33,7 +37,7 @@
       "recognizedRelations": [
         {
           "relationId": "circuits:ohm-law",
-          "support": "supported",
+          "support": "tentative",
           "authority": "candidate",
           "formulaAnchor": "selected-formula"
         }
@@ -42,7 +46,7 @@
     {
       "caseId": "binding-role-collision-refusal",
       "decision": {
-        "status": "partial",
+        "status": "unsupported",
         "meaning": "absent",
         "problems": "none"
       },
@@ -69,7 +73,7 @@
     {
       "caseId": "constraint-matrix-vector-mismatch",
       "decision": {
-        "status": "partial",
+        "status": "unsupported",
         "meaning": "absent",
         "problems": "none"
       },
@@ -114,7 +118,7 @@
       "recognizedRelations": [
         {
           "relationId": "circuits:ohm-law",
-          "support": "supported",
+          "support": "tentative",
           "authority": "candidate",
           "formulaAnchor": "selected-formula"
         }
@@ -159,13 +163,13 @@
         {
           "relationId": "probability:event-intersection",
           "support": "supported",
-          "authority": "authoritative",
+          "authority": "candidate",
           "formulaAnchor": "selected-formula"
         },
         {
           "relationId": "discrete-math:set-intersection",
           "support": "supported",
-          "authority": "authoritative",
+          "authority": "candidate",
           "formulaAnchor": "selected-formula"
         }
       ]
@@ -350,7 +354,7 @@
     {
       "caseId": "constraint-events-different-context-refusal",
       "decision": {
-        "status": "partial",
+        "status": "unsupported",
         "meaning": "absent",
         "problems": "none"
       },
@@ -402,7 +406,7 @@
       "recognizedRelations": [
         {
           "relationId": "electromagnetism:electric-force-law",
-          "support": "supported",
+          "support": "tentative",
           "authority": "candidate",
           "formulaAnchor": "selected-formula"
         }
@@ -419,8 +423,8 @@
       "recognizedRelations": [
         {
           "relationId": "classical-mechanics:linear-momentum-definition",
-          "support": "supported",
-          "authority": "authoritative",
+          "support": "tentative",
+          "authority": "candidate",
           "formulaAnchor": "selected-formula"
         }
       ]
@@ -436,7 +440,7 @@
       "recognizedRelations": [
         {
           "relationId": "thermodynamics-heat-transfer:sensible-heat-relation",
-          "support": "supported",
+          "support": "tentative",
           "authority": "candidate",
           "formulaAnchor": "selected-formula"
         }
@@ -445,7 +449,7 @@
     {
       "caseId": "pack-sensible-heat-untyped-refusal",
       "decision": {
-        "status": "partial",
+        "status": "unsupported",
         "meaning": "absent",
         "problems": "none"
       },

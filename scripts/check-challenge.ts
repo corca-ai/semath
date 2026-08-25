@@ -9,17 +9,13 @@ import {
 import type { SemanticViewInfo } from "../packages/protocol/src/index";
 import { runSemanticEvaluation } from "./semantic-evaluation-runner";
 
-const base = JSON.parse(
-  await readFile(
-    new URL("../fixtures/challenge/recognition-v2.json", import.meta.url),
-    "utf8",
-  ),
+const base = await readFile(
+  new URL("../fixtures/challenge/recognition-v2.json", import.meta.url),
+  "utf8",
 );
-const v3 = JSON.parse(
-  await readFile(
-    new URL("../fixtures/challenge/recognition-v3.json", import.meta.url),
-    "utf8",
-  ),
+const v3 = await readFile(
+  new URL("../fixtures/challenge/recognition-v3.json", import.meta.url),
+  "utf8",
 );
 const corpus = parseChallengeV4(
   base,
@@ -39,9 +35,6 @@ const observations = corpus.cases.map((item, index): ChallengeObservation => {
     result?.value.kind === "semanticView" ? result.value.view : undefined;
   const entityDecision = observeEntityDecision(view);
   const formula = observeSelectedFormulaDecision({
-    authoritativeRelationIds: new Set(
-      view?.context.relations.map((relation) => relation.relationId) ?? [],
-    ),
     disposition: view?.authoringContext.disposition,
     formula: view?.authoringContext.formula,
     hypotheses: view?.authoringContext.interpretations.hypotheses ?? [],

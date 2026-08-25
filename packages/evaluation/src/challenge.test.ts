@@ -9,6 +9,7 @@ import {
   parseChallengeV4,
   scoreChallenge,
   type ChallengeCase,
+  type ChallengeCorpus,
   type ChallengeObservation,
   type DevelopmentFixtureCase,
 } from "./challenge";
@@ -47,70 +48,6 @@ function observation(item: ChallengeCase): ChallengeObservation {
     shapes: [],
     sourceGrounded: false,
     symbols: item.expectation.symbol ? [item.expectation.symbol] : [],
-  };
-}
-
-interface V4TestProfile {
-  caseId: string;
-  decision: { meaning: string; problems: string; status: string };
-  decisionDomain: string;
-  recognizedRelations: {
-    authority: string;
-    formulaAnchor: string;
-    relationId: string;
-    support: string;
-  }[];
-  runtimeCaseId?: string;
-}
-
-function v4Profiles(value: readonly ChallengeCase[]): {
-  baseSchemaVersion: number;
-  profiles: V4TestProfile[];
-  schemaVersion: number;
-} {
-  return {
-    baseSchemaVersion: 3,
-    profiles: value.map((item) => ({
-      caseId: item.id,
-      decision: {
-        meaning: "absent",
-        problems: "none",
-        status: "partial",
-      },
-      decisionDomain: "cursor-entity",
-      recognizedRelations: [],
-    })),
-    schemaVersion: 4,
-  };
-}
-
-function v3Profiles(value: readonly ChallengeCase[]) {
-  const shapes = [
-    "distant-prose",
-    "macro-neighbor",
-    "malformed-neighbor",
-    "multi-equation",
-    "project-neighbor",
-    "sectioned",
-  ] as const;
-  return {
-    baseSchemaVersion: 2,
-    profiles: value.map((item, index) => ({
-      caseId: item.id,
-      decision: {
-        meaning: "absent",
-        problems: index === 0 ? "source-conflict" : "none",
-        status: [
-          "conflicting",
-          "established",
-          "ambiguous",
-          "unsupported",
-          "partial",
-        ][index % 5],
-      },
-      documentShape: shapes[index % shapes.length],
-    })),
-    schemaVersion: 3,
   };
 }
 
@@ -210,8 +147,8 @@ describe("independent recognition challenge", () => {
       ),
     ]);
     const challenge = parseChallengeV4(
-      JSON.parse(baseText),
-      JSON.parse(v3Text),
+      baseText,
+      v3Text,
       JSON.parse(v4Text),
     );
     expect(challenge.schemaVersion).toBe(4);
@@ -243,19 +180,39 @@ describe("independent recognition challenge", () => {
     expect(JSON.parse(v3Text).schemaVersion).toBe(3);
   });
 
-  test("rejects incomplete, domain-mixed, and non-exact v4 policy", () => {
-    const base = source(cases());
-    const v3 = v3Profiles(cases());
-    const complete = v4Profiles(cases());
+  test("rejects incomplete, domain-mixed, and non-exact v4 policy", async () => {
+    const [base, v3, v4Text] = await Promise.all([
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v2.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v3.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v4.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ]);
+    const complete: unknown = JSON.parse(v4Text);
     const missingDomain = structuredClone(complete);
-    delete (missingDomain.profiles[0] as { decisionDomain?: string })
-      .decisionDomain;
+    delete profileRecords(missingDomain)[0]!.decisionDomain;
     expect(() => parseChallengeV4(base, v3, missingDomain)).toThrow(
       "unknown or missing field decisionDomain",
     );
 
     const wrongAnchor = structuredClone(complete);
-    wrongAnchor.profiles[0]!.recognizedRelations = [
+    profileRecords(wrongAnchor)[0]!.recognizedRelations = [
       {
         authority: "candidate",
         formulaAnchor: "cursor-formula",
@@ -268,7 +225,7 @@ describe("independent recognition challenge", () => {
     );
 
     const invalidSupport = structuredClone(complete);
-    invalidSupport.profiles[0]!.recognizedRelations = [
+    profileRecords(invalidSupport)[0]!.recognizedRelations = [
       {
         authority: "candidate",
         formulaAnchor: "selected-formula",
@@ -281,42 +238,85 @@ describe("independent recognition challenge", () => {
     );
 
     const extra = structuredClone(complete);
-    extra.profiles[0] = {
-      ...extra.profiles[0]!,
-      runtimeCaseId: "case-0",
-    };
+    profileRecords(extra)[0]!.runtimeCaseId = "case-0";
     expect(() => parseChallengeV4(base, v3, extra)).toThrow(
       "unknown field runtimeCaseId",
     );
+
+    const wrongDigest = structuredClone(complete);
+    const wrongDigestRoot = recordFixture(wrongDigest, "v4 fixture");
+    const digests = recordFixture(wrongDigestRoot.baseDigests, "baseDigests");
+    digests.recognitionV2Sha256 = "0".repeat(64);
+    expect(() => parseChallengeV4(base, v3, wrongDigest)).toThrow(
+      "baseDigests.recognitionV2Sha256: must equal",
+    );
+    expect(() => parseChallengeV4(`${base} `, v3, complete)).toThrow(
+      "baseDigests.recognitionV2Sha256: source digest mismatch",
+    );
+
+    const parsedBase = parseChallengeCorpus(JSON.parse(base));
+    const excluded = parsedBase.cases.find(
+      (item) => item.expectation.excludedRelationId,
+    );
+    if (!excluded) throw new Error("expected an excluded relation fixture");
+    const wrongExcludedDomain = structuredClone(complete);
+    const excludedProfile = profileRecords(wrongExcludedDomain).find(
+      (profile) => profile.caseId === excluded.id,
+    );
+    if (!excludedProfile) throw new Error("missing excluded relation profile");
+    excludedProfile.decisionDomain = "cursor-entity";
+    expect(() => parseChallengeV4(base, v3, wrongExcludedDomain)).toThrow(
+      "relation decisions must use selected-formula",
+    );
+
+    const tooManyBase: unknown = JSON.parse(base);
+    const tooManyCases = fixtureCases(tooManyBase);
+    recordFixture(tooManyBase, "v2 fixture").cases = [
+      ...tooManyCases,
+      { ...tooManyCases[0]!, id: "extra-v4-case" },
+    ];
+    expect(() =>
+      parseChallengeV4(JSON.stringify(tooManyBase), v3, complete),
+    ).toThrow("base: must contain exactly 48 cases");
   });
 
   test("scores v4 decisions in the declared domain and keeps relation authority exact", () => {
     const baseCases = cases();
-    baseCases[0] = {
-      ...baseCases[0]!,
-      expectation: { relationId: "test:law", symbol: "x" },
+    const corpus: ChallengeCorpus = {
+      cases: baseCases.map(
+        (item, index): ChallengeCase =>
+          index === 0
+            ? {
+                ...item,
+                decisionDomain: "selected-formula",
+                decisionExpectation: {
+                  meaning: "present",
+                  problems: "source-conflict",
+                  status: "conflicting",
+                },
+                expectation: { symbol: "x" },
+                recognizedRelations: [
+                  {
+                    authority: "candidate",
+                    formulaAnchor: "selected-formula",
+                    relationId: "test:law",
+                    support: "contradicted",
+                  },
+                ],
+              }
+            : {
+                ...item,
+                decisionDomain: "cursor-entity",
+                decisionExpectation: {
+                  meaning: "absent",
+                  problems: "none",
+                  status: "partial",
+                },
+                recognizedRelations: [],
+              },
+      ),
+      schemaVersion: 4,
     };
-    const base = source(baseCases);
-    const v3 = v3Profiles(baseCases);
-    const v4 = v4Profiles(baseCases);
-    v4.profiles[0] = {
-      caseId: "case-0",
-      decision: {
-        meaning: "present",
-        problems: "source-conflict",
-        status: "conflicting",
-      },
-      decisionDomain: "selected-formula",
-      recognizedRelations: [
-        {
-          authority: "candidate",
-          formulaAnchor: "selected-formula",
-          relationId: "test:law",
-          support: "contradicted",
-        },
-      ],
-    };
-    const corpus = parseChallengeV4(base, v3, v4);
     const observations = corpus.cases.map(
       (item): ChallengeObservation => ({
         ...observation(item),
@@ -365,9 +365,7 @@ describe("independent recognition challenge", () => {
       ...observations[0]!,
       relationIds: ["test:law"],
     };
-    expect(scoreChallenge(corpus, observations).failures[0]).toContain(
-      "recognized relations",
-    );
+    expect(scoreChallenge(corpus, observations).passed).toBe(48);
 
     observations[0] = {
       ...observations[0]!,
@@ -375,7 +373,6 @@ describe("independent recognition challenge", () => {
         ...observations[0]!.formulaDecision!,
         sourceGrounded: false,
       },
-      relationIds: [],
     };
     expect(scoreChallenge(corpus, observations).failures[0]).toContain(
       "source-grounded",
@@ -510,6 +507,34 @@ function parseDevelopmentCases(value: unknown): DevelopmentFixtureCase[] {
       ? [{ documents, id: item.id }]
       : [];
   });
+}
+
+function recordFixture(
+  value: unknown,
+  path: string,
+): Record<string, unknown> {
+  if (!isRecord(value)) throw new Error(`${path}: expected an object`);
+  return value;
+}
+
+function profileRecords(value: unknown): Record<string, unknown>[] {
+  const root = recordFixture(value, "v4 fixture");
+  if (!Array.isArray(root.profiles)) {
+    throw new Error("v4 fixture: expected profiles");
+  }
+  return root.profiles.map((profile, index) =>
+    recordFixture(profile, `v4 fixture profile ${index}`),
+  );
+}
+
+function fixtureCases(value: unknown): Record<string, unknown>[] {
+  const root = recordFixture(value, "v2 fixture");
+  if (!Array.isArray(root.cases)) {
+    throw new Error("v2 fixture: expected cases");
+  }
+  return root.cases.map((item, index) =>
+    recordFixture(item, `v2 fixture case ${index}`),
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
